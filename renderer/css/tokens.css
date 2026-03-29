@@ -5,6 +5,17 @@
 :root {
   --bg-deep:        #151515;
   --accent-orange:  #ffbf48;
+  --accent-green-yellow: #ADFF2F;
+  --accent-red: #FF4500;
+  --accent-teal: #40E0D0;
+  --accent-blue: #1E90FF;
+  --accent-pink: #FF69B4;
+  --accent-purple: #9370DB;
+  --accent-lime: #00FF00;
+  --accent-cyan: #00FFFF;
+
+  --accent-color:   var(--accent-orange);
+  --accent-rgb:     255, 191, 72;
   --accent-green:   #22c55e;
 
   --glass-sidebar:  linear-gradient(166deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
@@ -22,7 +33,11 @@
 
   --radius-xl:   24px;
   --radius-lg:   16px;
+  --radius-md:   14px;
   --radius-pill: 1000px;
+
+  --layer-modal: #111111;
+  --layer-hover: rgba(255, 255, 255, 0.03);
 }
 
 /* ── Reset ─────────────────────────────────────────────── */
@@ -64,13 +79,13 @@ body {
   white-space: nowrap;
 }
 .btn-primary {
-  background: var(--accent-orange);
+  background: var(--accent-color);
   color: rgba(0, 0, 0, 0.9);
 }
 .btn-primary:hover {
-  background: linear-gradient(0deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)), var(--accent-orange);
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)), var(--accent-color);
 }
-.btn-primary:disabled { background: var(--accent-orange); opacity: 0.2; cursor: not-allowed; }
+.btn-primary:disabled { background: var(--accent-color); opacity: 0.2; cursor: not-allowed; }
 .btn-ghost { background: transparent; color: var(--text-90); }
 .btn-ghost:hover { background: var(--layer-hover); }
 .btn-ghost:disabled { opacity: 0.2; cursor: not-allowed; }

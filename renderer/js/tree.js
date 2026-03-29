@@ -52,12 +52,13 @@ const TreeModule = (() => {
     wrapper.className = 'tree-node-wrapper';
 
     const itemEl = document.createElement('div');
-    itemEl.className = 'tree-item' + (node.path === AppState.currentFile ? ' active' : '');
+    itemEl.className = 'tree-item ' + (node.type === 'directory' ? 'tree-item-directory' : 'tree-item-file') + (node.path === AppState.currentFile ? ' active' : '');
     itemEl.style.setProperty('--stagger', idx);
     
     const icon = node.type === 'directory' ? svgFolder : svgFile;
     const chevron = node.type === 'directory' ? svgChevronDown : '<span style="width:12px;flex-shrink:0;"></span>';
 
+    itemEl.dataset.path = node.path;
     itemEl.innerHTML = `
       ${chevron}
       <div class="item-icon-wrap">${icon}</div>
@@ -99,6 +100,12 @@ const TreeModule = (() => {
   function search(q) {
     currentQuery = (q || '').toLowerCase();
     const resultsCont = document.getElementById('search-results-list');
+    const resultsSection = document.getElementById('search-results-section');
+
+    if (resultsSection) {
+      resultsSection.classList.toggle('hidden', !currentQuery);
+    }
+
     if (resultsCont) {
       if (!currentQuery) {
         resultsCont.innerHTML = '';
@@ -107,9 +114,12 @@ const TreeModule = (() => {
         resultsCont.innerHTML = '';
         if (matches.length === 0) {
           resultsCont.innerHTML = `
-            <div style="display:flex; flex-direction:column; align-items:center; gap:8px; padding:24px 0;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <div class="section-label" style="text-align:center; width:100%;">No File Founded</div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding:32px 0; opacity:0.5; color:var(--text-90);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 10V8C20.0005 7.68345 19.9384 7.36992 19.8172 7.07747C19.6961 6.78503 19.5182 6.51944 19.294 6.296L15.706 2.708C15.4825 2.48316 15.2167 2.30483 14.9238 2.18331C14.631 2.06179 14.317 1.99949 14 2H6C5.46957 2 4.96086 2.21072 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H10.35" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M14 2V7C14 7.26522 14.1054 7.51957 14.2929 7.70711C14.4804 7.89464 14.7348 8 15 8H20M16 14C15.4696 14 14.9609 14.2107 14.5858 14.5858C14.2107 14.9609 14 15.4696 14 16M16 22C15.4696 22 14.9609 21.7893 14.5858 21.4142C14.2107 21.0391 14 20.5304 14 20M20 14C20.5304 14 21.0391 14.2107 21.4142 14.5858C21.7893 14.9609 22 15.4696 22 16M20 22C20.5304 22 21.0391 21.7893 21.4142 21.4142C21.7893 21.0391 22 20.5304 22 20" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div class="section-label" style="text-align:center; width:100%; margin:0; color:inherit;">No File Founded</div>
             </div>`;
         } else {
           matches.forEach(m => {
@@ -134,12 +144,8 @@ const TreeModule = (() => {
 
   function setActiveFile(filePath) {
     document.querySelectorAll('.tree-item').forEach(el => {
-      el.classList.remove('active');
+      el.classList.toggle('active', el.dataset.path === filePath);
     });
-    // This is imperfect because we render dynamically, 
-    // but in a small app it's fine until next render().
-    // Real logic: mark in treeData and re-render if needed.
-    render(); 
   }
 
   function filterTree(nodes, q) {

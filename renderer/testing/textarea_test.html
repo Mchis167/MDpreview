@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TextArea Component Test — MDpreview</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+  
+  <!-- Component Styles -->
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/textarea.css">
+  
+  <style>
+    body {
+      background: #0e0e12;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .test-wrapper {
+      width: 740px;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px dashed rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+    }
+    
+    .test-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      text-align: center;
+      color: var(--accent-orange);
+    }
+
+    /* Mocking the button behavior for the test */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 32px;
+      padding: 0 16px;
+      border-radius: 1000px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--accent-orange, #ffbf48);
+      color: #000;
+    }
+    .btn-primary:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    
+    .test-footer {
+      margin-top: 16px;
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    .debug-info {
+      margin-top: 24px;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      color: var(--text-20);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="test-wrapper">
+    <h1 class="test-title">TextArea Component Test</h1>
+    
+    <!-- Component Instance -->
+    <div id="test-textarea-container" class="textarea-component">
+      <div class="textarea-header">
+        <div class="textarea-label">INPUT CHAT RESPONSE</div>
+        <button id="test-expand-btn" class="textarea-expand-btn" title="Expand">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+        </button>
+      </div>
+      <div class="textarea-container">
+        <textarea id="test-textarea-input" class="textarea-input" placeholder="Type something here..."></textarea>
+      </div>
+      <div class="test-footer">
+        <button id="test-save-btn" class="btn btn-primary" disabled>Save Changes</button>
+      </div>
+    </div>
+
+    <div class="debug-info">
+      Status: <span id="debug-status">Awaiting input...</span>
+    </div>
+  </div>
+
+  <!-- Expanded Modal Structure (Typically before #app-layout) -->
+  <div id="test-expanded-modal" class="expanded-textarea-modal">
+    <div class="expanded-textarea-backdrop"></div>
+    <div class="expanded-textarea-container">
+      <div class="expanded-textarea-header">
+        <div class="textarea-label">INPUT CHAT RESPONSE</div>
+        <button id="test-minimize-btn" class="textarea-expand-btn" title="Minimize">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+        </button>
+      </div>
+      <div class="expanded-textarea-body">
+        <textarea id="test-expanded-input" class="expanded-textarea-input" placeholder="Continue typing in expanded view..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Component Logic -->
+  <script src="../js/textarea.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const saveBtn = document.getElementById('test-save-btn');
+      const debugStatus = document.getElementById('debug-status');
+      const modalSaveBtn = document.getElementById('test-modal-save-btn');
+
+      // Initialize the TextAreaModule
+      TextAreaModule.init({
+        containerId: 'test-textarea-container',
+        inputId: 'test-textarea-input',
+        expandBtnId: 'test-expand-btn',
+        modalId: 'test-expanded-modal',
+        modalInputId: 'test-expanded-input',
+        minimizeBtnId: 'test-minimize-btn',
+        label: 'Input Chat Response',
+        onInput: (val) => {
+          const hasText = !!(val && val.trim());
+          saveBtn.disabled = !hasText;
+          modalSaveBtn.disabled = !hasText;
+          debugStatus.textContent = hasText ? `Typing (${val.length} chars)` : 'Empty';
+          console.log('Text Change:', val);
+        }
+      });
+
+      // Actions
+      const submit = () => {
+        const val = document.getElementById('test-textarea-input').value;
+        alert('Submitted: ' + val);
+      };
+
+      saveBtn.onclick = submit;
+      modalSaveBtn.onclick = () => {
+        // In real app, modal save might close and submit
+        submit();
+        // Trigger minimize manually or via module
+        document.getElementById('test-minimize-btn').click();
+      };
+    });
+  </script>
+</body>
+</html>

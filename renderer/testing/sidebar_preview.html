@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sidebar UI Preview — MDpreview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    body { background: #0e0e12; display: flex; align-items: stretch; height: 100vh; padding: 20px; box-sizing: border-box; }
+    #sidebar-left { border-radius: 16px; height: 850px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); min-width: 256px; position: relative; }
+    .preview-container { flex: 1; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.02); margin-left: 20px; border-radius: 16px; border: 1px dashed rgba(255,255,255,0.1); color: rgba(255,255,255,0.3); font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body>
+
+  <aside id="sidebar-left">
+    <!-- Resizer -->
+    <div class="sidebar-resizer" id="sidebar-resizer"></div>
+
+    <div class="sidebar-mode-switcher">
+      <div class="sidebar-mode-control">
+        <div class="mode-indicator" id="mode-indicator"></div>
+        <button class="sidebar-mode-btn active" data-smode="markdown">Markdown</button>
+        <button class="sidebar-mode-btn" data-smode="ai">AI Response</button>
+      </div>
+    </div>
+
+    <div class="workspace-picker" id="sidebar-md-header">
+      <div id="workspace-switcher-outer">
+        <button id="workspace-switcher">
+          <span id="workspace-name">Touch App Design</span>
+          <svg class="ws-chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="sidebar-explorer-view">
+      <div id="recently-viewed-section" class="sidebar-section">
+        <div class="section-label">RECENTLY VIEWED</div>
+        <div id="recently-viewed-list">
+          <div class="recent-item">
+            <div class="item-icon-wrap"><svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5.33341 6L7.33341 4L5.33341 2M2.66675 2L0.666748 4L2.66675 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="recent-item-label" style="color: var(--text-50);">README.md</div>
+          </div>
+          <div class="recent-item active">
+            <div class="item-icon-wrap"><svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5.33341 6L7.33341 4L5.33341 2M2.66675 2L0.666748 4L2.66675 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="recent-item-label" style="color: var(--text-90);">App Design.md</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-footer">
+      <div class="hot-reload-badge">
+        <div class="hr-badge-left"><span class="hr-badge-label">Hot Reload Active</span></div>
+        <div class="hr-badge-bars"><div class="bar bar-1"></div><div class="bar bar-2"></div><div class="bar bar-3"></div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="preview-container">
+    <span>Main Content Preview Area (Try dragging the left sidebar edge)</span>
+  </div>
+
+  <script>
+    const btns = document.querySelectorAll('.sidebar-mode-btn');
+    const indicator = document.getElementById('mode-indicator');
+    
+    btns.forEach((btn, idx) => {
+      btn.onclick = () => {
+        btns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        indicator.style.transform = `translateX(${idx * 100}%)`;
+      };
+    });
+
+    // Local Resizer logic for Preview
+    const sidebar = document.getElementById('sidebar-left');
+    const resizer = document.getElementById('sidebar-resizer');
+    let isResizing = false;
+
+    resizer.addEventListener('mousedown', () => {
+      isResizing = true;
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+    window.addEventListener('mousemove', e => {
+      if (!isResizing) return;
+      const rect = sidebar.getBoundingClientRect();
+      const newWidth = e.clientX - rect.left;
+      if (newWidth >= 256 && newWidth <= 600) {
+        sidebar.style.width = newWidth + 'px';
+        sidebar.style.minWidth = newWidth + 'px';
+      }
+    });
+    window.addEventListener('mouseup', () => {
+      if (!isResizing) return;
+      isResizing = false;
+      document.body.style.cursor = 'default';
+      document.body.style.userSelect = 'auto';
+    });
+  </script>
+</body>
+</html>

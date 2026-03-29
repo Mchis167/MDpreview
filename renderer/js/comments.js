@@ -242,6 +242,7 @@ const CommentsModule = (() => {
     } else {
       input.value = initialText;
       saveBtn.disabled = !initialText.trim();
+      _autoResize(input);
       setTimeout(() => input.focus(), 50);
     }
 
@@ -253,13 +254,20 @@ const CommentsModule = (() => {
     top = Math.max(10, Math.min(top, window.innerHeight - 220));
 
     form.style.left = `${left}px`;
+    top = Math.max(10, Math.min(top, window.innerHeight - (form.offsetHeight || 220)));
     form.style.top  = `${top}px`;
     form.classList.add('show');
+    form.classList.remove('is-typing');
+    form.classList.toggle('is-filled', !!initialText.trim());
   }
 
   function _hideForm() {
     const form = document.getElementById('comment-form');
-    if (form) form.classList.remove('show');
+    if (form) {
+      form.classList.remove('show');
+      form.classList.remove('is-typing');
+    }
+    // We don't manually hide modal here anymore, it's handled by TextAreaModule
     formTarget = null;
     activeCommentId = null;
     _renderList();
@@ -271,6 +279,13 @@ const CommentsModule = (() => {
     await save(formTarget.lineStart, formTarget.lineEnd, formTarget.startLineContent, formTarget.endLineContent, text);
     _hideForm();
     window.getSelection().removeAllRanges();
+  }
+
+  function _autoResize(el) {
+    if (!el) return;
+    el.style.height = 'auto';
+    const newHeight = Math.min(el.scrollHeight, 240); 
+    el.style.height = newHeight + 'px';
   }
 
   function _getLineText(el) {
@@ -293,7 +308,99 @@ const CommentsModule = (() => {
     _clearHighlights();
   }
 
+  function initCommentResizer() {
+    const wrap    = document.getElementById('comment-sidebar-wrap');
+    const resizer = document.getElementById('comment-resizer');
+    if (!wrap || !resizer) return;
+
+    let isResizing = false;
+
+    // Load saved width
+    const savedWidth = localStorage.getItem('mdpreview_sidebar_right_width');
+    if (savedWidth) {
+      // Only set if sidebar is actually open/opening
+      if (wrap.classList.contains('open')) {
+        wrap.style.width = savedWidth + 'px';
+      }
+    }
+
+    resizer.addEventListener('mousedown', (e) => {
+      isResizing = true;
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isResizing) return;
+      // Right sidebar: width grows as mouse moves LEFT
+      const width = window.innerWidth - e.clientX;
+      if (width >= 256 && width <= 600) {
+        wrap.style.width = width + 'px';
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!isResizing) return;
+      isResizing = false;
+      document.body.style.cursor = 'default';
+      document.body.style.userSelect = 'auto';
+
+      // Save width
+      if (wrap.offsetWidth > 0) {
+        localStorage.setItem('mdpreview_sidebar_right_width', wrap.offsetWidth);
+      }
+    });
+  }
+
+  function initCommentDrag() {
+    const form = document.getElementById('comment-form');
+    if (!form) return;
+
+    let isDragging = false;
+    let startX, startY;
+    let initialX, initialY;
+
+    form.addEventListener('mousedown', (e) => {
+      // Don't drag if clicking buttons, textarea, or other interactive elements
+      const interactive = ['BUTTON', 'TEXTAREA', 'INPUT', 'SVG', 'PATH'];
+      if (interactive.includes(e.target.tagName) || e.target.closest('button')) return;
+
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      const rect = form.getBoundingClientRect();
+      initialX = rect.left;
+      initialY = rect.top;
+      document.body.style.cursor = 'grabbing';
+      document.body.style.userSelect = 'none';
+      
+      form.style.zIndex = '3000';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      form.style.left = (initialX + dx) + 'px';
+      form.style.top  = (initialY + dy) + 'px';
+      
+      // Remove scaling/transform that might interfere with manual positioning
+      form.style.transform = 'none'; 
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        document.body.style.cursor = 'default';
+        document.body.style.userSelect = 'auto';
+        form.style.zIndex = '2000';
+      }
+    });
+  }
+
   function _bindEvents() {
+    initCommentResizer();
+    initCommentDrag();
     document.getElementById('cancel-comment').addEventListener('click', _hideForm);
     document.getElementById('save-comment').addEventListener('click', _submitForm);
     document.getElementById('copy-comments-btn').addEventListener('click', copyAll);
@@ -305,16 +412,70 @@ const CommentsModule = (() => {
     const form  = document.getElementById('comment-form');
     const saveBtn = document.getElementById('save-comment');
 
+    // ── Original Form Logic (Restored) ─────────────────────
+    input.addEventListener('focus', () => form.classList.add('is-typing'));
+    input.addEventListener('blur', () => form.classList.remove('is-typing'));
     input.addEventListener('input', () => {
-      const text = input.value.trim();
-      saveBtn.disabled = !text;
-      form.setAttribute('data-mode', text ? 'filled' : 'empty');
+      const val = input.value.trim();
+      saveBtn.disabled = !val;
+      form.classList.toggle('is-filled', !!val);
+      form.setAttribute('data-mode', val ? 'filled' : 'empty');
+      _autoResize(input);
     });
+
+    // Handle Expansion (Original local logic)
+    const expandBtn = document.getElementById('expand-comment-btn');
+    const modal = document.getElementById('expanded-comment-modal');
+    const modalInput = document.getElementById('expanded-comment-input');
+    const minimizeBtn = document.getElementById('minimize-comment-btn');
+    const modalSaveBtn = document.getElementById('expanded-save-comment');
+
+    if (expandBtn && modal && modalInput) {
+      expandBtn.addEventListener('click', () => {
+        modalInput.value = input.value;
+        modal.classList.add('show');
+        setTimeout(() => modalInput.focus(), 50);
+      });
+
+      const closeExpand = () => {
+        input.value = modalInput.value;
+        const val = input.value.trim();
+        saveBtn.disabled = !val;
+        form.classList.toggle('is-filled', !!val);
+        modal.classList.remove('show');
+        input.focus();
+      };
+
+      if (minimizeBtn) minimizeBtn.addEventListener('click', closeExpand);
+      if (modalSaveBtn) {
+        modalSaveBtn.addEventListener('click', async () => {
+          await _submitForm();
+          modal.classList.remove('show');
+        });
+      }
+
+      modalInput.addEventListener('input', () => {
+        const val = modalInput.value.trim();
+        if (modalSaveBtn) modalSaveBtn.disabled = !val;
+        input.value = modalInput.value;
+        form.classList.toggle('is-filled', !!val);
+        _autoResize(input);
+      });
+      
+      // Close on backdrop
+      modal.addEventListener('click', (e) => {
+        if (e.target && e.target.classList.contains('expanded-textarea-backdrop')) {
+          closeExpand();
+        }
+      });
+    }
 
     document.getElementById('edit-comment-btn').addEventListener('click', () => {
       input.value = document.getElementById('comment-text-display').textContent;
       saveBtn.disabled = !input.value.trim();
+      form.classList.toggle('is-filled', true);
       form.setAttribute('data-mode', 'filled');
+      _autoResize(input);
       setTimeout(() => input.focus(), 50);
     });
 

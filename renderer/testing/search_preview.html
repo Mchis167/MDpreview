@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Search Bar Live Preview</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap"
+        rel="stylesheet">
+    <!-- Design System (Relative Path) -->
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        body {
+            background: #0c0c0c;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .container {
+            width: 400px;
+            padding: 60px;
+            background: #161616;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .header {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+        }
+
+        /* Override sidebar-specific constraints if needed */
+        .sidebar-search-container {
+            padding: 0 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">Testing: Sidebar Search (Component)</div>
+        <div id="mount-point"></div>
+
+        <div class="header" style="margin-top: 40px;">Testing: Search Empty Result (Static)</div>
+        <div style="background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.05);">
+            <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding:32px 0; opacity:0.5; color:var(--text-90);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 10V8C20.0005 7.68345 19.9384 7.36992 19.8172 7.07747C19.6961 6.78503 19.5182 6.51944 19.294 6.296L15.706 2.708C15.4825 2.48316 15.2167 2.30483 14.9238 2.18331C14.631 2.06179 14.317 1.99949 14 2H6C5.46957 2 4.96086 2.21072 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H10.35" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M14 2V7C14 7.26522 14.1054 7.51957 14.2929 7.70711C14.4804 7.89464 14.7348 8 15 8H20M16 14C15.4696 14 14.9609 14.2107 14.5858 14.5858C14.2107 14.9609 14 15.4696 14 16M16 22C15.4696 22 14.9609 21.7893 14.5858 21.4142C14.2107 21.0391 14 20.5304 14 20M20 14C20.5304 14 21.0391 14.2107 21.4142 14.5858C21.7893 14.9609 22 15.4696 22 16M20 22C20.5304 22 21.0391 21.7893 21.4142 21.4142C21.7893 21.0391 22 20.5304 22 20" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <div class="section-label" style="text-align:center; width:100%; margin:0; color:inherit;">No File Founded</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 40px; color: rgba(255,255,255,0.2); font-size: 10px; font-family: 'Roboto Mono';">
+            Edit: renderer/css/sidebar.css to see changes live.
+        </div>
+    </div>
+
+    <!-- Script to initialize component -->
+    <script src="../js/search-component.js"></script>
+    <script>
+        const mount = document.getElementById('mount-point');
+        const search = SearchComponent.create({
+            placeholder: 'Type something...',
+            onInput: (val) => console.log('Input changed:', val),
+            onExit: () => alert('Exit requested!')
+        });
+        mount.appendChild(search);
+    </script>
+</body>
+
+</html>

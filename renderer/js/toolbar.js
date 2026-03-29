@@ -35,10 +35,43 @@ function initToolbarBtns() {
     });
 
     document.addEventListener('fullscreenchange', () => {
-      fsBtn.innerHTML = document.fullscreenElement ? iconMin : iconMax;
+      const isFS = !!document.fullscreenElement;
+      fsBtn.innerHTML = isFS ? iconMin : iconMax;
+      document.body.classList.toggle('is-fullscreen', isFS);
     });
   }
+
+  initSidebarToggle();
 }
+
+function initSidebarToggle() {
+  const toggleBtn = document.getElementById('sidebar-toggle-btn');
+  const sidebarWrap = document.getElementById('sidebar-left-wrap');
+  if (!toggleBtn || !sidebarWrap) return;
+
+  const iconOpen = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19V5" /><path d="m13 19-7-7 7-7" /><path d="M21 12H6" /></svg>`; // arrow-left-to-line
+  const iconClosed = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5v14" /><path d="m11 5 7 7-7 7" /><path d="M3 12h15" /></svg>`; // arrow-right-from-line
+
+  const updateIcon = (isCollapsed) => {
+    toggleBtn.innerHTML = isCollapsed ? iconClosed : iconOpen;
+  };
+
+  // Initial state
+  const isCollapsed = localStorage.getItem('mdpreview_sidebar_left_collapsed') === 'true';
+  if (isCollapsed) {
+    sidebarWrap.classList.add('sidebar-collapsed');
+    updateIcon(true);
+  } else {
+    updateIcon(false);
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    const nowCollapsed = sidebarWrap.classList.toggle('sidebar-collapsed');
+    localStorage.setItem('mdpreview_sidebar_left_collapsed', nowCollapsed);
+    updateIcon(nowCollapsed);
+  });
+}
+
 
 function initSegmentedControl() {
   const segments = document.querySelectorAll('.mode-segment');
@@ -68,12 +101,24 @@ function initSegmentedControl() {
         sidebar.classList.remove('opening');
         sidebar.classList.remove('open');
         sidebar.style.width = '';
+        sidebar.style.minWidth = '';
       }
       if (typeof CommentsModule !== 'undefined') CommentsModule.removeCommentMode();
     } else {
       if (sidebar) {
+        // Remove open first so CSS starts from width:0, then add open to trigger transition
+        sidebar.classList.remove('open');
+        void sidebar.offsetWidth; // force browser reflow
         sidebar.classList.add('opening');
         sidebar.classList.add('open');
+
+        // Apply saved width if exists
+        const savedWidth = localStorage.getItem('mdpreview_sidebar_right_width');
+        if (savedWidth) {
+          sidebar.style.width = savedWidth + 'px';
+          sidebar.style.minWidth = savedWidth + 'px';
+        }
+
         setTimeout(() => sidebar.classList.remove('opening'), 800);
       }
       if (typeof CommentsModule !== 'undefined') CommentsModule.applyCommentMode();

@@ -98,26 +98,7 @@ function initZoom() {
   });
   window.addEventListener('mouseup', () => { zoomMoving = false; });
 
-  // Comment sidebar resizer
-  const cr = document.getElementById('comment-resizer');
-  const cw = document.getElementById('comment-sidebar-wrap');
-  if (cr && cw) {
-    cr.onmousedown = e => {
-      e.preventDefault();
-      const startX = e.clientX;
-      const startW = cw.offsetWidth;
-      const onMove = mm => {
-        const newW = Math.min(600, Math.max(200, startW + (startX - mm.clientX)));
-        cw.style.width = newW + 'px';
-      };
-      const onUp = () => {
-        window.removeEventListener('mousemove', onMove);
-        window.removeEventListener('mouseup', onUp);
-      };
-      window.addEventListener('mousemove', onMove);
-      window.addEventListener('mouseup', onUp);
-    };
-  }
+  // Comment sidebar resizer logic has been moved to comments.js
 
   // Wheel zoom toward cursor
   modal.addEventListener('wheel', e => {

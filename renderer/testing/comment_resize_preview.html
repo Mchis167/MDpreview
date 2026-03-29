@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Comment Auto-Resize Preview — MDpreview</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Component Styles -->
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/comments.css">
+  
+  <style>
+    body {
+      background: #0b0b0e;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      padding: 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 48px;
+    }
+    
+    .preview-section {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .preview-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-20);
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .test-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .btn-test {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-90);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn-test:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    /* Override position fixed for preview */
+    #comment-form {
+      position: relative !important;
+      display: block !important;
+      z-index: 1;
+      animation: none !important;
+      top: 0 !important;
+      left: 0 !important;
+      margin: 0 auto;
+    }
+
+    .info-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(var(--accent-rgb), 0.1);
+      color: var(--accent-color);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="preview-section">
+    <div class="preview-title">Auto-Resize Testing</div>
+    <div class="info-badge">Max-height set to 240px</div>
+    
+    <div class="test-controls">
+      <button class="btn-test" onclick="addSmallText()">Add Small Text</button>
+      <button class="btn-test" onclick="addMediumText()">Add Medium Text</button>
+      <button class="btn-test" onclick="addLongText()">Add Long Text (Scrollable)</button>
+      <button class="btn-test" onclick="clearText()">Clear</button>
+    </div>
+
+    <div id="comment-form" data-mode="empty">
+      <div class="comment-form-inner">
+        <div class="comment-edit-view">
+          <div class="comment-input-wrap">
+            <textarea id="comment-input" placeholder="Type here to see it grow..."></textarea>
+          </div>
+          <div class="comment-form-actions">
+            <button class="btn btn-ghost">Cancel</button>
+            <button id="save-comment" class="btn btn-primary" disabled>Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const input = document.getElementById('comment-input');
+    const saveBtn = document.getElementById('save-comment');
+    const form = document.getElementById('comment-form');
+
+    function _autoResize(el) {
+      if (!el) return;
+      el.style.height = 'auto';
+      // Use the same logic as in comments.js
+      const newHeight = Math.min(el.scrollHeight, 240); 
+      el.style.height = newHeight + 'px';
+      console.log('New height:', el.style.height);
+    }
+
+    input.addEventListener('input', () => {
+      const val = input.value.trim();
+      saveBtn.disabled = !val;
+      form.classList.toggle('is-filled', !!val);
+      _autoResize(input);
+    });
+
+    // Mock functions for testing
+    function addSmallText() {
+      input.value = "This is a single line comment.";
+      triggerInput();
+    }
+
+    function addMediumText() {
+      input.value = "This comment has multiple lines.\nIt should make the box taller.\nTesting the flexibility of the container as we add more content manually.";
+      triggerInput();
+    }
+
+    function addLongText() {
+      input.value = "This is a very long comment designed to exceed the 240px max-height threshold.\n\n" + 
+                    "Line 1: Textarea component inside MDpreview.\n" +
+                    "Line 2: Built with vanilla CSS and minimal JS.\n" +
+                    "Line 3: Supports auto-resize with a hard limit.\n" +
+                    "Line 4: Testing scrollbar appearance.\n" +
+                    "Line 5: Adding more lines to be sure.\n" +
+                    "Line 6: Keep going...\n" +
+                    "Line 7: Almost there...\n" +
+                    "Line 8: This should definitely trigger the scrollbar now.\n" +
+                    "Line 9: Scrolling is enabled via overflow-y: auto.\n" +
+                    "Line 10: Let's add even more text to make it extremely obvious.\n\n" +
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.";
+      triggerInput();
+    }
+
+    function clearText() {
+      input.value = "";
+      triggerInput();
+    }
+
+    function triggerInput() {
+      input.dispatchEvent(new Event('input'));
+    }
+
+    // Initialize
+    _autoResize(input);
+  </script>
+
+</body>
+</html>
