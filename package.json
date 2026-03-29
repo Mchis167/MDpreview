@@ -1,0 +1,53 @@
+{
+  "name": "mdpreview",
+  "version": "1.0.0",
+  "description": "MDpreview — Local Markdown Previewer",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "serve": "node server/index.js",
+    "build": "electron-builder --mac",
+    "build:dir": "electron-builder --mac --dir",
+    "dev": "electron ."
+  },
+  "dependencies": {
+    "chokidar": "^3.6.0",
+    "express": "^4.19.2",
+    "marked": "^12.0.0",
+    "socket.io": "^4.7.5",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3",
+    "tailwindcss": "^4.2.2"
+  },
+  "build": {
+    "appId": "com.mdpreview.app",
+    "productName": "MDpreview",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "server/**/*",
+      "renderer/**/*",
+      "data/**/*",
+      "assets/**/*",
+      "node_modules/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "icon": "assets/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ]
+    }
+  }
+}

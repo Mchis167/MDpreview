@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MDpreview</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+
+  <!-- Mermaid -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+  <!-- Socket.io (provided by local Express server) -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <!-- Design System -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════
+     WORKSPACE PANEL
+════════════════════════════════════════════════════ -->
+<div id="workspace-panel">
+  <div class="ws-panel-card">
+    <button id="workspace-panel-close">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="ws-panel-header">
+      <div class="ws-panel-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      </div>
+      <h2 class="ws-panel-title">Workspaces</h2>
+    </div>
+    <div id="workspace-list"></div>
+    <button id="add-workspace-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add New Workspace
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     ADD WORKSPACE MODAL
+════════════════════════════════════════════════════ -->
+<div id="add-workspace-modal">
+  <div class="aws-card">
+    <div class="aws-icon-wrapper">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><line x1="12" y1="10" x2="12" y2="16"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+    </div>
+    <h3 class="aws-title">New Workspace</h3>
+    <p class="aws-subtitle">Connect a local folder to start previewing.</p>
+    <div class="aws-fields">
+      <div>
+        <label class="aws-field-label">Workspace Name</label>
+        <input id="workspace-name-input" type="text" placeholder="Design Specs, API Docs…" class="aws-input">
+      </div>
+      <div>
+        <label class="aws-field-label">Folder Path</label>
+        <div class="aws-browse-row">
+          <input id="workspace-path-input" type="text" placeholder="Select document folder…" readonly class="aws-input path">
+          <button id="browse-btn">Browse</button>
+        </div>
+      </div>
+    </div>
+    <div class="aws-actions">
+      <button id="cancel-workspace-btn">Cancel</button>
+      <button id="confirm-workspace-btn" disabled>Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     APP LAYOUT
+════════════════════════════════════════════════════ -->
+<div id="app-layout">
+
+  <!-- ── Sidebar Left ──────────────────────────────── -->
+  <aside id="sidebar-left">
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">
+        <img src="../assets/Appicon.png" alt="MDpreview">
+      </div>
+      <div class="sidebar-logo-text">MDpreview</div>
+    </div>
+
+    <!-- Workspace Picker -->
+    <div class="workspace-picker">
+      <div id="workspace-switcher-outer">
+        <button id="workspace-switcher">
+          <span id="workspace-name">Touch</span>
+          <svg class="ws-chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="sidebar-search-container">
+      <div class="sidebar-search-inner">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="sidebar-search-input" placeholder="Search..." autocomplete="off">
+      </div>
+    </div>
+
+    <!-- File Tree -->
+    <div class="sidebar-tree-scroll">
+      <div id="file-tree"></div>
+    </div>
+
+    <!-- Footer Status -->
+    <div class="sidebar-footer">
+      <div class="hot-reload-badge">
+        <div class="hr-badge-left">
+          <span class="hr-badge-label">Hot Reload Active</span>
+        </div>
+        <div class="hr-badge-bars">
+          <div class="bar bar-1"></div>
+          <div class="bar bar-2"></div>
+          <div class="bar bar-3"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar Resizer -->
+    <div class="sidebar-resizer" id="sidebar-resizer"></div>
+  </aside>
+
+  <!-- ── Main Area ─────────────────────────────────── -->
+  <main>
+    <div class="glass-main">
+
+      <!-- Toolbar -->
+      <div id="toolbar">
+        <!-- Left: Breadcrumb -->
+        <div class="toolbar-left">
+          <div id="breadcrumb">
+            <svg class="home-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <svg class="breadcrumb-sep" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            <span>Select a file to preview...</span>
+          </div>
+        </div>
+
+        <!-- Center: Segmented Control -->
+        <div class="toolbar-center">
+          <div class="segmented-control">
+            <div id="segment-bg"></div>
+            <button class="mode-segment active" data-mode="read">Read</button>
+            <button class="mode-segment" data-mode="comment">Comment</button>
+          </div>
+        </div>
+
+        <!-- Right: Action Buttons -->
+        <div class="toolbar-right">
+          <button class="toolbar-btn" title="Scroll to top" id="scroll-top-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+          </button>
+          <button class="toolbar-btn" title="Fullscreen" id="fullscreen-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Content (md viewer only — comment sidebar is a sibling of main) -->
+      <div id="md-viewer">
+        <div id="md-content" style="display:none;"></div>
+
+        <!-- Empty State -->
+        <div id="empty-state">
+          <div class="illus-wrap">
+          <img src="../assets/Central Illustration.png" alt="MDpreview Welcome" class="center-illus">
+          </div>
+          <div class="empty-state-text">
+            <h2>MDpreview</h2>
+            <p>Select a Markdown file from the sidebar or<br>click the workspace switcher to get started.</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /glass-main -->
+  </main>
+
+  <!-- ── Right Sidebar (Comments) ─────────────────── -->
+  <!-- Wrapper handles the slide-in animation by transitioning width -->
+  <div id="comment-sidebar-wrap">
+    <!-- Comment Sidebar Resizer -->
+    <div class="comment-resizer" id="comment-resizer"></div>
+    <aside id="comment-sidebar">
+      <div class="comment-sidebar-header">
+        <div class="comment-sidebar-title">Comment</div>
+        <div class="comment-sidebar-actions">
+          <button class="icon-btn" id="clear-comments-btn" title="Clear all comments">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10.6665 14.6666L9.99984 12M12.6665 9.33331C12.8433 9.33331C13.0129 9.26307 13.1379 9.13805C13.2629 9.01303 13.3332 8.84346 13.3332 8.66665V7.99998C13.3332 7.64636 13.1927 7.30722 12.9426 7.05717C12.6926 6.80712 12.3535 6.66665 11.9998 6.66665H9.99984C9.82303 6.66665 9.65346 6.59641 9.52843 6.47138C9.40341 6.34636 9.33317 6.17679 9.33317 5.99998V2.66665C9.33317 2.31302 9.19269 1.97389 8.94265 1.72384C8.6926 1.47379 8.35346 1.33331 7.99984 1.33331C7.64622 1.33331 7.30708 1.47379 7.05703 1.72384C6.80698 1.97389 6.6665 2.31302 6.6665 2.66665V5.99998C6.6665 6.17679 6.59627 6.34636 6.47124 6.47138C6.34622 6.59641 6.17665 6.66665 5.99984 6.66665H3.99984C3.64622 6.66665 3.30708 6.80712 3.05703 7.05717C2.80698 7.30722 2.6665 7.64636 2.6665 7.99998V8.66665C2.6665 8.84346 2.73674 9.01303 2.86177 9.13805C2.98679 9.26307 3.15636 9.33331 3.33317 9.33331" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.33319 14.6666L5.99986 12M12.6665 9.33331H3.33319L2.01786 13.8446C1.99438 13.9427 1.99342 14.0447 2.01507 14.1432C2.03672 14.2416 2.0804 14.3338 2.14284 14.413C2.20527 14.4921 2.28484 14.556 2.37554 14.6C2.46625 14.6439 2.56574 14.6667 2.66653 14.6666H13.3332C13.434 14.6667 13.5335 14.6439 13.6242 14.6C13.7149 14.556 13.7944 14.4921 13.8569 14.413C13.9193 14.2416 13.963 14.2416 13.9847 14.1432C14.0063 14.0447 14.0053 13.9427 13.9819 13.8446L12.6665 9.33331Z" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="icon-btn" id="copy-comments-btn" title="Copy all comments">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="comment-list-wrap">
+        <div id="comment-list"></div>
+        <div id="no-comments">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <p>No comments yet.</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+</div><!-- /app-layout -->
+
+<!-- ══════════════════════════════════════════════════
+     COMMENT FORM POPUP
+════════════════════════════════════════════════════ -->
+<div id="comment-form">
+  <div class="comment-form-inner">
+    <label class="comment-form-label">Add Annotation</label>
+    <textarea id="comment-input" placeholder="What's your feedback?"></textarea>
+    <div class="comment-form-actions">
+      <button id="cancel-comment">CANCEL</button>
+      <button id="save-comment">SAVE</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     ZOOM MODAL
+════════════════════════════════════════════════════ -->
+<div id="zoom-modal">
+  <button id="zoom-close" title="Close (Esc)">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <div id="zoom-container"></div>
+  <div id="zoom-controls-bar">
+    <!-- Fit to screen -->
+    <button class="zoom-ctrl-btn" id="zoom-fit-btn" title="Fit to screen (double-click)">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+    </button>
+    <div class="zoom-ctrl-divider"></div>
+    <!-- Zoom Out -->
+    <button class="zoom-ctrl-btn" id="zoom-out-btn" title="Zoom out">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+    <!-- Percentage -->
+    <span id="zoom-pct">100%</span>
+    <!-- Zoom In -->
+    <button class="zoom-ctrl-btn" id="zoom-in-btn" title="Zoom in">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ── Scripts ─────────────────────────────────────── -->
+<script src="js/tree.js"></script>
+<script src="js/workspace.js"></script>
+<script src="js/comments.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
