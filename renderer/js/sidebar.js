@@ -78,11 +78,13 @@ function initSidebarModeSwitcher() {
         expView.style.display = 'none';
         searchView.style.display = 'none';
         if (aiView) aiView.style.display = 'flex';
+        if (typeof AIResponseModule !== 'undefined') AIResponseModule.toggleFooter('ai');
       } else {
         if (aiView) aiView.style.display = 'none';
         if (mdHeader) mdHeader.style.display = '';
         expView.style.display = 'flex';
         searchView.style.display = 'none';
+        if (typeof AIResponseModule !== 'undefined') AIResponseModule.toggleFooter('markdown');
       }
     });
   });

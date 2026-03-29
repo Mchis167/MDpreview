@@ -80,4 +80,20 @@ router.get('/render', (req, res) => {
   }
 });
 
+router.post('/render-raw', (req, res) => {
+  const { content } = req.body;
+  
+  if (content === undefined) {
+    return res.status(400).json({ error: 'Missing content body' });
+  }
+
+  try {
+    const html = renderWithLineNumbers(content);
+    const totalLines = content.split('\n').length;
+    res.json({ html, totalLines });
+  } catch (err) {
+    res.status(500).json({ error: 'Render failed', details: err.message });
+  }
+});
+
 module.exports = router;

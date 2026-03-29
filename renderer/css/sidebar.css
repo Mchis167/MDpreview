@@ -567,3 +567,83 @@
   height: 12px;
   background: var(--accent-green);
 }
+
+/* ── AI Response Variants (Issue #29) ──────────────────── */
+.ai-view-container {
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ai-view-container .textarea-component {
+  width: 100%;
+}
+
+.ai-view-container .btn-block {
+  width: 100%;
+  margin-top: 4px;
+}
+
+/* Status Badge Variant */
+.status-indicator-badge {
+  width: 100%;
+}
+
+.status-badge-inner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.status-badge-inner.is-updated {
+  background: rgba(5, 46, 22, 0.2);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.status-badge-inner.is-pending {
+  background: rgba(255, 191, 72, 0.1);
+  border: 1px solid rgba(255, 191, 72, 0.2);
+}
+
+.status-badge-inner .status-badge-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-green);
+}
+
+.status-badge-inner.is-pending .status-badge-icon {
+  color: var(--accent-orange);
+}
+
+.status-badge-inner .status-badge-text {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent-green);
+}
+
+.status-badge-inner.is-pending .status-badge-text {
+  color: var(--accent-orange);
+}
+
+/* Icon Toggling */
+.status-badge-inner .icon-check { display: block; }
+.status-badge-inner .icon-minus { display: none; }
+
+.status-badge-inner.is-pending .icon-check { display: none; }
+.status-badge-inner.is-pending .icon-minus { display: block; }
+
+.ai-variant {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+}

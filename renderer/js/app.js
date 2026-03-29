@@ -132,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSidebarRevamp();       // sidebar.js
   initSidebarResizer();      // sidebar.js
   SettingsModule.init();     // settings.js
+  AIResponseModule.init();   // ai-response.js (Issue #29)
 
   setTimeout(() => {
     if (typeof WorkspaceModule !== 'undefined') WorkspaceModule.init();
