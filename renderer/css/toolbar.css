@@ -1,0 +1,86 @@
+/* ============================================================
+   toolbar.css — Top toolbar: breadcrumb, mode control, action buttons
+   ============================================================ */
+
+#toolbar {
+  position: relative;
+  height: 56px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border-main);
+}
+.toolbar-left  { flex: 1; display: flex; align-items: center; }
+.toolbar-center {
+  flex-shrink: 0;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.toolbar-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Breadcrumb */
+#breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-60);
+  white-space: nowrap;
+}
+.home-icon { color: rgba(255,255,255,0.6); }
+.breadcrumb-sep { color: var(--text-20); opacity: 0.5; }
+
+/* Segmented Control (Read / Comment) */
+.segmented-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  background: rgba(0,0,0,0.4);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-main);
+}
+#segment-bg {
+  position: absolute;
+  top: 5px; bottom: 5px; left: 5px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-lg);
+  transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+  pointer-events: none;
+  backdrop-filter: blur(2px);
+}
+.mode-segment {
+  position: relative;
+  z-index: 1;
+  padding: 6px 24px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-50);
+  transition: color 0.2s;
+  white-space: nowrap;
+  border-radius: var(--radius-lg);
+}
+.mode-segment.active { color: #fff; }
+
+/* Action Buttons */
+.toolbar-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-40);
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s;
+}
+.toolbar-btn:hover { background: rgba(255,255,255,0.05); color: #fff; }

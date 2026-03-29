@@ -1,0 +1,80 @@
+/* ============================================================
+   tokens.css — Design tokens, global reset, shared components
+   ============================================================ */
+
+:root {
+  --bg-deep:        #151515;
+  --accent-orange:  #ffbf48;
+  --accent-green:   #22c55e;
+
+  --glass-sidebar:  linear-gradient(166deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+  --glass-main:     linear-gradient(168deg, rgba(0, 0, 0, 0.10) 8.96%, rgba(0, 0, 0, 0.30) 91.04%);
+  --border-sidebar: rgba(255, 255, 255, 0.08);
+  --border-main:    rgba(255, 255, 255, 0.05);
+  --border-light:   rgba(255,255,255,0.04);
+
+  --text-90: rgba(255,255,255,0.9);
+  --text-70: rgba(255,255,255,0.7);
+  --text-60: rgba(255,255,255,0.6);
+  --text-50: rgba(255,255,255,0.5);
+  --text-40: rgba(255,255,255,0.4);
+  --text-20: rgba(255,255,255,0.2);
+
+  --radius-xl:   24px;
+  --radius-lg:   16px;
+  --radius-pill: 1000px;
+}
+
+/* ── Reset ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+button { background: none; border: none; cursor: pointer; font-family: inherit; }
+
+body {
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--bg-deep);
+  color: var(--text-90);
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* ── Button Components ─────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: var(--radius-pill);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border: none;
+  gap: 8px;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--accent-orange);
+  color: rgba(0, 0, 0, 0.9);
+}
+.btn-primary:hover {
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)), var(--accent-orange);
+}
+.btn-primary:disabled { background: var(--accent-orange); opacity: 0.2; cursor: not-allowed; }
+.btn-ghost { background: transparent; color: var(--text-90); }
+.btn-ghost:hover { background: var(--layer-hover); }
+.btn-ghost:disabled { opacity: 0.2; cursor: not-allowed; }
+.btn i, .btn svg { width: 14px; height: 14px; }
+
+/* ── Utility ───────────────────────────────────────────── */
+.hidden { display: none !important; }
