@@ -12,9 +12,9 @@ module.exports = {
           rest: '#737373'
         },
         accent: {
-          DEFAULT: '#a855f7',
-          hover: '#9333ea',
-          glow: 'rgba(168, 85, 247, 0.8)'
+          DEFAULT: '#ffbf48',
+          hover: '#e5ab41',
+          glow: 'rgba(255, 191, 72, 0.8)'
         },
         success: {
           DEFAULT: '#22c55e',

@@ -10,6 +10,63 @@ const AppState = {
   socket:           null
 };
 
+// ── Recently Viewed Module ───────────────────────────────────
+const RecentModule = (() => {
+  const MAX_RECENT = 3;
+  const STORAGE_KEY = 'mdpreview_recent_';
+
+  function add(filePath) {
+    const ws = AppState.currentWorkspace;
+    if (!ws || !filePath) return;
+    const key = STORAGE_KEY + ws.id;
+    let recent = _getRaw(key);
+    
+    recent = recent.filter(p => p !== filePath);
+    recent.unshift(filePath);
+    recent = recent.slice(0, MAX_RECENT);
+    
+    localStorage.setItem(key, JSON.stringify(recent));
+    render();
+  }
+
+  function _getRaw(key) {
+    const data = localStorage.getItem(key);
+    try { return data ? JSON.parse(data) : []; } catch(e) { return []; }
+  }
+
+  function render() {
+    const ws = AppState.currentWorkspace;
+    if (!ws) return;
+    const list = document.getElementById('recently-viewed-list');
+    const section = document.getElementById('recently-viewed-section');
+    if (!list || !section) return;
+
+    const recent = _getRaw(STORAGE_KEY + ws.id);
+    if (recent.length === 0) {
+      section.style.display = 'none';
+      return;
+    }
+    section.style.display = 'block';
+    
+    list.innerHTML = '';
+    const svgFile = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14.5 2 14.5 7.5 20 7.5"/></svg>`;
+
+    recent.forEach(path => {
+      const fileName = path.split('/').pop();
+      const item = document.createElement('div');
+      item.className = 'recent-item';
+      item.innerHTML = `
+        <div class="recent-item-icon">${svgFile}</div>
+        <div class="recent-item-label">${fileName}</div>
+      `;
+      item.onclick = (e) => { e.stopPropagation(); loadFile(path); };
+      list.appendChild(item);
+    });
+  }
+
+  return { add, render };
+})();
+
 // ── Mermaid init ──────────────────────────────────────────────
 function initMermaid() {
   if (typeof mermaid === 'undefined') return;
@@ -48,6 +105,7 @@ function initSocket() {
   AppState.socket.on('workspace-changed', () => {
     TreeModule.load();
     setNoFile();
+    RecentModule.render();
   });
 }
 
@@ -78,6 +136,7 @@ async function loadFile(filePath) {
 
   await processMermaid(mdContent);
   await CommentsModule.loadForFile(filePath);
+  RecentModule.add(filePath);
 
   if (AppState.commentMode) CommentsModule.applyCommentMode();
 
@@ -379,14 +438,67 @@ function initSidebarResizer() {
   });
 }
 
-// ── Search ────────────────────────────────────────────────────
-function initSearch() {
-  const searchInput = document.getElementById('sidebar-search-input');
-  if (searchInput) {
-    searchInput.addEventListener('input', (e) => {
-      TreeModule.search(e.target.value);
+// ── Sidebar Management ─────────────────────────────────────────
+function initSidebarRevamp() {
+  const enterBtn   = document.getElementById('enter-search-btn');
+  const exitBtn    = document.getElementById('exit-search-btn');
+  const expView    = document.getElementById('sidebar-explorer-view');
+  const searchView = document.getElementById('sidebar-search-view');
+  const input      = document.getElementById('sidebar-search-input');
+  const mdHeader   = document.getElementById('sidebar-md-header');
+
+  if (enterBtn && exitBtn) {
+    enterBtn.addEventListener('click', () => {
+      expView.style.display = 'none';
+      if (mdHeader) mdHeader.style.display = 'none';
+      searchView.style.display = 'flex';
+      setTimeout(() => input.focus(), 50);
+    });
+
+    exitBtn.addEventListener('click', () => {
+      expView.style.display = 'flex';
+      if (mdHeader) mdHeader.style.display = '';
+      searchView.style.display = 'none';
+      input.value = '';
+      TreeModule.search('');
     });
   }
+
+  if (input) {
+    input.addEventListener('input', () => {
+      TreeModule.search(input.value.trim());
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') exitBtn.click();
+    });
+  }
+}
+
+// ── Sidebar Mode Switcher ─────────────────────────────────────
+function initSidebarModeSwitcher() {
+  const btns       = document.querySelectorAll('.sidebar-mode-btn');
+  const mdHeader   = document.getElementById('sidebar-md-header');
+  const expView    = document.getElementById('sidebar-explorer-view');
+  const searchView = document.getElementById('sidebar-search-view');
+  const aiView     = document.getElementById('sidebar-ai-view');
+
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      btns.forEach(b => b.classList.toggle('active', b === btn));
+
+      if (btn.dataset.smode === 'ai') {
+        if (mdHeader)   mdHeader.style.display   = 'none';
+        expView.style.display    = 'none';
+        searchView.style.display = 'none';
+        if (aiView) aiView.style.display = 'flex';
+      } else {
+        if (aiView) aiView.style.display = 'none';
+        if (mdHeader)   mdHeader.style.display   = '';
+        expView.style.display    = 'flex';
+        searchView.style.display = 'none';
+      }
+    });
+  });
 }
 
 // ── Boot ──────────────────────────────────────────────────────
@@ -396,10 +508,12 @@ document.addEventListener('DOMContentLoaded', () => {
   initZoom();
   initSegmentedControl();
   initToolbarBtns();
-  initSearch();
+  initSidebarModeSwitcher();
+  initSidebarRevamp();
   initSidebarResizer();
 
   setTimeout(() => {
     if (typeof WorkspaceModule !== 'undefined') WorkspaceModule.init();
+    RecentModule.render();
   }, 0);
 });

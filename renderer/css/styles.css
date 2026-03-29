@@ -3,15 +3,14 @@
    ============================================================ */
 
 :root {
-  --bg-deep:        #070707;
+  --bg-deep:        #151515;
   --accent-orange:  #ffbf48;
   --accent-green:   #22c55e;
-  --accent-purple:  #a855f7;
 
-  --glass-sidebar:  linear-gradient(135.17deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
-  --glass-main:     linear-gradient(126.76deg, rgba(36,36,36,0.4) 0%, rgba(33,33,33,0.6) 100%);
-  --border-sidebar: rgba(255,255,255,0.08);
-  --border-main:    rgba(255,255,255,0.05);
+  --glass-sidebar:  linear-gradient(166deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+  --glass-main:     linear-gradient(168deg, rgba(0, 0, 0, 0.10) 8.96%, rgba(0, 0, 0, 0.30) 91.04%);
+  --border-sidebar: rgba(255, 255, 255, 0.08);
+  --border-main:    rgba(255, 255, 255, 0.05);
   --border-light:   rgba(255,255,255,0.04);
 
   --text-90: rgba(255,255,255,0.9);
@@ -170,6 +169,71 @@ body {
   height: 14px;
 }
 
+/* ── Sidebar Mode Switcher ── */
+.sidebar-mode-switcher {
+  padding: 0 12px 12px;
+  flex-shrink: 0;
+}
+.sidebar-mode-control {
+  display: flex;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 24px;
+  padding: 5px;
+}
+.sidebar-mode-btn {
+  flex: 1;
+  padding: 7px 16px;
+  border-radius: 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  text-align: center;
+  border: 1px solid transparent;
+}
+.sidebar-mode-btn.active {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.1);
+  color: #fff;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  box-shadow: 0px 4px 6px -4px rgba(0,0,0,0.1);
+}
+
+/* ── AI Response Placeholder ── */
+#sidebar-ai-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.sidebar-ai-placeholder {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--text-20);
+  padding: 24px;
+}
+.sidebar-ai-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-50);
+}
+.sidebar-ai-sublabel {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-20);
+}
+
 /* Workspace Picker */
 .workspace-picker {
   padding: 0 12px 16px;
@@ -196,36 +260,146 @@ body {
 .ws-chevron { color: rgba(255,255,255,0.5); }
 
 /* Search Bar */
-.sidebar-search-container {
-  padding: 0 12px 24px;
+.sidebar-section {
+  padding: 0 12px 16px;
   flex-shrink: 0;
 }
-.sidebar-search-inner {
-  position: relative;
-  width: 100%;
-}
-.sidebar-search-inner .search-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+.section-label {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 500;
+  font-size: 10px;
+  text-transform: uppercase;
   color: var(--text-20);
-  pointer-events: none;
+  margin-bottom: 8px;
+  padding: 0 4px;
+  letter-spacing: 0.05em;
 }
-#sidebar-search-input {
+
+/* ── Sidebar Modes ── */
+#sidebar-explorer-view,
+#sidebar-search-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Search Trigger ── */
+.sidebar-search-trigger {
   width: 100%;
-  background: rgba(255,255,255,0.03);
+  height: 36px;
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-pill);
-  padding: 10px 12px 9px 36px;
-  font-family: 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 8px;
+  color: var(--text-20);
   font-size: 14px;
   font-weight: 500;
-  color: #fff;
-  outline: none;
-  user-select: text;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-#sidebar-search-input::placeholder { color: var(--text-20); }
+.sidebar-search-trigger:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-40);
+}
+
+/* ── Search Mode UI ── */
+.sidebar-search-input-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.sidebar-search-inner.search-mode {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0px 0px 10px 0px rgba(255, 182, 48, 0.2);
+}
+.exit-search-btn {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-60);
+  transition: all 0.2s;
+}
+.exit-search-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* ── Recently Viewed Item ── */
+.recent-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--text-50);
+}
+.recent-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-90);
+  transform: translateX(4px);
+}
+.recent-item-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+.recent-item-label {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── All File Section Header ── */
+.all-file-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+.all-file-header .section-label {
+  margin-bottom: 0;
+}
+.search-icon-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-20);
+  border-radius: 8px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.search-icon-btn:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--text-50);
+}
+
+/* Search view container padding */
+.sidebar-search-container {
+  padding: 0 12px 16px;
+  flex-shrink: 0;
+}
 
 /* File Tree */
 .sidebar-tree-scroll {
@@ -234,6 +408,8 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 #file-tree {
@@ -253,14 +429,21 @@ body {
   font-size: 14px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.4);
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   border: 1px solid transparent;
   position: relative;
   min-width: 0;
+  animation: treeItemEntry 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--stagger, 0) * 0.02s);
+}
+@keyframes treeItemEntry {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .tree-item:hover {
   background: rgba(255, 255, 255, 0.04);
   color: rgba(255, 255, 255, 0.7);
+  transform: translateX(4px);
 }
 .tree-item.active {
   background: rgba(255, 255, 255, 0.1);
@@ -311,6 +494,17 @@ body {
   flex-direction: column;
   gap: 4px;
   margin-top: 2px;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  max-height: 2000px;
+  opacity: 1;
+}
+.folder-children.hidden {
+  display: flex;
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+  margin-top: 0;
 }
 
 /* Sidebar Footer */
@@ -821,17 +1015,27 @@ main {
 
 /* No-comments empty state */
 #no-comments {
-  flex: 1;
-  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 12px;
-  padding: 32px;
+  width: 100%;
   color: var(--text-20);
   text-align: center;
+  pointer-events: none;
 }
-#no-comments p { font-size: 13px; font-weight: 500; }
+#no-comments p {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  line-height: 16px;
+}
 
 /* ══════════════════════════════════════════════════════════
    COMMENT FORM POPUP
@@ -1015,10 +1219,12 @@ main {
   border-radius: 40px; padding: 40px; text-align: center;
 }
 .aws-icon-wrapper {
-  width: 72px; height: 72px; background: var(--accent-purple);
+  width: 72px; height: 72px; 
+  background: rgba(255, 191, 72, 0.15);
+  border: 1px solid rgba(255,191,72,0.3);
   border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 28px; color: #fff;
-  box-shadow: 0 15px 30px rgba(168,85,247,0.4);
+  margin: 0 auto 28px; color: var(--accent-orange);
+  box-shadow: 0 15px 30px rgba(255,191,72,0.15);
 }
 .aws-title { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; }
 .aws-subtitle { color: var(--text-40); font-size: 14px; margin-bottom: 32px; }

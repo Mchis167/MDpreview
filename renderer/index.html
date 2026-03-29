@@ -87,27 +87,70 @@
       <div class="sidebar-logo-text">MDpreview</div>
     </div>
 
+    <!-- Mode Switcher -->
+    <div class="sidebar-mode-switcher">
+      <div class="sidebar-mode-control">
+        <button class="sidebar-mode-btn active" data-smode="markdown">Markdown</button>
+        <button class="sidebar-mode-btn" data-smode="ai">AI Response</button>
+      </div>
+    </div>
+
     <!-- Workspace Picker -->
-    <div class="workspace-picker">
+    <div class="workspace-picker" id="sidebar-md-header">
       <div id="workspace-switcher-outer">
         <button id="workspace-switcher">
           <span id="workspace-name">Touch</span>
-          <svg class="ws-chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          <svg class="ws-chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
     </div>
 
-    <!-- Search Bar -->
-    <div class="sidebar-search-container">
-      <div class="sidebar-search-inner">
-        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="sidebar-search-input" placeholder="Search..." autocomplete="off">
+    <!-- ── Explorer View ── -->
+    <div id="sidebar-explorer-view">
+      <!-- Recently Viewed -->
+      <div id="recently-viewed-section" class="sidebar-section">
+        <div class="section-label">RECENTLY VIEWED</div>
+        <div id="recently-viewed-list"></div>
+      </div>
+
+      <!-- File Explorer -->
+      <div class="sidebar-tree-scroll">
+        <div class="all-file-header">
+          <div class="section-label">ALL FILE</div>
+          <button id="enter-search-btn" class="search-icon-btn" title="Search files">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+        </div>
+        <div id="file-tree"></div>
       </div>
     </div>
 
-    <!-- File Tree -->
-    <div class="sidebar-tree-scroll">
-      <div id="file-tree"></div>
+    <!-- ── AI Response Placeholder View ── -->
+    <div id="sidebar-ai-view" style="display:none">
+      <div class="sidebar-ai-placeholder">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+        <div class="sidebar-ai-label">AI Response</div>
+        <div class="sidebar-ai-sublabel">Coming soon</div>
+      </div>
+    </div>
+
+    <!-- ── Search View ── -->
+    <div id="sidebar-search-view" style="display:none">
+      <div class="sidebar-search-container">
+        <div class="sidebar-search-input-group">
+          <div class="sidebar-search-inner search-mode">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="sidebar-search-input" placeholder="Search..." autocomplete="off">
+          </div>
+          <button id="exit-search-btn" class="exit-search-btn" title="Exit search">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="section-label">SEARCH RESULTS</div>
+        <div id="search-results-list"></div>
+      </div>
     </div>
 
     <!-- Footer Status -->
@@ -208,8 +251,8 @@
       <div class="comment-list-wrap">
         <div id="comment-list"></div>
         <div id="no-comments">
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <p>No comments yet.</p>
+          <img src="../assets/lucide_message-circle-dashed.svg" alt="No Comments" width="28" height="28" style="opacity:0.2;">
+          <p>No Comment yet</p>
         </div>
       </div>
     </aside>

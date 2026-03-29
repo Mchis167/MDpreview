@@ -18,6 +18,7 @@ const TreeModule = (() => {
   }
 
   function render() {
+    currentStagger = 0;
     const container = document.getElementById('file-tree');
     if (!container) return;
     container.innerHTML = '';
@@ -28,17 +29,31 @@ const TreeModule = (() => {
       return;
     }
 
-    filtered.forEach(node => {
-      container.appendChild(createNodeEl(node));
-    });
+    let globalIdx = 0;
+    const renderNodes = (nodes, parentEl) => {
+      nodes.forEach(node => {
+        const el = createNodeEl(node, globalIdx++);
+        parentEl.appendChild(el);
+        if (node.type === 'directory' && node.expanded && node.children) {
+          // Note: createNodeEl already handles children, but we need 
+          // to ensure the index is correct if we were to recursivly render here.
+          // In the current createNodeEl structure, it's already recursive.
+        }
+      });
+    };
+
+    renderNodes(filtered, container);
   }
 
+  let currentStagger = 0;
   function createNodeEl(node) {
+    const idx = currentStagger++;
     const wrapper = document.createElement('div');
     wrapper.className = 'tree-node-wrapper';
 
     const itemEl = document.createElement('div');
     itemEl.className = 'tree-item' + (node.path === AppState.currentFile ? ' active' : '');
+    itemEl.style.setProperty('--stagger', idx);
     
     const icon = node.type === 'directory' ? svgFolder : svgFile;
     const chevron = node.type === 'directory' ? svgChevronDown : '<span style="width:12px;flex-shrink:0;"></span>';
@@ -63,9 +78,11 @@ const TreeModule = (() => {
       // Initial rotation
       itemEl.querySelector('.item-chevron').style.transform = node.expanded ? 'rotate(0)' : 'rotate(-90deg)';
 
-      node.children.forEach(child => {
-        childrenCont.appendChild(createNodeEl(child));
-      });
+      if (node.children) {
+        node.children.forEach(child => {
+          childrenCont.appendChild(createNodeEl(child));
+        });
+      }
       
       wrapper.appendChild(itemEl);
       wrapper.appendChild(childrenCont);
@@ -80,8 +97,39 @@ const TreeModule = (() => {
   }
 
   function search(q) {
-    currentQuery = q.trim().toLowerCase();
-    render();
+    currentQuery = (q || '').toLowerCase();
+    const resultsCont = document.getElementById('search-results-list');
+    if (resultsCont) {
+      if (!currentQuery) {
+        resultsCont.innerHTML = '';
+      } else {
+        const matches = _flattenAndFilter(treeData || [], currentQuery);
+        resultsCont.innerHTML = '';
+        if (matches.length === 0) {
+          resultsCont.innerHTML = `
+            <div style="display:flex; flex-direction:column; align-items:center; gap:8px; padding:24px 0;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <div class="section-label" style="text-align:center; width:100%;">No File Founded</div>
+            </div>`;
+        } else {
+          matches.forEach(m => {
+            const el = createNodeEl(m);
+            el.onclick = (e) => { e.stopPropagation(); loadFile(m.path); };
+            resultsCont.appendChild(el);
+          });
+        }
+      }
+    }
+    render(); 
+  }
+
+  function _flattenAndFilter(nodes, q) {
+    let out = [];
+    nodes.forEach(n => {
+      if (n.type === 'file' && n.name.toLowerCase().includes(q)) out.push(n);
+      if (n.type === 'directory' && n.children) out = out.concat(_flattenAndFilter(n.children, q));
+    });
+    return out;
   }
 
   function setActiveFile(filePath) {
