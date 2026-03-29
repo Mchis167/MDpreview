@@ -4,8 +4,9 @@
    ============================================================ */
 
 const CommentsModule = (() => {
-  let comments    = [];
-  let formTarget  = null;
+  let comments        = [];
+  let formTarget      = null;
+  let activeCommentId = null;
 
   const svgX = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
   const svgMsg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
@@ -92,7 +93,8 @@ const CommentsModule = (() => {
       const lineRef = isRange ? `L${c.lineStart}–L${c.lineEnd}` : `Line ${c.lineStart}`;
 
       const item = document.createElement('div');
-      item.className = 'comment-item';
+      item.className = 'comment-item' + (c.id === activeCommentId ? ' selected' : '');
+      item.dataset.id = c.id;
 
       const snippet = isRange
         ? `${c.startLineContent} ... ${c.endLineContent}`
@@ -113,6 +115,7 @@ const CommentsModule = (() => {
 
       item.onmouseenter = () => _highlightLines(c.lineStart, c.lineEnd);
       item.onmouseleave = () => _clearHighlights();
+      item.onclick      = () => _onItemClick(c);
       
       const delBtn = item.querySelector('.comment-item-delete');
       if (delBtn) {
@@ -130,12 +133,40 @@ const CommentsModule = (() => {
     const targetEnd = end || start;
     for (let i = start; i <= targetEnd; i++) {
       const line = document.querySelector(`.md-line[data-line="${i}"]`);
-      if (line) line.style.background = 'rgba(168,85,247,0.08)';
+      if (line) line.classList.add('highlight-temp');
+    }
+  }
+
+  function _onItemClick(comment) {
+    activeCommentId = comment.id;
+    _renderList(); // Refresh list to show selected state
+
+    const targetLine = document.querySelector(`.md-line[data-line="${comment.lineStart}"]`);
+    if (targetLine) {
+      targetLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Temporary pulse effect on target line
+      targetLine.classList.add('pulse-highlight');
+      setTimeout(() => targetLine.classList.remove('pulse-highlight'), 2000);
+
+      // Open Form in View Only mode
+      const anchor = targetLine.querySelector('.comment-trigger');
+      if (anchor) {
+        formTarget = { 
+          lineStart: comment.lineStart, 
+          lineEnd: comment.lineEnd, 
+          startLineContent: comment.startLineContent, 
+          endLineContent: comment.endLineContent,
+          id: comment.id
+        };
+        _showForm(anchor, 'view', comment.text);
+      }
     }
   }
 
   function _clearHighlights() {
-    document.querySelectorAll('.md-line').forEach(l => { l.style.background = ''; });
+    document.querySelectorAll('.md-line').forEach(l => { 
+      l.classList.remove('highlight-temp');
+    });
   }
 
   // ── Mark lines that already have comments ───────────────────
@@ -198,9 +229,21 @@ const CommentsModule = (() => {
   }
 
   // ── Show / hide form ─────────────────────────────────────────
-  function _showForm(anchorBtn) {
+  function _showForm(anchorBtn, mode = 'empty', initialText = '') {
     const form  = document.getElementById('comment-form');
     const input = document.getElementById('comment-input');
+    const display = document.getElementById('comment-text-display');
+    const saveBtn = document.getElementById('save-comment');
+
+    form.setAttribute('data-mode', mode);
+    
+    if (mode === 'view') {
+      display.textContent = initialText;
+    } else {
+      input.value = initialText;
+      saveBtn.disabled = !initialText.trim();
+      setTimeout(() => input.focus(), 50);
+    }
 
     const rect = anchorBtn.getBoundingClientRect();
     let left = rect.right + 10;
@@ -212,14 +255,14 @@ const CommentsModule = (() => {
     form.style.left = `${left}px`;
     form.style.top  = `${top}px`;
     form.classList.add('show');
-    input.value = '';
-    input.focus();
   }
 
   function _hideForm() {
     const form = document.getElementById('comment-form');
     if (form) form.classList.remove('show');
     formTarget = null;
+    activeCommentId = null;
+    _renderList();
   }
 
   async function _submitForm() {
@@ -257,11 +300,40 @@ const CommentsModule = (() => {
     document.getElementById('clear-comments-btn').addEventListener('click', () => {
       if (comments.length && confirm('Clear all comments?')) clear();
     });
-    document.getElementById('comment-input').addEventListener('keydown', e => {
-      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); _submitForm(); }
+
+    const input = document.getElementById('comment-input');
+    const form  = document.getElementById('comment-form');
+    const saveBtn = document.getElementById('save-comment');
+
+    input.addEventListener('input', () => {
+      const text = input.value.trim();
+      saveBtn.disabled = !text;
+      form.setAttribute('data-mode', text ? 'filled' : 'empty');
+    });
+
+    document.getElementById('edit-comment-btn').addEventListener('click', () => {
+      input.value = document.getElementById('comment-text-display').textContent;
+      saveBtn.disabled = !input.value.trim();
+      form.setAttribute('data-mode', 'filled');
+      setTimeout(() => input.focus(), 50);
+    });
+
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey && !saveBtn.disabled) { e.preventDefault(); _submitForm(); }
       if (e.key === 'Escape') _hideForm();
     });
   }
+
+  document.addEventListener('mousedown', (e) => {
+    const form = document.getElementById('comment-form');
+    if (form && form.classList.contains('show')) {
+      if (!form.contains(e.target) && !e.target.closest('.comment-item') && !e.target.closest('.comment-trigger')) {
+        _hideForm();
+        // Clear active selection in sidebar
+        document.querySelectorAll('.comment-item.selected').forEach(i => i.classList.remove('selected'));
+      }
+    }
+  });
 
   document.addEventListener('DOMContentLoaded', _bindEvents);
 

@@ -1,0 +1,23 @@
+# Project Rule: Agent Identity & Approval Flow
+
+## Identity Mandatory
+I am **Antigravity**, a powerful agentic AI coding assistant designed by the Google Deepmind team. I must never misidentify myself as "Cursor," "Claude," or any other AI application. All project-level configurations, rules, and communications should reflect my unique identity as Antigravity.
+
+## Workflow Mandatory Step
+Every time a non-trivial task (implementation, refactoring, or bug fix) is requested, the agent MUST follow this sequence:
+
+1. **Fetch & Research**: Locate tasks in the GitHub Project (ID: `3`) and conduct research. Refer to `GITHUB_WORKFLOW.md` for specific commands.
+2. **Planning**: Create an `implementation_plan` artifact detailing the proposed changes.
+3. **Explicit Wait**: After presenting the plan, the agent MUST stop and wait for the USER to explicitly say "proceed", "approve", or providing feedback.
+4. **Execution**: ONLY after receiving the confirmation, start the execution phase.
+5. **Status Update (MANDATORY)**: Immediately after code changes, move the task to **"In review"** in the GitHub project using the `gh project item-edit` tool.
+6. **Verification**: Verify the work and present a `walkthrough` artifact.
+
+## Anti-Patterns
+- **Self-Misidentification**: Never use the name of other IDE agents or general LLMs.
+- **Internal AUTO-PROCEED**: Do NOT start execution immediately after writing the plan.
+- **Missing Status**: Never leave a task in "In progress" after logic is applied. 
+- **Assumed Intent**: Do NOT assume the plan is perfect.
+
+## Project Management Excellence
+- **Status Automation**: Always reference `GITHUB_WORKFLOW.md` for exact GitHub Project IDs (`PVT_kw...`) and Status Option IDs (`f75a...`). When the user asks to change a task status, use the `gh project item-edit` command with these IDs to ensure 100% accuracy without manual investigation.

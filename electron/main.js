@@ -55,6 +55,52 @@ ipcMain.handle('set-watch-dir', async (event, dirPath) => {
   return true;
 });
 
+// --- IPC: Rebuild / Relaunch ---
+ipcMain.on('rebuild-app', () => {
+  const { spawn } = require('child_process');
+  const fs = require('fs');
+  
+  // Get the app path and escape the ASAR virtual filesystem if necessary
+  let projectRoot = app.getAppPath();
+  if (projectRoot.endsWith('app.asar')) {
+    projectRoot = path.dirname(projectRoot); // Resources folder
+  }
+  
+  // Navigate up from dist/mac-arm64/MDpreview.app/Contents/Resources to project root
+  // We'll search upwards until we find rebuild.sh
+  let searchDir = projectRoot;
+  let scriptPath = '';
+  // Maximum search depth of 6 levels
+  for (let i = 0; i < 6; i++) {
+    const potentialPath = path.join(searchDir, 'rebuild.sh');
+    if (fs.existsSync(potentialPath)) {
+      scriptPath = potentialPath;
+      projectRoot = searchDir;
+      break;
+    }
+    const parent = path.dirname(searchDir);
+    if (parent === searchDir) break;
+    searchDir = parent;
+  }
+  
+  if (!scriptPath) {
+    console.error('Could not find rebuild.sh in parent directories.');
+    return;
+  }
+  
+  const customPath = process.env.PATH + ':/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin';
+  
+  const subprocess = spawn('bash', [scriptPath], {
+    detached: true,
+    stdio: 'ignore',
+    cwd: projectRoot,
+    env: { ...process.env, PATH: customPath }
+  });
+  
+  subprocess.unref();
+  app.quit();
+});
+
 // Register domain IPC handlers
 require('./ipc/workspace').register(ipcMain);
 require('./ipc/comments').register(ipcMain);

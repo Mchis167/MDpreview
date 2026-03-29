@@ -17,5 +17,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getComments:    (wsId, file)             => ipcRenderer.invoke('get-comments', wsId, file),
   saveComment:    (wsId, file, comment)    => ipcRenderer.invoke('save-comment', wsId, file, comment),
   deleteComment:  (wsId, file, commentId) => ipcRenderer.invoke('delete-comment', wsId, file, commentId),
-  clearComments:  (wsId, file)             => ipcRenderer.invoke('clear-comments', wsId, file)
+  clearComments:  (wsId, file)             => ipcRenderer.invoke('clear-comments', wsId, file),
+  
+  // Custom
+  rebuildApp: () => ipcRenderer.send('rebuild-app')
 });

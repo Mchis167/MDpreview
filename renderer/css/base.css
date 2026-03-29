@@ -3,20 +3,35 @@
    ============================================================ */
 
 :root {
-  --accent: #6366f1;
-  --accent-hover: #4f46e5;
-  --bg-dark: #0a0a0a;
-  --surface-dark: #171717;
-  --border-dark: #262626;
-  --text-primary: #f5f5f5;
-  --text-muted: #737373;
+  --bg-deep: #070707;
+  --accent-orange: #FFBF48;
+  --accent-green: #22C55E;
+  --accent-purple: #A855F7;
+  
+  --text-90: rgba(255, 255, 255, 0.9);
+  --text-70: rgba(255, 255, 255, 0.7);
+  --text-50: rgba(255, 255, 255, 0.5);
+  --text-20: rgba(255, 255, 255, 0.2);
+  
+  --border-sidebar: rgba(255, 255, 255, 0.08);
+  --border-main: rgba(255, 255, 255, 0.05);
+
+  --radius-xl: 24px;
+  --radius-lg: 16px;
+  --radius-pill: 1000px;
+
+  --heading-font: 'Inter', sans-serif;
+  --mono-font: 'Roboto Mono', monospace;
+
+  /* Utility tokens */
+  --layer-hover: rgba(255, 255, 255, 0.03);
 }
 
 /* ── Custom Scrollbar ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #404040; }
+::-webkit-scrollbar-thumb { background: var(--border-sidebar); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-20); }
 
 /* ── Markdown Content Styling ── */
 #md-content {
@@ -31,14 +46,16 @@
   color: #ffffff;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border-dark);
+  border-bottom: 1px solid var(--border-main);
   letter-spacing: -0.025em;
+  font-family: var(--heading-font);
 }
 
 #md-content h2 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #f5f5f5;
+  color: var(--text-90);
+  font-family: var(--heading-font);
   margin-top: 3rem;
   margin-bottom: 1.25rem;
   display: flex;
@@ -51,14 +68,15 @@
   display: block;
   width: 4px;
   height: 1.5rem;
-  background: var(--accent);
+  background: var(--accent-orange);
   border-radius: 2px;
 }
 
 #md-content h3 {
   font-size: 1.125rem;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--accent-orange);
+  font-family: var(--heading-font);
   margin-top: 2rem;
   margin-bottom: 0.75rem;
 }
@@ -68,40 +86,40 @@
 }
 
 #md-content a {
-  color: var(--accent);
+  color: var(--accent-orange);
   text-decoration: none;
   border-bottom: 1px solid transparent;
   transition: border-color 0.2s;
 }
 
 #md-content a:hover {
-  border-bottom-color: var(--accent);
+  border-bottom-color: var(--accent-orange);
 }
 
 #md-content blockquote {
-  border-left: 4px solid var(--border-dark);
+  border-left: 4px solid var(--border-main);
   padding: 0.75rem 1.5rem;
   margin: 1.5rem 0;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 0 0.5rem 0.5rem 0;
+  background: var(--layer-hover);
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
   font-style: italic;
-  color: #a3a3a3;
+  color: var(--text-70);
 }
 
 #md-content code {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--mono-font);
   font-size: 0.875rem;
-  background: #1e1e1e;
+  background: var(--layer-hover);
   padding: 0.2rem 0.4rem;
-  border-radius: 0.375rem;
-  color: #eab308;
+  border-radius: var(--radius-lg);
+  color: var(--accent-orange);
 }
 
 #md-content pre {
-  background: #000000;
-  border: 1px solid var(--border-dark);
+  background: var(--bg-deep);
+  border: 1px solid var(--border-main);
   padding: 1.5rem;
-  border-radius: 1rem;
+  border-radius: var(--radius-xl);
   margin: 1.5rem 0;
   overflow-x: auto;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
@@ -128,8 +146,8 @@
   border-collapse: separate;
   border-spacing: 0;
   margin: 2rem 0;
-  border: 1px solid var(--border-dark);
-  border-radius: 0.75rem;
+  border: 1px solid var(--border-main);
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
@@ -165,14 +183,14 @@
 }
 
 .md-line.has-comment {
-  border-left: 2px solid var(--accent);
+  border-left: 2px solid var(--accent-orange);
   padding-left: 0.75rem;
   margin-left: -0.75rem;
 }
 
 .md-line.range-selected {
-  background: rgba(99, 102, 241, 0.08);
-  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.2);
+  background: rgba(255, 191, 72, 0.1);
+  box-shadow: 0 0 0 1px rgba(255, 191, 72, 0.2);
 }
 
 /* ── Mermaid ── */
@@ -189,7 +207,7 @@
 .mermaid:hover {
   transform: translateY(-2px);
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-  border-color: var(--accent);
+  border-color: var(--accent-orange);
 }
 
 /* ── Utilities ── */

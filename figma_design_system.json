@@ -1,0 +1,121 @@
+{
+  "bg-deep": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.02745, 0.02745, 0.02745],
+      "alpha": 1,
+      "hex": "#070707"
+    }
+  },
+  "accent-orange": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [1.0, 0.74902, 0.28235],
+      "alpha": 1,
+      "hex": "#FFBF48"
+    }
+  },
+  "accent-green": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.13333, 0.77255, 0.36863],
+      "alpha": 1,
+      "hex": "#22C55E"
+    }
+  },
+  "accent-purple": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.65882, 0.33333, 0.96863],
+      "alpha": 1,
+      "hex": "#A855F7"
+    }
+  },
+  "text-90": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [1, 1, 1],
+      "alpha": 0.9,
+      "hex": "#FFFFFFE6"
+    }
+  },
+  "text-70": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [1, 1, 1],
+      "alpha": 0.7,
+      "hex": "#FFFFFFB3"
+    }
+  },
+  "text-50": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [1, 1, 1],
+      "alpha": 0.5,
+      "hex": "#FFFFFF80"
+    }
+  },
+  "text-20": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [1, 1, 1],
+      "alpha": 0.2,
+      "hex": "#FFFFFF33"
+    }
+  },
+  "border-sidebar": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [1, 1, 1],
+      "alpha": 0.08,
+      "hex": "#FFFFFF14"
+    }
+  },
+  "border-main": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [1, 1, 1],
+      "alpha": 0.05,
+      "hex": "#FFFFFF0D"
+    }
+  },
+  "radius-xl": {
+    "$type": "dimension",
+    "$value": {
+      "value": 24,
+      "unit": "px"
+    }
+  },
+  "radius-lg": {
+    "$type": "dimension",
+    "$value": {
+      "value": 16,
+      "unit": "px"
+    }
+  },
+  "radius-pill": {
+    "$type": "dimension",
+    "$value": {
+      "value": 1000,
+      "unit": "px"
+    }
+  },
+  "heading-font": {
+    "$type": "fontFamily",
+    "$value": "Inter"
+  },
+  "mono-font": {
+    "$type": "fontFamily",
+    "$value": "Roboto Mono"
+  }
+}

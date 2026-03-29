@@ -23,7 +23,7 @@
 #app-title {
   font-size: 12px;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--accent-orange);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   margin-bottom: 8px;
@@ -42,7 +42,7 @@
   transition: border-color 0.15s;
   user-select: none;
 }
-#workspace-switcher:hover { border-color: var(--accent); }
+#workspace-switcher:hover { border-color: var(--accent-orange); }
 
 #workspace-name {
   flex: 1;
@@ -75,7 +75,7 @@
   transition: border-color 0.2s;
   width: calc(100% - 24px);
 }
-#search:focus { border-color: var(--accent); }
+#search:focus { border-color: var(--accent-orange); }
 
 /* ── File list / tree ── */
 #file-list {
@@ -102,7 +102,7 @@
   margin: 0 6px;
 }
 .tree-item:hover { background: var(--surface2); color: var(--text); }
-.tree-item.active { background: rgba(88,166,255,0.1); color: var(--accent); font-weight: 500; }
+.tree-item.active { background: rgba(255,191,72,0.1); color: var(--accent-orange); font-weight: 500; }
 
 .item-chevron { font-size: 9px; width: 10px; text-align: center; transition: transform 0.15s; flex-shrink: 0; }
 .item-chevron.collapsed { transform: rotate(-90deg); }

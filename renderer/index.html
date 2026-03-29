@@ -154,6 +154,9 @@
 
         <!-- Right: Action Buttons -->
         <div class="toolbar-right">
+          <button class="toolbar-btn" title="Rebuild & Relaunch" id="rebuild-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+          </button>
           <button class="toolbar-btn" title="Scroll to top" id="scroll-top-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
           </button>
@@ -192,7 +195,9 @@
         <div class="comment-sidebar-title">Comment</div>
         <div class="comment-sidebar-actions">
           <button class="icon-btn" id="clear-comments-btn" title="Clear all comments">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10.6665 14.6666L9.99984 12M12.6665 9.33331C12.8433 9.33331C13.0129 9.26307 13.1379 9.13805C13.2629 9.01303 13.3332 8.84346 13.3332 8.66665V7.99998C13.3332 7.64636 13.1927 7.30722 12.9426 7.05717C12.6926 6.80712 12.3535 6.66665 11.9998 6.66665H9.99984C9.82303 6.66665 9.65346 6.59641 9.52843 6.47138C9.40341 6.34636 9.33317 6.17679 9.33317 5.99998V2.66665C9.33317 2.31302 9.19269 1.97389 8.94265 1.72384C8.6926 1.47379 8.35346 1.33331 7.99984 1.33331C7.64622 1.33331 7.30708 1.47379 7.05703 1.72384C6.80698 1.97389 6.6665 2.31302 6.6665 2.66665V5.99998C6.6665 6.17679 6.59627 6.34636 6.47124 6.47138C6.34622 6.59641 6.17665 6.66665 5.99984 6.66665H3.99984C3.64622 6.66665 3.30708 6.80712 3.05703 7.05717C2.80698 7.30722 2.6665 7.64636 2.6665 7.99998V8.66665C2.6665 8.84346 2.73674 9.01303 2.86177 9.13805C2.98679 9.26307 3.15636 9.33331 3.33317 9.33331" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.33319 14.6666L5.99986 12M12.6665 9.33331H3.33319L2.01786 13.8446C1.99438 13.9427 1.99342 14.0447 2.01507 14.1432C2.03672 14.2416 2.0804 14.3338 2.14284 14.413C2.20527 14.4921 2.28484 14.556 2.37554 14.6C2.46625 14.6439 2.56574 14.6667 2.66653 14.6666H13.3332C13.434 14.6667 13.5335 14.6439 13.6242 14.6C13.7149 14.556 13.7944 14.4921 13.8569 14.413C13.9193 14.2416 13.963 14.2416 13.9847 14.1432C14.0063 14.0447 14.0053 13.9427 13.9819 13.8446L12.6665 9.33331Z" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M7.99916 0.666016C8.52933 0.666016 9.0382 0.877227 9.41322 1.25195C9.78815 1.62688 9.99899 2.13581 9.99916 2.66602V6H11.9992C12.5295 6 13.0382 6.21101 13.4132 6.58594C13.7882 6.96094 13.9991 7.46968 13.9992 8V8.66602C13.9992 9.0196 13.8585 9.35933 13.6085 9.60938C13.5664 9.65145 13.5206 9.68888 13.4738 9.72461L14.6212 13.6582L14.63 13.6895C14.6769 13.8853 14.6791 14.0895 14.6359 14.2861C14.5926 14.4829 14.5047 14.667 14.38 14.8252C14.2551 14.9834 14.0956 15.1113 13.9142 15.1992C13.733 15.2869 13.5344 15.333 13.3331 15.333H2.66615C2.46481 15.333 2.26532 15.287 2.08412 15.1992C1.90308 15.1114 1.74394 14.9832 1.61928 14.8252C1.49465 14.6671 1.40666 14.4828 1.36342 14.2861C1.32024 14.0895 1.32243 13.8852 1.36928 13.6895L1.37709 13.6582L2.52357 9.72461C2.47707 9.68905 2.43162 9.65121 2.38978 9.60938C2.13988 9.35935 1.99916 9.01953 1.99916 8.66602V8C1.99924 7.46983 2.2103 6.96091 2.5851 6.58594C2.96005 6.21103 3.46893 6.00013 3.99916 6H5.99916V2.66602C5.99933 2.13581 6.21017 1.62688 6.5851 1.25195C6.96005 0.877041 7.46893 0.666142 7.99916 0.666016ZM2.66615 14H4.81166L5.35268 11.8379C5.44206 11.481 5.8043 11.2635 6.16127 11.3525C6.5183 11.4418 6.73559 11.8041 6.64662 12.1611L6.18666 14H9.81264L9.35268 12.1611C9.26374 11.8041 9.48106 11.4418 9.83803 11.3525C10.195 11.2635 10.5572 11.481 10.6466 11.8379L11.1867 14H13.3331L12.1662 10H3.83314L2.66615 14ZM7.99916 2C7.82256 2.00013 7.65336 2.07045 7.52846 2.19531C7.40358 2.32019 7.33331 2.48943 7.33314 2.66602V6C7.33306 6.35339 7.19234 6.69243 6.94252 6.94238C6.69247 7.19243 6.35278 7.33301 5.99916 7.33301H3.99916C3.82263 7.33313 3.65335 7.40356 3.52846 7.52832C3.4035 7.65327 3.33322 7.8233 3.33314 8V8.66602H12.6662V8C12.6661 7.8233 12.5958 7.65327 12.4708 7.52832C12.3458 7.40344 12.1759 7.33301 11.9992 7.33301H9.99916C9.64571 7.33288 9.30671 7.19232 9.05678 6.94238C8.80695 6.69243 8.66624 6.3534 8.66615 6V2.66602C8.66598 2.48951 8.59561 2.32017 8.47084 2.19531C8.34584 2.07043 8.17586 2 7.99916 2Z" fill="currentColor"/>
+            </svg>
           </button>
           <button class="icon-btn" id="copy-comments-btn" title="Copy all comments">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
@@ -215,13 +220,32 @@
 <!-- ══════════════════════════════════════════════════
      COMMENT FORM POPUP
 ════════════════════════════════════════════════════ -->
-<div id="comment-form">
+<div id="comment-form" data-mode="empty">
   <div class="comment-form-inner">
-    <label class="comment-form-label">Add Annotation</label>
-    <textarea id="comment-input" placeholder="What's your feedback?"></textarea>
-    <div class="comment-form-actions">
-      <button id="cancel-comment">CANCEL</button>
-      <button id="save-comment">SAVE</button>
+    <!-- Edit Mode (Empty or Filled) -->
+    <div class="comment-edit-view">
+      <div class="comment-input-area">
+        <textarea id="comment-input" placeholder="What’s your feedback"></textarea>
+      </div>
+      <div class="comment-form-actions">
+        <button id="cancel-comment" class="btn btn-ghost">Cancel</button>
+        <button id="save-comment" class="btn btn-primary" disabled>Save</button>
+      </div>
+    </div>
+    
+    <!-- View Only Mode -->
+    <div class="comment-read-view">
+      <div class="comment-read-header">
+        <div class="comment-header-label">Comment</div>
+        <button id="edit-comment-btn" class="icon-btn-edit" title="Edit comment">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11 2.66667L13.3333 5M12.3333 1.66667C12.7753 1.22464 13.4913 1.22464 13.9333 1.66667C14.3754 2.10869 14.3754 2.82472 13.9333 3.26675L4.33333 12.8667L2 13.5333L2.66667 11.2L12.3333 1.66667Z" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="comment-read-body">
+        <div id="comment-text-display"></div>
+      </div>
     </div>
   </div>
 </div>
