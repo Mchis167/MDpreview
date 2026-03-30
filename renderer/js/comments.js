@@ -40,6 +40,7 @@ const CommentsModule = (() => {
     const file = AppState.currentFile;
     if (!ws || !file) return;
     comments = await window.electronAPI.deleteComment(ws.id, file, commentId);
+    _clearHighlights();
     _renderList();
     _markLinesWithComments();
   }
@@ -50,6 +51,7 @@ const CommentsModule = (() => {
     const file = AppState.currentFile;
     if (!ws || !file) return;
     comments = await window.electronAPI.clearComments(ws.id, file);
+    _clearHighlights();
     _renderList();
     _markLinesWithComments();
   }

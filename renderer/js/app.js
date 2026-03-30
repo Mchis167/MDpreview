@@ -10,6 +10,7 @@
 const AppState = {
   currentFile:      null,
   currentWorkspace: null,
+  lastMarkdownFile: null, // Tracks original file when in AI mode
   commentMode:      false,
   socket:           null,
   
@@ -25,30 +26,41 @@ const AppState = {
    */
   onModeChange(mode) {
     if (mode === 'ai') {
-      // 1. Clear comments list (data is independent)
+      // 1. Store and switch to AI virtual file
+      if (AppState.currentFile !== '__AI_RESPONSE__') {
+        AppState.lastMarkdownFile = AppState.currentFile;
+        AppState.currentFile = '__AI_RESPONSE__';
+      }
+
+      // 2. Load AI-specific comments
       if (typeof CommentsModule !== 'undefined') {
-        CommentsModule.clearUI();
+        CommentsModule.loadForFile('__AI_RESPONSE__');
       }
       
-      // 2. Clear triggers if in comment mode
+      // 3. Clear triggers if in comment mode (they will be re-applied to AI preview)
       if (AppState.commentMode && typeof CommentsModule !== 'undefined') {
         CommentsModule.removeCommentMode();
       }
 
-      // 3. Sync AI preview (handled by AIResponseModule)
+      // 4. Sync AI preview (handled by AIResponseModule)
       if (typeof AIResponseModule !== 'undefined') {
         AIResponseModule.syncPreview();
       }
     } else {
       // Mode: markdown
-      // 1. Restore the currently active file (if any)
-      if (AppState.currentFile) {
+      // 1. Restore the original file
+      if (AppState.lastMarkdownFile) {
+        AppState.currentFile = AppState.lastMarkdownFile;
+        AppState.lastMarkdownFile = null;
+      }
+
+      if (AppState.currentFile && AppState.currentFile !== '__AI_RESPONSE__') {
         loadFile(AppState.currentFile);
       } else {
         setNoFile();
       }
 
-      // 2. Restore comment mode if it was active
+      // 2. Restore comment mode triggers
       if (AppState.commentMode && typeof CommentsModule !== 'undefined') {
         CommentsModule.applyCommentMode();
       }
