@@ -18,6 +18,41 @@ const AppState = {
     accentColor: localStorage.getItem('md-accent-color') || '#ffbf48',
     bgEnabled:   localStorage.getItem('md-bg-enabled') === 'true',
     bgImage:     localStorage.getItem('md-bg-image') || ''
+  },
+
+  /**
+   * Called when sidebar mode changes (Markdown <-> AI)
+   */
+  onModeChange(mode) {
+    if (mode === 'ai') {
+      // 1. Clear comments list (data is independent)
+      if (typeof CommentsModule !== 'undefined') {
+        CommentsModule.clearUI();
+      }
+      
+      // 2. Clear triggers if in comment mode
+      if (AppState.commentMode && typeof CommentsModule !== 'undefined') {
+        CommentsModule.removeCommentMode();
+      }
+
+      // 3. Sync AI preview (handled by AIResponseModule)
+      if (typeof AIResponseModule !== 'undefined') {
+        AIResponseModule.syncPreview();
+      }
+    } else {
+      // Mode: markdown
+      // 1. Restore the currently active file (if any)
+      if (AppState.currentFile) {
+        loadFile(AppState.currentFile);
+      } else {
+        setNoFile();
+      }
+
+      // 2. Restore comment mode if it was active
+      if (AppState.commentMode && typeof CommentsModule !== 'undefined') {
+        CommentsModule.applyCommentMode();
+      }
+    }
   }
 };
 
@@ -83,8 +118,6 @@ async function loadFile(filePath) {
 
   const emptyState = document.getElementById('empty-state');
   const mdContent  = document.getElementById('md-content');
-  const wsNameEl = document.getElementById('header-workspace-name');
-  const fileNameEl = document.getElementById('header-file-name');
 
   if (emptyState) emptyState.style.display = 'none';
   if (mdContent) {
@@ -92,8 +125,7 @@ async function loadFile(filePath) {
     mdContent.innerHTML = data.html;
   }
 
-  if (wsNameEl)  wsNameEl.innerText = AppState.currentWorkspace.name.toUpperCase() + '.';
-  if (fileNameEl) fileNameEl.innerText = filePath.split('/').pop();
+  updateHeaderUI();
 
   await processMermaid(mdContent); // processMermaid defined in mermaid.js
   await CommentsModule.loadForFile(filePath);
@@ -109,16 +141,37 @@ function setNoFile() {
 
   const emptyState = document.getElementById('empty-state');
   const mdContent  = document.getElementById('md-content');
-  const wsNameEl = document.getElementById('header-workspace-name');
-  const fileNameEl = document.getElementById('header-file-name');
 
   if (emptyState) emptyState.style.display = 'flex';
   if (mdContent)  mdContent.style.display  = 'none';
 
-  if (wsNameEl)  wsNameEl.innerText = AppState.currentWorkspace ? AppState.currentWorkspace.name.toUpperCase() + '.' : 'TOUCH.';
-  if (fileNameEl) fileNameEl.innerText = 'Select a file';
+  updateHeaderUI();
 
   if (typeof CommentsModule !== 'undefined') CommentsModule.clearUI();
+}
+
+/**
+ * Global function to sync the toolbar header with AppState
+ */
+function updateHeaderUI() {
+  const wsNameEl = document.getElementById('header-workspace-name');
+  const fileNameEl = document.getElementById('header-file-name');
+
+  if (!wsNameEl || !fileNameEl) return;
+
+  // If in AI Response tab (checked externally via sidebar state or handled by ai-response.js),
+  // this function will be overridden or skipped.
+  // But generally, show workspace and file:
+  
+  fileNameEl.style.display = ''; // Ensure visible
+
+  if (AppState.currentFile) {
+    wsNameEl.innerText = AppState.currentWorkspace.name.toUpperCase() + '.';
+    fileNameEl.innerText = AppState.currentFile.split('/').pop();
+  } else {
+    wsNameEl.innerText = AppState.currentWorkspace ? AppState.currentWorkspace.name.toUpperCase() + '.' : 'TOUCH.';
+    fileNameEl.innerText = 'Select a file';
+  }
 }
 
 // ── Boot ─────────────────────────────────────────────────────

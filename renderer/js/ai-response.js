@@ -4,6 +4,7 @@
 
 const AIResponseModule = (() => {
   let displayedContent = '';
+  let renderedHtml     = '';
   
   const elements = {
     chatComponent:  null,
@@ -35,6 +36,13 @@ const AIResponseModule = (() => {
     
     elements.footers.markdown = document.getElementById('markdown-footer');
     elements.footers.ai       = document.getElementById('ai-footer');
+
+    const importBtn = document.getElementById('ai-quick-import');
+    if (importBtn) {
+      importBtn.addEventListener('click', () => handleFileImport());
+    }
+
+    _setupDragAndDrop();
 
     if (!elements.chatInput || !elements.previewBtn) return;
 
@@ -116,6 +124,7 @@ const AIResponseModule = (() => {
       if (mdContent) {
         mdContent.style.display = 'block';
         mdContent.innerHTML = data.html;
+        renderedHtml = data.html; // Store for tab switching
         // Process Mermaid (global from app.js / mermaid.js)
         if (typeof processMermaid === 'function') processMermaid(mdContent);
       }
@@ -148,5 +157,122 @@ const AIResponseModule = (() => {
     }
   }
 
-  return { init, toggleFooter };
+  function updateHeader(mode) {
+    const wsNameEl   = document.getElementById('header-workspace-name');
+    const fileNameEl = document.getElementById('header-file-name');
+
+    if (mode === 'ai') {
+      if (wsNameEl) wsNameEl.innerText = 'NEW AI RESPONSE';
+      if (fileNameEl) {
+        fileNameEl.style.display = 'none';
+      }
+    } else {
+      // Restore from AppState using the global function in app.js
+      if (typeof updateHeaderUI === 'function') {
+        updateHeaderUI();
+      }
+    }
+  }
+
+  // ── File Import & Drag-and-Drop ────────────────────────────
+  async function handleFileImport() {
+    try {
+      // Use standard browser file input as a picker if electronAPI.pickAndReadFile is not yet implemented
+      // But let's assume we want a real Electron dialog if possible.
+      // If electronAPI.pickAndReadFile is missing, we'll fall back.
+      if (window.electronAPI && window.electronAPI.pickAndReadFile) {
+        const fileData = await window.electronAPI.pickAndReadFile();
+        if (fileData && fileData.content) {
+          _setChatInput(fileData.content);
+        }
+      } else {
+        // Fallback: create invisible input
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.md';
+        input.onchange = async (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const content = await file.text();
+            _setChatInput(content);
+          }
+        };
+        input.click();
+      }
+    } catch (err) {
+      console.error('File import failed:', err);
+    }
+  }
+
+  function _setupDragAndDrop() {
+    const container = elements.variants.input;
+    if (!container) return;
+
+    container.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      container.classList.add('drag-over');
+    });
+
+    container.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      container.classList.remove('drag-over');
+    });
+
+    container.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      container.classList.remove('drag-over');
+
+      const files = e.dataTransfer.files;
+      if (files && files.length > 0) {
+        const file = files[0];
+        if (file.name.toLowerCase().endsWith('.md')) {
+          const content = await file.text();
+          _setChatInput(content);
+        } else {
+          alert('Please drop a Markdown (.md) file.');
+        }
+      }
+    });
+  }
+
+  function _setChatInput(content) {
+    if (elements.chatInput) {
+      elements.chatInput.value = content;
+      // Trigger status badge update
+      updateBadgeState(content);
+      // If there's an expanded textarea modal open, sync it too
+      const expandedInput = document.getElementById('ai-expanded-input');
+      if (expandedInput) expandedInput.value = content;
+    }
+  }
+
+  // Sync the main viewer with AI's displayedContent
+  function syncPreview() {
+    const emptyState = document.getElementById('empty-state');
+    const mdContent  = document.getElementById('md-content');
+    
+    if (!displayedContent || !renderedHtml) {
+      if (emptyState) emptyState.style.display = 'flex';
+      if (mdContent)  mdContent.style.display  = 'none';
+      return;
+    }
+
+    // Restore previously rendered content
+    if (emptyState) emptyState.style.display = 'none';
+    if (mdContent) {
+      mdContent.style.display = 'block';
+      mdContent.innerHTML = renderedHtml;
+      
+      // Diagrams need to be reprocessed since we updated innerHTML
+      if (typeof processMermaid === 'function') processMermaid(mdContent);
+      
+      // Update header
+      updateHeader('ai');
+    }
+  }
+
+  return { init, toggleFooter, updateHeader, syncPreview };
 })();

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>MDpreview</title>
@@ -7,7 +8,9 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap"
+    rel="stylesheet">
 
   <!-- Mermaid -->
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
@@ -18,160 +21,203 @@
   <!-- Design System -->
   <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
 
-<div id="app-background"></div>
+  <div id="app-background"></div>
 
-<!-- ══════════════════════════════════════════════════
+  <!-- ══════════════════════════════════════════════════
      WORKSPACE PANEL
 ════════════════════════════════════════════════════ -->
-<div id="workspace-panel">
-  <div class="ws-panel-card">
-    <button id="workspace-panel-close">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-    <div class="ws-panel-header">
-      <div class="ws-panel-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+  <div id="workspace-panel">
+    <div class="ws-panel-card">
+      <button id="workspace-panel-close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+      <div class="ws-panel-header">
+        <div class="ws-panel-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="3" rx="2" />
+            <path d="M3 9h18M9 21V9" />
+          </svg>
+        </div>
+        <h2 class="ws-panel-title">Workspaces</h2>
       </div>
-      <h2 class="ws-panel-title">Workspaces</h2>
+      <div id="workspace-list"></div>
+      <button id="add-workspace-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Add New Workspace
+      </button>
     </div>
-    <div id="workspace-list"></div>
-    <button id="add-workspace-btn">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Add New Workspace
-    </button>
   </div>
-</div>
 
-<!-- ══════════════════════════════════════════════════
+  <!-- ══════════════════════════════════════════════════
      ADD WORKSPACE MODAL
 ════════════════════════════════════════════════════ -->
-<div id="add-workspace-modal">
-  <div class="aws-card">
-    <div class="aws-icon-wrapper">
-      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><line x1="12" y1="10" x2="12" y2="16"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
-    </div>
-    <h3 class="aws-title">New Workspace</h3>
-    <p class="aws-subtitle">Connect a local folder to start previewing.</p>
-    <div class="aws-fields">
-      <div>
-        <label class="aws-field-label">Workspace Name</label>
-        <input id="workspace-name-input" type="text" placeholder="Design Specs, API Docs…" class="aws-input">
+  <div id="add-workspace-modal">
+    <div class="aws-card">
+      <div class="aws-icon-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path
+            d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" />
+          <line x1="12" y1="10" x2="12" y2="16" />
+          <line x1="9" y1="13" x2="15" y2="13" />
+        </svg>
       </div>
-      <div>
-        <label class="aws-field-label">Folder Path</label>
-        <div class="aws-browse-row">
-          <input id="workspace-path-input" type="text" placeholder="Select document folder…" readonly class="aws-input path">
-          <button id="browse-btn">Browse</button>
+      <h3 class="aws-title">New Workspace</h3>
+      <p class="aws-subtitle">Connect a local folder to start previewing.</p>
+      <div class="aws-fields">
+        <div>
+          <label class="aws-field-label">Workspace Name</label>
+          <input id="workspace-name-input" type="text" placeholder="Design Specs, API Docs…" class="aws-input">
+        </div>
+        <div>
+          <label class="aws-field-label">Folder Path</label>
+          <div class="aws-browse-row">
+            <input id="workspace-path-input" type="text" placeholder="Select document folder…" readonly
+              class="aws-input path">
+            <button id="browse-btn">Browse</button>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="aws-actions">
-      <button id="cancel-workspace-btn">Cancel</button>
-      <button id="confirm-workspace-btn" disabled>Create</button>
+      <div class="aws-actions">
+        <button id="cancel-workspace-btn">Cancel</button>
+        <button id="confirm-workspace-btn" disabled>Create</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ══════════════════════════════════════════════════
+  <!-- ══════════════════════════════════════════════════
      EXPANDED COMMENT MODAL
 ════════════════════════════════════════════════════ -->
-<!-- Expanded Comment Modal (Restored original names) -->
-<div id="expanded-comment-modal" class="expanded-comment-modal">
-  <div class="expanded-textarea-backdrop"></div>
-  <div class="expanded-comment-container">
-    <div class="expanded-comment-header">
-      <div class="comment-form-label">INPUT CHAT RESPONSE</div>
-      <button id="minimize-comment-btn" class="comment-expand-btn" title="Minimize">
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-      </button>
-    </div>
-    <div class="expanded-comment-body">
-      <textarea id="expanded-comment-input" class="expanded-comment-input" placeholder="What’s your feedback"></textarea>
-    </div>
-    <div class="expanded-comment-footer">
-      <button id="expanded-save-comment" class="btn btn-primary">Save Comment</button>
-    </div>
-  </div>
-</div>
-
-<!-- Generic Expanded Modal for AI Responses -->
-<div id="ai-expanded-modal" class="expanded-textarea-modal">
-  <div class="expanded-textarea-backdrop"></div>
-  <div class="expanded-textarea-container">
-    <div class="expanded-textarea-header">
-      <div class="textarea-label">INPUT CHAT RESPONSE</div>
-      <button id="ai-minimize-btn" class="textarea-expand-btn" title="Minimize">
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-      </button>
-    </div>
-    <div class="expanded-textarea-body">
-      <textarea id="ai-expanded-input" class="expanded-textarea-input" placeholder="Type here..."></textarea>
+  <!-- Expanded Comment Modal (Restored original names) -->
+  <div id="expanded-comment-modal" class="expanded-comment-modal">
+    <div class="expanded-textarea-backdrop"></div>
+    <div class="expanded-comment-container">
+      <div class="expanded-comment-header">
+        <div class="comment-form-label">INPUT CHAT RESPONSE</div>
+        <button id="minimize-comment-btn" class="comment-expand-btn" title="Minimize">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 14 10 14 10 20" />
+            <polyline points="20 10 14 10 14 4" />
+            <line x1="14" y1="10" x2="21" y2="3" />
+            <line x1="3" y1="21" x2="10" y2="14" />
+          </svg>
+        </button>
+      </div>
+      <div class="expanded-comment-body">
+        <textarea id="expanded-comment-input" class="expanded-comment-input"
+          placeholder="What’s your feedback"></textarea>
+      </div>
+      <div class="expanded-comment-footer">
+        <button id="expanded-save-comment" class="btn btn-primary">Save Comment</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ══════════════════════════════════════════════════
+  <!-- Generic Expanded Modal for AI Responses -->
+  <div id="ai-expanded-modal" class="expanded-textarea-modal">
+    <div class="expanded-textarea-backdrop"></div>
+    <div class="expanded-textarea-container">
+      <div class="expanded-textarea-header">
+        <div class="textarea-label">INPUT CHAT RESPONSE</div>
+        <button id="ai-minimize-btn" class="textarea-expand-btn" title="Minimize">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 14 10 14 10 20" />
+            <polyline points="20 10 14 10 14 4" />
+            <line x1="14" y1="10" x2="21" y2="3" />
+            <line x1="3" y1="21" x2="10" y2="14" />
+          </svg>
+        </button>
+      </div>
+      <div class="expanded-textarea-body">
+        <textarea id="ai-expanded-input" class="expanded-textarea-input" placeholder="Type here..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
      SETTING MODAL
 ════════════════════════════════════════════════════ -->
-<div id="setting-modal">
-  <div class="setting-card">
-    <div class="setting-header">
-      <h2 class="setting-title">Setting</h2>
-      <button id="close-settings-btn" class="icon-btn-close">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    
-    <div class="setting-body">
-      <!-- Accent Color Setting -->
-      <div class="setting-item-row">
-        <div class="setting-label-col">
-          <span class="setting-label">Accent Color</span>
-        </div>
-        <div class="color-selector">
-          <!-- Populated by JS -->
-        </div>
+  <div id="setting-modal">
+    <div class="setting-card">
+      <div class="setting-header">
+        <h2 class="setting-title">Setting</h2>
+        <button id="close-settings-btn" class="icon-btn-close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
       </div>
 
-      <div class="setting-divider"></div>
+      <div class="setting-body">
+        <!-- Accent Color Setting -->
+        <div class="setting-item-row">
+          <div class="setting-label-col">
+            <span class="setting-label">Accent Color</span>
+          </div>
+          <div class="color-selector">
+            <!-- Populated by JS -->
+          </div>
+        </div>
 
-      <!-- Background Setting -->
-      <div class="setting-item-row">
-        <div class="setting-label-col">
-          <span class="setting-label">Custom Background</span>
-        </div>
-        <div id="bg-toggle-mount" class="switch-toggle" tabindex="0" role="switch">
-          <!-- SwitchToggle logic will mount indicator if empty or just use the current one -->
-          <div class="switch-indicator"></div>
-        </div>
-      </div>
+        <div class="setting-divider"></div>
 
-      <div class="bg-image-grid">
-        <div class="bg-image-item bg-new-image" id="bg-upload-trigger">
-           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-           <span>New Image</span>
-           <input type="file" id="bg-file-input" accept="image/*" style="display: none;" multiple>
+        <!-- Background Setting -->
+        <div class="setting-item-row">
+          <div class="setting-label-col">
+            <span class="setting-label">Custom Background</span>
+          </div>
+          <div id="bg-toggle-mount" class="switch-toggle" tabindex="0" role="switch">
+            <!-- SwitchToggle logic will mount indicator if empty or just use the current one -->
+            <div class="switch-indicator"></div>
+          </div>
         </div>
-        <!-- Custom Uploaded Images Rendered Here -->
-        <div id="custom-bg-list" style="display: contents;"></div>
-        <!-- Preset Demo Images -->
-        <div class="bg-image-item">
-          <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop" alt="Abstract 1">
-        </div>
-        <div class="bg-image-item">
-          <img src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop" alt="Abstract 2">
+
+        <div class="bg-image-grid">
+          <div class="bg-image-item bg-new-image" id="bg-upload-trigger">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            <span>New Image</span>
+            <input type="file" id="bg-file-input" accept="image/*" style="display: none;" multiple>
+          </div>
+          <!-- Custom Uploaded Images Rendered Here -->
+          <div id="custom-bg-list" style="display: contents;"></div>
+          <!-- Preset Demo Images -->
+          <div class="bg-image-item">
+            <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
+              alt="Abstract 1">
+          </div>
+          <div class="bg-image-item">
+            <img src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop"
+              alt="Abstract 2">
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ══════════════════════════════════════════════════
+  <!-- ══════════════════════════════════════════════════
      APP LAYOUT
 ════════════════════════════════════════════════════ -->
-<div id="app-layout">
+  <div id="app-layout">
 
     <!-- ── Sidebar Left ──────────────────────────────── -->
     <!-- ── Sidebar Left ──────────────────────────────── -->
@@ -192,7 +238,10 @@
           <div id="workspace-switcher-outer">
             <button id="workspace-switcher">
               <span id="workspace-name">Touch</span>
-              <svg class="ws-chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              <svg class="ws-chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
             </button>
           </div>
         </div>
@@ -212,7 +261,11 @@
             <div class="all-file-header">
               <div class="section-label">ALL FILE</div>
               <button id="enter-search-btn" class="search-icon-btn" title="Search files">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
               </button>
             </div>
             <div id="file-tree"></div>
@@ -225,7 +278,15 @@
           <!-- Variant: Placeholder -->
           <div id="ai-placeholder-variant" class="ai-variant">
             <div class="sidebar-ai-placeholder">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 8V4H8" />
+                <rect width="16" height="12" x="4" y="8" rx="2" />
+                <path d="M2 14h2" />
+                <path d="M20 14h2" />
+                <path d="M15 13v2" />
+                <path d="M9 13v2" />
+              </svg>
               <div class="sidebar-ai-label">AI Response</div>
               <div class="sidebar-ai-sublabel">Coming soon</div>
             </div>
@@ -234,13 +295,30 @@
           <!-- Variant: Input Mode (Issue #29) -->
           <div id="ai-input-variant" class="ai-variant" style="display:none">
             <div class="ai-view-container">
-              
+
+              <!-- Quick Import Button -->
+              <button id="ai-quick-import" class="ai-import-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3v12" />
+                  <path d="m8 11 4 4 4-4" />
+                  <path d="M8 5H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-4" />
+                </svg>
+                <span>Quick Import</span>
+              </button>
+
               <!-- Input Chat Response -->
               <div class="textarea-component" id="ai-chat-component">
                 <div class="textarea-header">
                   <span class="textarea-label">Input Chat Response</span>
                   <button class="textarea-expand-btn" id="ai-chat-expand" title="Expand">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="15 3 21 3 21 9" />
+                      <polyline points="9 21 3 21 3 15" />
+                      <line x1="21" y1="3" x2="14" y2="10" />
+                      <line x1="3" y1="21" x2="10" y2="14" />
+                    </svg>
                   </button>
                 </div>
                 <div class="textarea-container" id="ai-chat-container">
@@ -254,7 +332,8 @@
                   <span class="textarea-label">Additional Content</span>
                 </div>
                 <div class="textarea-container" id="ai-extra-container">
-                  <textarea id="ai-extra-input" class="textarea-input" placeholder="Paste additional content here..."></textarea>
+                  <textarea id="ai-extra-input" class="textarea-input"
+                    placeholder="Paste additional content here..."></textarea>
                 </div>
               </div>
 
@@ -292,9 +371,15 @@
             <div class="status-badge-inner is-updated" id="ai-status-badge">
               <div class="status-badge-icon">
                 <!-- Check Icon (Updated) -->
-                <svg class="icon-check" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <svg class="icon-check" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
                 <!-- Minus Icon (Pending) -->
-                <svg class="icon-minus" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <svg class="icon-minus" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
               </div>
               <span class="status-badge-text">Content Updated</span>
             </div>
@@ -306,176 +391,230 @@
       </aside>
     </div>
 
-  <!-- ── Main Area ─────────────────────────────────── -->
-  <main>
-    <div class="glass-main">
+    <!-- ── Main Area ─────────────────────────────────── -->
+    <main>
+      <div class="glass-main">
 
-      <!-- Toolbar -->
-      <div id="toolbar">
-        <!-- Left: Action Block -->
-        <div class="toolbar-left">
-          <button class="toolbar-btn" id="sidebar-toggle-btn" title="Toggle Sidebar">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sidebar-toggle-icon"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-          </button>
-          <div class="toolbar-divider"></div>
-          <div class="header-text-block">
-            <div id="header-workspace-name" class="header-label">TOUCH.</div>
-            <div id="header-file-name" class="header-value">Select a file</div>
+        <!-- Toolbar -->
+        <div id="toolbar">
+          <!-- Left: Action Block -->
+          <div class="toolbar-left">
+            <button class="toolbar-btn" id="sidebar-toggle-btn" title="Toggle Sidebar">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="sidebar-toggle-icon">
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
+            <div class="toolbar-divider"></div>
+            <div class="header-text-block">
+              <div id="header-workspace-name" class="header-label">TOUCH.</div>
+              <div id="header-file-name" class="header-value">Select a file</div>
+            </div>
+          </div>
+
+          <!-- Center: Segmented Control -->
+          <div class="toolbar-center">
+            <div class="segmented-control">
+              <div id="segment-bg"></div>
+              <button class="mode-segment active" data-mode="read">Read</button>
+              <button class="mode-segment" data-mode="comment">Comment</button>
+            </div>
+          </div>
+
+          <!-- Right: Action Buttons -->
+          <div class="toolbar-right">
+            <button class="toolbar-btn" title="Rebuild & Relaunch" id="rebuild-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                <path d="M16 16h5v5" />
+              </svg>
+            </button>
+            <button class="toolbar-btn" title="Scroll to top" id="scroll-top-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="19" x2="12" y2="5" />
+                <polyline points="5 12 12 5 19 12" />
+              </svg>
+            </button>
+            <button class="toolbar-btn" title="Fullscreen" id="fullscreen-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 3 21 3 21 9" />
+                <polyline points="9 21 3 21 3 15" />
+                <line x1="21" y1="3" x2="14" y2="10" />
+                <line x1="3" y1="21" x2="10" y2="14" />
+              </svg>
+            </button>
+            <div class="toolbar-divider"></div>
+            <button class="toolbar-btn" title="Settings" id="open-settings-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path
+                  d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
           </div>
         </div>
 
-        <!-- Center: Segmented Control -->
-        <div class="toolbar-center">
-          <div class="segmented-control">
-            <div id="segment-bg"></div>
-            <button class="mode-segment active" data-mode="read">Read</button>
-            <button class="mode-segment" data-mode="comment">Comment</button>
+        <!-- Content (md viewer only — comment sidebar is a sibling of main) -->
+        <div id="md-viewer">
+          <div id="md-content" style="display:none;"></div>
+
+          <!-- Empty State -->
+          <div id="empty-state">
+            <div class="illus-wrap">
+              <img src="../assets/Central Illustration.png" alt="MDpreview Welcome" class="center-illus">
+            </div>
+            <div class="empty-state-text">
+              <h2>MDpreview</h2>
+              <p>Select a Markdown file from the sidebar or<br>click the workspace switcher to get started.</p>
+            </div>
           </div>
         </div>
 
-        <!-- Right: Action Buttons -->
-        <div class="toolbar-right">
-          <button class="toolbar-btn" title="Rebuild & Relaunch" id="rebuild-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
-          </button>
-          <button class="toolbar-btn" title="Scroll to top" id="scroll-top-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
-          </button>
-          <button class="toolbar-btn" title="Fullscreen" id="fullscreen-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-          </button>
-          <div class="toolbar-divider"></div>
-          <button class="toolbar-btn" title="Settings" id="open-settings-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-        </div>
-      </div>
+      </div><!-- /glass-main -->
+    </main>
 
-      <!-- Content (md viewer only — comment sidebar is a sibling of main) -->
-      <div id="md-viewer">
-        <div id="md-content" style="display:none;"></div>
-
-        <!-- Empty State -->
-        <div id="empty-state">
-          <div class="illus-wrap">
-          <img src="../assets/Central Illustration.png" alt="MDpreview Welcome" class="center-illus">
-          </div>
-          <div class="empty-state-text">
-            <h2>MDpreview</h2>
-            <p>Select a Markdown file from the sidebar or<br>click the workspace switcher to get started.</p>
+    <!-- ── Right Sidebar (Comments) ─────────────────── -->
+    <!-- Wrapper handles the slide-in animation by transitioning width -->
+    <div id="comment-sidebar-wrap">
+      <!-- Comment Sidebar Resizer -->
+      <div class="comment-resizer" id="comment-resizer"></div>
+      <aside id="comment-sidebar">
+        <div class="comment-sidebar-header">
+          <div class="comment-sidebar-title">Comment</div>
+          <div class="comment-sidebar-actions">
+            <button class="icon-btn" id="clear-comments-btn" title="Clear all comments">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd"
+                  d="M7.99916 0.666016C8.52933 0.666016 9.0382 0.877227 9.41322 1.25195C9.78815 1.62688 9.99899 2.13581 9.99916 2.66602V6H11.9992C12.5295 6 13.0382 6.21101 13.4132 6.58594C13.7882 6.96094 13.9991 7.46968 13.9992 8V8.66602C13.9992 9.0196 13.8585 9.35933 13.6085 9.60938C13.5664 9.65145 13.5206 9.68888 13.4738 9.72461L14.6212 13.6582L14.63 13.6895C14.6769 13.8853 14.6791 14.0895 14.6359 14.2861C14.5926 14.4829 14.5047 14.667 14.38 14.8252C14.2551 14.9834 14.0956 15.1113 13.9142 15.1992C13.733 15.2869 13.5344 15.333 13.3331 15.333H2.66615C2.46481 15.333 2.26532 15.287 2.08412 15.1992C1.90308 15.1114 1.74394 14.9832 1.61928 14.8252C1.49465 14.6671 1.40666 14.4828 1.36342 14.2861C1.32024 14.0895 1.32243 13.8852 1.36928 13.6895L1.37709 13.6582L2.52357 9.72461C2.47707 9.68905 2.43162 9.65121 2.38978 9.60938C2.13988 9.35935 1.99916 9.01953 1.99916 8.66602V8C1.99924 7.46983 2.2103 6.96091 2.5851 6.58594C2.96005 6.21103 3.46893 6.00013 3.99916 6H5.99916V2.66602C5.99933 2.13581 6.21017 1.62688 6.5851 1.25195C6.96005 0.877041 7.46893 0.666142 7.99916 0.666016ZM2.66615 14H4.81166L5.35268 11.8379C5.44206 11.481 5.8043 11.2635 6.16127 11.3525C6.5183 11.4418 6.73559 11.8041 6.64662 12.1611L6.18666 14H9.81264L9.35268 12.1611C9.26374 11.8041 9.48106 11.4418 9.83803 11.3525C10.195 11.2635 10.5572 11.481 10.6466 11.8379L11.1867 14H13.3331L12.1662 10H3.83314L2.66615 14ZM7.99916 2C7.82256 2.00013 7.65336 2.07045 7.52846 2.19531C7.40358 2.32019 7.33331 2.48943 7.33314 2.66602V6C7.33306 6.35339 7.19234 6.69243 6.94252 6.94238C6.69247 7.19243 6.35278 7.33301 5.99916 7.33301H3.99916C3.82263 7.33313 3.65335 7.40356 3.52846 7.52832C3.4035 7.65327 3.33322 7.8233 3.33314 8V8.66602H12.6662V8C12.6661 7.8233 12.5958 7.65327 12.4708 7.52832C12.3458 7.40344 12.1759 7.33301 11.9992 7.33301H9.99916C9.64571 7.33288 9.30671 7.19232 9.05678 6.94238C8.80695 6.69243 8.66624 6.3534 8.66615 6V2.66602C8.66598 2.48951 8.59561 2.32017 8.47084 2.19531C8.34584 2.07043 8.17586 2 7.99916 2Z"
+                  fill="currentColor" />
+              </svg>
+            </button>
+            <button class="icon-btn" id="copy-comments-btn" title="Copy all comments">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+              </svg>
+            </button>
           </div>
         </div>
-      </div>
 
-    </div><!-- /glass-main -->
-  </main>
-
-  <!-- ── Right Sidebar (Comments) ─────────────────── -->
-  <!-- Wrapper handles the slide-in animation by transitioning width -->
-  <div id="comment-sidebar-wrap">
-    <!-- Comment Sidebar Resizer -->
-    <div class="comment-resizer" id="comment-resizer"></div>
-    <aside id="comment-sidebar">
-      <div class="comment-sidebar-header">
-        <div class="comment-sidebar-title">Comment</div>
-        <div class="comment-sidebar-actions">
-          <button class="icon-btn" id="clear-comments-btn" title="Clear all comments">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path fill-rule="evenodd" clip-rule="evenodd" d="M7.99916 0.666016C8.52933 0.666016 9.0382 0.877227 9.41322 1.25195C9.78815 1.62688 9.99899 2.13581 9.99916 2.66602V6H11.9992C12.5295 6 13.0382 6.21101 13.4132 6.58594C13.7882 6.96094 13.9991 7.46968 13.9992 8V8.66602C13.9992 9.0196 13.8585 9.35933 13.6085 9.60938C13.5664 9.65145 13.5206 9.68888 13.4738 9.72461L14.6212 13.6582L14.63 13.6895C14.6769 13.8853 14.6791 14.0895 14.6359 14.2861C14.5926 14.4829 14.5047 14.667 14.38 14.8252C14.2551 14.9834 14.0956 15.1113 13.9142 15.1992C13.733 15.2869 13.5344 15.333 13.3331 15.333H2.66615C2.46481 15.333 2.26532 15.287 2.08412 15.1992C1.90308 15.1114 1.74394 14.9832 1.61928 14.8252C1.49465 14.6671 1.40666 14.4828 1.36342 14.2861C1.32024 14.0895 1.32243 13.8852 1.36928 13.6895L1.37709 13.6582L2.52357 9.72461C2.47707 9.68905 2.43162 9.65121 2.38978 9.60938C2.13988 9.35935 1.99916 9.01953 1.99916 8.66602V8C1.99924 7.46983 2.2103 6.96091 2.5851 6.58594C2.96005 6.21103 3.46893 6.00013 3.99916 6H5.99916V2.66602C5.99933 2.13581 6.21017 1.62688 6.5851 1.25195C6.96005 0.877041 7.46893 0.666142 7.99916 0.666016ZM2.66615 14H4.81166L5.35268 11.8379C5.44206 11.481 5.8043 11.2635 6.16127 11.3525C6.5183 11.4418 6.73559 11.8041 6.64662 12.1611L6.18666 14H9.81264L9.35268 12.1611C9.26374 11.8041 9.48106 11.4418 9.83803 11.3525C10.195 11.2635 10.5572 11.481 10.6466 11.8379L11.1867 14H13.3331L12.1662 10H3.83314L2.66615 14ZM7.99916 2C7.82256 2.00013 7.65336 2.07045 7.52846 2.19531C7.40358 2.32019 7.33331 2.48943 7.33314 2.66602V6C7.33306 6.35339 7.19234 6.69243 6.94252 6.94238C6.69247 7.19243 6.35278 7.33301 5.99916 7.33301H3.99916C3.82263 7.33313 3.65335 7.40356 3.52846 7.52832C3.4035 7.65327 3.33322 7.8233 3.33314 8V8.66602H12.6662V8C12.6661 7.8233 12.5958 7.65327 12.4708 7.52832C12.3458 7.40344 12.1759 7.33301 11.9992 7.33301H9.99916C9.64571 7.33288 9.30671 7.19232 9.05678 6.94238C8.80695 6.69243 8.66624 6.3534 8.66615 6V2.66602C8.66598 2.48951 8.59561 2.32017 8.47084 2.19531C8.34584 2.07043 8.17586 2 7.99916 2Z" fill="currentColor"/>
-            </svg>
-          </button>
-          <button class="icon-btn" id="copy-comments-btn" title="Copy all comments">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-          </button>
+        <div class="comment-list-wrap">
+          <div id="comment-list"></div>
+          <div id="no-comments">
+            <img src="../assets/lucide_message-circle-dashed.svg" alt="No Comments" width="28" height="28"
+              style="opacity:0.2;">
+            <p>No Comment yet</p>
+          </div>
         </div>
-      </div>
+      </aside>
+    </div>
 
-      <div class="comment-list-wrap">
-        <div id="comment-list"></div>
-        <div id="no-comments">
-          <img src="../assets/lucide_message-circle-dashed.svg" alt="No Comments" width="28" height="28" style="opacity:0.2;">
-          <p>No Comment yet</p>
-        </div>
-      </div>
-    </aside>
-  </div>
+  </div><!-- /app-layout -->
 
-</div><!-- /app-layout -->
-
-<!-- ══════════════════════════════════════════════════
+  <!-- ══════════════════════════════════════════════════
      COMMENT FORM POPUP
 ════════════════════════════════════════════════════ -->
-    <div id="comment-form" data-mode="empty">
-      <div class="comment-form-inner">
-        <!-- Edit Mode (Empty or Filled) -->
-        <div class="comment-edit-view">
-          <div class="comment-input-wrap">
-            <textarea id="comment-input" placeholder="What’s your feedback"></textarea>
-          </div>
-          <div class="comment-form-actions">
-            <button id="cancel-comment" class="btn btn-ghost">Cancel</button>
-            <button id="save-comment" class="btn btn-primary" disabled>Save</button>
-          </div>
+  <div id="comment-form" data-mode="empty">
+    <div class="comment-form-inner">
+      <!-- Edit Mode (Empty or Filled) -->
+      <div class="comment-edit-view">
+        <div class="comment-input-wrap">
+          <textarea id="comment-input" placeholder="What’s your feedback"></textarea>
         </div>
-    
-    <!-- View Only Mode -->
-    <div class="comment-read-view">
-      <div class="comment-read-header">
-        <div class="comment-header-label">COMMENT</div>
-        <button id="edit-comment-btn" class="icon-btn-edit" title="Edit comment">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M11 2.66667L13.3333 5M12.3333 1.66667C12.7753 1.22464 13.4913 1.22464 13.9333 1.66667C14.3754 2.10869 14.3754 2.82472 13.9333 3.26675L4.33333 12.8667L2 13.5333L2.66667 11.2L12.3333 1.66667Z" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
+        <div class="comment-form-actions">
+          <button id="cancel-comment" class="btn btn-ghost">Cancel</button>
+          <button id="save-comment" class="btn btn-primary" disabled>Save</button>
+        </div>
       </div>
-      <div class="comment-read-body">
-        <div id="comment-text-display"></div>
+
+      <!-- View Only Mode -->
+      <div class="comment-read-view">
+        <div class="comment-read-header">
+          <div class="comment-header-label">COMMENT</div>
+          <button id="edit-comment-btn" class="icon-btn-edit" title="Edit comment">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M11 2.66667L13.3333 5M12.3333 1.66667C12.7753 1.22464 13.4913 1.22464 13.9333 1.66667C14.3754 2.10869 14.3754 2.82472 13.9333 3.26675L4.33333 12.8667L2 13.5333L2.66667 11.2L12.3333 1.66667Z"
+                stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+        <div class="comment-read-body">
+          <div id="comment-text-display"></div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ══════════════════════════════════════════════════
+  <!-- ══════════════════════════════════════════════════
      ZOOM MODAL
 ════════════════════════════════════════════════════ -->
-<div id="zoom-modal">
-  <button id="zoom-close" title="Close (Esc)">
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-  </button>
-  <div id="zoom-container"></div>
-  <div id="zoom-controls-bar">
-    <!-- Fit to screen -->
-    <button class="zoom-ctrl-btn" id="zoom-fit-btn" title="Fit to screen (double-click)">
-      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+  <div id="zoom-modal">
+    <button id="zoom-close" title="Close (Esc)">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
     </button>
-    <div class="zoom-ctrl-divider"></div>
-    <!-- Zoom Out -->
-    <button class="zoom-ctrl-btn" id="zoom-out-btn" title="Zoom out">
-      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    </button>
-    <!-- Percentage -->
-    <span id="zoom-pct">100%</span>
-    <!-- Zoom In -->
-    <button class="zoom-ctrl-btn" id="zoom-in-btn" title="Zoom in">
-      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    </button>
+    <div id="zoom-container"></div>
+    <div id="zoom-controls-bar">
+      <!-- Fit to screen -->
+      <button class="zoom-ctrl-btn" id="zoom-fit-btn" title="Fit to screen (double-click)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 3 21 3 21 9" />
+          <polyline points="9 21 3 21 3 15" />
+          <line x1="21" y1="3" x2="14" y2="10" />
+          <line x1="3" y1="21" x2="10" y2="14" />
+        </svg>
+      </button>
+      <div class="zoom-ctrl-divider"></div>
+      <!-- Zoom Out -->
+      <button class="zoom-ctrl-btn" id="zoom-out-btn" title="Zoom out">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+      </button>
+      <!-- Percentage -->
+      <span id="zoom-pct">100%</span>
+      <!-- Zoom In -->
+      <button class="zoom-ctrl-btn" id="zoom-in-btn" title="Zoom in">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+      </button>
+    </div>
   </div>
-</div>
 
-<!-- ── Scripts ─────────────────────────────────────── -->
-<script src="js/tree.js"></script>
-<script src="js/workspace.js"></script>
-<script src="js/textarea.js"></script>
-<script src="js/comments.js"></script>
-<script src="js/zoom.js"></script>
-<script src="js/mermaid.js"></script>
-<script src="js/toolbar.js"></script>
-<script src="js/switch-toggle.js"></script>
-<script src="js/settings.js"></script>
-<script src="js/search-component.js"></script>
-<script src="js/sidebar.js"></script>
-<script src="js/ai-response.js"></script>
-<script src="js/app.js"></script>
+  <!-- ── Scripts ─────────────────────────────────────── -->
+  <script src="js/tree.js"></script>
+  <script src="js/workspace.js"></script>
+  <script src="js/textarea.js"></script>
+  <script src="js/comments.js"></script>
+  <script src="js/zoom.js"></script>
+  <script src="js/mermaid.js"></script>
+  <script src="js/toolbar.js"></script>
+  <script src="js/switch-toggle.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/search-component.js"></script>
+  <script src="js/sidebar.js"></script>
+  <script src="js/ai-response.js"></script>
+  <script src="js/app.js"></script>
 
 </body>
+
 </html>

@@ -73,18 +73,33 @@ function initSidebarModeSwitcher() {
       btns.forEach(b => b.classList.toggle('active', b === btn));
       updateIndicator(btn);
 
-      if (btn.dataset.smode === 'ai') {
+      const mode = btn.dataset.smode;
+      
+      // Global UI handling for mode switching
+      if (typeof AppState !== 'undefined' && typeof AppState.onModeChange === 'function') {
+        AppState.onModeChange(mode);
+      }
+
+      if (mode === 'ai') {
         if (mdHeader) mdHeader.style.display = 'none';
         expView.style.display = 'none';
         searchView.style.display = 'none';
         if (aiView) aiView.style.display = 'flex';
-        if (typeof AIResponseModule !== 'undefined') AIResponseModule.toggleFooter('ai');
+        // Toggle footer and header (Issue #29)
+        if (typeof AIResponseModule !== 'undefined') {
+          AIResponseModule.toggleFooter('ai');
+          AIResponseModule.updateHeader('ai');
+        }
       } else {
         if (aiView) aiView.style.display = 'none';
         if (mdHeader) mdHeader.style.display = '';
         expView.style.display = 'flex';
         searchView.style.display = 'none';
-        if (typeof AIResponseModule !== 'undefined') AIResponseModule.toggleFooter('markdown');
+        // Toggle footer and header (Issue #29)
+        if (typeof AIResponseModule !== 'undefined') {
+          AIResponseModule.toggleFooter('markdown');
+          AIResponseModule.updateHeader('markdown');
+        }
       }
     });
   });

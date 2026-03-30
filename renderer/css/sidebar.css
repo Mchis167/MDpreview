@@ -570,10 +570,48 @@
 
 /* ── AI Response Variants (Issue #29) ──────────────────── */
 .ai-view-container {
-  padding: 8px 12px;
+  padding: 20px 12px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.ai-import-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-pill);
+  color: var(--text-70);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.ai-import-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.ai-import-btn svg {
+  color: var(--text-40);
+  transition: color 0.2s;
+}
+
+.ai-import-btn:hover svg {
+  color: #fff;
+}
+
+/* Drag Over State */
+.ai-variant.drag-over {
+  background: rgba(var(--accent-rgb), 0.05);
+  box-shadow: inset 0 0 20px rgba(var(--accent-rgb), 0.1);
 }
 
 .ai-view-container .textarea-component {
@@ -636,11 +674,21 @@
 }
 
 /* Icon Toggling */
-.status-badge-inner .icon-check { display: block; }
-.status-badge-inner .icon-minus { display: none; }
+.status-badge-inner .icon-check {
+  display: block;
+}
 
-.status-badge-inner.is-pending .icon-check { display: none; }
-.status-badge-inner.is-pending .icon-minus { display: block; }
+.status-badge-inner .icon-minus {
+  display: none;
+}
+
+.status-badge-inner.is-pending .icon-check {
+  display: none;
+}
+
+.status-badge-inner.is-pending .icon-minus {
+  display: block;
+}
 
 .ai-variant {
   display: none;
