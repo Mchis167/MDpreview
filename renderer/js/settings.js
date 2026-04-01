@@ -43,7 +43,52 @@ const SettingsModule = (() => {
     }
 
     // ── Custom Background Toggle ──────────────────────────────
+    const imageGrid = modal.querySelector('.bg-image-grid');
     const bgToggleContainer = document.getElementById('bg-toggle-mount');
+
+    const updateGridVisibility = (enabled) => {
+      if (imageGrid) {
+        imageGrid.style.display = enabled ? 'grid' : 'none';
+        // Handle label sibling visibility as well
+        const gridLabel = imageGrid.previousElementSibling;
+        if (gridLabel && gridLabel.classList.contains('settings-label')) {
+          gridLabel.style.display = enabled ? 'block' : 'none';
+        }
+      }
+    };
+
+    // ── Explorer Toggles ──────────────────────────────────────
+    const mountToggle = (id, stateKey, storageKey) => {
+      SwitchToggleModule.init({
+        containerId: id,
+        isOn: AppState.settings[stateKey],
+        onChange: (val) => {
+          AppState.settings[stateKey] = val;
+          localStorage.setItem(storageKey, val);
+          if (typeof TreeModule !== 'undefined') TreeModule.load();
+        }
+      });
+    };
+
+    mountToggle('hidden-toggle-mount', 'showHidden', 'md-show-hidden');
+    mountToggle('empty-toggle-mount',  'hideEmptyFolders', 'md-hide-empty');
+    mountToggle('flat-toggle-mount',   'flatView', 'md-flat-view');
+
+    // ── Text Zoom ─────────────────────────────────────────────
+    const zoomSlider = document.getElementById('text-zoom-slider');
+    const zoomVal    = document.getElementById('text-zoom-val');
+    if (zoomSlider && zoomVal) {
+      zoomSlider.value = AppState.settings.textZoom || 100;
+      zoomVal.innerText = `${zoomSlider.value}%`;
+      zoomSlider.addEventListener('input', (e) => {
+        const val = e.target.value;
+        zoomVal.innerText = `${val}%`;
+        AppState.settings.textZoom = parseInt(val, 10);
+        localStorage.setItem('md-text-zoom', val);
+        applyTheme();
+      });
+    }
+
     if (bgToggleContainer) {
       SwitchToggleModule.init({
         containerId: 'bg-toggle-mount',
@@ -51,15 +96,16 @@ const SettingsModule = (() => {
         onChange: (val) => {
           AppState.settings.bgEnabled = val;
           localStorage.setItem('md-bg-enabled', val);
+          updateGridVisibility(val);
           applyTheme();
         }
       });
     }
 
     // ── Background Image Grid ──────────────────────────────────
-    const imageGrid = modal.querySelector('.bg-image-grid');
     if (imageGrid) {
       setupImageGrid(imageGrid);
+      updateGridVisibility(AppState.settings.bgEnabled);
     }
     
     // Initial Application

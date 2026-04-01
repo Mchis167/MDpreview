@@ -61,6 +61,18 @@ const CommentsModule = (() => {
     if (!comments.length) return;
     const file  = AppState.currentFile || 'unknown';
     const lines = [`--- Comments ---`, `File: ${file}`, ``];
+    
+    // Check for Additional Content if in AI mode (Issue #37)
+    if (file === '__AI_RESPONSE__') {
+      const extra = document.getElementById('ai-extra-input')?.value.trim();
+      if (extra) {
+        lines.push(`--- Additional Content ---`);
+        lines.push(extra);
+        lines.push(``);
+        lines.push(`--- User Comments ---`);
+      }
+    }
+
     comments.forEach(c => {
       if (c.lineStart === c.lineEnd) {
         lines.push(`Line ${c.lineStart} ("${c.startLineContent}"): ${c.text}`);
@@ -72,7 +84,27 @@ const CommentsModule = (() => {
       }
       lines.push('');
     });
-    navigator.clipboard.writeText(lines.join('\n'));
+    
+    navigator.clipboard.writeText(lines.join('\n')).then(() => {
+        // Feedback logic (Issue #36)
+        if (typeof showToast === 'function') {
+            const count = comments.length;
+            const msg = `Copied ${count} comment${count !== 1 ? 's' : ''}`;
+            showToast(msg);
+        }
+        
+        // Icon animation
+        const btn = document.getElementById('copy-comments-btn');
+        if (btn) {
+            const originalIcon = btn.innerHTML;
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>`;
+            btn.style.color = 'var(--accent-color)';
+            setTimeout(() => {
+                btn.innerHTML = originalIcon;
+                btn.style.color = '';
+            }, 1000);
+        }
+    });
   }
 
   // ── Render comment list in right sidebar ─────────────────────
@@ -500,5 +532,5 @@ const CommentsModule = (() => {
 
   document.addEventListener('DOMContentLoaded', _bindEvents);
 
-  return { loadForFile, applyCommentMode, removeCommentMode, clearUI };
+  return { loadForFile, applyCommentMode, removeCommentMode, clearUI, clear, getCommentCount: () => comments.length };
 })();

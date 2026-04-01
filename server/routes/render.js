@@ -33,7 +33,11 @@ function renderWithLineNumbers(content) {
     // For code blocks (including mermaid), keep the HTML intact without
     // splitting into per-line divs — splitting breaks the <pre><code> structure
     // that the mermaid processor needs.
-    if (token.type === 'code') {
+    // Also include container tags like blockquote, list, and table to prevent
+    // breaking their HTML tags line-by-line (Issue #35).
+    const isAtomic = ['code', 'blockquote', 'list', 'table'].includes(token.type);
+    
+    if (isAtomic) {
       html += `<div class="md-block" data-line-start="${lineStart}" data-line-end="${lineEnd}"><div class="md-line" data-line="${lineStart}">${tokenHtml}</div></div>\n`;
       continue;
     }

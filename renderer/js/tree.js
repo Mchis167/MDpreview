@@ -11,9 +11,41 @@ const TreeModule = (() => {
   const svgFile = `<svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5.33341 6L7.33341 4L5.33341 2M2.66675 2L0.666748 4L2.66675 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
   async function load() {
-    const res = await fetch('/api/files').catch(() => null);
+    // 1. Save expanded states
+    const expandedPaths = new Set();
+    const saveExpanded = (nodes) => {
+      nodes.forEach(n => {
+        if (n.type === 'directory' && n.expanded) {
+          expandedPaths.add(n.path);
+          if (n.children) saveExpanded(n.children);
+        }
+      });
+    };
+    saveExpanded(treeData);
+
+    const { showHidden, hideEmptyFolders, flatView } = AppState.settings;
+    const query = new URLSearchParams({
+      showHidden: !!showHidden,
+      hideEmpty:  !!hideEmptyFolders,
+      flat:       !!flatView
+    });
+
+    const res = await fetch(`/api/files?${query}`).catch(() => null);
     if (!res || !res.ok) return;
-    treeData = await res.json();
+    const newData = await res.json();
+    
+    // 2. Restore expanded states
+    const restoreExpanded = (nodes) => {
+      nodes.forEach(n => {
+        if (n.type === 'directory') {
+          if (expandedPaths.has(n.path)) n.expanded = true;
+          if (n.children) restoreExpanded(n.children);
+        }
+      });
+    };
+    restoreExpanded(newData);
+
+    treeData = newData;
     render();
   }
 
@@ -57,12 +89,17 @@ const TreeModule = (() => {
     
     const icon = node.type === 'directory' ? svgFolder : svgFile;
     const chevron = node.type === 'directory' ? svgChevronDown : '<span style="width:12px;flex-shrink:0;"></span>';
+    const trashIcon = node.type === 'file' ? `
+      <div class="item-delete-btn" title="Delete file">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+      </div>` : '';
 
     itemEl.dataset.path = node.path;
     itemEl.innerHTML = `
       ${chevron}
       <div class="item-icon-wrap">${icon}</div>
       <span class="item-label" title="${_esc(node.name)}">${_esc(node.name)}</span>
+      ${trashIcon}
     `;
 
     if (node.type === 'directory') {
@@ -88,9 +125,122 @@ const TreeModule = (() => {
       wrapper.appendChild(itemEl);
       wrapper.appendChild(childrenCont);
     } else {
+      const label = itemEl.querySelector('.item-label');
+      label.ondblclick = (e) => {
+        e.stopPropagation();
+        _startRename(itemEl, node);
+      };
+
       itemEl.onclick = () => {
         loadFile(node.path);
       };
+
+      // Handle delete button click
+      const deleteBtn = itemEl.querySelector('.item-delete-btn');
+      if (deleteBtn) {
+        deleteBtn.onclick = async (e) => {
+          e.stopPropagation();
+          const fileName = node.path.split('/').pop();
+          if (confirm(`Are you sure you want to delete "${fileName}"? This action cannot be undone.`)) {
+            if (!window.electronAPI || !window.electronAPI.deleteFile) {
+              alert('Error: File deletion API not available.');
+              return;
+            }
+            // Build absolute path — tree stores relative paths, IPC needs absolute
+            const wsPath = AppState.currentWorkspace ? AppState.currentWorkspace.path : '';
+            const absPath = wsPath ? wsPath.replace(/\/$/, '') + '/' + node.path : node.path;
+            const result = await window.electronAPI.deleteFile(absPath);
+            if (result.success) {
+              if (typeof showToast === 'function') showToast(`Deleted ${fileName}`);
+              
+              // Remove from recently viewed if exists
+              if (typeof RecentlyViewedModule !== 'undefined') {
+                RecentlyViewedModule.remove(node.path);
+              }
+
+              // If it was the active file, clear view
+              if (AppState.currentFile === node.path) {
+                AppState.currentFile = null;
+                const mdContent = document.getElementById('md-content');
+                const editViewer = document.getElementById('edit-viewer');
+                const emptyState = document.getElementById('empty-state');
+                
+                if (mdContent) mdContent.style.display = 'none';
+                if (editViewer) editViewer.style.display = 'none';
+                if (emptyState) emptyState.style.display = 'flex';
+                
+                if (typeof updateHeaderUI === 'function') updateHeaderUI();
+              }
+
+              // Reload the tree
+              load();
+            } else {
+              alert(`Error deleting file: ${result.error}`);
+            }
+          }
+        };
+      }
+
+      // ── Context Menu [Lợi: Thêm Duplicate & Rename] ──────────
+      itemEl.oncontextmenu = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        _hideContextMenu();
+
+        const menu = document.createElement('div');
+        menu.className = 'ctx-menu';
+        menu.style.left = `${e.clientX}px`;
+        menu.style.top = `${e.clientY}px`;
+
+        const renameItem = document.createElement('div');
+        renameItem.className = 'ctx-item';
+        renameItem.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg> Rename`;
+        renameItem.onclick = () => {
+          _hideContextMenu();
+          _startRename(itemEl, node);
+        };
+
+        const duplicateItem = document.createElement('div');
+        duplicateItem.className = 'ctx-item';
+        duplicateItem.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg> Duplicate`;
+        duplicateItem.onclick = async () => {
+          _hideContextMenu();
+          const wsPath = AppState.currentWorkspace ? AppState.currentWorkspace.path : '';
+          const absPath = wsPath ? wsPath.replace(/\/$/, '') + '/' + node.path : node.path;
+          const res = await window.electronAPI.duplicateFile(absPath);
+          if (res.success) {
+            if (typeof showToast === 'function') showToast('File duplicated');
+            load();
+            // Tự động mở file mới
+            const newRelativePath = res.path.replace(wsPath.replace(/\/$/, ''), '').replace(/^\//, '');
+            setTimeout(() => loadFile(newRelativePath), 100);
+          } else {
+            alert('Duplicate failed: ' + res.error);
+          }
+        };
+
+        const deleteItem = document.createElement('div');
+        deleteItem.className = 'ctx-item';
+        deleteItem.style.color = '#ff4d4d';
+        deleteItem.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg> Delete`;
+        deleteItem.onclick = () => {
+          _hideContextMenu();
+          if (deleteBtn) deleteBtn.click();
+        };
+
+        menu.appendChild(renameItem);
+        menu.appendChild(duplicateItem);
+        menu.appendChild(document.createElement('div')).className = 'ctx-divider';
+        menu.appendChild(deleteItem);
+
+        document.body.appendChild(menu);
+
+        const closeMenu = (e) => {
+          if (!menu.contains(e.target)) _hideContextMenu();
+        };
+        document.addEventListener('mousedown', closeMenu, { once: true });
+      };
+
       wrapper.appendChild(itemEl);
     }
 
@@ -162,6 +312,81 @@ const TreeModule = (() => {
       }
       return acc;
     }, []);
+  }
+
+  function _hideContextMenu() {
+    const existing = document.querySelector('.ctx-menu');
+    if (existing) existing.remove();
+  }
+
+  async function _startRename(itemEl, node) {
+    const label = itemEl.querySelector('.item-label');
+    const originalName = node.name;
+    const originalText = label.innerText;
+
+    label.innerHTML = '';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'inline-rename-input';
+    input.value = originalName;
+    label.appendChild(input);
+    input.select();
+    input.focus();
+
+    const finish = async (save) => {
+      if (input._done) return;
+      input._done = true;
+
+      let newName = input.value.trim();
+      if (save && newName && newName !== originalName) {
+        // Auto-append .md if missing
+        if (!newName.toLowerCase().endsWith('.md')) {
+          newName += '.md';
+        }
+        
+        // If after auto-append it's still the same as original, just cancel
+        if (newName === originalName) {
+            label.innerText = originalText;
+            return;
+        }
+
+        const wsPath = AppState.currentWorkspace ? AppState.currentWorkspace.path : '';
+        const oldAbs = (wsPath.replace(/\/$/, '') + '/' + node.path).replace(/\/\//g, '/');
+        
+        // Build new path
+        const dir = node.path.substring(0, node.path.lastIndexOf('/') + 1);
+        const newRelative = dir + newName;
+        const newAbs = (wsPath.replace(/\/$/, '') + '/' + newRelative).replace(/\/\//g, '/');
+
+        const res = await window.electronAPI.renameFile(oldAbs, newAbs);
+        if (res.success) {
+          if (typeof showToast === 'function') showToast('Renamed file');
+          
+          // Update recently viewed
+          if (typeof RecentlyViewedModule !== 'undefined') {
+            RecentlyViewedModule.swap(node.path, newRelative);
+          }
+
+          // If active file was renamed, update AppState
+          if (AppState.currentFile === node.path) {
+            AppState.currentFile = newRelative;
+            if (typeof updateHeaderUI === 'function') updateHeaderUI();
+          }
+          load();
+        } else {
+          alert('Rename failed: ' + res.error);
+          label.innerText = originalText;
+        }
+      } else {
+        label.innerText = originalText;
+      }
+    };
+
+    input.onblur = () => finish(true);
+    input.onkeydown = (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+      if (e.key === 'Escape') { e.preventDefault(); finish(false); }
+    };
   }
 
   function _esc(t) {

@@ -42,6 +42,11 @@ const AIResponseModule = (() => {
       importBtn.addEventListener('click', () => handleFileImport());
     }
 
+    const clearBtn = document.getElementById('ai-clear-btn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => clear());
+    }
+
     _setupDragAndDrop();
 
     if (!elements.chatInput || !elements.previewBtn) return;
@@ -101,6 +106,15 @@ const AIResponseModule = (() => {
     const content = elements.chatInput.value;
     if (!content) return;
 
+    // Check for existing comments (Issue #38)
+    if (typeof CommentsModule !== 'undefined' && CommentsModule.getCommentCount() > 0) {
+        if (confirm('Rendering a new preview will clear your existing comments. Continue?')) {
+            await CommentsModule.clear();
+        } else {
+            return;
+        }
+    }
+    
     elements.previewBtn.disabled = true;
     elements.previewBtn.textContent = 'Rendering...';
 
@@ -122,11 +136,17 @@ const AIResponseModule = (() => {
 
       if (emptyState) emptyState.style.display = 'none';
       if (mdContent) {
-        mdContent.style.display = 'block';
-        mdContent.innerHTML = data.html;
+        const inner = mdContent.querySelector('.md-content-inner') || mdContent;
+        inner.innerHTML = data.html;
         renderedHtml = data.html; // Store for tab switching
+        
+        // Only show mdContent if NOT in edit mode
+        if (AppState.currentMode !== 'edit') {
+            mdContent.style.display = 'block';
+        }
+        
         // Process Mermaid (global from app.js / mermaid.js)
-        if (typeof processMermaid === 'function') processMermaid(mdContent);
+        if (typeof processMermaid === 'function') processMermaid(inner);
       }
 
       if (wsNameEl)  wsNameEl.innerText = (AppState.currentWorkspace ? AppState.currentWorkspace.name : 'AI').toUpperCase() + '.';
@@ -135,6 +155,11 @@ const AIResponseModule = (() => {
       // Update local state
       displayedContent = content;
       updateBadgeState(content);
+      
+      // If we are in edit mode, sync the editor with the new content
+      if (AppState.currentMode === 'edit' && typeof EditorModule !== 'undefined') {
+          EditorModule.setOriginalContent(content);
+      }
       
       // Reset scroll
       document.getElementById('md-viewer').scrollTop = 0;
@@ -249,13 +274,35 @@ const AIResponseModule = (() => {
     }
   }
 
+  async function clear() {
+    displayedContent = '';
+    renderedHtml = '';
+
+    if (elements.chatInput) elements.chatInput.value = '';
+    if (elements.extraInput) elements.extraInput.value = '';
+
+    // Clear expanded input if exist
+    const expandedInput = document.getElementById('ai-expanded-input');
+    if (expandedInput) expandedInput.value = '';
+
+    updateBadgeState('');
+    syncPreview();
+  }
+
   // Sync the main viewer with AI's displayedContent
   function syncPreview() {
     const emptyState = document.getElementById('empty-state');
     const mdContent  = document.getElementById('md-content');
     
     if (!displayedContent || !renderedHtml) {
-      if (emptyState) emptyState.style.display = 'flex';
+      if (emptyState) {
+        emptyState.style.display = 'flex';
+        // Restore default text if needed
+        const h2 = emptyState.querySelector('h2');
+        const p  = emptyState.querySelector('p');
+        if (h2) h2.innerText = 'MDpreview';
+        if (p)  p.innerText = 'Select a Markdown file from the sidebar or click the workspace switcher to get started.';
+      }
       if (mdContent)  mdContent.style.display  = 'none';
       return;
     }
@@ -264,15 +311,16 @@ const AIResponseModule = (() => {
     if (emptyState) emptyState.style.display = 'none';
     if (mdContent) {
       mdContent.style.display = 'block';
-      mdContent.innerHTML = renderedHtml;
+      const inner = mdContent.querySelector('.md-content-inner') || mdContent;
+      inner.innerHTML = renderedHtml;
       
       // Diagrams need to be reprocessed since we updated innerHTML
-      if (typeof processMermaid === 'function') processMermaid(mdContent);
+      if (typeof processMermaid === 'function') processMermaid(inner);
       
       // Update header
       updateHeader('ai');
     }
   }
 
-  return { init, toggleFooter, updateHeader, syncPreview };
+  return { init, toggleFooter, updateHeader, syncPreview, renderPreview, clear };
 })();

@@ -14,11 +14,15 @@ const AppState = {
   commentMode:      false,
   socket:           null,
   
-  // Theme settings (persisted in localStorage)
+  // Theme & Explorer settings (persisted in localStorage)
   settings: {
-    accentColor: localStorage.getItem('md-accent-color') || '#ffbf48',
-    bgEnabled:   localStorage.getItem('md-bg-enabled') === 'true',
-    bgImage:     localStorage.getItem('md-bg-image') || ''
+    accentColor:      localStorage.getItem('md-accent-color') || '#ffbf48',
+    bgEnabled:        localStorage.getItem('md-bg-enabled') === 'true',
+    bgImage:          localStorage.getItem('md-bg-image') || '',
+    textZoom:         parseInt(localStorage.getItem('md-text-zoom') || '100', 10),
+    showHidden:       localStorage.getItem('md-show-hidden') === 'true',
+    hideEmptyFolders: localStorage.getItem('md-hide-empty') === 'true',
+    flatView:         localStorage.getItem('md-flat-view') === 'true'
   },
 
   /**
@@ -46,6 +50,11 @@ const AppState = {
       if (typeof AIResponseModule !== 'undefined') {
         AIResponseModule.syncPreview();
       }
+
+      // 5. Refresh toolbar UI state
+      if (typeof AppState.updateToolbarUI === 'function') {
+        AppState.updateToolbarUI(AppState.currentMode || 'read');
+      }
     } else {
       // Mode: markdown
       // 1. Restore the original file
@@ -64,6 +73,11 @@ const AppState = {
       if (AppState.commentMode && typeof CommentsModule !== 'undefined') {
         CommentsModule.applyCommentMode();
       }
+
+      // 3. Refresh toolbar UI state
+      if (typeof AppState.updateToolbarUI === 'function') {
+        AppState.updateToolbarUI(AppState.currentMode || 'read');
+      }
     }
   }
 };
@@ -72,7 +86,10 @@ const AppState = {
  * Apply theme settings to the document
  */
 function applyTheme() {
-  const { accentColor, bgEnabled, bgImage } = AppState.settings;
+  const { accentColor, bgEnabled, bgImage, textZoom } = AppState.settings;
+  
+  // Update text zoom
+  document.documentElement.style.setProperty('--preview-zoom', textZoom || 100);
   
   // Update accent color (Hex)
   document.documentElement.style.setProperty('--accent-color', accentColor);
@@ -122,8 +139,18 @@ function initSocket() {
 async function loadFile(filePath) {
   if (!AppState.currentWorkspace) return;
 
+  // 1. Dirty check if we are in 'edit' mode before switching files
+  if (AppState.currentMode === 'edit') {
+    if (typeof EditorModule !== 'undefined' && EditorModule.isDirty()) {
+      if (confirm(`You have unsaved changes in the current file. Save them before switching to ${filePath.split('/').pop()}?`)) {
+        const saved = await EditorModule.save();
+        if (!saved) return; // Cancel switch if save failed
+      }
+    }
+  }
+
   const res = await fetch(`/api/render?file=${encodeURIComponent(filePath)}`);
-  if (!res.ok) return;
+  if (!res.ok) throw new Error(`Failed to load file: ${filePath}`);
   const data = await res.json();
 
   AppState.currentFile = filePath;
@@ -134,16 +161,23 @@ async function loadFile(filePath) {
   if (emptyState) emptyState.style.display = 'none';
   if (mdContent) {
     mdContent.style.display = 'block';
-    mdContent.innerHTML = data.html;
+    const inner = mdContent.querySelector('.md-content-inner') || mdContent;
+    inner.innerHTML = data.html;
+    await processMermaid(inner); // processMermaid defined in mermaid.js
   }
 
   updateHeaderUI();
-
-  await processMermaid(mdContent); // processMermaid defined in mermaid.js
   await CommentsModule.loadForFile(filePath);
   RecentlyViewedModule.add(filePath);
 
-  if (AppState.commentMode) CommentsModule.applyCommentMode();
+  // Instead of forcing 'read', refresh the current state (Edit, Comment, Read)
+  const activeSeg = document.querySelector('.mode-segment.active');
+  if (activeSeg && typeof AppState.updateToolbarUI === 'function') {
+      AppState.updateToolbarUI(activeSeg.dataset.mode);
+  } else if (AppState.commentMode) {
+      CommentsModule.applyCommentMode();
+  }
+
   TreeModule.setActiveFile(filePath);
   document.getElementById('md-viewer').scrollTop = 0;
 }
@@ -215,5 +249,40 @@ function hexToRgb(hex) {
     g: parseInt(result[2], 16),
     b: parseInt(result[3], 16)
   } : null;
+}
+
+/**
+ * Global Toast Notification
+ */
+function showToast(message) {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container';
+    container.innerHTML = `
+      <div class="toast-content">
+        <div class="toast-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 12 2 2 4-4"/><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+        </div>
+        <div class="toast-message"></div>
+        <div class="toast-close" onclick="this.closest('.toast-container').classList.remove('show')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(container);
+  }
+  
+  container.querySelector('.toast-message').textContent = message;
+  
+  // Clear any existing timer
+  if (container._timer) clearTimeout(container._timer);
+  
+  container.classList.add('show');
+  
+  container._timer = setTimeout(() => {
+    container.classList.remove('show');
+  }, 3000);
 }
 

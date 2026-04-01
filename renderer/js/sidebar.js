@@ -15,6 +15,29 @@ const RecentlyViewedModule = (() => {
     render();
   }
 
+  function remove(filePath) {
+    const ws = AppState.currentWorkspace;
+    if (!ws || !filePath) return;
+    const key = STORAGE_KEY + ws.id;
+    let recent = _getRaw(key);
+    recent = recent.filter(p => p !== filePath);
+    localStorage.setItem(key, JSON.stringify(recent));
+    render();
+  }
+
+  function swap(oldPath, newPath) {
+    const ws = AppState.currentWorkspace;
+    if (!ws) return;
+    const key = STORAGE_KEY + ws.id;
+    let recent = _getRaw(key);
+    const idx = recent.indexOf(oldPath);
+    if (idx !== -1) {
+      recent[idx] = newPath;
+      localStorage.setItem(key, JSON.stringify(recent));
+      render();
+    }
+  }
+
   function _getRaw(key) {
     const data = localStorage.getItem(key);
     try { return data ? JSON.parse(data) : []; } catch (e) { return []; }
@@ -33,6 +56,7 @@ const RecentlyViewedModule = (() => {
 
     // Figma File Icon (identical to tree.js)
     const svgFile = `<svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5.33341 6L7.33341 4L5.33341 2M2.66675 2L0.666748 4L2.66675 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const svgClose = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`;
 
     list.innerHTML = '';
     recent.forEach(path => {
@@ -41,15 +65,35 @@ const RecentlyViewedModule = (() => {
       item.className = 'recent-item' + (path === AppState.currentFile ? ' active' : '');
       item.dataset.path = path;
       item.innerHTML = `
-        <div class="item-icon-wrap">${svgFile}</div>
-        <div class="recent-item-label">${fileName}</div>
+        <div class="recent-item-main">
+          <div class="item-icon-wrap">${svgFile}</div>
+          <div class="recent-item-label">${fileName}</div>
+        </div>
+        <div class="recent-clear-btn" title="Clear">${svgClose}</div>
       `;
-      item.onclick = e => { e.stopPropagation(); loadFile(path); };
+      
+      const main = item.querySelector('.recent-item-main');
+      const clear = item.querySelector('.recent-clear-btn');
+
+      main.onclick = async e => { 
+        e.stopPropagation(); 
+        try {
+          await loadFile(path);
+        } catch (err) {
+          remove(path);
+        }
+      };
+
+      clear.onclick = e => {
+        e.stopPropagation();
+        remove(path);
+      };
+
       list.appendChild(item);
     });
   }
 
-  return { add, render };
+  return { add, remove, swap, render };
 })();
 
 function initSidebarModeSwitcher() {

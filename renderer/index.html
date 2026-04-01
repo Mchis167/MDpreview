@@ -20,6 +20,7 @@
 
   <!-- Design System -->
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/editor.css">
 </head>
 
 <body>
@@ -177,13 +178,64 @@
 
         <div class="setting-divider"></div>
 
+        <!-- Text Zoom Setting -->
+        <div class="setting-item-row">
+          <div class="setting-label-col">
+            <span class="setting-label">Text Zoom</span>
+          </div>
+          <div class="setting-control-col">
+            <input type="range" id="text-zoom-slider" min="50" max="200" step="5" value="100" class="zoom-slider">
+            <span id="text-zoom-val" class="zoom-val-label">100%</span>
+          </div>
+        </div>
+
+        <div class="setting-divider"></div>
+
+        <!-- Advanced Settings Group -->
+        <div class="setting-group-title">Explorer Settings</div>
+        
+        <!-- Show Hidden Files -->
+        <div class="setting-item-row">
+          <div class="setting-label-col">
+            <span class="setting-label">Show Hidden Files</span>
+          </div>
+          <div id="hidden-toggle-mount" class="switch-toggle" tabindex="0" role="switch">
+            <div class="switch-indicator"></div>
+          </div>
+        </div>
+
+        <div class="setting-divider"></div>
+
+        <!-- Hide Empty Folders -->
+        <div class="setting-item-row">
+          <div class="setting-label-col">
+            <span class="setting-label">Hide Empty Folders</span>
+          </div>
+          <div id="empty-toggle-mount" class="switch-toggle" tabindex="0" role="switch">
+            <div class="switch-indicator"></div>
+          </div>
+        </div>
+
+        <div class="setting-divider"></div>
+
+        <!-- Flat View -->
+        <div class="setting-item-row">
+          <div class="setting-label-col">
+            <span class="setting-label">Flat View</span>
+          </div>
+          <div id="flat-toggle-mount" class="switch-toggle" tabindex="0" role="switch">
+            <div class="switch-indicator"></div>
+          </div>
+        </div>
+
+        <div class="setting-divider"></div>
+
         <!-- Background Setting -->
         <div class="setting-item-row">
           <div class="setting-label-col">
             <span class="setting-label">Custom Background</span>
           </div>
           <div id="bg-toggle-mount" class="switch-toggle" tabindex="0" role="switch">
-            <!-- SwitchToggle logic will mount indicator if empty or just use the current one -->
             <div class="switch-indicator"></div>
           </div>
         </div>
@@ -338,6 +390,7 @@
               </div>
 
               <button id="ai-preview-btn" class="btn btn-primary btn-block" disabled>Preview</button>
+              <button id="ai-clear-btn" class="btn btn-ghost btn-block" style="margin-top: 8px;">Clear</button>
             </div>
           </div>
         </div>
@@ -420,6 +473,7 @@
             <div class="segmented-control">
               <div id="segment-bg"></div>
               <button class="mode-segment active" data-mode="read">Read</button>
+              <button class="mode-segment" data-mode="edit">Edit</button>
               <button class="mode-segment" data-mode="comment">Comment</button>
             </div>
           </div>
@@ -465,7 +519,229 @@
 
         <!-- Content (md viewer only — comment sidebar is a sibling of main) -->
         <div id="md-viewer">
-          <div id="md-content" style="display:none;"></div>
+          <div id="md-content" style="display:none;">
+            <div class="md-content-inner"></div>
+          </div>
+          
+          <!-- Edit mode editor -->
+          <div id="edit-viewer" style="display:none;">
+            <textarea id="edit-textarea" placeholder="Start writing..."></textarea>
+            
+            <div class="edit-toolbar-container">
+              <!-- Help Popover -->
+              <div id="edit-help-popover" class="edit-help-popover">
+                <div class="help-header">
+                  <div class="help-header-title">Markdown Helper</div>
+                  <div class="help-close-btn" id="help-close-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  </div>
+                </div>
+                
+                <div class="help-content-scroll">
+                  <!-- FORMAT SECTION -->
+                  <div class="help-group">
+                    <div class="help-group-title">Format</div>
+                    <div class="help-grid">
+                      <div class="help-item-btn" data-action="b">
+                        <span class="help-label">In đậm</span>
+                        <span class="help-syntax">**text**</span>
+                      </div>
+                      <div class="help-item-btn" data-action="i">
+                        <span class="help-label">In nghiêng</span>
+                        <span class="help-syntax">*text*</span>
+                      </div>
+                      <div class="help-item-btn" data-action="bi">
+                        <span class="help-label">In đậm + nghiêng</span>
+                        <span class="help-syntax">***text***</span>
+                      </div>
+                      <div class="help-item-btn" data-action="s">
+                        <span class="help-label">Gạch ngang</span>
+                        <span class="help-syntax">~~text~~</span>
+                      </div>
+                      <div class="help-item-btn" data-action="c">
+                        <span class="help-label">Inline code</span>
+                        <span class="help-syntax">`text`</span>
+                      </div>
+                      <div class="help-empty"></div>
+                    </div>
+                  </div>
+
+                  <!-- TITLES SECTION -->
+                  <div class="help-group">
+                    <div class="help-group-title">Tiêu đề</div>
+                    <div class="help-grid">
+                      <div class="help-item-btn" data-action="h1">
+                        <span class="help-label">H1</span>
+                        <span class="help-syntax"># H1</span>
+                      </div>
+                      <div class="help-item-btn" data-action="h2">
+                        <span class="help-label">H2</span>
+                        <span class="help-syntax">## H2</span>
+                      </div>
+                      <div class="help-item-btn" data-action="h3">
+                        <span class="help-label">H3</span>
+                        <span class="help-syntax">### H3</span>
+                      </div>
+                      <div class="help-item-btn" data-action="h">
+                        <span class="help-label">H4</span>
+                        <span class="help-syntax">#### H4</span>
+                      </div>
+                      <div class="help-item-btn" data-action="h5">
+                        <span class="help-label">H5</span>
+                        <span class="help-syntax">##### H5</span>
+                      </div>
+                      <div class="help-item-btn" data-action="h6">
+                        <span class="help-label">H6</span>
+                        <span class="help-syntax">###### H6</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- LISTS SECTION -->
+                  <div class="help-group">
+                    <div class="help-group-title">Danh sách</div>
+                    <div class="help-grid">
+                      <div class="help-item-btn" data-action="ul">
+                        <span class="help-label">Bullet list</span>
+                        <span class="help-syntax">- ITEM</span>
+                      </div>
+                      <div class="help-item-btn" data-action="ol">
+                        <span class="help-label">Numbered list</span>
+                        <span class="help-syntax">1. ITEM</span>
+                      </div>
+                      <div class="help-item-btn" data-action="tl">
+                        <span class="help-label">Checkbox</span>
+                        <span class="help-syntax">- [ ] ITEM</span>
+                      </div>
+                      <div class="help-item-btn" data-action="tl-checked">
+                        <span class="help-label">Checked</span>
+                        <span class="help-syntax">- [x] ITEM</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- OTHERS SECTION -->
+                  <div class="help-group">
+                    <div class="help-group-title">Khác</div>
+                    <div class="help-grid">
+                      <div class="help-item-btn" data-action="q">
+                        <span class="help-label">Blockquote</span>
+                        <span class="help-syntax">> TEXT</span>
+                      </div>
+                      <div class="help-item-btn" data-action="l">
+                        <span class="help-label">Link</span>
+                        <span class="help-syntax">[NAME](URL)</span>
+                      </div>
+                      <div class="help-item-btn" data-action="img">
+                        <span class="help-label">Image</span>
+                        <span class="help-syntax">![ALT](URL)</span>
+                      </div>
+                      <div class="help-item-btn" data-action="cb">
+                        <span class="help-label">Code block</span>
+                        <span class="help-syntax">```lang ```</span>
+                      </div>
+                      <div class="help-item-btn" data-action="tb">
+                        <span class="help-label">Table</span>
+                        <span class="help-syntax">| A | B |</span>
+                      </div>
+                      <div class="help-item-btn" data-action="hr">
+                        <span class="help-label">Đường kẻ</span>
+                        <span class="help-syntax">---</span>
+                      </div>
+                      <div class="help-item-btn" data-action="fn">
+                        <span class="help-label">Footnote</span>
+                        <span class="help-syntax">TEXT[^1]</span>
+                      </div>
+                      <div class="help-empty"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="edit-toolbar">
+                <!-- Help Toggle -->
+                <div class="edit-action-group">
+                  <div class="edit-tool-btn" id="edit-help-btn" title="Markdown Help">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  </div>
+                </div>
+                
+                <div class="edit-divider"></div>
+
+                <!-- Action Group 1: Typography -->
+                <div class="edit-action-group">
+                  <div class="edit-tool-btn" data-action="h" title="Heading">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h12"/><path d="M6 20V4"/><path d="M18 20V4"/></svg>
+                  </div>
+                  <div class="edit-tool-btn" data-action="b" title="Bold">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 12a4 4 0 0 0 0-8H6v8"/><path d="M15 20a4 4 0 0 0 0-8H6v8"/></svg>
+                  </div>
+                  <div class="edit-tool-btn" data-action="i" title="Italic">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" x2="10" y1="4" y2="4"/><line x1="14" x2="5" y1="20" y2="20"/><line x1="15" x2="9" y1="4" y2="20"/></svg>
+                  </div>
+                  <div class="edit-tool-btn" data-action="s" title="Strikethrough">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4H9a3 3 0 0 0-2.83 4"/><path d="M14 12a4 4 0 0 1 0 8H6"/><line x1="4" x2="20" y1="12" y2="12"/></svg>
+                  </div>
+                </div>
+
+                <div class="edit-divider"></div>
+
+                <!-- Action Group 2: Content -->
+                <div class="edit-action-group">
+                  <div class="edit-tool-btn" data-action="q" title="Quote">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 6H3"/><path d="M21 12H8"/><path d="M21 18H8"/><path d="M3 12v6"/></svg>
+                  </div>
+                  <div class="edit-tool-btn" data-action="l" title="Link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                  </div>
+                  <div class="edit-tool-btn" data-action="img" title="Image">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                  </div>
+                  <div class="edit-tool-btn" data-action="hr" title="Divider">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" x2="19" y1="12" y2="12"/></svg>
+                  </div>
+                </div>
+
+                <div class="edit-divider"></div>
+
+                <!-- Action Group 3: Lists -->
+                <div class="edit-action-group">
+                  <div class="edit-tool-btn" data-action="ul" title="Unordered List">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
+                  </div>
+                  <div class="edit-tool-btn" data-action="ol" title="Numbered List">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="10" x2="21" y1="6" y2="6"/><line x1="10" x2="21" y1="12" y2="12"/><line x1="10" x2="21" y1="18" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+                  </div>
+                  <div class="edit-tool-btn" data-action="tl" title="Task List">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/></svg>
+                  </div>
+                </div>
+
+                <div class="edit-divider"></div>
+
+                <!-- Action Group 4: Code & Advanced -->
+                <div class="edit-action-group">
+                  <div class="edit-tool-btn" data-action="c" title="Code">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                  </div>
+                  <div class="edit-tool-btn" data-action="cb" title="Code Block">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></svg>
+                  </div>
+                  <div class="edit-tool-btn" data-action="tb" title="Table">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
+                  </div>
+                </div>
+
+                <div class="edit-divider"></div>
+
+                <!-- Final Action Group -->
+                <div class="edit-button-group">
+                  <button class="btn-ghost" id="edit-cancel-btn">Cancel</button>
+                  <button class="btn-primary-pill" id="edit-save-btn">Save</button>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <!-- Empty State -->
           <div id="empty-state">
@@ -613,6 +889,7 @@
   <script src="js/search-component.js"></script>
   <script src="js/sidebar.js"></script>
   <script src="js/ai-response.js"></script>
+  <script src="js/editor.js"></script>
   <script src="js/app.js"></script>
 
 </body>

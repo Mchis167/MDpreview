@@ -74,13 +74,38 @@ function initSidebarToggle() {
 
 
 function initSegmentedControl() {
-  const segments = document.querySelectorAll('.mode-segment');
+  const control  = document.querySelector('.segmented-control');
+  if (!control) return;
+
+  // Security: Ensure Edit segment exists (some users reported it missing in main app)
+  if (control && control.querySelectorAll('.mode-segment').length < 3) {
+      control.innerHTML = `
+        <div id="segment-bg"></div>
+        <button class="mode-segment" data-mode="read">Read</button>
+        <button class="mode-segment" data-mode="edit">Edit</button>
+        <button class="mode-segment" data-mode="comment">Comment</button>
+      `;
+  }
+
+  const segments = control.querySelectorAll('.mode-segment');
   const bg       = document.getElementById('segment-bg');
   const sidebar  = document.getElementById('comment-sidebar-wrap');
-  const control  = document.querySelector('.segmented-control');
 
-  const updateUI = (mode) => {
-    AppState.commentMode = (mode === 'comment'); // AppState defined in app.js
+  const updateUI = async (mode) => {
+    if (typeof AppState === 'undefined') return;
+    
+    // Dirty check before leaving 'edit' mode
+    if (AppState.currentMode === 'edit' && mode !== 'edit') {
+        if (typeof EditorModule !== 'undefined' && EditorModule.isDirty()) {
+            if (confirm('You have unsaved changes. Save them before switching?')) {
+                const saved = await EditorModule.save();
+                if (!saved) return; // Stop if save failed
+            }
+        }
+    }
+
+    AppState.commentMode = (mode === 'comment');
+    AppState.currentMode = mode;
 
     let activeSeg = null;
     segments.forEach(seg => {
@@ -90,44 +115,84 @@ function initSegmentedControl() {
     });
 
     if (activeSeg && bg && control) {
-      const segRect = activeSeg.getBoundingClientRect();
-      const conRect = control.getBoundingClientRect();
-      bg.style.width     = `${segRect.width}px`;
-      bg.style.transform = `translateX(${segRect.left - conRect.left - 5}px)`;
+      bg.style.width     = `${activeSeg.offsetWidth}px`;
+      bg.style.transform = `translateX(${activeSeg.offsetLeft - 5}px)`;
     }
 
-    if (mode === 'read') {
+    const mdContent   = document.getElementById('md-content');
+    const editViewer  = document.getElementById('edit-viewer');
+    const emptyState  = document.getElementById('empty-state');
+
+    // Basic visibility
+    if (mdContent)  mdContent.style.display  = 'none';
+    if (editViewer) editViewer.style.display = 'none';
+
+    if (mode === 'read' || mode === 'comment') {
+      if (AppState.currentFile) {
+        if (mdContent) mdContent.style.display = 'block';
+        if (emptyState) emptyState.style.display = 'none';
+      }
+      
+      // Sidebar
+      if (mode === 'read') {
+        if (sidebar) {
+          sidebar.classList.remove('open');
+          sidebar.style.width = '';
+        }
+        if (typeof CommentsModule !== 'undefined') CommentsModule.removeCommentMode();
+      } else {
+        if (sidebar) {
+          sidebar.classList.add('open');
+          const savedWidth = localStorage.getItem('mdpreview_sidebar_right_width');
+          if (savedWidth) sidebar.style.width = savedWidth + 'px';
+        }
+        if (typeof CommentsModule !== 'undefined') CommentsModule.applyCommentMode();
+      }
+    } else if (mode === 'edit') {
+      if (AppState.currentFile) {
+        if (editViewer) editViewer.style.display = 'flex';
+        if (emptyState) emptyState.style.display = 'none';
+        await loadRawContent();
+      }
       if (sidebar) {
-        sidebar.classList.remove('opening');
         sidebar.classList.remove('open');
         sidebar.style.width = '';
-        sidebar.style.minWidth = '';
       }
       if (typeof CommentsModule !== 'undefined') CommentsModule.removeCommentMode();
-    } else {
-      if (sidebar) {
-        // Remove open first so CSS starts from width:0, then add open to trigger transition
-        sidebar.classList.remove('open');
-        void sidebar.offsetWidth; // force browser reflow
-        sidebar.classList.add('opening');
-        sidebar.classList.add('open');
-
-        // Apply saved width if exists
-        const savedWidth = localStorage.getItem('mdpreview_sidebar_right_width');
-        if (savedWidth) {
-          sidebar.style.width = savedWidth + 'px';
-          sidebar.style.minWidth = savedWidth + 'px';
-        }
-
-        setTimeout(() => sidebar.classList.remove('opening'), 800);
-      }
-      if (typeof CommentsModule !== 'undefined') CommentsModule.applyCommentMode();
     }
   };
+
+  async function loadRawContent() {
+    if (!AppState.currentFile) return;
+
+    if (AppState.currentFile === '__AI_RESPONSE__') {
+        // For AI Response, the "raw" content is what's in the AI chat input
+        const aiInput = document.getElementById('ai-chat-input');
+        if (aiInput && typeof EditorModule !== 'undefined') {
+            EditorModule.setOriginalContent(aiInput.value);
+        }
+        return;
+    }
+
+    const res = await fetch(`/api/file/raw?path=${encodeURIComponent(AppState.currentFile)}`);
+
+    if (res.ok) {
+        const text = await res.text();
+        if (typeof EditorModule !== 'undefined') {
+            EditorModule.setOriginalContent(text);
+        } else {
+            const textarea = document.getElementById('edit-textarea');
+            if (textarea) textarea.value = text;
+        }
+    }
+  }
 
   segments.forEach(seg => {
     seg.addEventListener('click', () => updateUI(seg.dataset.mode));
   });
+
+  // Expose updateUI to AppState so sidebar can trigger it
+  AppState.updateToolbarUI = updateUI;
 
   setTimeout(() => updateUI('read'), 100);
 }
