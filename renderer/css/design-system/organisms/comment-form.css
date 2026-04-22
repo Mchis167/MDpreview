@@ -1,0 +1,159 @@
+/* ============================================================
+   comment-form.css — Design System Component (Organism)
+   Floating popup for creating, editing, and viewing comments.
+   ============================================================ */
+
+.ds-comment-form {
+  position: fixed;
+  z-index: 2000;
+  width: 360px;
+  background: var(--layer-modal, #111);
+  border: 1px solid var(--border-sidebar, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-lg, 16px);
+  /* Figma Multi-layered Shadow (Node 25:161) */
+  box-shadow:
+    132px 97px 46px 0px rgba(0, 0, 0, 0),
+    85px 62px 42px 0px rgba(0, 0, 0, 0.04),
+    48px 35px 35px 0px rgba(0, 0, 0, 0.13),
+    21px 16px 26px 0px rgba(0, 0, 0, 0.23),
+    5px 4px 14px 0px rgba(0, 0, 0, 0.26);
+  display: none;
+  overflow: hidden;
+  transition: opacity 0.2s, transform 0.2s;
+  flex-direction: column;
+  cursor: grab;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.ds-comment-form.show {
+  display: flex;
+  animation: dsFormPop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes dsFormPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.ds-comment-form__inner {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Edit View ─────────────────────────────────────────── */
+.ds-comment-form__edit-view {
+  flex-direction: column;
+}
+
+
+.ds-comment-form__input-wrap {
+  padding: 20px;
+  border-bottom: 1px solid var(--border-main, rgba(255, 255, 255, 0.05));
+  flex: 1;
+}
+
+.ds-comment-form__input {
+  width: 100%;
+  min-height: 40px;
+  max-height: 240px;
+  background: transparent !important;
+  border: none !important;
+  padding: 0;
+  color: var(--text-90);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  resize: none !important;
+  outline: none !important;
+  field-sizing: content;
+}
+
+.ds-comment-form__actions {
+  display: flex;
+  height: 48px;
+  justify-content: flex-end;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.1);
+  border-top: 1px solid var(--border-main, rgba(255, 255, 255, 0.05));
+  padding: 0;
+}
+
+.ds-comment-form__btn-stack {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+}
+
+
+/* ── Read View ─────────────────────────────────────────── */
+.ds-comment-form__read-view {
+  flex-direction: column;
+}
+
+
+.ds-comment-form__read-header {
+  display: flex;
+  height: 48px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0 0 16px;
+  border-bottom: 1px solid var(--border-main, rgba(255, 255, 255, 0.05));
+}
+
+.ds-comment-form__secondary-action {
+  height: 100%;
+}
+
+.ds-comment-form__secondary-action .ds-header-action {
+  height: 100%;
+  width: 48px;
+  border-radius: 0;
+}
+
+
+.ds-comment-form__header-label {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-50);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.ds-comment-form__read-body {
+  padding: 16px 20px 20px;
+}
+
+.ds-comment-form__display {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--text-90);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ── Mode Transitions ──────────────────────────────────── */
+/* Mặc định ẩn cả 2 */
+.ds-comment-form__edit-view,
+.ds-comment-form__read-view {
+  display: none;
+  flex-direction: column;
+}
+
+/* Hiện Edit View khi KHÔNG PHẢI mode view */
+.ds-comment-form:not([data-mode="view"]) .ds-comment-form__edit-view {
+  display: flex;
+}
+
+/* Hiện Read View khi LÀ mode view */
+.ds-comment-form[data-mode="view"] .ds-comment-form__read-view {
+  display: flex;
+}

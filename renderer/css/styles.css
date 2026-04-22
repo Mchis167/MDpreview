@@ -19,4 +19,7 @@
 @import url('toolbar.css');
 @import url('markdown.css');
 @import url('design-system/organisms/right-sidebar.css');
-@import url('modals.css');
+@import url('popover-shield.css');
+@import url('workspace-panel.css');
+@import url('settings-panel.css');
+@import url('modals-misc.css');

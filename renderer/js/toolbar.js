@@ -12,25 +12,35 @@ function initToolbarBtns() {
 
 // ── Keyboard Shortcuts Popover ───────────────────────────
 function initShortcutsPopover() {
-  const btn     = document.getElementById('shortcuts-btn');
-  const popover = document.getElementById('shortcuts-popover');
-  const closeBtn = document.getElementById('shortcuts-close-btn');
-  if (!btn || !popover) return;
+  const btn = document.getElementById('shortcuts-btn');
+  if (!btn) return null;
 
-  const open  = () => popover.classList.add('open');
-  const close = () => popover.classList.remove('open');
-  const toggle = () => popover.classList.contains('open') ? close() : open();
+  let activePopover = null;
 
-  btn.addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
-  if (closeBtn) closeBtn.addEventListener('click', close);
+  const toggle = () => {
+    if (activePopover) {
+      activePopover.close();
+      activePopover = null;
+    } else if (window.ShortcutsComponent) {
+      activePopover = window.ShortcutsComponent.open();
+      // Reset reference when closed from inside
+      const originalClose = activePopover.close;
+      activePopover.close = () => {
+        originalClose();
+        activePopover = null;
+      };
+    }
+  };
 
-  // Close when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!popover.contains(e.target) && e.target !== btn) close();
+  btn.addEventListener('click', (e) => { 
+    e.stopPropagation(); 
+    toggle(); 
   });
 
-  // Expose control for global shortcuts
-  return { open, close, toggle };
+  return { 
+    close: () => { if (activePopover) activePopover.close(); }, 
+    toggle 
+  };
 }
 
 // ── Global Keyboard Shortcuts ────────────────────────────
@@ -40,17 +50,6 @@ function initGlobalShortcuts() {
 
   const isMac = /Mac|iPhone|iPod|iPad/.test(navigator.platform) || (navigator.userAgentData && navigator.userAgentData.platform === 'macOS');
 
-  // Update UI to show ⌘ symbols on Mac
-  if (isMac) {
-    document.querySelectorAll('#shortcuts-popover kbd').forEach(k => {
-      if (k.textContent === 'Ctrl') k.textContent = '⌘';
-    });
-    // Handle Fullscreen special case for Mac UI
-    const fsKbd = document.getElementById('kbd-fullscreen');
-    if (fsKbd) {
-      fsKbd.innerHTML = '<kbd>⌃</kbd><kbd>⌘</kbd><kbd>F</kbd>';
-    }
-  }
 
   document.addEventListener('keydown', (e) => {
     const mod = isMac ? e.metaKey : e.ctrlKey;
@@ -58,8 +57,6 @@ function initGlobalShortcuts() {
     // ── Escape: close any open overlays ─────────────────
     if (e.key === 'Escape') {
       shortcutsCtrl.close();
-      const helpPopover = document.getElementById('edit-help-popover');
-      if (helpPopover) helpPopover.classList.remove('open');
       return;
     }
 
@@ -77,8 +74,9 @@ function initGlobalShortcuts() {
     // ── Mod+, — Settings ───────────────────────────────
     if (mod && e.key === ',') {
       e.preventDefault();
-      const settingsBtn = document.getElementById('open-settings-btn');
-      if (settingsBtn) settingsBtn.click();
+      if (typeof SettingsModule !== 'undefined') {
+        SettingsModule.open();
+      }
       return;
     }
 
@@ -197,8 +195,9 @@ function initGlobalShortcuts() {
       const editViewer = document.getElementById('edit-viewer');
       if (!editViewer || editViewer.style.display === 'none') return;
       e.preventDefault();
-      const helpPopover = document.getElementById('edit-help-popover');
-      if (helpPopover) helpPopover.classList.toggle('open');
+      if (window.MarkdownHelperComponent) {
+        window.MarkdownHelperComponent.open();
+      }
     }
   });
 }

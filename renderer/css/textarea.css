@@ -17,7 +17,7 @@
 }
 
 .textarea-label {
-  font-family: 'Roboto Mono', monospace;
+  font-family: var(--font-code);
   font-weight: 500;
   font-size: 10px;
   text-transform: uppercase;
@@ -62,7 +62,7 @@
   background: transparent;
   border: none;
   color: var(--text-90);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-text);
   font-size: 14px;
   line-height: 22px;
   resize: none;

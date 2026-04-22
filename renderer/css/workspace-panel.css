@@ -1,0 +1,426 @@
+/* ============================================================
+   workspace-panel.css — Workspace panel & Add Workspace Modal
+   ============================================================ */
+
+/* ── Workspace Picker Component (Instance Specifics) ── */
+.workspace-picker-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.workspace-picker-popover .ds-popover-group {
+  padding: 0;
+  /* Minimal padding for a clean look */
+}
+
+.ws-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 24px;
+  cursor: pointer;
+  transition: background 0.2s;
+  position: relative;
+}
+
+.ws-list-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ws-list-item.active {
+  background: rgba(var(--accent-rgb), 0.05);
+}
+
+.ws-list-item-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 45%;
+  /* Name column */
+  min-width: 0;
+}
+
+.ws-list-item-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-30);
+  flex-shrink: 0;
+}
+
+.ws-list-item-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.ws-list-item-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-90);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.ws-list-item-path-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.ws-list-item-path {
+  font-size: 11px;
+  color: var(--text-20);
+  font-family: var(--font-code);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ws-list-item-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  width: 80px;
+  /* Actions column */
+  justify-content: flex-end;
+}
+
+.ws-badge {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--accent-color);
+  background: rgba(var(--accent-rgb), 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.ws-inline-edit-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--accent-color);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 8px;
+  width: 100%;
+  outline: none;
+  font-family: inherit;
+}
+
+.ws-list-item-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Connect the global delete button to our list item hover state */
+.ws-list-item:hover .ds-item-delete-btn {
+  opacity: 1;
+}
+
+/* ── Add Action Button ── */
+.ws-add-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  margin: 0 8px;
+  cursor: pointer;
+  color: var(--accent-color);
+  font-weight: 700;
+  font-size: 14px;
+  transition: background 0.2s;
+  border-radius: var(--radius-md);
+  margin-top: -4px;
+}
+
+.ws-add-action-btn:hover {
+  background: rgba(var(--accent-rgb), 0.08);
+}
+
+.ws-add-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--accent-rgb), 0.1);
+  border-radius: 50%;
+  font-size: 16px;
+}
+
+/* ── Add Workspace Modal ───────────────────────────────── */
+#add-workspace-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(20px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+#add-workspace-modal.show {
+  display: flex;
+}
+
+.aws-popover-shield .ds-popover-card {
+  width: 480px;
+  background: var(--layer-modal);
+  border: 1px solid var(--border-main);
+  border-radius: 32px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+}
+
+.aws-popover-shield .ds-popover-body {
+  padding: 0;
+  overflow: visible;
+}
+
+.aws-form-content {
+  display: block;
+  padding: 56px 20px 20px 20px;
+}
+
+.aws-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  background: rgba(var(--accent-rgb), 0.1);
+  border: 1px solid rgba(var(--accent-rgb), 0.2);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  color: var(--accent-color);
+  box-shadow: 0 12px 24px rgba(var(--accent-rgb), 0.15);
+}
+
+.aws-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+  text-align: center;
+  /* Centered */
+}
+
+.aws-subtitle {
+  color: var(--text-40);
+  font-size: 15px;
+  margin-bottom: 32px;
+  line-height: 1.5;
+  text-align: center;
+  /* Centered */
+}
+
+.aws-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 0;
+}
+
+.aws-field-label {
+  font-family: var(--font-code);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-20);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: block;
+  text-align: left;
+  margin: 0 0 8px 16px;
+}
+
+.aws-input {
+  width: 100%;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-main);
+  border-radius: var(--radius-pill);
+  padding: 0 20px;
+  color: #fff;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  margin-bottom: 20px;
+  user-select: text;
+}
+
+.aws-browse-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.aws-browse-row .aws-input {
+  margin-bottom: 0;
+}
+
+#browse-btn {
+  height: 44px;
+  padding: 0 20px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-main);
+  border-radius: var(--radius-pill);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+#browse-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.aws-actions {
+  display: flex;
+  gap: 12px;
+}
+
+#confirm-workspace-btn {
+  flex: 1;
+  height: 48px;
+  background: var(--accent-color);
+  border: none;
+  border-radius: var(--radius-pill);
+  color: #000;
+  font-weight: 700;
+  box-shadow: 0 8px 20px rgba(var(--accent-rgb), 0.3);
+  transition: opacity 0.2s;
+}
+
+#confirm-workspace-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+#cancel-workspace-btn {
+  flex: 1;
+  height: 48px;
+  color: var(--text-50);
+  font-weight: 600;
+}
+
+/* ── Zoom Modal ────────────────────────────────────────── */
+#zoom-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(20px);
+  display: none;
+  overflow: hidden;
+  cursor: grab;
+}
+
+#zoom-modal.show {
+  display: block;
+}
+
+#zoom-modal:active {
+  cursor: grabbing;
+}
+
+#zoom-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+#zoom-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+#zoom-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+#zoom-controls-bar {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  padding: 6px 10px;
+  z-index: 10;
+  cursor: default;
+}
+
+.zoom-ctrl-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.6);
+  transition: background 0.15s, color 0.15s;
+  cursor: pointer;
+}
+
+.zoom-ctrl-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+#zoom-pct {
+  font-family: var(--font-code);
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  min-width: 44px;
+  text-align: center;
+  padding: 0 6px;
+  cursor: default;
+}
+
+.zoom-ctrl-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 6px;
+}

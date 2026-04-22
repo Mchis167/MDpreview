@@ -1,0 +1,108 @@
+/* ══════════════════════════════════════════════════
+   ShortcutsComponent.js — Keyboard Guide Organism
+   Atomic Design System (Organism)
+   ════════════════════════════════════════════════════ */
+
+class ShortcutsComponent {
+  constructor() {
+    this.isMac = /Mac|iPhone|iPod|iPad/.test(navigator.platform) || (navigator.userAgentData && navigator.userAgentData.platform === 'macOS');
+  }
+
+  /**
+   * Main render function that returns the content element
+   */
+  render() {
+    const container = DesignSystem.createElement('div', 'shortcuts-container');
+    
+    const sections = [
+      {
+        title: 'Navigation',
+        items: [
+          { label: 'Switch to Read mode', keys: ['Ctrl', '1'] },
+          { label: 'Switch to Edit mode', keys: ['Ctrl', '2'] },
+          { label: 'Switch to Comment mode', keys: ['Ctrl', '3'] },
+          { label: 'Toggle Sidebar', keys: ['Ctrl', 'B'] },
+          { label: 'Focus Search', keys: ['Ctrl', 'F'] },
+          { label: 'Scroll to Top', keys: ['Ctrl', '↑'] },
+          { label: 'Scroll to Bottom', keys: ['Ctrl', '↓'] },
+          { label: 'Toggle Fullscreen', keys: ['F11'] }
+        ]
+      },
+      {
+        title: 'Editor',
+        items: [
+          { label: 'Save File', keys: ['Ctrl', 'S'] },
+          { label: 'Undo', keys: ['Ctrl', 'Z'] },
+          { label: 'Redo', keys: ['Ctrl', 'Y'] },
+          { label: 'Markdown Helper', keys: ['Ctrl', 'H'] }
+        ]
+      },
+      {
+        title: 'General',
+        items: [
+          { label: 'Workspace Picker', keys: ['Ctrl', 'O'] },
+          { label: 'Rebuild & Relaunch', keys: ['Ctrl', 'R'] },
+          { label: 'Close Tab', keys: ['Ctrl', 'W'] },
+          { label: 'Keyboard Shortcuts', keys: ['Ctrl', '/'] },
+          { label: 'Open Settings', keys: ['Ctrl', ','] },
+          { label: 'Close / Cancel', keys: ['Esc'] }
+        ]
+      }
+    ];
+
+    sections.forEach(sec => {
+      const group = DesignSystem.createElement('div', 'ds-popover-group');
+      const title = DesignSystem.createElement('div', 'ds-popover-group-title', { text: sec.title });
+      const grid = DesignSystem.createElement('div', 'shortcuts-grid');
+
+      sec.items.forEach(item => {
+        const row = DesignSystem.createElement('div', 'shortcuts-item');
+        const label = DesignSystem.createElement('span', 'shortcuts-label', { text: item.label });
+        const keysContainer = DesignSystem.createElement('span', 'shortcuts-keys');
+
+        item.keys.forEach(key => {
+          let keyText = key;
+          if (this.isMac && key === 'Ctrl') keyText = '⌘';
+          
+          const kbd = DesignSystem.createElement('kbd', '', { text: keyText });
+          keysContainer.appendChild(kbd);
+        });
+
+        row.appendChild(label);
+        row.appendChild(keysContainer);
+        grid.appendChild(row);
+      });
+
+      group.appendChild(title);
+      group.appendChild(grid);
+      container.appendChild(group);
+    });
+
+    return container;
+  }
+
+  /**
+   * Open the Shortcuts UI in a floating popover (No backdrop)
+   */
+  static open() {
+    const component = new ShortcutsComponent();
+    const content = component.render();
+    
+    const popover = DesignSystem.createPopoverShield({
+      title: 'Keyboard Shortcuts',
+      content: content,
+      width: '480px',
+      hasBackdrop: false,
+      className: 'shortcuts-dynamic-popover',
+      position: {
+        top: '60px',
+        right: '12px'
+      }
+    });
+
+    return popover;
+  }
+}
+
+// Export for Design System
+window.ShortcutsComponent = ShortcutsComponent;

@@ -96,10 +96,12 @@ const CommentsModule = (() => {
     }
 
     comments.forEach((c, index) => {
-      const anchor = (c.selectedText || c.startLineContent || 'N/A').trim();
+      // Normalize whitespace for cleaner report
+      const anchor = (c.selectedText || c.startLineContent || 'N/A').trim().replace(/\s+/g, ' ');
       const lineRef = (c.lineStart === c.lineEnd) ? `L${c.lineStart}` : `L${c.lineStart} -> L${c.lineEnd}`;
-      const before = (c.context?.before || '').trim();
-      const after  = (c.context?.after || '').trim();
+      const before = (c.context?.before || '').trim().replace(/\s+/g, ' ');
+      const after  = (c.context?.after || '').trim().replace(/\s+/g, ' ');
+
       const position = c.headingPath || "General";
 
       lines.push(`================================================================`);
@@ -297,37 +299,91 @@ const CommentsModule = (() => {
   function _applyRobustHighlights(element, lineComments) {
     const textComments = lineComments.filter(c => !!c.selectedText);
     if (textComments.length === 0) return;
+
+    // 1. Lấy toàn bộ text của dòng và danh sách các text nodes cùng offset của chúng
+    const fullContent = element.textContent;
     const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
     const textNodes = [];
+    let currentOffset = 0;
     let node;
-    while (node = walker.nextNode()) textNodes.push(node);
+    while (node = walker.nextNode()) {
+      textNodes.push({
+        node: node,
+        start: currentOffset,
+        end: currentOffset + node.textContent.length,
+        content: node.textContent
+      });
+      currentOffset += node.textContent.length;
+    }
 
-    textNodes.forEach(textNode => {
-      const content = textNode.textContent;
-      const boundaries = new Set([0, content.length]);
+    // 2. Tìm vị trí Global của từng comment
+    const globalMatches = [];
+    textComments.forEach(c => {
+      let globalStartIdx = -1;
+      
+      // Search with Context
+      if (c.context) {
+        const cleanBefore = (c.context.before || '').replace(/^\.\.\./, '');
+        const cleanAfter  = (c.context.after || '').replace(/\.\.\.$/, '');
+        const fingerprint = cleanBefore + c.selectedText + cleanAfter;
+        
+        const matchIdx = fullContent.indexOf(fingerprint);
+        if (matchIdx !== -1) {
+          globalStartIdx = matchIdx + cleanBefore.length;
+        }
+      }
+
+      // Fallback
+      if (globalStartIdx === -1) {
+        globalStartIdx = fullContent.indexOf(c.selectedText);
+      }
+
+      if (globalStartIdx !== -1) {
+        globalMatches.push({
+          comment: c,
+          start: globalStartIdx,
+          end: globalStartIdx + c.selectedText.length
+        });
+      }
+    });
+
+    // 3. Ánh xạ các Global Match ngược lại từng Text Node và thực hiện thay thế
+    for (let i = textNodes.length - 1; i >= 0; i--) {
+      const nodeInfo = textNodes[i];
+      const boundaries = new Set([0, nodeInfo.content.length]);
       const nodeMap = new Map();
-      textComments.forEach(c => {
-        let startIdx = 0;
-        while ((startIdx = content.indexOf(c.selectedText, startIdx)) !== -1) {
-          const endIdx = startIdx + c.selectedText.length;
-          boundaries.add(startIdx);
-          boundaries.add(endIdx);
-          for (let i = startIdx; i < endIdx; i++) {
-            if (!nodeMap.has(i)) nodeMap.set(i, new Set());
-            nodeMap.get(i).add(c);
+
+      globalMatches.forEach(m => {
+        const intersectStart = Math.max(nodeInfo.start, m.start);
+        const intersectEnd = Math.min(nodeInfo.end, m.end);
+
+        if (intersectStart < intersectEnd) {
+          const localStart = intersectStart - nodeInfo.start;
+          const localEnd = intersectEnd - nodeInfo.start;
+          
+          boundaries.add(localStart);
+          boundaries.add(localEnd);
+          
+          for (let j = localStart; j < localEnd; j++) {
+            if (!nodeMap.has(j)) nodeMap.set(j, new Set());
+            nodeMap.get(j).add(m.comment);
           }
-          startIdx = endIdx;
         }
       });
-      if (boundaries.size <= 2 && nodeMap.size === 0) return;
+
+      if (boundaries.size <= 2 && nodeMap.size === 0) continue;
+
       const sorted = Array.from(boundaries).sort((a, b) => a - b);
       const fragments = document.createDocumentFragment();
-      for (let i = 0; i < sorted.length - 1; i++) {
-        const start = sorted[i];
-        const end = sorted[i+1];
+      
+      for (let j = 0; j < sorted.length - 1; j++) {
+        const start = sorted[j];
+        const end = sorted[j+1];
         if (start === end) continue;
-        const segmentText = content.substring(start, end);
+        
+        const segmentText = nodeInfo.content.substring(start, end);
         const segmentComments = nodeMap.get(start);
+
         if (segmentComments && segmentComments.size > 0) {
           const mark = document.createElement('mark');
           mark.className = 'comment-range';
@@ -335,10 +391,12 @@ const CommentsModule = (() => {
           const firstComment = Array.from(segmentComments)[0];
           mark.dataset.id = firstComment.id;
           mark.dataset.ids = Array.from(segmentComments).map(c => c.id).join(',');
+          
           if (segmentComments.size > 1) {
             mark.classList.add('multiple-comments');
             mark.title = `${segmentComments.size} comments here`;
           }
+          
           mark.onclick = (e) => {
             e.stopPropagation();
             _onItemClick(firstComment);
@@ -348,9 +406,10 @@ const CommentsModule = (() => {
           fragments.appendChild(document.createTextNode(segmentText));
         }
       }
-      textNode.parentNode.replaceChild(fragments, textNode);
-    });
+      nodeInfo.node.parentNode.replaceChild(fragments, nodeInfo.node);
+    }
   }
+
 
   // ── Apply comment mode (floating trigger) ─────────────────────
   let floatingTrigger = null;
@@ -440,67 +499,51 @@ const CommentsModule = (() => {
   }
 
   function _getSelectionContext(range) {
-    const startNode = range.startContainer;
-    const endNode = range.endContainer;
-    let before = '';
-    let after = '';
+    let container = range.commonAncestorContainer;
+    if (container.nodeType === 3) container = container.parentElement;
+    
+    const lineEl = container.closest('.md-line');
+    if (!lineEl) return { before: '', after: '' };
+
+
+    const fullLineText = lineEl.textContent;
+    
+    // Tính toán offset của selection so với textContent của toàn bộ dòng
+    const preRange = document.createRange();
+    preRange.setStart(lineEl, 0);
+    preRange.setEnd(range.startContainer, range.startOffset);
+    const offsetStart = preRange.toString().length;
+    const selectedText = range.toString();
+
     const RADIUS = 60;
-    if (startNode.nodeType === 3) {
-      const fullText = startNode.textContent;
-      const start = Math.max(0, range.startOffset - RADIUS);
-      before = fullText.substring(start, range.startOffset).trimStart();
-      if (start > 0) before = '...' + before;
-    }
-    if (endNode.nodeType === 3) {
-      const fullText = endNode.textContent;
-      const end = Math.min(fullText.length, range.endOffset + RADIUS);
-      after = fullText.substring(range.endOffset, end).trimEnd();
-      if (end < fullText.length) after = after + '...';
-    }
-    return { before, after };
+    const before = fullLineText.substring(Math.max(0, offsetStart - RADIUS), offsetStart);
+    const after  = fullLineText.substring(offsetStart + selectedText.length, offsetStart + selectedText.length + RADIUS);
+
+    return { 
+      before: before.length < RADIUS ? before : '...' + before, 
+      after: after.length < RADIUS ? after : after + '...' 
+    };
+
+
   }
 
+
   // ── Show / hide form ─────────────────────────────────────────
+
   function _showForm(anchorBtn, mode = 'empty', initialText = '') {
-    const form  = document.getElementById('comment-form');
-    const input = document.getElementById('comment-input');
-    const display = document.getElementById('comment-text-display');
-    const saveBtn = document.getElementById('save-comment');
-    form.setAttribute('data-mode', mode);
-    if (mode === 'view') {
-      display.textContent = initialText;
-    } else {
-      input.value = initialText;
-      saveBtn.disabled = !initialText.trim();
-      _autoResize(input);
-      setTimeout(() => input.focus(), 50);
-    }
-    const rect = anchorBtn.getBoundingClientRect();
-    let left = rect.right + 10;
-    let top  = rect.top;
-    if (left + 350 > window.innerWidth - 10) left = rect.left - 360;
-    top = Math.max(10, Math.min(top, window.innerHeight - 220));
-    form.style.left = `${left}px`;
-    top = Math.max(10, Math.min(top, window.innerHeight - (form.offsetHeight || 220)));
-    form.style.top  = `${top}px`;
-    form.classList.add('show');
-    form.classList.remove('is-typing');
-    form.classList.toggle('is-filled', !!initialText.trim());
+    const formComp = CommentFormComponent.getInstance();
+    formComp.show(anchorBtn, mode, initialText);
   }
 
   function _hideForm() {
-    const form = document.getElementById('comment-form');
-    if (form) {
-      form.classList.remove('show');
-      form.classList.remove('is-typing');
-    }
+    const formComp = CommentFormComponent.getInstance();
+    formComp.hide();
     formTarget = null;
     activeCommentId = null;
     _renderList();
   }
 
-  async function _submitForm() {
-    const text = document.getElementById('comment-input').value.trim();
+  async function _submitForm(text) {
     if (!text || !formTarget) return;
     await save(
       formTarget.lineStart, 
@@ -515,13 +558,6 @@ const CommentsModule = (() => {
     );
     _hideForm();
     window.getSelection().removeAllRanges();
-  }
-
-  function _autoResize(el) {
-    if (!el) return;
-    el.style.height = 'auto';
-    const newHeight = Math.min(el.scrollHeight, 240); 
-    el.style.height = newHeight + 'px';
   }
 
   function _getLineText(el) {
@@ -544,127 +580,70 @@ const CommentsModule = (() => {
     _clearHighlights();
   }
 
-  function initCommentDrag() {
-    const form = document.getElementById('comment-form');
-    if (!form) return;
-    let isDragging = false;
-    let startX, startY, initialX, initialY;
-    form.addEventListener('mousedown', (e) => {
-      const interactive = ['BUTTON', 'TEXTAREA', 'INPUT', 'SVG', 'PATH'];
-      if (interactive.includes(e.target.tagName) || e.target.closest('button')) return;
-      isDragging = true;
-      startX = e.clientX;
-      startY = e.clientY;
-      const rect = form.getBoundingClientRect();
-      initialX = rect.left;
-      initialY = rect.top;
-      document.body.style.cursor = 'grabbing';
-      document.body.style.userSelect = 'none';
-      form.style.zIndex = '3000';
-    });
-    window.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-      form.style.left = (initialX + dx) + 'px';
-      form.style.top  = (initialY + dy) + 'px';
-      form.style.transform = 'none'; 
-    });
-    window.addEventListener('mouseup', () => {
-      if (isDragging) {
-        isDragging = false;
-        document.body.style.cursor = 'default';
-        document.body.style.userSelect = 'auto';
-        form.style.zIndex = '2000';
-      }
-    });
-  }
-
   function _bindEvents() {
-    initCommentDrag();
-    document.getElementById('cancel-comment').addEventListener('click', _hideForm);
-    document.getElementById('save-comment').addEventListener('click', _submitForm);
-    const input = document.getElementById('comment-input');
-    const form  = document.getElementById('comment-form');
-    const saveBtn = document.getElementById('save-comment');
+    const formComp = CommentFormComponent.getInstance();
     
-    if (!input || !form || !saveBtn) {
-      console.warn('CommentsModule: Essential elements not found.');
-      return;
-    }
-    input.addEventListener('focus', () => form.classList.add('is-typing'));
-    input.addEventListener('blur', () => form.classList.remove('is-typing'));
-    input.addEventListener('input', () => {
-      const val = input.value.trim();
-      saveBtn.disabled = !val;
-      form.classList.toggle('is-filled', !!val);
-      form.setAttribute('data-mode', val ? 'filled' : 'empty');
-      _autoResize(input);
+    formComp.onSave((text) => _submitForm(text));
+    formComp.onCancel(() => _hideForm());
+    
+    formComp.onEdit((text) => {
+      formComp.setMode('filled');
+      formComp.setText(text);
     });
-    const expandBtn = document.getElementById('expand-comment-btn');
-    const modal = document.getElementById('expanded-comment-modal');
-    const modalInput = document.getElementById('expanded-comment-input');
-    const minimizeBtn = document.getElementById('minimize-comment-btn');
-    const modalSaveBtn = document.getElementById('expanded-save-comment');
-    if (expandBtn && modal && modalInput) {
-      expandBtn.addEventListener('click', () => {
-        modalInput.value = input.value;
+
+    formComp.onExpand((text) => {
+      // Use existing expanded modal logic for now
+      const input = document.getElementById('comment-input'); // This might not work now that we removed it from HTML
+      // We need to sync with the expanded modal
+      const modal = document.getElementById('expanded-comment-modal');
+      const modalInput = document.getElementById('expanded-comment-input');
+      if (modal && modalInput) {
+        modalInput.value = text;
         modal.classList.add('show');
         setTimeout(() => modalInput.focus(), 50);
-      });
-      const closeExpand = () => {
-        input.value = modalInput.value;
-        const val = input.value.trim();
-        saveBtn.disabled = !val;
-        form.classList.toggle('is-filled', !!val);
-        modal.classList.remove('show');
-        input.focus();
-      };
-      if (minimizeBtn) minimizeBtn.addEventListener('click', closeExpand);
-      if (modalSaveBtn) {
-        modalSaveBtn.addEventListener('click', async () => {
-          await _submitForm();
-          modal.classList.remove('show');
-        });
       }
+    });
+
+    // Handle expanded modal buttons
+    const modalSaveBtn = document.getElementById('expanded-save-comment');
+    const minimizeBtn = document.getElementById('minimize-comment-btn');
+    const modalInput = document.getElementById('expanded-comment-input');
+    const modal = document.getElementById('expanded-comment-modal');
+
+    if (modalSaveBtn) {
+      modalSaveBtn.onclick = async () => {
+        await _submitForm(modalInput.value.trim());
+        modal.classList.remove('show');
+      };
+    }
+
+    if (minimizeBtn) {
+      minimizeBtn.onclick = () => {
+        formComp.setText(modalInput.value);
+        modal.classList.remove('show');
+      };
+    }
+
+    if (modalInput) {
       modalInput.addEventListener('input', () => {
-        const val = modalInput.value.trim();
-        if (modalSaveBtn) modalSaveBtn.disabled = !val;
-        input.value = modalInput.value;
-        form.classList.toggle('is-filled', !!val);
-        _autoResize(input);
-      });
-      modal.addEventListener('click', (e) => {
-        if (e.target && e.target.classList.contains('expanded-textarea-backdrop')) closeExpand();
+        formComp.setText(modalInput.value);
       });
     }
-    document.getElementById('edit-comment-btn').addEventListener('click', () => {
-      if (!formTarget) return;
-      input.value = document.getElementById('comment-text-display').textContent;
-      saveBtn.disabled = !input.value.trim();
-      form.classList.toggle('is-filled', true);
-      form.setAttribute('data-mode', 'filled'); // Switch to edit mode
-      _autoResize(input);
-      setTimeout(() => input.focus(), 50);
-    });
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && !e.shiftKey && !saveBtn.disabled) { e.preventDefault(); _submitForm(); }
-      if (e.key === 'Escape') _hideForm();
-    });
+    
+    // Backdrop click
+    const backdrop = modal?.querySelector('.expanded-textarea-backdrop');
+    if (backdrop) {
+      backdrop.onclick = () => {
+        formComp.setText(modalInput.value);
+        modal.classList.remove('show');
+      };
+    }
   }
 
   function init() {
     _bindEvents();
   }
 
-  document.addEventListener('mousedown', (e) => {
-    const form = document.getElementById('comment-form');
-    if (form && form.classList.contains('show')) {
-      if (!form.contains(e.target) && !e.target.closest('.ds-sidebar-item') && !e.target.closest('.comment-trigger')) {
-        _hideForm();
-      }
-    }
-  });
 
   return { init, loadForFile, applyCommentMode, removeCommentMode, clearUI, clear, getCommentCount: () => comments.length };
 })();

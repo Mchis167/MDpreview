@@ -16,34 +16,35 @@ const SettingsModule = (() => {
     { name: 'Green',  value: '#ADFF2F' }
   ];
 
+  function open() {
+    if (typeof SettingsComponent !== 'undefined') {
+      SettingsComponent.open();
+    }
+  }
+
+  function close() {
+    // The PopoverShield handles its own closing logic,
+    // but we can trigger it via the DesignSystem if we had a reference.
+    // For now, most close actions are via the "X" button or backdrop.
+    const shield = document.querySelector('.ds-popover-shield.show');
+    if (shield) {
+      shield.click(); // Trigger backdrop click to close
+    }
+  }
+
   function init() {
-    const modal = document.getElementById('setting-modal');
-    const openBtn = document.getElementById('open-settings-btn');
-    const closeBtn = document.getElementById('close-settings-btn');
-    
-    if (!modal) return;
-
-    // ── Modal Toggle ──────────────────────────────────────────
-    if (openBtn) {
-      openBtn.addEventListener('click', () => modal.classList.add('show'));
-    }
-    if (closeBtn) {
-      closeBtn.addEventListener('click', () => modal.classList.remove('show'));
-    }
-
-    // Close on outside click
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) modal.classList.remove('show');
-    });
+    // Note: Elements are now dynamic. We look for them in the DOM.
+    const container = document.querySelector('.settings-organism');
+    if (!container) return;
 
     // ── Accent Color Selector ──────────────────────────────────
-    const colorSelector = modal.querySelector('.color-selector');
+    const colorSelector = container.querySelector('.color-selector');
     if (colorSelector) {
       renderColors(colorSelector);
     }
 
     // ── Custom Background Toggle ──────────────────────────────
-    const imageGrid = modal.querySelector('.bg-image-grid');
+    const imageGrid = container.querySelector('.bg-image-grid');
     const bgToggleContainer = document.getElementById('bg-toggle-mount');
 
     const updateGridVisibility = (enabled) => {
@@ -238,5 +239,20 @@ const SettingsModule = (() => {
     });
   }
 
-  return { init };
+  function updateFont(type, font) {
+    let fontVal = font;
+    if (font === 'System Default') fontVal = 'var(--font-text-system)';
+    if (font === 'System Mono') fontVal = 'var(--font-code-system)';
+
+    if (type === 'text') {
+      AppState.settings.fontText = fontVal;
+      localStorage.setItem('md-font-text', fontVal);
+    } else {
+      AppState.settings.fontCode = fontVal;
+      localStorage.setItem('md-font-code', fontVal);
+    }
+    applyTheme();
+  }
+
+  return { init, open, close, updateFont };
 })();

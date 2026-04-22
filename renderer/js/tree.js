@@ -413,5 +413,11 @@ const TreeModule = (() => {
     return div.innerHTML;
   }
 
-  return { load, search, setActiveFile };
+  function clear() {
+    treeData = [];
+    const container = document.getElementById('file-tree');
+    if (container) container.innerHTML = '';
+  }
+
+  return { load, search, setActiveFile, clear };
 })();

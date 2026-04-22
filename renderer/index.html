@@ -8,9 +8,7 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Be+Vietnam+Pro:wght@400;600;700&family=Roboto:wght@400;700&family=Open+Sans:wght@400;600;700&family=Montserrat:wght@400;600;700&family=Lato:wght@400;700&family=Source+Sans+3:wght@400;600;700&family=Noto+Sans:wght@400;600;700&family=Nunito:wght@400;600;700&family=Raleway:wght@400;600;700&family=Work+Sans:wght@400;600;700&family=Quicksand:wght@400;600;700&family=Barlow:wght@400;600;700&family=Jost:wght@400;600;700&family=Public+Sans:wght@400;600;700&family=Rubik:wght@400;600;700&family=Kanit:wght@400;700&family=Outfit:wght@400;600;700&family=Urbanist:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&family=Lexend:wght@400;600;700&family=Syne:wght@400;700&family=Figtree:wght@400;600;700&family=Manrope:wght@400;600;700&family=DM+Sans:wght@400;600;700&family=Sora:wght@400;600;700&family=Space+Grotesk:wght@400;600;700&family=Mulish:wght@400;600;700&family=Cabin:wght@400;600;700&family=Titillium+Web:wght@400;600;700&family=Heebo:wght@400;700&family=Karla:wght@400;600;700&family=Libre+Franklin:wght@400;600;700&family=Arimo:wght@400;700&family=Varela+Round&family=Commissioner:wght@400;600;700&family=Epilogue:wght@400;600;700&family=Archivo:wght@400;600;700&family=Chivo:wght@400;600;700&family=Bricolage+Grotesk:wght@400;600;700&family=Roboto+Mono:wght@400;500;700&family=Fira+Code:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Source+Code+Pro:wght@400;500;700&family=Inconsolata:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;700&family=Ubuntu+Mono:wght@400;700&family=Space+Mono:wght@400;700&family=Share+Tech+Mono&family=Victor+Mono:wght@400;500;700&family=Anonymous+Pro:wght@400;700&family=DM+Mono:wght@400;500&family=PT+Mono&family=Red+Hat+Mono:wght@400;500;700&family=Sono:wght@400;500;700&family=Spline+Sans+Mono:wght@400;500;700&family=Xanh+Mono&family=Cousine:wght@400;700&family=Nova+Mono&family=Major+Mono+Display&display=swap" rel="stylesheet">
 
   <!-- Mermaid -->
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
@@ -29,69 +27,6 @@
 
   <div id="app-background"></div>
 
-  <!-- ══════════════════════════════════════════════════
-     WORKSPACE PANEL
-════════════════════════════════════════════════════ -->
-  <div id="workspace-panel">
-    <div class="ws-panel-card">
-      <div class="ws-panel-header">
-        <h2 class="ws-panel-title">Workspaces</h2>
-        <button id="workspace-panel-close">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
-      </div>
-      <div id="workspace-list"></div>
-      <button id="add-workspace-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-        New Workspace
-      </button>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════════════
-     ADD WORKSPACE MODAL
-════════════════════════════════════════════════════ -->
-  <div id="add-workspace-modal">
-    <div class="aws-card">
-      <div class="aws-icon-wrapper">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path
-            d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" />
-          <line x1="12" y1="10" x2="12" y2="16" />
-          <line x1="9" y1="13" x2="15" y2="13" />
-        </svg>
-      </div>
-      <h3 class="aws-title">New Workspace</h3>
-      <p class="aws-subtitle">Connect a local folder to start previewing.</p>
-      <div class="aws-fields">
-        <div>
-          <label class="aws-field-label">Workspace Name</label>
-          <input id="workspace-name-input" type="text" placeholder="Design Specs, API Docs…" class="aws-input">
-        </div>
-        <div class="aws-browse-row-container">
-          <label class="aws-field-label">Folder Path</label>
-          <div class="aws-browse-row">
-            <input id="workspace-path-input" type="text" placeholder="Select document folder…" readonly
-              class="aws-input path">
-            <button id="browse-btn">Browse</button>
-          </div>
-        </div>
-      </div>
-      <div class="aws-actions">
-        <button id="cancel-workspace-btn">Cancel</button>
-        <button id="confirm-workspace-btn" disabled>Create</button>
-      </div>
-    </div>
-  </div>
 
   <!-- ══════════════════════════════════════════════════
      EXPANDED COMMENT MODAL
@@ -141,245 +76,6 @@
       <div class="expanded-textarea-body">
         <textarea id="draft-expanded-input" class="expanded-textarea-input" placeholder="Type here..."></textarea>
       </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════════════
-     SETTING MODAL
-════════════════════════════════════════════════════ -->
-  <div id="setting-modal">
-    <div class="setting-card">
-      <div class="setting-header">
-        <h2 class="setting-title">Setting</h2>
-        <button id="close-settings-btn" class="icon-btn-close">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
-      </div>
-
-      <div class="setting-body">
-        <!-- Accent Color Setting -->
-        <div class="setting-item-row">
-          <div class="setting-label-col">
-            <span class="setting-label">Accent Color</span>
-          </div>
-          <div class="color-selector">
-            <!-- Populated by JS -->
-          </div>
-        </div>
-
-        <div class="setting-divider"></div>
-
-        <!-- Text Zoom Setting -->
-        <div class="setting-item-row">
-          <div class="setting-label-col">
-            <span class="setting-label">Text Zoom</span>
-          </div>
-          <div class="setting-control-col">
-            <input type="range" id="text-zoom-slider" min="50" max="200" step="5" value="100" class="zoom-slider">
-            <span id="text-zoom-val" class="zoom-val-label">100%</span>
-          </div>
-        </div>
-
-        <div class="setting-divider"></div>
-
-        <!-- Code Zoom Setting -->
-        <div class="setting-item-row">
-          <div class="setting-label-col">
-            <span class="setting-label">Code Zoom</span>
-          </div>
-          <div class="setting-control-col">
-            <input type="range" id="code-zoom-slider" min="50" max="200" step="5" value="100" class="zoom-slider">
-            <span id="code-zoom-val" class="zoom-val-label">100%</span>
-          </div>
-        </div>
-
-        <div class="setting-divider"></div>
-
-        <!-- Advanced Settings Group -->
-        <div class="setting-group-title">Explorer Settings</div>
-        
-        <!-- Show Hidden Files -->
-        <div class="setting-item-row">
-          <div class="setting-label-col">
-            <span class="setting-label">Show Hidden Files</span>
-          </div>
-          <div id="hidden-toggle-mount" class="switch-toggle" tabindex="0" role="switch">
-            <div class="switch-indicator"></div>
-          </div>
-        </div>
-
-        <div class="setting-divider"></div>
-
-        <!-- Hide Empty Folders -->
-        <div class="setting-item-row">
-          <div class="setting-label-col">
-            <span class="setting-label">Hide Empty Folders</span>
-          </div>
-          <div id="empty-toggle-mount" class="switch-toggle" tabindex="0" role="switch">
-            <div class="switch-indicator"></div>
-          </div>
-        </div>
-
-        <div class="setting-divider"></div>
-
-        <!-- Flat View -->
-        <div class="setting-item-row">
-          <div class="setting-label-col">
-            <span class="setting-label">Flat View</span>
-          </div>
-          <div id="flat-toggle-mount" class="switch-toggle" tabindex="0" role="switch">
-            <div class="switch-indicator"></div>
-          </div>
-        </div>
-
-        <div class="setting-divider"></div>
-
-        <!-- Background Setting -->
-        <div class="setting-item-row">
-          <div class="setting-label-col">
-            <span class="setting-label">Custom Background</span>
-          </div>
-          <div id="bg-toggle-mount" class="switch-toggle" tabindex="0" role="switch">
-            <div class="switch-indicator"></div>
-          </div>
-        </div>
-
-        <div class="bg-image-grid">
-          <div class="bg-image-item bg-new-image" id="bg-upload-trigger">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            <span>New Image</span>
-            <input type="file" id="bg-file-input" accept="image/*" style="display: none;" multiple>
-          </div>
-          <!-- Custom Uploaded Images Rendered Here -->
-          <div id="custom-bg-list" style="display: contents;"></div>
-          <!-- Preset Demo Images -->
-          <div class="bg-image-item">
-            <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
-              alt="Abstract 1">
-          </div>
-          <div class="bg-image-item">
-            <img src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop"
-              alt="Abstract 2">
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- ══════════════════════════════════════════════════
-     KEYBOARD SHORTCUTS POPOVER
-════════════════════════════════════════════════════ -->
-  <div id="shortcuts-popover" class="shortcuts-popover">
-    <div class="shortcuts-header">
-      <div class="shortcuts-header-title">Keyboard Shortcuts</div>
-      <div class="shortcuts-close-btn" id="shortcuts-close-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </div>
-    </div>
-    <div class="shortcuts-content-scroll">
-
-      <!-- GROUP: Navigation -->
-      <div class="shortcuts-group">
-        <div class="shortcuts-group-title">Navigation</div>
-        <div class="shortcuts-grid">
-          <div class="shortcuts-item">
-            <span class="shortcuts-label">Switch to Read mode</span>
-            <span class="shortcuts-keys"><kbd>Ctrl</kbd><kbd>1</kbd></span>
-          </div>
-          <div class="shortcuts-item">
-            <span class="shortcuts-label">Switch to Edit mode</span>
-            <span class="shortcuts-keys"><kbd>Ctrl</kbd><kbd>2</kbd></span>
-          </div>
-          <div class="shortcuts-item">
-            <span class="shortcuts-label">Switch to Comment mode</span>
-            <span class="shortcuts-keys"><kbd>Ctrl</kbd><kbd>3</kbd></span>
-          </div>
-          <div class="shortcuts-item">
-            <span class="shortcuts-label">Toggle Sidebar</span>
-            <span class="shortcuts-keys"><kbd>Ctrl</kbd><kbd>B</kbd></span>
-          </div>
-          <div class="shortcuts-item">
-            <span class="shortcuts-label">Focus Search</span>
-            <span class="shortcuts-keys"><kbd>Ctrl</kbd><kbd>F</kbd></span>
-          </div>
-          <div class="shortcuts-item">
-            <span class="shortcuts-label">Scroll to Top</span>
-            <span class="shortcuts-keys"><kbd>Ctrl</kbd><kbd>↑</kbd></span>
-          </div>
-          <div class="shortcuts-item">
-            <span class="shortcuts-label">Scroll to Bottom</span>
-            <span class="shortcuts-keys"><kbd>Ctrl</kbd><kbd>↓</kbd></span>
-          </div>
-          <div class="shortcuts-item">
-            <span class="shortcuts-label">Toggle Fullscreen</span>
-            <span class="shortcuts-keys" id="kbd-fullscreen"><kbd>F11</kbd></span>
-          </div>
-        </div>
-      </div>
-
-      <!-- GROUP: Editor -->
-      <div class="shortcuts-group">
-        <div class="shortcuts-group-title">Editor</div>
-        <div class="shortcuts-grid">
-          <div class="shortcuts-item">
-            <span class="shortcuts-label">Save File</span>
-            <span class="shortcuts-keys"><kbd>Ctrl</kbd><kbd>S</kbd></span>
-          </div>
-          <div class="shortcuts-item">
-            <span class="shortcuts-label">Undo</span>
-            <span class="shortcuts-keys"><kbd>Ctrl</kbd><kbd>Z</kbd></span>
-          </div>
-          <div class="shortcuts-item">
-            <span class="shortcuts-label">Redo</span>
-            <span class="shortcuts-keys"><kbd>Ctrl</kbd><kbd>Y</kbd></span>
-          </div>
-          <div class="shortcuts-item">
-            <span class="shortcuts-label">Markdown Helper</span>
-            <span class="shortcuts-keys"><kbd>Ctrl</kbd><kbd>H</kbd></span>
-          </div>
-        </div>
-      </div>
-
-      <!-- GROUP: General -->
-      <div class="shortcuts-group">
-        <div class="shortcuts-group-title">General</div>
-        <div class="shortcuts-grid">
-          <div class="shortcuts-item">
-            <span class="shortcuts-label">Workspace Picker</span>
-            <span class="shortcuts-keys"><kbd>Ctrl</kbd><kbd>O</kbd></span>
-          </div>
-          <div class="shortcuts-item">
-            <span class="shortcuts-label">Rebuild & Relaunch</span>
-            <span class="shortcuts-keys"><kbd>Ctrl</kbd><kbd>R</kbd></span>
-          </div>
-          <div class="shortcuts-item">
-            <span class="shortcuts-label">Close Tab</span>
-            <span class="shortcuts-keys"><kbd>Ctrl</kbd><kbd>W</kbd></span>
-          </div>
-          <div class="shortcuts-item">
-            <span class="shortcuts-label">Keyboard Shortcuts</span>
-            <span class="shortcuts-keys"><kbd>Ctrl</kbd><kbd>/</kbd></span>
-          </div>
-          <div class="shortcuts-item">
-            <span class="shortcuts-label">Open Settings</span>
-            <span class="shortcuts-keys"><kbd>Ctrl</kbd><kbd>,</kbd></span>
-          </div>
-          <div class="shortcuts-item">
-            <span class="shortcuts-label">Close / Cancel</span>
-            <span class="shortcuts-keys"><kbd>Esc</kbd></span>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
 
@@ -550,135 +246,6 @@
             <textarea id="edit-textarea" placeholder="Start writing..."></textarea>
             
             <div class="edit-toolbar-container">
-              <!-- Help Popover -->
-              <div id="edit-help-popover" class="edit-help-popover">
-                <div class="help-header">
-                  <div class="help-header-title">Markdown Helper</div>
-                  <div class="help-close-btn" id="help-close-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                  </div>
-                </div>
-                
-                <div class="help-content-scroll">
-                  <!-- FORMAT SECTION -->
-                  <div class="help-group">
-                    <div class="help-group-title">Format</div>
-                    <div class="help-grid">
-                      <div class="help-item-btn" data-action="b">
-                        <span class="help-label">In đậm</span>
-                        <span class="help-syntax">**text**</span>
-                      </div>
-                      <div class="help-item-btn" data-action="i">
-                        <span class="help-label">In nghiêng</span>
-                        <span class="help-syntax">*text*</span>
-                      </div>
-                      <div class="help-item-btn" data-action="bi">
-                        <span class="help-label">In đậm + nghiêng</span>
-                        <span class="help-syntax">***text***</span>
-                      </div>
-                      <div class="help-item-btn" data-action="s">
-                        <span class="help-label">Gạch ngang</span>
-                        <span class="help-syntax">~~text~~</span>
-                      </div>
-                      <div class="help-item-btn" data-action="c">
-                        <span class="help-label">Inline code</span>
-                        <span class="help-syntax">`text`</span>
-                      </div>
-                      <div class="help-empty"></div>
-                    </div>
-                  </div>
-
-                  <!-- TITLES SECTION -->
-                  <div class="help-group">
-                    <div class="help-group-title">Tiêu đề</div>
-                    <div class="help-grid">
-                      <div class="help-item-btn" data-action="h1">
-                        <span class="help-label">H1</span>
-                        <span class="help-syntax"># H1</span>
-                      </div>
-                      <div class="help-item-btn" data-action="h2">
-                        <span class="help-label">H2</span>
-                        <span class="help-syntax">## H2</span>
-                      </div>
-                      <div class="help-item-btn" data-action="h3">
-                        <span class="help-label">H3</span>
-                        <span class="help-syntax">### H3</span>
-                      </div>
-                      <div class="help-item-btn" data-action="h">
-                        <span class="help-label">H4</span>
-                        <span class="help-syntax">#### H4</span>
-                      </div>
-                      <div class="help-item-btn" data-action="h5">
-                        <span class="help-label">H5</span>
-                        <span class="help-syntax">##### H5</span>
-                      </div>
-                      <div class="help-item-btn" data-action="h6">
-                        <span class="help-label">H6</span>
-                        <span class="help-syntax">###### H6</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- LISTS SECTION -->
-                  <div class="help-group">
-                    <div class="help-group-title">Danh sách</div>
-                    <div class="help-grid">
-                      <div class="help-item-btn" data-action="ul">
-                        <span class="help-label">Bullet list</span>
-                        <span class="help-syntax">- ITEM</span>
-                      </div>
-                      <div class="help-item-btn" data-action="ol">
-                        <span class="help-label">Numbered list</span>
-                        <span class="help-syntax">1. ITEM</span>
-                      </div>
-                      <div class="help-item-btn" data-action="tl">
-                        <span class="help-label">Checkbox</span>
-                        <span class="help-syntax">- [ ] ITEM</span>
-                      </div>
-                      <div class="help-item-btn" data-action="tl-checked">
-                        <span class="help-label">Checked</span>
-                        <span class="help-syntax">- [x] ITEM</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- OTHERS SECTION -->
-                  <div class="help-group">
-                    <div class="help-group-title">Khác</div>
-                    <div class="help-grid">
-                      <div class="help-item-btn" data-action="q">
-                        <span class="help-label">Blockquote</span>
-                        <span class="help-syntax">> TEXT</span>
-                      </div>
-                      <div class="help-item-btn" data-action="l">
-                        <span class="help-label">Link</span>
-                        <span class="help-syntax">[NAME](URL)</span>
-                      </div>
-                      <div class="help-item-btn" data-action="img">
-                        <span class="help-label">Image</span>
-                        <span class="help-syntax">![ALT](URL)</span>
-                      </div>
-                      <div class="help-item-btn" data-action="cb">
-                        <span class="help-label">Code block</span>
-                        <span class="help-syntax">```lang ```</span>
-                      </div>
-                      <div class="help-item-btn" data-action="tb">
-                        <span class="help-label">Table</span>
-                        <span class="help-syntax">| A | B |</span>
-                      </div>
-                      <div class="help-item-btn" data-action="hr">
-                        <span class="help-label">Đường kẻ</span>
-                        <span class="help-syntax">---</span>
-                      </div>
-                      <div class="help-item-btn" data-action="fn">
-                        <span class="help-label">Footnote</span>
-                        <span class="help-syntax">TEXT[^1]</span>
-                      </div>
-                      <div class="help-empty"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
               <div class="edit-toolbar">
                 <!-- Help Toggle -->
@@ -787,44 +354,8 @@
 
   </div><!-- /app-layout -->
 
-  <!-- ══════════════════════════════════════════════════
-     COMMENT FORM POPUP
-════════════════════════════════════════════════════ -->
-  <div id="comment-form" data-mode="empty">
-    <div class="comment-form-inner">
-      <!-- Edit Mode (Empty or Filled) -->
-      <div class="comment-edit-view">
-        <div class="comment-input-wrap">
-          <textarea id="comment-input" placeholder="What’s your feedback"></textarea>
-        </div>
-        <div class="comment-form-actions">
-          <button id="expand-comment-btn" class="icon-btn" title="Expand to full editor">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
-          </button>
-          <div style="flex:1"></div>
-          <button id="cancel-comment" class="btn btn-ghost">Cancel</button>
-          <button id="save-comment" class="btn btn-primary" disabled>Save</button>
-        </div>
-      </div>
+  <!-- Comment form is now handled by DesignSystem (js/components/organisms/comment-form-component.js) -->
 
-      <!-- View Only Mode -->
-      <div class="comment-read-view">
-        <div class="comment-read-header">
-          <div class="comment-header-label">COMMENT</div>
-          <button id="edit-comment-btn" class="icon-btn-edit" title="Edit comment">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M11 2.66667L13.3333 5M12.3333 1.66667C12.7753 1.22464 13.4913 1.22464 13.9333 1.66667C14.3754 2.10869 14.3754 2.82472 13.9333 3.26675L4.33333 12.8667L2 13.5333L2.66667 11.2L12.3333 1.66667Z"
-                stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </button>
-        </div>
-        <div class="comment-read-body">
-          <div id="comment-text-display"></div>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- ══════════════════════════════════════════════════
      ZOOM MODAL
@@ -887,9 +418,12 @@
   <script src="js/components/organisms/change-action-view-bar.js"></script>
   <script src="js/components/organisms/tab-bar.js"></script>
   <script src="js/components/organisms/right-sidebar.js"></script>
+  <script src="js/components/organisms/comment-form-component.js"></script>
   
   <script src="js/tree.js"></script>
   <script src="js/workspace.js"></script>
+  <script src="js/components/organisms/workspace-picker-component.js"></script>
+  <script src="js/components/organisms/workspace-form-component.js"></script>
   <script src="js/components/textarea.js"></script>
   <script src="js/comments.js"></script>
   <script src="js/collect.js"></script>
@@ -898,6 +432,9 @@
   <script src="js/toolbar.js"></script>
   <script src="js/components/switch-toggle.js"></script>
   <script src="js/settings.js"></script>
+  <script src="js/components/organisms/settings-component.js"></script>
+  <script src="js/components/organisms/markdown-helper-component.js"></script>
+  <script src="js/components/organisms/shortcuts-component.js"></script>
   <script src="js/components/search-component.js"></script>
   <script src="js/sidebar.js"></script>
   <script src="js/draft.js"></script>

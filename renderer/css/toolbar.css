@@ -44,7 +44,7 @@
 }
 
 .header-label {
-  font-family: 'Roboto Mono', monospace;
+  font-family: var(--font-code);
   font-size: 10px;
   font-weight: 500;
   color: var(--text-20);
@@ -54,7 +54,7 @@
 }
 
 .header-value {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-text);
   font-size: 14px;
   font-weight: 500;
   color: var(--text-60);

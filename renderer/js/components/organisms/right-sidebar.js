@@ -97,15 +97,15 @@ class RightSidebarComponent {
     
     if (this.state.items.length === 0) {
       const empty = DesignSystem.createElement('div', 'ds-sidebar-empty');
-      const isLucide = this.state.emptyState.icon && !this.state.emptyState.icon.includes('<svg');
-      const iconHtml = isLucide ? `<i data-lucide="${this.state.emptyState.icon}"></i>` : this.state.emptyState.icon;
+      const iconHtml = DesignSystem.getIcon ? DesignSystem.getIcon(this.state.emptyState.icon) : this.state.emptyState.icon;
       
       empty.innerHTML = `
-        ${iconHtml}
+        <div class="ds-sidebar-empty-icon">${iconHtml}</div>
         <p>${this.state.emptyState.text}</p>
       `;
       contentWrap.appendChild(empty);
     } else {
+
       this.state.items.forEach((item, index) => {
         if (this.state.renderItem) {
           const itemEl = this.state.renderItem(item, index);

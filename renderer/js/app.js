@@ -23,7 +23,9 @@ window.AppState = {
     codeZoom:         parseInt(localStorage.getItem('md-code-zoom') || '100', 10),
     showHidden:       localStorage.getItem('md-show-hidden') === 'true',
     hideEmptyFolders: localStorage.getItem('md-hide-empty') === 'true',
-    flatView:         localStorage.getItem('md-flat-view') === 'true'
+    flatView:         localStorage.getItem('md-flat-view') === 'true',
+    fontText:         localStorage.getItem('md-font-text') || 'Inter',
+    fontCode:         localStorage.getItem('md-font-code') || 'Roboto Mono'
   },
 
   /**
@@ -107,27 +109,32 @@ window.AppState = {
  * Apply theme settings to the document
  */
 function applyTheme() {
-  const { accentColor, bgEnabled, bgImage, textZoom, codeZoom } = AppState.settings;
+  const root = document.documentElement;
+  const s = AppState.settings;
   
-  // Update text zoom
-  document.documentElement.style.setProperty('--preview-zoom', textZoom || 100);
-  document.documentElement.style.setProperty('--code-zoom',    codeZoom || 100);
+  // Update zoom
+  root.style.setProperty('--preview-zoom', s.textZoom || 100);
+  root.style.setProperty('--code-zoom',    s.codeZoom || 100);
   
   // Update accent color (Hex)
-  document.documentElement.style.setProperty('--accent-color', accentColor);
+  root.style.setProperty('--accent-color', s.accentColor);
   
   // Update accent color (RGB) for translucent tints
-  const rgb = hexToRgb(accentColor);
+  const rgb = hexToRgb(s.accentColor);
   if (rgb) {
-    document.documentElement.style.setProperty('--accent-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+    root.style.setProperty('--accent-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
   }
   
-  // Update background
+  // Update fonts
+  root.style.setProperty('--font-text', s.fontText);
+  root.style.setProperty('--font-code', s.fontCode);
+  
+  // Custom Background Logic
   const bgLayer = document.getElementById('app-background');
 
   if (bgLayer) {
-    if (bgEnabled && bgImage) {
-      bgLayer.style.backgroundImage = `url(${bgImage})`;
+    if (s.bgEnabled && s.bgImage) {
+      bgLayer.style.backgroundImage = `url(${s.bgImage})`;
       bgLayer.style.display = 'block';
     } else {
       bgLayer.style.display = 'none';
@@ -302,6 +309,9 @@ function updateSidebarToggleIcon(isCollapsed) {
 
 // ── Boot ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  // 0. Initial theme application
+  applyTheme();
+
   // 1. Core UI Components First
   ChangeActionViewBar.init(); // organisms/change-action-view-bar.js
   RightSidebar.init();        // organisms/right-sidebar.js

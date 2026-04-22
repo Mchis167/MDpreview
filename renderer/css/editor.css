@@ -13,7 +13,7 @@
   background: transparent;
   border: none;
   color: var(--text-90);
-  font-family: 'Roboto Mono', monospace;
+  font-family: var(--font-code);
   font-size: 14px;
   padding: 80px 32px 120px 32px; /* Top=80px, Bottom=120px for toolbar area */
   resize: none;
@@ -293,10 +293,10 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
-/* No border on last items in grid sometimes tricky with 2 cols, 
-   but a subtle line between all is usually what's requested for dividers */
+/* Remove divider on the last row (2 columns) */
+.help-item-btn:nth-last-child(-n+2),
 .help-empty {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: none;
 }
 
 .help-label {

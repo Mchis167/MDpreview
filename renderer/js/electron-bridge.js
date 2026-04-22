@@ -10,9 +10,29 @@
 
   window.electronAPI = {
     // Folder picker (In browser, we'll just prompt for a string or return null)
-    openFolder: async () => {
-      const p = prompt('Please enter the absolute path to your local folder:');
-      return p || null;
+    openFolder: () => {
+      return new Promise((resolve) => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.webkitdirectory = true;
+        
+        input.onchange = (e) => {
+          const files = e.target.files;
+          if (files && files.length > 0) {
+            // On web, we can't get absolute path, but we can get the folder name 
+            // from the relative path of the first file.
+            const firstFile = files[0];
+            const relativePath = firstFile.webkitRelativePath;
+            const folderName = relativePath.split('/')[0];
+            resolve(folderName || 'Selected Folder');
+          } else {
+            resolve(null);
+          }
+        };
+        
+        input.oncancel = () => resolve(null);
+        input.click();
+      });
     },
 
     // Server watch dir

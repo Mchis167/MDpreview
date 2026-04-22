@@ -92,39 +92,14 @@ const EditorModule = (() => {
 
     // Help Toggle logic
     const helpBtn = document.getElementById('edit-help-btn');
-    const helpPopover = document.getElementById('edit-help-popover');
-    if (helpBtn && helpPopover) {
+    if (helpBtn) {
         helpBtn.onclick = (e) => {
-            e.preventDefault(); // Prevent unexpected scrolling
+            e.preventDefault();
             e.stopPropagation();
-            helpPopover.classList.toggle('open');
-        };
-
-        const closeBtn = document.getElementById('help-close-btn');
-        if (closeBtn) {
-            closeBtn.onclick = () => helpPopover.classList.remove('open');
-        }
-
-        // Attach listeners to help items
-        const helpItems = helpPopover.querySelectorAll('.help-item-btn');
-        helpItems.forEach(item => {
-            item.onclick = (e) => {
-                e.preventDefault(); // Prevent losing textarea focus/selection
-                const action = item.dataset.action;
-                applyAction(_textarea, action);
-            };
-        });
-
-        // Close on escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') helpPopover.classList.remove('open');
-        });
-        // Close when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!helpPopover.contains(e.target) && e.target !== helpBtn) {
-                helpPopover.classList.remove('open');
+            if (window.MarkdownHelperComponent) {
+              window.MarkdownHelperComponent.open();
             }
-        });
+        };
     }
 
     // Save Action
@@ -322,7 +297,7 @@ const EditorModule = (() => {
     textarea.focus();
   }
 
-  return { init, save, isDirty, setOriginalContent, undo, redo };
+  return { init, save, isDirty, setOriginalContent, undo, redo, applyAction: (action) => applyAction(_textarea, action) };
 })();
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -1,0 +1,271 @@
+/* ============================================================
+   settings-panel.css — Settings Organism & Design System Popover
+   ============================================================ */
+
+/* ── Settings Organism Specifics ─────────────────────── */
+
+/* ── Settings Organism Specifics ─────────────────────── */
+/* ── Settings Container ── */
+.settings-container {
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* ── Floating Triggers (Comment / Collect) ───────────── */
+.comment-trigger,
+.collect-trigger {
+  position: fixed;
+  z-index: 1500;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  color: #000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s;
+}
+
+.comment-trigger.show,
+.collect-trigger.show {
+  display: flex;
+  animation: triggerPop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.comment-trigger:hover,
+.collect-trigger:hover {
+  transform: scale(1.1);
+  background: var(--accent-hover, #ffce74);
+}
+
+@keyframes triggerPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.setting-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-90);
+}
+
+.icon-btn-close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: var(--text-60);
+  transition: all 0.2s;
+}
+
+.icon-btn-close:hover {
+  background: var(--layer-hover);
+  color: var(--text-90);
+}
+
+.setting-body {
+  padding: 0 20px 24px;
+  background: var(--layer-hover);
+  margin: 0 4px 4px;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-top: 20px;
+}
+
+.setting-group-title {
+  font-family: var(--font-code);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent-color);
+  margin-bottom: 12px;
+  opacity: 0.8;
+}
+
+.setting-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  width: 100%;
+}
+
+.setting-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-90);
+}
+
+.color-selector {
+  display: flex;
+  gap: 8px;
+  padding-right: 12px;
+}
+
+.color-item {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 4px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-clip: padding-box;
+}
+
+.color-item:hover {
+  transform: scale(1.1);
+}
+
+.color-item.active {
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 0 1px var(--accent-color), 0 0 4px var(--accent-color);
+}
+
+.setting-divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.02);
+  flex-shrink: 0;
+}
+
+.setting-control-col {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  max-width: 240px;
+}
+
+.zoom-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.zoom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--accent-color);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.4);
+  transition: transform 0.1s;
+}
+
+.zoom-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.zoom-val-label {
+  min-width: 40px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-color);
+  font-family: var(--font-code);
+}
+
+.ds-select {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--accent-color);
+  font-family: var(--font-code);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 22px 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  text-align: right;
+  -webkit-appearance: none;
+  appearance: none;
+  /* Custom Accent Arrow */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23ffbf48' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 2px center;
+  background-size: 14px;
+}
+
+.ds-select:hover {
+  opacity: 0.8;
+}
+
+.bg-image-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+  padding: 12px 0;
+}
+
+.bg-image-item {
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-main);
+  background: var(--layer-hover);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.bg-image-item:hover {
+  border-color: var(--accent-color);
+}
+
+.bg-image-item.active {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px var(--accent-color);
+}
+
+.bg-image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.1;
+  transition: opacity 0.3s;
+}
+
+.bg-image-item.active img {
+  opacity: 0.3;
+}
+
+.bg-new-image {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-70);
+  font-family: var(--font-code);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.bg-new-image:hover {
+  color: var(--accent-color);
+}

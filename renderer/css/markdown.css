@@ -189,7 +189,7 @@
 }
 
 #md-content code {
-  font-family: 'Roboto Mono', monospace;
+  font-family: var(--font-code);
   font-size: 0.85em;
   background: rgba(var(--accent-rgb), 0.1);
   padding: 0.15em 0.45em;
@@ -350,7 +350,7 @@
   color: var(--text-40);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-family: 'Roboto Mono', monospace;
+  font-family: var(--font-code);
 }
 
 .code-block-copy {
@@ -405,7 +405,7 @@
   border: none;
   white-space: pre;
   word-break: normal;
-  font-family: 'Roboto Mono', monospace;
+  font-family: var(--font-code);
 }
 
 /* ── Syntax Highlighting (Atom One Dark Inspired) ──────── */
@@ -519,7 +519,7 @@
   letter-spacing: 0.12em;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   white-space: nowrap;
-  font-family: 'Roboto Mono', monospace;
+  font-family: var(--font-code);
 }
 
 #md-content td {
@@ -719,19 +719,7 @@
   font-weight: 700;
 }
 
-.comment-range {
-  background: rgba(var(--accent-rgb), 0.12);
-  border-bottom: 2px solid rgba(var(--accent-rgb), 0.4);
-  border-radius: 2px;
-  color: inherit;
-  cursor: pointer;
-  transition: all 0.2s;
-}
 
-.comment-range:hover {
-  background: rgba(var(--accent-rgb), 0.2);
-  border-bottom-color: var(--accent-color);
-}
 
 
 
@@ -777,7 +765,7 @@
 /* Trailing Icon (+ / -) ── Forced Style */
 #md-content summary::after {
   content: '+';
-  font-family: 'Inter', system-ui, sans-serif !important;
+  font-family: var(--font-text), system-ui, sans-serif !important;
   font-size: 28px !important;
   font-weight: 700 !important;
   color: var(--text-40);
