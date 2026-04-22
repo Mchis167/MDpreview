@@ -171,6 +171,12 @@ function initSidebarRevamp() {
 
   if (!mount || !enterBtn) return;
 
+  // Safety check: Ensure SearchComponent is loaded
+  if (typeof SearchComponent === 'undefined') {
+    console.warn('SearchComponent not found. Search feature disabled.');
+    return;
+  }
+
   // Initialize the reusable component
   const searchBar = SearchComponent.create({
     placeholder: 'Search...',
