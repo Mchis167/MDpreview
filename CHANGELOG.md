@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 
 
-## [Unreleased] — 2026-04-23 01:40
+## [1.1.0] — 2026-04-23 01:40
 
 ### Added
 - **Design System Icon Registry**: Implemented a central `ICONS` registry in `design-system.js` for instant, reliable SVG rendering without DOM scanning delays.
@@ -22,7 +22,7 @@ All notable changes to this project will be documented in this file.
 - **Icon Rendering Regressions**: Resolved issues where icons (specifically `trash-2`) were displaying as raw text due to improper manual gán `innerHTML`.
 - **Sidebar Header Alignment**: Refined Right Sidebar header padding (`0 0 0 16px`) and action group alignment to ensure a perfectly balanced, premium UI.
 
-## [Unreleased] — 2026-04-23 01:15
+## [1.1.0] — 2026-04-23 01:15
 
 ### Added
 - **Word-Level Highlighting**: Implemented precise, robust text range highlighting for both **Comments** and **Collect** (Bookmark) modules using a `DocumentFragment` wrapping system.
@@ -41,12 +41,12 @@ All notable changes to this project will be documented in this file.
 - **Functional Sidebar Regressions**: Fixed missing SVG constants (`svgTrash`, `svgMsg`) and event binding failures in the sidebar boot sequence.
 - **Interactive "X" Button**: Fixed the delete button failure by resolving the underlying null-ID issue.
 
-## [Unreleased] — 2026-04-23 00:26
+## [1.1.0] — 2026-04-23 00:26
 
 ### Added
 - **Agent Rule: Mandatory Changelog Review**: Updated `.agents/rules/readchangelog.md` to force all AI agents to read `CHANGELOG.md` at the start of every session for better context retention.
 
-## [Unreleased] — 2026-04-23 00:25
+## [1.1.0] — 2026-04-23 00:25
 
 ### Added
 - **Atomic TabBar Component**: Implemented a fully modular `TabBarComponent` (Organism) with a dynamic "Right Action" configuration system.
@@ -61,7 +61,7 @@ All notable changes to this project will be documented in this file.
 - **Sidebar Selection Persistence**: Resolved a bug in `sidebar.js` where the "Recently Viewed" highlight remained active even when the workspace had no open tabs.
 - **Editor Mode Synchronization**: Updated `editor.js` to correctly switch back to Read Mode using the new component selectors after saving or canceling edits.
 
-## [Unreleased] — 2026-04-23 00:20
+## [1.1.0] — 2026-04-23 00:20
 
 ### Added
 - **Mutual Exclusion Sidebar Logic**: Implemented a "Single Sidebar" rule to ensure only one right-hand panel (Comment or Collect) is open at a time.
@@ -78,7 +78,7 @@ All notable changes to this project will be documented in this file.
 - **Edge Browser Support**: Fixed "Invalid Property" warnings for `backdrop-filter` by refining CSS property ordering.
 - **Overlapping Sidebar Bug**: Fixed a UI collision where both Comment and Collect sidebars could appear simultaneously.
 
-## [Unreleased] — 2026-04-22
+## [1.1.0] — 2026-04-22
 
 ### Added
 - **Premium Scroll Experience**: Implemented a smooth alpha-mask fade on the top and bottom edges of the Markdown viewer (`#md-viewer`).
