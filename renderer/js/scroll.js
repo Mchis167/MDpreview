@@ -15,13 +15,15 @@ const ScrollModule = (() => {
     } catch (e) {
       console.error('Failed to load scroll positions', e);
     }
-
+    
     // Save on scroll (debounced)
     const viewer = document.getElementById('md-viewer');
     if (viewer) {
       viewer.addEventListener('scroll', _debounce(() => {
-        if (AppState.currentFile) {
-          positions[AppState.currentFile] = viewer.scrollTop;
+        const ws = AppState.currentWorkspace;
+        if (AppState.currentFile && ws) {
+          const key = `${ws.id}:${AppState.currentFile}`;
+          positions[key] = viewer.scrollTop;
           _persist();
         }
       }, 200));
@@ -29,8 +31,10 @@ const ScrollModule = (() => {
 
     // Save on app close
     window.addEventListener('beforeunload', () => {
-      if (AppState.currentFile && viewer) {
-        positions[AppState.currentFile] = viewer.scrollTop;
+      const ws = AppState.currentWorkspace;
+      if (AppState.currentFile && ws && viewer) {
+        const key = `${ws.id}:${AppState.currentFile}`;
+        positions[key] = viewer.scrollTop;
         _persist();
       }
     });
@@ -40,9 +44,11 @@ const ScrollModule = (() => {
    * Manually save current scroll position for a specific file
    */
   function save(filePath) {
+    const ws = AppState.currentWorkspace;
     const viewer = document.getElementById('md-viewer');
-    if (viewer && filePath) {
-      positions[filePath] = viewer.scrollTop;
+    if (viewer && filePath && ws) {
+      const key = `${ws.id}:${filePath}`;
+      positions[key] = viewer.scrollTop;
       _persist();
     }
   }
@@ -51,13 +57,15 @@ const ScrollModule = (() => {
    * Restore scroll position for a file
    */
   function restore(filePath) {
+    const ws = AppState.currentWorkspace;
     const viewer = document.getElementById('md-viewer');
-    if (!viewer) return;
+    if (!viewer || !ws) return;
 
-    if (filePath && positions[filePath] !== undefined) {
+    const key = `${ws.id}:${filePath}`;
+    if (filePath && positions[key] !== undefined) {
       // Use requestAnimationFrame to ensure DOM is ready
       requestAnimationFrame(() => {
-        viewer.scrollTop = positions[filePath];
+        viewer.scrollTop = positions[key];
       });
     } else {
       viewer.scrollTop = 0;
@@ -80,5 +88,35 @@ const ScrollModule = (() => {
     };
   }
 
-  return { init, save, restore };
+  /**
+   * Remove scroll position for a specific file in current workspace
+   */
+  function remove(filePath) {
+    const ws = AppState.currentWorkspace;
+    const key = ws ? `${ws.id}:${filePath}` : filePath;
+    if (positions[key] !== undefined) {
+      delete positions[key];
+      _persist();
+    }
+  }
+
+  /**
+   * Clear all scroll positions for a specific workspace
+   */
+  function clearForWorkspace(wsId) {
+    const prefix = `${wsId}:`;
+    Object.keys(positions).forEach(key => {
+      if (key.startsWith(prefix)) {
+        delete positions[key];
+      }
+    });
+    _persist();
+  }
+
+  function clear() {
+    positions = {};
+    _persist();
+  }
+
+  return { init, save, restore, remove, clear, clearForWorkspace };
 })();

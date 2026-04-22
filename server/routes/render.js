@@ -132,7 +132,18 @@ function renderWithLineNumbers(content) {
     i++;
   }
 
-  return html;
+  return _sanitize(html);
+}
+
+/**
+ * Basic XSS Sanitization
+ * Strips script and iframe tags
+ */
+function _sanitize(html) {
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+    .replace(/on\w+="[^"]*"/gi, ''); // Remove inline event handlers
 }
 
 router.get('/render', (req, res) => {

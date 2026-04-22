@@ -15,7 +15,7 @@ const TabsModule = (function () {
       addBtn.addEventListener('click', () => {
         // Create a new Draft tab
         if (typeof AppState !== 'undefined' && typeof AppState.onModeChange === 'function') {
-          AppState.onModeChange('ai');
+          AppState.onModeChange('draft');
         }
       });
     }
@@ -30,6 +30,70 @@ const TabsModule = (function () {
         }
       }
     });
+
+    // Initial load if workspace is already set
+    if (typeof AppState !== 'undefined' && AppState.currentWorkspace) {
+      switchWorkspace(AppState.currentWorkspace.id);
+    }
+  }
+
+  function saveToStorage() {
+    if (typeof AppState === 'undefined' || !AppState.currentWorkspace) return;
+    const key = `tabs_${AppState.currentWorkspace.id}`;
+    const data = {
+      openFiles: state.openFiles,
+      activeFile: state.activeFile
+    };
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+
+  function switchWorkspace(workspaceId) {
+    if (!workspaceId) {
+      state.openFiles = [];
+      state.activeFile = null;
+      render();
+      return;
+    }
+
+    const key = `tabs_${workspaceId}`;
+    const saved = localStorage.getItem(key);
+    
+    // Also load draft state for this workspace
+    if (typeof DraftModule !== 'undefined') {
+      DraftModule.loadFromStorage(workspaceId);
+    }
+
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        state.openFiles = data.openFiles || [];
+        state.activeFile = data.activeFile || null;
+      } catch (e) {
+        console.error('Error parsing tabs data', e);
+        state.openFiles = [];
+        state.activeFile = null;
+      }
+    } else {
+      state.openFiles = [];
+      state.activeFile = null;
+    }
+    
+    render();
+
+    // If there was an active file, try to load it
+    if (state.activeFile) {
+      if (typeof window.loadFile === 'function') {
+        window.loadFile(state.activeFile).catch(err => {
+          console.warn('Failed to restore active file, it might have been moved or deleted:', state.activeFile);
+          // If file is missing, remove it from tabs
+          remove(state.activeFile);
+        });
+      }
+    } else {
+      if (typeof window.setNoFile === 'function') {
+        window.setNoFile();
+      }
+    }
   }
 
   /**
@@ -42,6 +106,7 @@ const TabsModule = (function () {
       state.openFiles.push(filePath);
     }
     state.activeFile = filePath;
+    saveToStorage();
     render();
   }
 
@@ -52,13 +117,13 @@ const TabsModule = (function () {
     if (e) e.stopPropagation();
 
     // Special handling for Draft tab
-    if (filePath === '__AI_RESPONSE__') {
+    if (filePath === '__DRAFT_MODE__') {
       const confirmed = confirm('Are you sure you want to discard this draft? This cannot be undone.');
       if (!confirmed) return;
 
       // Clear draft content if possible
-      if (typeof AIResponseModule !== 'undefined' && typeof AIResponseModule.clear === 'function') {
-        AIResponseModule.clear();
+      if (typeof DraftModule !== 'undefined' && typeof DraftModule.clear === 'function') {
+        DraftModule.clear();
       }
       
       // Hide buttons immediately
@@ -82,11 +147,14 @@ const TabsModule = (function () {
         }
       } else {
         // No tabs left
+        state.activeFile = null;
         if (typeof window.setNoFile === 'function') {
           window.setNoFile();
         }
       }
     }
+    
+    saveToStorage();
     render();
   }
 
@@ -97,7 +165,7 @@ const TabsModule = (function () {
     list.innerHTML = '';
 
     state.openFiles.forEach(path => {
-      const isDraft = path === '__AI_RESPONSE__';
+      const isDraft = path === '__DRAFT_MODE__';
       const fileName = isDraft ? 'New Draft' : path.split('/').pop();
       const isActive = path === state.activeFile;
 
@@ -141,7 +209,9 @@ const TabsModule = (function () {
     open,
     remove,
     render,
+    switchWorkspace,
     getActive: () => state.activeFile,
     getOpenFiles: () => state.openFiles
   };
-})(); 
+})();
+ 

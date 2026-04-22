@@ -83,7 +83,7 @@ const CommentsModule = (() => {
     ];
     
     // Check for Additional Content if in AI mode
-    if (file === '__AI_RESPONSE__') {
+    if (file === '__DRAFT_MODE__') {
       const extra = document.getElementById('ai-extra-input')?.value.trim();
       if (extra) {
         lines.push(`================================================================`);
@@ -282,76 +282,107 @@ const CommentsModule = (() => {
     // 1. Remove existing highlights to avoid duplication
     document.querySelectorAll('.comment-range').forEach(el => {
       const parent = el.parentNode;
-      parent.replaceChild(document.createTextNode(el.textContent), el);
-      parent.normalize();
+      if (parent) {
+        parent.replaceChild(document.createTextNode(el.textContent), el);
+        parent.normalize();
+      }
     });
     document.querySelectorAll('.md-line').forEach(b => b.classList.remove('has-comment'));
 
-    // 2. Apply new highlights
+    // 2. Process each line that has comments
+    const linesWithComments = new Set(comments.map(c => c.lineStart));
+    // Also include range lines
     comments.forEach(c => {
-      if (!c.selectedText) {
-        // Fallback for line-based comments
-        const line = document.querySelector(`.md-line[data-line="${c.lineStart}"]`);
-        if (line) line.classList.add('has-comment');
-        return;
-      }
+        if (c.lineEnd) {
+            for (let i = c.lineStart; i <= c.lineEnd; i++) linesWithComments.add(i);
+        }
+    });
 
-      // High precision marking
-      const targetLines = [];
-      for (let i = c.lineStart; i <= (c.lineEnd || c.lineStart); i++) {
-        const line = document.querySelector(`.md-line[data-line="${i}"]`);
-        if (line) targetLines.push(line);
-      }
+    linesWithComments.forEach(lineNum => {
+      const lineEl = document.querySelector(`.md-line[data-line="${lineNum}"]`);
+      if (!lineEl) return;
+      lineEl.classList.add('has-comment');
 
-      if (targetLines.length === 0) return;
+      const lineComments = comments.filter(c => 
+        lineNum >= c.lineStart && lineNum <= (c.lineEnd || c.lineStart)
+      );
 
-      // For simplicity and safety, we look for the selectedText within the target lines' text nodes
-      targetLines.forEach(line => {
-        _highlightTextInElement(line, c);
-      });
+      _applyRobustHighlights(lineEl, lineComments);
     });
   }
 
-  function _highlightTextInElement(element, comment) {
-    const searchText = comment.selectedText;
+  function _applyRobustHighlights(element, lineComments) {
+    // We only care about comments that have selectedText
+    const textComments = lineComments.filter(c => !!c.selectedText);
+    if (textComments.length === 0) return;
+
+    // Get all text nodes in the element
     const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+    const textNodes = [];
     let node;
-    const nodesToProcess = [];
+    while (node = walker.nextNode()) textNodes.push(node);
 
-    while (node = walker.nextNode()) {
-      if (node.textContent.includes(searchText)) {
-        nodesToProcess.push(node);
-      }
-    }
-
-    nodesToProcess.forEach(textNode => {
-      const parent = textNode.parentNode;
-      if (parent.classList.contains('comment-range')) return; // Already highlighted
-
+    textNodes.forEach(textNode => {
       const content = textNode.textContent;
-      const index = content.indexOf(searchText);
-      
-      // Verify with context if possible (very basic check)
-      if (comment.context) {
-        const before = content.substring(Math.max(0, index - 20), index);
-        const after  = content.substring(index + searchText.length, index + searchText.length + 20);
-        // If we have a context mismatch and there might be other occurrences, we could skip
-        // but for now, first match is usually fine in the context of specific lines.
+      const boundaries = new Set([0, content.length]);
+      const nodeMap = new Map(); // Map index to set of comment objects
+
+      textComments.forEach(c => {
+        let startIdx = 0;
+        while ((startIdx = content.indexOf(c.selectedText, startIdx)) !== -1) {
+          const endIdx = startIdx + c.selectedText.length;
+          boundaries.add(startIdx);
+          boundaries.add(endIdx);
+          
+          for (let i = startIdx; i < endIdx; i++) {
+            if (!nodeMap.has(i)) nodeMap.set(i, new Set());
+            nodeMap.get(i).add(c);
+          }
+          startIdx = endIdx;
+        }
+      });
+
+      if (boundaries.size <= 2 && nodeMap.size === 0) return;
+
+      // Sort boundaries
+      const sorted = Array.from(boundaries).sort((a, b) => a - b);
+      const fragments = document.createDocumentFragment();
+
+      for (let i = 0; i < sorted.length - 1; i++) {
+        const start = sorted[i];
+        const end = sorted[i+1];
+        if (start === end) continue;
+
+        const segmentText = content.substring(start, end);
+        const segmentComments = nodeMap.get(start);
+
+        if (segmentComments && segmentComments.size > 0) {
+          const mark = document.createElement('mark');
+          mark.className = 'comment-range';
+          mark.textContent = segmentText;
+          
+          // If multiple comments, we take the first one for the click action 
+          // or we could show a list. For now, first is fine.
+          const firstComment = Array.from(segmentComments)[0];
+          mark.dataset.id = firstComment.id;
+          mark.dataset.ids = Array.from(segmentComments).map(c => c.id).join(',');
+          
+          if (segmentComments.size > 1) {
+            mark.classList.add('multiple-comments');
+            mark.title = `${segmentComments.size} comments here`;
+          }
+
+          mark.onclick = (e) => {
+            e.stopPropagation();
+            _onItemClick(firstComment);
+          };
+          fragments.appendChild(mark);
+        } else {
+          fragments.appendChild(document.createTextNode(segmentText));
+        }
       }
 
-      const range = document.createRange();
-      range.setStart(textNode, index);
-      range.setEnd(textNode, index + searchText.length);
-
-      const mark = document.createElement('mark');
-      mark.className = 'comment-range';
-      mark.dataset.id = comment.id;
-      mark.onclick = (e) => {
-        e.stopPropagation();
-        _onItemClick(comment);
-      };
-      
-      range.surroundContents(mark);
+      textNode.parentNode.replaceChild(fragments, textNode);
     });
   }
 
@@ -404,16 +435,23 @@ const CommentsModule = (() => {
     }
     
     const lastRect = rects[rects.length - 1];
+    const firstRect = rects[0];
     
     if (floatingTrigger) {
-      // Since it's position: fixed, we use viewport coordinates (lastRect)
-      floatingTrigger.style.left = `${lastRect.right + 5}px`;
-      floatingTrigger.style.top  = `${lastRect.bottom + 5}px`;
+      // Determine if selection is forward or backward (rough estimation)
+      const isForward = (range.startContainer === selection.anchorNode && range.startOffset === selection.anchorOffset);
+      
+      let left = isForward ? lastRect.right + 5 : firstRect.left - 40;
+      let top  = isForward ? lastRect.bottom + 5 : firstRect.top - 40;
 
       // Keep within viewport
-      if (lastRect.right + 40 > window.innerWidth) {
-        floatingTrigger.style.left = `${lastRect.left - 40}px`;
-      }
+      if (left + 40 > window.innerWidth) left = window.innerWidth - 45;
+      if (left < 5) left = 5;
+      if (top < 5) top = 5;
+      if (top + 40 > window.innerHeight) top = window.innerHeight - 45;
+      
+      floatingTrigger.style.left = `${left}px`;
+      floatingTrigger.style.top  = `${top}px`;
       
       floatingTrigger.classList.add('show');
     }

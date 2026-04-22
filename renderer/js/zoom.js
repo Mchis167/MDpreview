@@ -78,6 +78,17 @@ function initZoom() {
     updateZoomTransform(); updateZoomPercent();
   });
 
+  document.getElementById('zoom-copy-btn')?.addEventListener('click', () => {
+    const container = document.getElementById('zoom-container');
+    const svg = container.querySelector('svg');
+    if (svg) {
+      const svgData = svg.outerHTML;
+      navigator.clipboard.writeText(svgData).then(() => {
+        if (typeof showToast === 'function') showToast('SVG copied to clipboard');
+      });
+    }
+  });
+
   window.addEventListener('keydown', e => { if (e.key === 'Escape') closeZoom(); });
 
   const modal = document.getElementById('zoom-modal');

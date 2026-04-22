@@ -3,16 +3,17 @@ const router  = express.Router();
 const fs      = require('fs');
 const path    = require('path');
 
-router.get('/files', (req, res) => {
+router.get('/files', async (req, res) => {
   const watchDir = req.watchDir;
   if (!watchDir) return res.json([]);
 
-  // Query Params: showHidden=true/false, hideEmpty=true/false, flat=true/false
   const showHidden = req.query.showHidden === 'true';
   const hideEmpty  = req.query.hideEmpty  === 'true';
   const isFlat      = req.query.flat       === 'true';
 
-  function buildTree(dir, relativePath = '') {
+  const EXCLUDE_DIRS = ['node_modules', '.git', 'dist', 'build', '.next'];
+
+  async function buildTree(dir, relativePath = '') {
     const node = {
       name: path.basename(dir),
       path: relativePath,
@@ -21,25 +22,39 @@ router.get('/files', (req, res) => {
     };
 
     try {
-      const items = fs.readdirSync(dir).sort();
+      const items = await fs.promises.readdir(dir);
       
-      items.forEach(child => {
+      const promises = items.map(async (child) => {
         // Handle Hidden Files
         if (!showHidden && child.startsWith('.')) return;
+        
+        // Exclude common large/system directories
+        if (EXCLUDE_DIRS.includes(child)) return;
 
         const childFull     = path.join(dir, child);
         const childRelative = relativePath ? path.join(relativePath, child) : child;
-        const stat          = fs.statSync(childFull);
+        
+        try {
+          const stat = await fs.promises.stat(childFull);
 
-        if (stat.isDirectory()) {
-          const subDir = buildTree(childFull, childRelative);
-          // If hideEmpty is on, only add folder if it has children
-          if (!hideEmpty || subDir.children.length > 0) {
-            node.children.push(subDir);
+          if (stat.isDirectory()) {
+            const subDir = await buildTree(childFull, childRelative);
+            // If hideEmpty is on, only add folder if it has children
+            if (!hideEmpty || subDir.children.length > 0) {
+              node.children.push(subDir);
+            }
+          } else if (child.endsWith('.md')) {
+            node.children.push({ name: child, path: childRelative, type: 'file' });
           }
-        } else if (child.endsWith('.md')) {
-          node.children.push({ name: child, path: childRelative, type: 'file' });
+        } catch (e) {
+          // skip inaccessible files
         }
+      });
+
+      await Promise.all(promises);
+      node.children.sort((a, b) => {
+        if (a.type !== b.type) return a.type === 'directory' ? -1 : 1;
+        return a.name.localeCompare(b.name);
       });
     } catch {
       // skip permission errors
@@ -59,7 +74,7 @@ router.get('/files', (req, res) => {
   }
 
   try {
-    const fullTree = buildTree(watchDir);
+    const fullTree = await buildTree(watchDir);
     if (isFlat) {
       res.json(flattenTree(fullTree).sort((a, b) => a.name.localeCompare(b.name)));
     } else {
@@ -70,13 +85,23 @@ router.get('/files', (req, res) => {
   }
 });
 
+// Helper to resolve absolute path safely within watchDir
+function resolvePath(watchDir, filePath) {
+  const fullPath = path.isAbsolute(filePath) ? path.normalize(filePath) : path.resolve(watchDir, filePath);
+  const normalizedWatchDir = path.normalize(watchDir);
+  if (!fullPath.startsWith(normalizedWatchDir)) {
+    throw new Error('Security Error: Path traversal detected.');
+  }
+  return fullPath;
+}
+
 router.get('/file/raw', (req, res) => {
   const { path: filePath } = req.query;
   const watchDir = req.watchDir;
   if (!watchDir || !filePath) return res.status(400).send('Missing path');
 
-  const fullPath = path.isAbsolute(filePath) ? filePath : path.join(watchDir, filePath);
   try {
+    const fullPath = resolvePath(watchDir, filePath);
     const content = fs.readFileSync(fullPath, 'utf8');
     res.send(content);
   } catch (e) {
@@ -89,8 +114,8 @@ router.post('/file/save', (req, res) => {
   const watchDir = req.watchDir;
   if (!watchDir || !filePath) return res.status(400).send('Missing path');
 
-  const fullPath = path.isAbsolute(filePath) ? filePath : path.join(watchDir, filePath);
   try {
+    const fullPath = resolvePath(watchDir, filePath);
     fs.writeFileSync(fullPath, content, 'utf8');
     res.json({ success: true });
   } catch (e) {

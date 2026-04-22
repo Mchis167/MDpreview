@@ -30,49 +30,55 @@ const AppState = {
    * Called when sidebar mode changes (Space <-> Draft)
    */
   onModeChange(mode) {
-    if (mode === 'ai') {
-      // 1. Store and switch to AI virtual file
-      if (AppState.currentFile !== '__AI_RESPONSE__') {
+    if (mode === 'draft') {
+      // 1. Store and switch to Draft virtual file
+      if (AppState.currentFile !== '__DRAFT_MODE__') {
         ScrollModule.save(AppState.currentFile);
         AppState.lastMarkdownFile = AppState.currentFile;
-        AppState.currentFile = '__AI_RESPONSE__';
-        ScrollModule.restore('__AI_RESPONSE__');
+        AppState.currentFile = '__DRAFT_MODE__';
+        ScrollModule.restore('__DRAFT_MODE__');
       }
 
-      // 2. Load AI-specific comments
+      // 2. Load Draft-specific comments
       if (typeof CommentsModule !== 'undefined') {
-        CommentsModule.loadForFile('__AI_RESPONSE__');
+        CommentsModule.loadForFile('__DRAFT_MODE__');
       }
       
-      // 3. Clear triggers if in comment mode (they will be re-applied to AI preview)
+      // 3. Clear triggers if in comment mode (they will be re-applied to Draft preview)
       if (AppState.commentMode && typeof CommentsModule !== 'undefined') {
         CommentsModule.removeCommentMode();
       }
 
-      // 4. Sync AI preview (handled by AIResponseModule)
-      if (typeof AIResponseModule !== 'undefined') {
-        AIResponseModule.syncPreview();
+      // 4. Sync Draft preview (handled by DraftModule)
+      if (typeof DraftModule !== 'undefined') {
+        DraftModule.syncPreview();
       }
 
       // 5. Ensure Draft tab is open
       if (typeof TabsModule !== 'undefined') {
-        TabsModule.open('__AI_RESPONSE__');
+        TabsModule.open('__DRAFT_MODE__');
       }
 
       // 6. Refresh toolbar UI state: Force 'edit' for new Draft
       if (typeof AppState.updateToolbarUI === 'function') {
         AppState.updateToolbarUI('edit');
       }
+
+      const mdContent = document.getElementById('md-content');
+      if (mdContent) {
+        mdContent.classList.add('fade-in');
+        setTimeout(() => mdContent.classList.remove('fade-in'), 300);
+      }
     } else {
       // Mode: space
       // 1. Restore the original file
       if (AppState.lastMarkdownFile) {
-        ScrollModule.save('__AI_RESPONSE__');
+        ScrollModule.save('__DRAFT_MODE__');
         AppState.currentFile = AppState.lastMarkdownFile;
         AppState.lastMarkdownFile = null;
       }
 
-      if (AppState.currentFile && AppState.currentFile !== '__AI_RESPONSE__') {
+      if (AppState.currentFile && AppState.currentFile !== '__DRAFT_MODE__') {
         loadFile(AppState.currentFile);
       } else {
         setNoFile();
@@ -179,6 +185,8 @@ async function loadFile(filePath) {
     mdContent.style.display = 'block';
     const inner = mdContent.querySelector('.md-content-inner') || mdContent;
     inner.innerHTML = data.html;
+    mdContent.classList.add('fade-in');
+    setTimeout(() => mdContent.classList.remove('fade-in'), 300);
     await processMermaid(inner); // processMermaid defined in mermaid.js
     if (typeof CodeBlockModule !== 'undefined') CodeBlockModule.process(inner);
   }
@@ -190,7 +198,7 @@ async function loadFile(filePath) {
 
   // Force 'edit' for Draft, 'read' for normal documents
   if (typeof AppState.updateToolbarUI === 'function') {
-    const targetMode = (filePath === '__AI_RESPONSE__') ? 'edit' : 'read';
+    const targetMode = (filePath === '__DRAFT_MODE__') ? 'edit' : 'read';
     AppState.updateToolbarUI(targetMode);
   } else if (AppState.commentMode) {
     CommentsModule.applyCommentMode();
@@ -229,7 +237,7 @@ function updateHeaderUI() {
 
   if (!wsNameEl || !fileNameEl) return;
 
-  // If in AI Response tab (checked externally via sidebar state or handled by ai-response.js),
+  // If in Draft Response tab (checked externally via sidebar state or handled by draft.js),
   // this function will be overridden or skipped.
   // But generally, show workspace and file:
   
@@ -280,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSidebarRevamp();       // sidebar.js
   initSidebarResizer();      // sidebar.js
   SettingsModule.init();     // settings.js
-  AIResponseModule.init();   // ai-response.js (Issue #29)
+  DraftModule.init();        // draft.js
   ScrollModule.init();       // scroll.js
   TabsModule.init();         // tabs.js
   if (typeof CollectModule !== 'undefined') CollectModule.init(); // collect.js

@@ -202,27 +202,113 @@
 
 /* No hover state for code text */
 
+
+
+/* ── Premium Block System (Shared) ─────────────────────── */
+/* Unified style for Code Blocks, Tables, and Charts */
+.premium-block-container,
+.premium-code-block,
+.md-table-wrapper,
+.mermaid {
+  background: rgba(255, 255, 255, 0.05) !important; /* Slightly more opaque for visibility */
+  backdrop-filter: blur(40px) !important; /* Stable blur value */
+  -webkit-backdrop-filter: blur(40px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+  margin: 1.5rem 0 !important;
+  overflow: hidden !important;
+  transition: none !important;
+  transform: translateZ(0); /* Force hardware acceleration */
+  isolation: isolate; /* Create new stacking context */
+}
+
+
+
+
+/* No hover state for these blocks per user request */
+.premium-block-container:hover,
+.premium-code-block:hover,
+.md-table-wrapper:hover,
+.mermaid:hover {
+  border-color: rgba(255, 255, 255, 0.08) !important; /* Same as static */
+  transform: none !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
+}
+
+
 /* ── Premium Code Block ────────────────────────────────── */
 .premium-code-block {
-  margin: 1.5rem 0;
-  /* Reduced from 2.5rem for better flow */
-  background: #0d1117;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  /* Inherits from .premium-block-container */
 }
 
 /* Specific compact margins when inside details */
 #md-content details .premium-code-block {
-  margin-top: 1rem;
-  margin-bottom: 1rem;
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
 }
 
-#md-content details>.premium-code-block:first-child,
-#md-content details>.md-block:first-child .premium-code-block {
-  margin-top: 0.5rem;
+#md-content details > .premium-code-block:first-child,
+#md-content details > .md-block:first-child .premium-code-block {
+  margin-top: 0.5rem !important;
 }
+
+
+/* ── Mermaid Diagram Overrides (Fix Text Readability) ───── */
+.mermaid svg {
+  color: #ffffff !important; /* Force pure white */
+}
+
+.mermaid .node rect,
+.mermaid .node circle,
+.mermaid .node polygon,
+.mermaid .node path,
+.mermaid .node ellipse,
+.mermaid .classGroup rect {
+  fill: rgba(255, 255, 255, 0.05) !important;
+  stroke: rgba(255, 255, 255, 0.4) !important;
+  stroke-width: 1px !important;
+}
+
+/* Force all text elements to white */
+.mermaid .label,
+.mermaid .label text,
+.mermaid text,
+.mermaid tspan,
+.mermaid .classTitle,
+.mermaid .classTitle text,
+.mermaid .method text,
+.mermaid .attribute text,
+.mermaid .note text {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+  font-family: var(--font-main) !important;
+  font-weight: 500 !important;
+}
+
+.mermaid .edgePath .path,
+.mermaid .relation,
+.mermaid .relationLine {
+  stroke: rgba(255, 255, 255, 0.4) !important;
+}
+
+.mermaid .marker,
+.mermaid .arrowheadPath {
+  fill: rgba(255, 255, 255, 0.4) !important;
+  stroke: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Class Diagram Specifics */
+.mermaid .classGroup line {
+  stroke: rgba(255, 255, 255, 0.3) !important;
+}
+
+.mermaid .classTitle text {
+  font-weight: 700 !important;
+}
+
+
+
 
 
 /* Ensure pre inside premium block is seamless */

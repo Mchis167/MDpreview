@@ -56,6 +56,16 @@ function register(ipcMain) {
     save(data);
     return data;
   });
+
+  ipcMain.handle('rename-workspace', (event, { id, name }) => {
+    const data = load();
+    const ws = data.workspaces.find(w => w.id === id);
+    if (ws) {
+      ws.name = name;
+      save(data);
+    }
+    return data;
+  });
 }
 
 module.exports = { register };

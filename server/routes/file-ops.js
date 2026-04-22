@@ -4,9 +4,17 @@ const fs      = require('fs');
 const path    = require('path');
 
 // Helper to resolve absolute path from watchDir and relative path
+// Helper to resolve absolute path safely within watchDir
 function resolvePath(watchDir, filePath) {
-  if (path.isAbsolute(filePath)) return filePath;
-  return path.join(watchDir, filePath);
+  // Always resolve to absolute path to handle ../ and other tricks
+  const fullPath = path.isAbsolute(filePath) ? path.normalize(filePath) : path.resolve(watchDir, filePath);
+  
+  // Ensure the resolved path STARTS with the watchDir
+  const normalizedWatchDir = path.normalize(watchDir);
+  if (!fullPath.startsWith(normalizedWatchDir)) {
+    throw new Error('Security Error: Path traversal detected.');
+  }
+  return fullPath;
 }
 
 // DELETE file

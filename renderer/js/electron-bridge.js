@@ -52,6 +52,15 @@
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
       return res.json();
     },
+    renameWorkspace: async (id, name) => {
+      const res = await fetch('/api/workspaces/rename', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, name })
+      });
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      return res.json();
+    },
 
     // Comments
     getComments: async (wsId, file) => {

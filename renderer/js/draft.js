@@ -1,9 +1,10 @@
 /* ============================================================
-   ai-response.js — Logic for AI Response tab (Issue #29)
+   draft.js — Logic for Draft tab
    ============================================================ */
 
-const AIResponseModule = (() => {
+const DraftModule = (() => {
   let displayedContent = '';
+  let draftContent     = '';
   let renderedHtml     = '';
   
   const elements = {
@@ -19,62 +20,25 @@ const AIResponseModule = (() => {
     },
     footers: {
       markdown:    null,
-      ai:          null
+      draft:       null
     }
   };
 
   function init() {
-    elements.chatComponent = document.getElementById('ai-chat-component');
-    elements.chatInput     = document.getElementById('ai-chat-input');
-    elements.extraInput    = document.getElementById('ai-extra-input');
-    elements.previewBtn    = document.getElementById('ai-preview-btn');
-    elements.statusBadge   = document.getElementById('ai-status-badge');
-    elements.statusText    = elements.statusBadge ? elements.statusBadge.querySelector('.status-badge-text') : null;
-    
-    elements.variants.placeholder = document.getElementById('ai-placeholder-variant');
-    elements.variants.input       = document.getElementById('ai-input-variant');
+    elements.variants.placeholder = document.getElementById('draft-placeholder-variant');
+    elements.variants.input       = document.getElementById('draft-input-variant');
     
     elements.footers.markdown = document.getElementById('markdown-footer');
-    elements.footers.ai       = document.getElementById('ai-footer');
+    elements.footers.draft    = document.getElementById('draft-footer');
 
-    const importBtn = document.getElementById('ai-quick-import');
+    const importBtn = document.getElementById('draft-quick-import');
     if (importBtn) {
       importBtn.addEventListener('click', () => handleFileImport());
     }
 
-    const clearBtn = document.getElementById('ai-clear-btn');
-    if (clearBtn) {
-        clearBtn.addEventListener('click', () => clear());
-    }
-
     _setupDragAndDrop();
 
-    if (!elements.chatInput || !elements.previewBtn) return;
-
-    // ── Initialize TextAreas ──────────────────────────────────
-    // Chat Input (with expansion)
-    TextAreaModule.init({
-      containerId:   'ai-chat-container',
-      inputId:       'ai-chat-input',
-      expandBtnId:   'ai-chat-expand',
-      modalId:       'ai-expanded-modal',
-      modalInputId:  'ai-expanded-input',
-      minimizeBtnId: 'ai-minimize-btn',
-      label:         'Input Chat Response',
-      onInput:       (val) => updateBadgeState(val)
-    });
-
-    // Extra Input (no expansion requested yet)
-    TextAreaModule.init({
-      containerId: 'ai-extra-container',
-      inputId:     'ai-extra-input',
-      label:       'Additional Content'
-    });
-
-    // ── Preview Button ────────────────────────────────────────
-    elements.previewBtn.addEventListener('click', () => renderPreview());
-
-    // Switch to input variant by default (or based on some logic)
+    // Switch to input variant by default
     setVariant('input');
   }
 
@@ -88,71 +52,75 @@ const AIResponseModule = (() => {
   }
 
   function updateBadgeState(currentVal) {
-    const isMatched = (currentVal === displayedContent);
-    
-    if (elements.statusBadge) {
-      elements.statusBadge.classList.toggle('is-updated', isMatched);
-      elements.statusBadge.classList.toggle('is-pending', !isMatched);
-    }
-    
-    if (elements.statusText) {
-      elements.statusText.textContent = isMatched ? 'Content Updated' : 'Pending Update';
-    }
-
-    elements.previewBtn.disabled = isMatched;
+    // No longer used since badge is removed
   }
 
-  async function renderPreview() {
-    const content = elements.chatInput.value;
-    if (!content) return;
+  async function renderPreview(content) {
+    const finalContent = content || draftContent;
+    if (!finalContent) return;
 
     // Check for existing comments
     if (typeof CommentsModule !== 'undefined' && CommentsModule.getCommentCount() > 0) {
-        if (confirm('Rendering a new preview will clear your existing comments. Continue?')) {
-            await CommentsModule.clear();
-        } else {
-            return;
-        }
+        // Automatically clear comments or ask? 
+        // For Draft mode, let's just clear them to keep it snappy
+        await CommentsModule.clear();
     }
-    
-    elements.previewBtn.disabled = true;
-    elements.previewBtn.textContent = 'Rendering...';
-
-    const mdContent = document.getElementById('md-content');
-    const inner = mdContent ? (mdContent.querySelector('.md-content-inner') || mdContent) : null;
-    const emptyState = document.getElementById('empty-state');
-    
-    if (emptyState) emptyState.style.display = 'none';
-    if (mdContent) mdContent.style.display = 'block';
 
     try {
       const res = await fetch('/api/render-raw', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content })
+        body: JSON.stringify({ content: finalContent })
       });
 
       if (!res.ok) throw new Error('Render failed');
       const data = await res.json();
 
-      if (inner) {
+      // Update Viewer
+      const emptyState = document.getElementById('empty-state');
+      const mdContent  = document.getElementById('md-content');
+      const wsNameEl   = document.getElementById('header-workspace-name');
+      const fileNameEl = document.getElementById('header-file-name');
+
+      if (emptyState) emptyState.style.display = 'none';
+      if (mdContent) {
+        const inner = mdContent.querySelector('.md-content-inner') || mdContent;
         inner.innerHTML = data.html;
-        renderedHtml = data.html;
+        renderedHtml = data.html; // Store for tab switching
+        
+        // Only show mdContent if NOT in edit mode
+        if (AppState.currentMode !== 'edit') {
+            mdContent.style.display = 'block';
+        }
+        
+        // Process Mermaid (global from app.js / mermaid.js)
         if (typeof processMermaid === 'function') processMermaid(inner);
+        
+        // Process Code Blocks (global from code-blocks.js)
         if (typeof CodeBlockModule !== 'undefined') CodeBlockModule.process(inner);
       }
 
-      // Update header and state
-      displayedContent = content;
-      updateBadgeState(content);
-      updateHeader('ai');
+      if (wsNameEl)  wsNameEl.innerText = (AppState.currentWorkspace ? AppState.currentWorkspace.name : 'DRAFT').toUpperCase() + '.';
+      if (fileNameEl) fileNameEl.innerText = 'Draft Preview';
+
+      // Update local state
+      displayedContent = finalContent;
+      draftContent     = finalContent;
+      
+      saveToStorage(); // Persist rendered draft
+      
+      // If we are in edit mode, sync the editor with the new content
+      if (AppState.currentMode === 'edit' && typeof EditorModule !== 'undefined') {
+          EditorModule.setOriginalContent(finalContent);
+      }
+      
+      // Reset scroll
+      document.getElementById('md-viewer').scrollTop = 0;
 
     } catch (err) {
       console.error(err);
-      alert('Failed to render preview.');
     } finally {
-      elements.previewBtn.textContent = 'Preview';
-      elements.previewBtn.disabled = (elements.chatInput.value === displayedContent);
+      // Done
     }
   }
 
@@ -160,8 +128,8 @@ const AIResponseModule = (() => {
     if (elements.footers.markdown) {
       elements.footers.markdown.style.display = (mode === 'markdown' ? 'flex' : 'none');
     }
-    if (elements.footers.ai) {
-      elements.footers.ai.style.display = (mode === 'ai' ? 'flex' : 'none');
+    if (elements.footers.draft) {
+      elements.footers.draft.style.display = (mode === 'draft' ? 'flex' : 'none');
     }
   }
 
@@ -169,8 +137,8 @@ const AIResponseModule = (() => {
     const wsNameEl   = document.getElementById('header-workspace-name');
     const fileNameEl = document.getElementById('header-file-name');
 
-    if (mode === 'ai') {
-      if (wsNameEl) wsNameEl.innerText = 'NEW AI RESPONSE';
+    if (mode === 'draft') {
+      if (wsNameEl) wsNameEl.innerText = 'NEW DRAFT';
       if (fileNameEl) {
         fileNameEl.style.display = 'none';
       }
@@ -182,19 +150,19 @@ const AIResponseModule = (() => {
     }
   }
 
+  // ── Helper ────────────────────────────────────────────────
+  function getDraftContent() { return draftContent; }
+  function setDraftContent(val) { draftContent = val; }
+
   // ── File Import & Drag-and-Drop ────────────────────────────
   async function handleFileImport() {
     try {
-      // Use standard browser file input as a picker if electronAPI.pickAndReadFile is not yet implemented
-      // But let's assume we want a real Electron dialog if possible.
-      // If electronAPI.pickAndReadFile is missing, we'll fall back.
       if (window.electronAPI && window.electronAPI.pickAndReadFile) {
         const fileData = await window.electronAPI.pickAndReadFile();
         if (fileData && fileData.content) {
           _setChatInput(fileData.content);
         }
       } else {
-        // Fallback: create invisible input
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.md';
@@ -247,32 +215,71 @@ const AIResponseModule = (() => {
   }
 
   function _setChatInput(content) {
-    if (elements.chatInput) {
-      elements.chatInput.value = content;
-      // Trigger status badge update
-      updateBadgeState(content);
-      // If there's an expanded textarea modal open, sync it too
-      const expandedInput = document.getElementById('ai-expanded-input');
-      if (expandedInput) expandedInput.value = content;
+    draftContent = content;
+    saveToStorage(); // Persist change
+    renderPreview(content);
+  }
+
+  function saveToStorage() {
+    if (typeof AppState === 'undefined' || !AppState.currentWorkspace) return;
+    const key = `draft_${AppState.currentWorkspace.id}`;
+    const data = {
+      displayedContent,
+      draftContent,
+      renderedHtml
+    };
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+
+  function loadFromStorage(workspaceId) {
+    if (!workspaceId) {
+      displayedContent = '';
+      draftContent = '';
+      renderedHtml = '';
+      return;
+    }
+
+    const key = `draft_${workspaceId}`;
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        displayedContent = data.displayedContent || '';
+        draftContent = data.draftContent || '';
+        renderedHtml = data.renderedHtml || '';
+      } catch (e) {
+        console.error('Error parsing draft data', e);
+        displayedContent = '';
+        draftContent = '';
+        renderedHtml = '';
+      }
+    } else {
+      displayedContent = '';
+      draftContent = '';
+      renderedHtml = '';
     }
   }
 
   async function clear() {
     displayedContent = '';
+    draftContent = '';
     renderedHtml = '';
 
-    if (elements.chatInput) elements.chatInput.value = '';
-    if (elements.extraInput) elements.extraInput.value = '';
+    const chatInput = document.getElementById('draft-chat-input');
+    const extraInput = document.getElementById('draft-extra-input');
+    if (chatInput) chatInput.value = '';
+    if (extraInput) extraInput.value = '';
 
     // Clear expanded input if exist
-    const expandedInput = document.getElementById('ai-expanded-input');
+    const expandedInput = document.getElementById('draft-expanded-input');
     if (expandedInput) expandedInput.value = '';
 
     updateBadgeState('');
+    saveToStorage(); // Clear from storage too
     syncPreview();
   }
 
-  // Sync the main viewer with AI's displayedContent
+  // Sync the main viewer with Draft's displayedContent
   function syncPreview() {
     const emptyState = document.getElementById('empty-state');
     const mdContent  = document.getElementById('md-content');
@@ -304,9 +311,10 @@ const AIResponseModule = (() => {
       if (typeof CodeBlockModule !== 'undefined') CodeBlockModule.process(inner);
       
       // Update header
-      updateHeader('ai');
+      updateHeader('draft');
     }
   }
 
-  return { init, toggleFooter, updateHeader, syncPreview, renderPreview, clear };
+  return { init, toggleFooter, updateHeader, syncPreview, renderPreview, clear, getDraftContent, setDraftContent, saveToStorage, loadFromStorage };
 })();
+

@@ -33,31 +33,24 @@
 ════════════════════════════════════════════════════ -->
   <div id="workspace-panel">
     <div class="ws-panel-card">
-      <button id="workspace-panel-close">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18" />
-          <line x1="6" y1="6" x2="18" y2="18" />
-        </svg>
-      </button>
       <div class="ws-panel-header">
-        <div class="ws-panel-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect width="18" height="18" x="3" y="3" rx="2" />
-            <path d="M3 9h18M9 21V9" />
-          </svg>
-        </div>
         <h2 class="ws-panel-title">Workspaces</h2>
+        <button id="workspace-panel-close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
       </div>
       <div id="workspace-list"></div>
       <button id="add-workspace-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
           <line x1="12" y1="5" x2="12" y2="19" />
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
-        Add New Workspace
+        New Workspace
       </button>
     </div>
   </div>
@@ -83,7 +76,7 @@
           <label class="aws-field-label">Workspace Name</label>
           <input id="workspace-name-input" type="text" placeholder="Design Specs, API Docs…" class="aws-input">
         </div>
-        <div>
+        <div class="aws-browse-row-container">
           <label class="aws-field-label">Folder Path</label>
           <div class="aws-browse-row">
             <input id="workspace-path-input" type="text" placeholder="Select document folder…" readonly
@@ -129,12 +122,12 @@
   </div>
 
   <!-- Generic Expanded Modal for Draft Content -->
-  <div id="ai-expanded-modal" class="expanded-textarea-modal">
+  <div id="draft-expanded-modal" class="expanded-textarea-modal">
     <div class="expanded-textarea-backdrop"></div>
     <div class="expanded-textarea-container">
       <div class="expanded-textarea-header">
         <div class="textarea-label">DRAFT RESPONSE</div>
-        <button id="ai-minimize-btn" class="textarea-expand-btn" title="Minimize">
+        <button id="draft-minimize-btn" class="textarea-expand-btn" title="Minimize">
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="4 14 10 14 10 20" />
@@ -145,7 +138,7 @@
         </button>
       </div>
       <div class="expanded-textarea-body">
-        <textarea id="ai-expanded-input" class="expanded-textarea-input" placeholder="Type here..."></textarea>
+        <textarea id="draft-expanded-input" class="expanded-textarea-input" placeholder="Type here..."></textarea>
       </div>
     </div>
   </div>
@@ -446,10 +439,10 @@
 
         <div class="sidebar-divider"></div>
 
-        <div id="sidebar-ai-view" style="display:none">
+        <div id="sidebar-draft-view" style="display:none">
           <!-- Variant: Placeholder -->
-          <div id="ai-placeholder-variant" class="ai-variant">
-            <div class="sidebar-ai-placeholder">
+          <div id="draft-placeholder-variant" class="draft-variant">
+            <div class="sidebar-draft-placeholder">
               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 8V4H8" />
@@ -459,23 +452,23 @@
                 <path d="M15 13v2" />
                 <path d="M9 13v2" />
               </svg>
-              <div class="sidebar-ai-label">Draft</div>
-              <div class="sidebar-ai-sublabel">Coming soon</div>
+              <div class="sidebar-draft-label">Draft</div>
+              <div class="sidebar-draft-sublabel">Coming soon</div>
             </div>
           </div>
 
           <!-- Variant: Active Draft Info -->
-          <div id="ai-input-variant" class="ai-variant" style="display:none">
-            <div class="sidebar-ai-placeholder">
+          <div id="draft-input-variant" class="draft-variant" style="display:none">
+            <div class="sidebar-draft-placeholder">
               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z" />
               </svg>
-              <div class="sidebar-ai-label">Draft Mode</div>
-              <div class="sidebar-ai-sublabel">Use the Edit tab to modify content</div>
+              <div class="sidebar-draft-label">Draft Mode</div>
+              <div class="sidebar-draft-sublabel">Use the Edit tab to modify content</div>
               
-              <button id="ai-quick-import" class="ai-import-btn" style="margin-top: 20px; width: 100%;">
+              <button id="draft-quick-import" class="draft-import-btn" style="margin-top: 20px; width: 100%;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 3v12" />
@@ -513,8 +506,8 @@
           </div>
 
           <!-- Draft Mode Footer (Badge Variant) -->
-          <div class="status-indicator-badge" id="ai-footer" style="display:none">
-            <div class="status-badge-inner is-updated" id="ai-status-badge">
+          <div class="status-indicator-badge" id="draft-footer" style="display:none">
+            <div class="status-badge-inner is-updated" id="draft-status-badge">
               <div class="status-badge-icon">
                 <!-- Check Icon (Updated) -->
                 <svg class="icon-check" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
@@ -1019,6 +1012,15 @@
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
       </button>
+      <div class="zoom-ctrl-divider"></div>
+      <!-- Copy SVG -->
+      <button class="zoom-ctrl-btn" id="zoom-copy-btn" title="Copy SVG code">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+        </svg>
+      </button>
     </div>
   </div>
 
@@ -1036,7 +1038,7 @@
   <script src="js/settings.js"></script>
   <script src="js/search-component.js"></script>
   <script src="js/sidebar.js"></script>
-  <script src="js/ai-response.js"></script>
+  <script src="js/draft.js"></script>
   <script src="js/editor.js"></script>
   <script src="js/code-blocks.js"></script>
   <script src="js/scroll.js"></script>

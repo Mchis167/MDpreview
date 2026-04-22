@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   saveWorkspace:      (ws)             => ipcRenderer.invoke('save-workspace', ws),
   deleteWorkspace:    (id)             => ipcRenderer.invoke('delete-workspace', id),
   setActiveWorkspace: (id)             => ipcRenderer.invoke('set-active-workspace', id),
+  renameWorkspace:    (id, name)       => ipcRenderer.invoke('rename-workspace', { id, name }),
 
   // Comments
   getComments:    (wsId, file)             => ipcRenderer.invoke('get-comments', wsId, file),

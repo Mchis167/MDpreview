@@ -152,11 +152,11 @@ const EditorModule = (() => {
     if (!AppState.currentFile || !_textarea) return false;
     const content = _textarea.value;
 
-    // Special Case: AI Response
-    if (AppState.currentFile === '__AI_RESPONSE__') {
-        if (typeof AIResponseModule !== 'undefined') {
-            AIResponseModule.setDraftContent(content);
-            AIResponseModule.renderPreview(content);
+    // Special Case: Draft Response
+    if (AppState.currentFile === '__DRAFT_MODE__') {
+        if (typeof DraftModule !== 'undefined') {
+            DraftModule.setDraftContent(content);
+            DraftModule.renderPreview(content);
             _originalContent = content; // Update original to new state
             if (typeof showToast === 'function') showToast('Draft updated');
             return true;

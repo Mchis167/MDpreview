@@ -102,7 +102,7 @@ function initSidebarModeSwitcher() {
   const mdHeader = document.getElementById('sidebar-md-header');
   const expView = document.getElementById('sidebar-explorer-view');
   const searchView = document.getElementById('sidebar-search-view');
-  const aiView = document.getElementById('sidebar-ai-view');
+  const aiView = document.getElementById('sidebar-draft-view');
 
   function updateIndicator(btn) {
     if (!indicator) return;
@@ -124,25 +124,25 @@ function initSidebarModeSwitcher() {
         AppState.onModeChange(mode);
       }
 
-      if (mode === 'ai') {
+      if (mode === 'draft') {
         if (mdHeader) mdHeader.style.display = 'none';
         expView.style.display = 'none';
         searchView.style.display = 'none';
         if (aiView) aiView.style.display = 'flex';
-        // Toggle footer and header (Issue #29)
-        if (typeof AIResponseModule !== 'undefined') {
-          AIResponseModule.toggleFooter('ai');
-          AIResponseModule.updateHeader('ai');
+        // Toggle footer and header
+        if (typeof DraftModule !== 'undefined') {
+          DraftModule.toggleFooter('draft');
+          DraftModule.updateHeader('draft');
         }
       } else {
         if (aiView) aiView.style.display = 'none';
         if (mdHeader) mdHeader.style.display = '';
         expView.style.display = 'flex';
         searchView.style.display = 'none';
-        // Toggle footer and header (Issue #29)
-        if (typeof AIResponseModule !== 'undefined') {
-          AIResponseModule.toggleFooter('markdown');
-          AIResponseModule.updateHeader('markdown'); // still uses 'markdown' as internal mode ID
+        // Toggle footer and header
+        if (typeof DraftModule !== 'undefined') {
+          DraftModule.toggleFooter('markdown');
+          DraftModule.updateHeader('markdown'); // still uses 'markdown' as internal mode ID
         }
       }
     });

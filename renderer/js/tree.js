@@ -63,15 +63,12 @@ const TreeModule = (() => {
 
     let globalIdx = 0;
     const renderNodes = (nodes, parentEl) => {
+      const fragment = document.createDocumentFragment();
       nodes.forEach(node => {
-        const el = createNodeEl(node, globalIdx++);
-        parentEl.appendChild(el);
-        if (node.type === 'directory' && node.expanded && node.children) {
-          // Note: createNodeEl already handles children, but we need 
-          // to ensure the index is correct if we were to recursivly render here.
-          // In the current createNodeEl structure, it's already recursive.
-        }
+        const el = createNodeEl(node);
+        fragment.appendChild(el);
       });
+      parentEl.appendChild(fragment);
     };
 
     renderNodes(filtered, container);
@@ -106,20 +103,36 @@ const TreeModule = (() => {
       const childrenCont = document.createElement('div');
       childrenCont.className = 'folder-children' + (node.expanded ? '' : ' hidden');
       
+      const renderChildren = () => {
+        if (node.children && childrenCont.innerHTML === '') {
+          const fragment = document.createDocumentFragment();
+          node.children.forEach(child => {
+            fragment.appendChild(createNodeEl(child));
+          });
+          childrenCont.appendChild(fragment);
+        }
+      };
+
+      if (node.expanded) {
+        renderChildren();
+      }
+      
       itemEl.onclick = (e) => {
         e.stopPropagation();
         node.expanded = !node.expanded;
-        childrenCont.classList.toggle('hidden', !node.expanded);
+        if (node.expanded) {
+          renderChildren();
+          childrenCont.classList.remove('hidden');
+        } else {
+          childrenCont.classList.add('hidden');
+        }
         itemEl.querySelector('.item-chevron').style.transform = node.expanded ? 'rotate(0)' : 'rotate(-90deg)';
       };
 
       // Initial rotation
-      itemEl.querySelector('.item-chevron').style.transform = node.expanded ? 'rotate(0)' : 'rotate(-90deg)';
-
-      if (node.children) {
-        node.children.forEach(child => {
-          childrenCont.appendChild(createNodeEl(child));
-        });
+      const chevronEl = itemEl.querySelector('.item-chevron');
+      if (chevronEl) {
+        chevronEl.style.transform = node.expanded ? 'rotate(0)' : 'rotate(-90deg)';
       }
       
       wrapper.appendChild(itemEl);
@@ -153,9 +166,12 @@ const TreeModule = (() => {
             if (result.success) {
               if (typeof showToast === 'function') showToast(`Deleted ${fileName}`);
               
-              // Remove from recently viewed if exists
+              // Remove from recently viewed and scroll persistence if exists
               if (typeof RecentlyViewedModule !== 'undefined') {
                 RecentlyViewedModule.remove(node.path);
+              }
+              if (typeof ScrollModule !== 'undefined') {
+                ScrollModule.remove(node.path);
               }
 
               // If it was the active file, clear view
@@ -272,11 +288,13 @@ const TreeModule = (() => {
               <div class="section-label" style="text-align:center; width:100%; margin:0; color:inherit;">No File Founded</div>
             </div>`;
         } else {
+          const fragment = document.createDocumentFragment();
           matches.forEach(m => {
             const el = createNodeEl(m);
             el.onclick = (e) => { e.stopPropagation(); loadFile(m.path); };
-            resultsCont.appendChild(el);
+            fragment.appendChild(el);
           });
+          resultsCont.appendChild(fragment);
         }
       }
     }

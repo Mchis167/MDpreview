@@ -288,7 +288,7 @@ function initSegmentedControl() {
     // ── Draft Specific UI Toggle ───────────────────────────────
     const draftActions = document.getElementById('draft-actions-group');
     if (draftActions) {
-      draftActions.style.display = (AppState.currentFile === '__AI_RESPONSE__') ? 'flex' : 'none';
+      draftActions.style.display = (AppState.currentFile === '__DRAFT_MODE__') ? 'flex' : 'none';
     }
   };
 
@@ -309,8 +309,8 @@ function initDraftActions() {
 
   if (saveBtn) {
     saveBtn.onclick = async () => {
-      if (typeof AIResponseModule === 'undefined') return;
-      const content = AIResponseModule.getDraftContent();
+      if (typeof DraftModule === 'undefined') return;
+      const content = DraftModule.getDraftContent();
       if (!content) {
           alert('Draft is empty.');
           return;
@@ -338,7 +338,7 @@ function initDraftActions() {
 
           // Close Draft tab and open new file
           if (typeof TabsModule !== 'undefined') {
-            TabsModule.remove('__AI_RESPONSE__');
+            TabsModule.remove('__DRAFT_MODE__');
             if (typeof loadFile === 'function') loadFile(filePath);
           }
         } else {
@@ -360,9 +360,9 @@ function initDraftActions() {
         if (group) group.style.display = 'none';
 
         if (typeof TabsModule !== 'undefined') {
-          TabsModule.remove('__AI_RESPONSE__');
-          if (typeof AIResponseModule !== 'undefined') {
-            AIResponseModule.clear();
+          TabsModule.remove('__DRAFT_MODE__');
+          if (typeof DraftModule !== 'undefined') {
+            DraftModule.clear();
           }
         }
       }
@@ -373,10 +373,10 @@ function initDraftActions() {
 async function loadRawContent() {
   if (!AppState.currentFile) return;
 
-  if (AppState.currentFile === '__AI_RESPONSE__') {
-      // For Draft, the "raw" content is what's in the AIResponseModule state
-      if (typeof AIResponseModule !== 'undefined' && typeof EditorModule !== 'undefined') {
-          EditorModule.setOriginalContent(AIResponseModule.getDraftContent());
+  if (AppState.currentFile === '__DRAFT_MODE__') {
+      // For Draft, the "raw" content is what's in the DraftModule state
+      if (typeof DraftModule !== 'undefined' && typeof EditorModule !== 'undefined') {
+          EditorModule.setOriginalContent(DraftModule.getDraftContent());
       }
       return;
   }

@@ -66,4 +66,16 @@ router.post('/workspaces/active', (req, res) => {
   res.json(data);
 });
 
+// POST rename workspace
+router.post('/workspaces/rename', (req, res) => {
+  const { id, name } = req.body;
+  const data = loadWorkspaces(req.dataDir);
+  const ws = data.workspaces.find(w => w.id === id);
+  if (ws) {
+    ws.name = name;
+    saveWorkspaces(req.dataDir, data);
+  }
+  res.json(data);
+});
+
 module.exports = router;
