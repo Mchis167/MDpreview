@@ -1,6 +1,9 @@
 #!/bin/bash
+# Move to the project root directory
+cd "$(dirname "$0")/.."
+
 # Rebuild log for troubleshooting
-LOG_FILE="rebuild.log"
+LOG_FILE="logs/rebuild.log"
 exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "--------------------------------------------------------"

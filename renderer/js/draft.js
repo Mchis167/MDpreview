@@ -4,7 +4,6 @@
 
 const AIResponseModule = (() => {
   let displayedContent = '';
-  let draftContent     = '';
   let renderedHtml     = '';
   
   const elements = {
@@ -25,6 +24,13 @@ const AIResponseModule = (() => {
   };
 
   function init() {
+    elements.chatComponent = document.getElementById('ai-chat-component');
+    elements.chatInput     = document.getElementById('ai-chat-input');
+    elements.extraInput    = document.getElementById('ai-extra-input');
+    elements.previewBtn    = document.getElementById('ai-preview-btn');
+    elements.statusBadge   = document.getElementById('ai-status-badge');
+    elements.statusText    = elements.statusBadge ? elements.statusBadge.querySelector('.status-badge-text') : null;
+    
     elements.variants.placeholder = document.getElementById('ai-placeholder-variant');
     elements.variants.input       = document.getElementById('ai-input-variant');
     
@@ -36,9 +42,39 @@ const AIResponseModule = (() => {
       importBtn.addEventListener('click', () => handleFileImport());
     }
 
+    const clearBtn = document.getElementById('ai-clear-btn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => clear());
+    }
+
     _setupDragAndDrop();
 
-    // Switch to input variant by default
+    if (!elements.chatInput || !elements.previewBtn) return;
+
+    // ── Initialize TextAreas ──────────────────────────────────
+    // Chat Input (with expansion)
+    TextAreaModule.init({
+      containerId:   'ai-chat-container',
+      inputId:       'ai-chat-input',
+      expandBtnId:   'ai-chat-expand',
+      modalId:       'ai-expanded-modal',
+      modalInputId:  'ai-expanded-input',
+      minimizeBtnId: 'ai-minimize-btn',
+      label:         'Input Chat Response',
+      onInput:       (val) => updateBadgeState(val)
+    });
+
+    // Extra Input (no expansion requested yet)
+    TextAreaModule.init({
+      containerId: 'ai-extra-container',
+      inputId:     'ai-extra-input',
+      label:       'Additional Content'
+    });
+
+    // ── Preview Button ────────────────────────────────────────
+    elements.previewBtn.addEventListener('click', () => renderPreview());
+
+    // Switch to input variant by default (or based on some logic)
     setVariant('input');
   }
 
@@ -52,73 +88,71 @@ const AIResponseModule = (() => {
   }
 
   function updateBadgeState(currentVal) {
-    // No longer used since badge is removed
+    const isMatched = (currentVal === displayedContent);
+    
+    if (elements.statusBadge) {
+      elements.statusBadge.classList.toggle('is-updated', isMatched);
+      elements.statusBadge.classList.toggle('is-pending', !isMatched);
+    }
+    
+    if (elements.statusText) {
+      elements.statusText.textContent = isMatched ? 'Content Updated' : 'Pending Update';
+    }
+
+    elements.previewBtn.disabled = isMatched;
   }
 
-  async function renderPreview(content) {
-    const finalContent = content || draftContent;
-    if (!finalContent) return;
+  async function renderPreview() {
+    const content = elements.chatInput.value;
+    if (!content) return;
 
-    // Check for existing comments (Issue #38)
+    // Check for existing comments
     if (typeof CommentsModule !== 'undefined' && CommentsModule.getCommentCount() > 0) {
-        // Automatically clear comments or ask? 
-        // For Draft mode, let's just clear them to keep it snappy
-        await CommentsModule.clear();
+        if (confirm('Rendering a new preview will clear your existing comments. Continue?')) {
+            await CommentsModule.clear();
+        } else {
+            return;
+        }
     }
+    
+    elements.previewBtn.disabled = true;
+    elements.previewBtn.textContent = 'Rendering...';
+
+    const mdContent = document.getElementById('md-content');
+    const inner = mdContent ? (mdContent.querySelector('.md-content-inner') || mdContent) : null;
+    const emptyState = document.getElementById('empty-state');
+    
+    if (emptyState) emptyState.style.display = 'none';
+    if (mdContent) mdContent.style.display = 'block';
 
     try {
       const res = await fetch('/api/render-raw', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: finalContent })
+        body: JSON.stringify({ content })
       });
 
       if (!res.ok) throw new Error('Render failed');
       const data = await res.json();
 
-      // Update Viewer
-      const emptyState = document.getElementById('empty-state');
-      const mdContent  = document.getElementById('md-content');
-      const wsNameEl   = document.getElementById('header-workspace-name');
-      const fileNameEl = document.getElementById('header-file-name');
-
-      if (emptyState) emptyState.style.display = 'none';
-      if (mdContent) {
-        const inner = mdContent.querySelector('.md-content-inner') || mdContent;
+      if (inner) {
         inner.innerHTML = data.html;
-        renderedHtml = data.html; // Store for tab switching
-        
-        // Only show mdContent if NOT in edit mode
-        if (AppState.currentMode !== 'edit') {
-            mdContent.style.display = 'block';
-        }
-        
-        // Process Mermaid (global from app.js / mermaid.js)
+        renderedHtml = data.html;
         if (typeof processMermaid === 'function') processMermaid(inner);
-        
-        // Process Code Blocks (global from code-blocks.js)
         if (typeof CodeBlockModule !== 'undefined') CodeBlockModule.process(inner);
       }
 
-      if (wsNameEl)  wsNameEl.innerText = (AppState.currentWorkspace ? AppState.currentWorkspace.name : 'AI').toUpperCase() + '.';
-      if (fileNameEl) fileNameEl.innerText = 'Draft Preview';
-
-      // Update local state
-      displayedContent = finalContent;
-      draftContent     = finalContent;
-      
-      // If we are in edit mode, sync the editor with the new content
-      if (AppState.currentMode === 'edit' && typeof EditorModule !== 'undefined') {
-          EditorModule.setOriginalContent(finalContent);
-      }
-      
-      // Reset scroll
-      document.getElementById('md-viewer').scrollTop = 0;
+      // Update header and state
+      displayedContent = content;
+      updateBadgeState(content);
+      updateHeader('ai');
 
     } catch (err) {
       console.error(err);
+      alert('Failed to render preview.');
     } finally {
-      // Done
+      elements.previewBtn.textContent = 'Preview';
+      elements.previewBtn.disabled = (elements.chatInput.value === displayedContent);
     }
   }
 
@@ -136,7 +170,7 @@ const AIResponseModule = (() => {
     const fileNameEl = document.getElementById('header-file-name');
 
     if (mode === 'ai') {
-      if (wsNameEl) wsNameEl.innerText = 'NEW DRAFT';
+      if (wsNameEl) wsNameEl.innerText = 'NEW AI RESPONSE';
       if (fileNameEl) {
         fileNameEl.style.display = 'none';
       }
@@ -148,19 +182,19 @@ const AIResponseModule = (() => {
     }
   }
 
-  // ── Helper ────────────────────────────────────────────────
-  function getDraftContent() { return draftContent; }
-  function setDraftContent(val) { draftContent = val; }
-
   // ── File Import & Drag-and-Drop ────────────────────────────
   async function handleFileImport() {
     try {
+      // Use standard browser file input as a picker if electronAPI.pickAndReadFile is not yet implemented
+      // But let's assume we want a real Electron dialog if possible.
+      // If electronAPI.pickAndReadFile is missing, we'll fall back.
       if (window.electronAPI && window.electronAPI.pickAndReadFile) {
         const fileData = await window.electronAPI.pickAndReadFile();
         if (fileData && fileData.content) {
           _setChatInput(fileData.content);
         }
       } else {
+        // Fallback: create invisible input
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.md';
@@ -213,8 +247,14 @@ const AIResponseModule = (() => {
   }
 
   function _setChatInput(content) {
-    draftContent = content;
-    renderPreview(content);
+    if (elements.chatInput) {
+      elements.chatInput.value = content;
+      // Trigger status badge update
+      updateBadgeState(content);
+      // If there's an expanded textarea modal open, sync it too
+      const expandedInput = document.getElementById('ai-expanded-input');
+      if (expandedInput) expandedInput.value = content;
+    }
   }
 
   async function clear() {
@@ -268,5 +308,5 @@ const AIResponseModule = (() => {
     }
   }
 
-  return { init, toggleFooter, updateHeader, syncPreview, renderPreview, clear, getDraftContent, setDraftContent };
+  return { init, toggleFooter, updateHeader, syncPreview, renderPreview, clear };
 })();

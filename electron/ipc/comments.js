@@ -21,7 +21,23 @@ function commentsFile(workspaceId, filePath) {
 
 function loadComments(wsId, filePath) {
   try {
-    return JSON.parse(fs.readFileSync(commentsFile(wsId, filePath), 'utf8'));
+    const data = fs.readFileSync(commentsFile(wsId, filePath), 'utf8');
+    const comments = JSON.parse(data);
+    
+    // Auto-fix: Ensure every comment has a unique ID
+    let changed = false;
+    comments.forEach(c => {
+      if (!c.id) {
+        c.id = uuidv4();
+        changed = true;
+      }
+    });
+    
+    if (changed) {
+      saveComments(wsId, filePath, comments);
+    }
+    
+    return comments;
   } catch {
     return [];
   }
@@ -36,16 +52,37 @@ function register(ipcMain) {
     return loadComments(wsId, filePath);
   });
 
-  ipcMain.handle('save-comment', (event, wsId, filePath, comment) => {
+  ipcMain.handle('save-comment', (event, wsId, filePath, commentData) => {
     const comments = loadComments(wsId, filePath);
-    const newComment = { id: uuidv4(), ...comment, createdAt: new Date().toISOString() };
-    comments.push(newComment);
+    let resultComment;
+
+    // Destructure to avoid overwriting id with null/undefined from frontend
+    const { id, createdAt, ...data } = commentData;
+
+    if (id) {
+      // Update existing
+      const idx = comments.findIndex(c => c.id === id);
+      if (idx !== -1) {
+        comments[idx] = { ...comments[idx], ...data, updatedAt: new Date().toISOString() };
+        resultComment = comments[idx];
+      } else {
+        // ID provided but not found, create new anyway
+        resultComment = { ...data, id, createdAt: new Date().toISOString() };
+        comments.push(resultComment);
+      }
+    } else {
+      // Create new
+      resultComment = { ...data, id: uuidv4(), createdAt: new Date().toISOString() };
+      comments.push(resultComment);
+    }
+
     comments.sort((a, b) => a.lineStart - b.lineStart);
     saveComments(wsId, filePath, comments);
-    return newComment;
+    return resultComment;
   });
 
   ipcMain.handle('delete-comment', (event, wsId, filePath, commentId) => {
+    if (!commentId) return loadComments(wsId, filePath);
     const comments = loadComments(wsId, filePath).filter(c => c.id !== commentId);
     saveComments(wsId, filePath, comments);
     return comments;

@@ -1,0 +1,17 @@
+[
+  {
+    "id": null,
+    "lineStart": 6,
+    "lineEnd": 6,
+    "startLineContent": "Vấn đề cốt lõi: Tại sao AI bị \"loạn\"?",
+    "endLineContent": "Vấn đề cốt lõi: Tại sao AI bị \"loạn\"?",
+    "text": "test",
+    "selectedText": "Vấn đề cốt lõi: T",
+    "context": {
+      "before": "",
+      "after": "ại sao AI bị \"loạn\"?"
+    },
+    "headingPath": "Vấn đề cốt lõi: Tại sao AI bị \"loạn\"?",
+    "createdAt": "2026-04-22T11:22:04.764Z"
+  }
+]

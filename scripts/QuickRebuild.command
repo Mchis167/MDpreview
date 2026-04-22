@@ -1,14 +1,14 @@
 #!/bin/bash
 
-# Tự động tìm thư mục chứa file này và di chuyển vào đó
-cd "$(dirname "$0")"
+# Tự động tìm thư mục chứa file này và di chuyển vào thư mục gốc của dự án
+cd "$(dirname "$0")/.."
 
-# Thực thi script rebuild mà chúng ta đã tạo
+# Thực thi script rebuild nằm trong thư mục scripts
 echo "--------------------------------------------------------"
 echo "🛠️ ĐANG TỰ ĐỘNG REBUILD MDPREVIEW..."
 echo "--------------------------------------------------------"
 
-./rebuild.sh
+./scripts/rebuild.sh
 
 # Giữ cửa sổ terminal mở để bạn có thể xem kết quả
 echo ""

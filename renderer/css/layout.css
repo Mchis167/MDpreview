@@ -6,7 +6,8 @@
   display: flex;
   height: 100%;
   width: 100%;
-  padding: 24px; /* Default for windowed mode (to clear macOS buttons) */
+  padding: 24px;
+  /* Default for windowed mode (to clear macOS buttons) */
   gap: 4px;
   transition: padding 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -18,8 +19,8 @@
   flex-shrink: 0;
   margin-right: 0;
   transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-              min-width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-              margin-right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    min-width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    margin-right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   height: 100%;
 }
@@ -27,12 +28,14 @@
 #sidebar-left-wrap.sidebar-collapsed {
   width: 0 !important;
   min-width: 0 !important;
-  margin-right: -4px; /* Hide gap */
+  margin-right: -4px;
+  /* Hide gap */
 }
 
 
 body.is-fullscreen #app-layout {
-  padding: 8px; /* Standard premium spacing in fullscreen */
+  padding: 8px;
+  /* Standard premium spacing in fullscreen */
 }
 
 main {

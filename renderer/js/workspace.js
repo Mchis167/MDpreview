@@ -16,6 +16,10 @@ const WorkspaceModule = (() => {
 
   // ── Load from main process ──────────────────────────────────
   async function load() {
+    if (!window.electronAPI) {
+      console.warn('WorkspaceModule: window.electronAPI is undefined. Workspaces will not be loaded.');
+      return;
+    }
     const data  = await window.electronAPI.getWorkspaces();
     workspaces  = data.workspaces  || [];
     activeId    = data.activeWorkspaceId;
@@ -33,7 +37,9 @@ const WorkspaceModule = (() => {
     if (lbl) lbl.textContent = ws ? ws.name : 'Add Workspace';
 
     if (ws) {
-      await window.electronAPI.setWatchDir(ws.path);
+      if (window.electronAPI) {
+        await window.electronAPI.setWatchDir(ws.path);
+      }
       TreeModule.load();
     } else {
       setNoFile();
@@ -46,6 +52,7 @@ const WorkspaceModule = (() => {
 
   // ── Switch workspace ────────────────────────────────────────
   async function switchTo(id) {
+    if (!window.electronAPI) return;
     activeId = id;
     AppState.currentFile = null;
     await window.electronAPI.setActiveWorkspace(id);
@@ -57,6 +64,7 @@ const WorkspaceModule = (() => {
 
   // ── Add workspace ────────────────────────────────────────────
   async function add(name, folderPath) {
+    if (!window.electronAPI) return;
     const ws = await window.electronAPI.saveWorkspace({ name, path: folderPath });
     workspaces.push(ws);
     activeId = ws.id;
@@ -67,6 +75,7 @@ const WorkspaceModule = (() => {
 
   // ── Delete workspace ─────────────────────────────────────────
   async function remove(id) {
+    if (!window.electronAPI) return;
     const data = await window.electronAPI.deleteWorkspace(id);
     workspaces = data.workspaces;
     activeId   = data.activeWorkspaceId;
@@ -177,6 +186,7 @@ const WorkspaceModule = (() => {
   // ── Bind modal events ─────────────────────────────────────────
   function _bindModalEvents() {
     document.getElementById('browse-btn').addEventListener('click', async () => {
+      if (!window.electronAPI) return;
       const p = await window.electronAPI.openFolder();
       if (p) {
         pendingPath = p;

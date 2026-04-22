@@ -1,0 +1,267 @@
+/* ══════════════════════════════════════════════════
+   TABS BAR STYLES — FIGMA PRECISION (Node 190:342)
+════════════════════════════════════════════════════ */
+
+:root {
+  --header-height: 48px;
+  --figma-divider: rgba(255, 255, 255, 0.05);
+}
+
+#tab-bar-container {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  background: transparent;
+  /* Made transparent as requested */
+  border-bottom: 1px solid var(--figma-divider);
+  user-select: none;
+}
+
+/* Vertical Divider Utility */
+.figma-divider-v {
+  width: 1px;
+  height: 100%;
+  background: var(--figma-divider);
+  flex-shrink: 0;
+}
+
+/* Sidebar Toggle Container */
+#sidebar-toggle-btn {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+/* Wrapper to maintain the 48px spacing as requested */
+#sidebar-toggle-wrapper {
+  width: 48px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+#sidebar-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: #fff;
+}
+
+/* Tab List Container */
+#tab-list {
+  display: flex;
+  height: 100%;
+  align-items: center;
+}
+
+.tab-item {
+  width: 160px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  position: relative;
+  border-right: 1px solid var(--figma-divider);
+  transition: all 0.2s;
+}
+
+.tab-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.tab-item.active {
+  background: transparent;
+  color: #fff;
+}
+
+/* Active Tab Bottom Indicator */
+.tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  /* Subtle white indicator as in screenshot */
+}
+
+.tab-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tab-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.tab-item.active .tab-close,
+.tab-item:hover .tab-close {
+  opacity: 0.5;
+}
+
+.tab-close:hover {
+  opacity: 1 !important;
+}
+
+/* Add Tab Button Container */
+#add-tab-btn-container {
+  width: 48px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid var(--figma-divider);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+#add-tab-btn-container:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+#add-tab-btn-container:hover #add-tab-btn {
+  color: #fff;
+}
+
+#add-tab-btn {
+  color: rgba(255, 255, 255, 0.3);
+  transition: all 0.2s;
+  display: flex;
+}
+
+/* Right Side Actions Group */
+.header-actions-right {
+  margin-left: auto;
+  display: flex;
+  height: 100%;
+  align-items: center;
+  border-left: 1px solid var(--figma-divider);
+}
+
+.action-btn-wrap {
+  width: 48px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn-wrap:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: #fff;
+}
+
+/* Special Divider before Settings */
+.action-group-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Center Floating Toolbar */
+#secondary-toolbar {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  gap: 4px;
+}
+
+#secondary-toolbar .segmented-control {
+  pointer-events: auto;
+  background: rgba(20, 20, 20, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 4px;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ── Draft Actions ────────────────────────────────────────── */
+#draft-actions-group {
+  display: flex;
+  align-items: center;
+  pointer-events: auto;
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 12px;
+}
+
+.draft-action-btns {
+  display: flex;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 4px;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.draft-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 100px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+}
+
+.draft-btn.discard:hover {
+  color: #fff;
+}
+
+.draft-btn.save {
+  background: var(--accent-color);
+  color: #000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.draft-btn.save:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+/* ── Draft Dot Indicator ────────────────────────────────── */
+.tab-draft-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--accent-color);
+  border-radius: 50%;
+  margin-right: 8px;
+  flex-shrink: 0;
+  box-shadow: 0 0 10px var(--accent-color);
+}
+
+.tab-item:not(.active) .tab-draft-dot {
+  opacity: 0.5;
+  box-shadow: none;
+}

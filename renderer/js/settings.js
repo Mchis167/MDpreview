@@ -89,6 +89,20 @@ const SettingsModule = (() => {
       });
     }
 
+    const codeZoomSlider = document.getElementById('code-zoom-slider');
+    const codeZoomVal    = document.getElementById('code-zoom-val');
+    if (codeZoomSlider && codeZoomVal) {
+      codeZoomSlider.value = AppState.settings.codeZoom || 100;
+      codeZoomVal.innerText = `${codeZoomSlider.value}%`;
+      codeZoomSlider.addEventListener('input', (e) => {
+        const val = e.target.value;
+        codeZoomVal.innerText = `${val}%`;
+        AppState.settings.codeZoom = parseInt(val, 10);
+        localStorage.setItem('md-code-zoom', val);
+        applyTheme();
+      });
+    }
+
     if (bgToggleContainer) {
       SwitchToggleModule.init({
         containerId: 'bg-toggle-mount',

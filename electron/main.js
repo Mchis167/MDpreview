@@ -19,7 +19,7 @@ async function createWindow() {
   });
 
   serverModule = require('../server/index');
-  const port = await serverModule.start();
+  const port = await serverModule.start(app.getPath('userData'));
 
   mainWindow.loadURL(`http://localhost:${port}`);
 

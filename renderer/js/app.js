@@ -10,7 +10,7 @@
 const AppState = {
   currentFile:      null,
   currentWorkspace: null,
-  lastMarkdownFile: null, // Tracks original file when in AI mode
+  lastMarkdownFile: null, // Tracks original file when in Draft mode
   commentMode:      false,
   socket:           null,
   
@@ -20,20 +20,23 @@ const AppState = {
     bgEnabled:        localStorage.getItem('md-bg-enabled') === 'true',
     bgImage:          localStorage.getItem('md-bg-image') || '',
     textZoom:         parseInt(localStorage.getItem('md-text-zoom') || '100', 10),
+    codeZoom:         parseInt(localStorage.getItem('md-code-zoom') || '100', 10),
     showHidden:       localStorage.getItem('md-show-hidden') === 'true',
     hideEmptyFolders: localStorage.getItem('md-hide-empty') === 'true',
     flatView:         localStorage.getItem('md-flat-view') === 'true'
   },
 
   /**
-   * Called when sidebar mode changes (Markdown <-> AI)
+   * Called when sidebar mode changes (Space <-> Draft)
    */
   onModeChange(mode) {
     if (mode === 'ai') {
       // 1. Store and switch to AI virtual file
       if (AppState.currentFile !== '__AI_RESPONSE__') {
+        ScrollModule.save(AppState.currentFile);
         AppState.lastMarkdownFile = AppState.currentFile;
         AppState.currentFile = '__AI_RESPONSE__';
+        ScrollModule.restore('__AI_RESPONSE__');
       }
 
       // 2. Load AI-specific comments
@@ -51,14 +54,20 @@ const AppState = {
         AIResponseModule.syncPreview();
       }
 
-      // 5. Refresh toolbar UI state
+      // 5. Ensure Draft tab is open
+      if (typeof TabsModule !== 'undefined') {
+        TabsModule.open('__AI_RESPONSE__');
+      }
+
+      // 6. Refresh toolbar UI state: Force 'edit' for new Draft
       if (typeof AppState.updateToolbarUI === 'function') {
-        AppState.updateToolbarUI(AppState.currentMode || 'read');
+        AppState.updateToolbarUI('edit');
       }
     } else {
-      // Mode: markdown
+      // Mode: space
       // 1. Restore the original file
       if (AppState.lastMarkdownFile) {
+        ScrollModule.save('__AI_RESPONSE__');
         AppState.currentFile = AppState.lastMarkdownFile;
         AppState.lastMarkdownFile = null;
       }
@@ -86,10 +95,11 @@ const AppState = {
  * Apply theme settings to the document
  */
 function applyTheme() {
-  const { accentColor, bgEnabled, bgImage, textZoom } = AppState.settings;
+  const { accentColor, bgEnabled, bgImage, textZoom, codeZoom } = AppState.settings;
   
   // Update text zoom
   document.documentElement.style.setProperty('--preview-zoom', textZoom || 100);
+  document.documentElement.style.setProperty('--code-zoom',    codeZoom || 100);
   
   // Update accent color (Hex)
   document.documentElement.style.setProperty('--accent-color', accentColor);
@@ -153,7 +163,13 @@ async function loadFile(filePath) {
   if (!res.ok) throw new Error(`Failed to load file: ${filePath}`);
   const data = await res.json();
 
+  // Save current scroll before switching
+  if (AppState.currentFile) {
+    ScrollModule.save(AppState.currentFile);
+  }
+
   AppState.currentFile = filePath;
+  TabsModule.open(filePath);
 
   const emptyState = document.getElementById('empty-state');
   const mdContent  = document.getElementById('md-content');
@@ -164,22 +180,24 @@ async function loadFile(filePath) {
     const inner = mdContent.querySelector('.md-content-inner') || mdContent;
     inner.innerHTML = data.html;
     await processMermaid(inner); // processMermaid defined in mermaid.js
+    if (typeof CodeBlockModule !== 'undefined') CodeBlockModule.process(inner);
   }
 
   updateHeaderUI();
   await CommentsModule.loadForFile(filePath);
+  if (typeof CollectModule !== 'undefined') CollectModule.loadForFile(filePath);
   RecentlyViewedModule.add(filePath);
 
-  // Instead of forcing 'read', refresh the current state (Edit, Comment, Read)
-  const activeSeg = document.querySelector('.mode-segment.active');
-  if (activeSeg && typeof AppState.updateToolbarUI === 'function') {
-      AppState.updateToolbarUI(activeSeg.dataset.mode);
+  // Force 'edit' for Draft, 'read' for normal documents
+  if (typeof AppState.updateToolbarUI === 'function') {
+    const targetMode = (filePath === '__AI_RESPONSE__') ? 'edit' : 'read';
+    AppState.updateToolbarUI(targetMode);
   } else if (AppState.commentMode) {
-      CommentsModule.applyCommentMode();
+    CommentsModule.applyCommentMode();
   }
 
   TreeModule.setActiveFile(filePath);
-  document.getElementById('md-viewer').scrollTop = 0;
+  ScrollModule.restore(filePath);
 }
 
 function setNoFile() {
@@ -194,6 +212,12 @@ function setNoFile() {
   updateHeaderUI();
 
   if (typeof CommentsModule !== 'undefined') CommentsModule.clearUI();
+  if (typeof CollectModule !== 'undefined') CollectModule.loadForFile(null);
+
+  // Hide secondary toolbar
+  if (typeof AppState.updateToolbarUI === 'function') {
+    AppState.updateToolbarUI(AppState.currentMode || 'read');
+  }
 }
 
 /**
@@ -212,11 +236,35 @@ function updateHeaderUI() {
   fileNameEl.style.display = ''; // Ensure visible
 
   if (AppState.currentFile) {
-    wsNameEl.innerText = AppState.currentWorkspace.name.toUpperCase() + '.';
+    wsNameEl.innerText = (AppState.currentWorkspace ? AppState.currentWorkspace.name.toUpperCase() : 'UNKNOWN') + '.';
     fileNameEl.innerText = AppState.currentFile.split('/').pop();
   } else {
     wsNameEl.innerText = AppState.currentWorkspace ? AppState.currentWorkspace.name.toUpperCase() + '.' : 'TOUCH.';
     fileNameEl.innerText = 'Select a file';
+  }
+}
+
+/**
+ * Update Sidebar Toggle Icon to match Figma (Lucide style)
+ */
+function updateSidebarToggleIcon(isCollapsed) {
+  const btn = document.getElementById('sidebar-toggle-btn');
+  if (!btn) return;
+  
+  if (isCollapsed) {
+    // arrow-right-to-line
+    btn.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 12H3"/><path d="m11 18 6-6-6-6"/><path d="M21 5v14"/>
+      </svg>
+    `;
+  } else {
+    // arrow-left-to-line
+    btn.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m9 6-6 6 6 6"/><path d="M3 12h12"/><path d="M21 19V5"/>
+      </svg>
+    `;
   }
 }
 
@@ -227,11 +275,15 @@ document.addEventListener('DOMContentLoaded', () => {
   initZoom();             // zoom.js
   initSegmentedControl(); // toolbar.js
   initToolbarBtns();      // toolbar.js
+  initGlobalShortcuts();  // toolbar.js
   initSidebarModeSwitcher(); // sidebar.js
   initSidebarRevamp();       // sidebar.js
   initSidebarResizer();      // sidebar.js
   SettingsModule.init();     // settings.js
   AIResponseModule.init();   // ai-response.js (Issue #29)
+  ScrollModule.init();       // scroll.js
+  TabsModule.init();         // tabs.js
+  if (typeof CollectModule !== 'undefined') CollectModule.init(); // collect.js
 
   setTimeout(() => {
     if (typeof WorkspaceModule !== 'undefined') WorkspaceModule.init();

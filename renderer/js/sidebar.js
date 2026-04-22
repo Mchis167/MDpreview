@@ -142,7 +142,7 @@ function initSidebarModeSwitcher() {
         // Toggle footer and header (Issue #29)
         if (typeof AIResponseModule !== 'undefined') {
           AIResponseModule.toggleFooter('markdown');
-          AIResponseModule.updateHeader('markdown');
+          AIResponseModule.updateHeader('markdown'); // still uses 'markdown' as internal mode ID
         }
       }
     });

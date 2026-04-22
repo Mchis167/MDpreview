@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Block UI Preview</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Core Styles -->
+  <link rel="stylesheet" href="../css/styles.css">
+  
+  <style>
+    body {
+      background: #0e0e12;
+      padding: 60px;
+      display: flex;
+      justify-content: center;
+    }
+    .preview-container {
+      width: 100%;
+      max-width: 800px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 24px;
+      padding: 40px;
+      backdrop-filter: blur(20px);
+    }
+    h1 {
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      margin-bottom: 40px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 20px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="preview-container">
+    <span class="section-label">UI PREVIEW</span>
+    <h1>Premium Code Blocks</h1>
+
+    <div id="md-content">
+      <div class="md-content-inner">
+        
+        <!-- JavaScript Example -->
+        <p>JavaScript code block with syntax highlighting:</p>
+        <div class="md-block">
+          <div class="md-line">
+            <pre><code class="hljs language-javascript"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">fetchData</span>(<span class="hljs-params">url</span>) {
+  <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(url);
+  <span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> response.<span class="hljs-title function_">json</span>();
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">'Data received:'</span>, data);
+  <span class="hljs-keyword">return</span> data;
+}</code></pre>
+          </div>
+        </div>
+
+        <div style="height: 40px;"></div>
+
+        <!-- CSS Example -->
+        <p>CSS code block with syntax highlighting:</p>
+        <div class="md-block">
+          <div class="md-line">
+            <pre><code class="hljs language-css"><span class="hljs-selector-class">.premium-card</span> {
+  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">rgba</span>(<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0.05</span>);
+  <span class="hljs-attribute">border-radius</span>: <span class="hljs-number">12px</span>;
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">24px</span>;
+  <span class="hljs-attribute">transition</span>: all <span class="hljs-number">0.3s</span> <span class="hljs-built_in">cubic-bezier</span>(<span class="hljs-number">0.4</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.2</span>, <span class="hljs-number">1</span>);
+}
+
+<span class="hljs-selector-class">.premium-card</span><span class="hljs-selector-pseudo">:hover</span> {
+  <span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translateY</span>(-<span class="hljs-number">4px</span>);
+  <span class="hljs-attribute">box-shadow</span>: <span class="hljs-number">0</span> <span class="hljs-number">20px</span> <span class="hljs-number">40px</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.4</span>);
+}</code></pre>
+          </div>
+        </div>
+
+        <div style="height: 40px;"></div>
+
+        <!-- Python Example -->
+        <p>Python code block with syntax highlighting:</p>
+        <div class="md-block">
+          <div class="md-line">
+            <pre><code class="hljs language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">calculate_fibonacci</span>(<span class="hljs-params">n</span>):
+    <span class="hljs-string">"""Return a list containing the Fibonacci series up to n."""</span>
+    result = []
+    a, b = <span class="hljs-number">0</span>, <span class="hljs-number">1</span>
+    <span class="hljs-keyword">while</span> a &lt; n:
+        result.append(a)
+        a, b = b, a + b
+    <span class="hljs-keyword">return</span> result
+
+<span class="hljs-comment"># This is a very long comment that should wrap to the next line if the code block wrapping logic is working correctly in the CSS styles we just applied.</span>
+<span class="hljs-built_in">print</span>(calculate_fibonacci(<span class="hljs-number">100</span>))</code></pre>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../js/code-blocks.js"></script>
+  <script>
+    // Initialize the code blocks manually for this preview
+    document.addEventListener('DOMContentLoaded', () => {
+      const content = document.getElementById('md-content');
+      if (typeof CodeBlockModule !== 'undefined') {
+        CodeBlockModule.process(content);
+      }
+    });
+  </script>
+</body>
+</html>

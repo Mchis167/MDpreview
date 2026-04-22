@@ -20,15 +20,30 @@ const CommentsModule = (() => {
     _markLinesWithComments();
   }
 
-  // ── Save a new comment ───────────────────────────────────────
-  async function save(lineStart, lineEnd, startLineContent, endLineContent, text) {
+  // ── Save a new or existing comment ──────────────────────────
+  async function save(lineStart, lineEnd, startLineContent, endLineContent, text, selectedText, context, id = null, headingPath = null) {
     const ws   = AppState.currentWorkspace;
     const file = AppState.currentFile;
     if (!ws || !file) return;
     const comment = await window.electronAPI.saveComment(ws.id, file, {
-      lineStart, lineEnd, startLineContent, endLineContent, text
+      id, lineStart, lineEnd, startLineContent, endLineContent, text, selectedText, context, headingPath
     });
-    comments.push(comment);
+
+    if (id) {
+      // Update local list
+      const idx = comments.findIndex(c => c.id === id);
+      if (idx !== -1) {
+        comments[idx] = comment;
+      } else {
+        // Fallback: search by new ID if the old one wasn't found
+        const idxNew = comments.findIndex(c => c.id === comment.id);
+        if (idxNew !== -1) comments[idxNew] = comment;
+        else comments.push(comment);
+      }
+    } else {
+      comments.push(comment);
+    }
+
     comments.sort((a, b) => a.lineStart - b.lineStart);
     _renderList();
     _markLinesWithComments();
@@ -60,35 +75,51 @@ const CommentsModule = (() => {
   function copyAll() {
     if (!comments.length) return;
     const file  = AppState.currentFile || 'unknown';
-    const lines = [`--- Comments ---`, `File: ${file}`, ``];
+    const count = comments.length;
     
-    // Check for Additional Content if in AI mode (Issue #37)
+    const lines = [
+        `Dưới đây là [${count}] feedback cho tài liệu "${file}". Với mỗi block, hãy định vị ANCHOR bằng CONTEXT và POSITION, sau đó thực hiện FEEDBACK. Trả lời theo thứ tự comment.`,
+        ``
+    ];
+    
+    // Check for Additional Content if in AI mode
     if (file === '__AI_RESPONSE__') {
       const extra = document.getElementById('ai-extra-input')?.value.trim();
       if (extra) {
-        lines.push(`--- Additional Content ---`);
+        lines.push(`================================================================`);
+        lines.push(`[ADDITIONAL CONTENT / USER CONTEXT]`);
+        lines.push(`----------------------------------------------------------------`);
         lines.push(extra);
+        lines.push(`================================================================`);
         lines.push(``);
-        lines.push(`--- User Comments ---`);
       }
     }
 
-    comments.forEach(c => {
-      if (c.lineStart === c.lineEnd) {
-        lines.push(`Line ${c.lineStart} ("${c.startLineContent}"): ${c.text}`);
-      } else {
-        lines.push(`Range Line ${c.lineStart}-${c.lineEnd}:`);
-        lines.push(`  Start: "${c.startLineContent}"`);
-        lines.push(`  End:   "${c.endLineContent}"`);
-        lines.push(`  Comment: ${c.text}`);
-      }
-      lines.push('');
+    comments.forEach((c, index) => {
+      const anchor = (c.selectedText || c.startLineContent || 'N/A').trim();
+      const lineRef = (c.lineStart === c.lineEnd) ? `L${c.lineStart}` : `L${c.lineStart} -> L${c.lineEnd}`;
+      const before = (c.context?.before || '').trim();
+      const after  = (c.context?.after || '').trim();
+      const position = c.headingPath || "General";
+
+      lines.push(`================================================================`);
+      lines.push(`[COMMENT #${index + 1}]`);
+      lines.push(`----------------------------------------------------------------`);
+      lines.push(`ANCHOR: "${anchor}"`);
+      lines.push(``);
+      lines.push(`CONTEXT: "...${before} [${anchor}] ${after}..."`);
+      lines.push(``);
+      lines.push(`POSITION: ${position} (${lineRef})`);
+      lines.push(``);
+      lines.push(`FEEDBACK:`);
+      lines.push(c.text);
+      lines.push(`================================================================`);
+      lines.push(``);
     });
-    
+
     navigator.clipboard.writeText(lines.join('\n')).then(() => {
-        // Feedback logic (Issue #36)
+        // Feedback logic
         if (typeof showToast === 'function') {
-            const count = comments.length;
             const msg = `Copied ${count} comment${count !== 1 ? 's' : ''}`;
             showToast(msg);
         }
@@ -126,19 +157,27 @@ const CommentsModule = (() => {
       const isRange = c.lineEnd && c.lineEnd > c.lineStart;
       const lineRef = isRange ? `L${c.lineStart}–L${c.lineEnd}` : `Line ${c.lineStart}`;
 
+      const isSelected = activeCommentId && c.id && c.id === activeCommentId;
       const item = document.createElement('div');
-      item.className = 'comment-item' + (c.id === activeCommentId ? ' selected' : '');
+      item.className = 'comment-item' + (isSelected ? ' selected' : '');
       item.dataset.id = c.id;
 
-      const snippet = isRange
-        ? `${c.startLineContent} ... ${c.endLineContent}`
-        : (c.startLineContent || '');
+      // Use selected text with a bit of context for the sidebar snippet
+      let snippet = '';
+      if (c.selectedText) {
+        const b = c.context?.before ? '...' + c.context.before.slice(-15) : '';
+        const a = c.context?.after ? c.context.after.slice(0, 15) + '...' : '';
+        snippet = `${b} <span class="highlight-selection">${_esc(c.selectedText)}</span> ${a}`;
+      } else {
+        snippet = isRange ? `${c.startLineContent} ... ${c.endLineContent}` : (c.startLineContent || '');
+        snippet = _esc(snippet);
+      }
 
       item.innerHTML = `
         <div class="comment-item-line">
           <div class="comment-item-header">
             <div class="comment-item-label">${lineRef.toUpperCase()}</div>
-            <div class="comment-item-snippet">${_esc(snippet)}</div>
+            <div class="comment-item-snippet">${snippet}</div>
           </div>
           <button class="comment-item-delete" data-id="${c.id}" title="Delete">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
@@ -183,18 +222,53 @@ const CommentsModule = (() => {
       setTimeout(() => targetLine.classList.remove('pulse-highlight'), 2000);
 
       // Open Form in View Only mode
-      const anchor = targetLine.querySelector('.comment-trigger');
-      if (anchor) {
-        formTarget = { 
-          lineStart: comment.lineStart, 
-          lineEnd: comment.lineEnd, 
-          startLineContent: comment.startLineContent, 
-          endLineContent: comment.endLineContent,
-          id: comment.id
-        };
-        _showForm(anchor, 'view', comment.text);
+      // Use the line itself as anchor since floating triggers are now global
+      formTarget = { 
+        lineStart: comment.lineStart, 
+        lineEnd: comment.lineEnd, 
+        startLineContent: comment.startLineContent, 
+        endLineContent: comment.endLineContent,
+        selectedText: comment.selectedText,
+        context: comment.context,
+        headingPath: comment.headingPath,
+        id: comment.id
+      };
+      _showForm(targetLine, 'view', comment.text);
+    }
+  }
+
+  function _getHeadingPath(lineStart) {
+    const container = document.getElementById('md-content');
+    if (!container) return "General";
+
+    // Find all headings in the container
+    const headings = Array.from(container.querySelectorAll('h1, h2, h3, h4, h5, h6'));
+    
+    // Filter headings that appear AT or BEFORE the target line
+    const relevantHeadings = headings.filter(h => {
+      const lineEl = h.closest('.md-line');
+      if (!lineEl) return false;
+      const lineNum = parseInt(lineEl.dataset.line, 10);
+      return lineNum <= lineStart;
+    });
+
+    if (relevantHeadings.length === 0) return "General";
+
+    // Trace back to H1
+    let current = relevantHeadings[relevantHeadings.length - 1];
+    let level = parseInt(current.tagName[1], 10);
+    const path = [current.textContent.trim()];
+
+    for (let i = relevantHeadings.length - 2; i >= 0; i--) {
+      const h = relevantHeadings[i];
+      const hLevel = parseInt(h.tagName[1], 10);
+      if (hLevel < level) {
+        path.unshift(h.textContent.trim());
+        level = hLevel;
       }
     }
+
+    return path.join(' > ');
   }
 
   function _clearHighlights() {
@@ -203,63 +277,205 @@ const CommentsModule = (() => {
     });
   }
 
-  // ── Mark lines that already have comments ───────────────────
+  // ── Mark exact text ranges that have comments ───────────────────
   function _markLinesWithComments() {
+    // 1. Remove existing highlights to avoid duplication
+    document.querySelectorAll('.comment-range').forEach(el => {
+      const parent = el.parentNode;
+      parent.replaceChild(document.createTextNode(el.textContent), el);
+      parent.normalize();
+    });
     document.querySelectorAll('.md-line').forEach(b => b.classList.remove('has-comment'));
+
+    // 2. Apply new highlights
     comments.forEach(c => {
-      const line = document.querySelector(`.md-line[data-line="${c.lineStart}"]`);
-      if (line) line.classList.add('has-comment');
+      if (!c.selectedText) {
+        // Fallback for line-based comments
+        const line = document.querySelector(`.md-line[data-line="${c.lineStart}"]`);
+        if (line) line.classList.add('has-comment');
+        return;
+      }
+
+      // High precision marking
+      const targetLines = [];
+      for (let i = c.lineStart; i <= (c.lineEnd || c.lineStart); i++) {
+        const line = document.querySelector(`.md-line[data-line="${i}"]`);
+        if (line) targetLines.push(line);
+      }
+
+      if (targetLines.length === 0) return;
+
+      // For simplicity and safety, we look for the selectedText within the target lines' text nodes
+      targetLines.forEach(line => {
+        _highlightTextInElement(line, c);
+      });
     });
   }
 
-  // ── Apply comment mode (inject triggers) ─────────────────────
+  function _highlightTextInElement(element, comment) {
+    const searchText = comment.selectedText;
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+    let node;
+    const nodesToProcess = [];
+
+    while (node = walker.nextNode()) {
+      if (node.textContent.includes(searchText)) {
+        nodesToProcess.push(node);
+      }
+    }
+
+    nodesToProcess.forEach(textNode => {
+      const parent = textNode.parentNode;
+      if (parent.classList.contains('comment-range')) return; // Already highlighted
+
+      const content = textNode.textContent;
+      const index = content.indexOf(searchText);
+      
+      // Verify with context if possible (very basic check)
+      if (comment.context) {
+        const before = content.substring(Math.max(0, index - 20), index);
+        const after  = content.substring(index + searchText.length, index + searchText.length + 20);
+        // If we have a context mismatch and there might be other occurrences, we could skip
+        // but for now, first match is usually fine in the context of specific lines.
+      }
+
+      const range = document.createRange();
+      range.setStart(textNode, index);
+      range.setEnd(textNode, index + searchText.length);
+
+      const mark = document.createElement('mark');
+      mark.className = 'comment-range';
+      mark.dataset.id = comment.id;
+      mark.onclick = (e) => {
+        e.stopPropagation();
+        _onItemClick(comment);
+      };
+      
+      range.surroundContents(mark);
+    });
+  }
+
+  // ── Apply comment mode (floating trigger) ─────────────────────
+  let floatingTrigger = null;
+
   function applyCommentMode() {
-    document.querySelectorAll('.md-line').forEach(line => {
-      if (line.querySelector('.comment-trigger')) return;
-      const btn = document.createElement('button');
-      btn.className = 'comment-trigger';
-      btn.innerHTML = svgMsg;
-      btn.title     = 'Add comment';
-      btn.addEventListener('click', e => _onTriggerClick(e, line));
-      line.appendChild(btn);
-    });
+    if (!floatingTrigger) {
+      floatingTrigger = document.createElement('button');
+      floatingTrigger.className = 'comment-trigger';
+      floatingTrigger.innerHTML = svgMsg;
+      floatingTrigger.title     = 'Add comment to selection';
+      floatingTrigger.addEventListener('click', _onTriggerClick);
+      document.body.appendChild(floatingTrigger);
+    }
+    
+    document.addEventListener('mouseup', _handleSelection);
+    document.addEventListener('keyup', _handleSelection);
   }
 
-  // ── Remove comment mode ──────────────────────────────────────
   function removeCommentMode() {
-    document.querySelectorAll('.comment-trigger').forEach(b => b.remove());
+    if (floatingTrigger) floatingTrigger.classList.remove('show');
+    document.removeEventListener('mouseup', _handleSelection);
+    document.removeEventListener('keyup', _handleSelection);
     _clearHighlights();
     _hideForm();
   }
 
-  // ── Trigger click handler ─────────────────────────────────────
-  function _onTriggerClick(e, lineEl) {
-    e.stopPropagation();
+  function _handleSelection() {
     const selection = window.getSelection();
-    let lineStart = parseInt(lineEl.dataset.line, 10);
-    let lineEnd   = lineStart;
-    let startContent = _getLineText(lineEl);
-    let endContent   = startContent;
-
-    if (!selection.isCollapsed) {
-      const range = selection.getRangeAt(0);
-      const container = document.getElementById('md-content');
-      if (container.contains(range.commonAncestorContainer)) {
-        const allLines = Array.from(document.querySelectorAll('.md-line'));
-        const selectedLines = allLines.filter(el => selection.containsNode(el, true));
-        if (selectedLines.length > 0) {
-          lineStart = parseInt(selectedLines[0].dataset.line, 10);
-          lineEnd   = parseInt(selectedLines[selectedLines.length - 1].dataset.line, 10);
-          const startEl = selectedLines.find(el => _getLineText(el) !== '');
-          const endEl   = [...selectedLines].reverse().find(el => _getLineText(el) !== '');
-          startContent = _getLineText(startEl || selectedLines[0]);
-          endContent   = _getLineText(endEl   || selectedLines[selectedLines.length - 1]);
-        }
-      }
+    if (selection.isCollapsed || selection.toString().trim() === '') {
+      if (floatingTrigger) floatingTrigger.classList.remove('show');
+      return;
     }
 
-    formTarget = { lineStart, lineEnd, startLineContent: startContent, endLineContent: endContent };
-    _showForm(e.currentTarget);
+    const range = selection.getRangeAt(0);
+    const container = document.getElementById('md-content');
+    
+    // Check if selection is within markdown content
+    if (!container.contains(range.commonAncestorContainer)) {
+      if (floatingTrigger) floatingTrigger.classList.remove('show');
+      return;
+    }
+
+    // Position the trigger
+    const rects = range.getClientRects();
+    if (rects.length === 0) {
+      if (floatingTrigger) floatingTrigger.classList.remove('show');
+      return;
+    }
+    
+    const lastRect = rects[rects.length - 1];
+    
+    if (floatingTrigger) {
+      // Since it's position: fixed, we use viewport coordinates (lastRect)
+      floatingTrigger.style.left = `${lastRect.right + 5}px`;
+      floatingTrigger.style.top  = `${lastRect.bottom + 5}px`;
+
+      // Keep within viewport
+      if (lastRect.right + 40 > window.innerWidth) {
+        floatingTrigger.style.left = `${lastRect.left - 40}px`;
+      }
+      
+      floatingTrigger.classList.add('show');
+    }
+  }
+
+  function _onTriggerClick(e) {
+    e.stopPropagation();
+    const selection = window.getSelection();
+    if (selection.isCollapsed) return;
+
+    const range = selection.getRangeAt(0);
+    const selectedText = selection.toString().trim();
+    
+    // Find involved lines
+    const allLines = Array.from(document.querySelectorAll('.md-line'));
+    const selectedLines = allLines.filter(el => selection.containsNode(el, true));
+    
+    if (selectedLines.length === 0) return;
+
+    const lineStart = parseInt(selectedLines[0].dataset.line, 10);
+    const lineEnd   = parseInt(selectedLines[selectedLines.length - 1].dataset.line, 10);
+    
+    // Get context (some words before and after)
+    const context = _getSelectionContext(range);
+
+    formTarget = { 
+      lineStart, 
+      lineEnd, 
+      startLineContent: _getLineText(selectedLines[0]), 
+      endLineContent: _getLineText(selectedLines[selectedLines.length - 1]),
+      selectedText,
+      context,
+      headingPath: _getHeadingPath(lineStart)
+    };
+
+    _showForm(floatingTrigger);
+  }
+
+  function _getSelectionContext(range) {
+    const startNode = range.startContainer;
+    const endNode = range.endContainer;
+    
+    let before = '';
+    let after = '';
+    
+    const RADIUS = 60; // Increased radius for better context
+
+    if (startNode.nodeType === 3) { // Text node
+      const fullText = startNode.textContent;
+      const start = Math.max(0, range.startOffset - RADIUS);
+      before = fullText.substring(start, range.startOffset).trimStart();
+      if (start > 0) before = '...' + before;
+    }
+    
+    if (endNode.nodeType === 3) {
+      const fullText = endNode.textContent;
+      const end = Math.min(fullText.length, range.endOffset + RADIUS);
+      after = fullText.substring(range.endOffset, end).trimEnd();
+      if (end < fullText.length) after = after + '...';
+    }
+    
+    return { before, after };
   }
 
   // ── Show / hide form ─────────────────────────────────────────
@@ -310,7 +526,17 @@ const CommentsModule = (() => {
   async function _submitForm() {
     const text = document.getElementById('comment-input').value.trim();
     if (!text || !formTarget) return;
-    await save(formTarget.lineStart, formTarget.lineEnd, formTarget.startLineContent, formTarget.endLineContent, text);
+    await save(
+      formTarget.lineStart, 
+      formTarget.lineEnd, 
+      formTarget.startLineContent, 
+      formTarget.endLineContent, 
+      text,
+      formTarget.selectedText,
+      formTarget.context,
+      formTarget.id,
+      formTarget.headingPath
+    );
     _hideForm();
     window.getSelection().removeAllRanges();
   }

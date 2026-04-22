@@ -4,6 +4,51 @@ const EditorModule = (() => {
   let _originalContent = '';
   let _textarea = null;
 
+  // ── Undo / Redo Stack ──────────────────────────────────
+  /** @type {{ value: string, ss: number, se: number }[]} */
+  let _undoStack = [];
+  /** @type {{ value: string, ss: number, se: number }[]} */
+  let _redoStack = [];
+  let _debounceTimer = null;
+  let _ignoreNextInput = false; // set to true when we're restoring a snapshot
+
+  function _snapshot() {
+    if (!_textarea) return;
+    const snap = { value: _textarea.value, ss: _textarea.selectionStart, se: _textarea.selectionEnd };
+    // Avoid duplicate snapshots
+    const last = _undoStack[_undoStack.length - 1];
+    if (last && last.value === snap.value) return;
+    _undoStack.push(snap);
+    if (_undoStack.length > 200) _undoStack.shift(); // cap at 200 levels
+    _redoStack = []; // any new edit clears redo
+  }
+
+  function _scheduleSnapshot() {
+    clearTimeout(_debounceTimer);
+    _debounceTimer = setTimeout(_snapshot, 300);
+  }
+
+  function _restoreSnapshot(snap) {
+    if (!_textarea || !snap) return;
+    _ignoreNextInput = true;
+    _textarea.value = snap.value;
+    _textarea.setSelectionRange(snap.ss, snap.se);
+    _textarea.focus();
+  }
+
+  function undo() {
+    if (_undoStack.length <= 1) return; // keep at least the base state
+    _redoStack.push(_undoStack.pop());
+    _restoreSnapshot(_undoStack[_undoStack.length - 1]);
+  }
+
+  function redo() {
+    if (_redoStack.length === 0) return;
+    const snap = _redoStack.pop();
+    _undoStack.push(snap);
+    _restoreSnapshot(snap);
+  }
+
   function init() {
     _textarea = document.getElementById('edit-textarea');
     const toolBtns = document.querySelectorAll('.edit-tool-btn');
@@ -12,11 +57,36 @@ const EditorModule = (() => {
 
     if (!_textarea) return;
 
-    // Formatting Actions
+    // ── Undo/Redo wiring ──────────────────────────────────
+    // Snapshot on every keystroke (debounced 300ms) 
+    _textarea.addEventListener('input', () => {
+      if (_ignoreNextInput) { _ignoreNextInput = false; return; }
+      _scheduleSnapshot();
+    });
+
+    // Intercept Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z before browser handles them
+    _textarea.addEventListener('keydown', (e) => {
+      const isMac = navigator.platform.includes('Mac');
+      const ctrl = isMac ? e.metaKey : e.ctrlKey;
+      if (ctrl && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+        return;
+      }
+      if (ctrl && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        redo();
+        return;
+      }
+    });
+
+    // Formatting Actions — snapshot after each tool action so undo restores pre-action state
     toolBtns.forEach(btn => {
       btn.addEventListener('click', () => {
+        _snapshot(); // save state before applying
         const action = btn.dataset.action;
         applyAction(_textarea, action);
+        _snapshot(); // save state after applying
       });
     });
 
@@ -84,15 +154,11 @@ const EditorModule = (() => {
 
     // Special Case: AI Response
     if (AppState.currentFile === '__AI_RESPONSE__') {
-        const aiInput = document.getElementById('ai-chat-input');
-        if (aiInput) {
-            aiInput.value = content;
+        if (typeof AIResponseModule !== 'undefined') {
+            AIResponseModule.setDraftContent(content);
+            AIResponseModule.renderPreview(content);
             _originalContent = content; // Update original to new state
-            if (typeof showToast === 'function') showToast('AI response updated');
-            // Re-render preview automatically
-            if (typeof AIResponseModule !== 'undefined' && typeof AIResponseModule.renderPreview === 'function') {
-                AIResponseModule.renderPreview();
-            }
+            if (typeof showToast === 'function') showToast('Draft updated');
             return true;
         }
         return false;
@@ -119,7 +185,12 @@ const EditorModule = (() => {
 
   function setOriginalContent(text) {
     _originalContent = text;
-    if (_textarea) _textarea.value = text;
+    if (_textarea) {
+      _textarea.value = text;
+      // Reset undo/redo history — seed with the loaded state as base
+      _undoStack = [{ value: text, ss: 0, se: 0 }];
+      _redoStack = [];
+    }
   }
 
   function isDirty() {
@@ -251,7 +322,7 @@ const EditorModule = (() => {
     textarea.focus();
   }
 
-  return { init, save, isDirty, setOriginalContent };
+  return { init, save, isDirty, setOriginalContent, undo, redo };
 })();
 
 document.addEventListener('DOMContentLoaded', () => {

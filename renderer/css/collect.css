@@ -1,0 +1,222 @@
+/* ============================================================
+   collect.css — Right sidebar for Collected Ideas & Bookmark trigger
+   ============================================================ */
+
+/* ── Right Sidebar Wrapper (Collect) ─────────────────────── */
+#collect-sidebar-wrap {
+  width: 0;
+  min-width: 0;
+  overflow: hidden;
+  flex-shrink: 0;
+  margin-left: -4px;
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    min-width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    margin-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+#collect-sidebar-wrap.open {
+  width: 320px;
+  /* Slightly wider for ideas */
+  min-width: 320px;
+  margin-left: 0;
+}
+
+.collect-resizer {
+  position: absolute;
+  top: 0;
+  left: -2px;
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 10;
+  transition: background 0.2s;
+}
+
+.collect-resizer:hover {
+  background: rgba(var(--accent-rgb), 0.3);
+}
+
+#collect-sidebar {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--glass-sidebar);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-sidebar);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+/* ── Header ────────────────────────────────────────────── */
+.collect-sidebar-header {
+  height: 48px;
+  flex-shrink: 0;
+  padding: 0px 8px 0px 16px;
+  border-bottom: 1px solid var(--border-main);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.collect-sidebar-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-90);
+  flex: 1;
+}
+
+.collect-sidebar-actions {
+  display: flex;
+  gap: 4px;
+}
+
+/* ── Idea List ────────────────────────────────────────── */
+.collect-list-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+#collect-list {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.idea-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-bottom: 1px solid var(--border-main);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.idea-item:hover {
+  background: var(--layer-hover);
+}
+
+.idea-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.idea-item-label {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--accent-color);
+  letter-spacing: 0.05em;
+}
+
+.idea-item-delete {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: var(--text-40);
+  transition: all 0.2s;
+  opacity: 0;
+}
+
+.idea-item:hover .idea-item-delete {
+  opacity: 1;
+}
+
+.idea-item-delete:hover {
+  background: rgba(255, 69, 58, 0.1);
+  color: #ff453a;
+}
+
+.idea-item-content {
+  font-size: 13px;
+  color: var(--text-80);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+}
+
+.idea-item:hover .idea-item-content {
+  display: block; /* Breaks the -webkit-box model to show all text */
+}
+
+/* Empty State */
+#no-ideas {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: var(--text-30);
+  text-align: center;
+  padding: 40px;
+}
+
+#no-ideas p {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ── Bookmark Trigger (Selection Button) ──────────────── */
+.collect-trigger {
+  position: fixed;
+  z-index: 2100;
+  width: 36px;
+  height: 36px;
+  background: var(--accent-color);
+  color: #000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  border: none;
+  opacity: 0;
+  transform: scale(0.8) translateY(10px);
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.collect-trigger.show {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: auto;
+}
+
+.collect-trigger:hover {
+  transform: scale(1.1);
+  filter: brightness(1.1);
+}
+
+.collect-trigger:active {
+  transform: scale(0.95);
+}
+
+/* Icon Animation for trigger */
+.collect-trigger svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.2s;
+}
+
+.collect-trigger:hover svg {
+  transform: translateY(-1px);
+}
