@@ -6,7 +6,7 @@
   // If window.electronAPI is already defined (by Electron preload), do nothing.
   if (window.electronAPI) return;
 
-  console.log('%c[Bridge] Electron not detected. Polyfilling window.electronAPI via Express APIs...', 'color: #ffbf48; font-weight: bold;');
+  // console.log('%c[Bridge] Electron not detected. Polyfilling window.electronAPI via Express APIs...', 'color: #ffbf48; font-weight: bold;');
 
   window.electronAPI = {
     // Folder picker (In browser, we'll just prompt for a string or return null)
@@ -17,10 +17,13 @@
 
     // Server watch dir
     setWatchDir: async (dirPath) => {
-      // Note: We don't have a direct way to trigger the server's setWatchDir from the browser
-      // without an API endpoint. Let's assume the server will handle it if we tell it to.
-      // But for now, we'll just return true to avoid errors.
-      return true;
+      const res = await fetch('/api/set-watch-dir', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dir: dirPath })
+      });
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      return res.json();
     },
 
     // Workspaces

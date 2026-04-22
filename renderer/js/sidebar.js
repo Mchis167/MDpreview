@@ -93,7 +93,20 @@ const RecentlyViewedModule = (() => {
     });
   }
 
-  return { add, remove, swap, render };
+  function setActiveFile(filePath) {
+    const list = document.getElementById('recently-viewed-list');
+    if (!list) return;
+    list.querySelectorAll('.recent-item').forEach(el => {
+      // If filePath is null/empty, always remove active class
+      if (!filePath) {
+        el.classList.remove('active');
+      } else {
+        el.classList.toggle('active', el.dataset.path === filePath);
+      }
+    });
+  }
+
+  return { add, remove, swap, render, setActiveFile };
 })();
 
 function initSidebarModeSwitcher() {

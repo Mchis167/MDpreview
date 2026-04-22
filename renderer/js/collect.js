@@ -1,13 +1,8 @@
-/* ============================================================
-   collect.js — Idea collection (bookmark) module
-   ============================================================ */
-
 const CollectModule = (() => {
   let ideas = [];
   let currentFilePath = null;
 
-  const svgBookmark = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>`;
-  const svgCheck = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>`;
+  // SVG constants removed in favor of Lucide icon names
 
   // ── Persistence ──────────────────────────────────────────
   function _getStorageKey(filePath) {
@@ -24,6 +19,7 @@ const CollectModule = (() => {
     const stored = localStorage.getItem(_getStorageKey(filePath));
     ideas = stored ? JSON.parse(stored) : [];
     _renderList();
+    _markLinesWithIdeas();
   }
 
   function _saveToStorage() {
@@ -33,18 +29,22 @@ const CollectModule = (() => {
   }
 
   // ── CRUD ─────────────────────────────────────────────────
-  function addIdea(text) {
+  function addIdea(text, lineStart = null, lineEnd = null, selectedText = null) {
     if (!text || text.trim() === '') return;
     
     const newIdea = {
       id: Date.now(),
       text: text.trim(),
-      timestamp: new Date().toISOString()
+      selectedText: selectedText || text.trim(), // Explicitly store selected text
+      timestamp: new Date().toISOString(),
+      lineStart,
+      lineEnd
     };
     
     ideas.push(newIdea);
     _saveToStorage();
     _renderList();
+    _markLinesWithIdeas();
     
     if (typeof showToast === 'function') {
       showToast('Idea bookmarked!');
@@ -55,6 +55,7 @@ const CollectModule = (() => {
     ideas = ideas.filter(i => i.id !== id);
     _saveToStorage();
     _renderList();
+    _markLinesWithIdeas();
   }
 
   function clearAll() {
@@ -63,6 +64,7 @@ const CollectModule = (() => {
       ideas = [];
       _saveToStorage();
       _renderList();
+      _markLinesWithIdeas();
     }
   }
 
@@ -85,55 +87,141 @@ const CollectModule = (() => {
       if (typeof showToast === 'function') {
         showToast(`Copied ${ideas.length} ideas to clipboard`);
       }
-      
-      // Feedback animation on button
-      const btn = document.getElementById('copy-ideas-btn');
-      if (btn) {
-        const originalIcon = btn.innerHTML;
-        btn.innerHTML = svgCheck;
-        btn.style.color = 'var(--accent-color)';
-        setTimeout(() => {
-          btn.innerHTML = originalIcon;
-          btn.style.color = '';
-        }, 1500);
-      }
     });
   }
 
   // ── Rendering ────────────────────────────────────────────
   function _renderList() {
-    const list = document.getElementById('collect-list');
-    const noIdeas = document.getElementById('no-ideas');
-    if (!list || !noIdeas) return;
+    const sidebar = RightSidebar.getInstance();
+    if (!sidebar || AppState.currentMode !== 'collect') return;
 
-    list.innerHTML = '';
-    
-    if (ideas.length === 0) {
-      noIdeas.style.display = 'flex';
-      return;
+    sidebar.setupModule({
+      title: 'Collect',
+      actions: [
+        { id: 'clear', icon: 'trash', title: 'Clear all ideas', onClick: clearAll },
+        { id: 'copy', icon: 'copy', title: 'Copy all ideas', onClick: copyAll }
+      ],
+      items: ideas,
+      emptyState: {
+        icon: 'bookmark',
+        text: 'No ideas yet'
+      },
+      renderItem: (idea, index) => {
+        const lineRef = idea.lineStart ? `LINE ${idea.lineStart}` : `IDEA ${index + 1}`;
+        const item = DesignSystem.createElement('div', 'ds-sidebar-item');
+        item.innerHTML = `
+          <div class="ds-item-header">
+            <span class="ds-item-label">${lineRef}</span>
+            <button class="ds-item-delete-btn" title="Remove">
+              ${DesignSystem.getIcon('x')}
+            </button>
+          </div>
+          <div class="ds-item-body ds-text-clamp-5">${_esc(idea.text)}</div>
+        `;
+        
+        item.onclick = () => _onItemClick(idea);
+
+        item.querySelector('.ds-item-delete-btn').onclick = (e) => {
+          e.stopPropagation();
+          removeIdea(idea.id);
+        };
+        
+        return item;
+      }
+    });
+  }
+
+  function _onItemClick(idea) {
+    if (!idea.lineStart) return;
+    const targetLine = document.querySelector(`.md-line[data-line="${idea.lineStart}"]`);
+    if (targetLine) {
+      targetLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      targetLine.classList.add('pulse-highlight-collect');
+      setTimeout(() => targetLine.classList.remove('pulse-highlight-collect'), 2000);
     }
-    
-    noIdeas.style.display = 'none';
+  }
 
-    ideas.forEach((idea, index) => {
-      const item = document.createElement('div');
-      item.className = 'idea-item';
-      item.innerHTML = `
-        <div class="idea-item-header">
-          <span class="idea-item-label">IDEA ${index + 1}</span>
-          <button class="idea-item-delete" title="Remove">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </div>
-        <div class="idea-item-content">${_esc(idea.text)}</div>
-      `;
-      
-      item.querySelector('.idea-item-delete').onclick = (e) => {
-        e.stopPropagation();
-        removeIdea(idea.id);
-      };
-      
-      list.appendChild(item);
+  function _markLinesWithIdeas() {
+    // 1. Clear old highlights
+    document.querySelectorAll('.idea-range').forEach(el => {
+      const parent = el.parentNode;
+      if (parent) {
+        parent.replaceChild(document.createTextNode(el.textContent), el);
+        parent.normalize();
+      }
+    });
+    document.querySelectorAll('.md-line').forEach(el => el.classList.remove('has-idea'));
+    
+    // 2. Identify lines that need marking
+    const lineMap = new Map();
+    ideas.forEach(idea => {
+      if (idea.lineStart) {
+        const start = parseInt(idea.lineStart, 10);
+        const end = idea.lineEnd ? parseInt(idea.lineEnd, 10) : start;
+        for (let i = start; i <= end; i++) {
+          if (!lineMap.has(i)) lineMap.set(i, []);
+          lineMap.get(i).push(idea);
+        }
+      }
+    });
+
+    // 3. Apply highlights line by line
+    lineMap.forEach((lineIdeas, lineNum) => {
+      const lineEl = document.querySelector(`.md-line[data-line="${lineNum}"]`);
+      if (!lineEl) return;
+      _applyIdeaHighlights(lineEl, lineIdeas);
+    });
+  }
+
+  function _applyIdeaHighlights(element, lineIdeas) {
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+    const textNodes = [];
+    let node;
+    while (node = walker.nextNode()) textNodes.push(node);
+
+    textNodes.forEach(textNode => {
+      const content = textNode.textContent;
+      const boundaries = new Set([0, content.length]);
+      const nodeMap = new Map();
+
+      lineIdeas.forEach(idea => {
+        if (!idea.selectedText) return;
+        let startIdx = 0;
+        while ((startIdx = content.indexOf(idea.selectedText, startIdx)) !== -1) {
+          const endIdx = startIdx + idea.selectedText.length;
+          boundaries.add(startIdx);
+          boundaries.add(endIdx);
+          for (let i = startIdx; i < endIdx; i++) {
+            if (!nodeMap.has(i)) nodeMap.set(i, idea);
+          }
+          startIdx = endIdx;
+        }
+      });
+
+      if (nodeMap.size === 0) return;
+
+      const sorted = Array.from(boundaries).sort((a, b) => a - b);
+      const fragments = document.createDocumentFragment();
+      for (let i = 0; i < sorted.length - 1; i++) {
+        const start = sorted[i];
+        const end = sorted[i+1];
+        if (start === end) continue;
+        const segmentText = content.substring(start, end);
+        const idea = nodeMap.get(start);
+        if (idea) {
+          const mark = document.createElement('mark');
+          mark.className = 'idea-range';
+          mark.textContent = segmentText;
+          mark.onclick = (e) => {
+            e.stopPropagation();
+            _onItemClick(idea);
+          };
+          fragments.appendChild(mark);
+        } else {
+          fragments.appendChild(document.createTextNode(segmentText));
+        }
+      }
+      textNode.parentNode.replaceChild(fragments, textNode);
     });
   }
 
@@ -148,7 +236,7 @@ const CollectModule = (() => {
     if (!trigger) {
       trigger = document.createElement('button');
       trigger.className = 'collect-trigger';
-      trigger.innerHTML = svgBookmark;
+      trigger.innerHTML = DesignSystem.getIcon('bookmark');
       trigger.title = 'Bookmark selection';
       trigger.onclick = _onTriggerClick;
       document.body.appendChild(trigger);
@@ -156,12 +244,16 @@ const CollectModule = (() => {
     
     document.addEventListener('mouseup', _handleSelection);
     document.addEventListener('keyup', _handleSelection);
+    _renderList(); // Initial render for sidebar
   }
 
   function removeCollectMode() {
     if (trigger) trigger.classList.remove('show');
     document.removeEventListener('mouseup', _handleSelection);
     document.removeEventListener('keyup', _handleSelection);
+    
+    const sidebar = RightSidebar.getInstance();
+    if (sidebar) sidebar.close();
   }
 
   function _handleSelection() {
@@ -202,7 +294,18 @@ const CollectModule = (() => {
     if (selection.isCollapsed) return;
 
     const text = selection.toString().trim();
-    addIdea(text);
+    
+    // Get line info
+    const allLines = Array.from(document.querySelectorAll('.md-line'));
+    const selectedLines = allLines.filter(el => selection.containsNode(el, true));
+    let lineStart = null;
+    let lineEnd = null;
+    if (selectedLines.length > 0) {
+      lineStart = parseInt(selectedLines[0].dataset.line, 10);
+      lineEnd   = parseInt(selectedLines[selectedLines.length - 1].dataset.line, 10);
+    }
+
+    addIdea(text, lineStart, lineEnd, text); // Pass text as selectedText
     
     if (trigger) trigger.classList.remove('show');
     selection.removeAllRanges();
@@ -210,48 +313,7 @@ const CollectModule = (() => {
 
   // ── Initialization ───────────────────────────────────────
   function init() {
-    const clearBtn = document.getElementById('clear-ideas-btn');
-    const copyBtn = document.getElementById('copy-ideas-btn');
-    
-    if (clearBtn) clearBtn.addEventListener('click', clearAll);
-    if (copyBtn) copyBtn.addEventListener('click', copyAll);
-
-    // Initial load if a file is already active
-    if (typeof AppState !== 'undefined' && AppState.currentFile) {
-      loadForFile(AppState.currentFile);
-    }
-    
-    // Resizer logic
-    _initResizer();
-  }
-
-  function _initResizer() {
-    const wrap = document.getElementById('collect-sidebar-wrap');
-    const resizer = document.getElementById('collect-resizer');
-    if (!wrap || !resizer) return;
-
-    let isResizing = false;
-
-    resizer.addEventListener('mousedown', (e) => {
-      isResizing = true;
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
-    });
-
-    window.addEventListener('mousemove', (e) => {
-      if (!isResizing) return;
-      const width = window.innerWidth - e.clientX;
-      if (width >= 200 && width <= 600) {
-        wrap.style.width = width + 'px';
-      }
-    });
-
-    window.addEventListener('mouseup', () => {
-      if (!isResizing) return;
-      isResizing = false;
-      document.body.style.cursor = 'default';
-      document.body.style.userSelect = 'auto';
-    });
+    // UI is handled by RightSidebar organism
   }
 
   return {

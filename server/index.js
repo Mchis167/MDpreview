@@ -3,6 +3,8 @@ const http     = require('http');
 const { Server } = require('socket.io');
 const path     = require('path');
 const chokidar = require('chokidar');
+const os       = require('os');
+const fs       = require('fs');
 
 const app    = express();
 app.use(express.json());
@@ -11,8 +13,35 @@ const io     = new Server(server);
 
 const PORT = process.env.PORT || 3737;
 
+/**
+ * Resolves the default data directory.
+ * Prioritizes the Electron app's userData folder if it exists.
+ */
+function getDefaultDataDir() {
+  if (process.env.MDPREVIEW_DATA_DIR) return process.env.MDPREVIEW_DATA_DIR;
+
+  const home = os.homedir();
+  let appPath = '';
+
+  if (process.platform === 'darwin') {
+    appPath = path.join(home, 'Library/Application Support/MDpreview');
+  } else if (process.platform === 'win32') {
+    appPath = path.join(process.env.APPDATA || path.join(home, 'AppData/Roaming'), 'MDpreview');
+  } else {
+    appPath = path.join(home, '.config/MDpreview');
+  }
+
+  // If the Electron app data folder exists, use it to share data
+  if (fs.existsSync(appPath)) {
+    return appPath;
+  }
+
+  // Fallback to local data folder in the project
+  return path.join(__dirname, '../data');
+}
+
 let currentWatchDir = null;
-let currentDataDir  = path.join(__dirname, '../data');
+let currentDataDir  = getDefaultDataDir();
 let watcher         = null;
 
 // --- Static renderer assets ---
@@ -35,6 +64,14 @@ app.use('/api', (req, res, next) => {
 
 // Debug route to verify API is alive
 app.get('/api/ping', (req, res) => res.json({ status: 'alive', time: new Date().toISOString() }));
+
+// Endpoint to set watch directory (used by web version)
+app.post('/api/set-watch-dir', (req, res) => {
+  const { dir } = req.body;
+  if (!dir) return res.status(400).send('Missing directory path');
+  setWatchDir(dir);
+  res.json({ success: true, watchDir: dir });
+});
 
 app.use('/api', require('./routes/files'));
 app.use('/api', require('./routes/render'));

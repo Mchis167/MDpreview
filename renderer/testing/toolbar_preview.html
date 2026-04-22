@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Secondary Toolbar Design System - Preview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="../css/design-system.css">
+    <style>
+        body {
+            background-color: #0d0d0d;
+            margin: 0;
+            padding: 40px;
+            font-family: 'Inter', sans-serif;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            gap: 60px;
+            align-items: center;
+        }
+        .preview-section {
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 24px;
+            background: rgba(255,255,255,0.02);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            position: relative;
+        }
+        .section-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(255,255,255,0.4);
+            position: absolute;
+            top: 20px;
+            left: 24px;
+        }
+        h1 { margin: 0 0 10px 0; font-size: 24px; }
+        p { margin: 0; color: rgba(255,255,255,0.6); font-size: 14px; }
+
+        /* Override fixed positioning for preview */
+        .ds-secondary-toolbar-container.preview-mode {
+            position: relative;
+            bottom: auto;
+            left: auto;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div style="text-align: center;">
+        <h1>Atomic Design System</h1>
+        <p>Secondary Toolbar Component Variants</p>
+    </div>
+
+    <!-- Variant 1: Standard -->
+    <div class="preview-section">
+        <span class="section-label">Variant: Standard</span>
+        <div id="standard-toolbar-mount"></div>
+        <p>Sử dụng khi xem các file Markdown thông thường.</p>
+    </div>
+
+    <!-- Variant 2: Draft Actions -->
+    <div class="preview-section">
+        <span class="section-label">Variant: With Draft Actions</span>
+        <div id="draft-toolbar-mount"></div>
+        <p>Tự động hiển thị khi đang ở chế độ Draft (AI Response).</p>
+    </div>
+
+    <!-- Mocks -->
+    <script>
+        window.DesignSystem = {
+            createElement: (tag, className, attributes = {}) => {
+                const el = document.createElement(tag);
+                if (className) {
+                    if (Array.isArray(className)) el.classList.add(...className);
+                    else el.className = className;
+                }
+                for (const [key, value] of Object.entries(attributes)) {
+                    if (key === 'text') el.textContent = value;
+                    else if (key === 'html') el.innerHTML = value;
+                    else el.setAttribute(key, value);
+                }
+                return el;
+            }
+        };
+    </script>
+    <script src="../js/components/organisms/secondary-toolbar.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Standard Toolbar
+            const standard = new SecondaryToolbarComponent({
+                targetContainer: document.getElementById('standard-toolbar-mount'),
+                isStandalone: true
+            });
+
+            // Initialize Draft Toolbar
+            const draft = new SecondaryToolbarComponent({
+                targetContainer: document.getElementById('draft-toolbar-mount'),
+                isStandalone: true
+            });
+            draft.setDraftMode(true);
+        });
+    </script>
+</body>
+</html>

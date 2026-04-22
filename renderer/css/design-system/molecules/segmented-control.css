@@ -1,0 +1,50 @@
+/* ============================================================
+   design-system/molecules/segmented-control.css
+   ============================================================ */
+
+.ds-segmented-control {
+  display: flex;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 2px;
+  border-radius: 8px;
+  gap: 2px;
+  position: relative;
+}
+
+.ds-segment-indicator {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ds-segment-item {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: var(--ds-text-secondary);
+  cursor: pointer;
+  transition: all var(--ds-transition-fast);
+  position: relative;
+  z-index: 1;
+}
+
+.ds-segment-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ds-text-primary);
+}
+
+.ds-segment-item.active {
+  color: var(--ds-text-primary);
+}
+
+.ds-segment-item svg {
+  width: 14px;
+  height: 14px;
+}

@@ -1,0 +1,189 @@
+/* ══════════════════════════════════════════════════
+   TAB BAR ORGANISM — FIGMA PRECISION
+   Scalable component-based styling
+   ════════════════════════════════════════════════════ */
+
+.tab-bar-container {
+  height: var(--header-height, 48px);
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border-bottom: 1px solid var(--figma-divider, rgba(255, 255, 255, 0.05));
+  user-select: none;
+}
+
+/* Vertical Divider Utility */
+.tab-bar__divider-v {
+  width: 1px;
+  height: 100%;
+  background: var(--figma-divider, rgba(255, 255, 255, 0.05));
+  flex-shrink: 0;
+}
+
+/* Sidebar Toggle Section */
+.tab-bar__sidebar-toggle-wrapper {
+  width: 48px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tab-bar__toggle-btn {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-bar__toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: #fff;
+}
+
+/* Tab List Section */
+.tab-bar__list {
+  display: flex;
+  height: 100%;
+  align-items: center;
+}
+
+.tab-item {
+  width: 160px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  position: relative;
+  border-right: 1px solid var(--figma-divider, rgba(255, 255, 255, 0.05));
+  transition: all 0.2s;
+}
+
+.tab-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.tab-item.active {
+  background: transparent;
+  color: #fff;
+}
+
+.tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.tab-bar__name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tab-bar__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.tab-item.active .tab-bar__close,
+.tab-item:hover .tab-bar__close {
+  opacity: 0.5;
+}
+
+.tab-bar__close:hover {
+  opacity: 1 !important;
+}
+
+/* Add Tab Section */
+.tab-bar__add-btn-container {
+  width: 48px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid var(--figma-divider, rgba(255, 255, 255, 0.05));
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-bar__add-btn-container:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tab-bar__add-btn {
+  color: rgba(255, 255, 255, 0.3);
+  transition: all 0.2s;
+  display: flex;
+}
+
+.tab-bar__add-btn-container:hover .tab-bar__add-btn {
+  color: #fff;
+}
+
+/* Right Actions Section */
+.tab-bar__actions-right {
+  margin-left: auto;
+  display: flex;
+  height: 100%;
+  align-items: center;
+  border-left: 1px solid var(--figma-divider, rgba(255, 255, 255, 0.05));
+}
+
+.ds-header-action {
+  width: 48px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ds-header-action:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: #fff;
+}
+
+.tab-bar__action-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Draft Indicator */
+.tab-bar__draft-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--accent-color, #ffbf48);
+  border-radius: 50%;
+  margin-right: 8px;
+  flex-shrink: 0;
+  box-shadow: 0 0 10px var(--accent-color, #ffbf48);
+}
+
+.tab-item:not(.active) .tab-bar__draft-dot {
+  opacity: 0.5;
+  box-shadow: none;
+}

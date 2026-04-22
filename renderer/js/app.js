@@ -7,7 +7,7 @@
      sidebar.js  — Mode switcher, search, resizer
    ============================================================ */
 
-const AppState = {
+window.AppState = {
   currentFile:      null,
   currentWorkspace: null,
   lastMarkdownFile: null, // Tracks original file when in Draft mode
@@ -30,6 +30,7 @@ const AppState = {
    * Called when sidebar mode changes (Space <-> Draft)
    */
   onModeChange(mode) {
+    console.log('[App] onModeChange:', mode);
     if (mode === 'draft') {
       // 1. Store and switch to Draft virtual file
       if (AppState.currentFile !== '__DRAFT_MODE__') {
@@ -47,6 +48,11 @@ const AppState = {
       // 3. Clear triggers if in comment mode (they will be re-applied to Draft preview)
       if (AppState.commentMode && typeof CommentsModule !== 'undefined') {
         CommentsModule.removeCommentMode();
+      }
+
+      const viewer = document.getElementById('md-viewer');
+      if (viewer) {
+        viewer.setAttribute('data-active-mode', mode);
       }
 
       // 4. Sync Draft preview (handled by DraftModule)
@@ -165,9 +171,17 @@ async function loadFile(filePath) {
     }
   }
 
-  const res = await fetch(`/api/render?file=${encodeURIComponent(filePath)}`);
-  if (!res.ok) throw new Error(`Failed to load file: ${filePath}`);
-  const data = await res.json();
+  let data = { html: '' };
+  if (filePath === '__DRAFT_MODE__') {
+    // For Draft, we don't fetch from server, we sync from DraftModule
+    if (typeof DraftModule !== 'undefined') {
+      data.html = DraftModule.getRenderedHtml ? DraftModule.getRenderedHtml() : '';
+    }
+  } else {
+    const res = await fetch(`/api/render?file=${encodeURIComponent(filePath)}`);
+    if (!res.ok) throw new Error(`Failed to load file: ${filePath}`);
+    data = await res.json();
+  }
 
   // Save current scroll before switching
   if (AppState.currentFile) {
@@ -192,15 +206,21 @@ async function loadFile(filePath) {
   }
 
   updateHeaderUI();
-  await CommentsModule.loadForFile(filePath);
-  if (typeof CollectModule !== 'undefined') CollectModule.loadForFile(filePath);
+  
+  try {
+    if (typeof CommentsModule !== 'undefined') await CommentsModule.loadForFile(filePath);
+  } catch (e) { console.error('[App] CommentsModule error:', e); }
+
+  try {
+    if (typeof CollectModule !== 'undefined') CollectModule.loadForFile(filePath);
+  } catch (e) { console.error('[App] CollectModule error:', e); }
+
   RecentlyViewedModule.add(filePath);
 
-  // Force 'edit' for Draft, 'read' for normal documents
   if (typeof AppState.updateToolbarUI === 'function') {
     const targetMode = (filePath === '__DRAFT_MODE__') ? 'edit' : 'read';
     AppState.updateToolbarUI(targetMode);
-  } else if (AppState.commentMode) {
+  } else if (AppState.commentMode && typeof CommentsModule !== 'undefined') {
     CommentsModule.applyCommentMode();
   }
 
@@ -209,6 +229,7 @@ async function loadFile(filePath) {
 }
 
 function setNoFile() {
+  // console.log('[App] setNoFile triggered');
   AppState.currentFile = null;
 
   const emptyState = document.getElementById('empty-state');
@@ -221,6 +242,9 @@ function setNoFile() {
 
   if (typeof CommentsModule !== 'undefined') CommentsModule.clearUI();
   if (typeof CollectModule !== 'undefined') CollectModule.loadForFile(null);
+
+  if (typeof TreeModule !== 'undefined') TreeModule.setActiveFile(null);
+  if (typeof RecentlyViewedModule !== 'undefined') RecentlyViewedModule.setActiveFile(null);
 
   // Hide secondary toolbar
   if (typeof AppState.updateToolbarUI === 'function') {
@@ -278,20 +302,30 @@ function updateSidebarToggleIcon(isCollapsed) {
 
 // ── Boot ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  // 1. Core UI Components First
+  ChangeActionViewBar.init(); // organisms/change-action-view-bar.js
+  RightSidebar.init();        // organisms/right-sidebar.js
+
+  // 2. Support Modules
   initSocket();
   initMermaid();          // mermaid.js
   initZoom();             // zoom.js
-  initSegmentedControl(); // toolbar.js
   initToolbarBtns();      // toolbar.js
   initGlobalShortcuts();  // toolbar.js
   initSidebarModeSwitcher(); // sidebar.js
   initSidebarRevamp();       // sidebar.js
   initSidebarResizer();      // sidebar.js
+
+  // 3. Functional Modules
   SettingsModule.init();     // settings.js
   DraftModule.init();        // draft.js
   ScrollModule.init();       // scroll.js
+  
+  // 4. Tab System (triggers initial loadFile)
   TabsModule.init();         // tabs.js
+  
   if (typeof CollectModule !== 'undefined') CollectModule.init(); // collect.js
+  if (typeof CommentsModule !== 'undefined') CommentsModule.init(); // comments.js
 
   setTimeout(() => {
     if (typeof WorkspaceModule !== 'undefined') WorkspaceModule.init();

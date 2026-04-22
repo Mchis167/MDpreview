@@ -315,6 +315,6 @@ const DraftModule = (() => {
     }
   }
 
-  return { init, toggleFooter, updateHeader, syncPreview, renderPreview, clear, getDraftContent, setDraftContent, saveToStorage, loadFromStorage };
+  return { init, toggleFooter, updateHeader, syncPreview, renderPreview, clear, getDraftContent, setDraftContent, getRenderedHtml: () => renderedHtml, saveToStorage, loadFromStorage };
 })();
 

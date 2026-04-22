@@ -11,12 +11,12 @@
    ============================================================ */
 
 @import url('tokens.css');
+@import url('design-system.css');
 @import url('textarea.css');
 @import url('switch-toggle.css');
 @import url('layout.css');
 @import url('sidebar.css');
 @import url('toolbar.css');
 @import url('markdown.css');
-@import url('comments.css');
-@import url('collect.css');
+@import url('design-system/organisms/right-sidebar.css');
 @import url('modals.css');

@@ -1,0 +1,33 @@
+/* ============================================================
+   design-system/tokens.css — Base tokens for MDPreview
+   ============================================================ */
+
+:root {
+  /* ── Colors ────────────────────────────────────────────── */
+  --ds-bg-toolbar: rgba(13, 13, 13, 0.5);
+  --ds-bg-toolbar-inner: rgba(255, 255, 255, 0.03);
+  --ds-border-toolbar: rgba(255, 255, 255, 0.08);
+
+  --ds-accent-orange: #ffbf48;
+  --ds-accent-hover: #ffca6b;
+
+  --ds-text-primary: rgba(255, 255, 255, 0.9);
+  --ds-text-secondary: rgba(255, 255, 255, 0.5);
+  --ds-text-dark: rgba(0, 0, 0, 0.9);
+
+  /* ── Spacing ───────────────────────────────────────────── */
+  --ds-space-xs: 4px;
+  --ds-space-sm: 8px;
+  --ds-space-md: 12px;
+  --ds-space-lg: 16px;
+
+  /* ── Radius ────────────────────────────────────────────── */
+  --ds-radius-sm: 6px;
+  --ds-radius-md: 8px;
+  --ds-radius-lg: 12px;
+  --ds-radius-full: 999px;
+
+  /* ── Transitions ───────────────────────────────────────── */
+  --ds-transition-fast: 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  --ds-transition-main: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}

@@ -56,4 +56,5 @@ main {
   border: 1px solid var(--border-main);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  position: relative;
 }

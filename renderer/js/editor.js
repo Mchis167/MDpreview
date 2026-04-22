@@ -132,7 +132,7 @@ const EditorModule = (() => {
       saveBtn.onclick = async () => {
         const success = await save();
         if (success) {
-          const readSeg = document.querySelector('.mode-segment[data-mode="read"]');
+          const readSeg = document.querySelector('.ds-segment-item[data-mode="read"]');
           if (readSeg) readSeg.click();
         }
       };
@@ -142,7 +142,7 @@ const EditorModule = (() => {
     if (cancelBtn) {
       cancelBtn.onclick = () => {
         // Toggle back to read mode
-        const readSeg = document.querySelector('.mode-segment[data-mode="read"]');
+        const readSeg = document.querySelector('.ds-segment-item[data-mode="read"]');
         if (readSeg) readSeg.click();
       };
     }

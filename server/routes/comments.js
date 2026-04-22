@@ -21,7 +21,23 @@ function loadComments(dataDir, wsId, filePath) {
   try {
     const file = getCommentsFile(dataDir, wsId, filePath);
     if (!fs.existsSync(file)) return [];
-    return JSON.parse(fs.readFileSync(file, 'utf8'));
+    const data = fs.readFileSync(file, 'utf8');
+    const comments = JSON.parse(data);
+
+    // Auto-fix: Ensure every comment has a unique ID
+    let changed = false;
+    comments.forEach(c => {
+      if (!c.id) {
+        c.id = uuidv4();
+        changed = true;
+      }
+    });
+
+    if (changed) {
+      saveComments(dataDir, wsId, filePath, comments);
+    }
+
+    return comments;
   } catch {
     return [];
   }
@@ -46,17 +62,20 @@ router.post('/comments', (req, res) => {
   const comments = loadComments(req.dataDir, wsId, file);
   let resultComment;
 
-  if (commentData.id) {
-    const idx = comments.findIndex(c => c.id === commentData.id);
+  // Destructure to avoid overwriting id with null/undefined from frontend
+  const { id, createdAt, ...data } = commentData;
+
+  if (id) {
+    const idx = comments.findIndex(c => c.id === id);
     if (idx !== -1) {
-      comments[idx] = { ...comments[idx], ...commentData, updatedAt: new Date().toISOString() };
+      comments[idx] = { ...comments[idx], ...data, updatedAt: new Date().toISOString() };
       resultComment = comments[idx];
     } else {
-      resultComment = { id: uuidv4(), ...commentData, createdAt: new Date().toISOString() };
+      resultComment = { ...data, id, createdAt: new Date().toISOString() };
       comments.push(resultComment);
     }
   } else {
-    resultComment = { id: uuidv4(), ...commentData, createdAt: new Date().toISOString() };
+    resultComment = { ...data, id: uuidv4(), createdAt: new Date().toISOString() };
     comments.push(resultComment);
   }
 

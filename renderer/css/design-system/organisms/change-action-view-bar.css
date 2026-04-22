@@ -1,0 +1,64 @@
+/* ============================================================
+   design-system/organisms/change-action-view-bar.css
+   ============================================================ */
+
+.ds-change-action-view-bar-container {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+
+.ds-change-action-view-bar {
+  display: flex;
+  align-items: center;
+  background: var(--ds-bg-toolbar);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-radius: 12px;
+  border: 1px solid var(--ds-border-toolbar);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  pointer-events: auto;
+}
+
+.ds-toolbar-section-left {
+  display: flex;
+  align-items: center;
+  margin: 5px;
+}
+
+.ds-toolbar-divider {
+  width: 1px;
+  height: stretch;
+  background: var(--ds-border-toolbar);
+}
+
+.ds-toolbar-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+}
+
+/* Animations */
+.ds-change-action-view-bar {
+  animation: toolbarSlideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes toolbarSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

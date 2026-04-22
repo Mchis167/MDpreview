@@ -20,6 +20,7 @@ For every non-trivial task (implementation, refactoring, bug fix):
 - Auto-proceeding after writing a plan
 - Leaving a task in "In progress" after code is changed
 - Assuming the plan is correct without user approval
+- **Auto-updating Changelog** — Never add entries to `CHANGELOG.md` unless the user explicitly requests it.
 
 ---
 
@@ -95,6 +96,7 @@ Single file, no fragments. Section order:
 - New styles → find the correct file from the table above, never write into `styles.css`
 - New UI component → add a section with a `/* ── Name ── */` comment header
 - Always use CSS variables (`var(--accent-orange)`, `var(--border-main)`, etc.) — no hardcoded colors
+- **Design System**: All new components must follow [design-system.md](file:///Users/mchisdo/MDpreview/.ai/design-system.md) and Atomic Design principles.
 - New CSS file → add `@import url('filename.css');` to `styles.css` (keep `tokens.css` first)
 
 ---

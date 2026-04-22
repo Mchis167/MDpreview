@@ -21,7 +21,8 @@
   <!-- Design System -->
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/editor.css">
-  <link rel="stylesheet" href="css/tabs.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>
@@ -95,13 +96,13 @@
   <!-- ══════════════════════════════════════════════════
      EXPANDED COMMENT MODAL
 ════════════════════════════════════════════════════ -->
-  <!-- Expanded Comment Modal (Restored original names) -->
-  <div id="expanded-comment-modal" class="expanded-comment-modal">
+  <!-- Expanded Comment Modal (Unified with Premium Design System) -->
+  <div id="expanded-comment-modal" class="expanded-textarea-modal">
     <div class="expanded-textarea-backdrop"></div>
-    <div class="expanded-comment-container">
-      <div class="expanded-comment-header">
-        <div class="comment-form-label">DRAFT RESPONSE</div>
-        <button id="minimize-comment-btn" class="comment-expand-btn" title="Minimize">
+    <div class="expanded-textarea-container">
+      <div class="expanded-textarea-header">
+        <div class="textarea-label">COMMENT FEEDBACK</div>
+        <button id="minimize-comment-btn" class="textarea-expand-btn" title="Minimize">
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="4 14 10 14 10 20" />
@@ -111,11 +112,11 @@
           </svg>
         </button>
       </div>
-      <div class="expanded-comment-body">
-        <textarea id="expanded-comment-input" class="expanded-comment-input"
-          placeholder="What’s your feedback"></textarea>
+      <div class="expanded-textarea-body">
+        <textarea id="expanded-comment-input" class="expanded-textarea-input"
+          placeholder="What’s your feedback..."></textarea>
       </div>
-      <div class="expanded-comment-footer">
+      <div class="expanded-textarea-footer">
         <button id="expanded-save-comment" class="btn btn-primary">Save Comment</button>
       </div>
     </div>
@@ -388,12 +389,8 @@
   <div id="app-layout">
 
     <!-- ── Sidebar Left ──────────────────────────────── -->
-    <!-- ── Sidebar Left ──────────────────────────────── -->
     <div id="sidebar-left-wrap">
       <aside id="sidebar-left">
-
-        <!-- Mode Switcher -->
-        <!-- Sidebar mode switcher removed in favor of Tab Bar "+" button -->
 
         <!-- Workspace Picker -->
         <div class="workspace-picker" id="sidebar-md-header">
@@ -537,94 +534,10 @@
 
         <!-- ── NEW HEADER (Figma Precision) ────────────────── -->
         <div id="tab-bar-container">
-          <!-- Left: Sidebar Toggle -->
-          <div id="sidebar-toggle-wrapper">
-            <div id="sidebar-toggle-btn" title="Toggle Sidebar">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m9 6-6 6 6 6"/><path d="M3 12h12"/><path d="M21 19V5"/>
-              </svg>
-            </div>
-          </div>
-
-          <div class="figma-divider-v"></div>
-
-          <!-- Middle: Tabs -->
-          <div id="tab-list">
-            <!-- Tabs will be rendered here by JS -->
-          </div>
-
-          <!-- Add Tab -->
-          <div id="add-tab-btn-container">
-            <div id="add-tab-btn" title="New Draft">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-            </div>
-          </div>
-
-          <!-- Right: Action Buttons -->
-          <div class="header-actions-right">
-            <div class="action-btn-wrap" title="Rebuild & Relaunch" id="rebuild-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                <path d="M3 3v5h5" />
-                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
-                <path d="M16 16h5v5" />
-              </svg>
-            </div>
-            <div class="action-btn-wrap" title="Scroll to top" id="scroll-top-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="19" x2="12" y2="5" />
-                <polyline points="5 12 12 5 19 12" />
-              </svg>
-            </div>
-            <div class="action-btn-wrap" title="Fullscreen" id="fullscreen-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 3 21 3 21 9" />
-                <polyline points="9 21 3 21 3 15" />
-                <line x1="21" y1="3" x2="14" y2="10" />
-                <line x1="3" y1="21" x2="10" y2="14" />
-              </svg>
-            </div>
-            <div class="action-group-divider"></div>
-            <div class="action-btn-wrap" title="Settings" id="open-settings-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path
-                  d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-            </div>
-          </div>
+          <!-- TabBarComponent will mount here -->
         </div>
 
-        <!-- ── SECONDARY TOOLBAR (Segmented Control) ───── -->
-        <div id="secondary-toolbar">
-          <div class="segmented-control">
-            <div id="segment-bg"></div>
-            <button class="mode-segment active" data-mode="read">Read</button>
-            <button class="mode-segment" data-mode="edit">Edit</button>
-            <button class="mode-segment" data-mode="comment">Comment</button>
-            <button class="mode-segment" data-mode="collect">Collect</button>
-          </div>
-
-          <!-- Draft Specific Actions (Hidden by default) -->
-          <div id="draft-actions-group" style="display: none;">
-            <div class="draft-action-btns">
-              <button id="draft-discard-btn" class="draft-btn discard" title="Discard Draft">
-                <span>Discard</span>
-              </button>
-              <button id="draft-save-btn" class="draft-btn save" title="Save to Workspace">
-                <span>Save</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        <!-- Change Action View Bar is now handled by Design System (js/components/organisms/change-action-view-bar.js) -->
 
         <!-- Content (md viewer only — comment sidebar is a sibling of main) -->
         <div id="md-viewer">
@@ -867,71 +780,9 @@
       </div><!-- /glass-main -->
     </main>
 
-    <!-- ── Right Sidebar (Comments) ─────────────────── -->
-    <!-- Wrapper handles the slide-in animation by transitioning width -->
-    <div id="comment-sidebar-wrap">
-      <!-- Comment Sidebar Resizer -->
-      <div class="comment-resizer" id="comment-resizer"></div>
-      <aside id="comment-sidebar">
-        <div class="comment-sidebar-header">
-          <div class="comment-sidebar-title">Comment</div>
-          <div class="comment-sidebar-actions">
-            <button class="icon-btn" id="clear-comments-btn" title="Clear all comments">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd" clip-rule="evenodd"
-                  d="M7.99916 0.666016C8.52933 0.666016 9.0382 0.877227 9.41322 1.25195C9.78815 1.62688 9.99899 2.13581 9.99916 2.66602V6H11.9992C12.5295 6 13.0382 6.21101 13.4132 6.58594C13.7882 6.96094 13.9991 7.46968 13.9992 8V8.66602C13.9992 9.0196 13.8585 9.35933 13.6085 9.60938C13.5664 9.65145 13.5206 9.68888 13.4738 9.72461L14.6212 13.6582L14.63 13.6895C14.6769 13.8853 14.6791 14.0895 14.6359 14.2861C14.5926 14.4829 14.5047 14.667 14.38 14.8252C14.2551 14.9834 14.0956 15.1113 13.9142 15.1992C13.733 15.2869 13.5344 15.333 13.3331 15.333H2.66615C2.46481 15.333 2.26532 15.287 2.08412 15.1992C1.90308 15.1114 1.74394 14.9832 1.61928 14.8252C1.49465 14.6671 1.40666 14.4828 1.36342 14.2861C1.32024 14.0895 1.32243 13.8852 1.36928 13.6895L1.37709 13.6582L2.52357 9.72461C2.47707 9.68905 2.43162 9.65121 2.38978 9.60938C2.13988 9.35935 1.99916 9.01953 1.99916 8.66602V8C1.99924 7.46983 2.2103 6.96091 2.5851 6.58594C2.96005 6.21103 3.46893 6.00013 3.99916 6H5.99916V2.66602C5.99933 2.13581 6.21017 1.62688 6.5851 1.25195C6.96005 0.877041 7.46893 0.666142 7.99916 0.666016ZM2.66615 14H4.81166L5.35268 11.8379C5.44206 11.481 5.8043 11.2635 6.16127 11.3525C6.5183 11.4418 6.73559 11.8041 6.64662 12.1611L6.18666 14H9.81264L9.35268 12.1611C9.26374 11.8041 9.48106 11.4418 9.83803 11.3525C10.195 11.2635 10.5572 11.481 10.6466 11.8379L11.1867 14H13.3331L12.1662 10H3.83314L2.66615 14ZM7.99916 2C7.82256 2.00013 7.65336 2.07045 7.52846 2.19531C7.40358 2.32019 7.33331 2.48943 7.33314 2.66602V6C7.33306 6.35339 7.19234 6.69243 6.94252 6.94238C6.69247 7.19243 6.35278 7.33301 5.99916 7.33301H3.99916C3.82263 7.33313 3.65335 7.40356 3.52846 7.52832C3.4035 7.65327 3.33322 7.8233 3.33314 8V8.66602H12.6662V8C12.6661 7.8233 12.5958 7.65327 12.4708 7.52832C12.3458 7.40344 12.1759 7.33301 11.9992 7.33301H9.99916C9.64571 7.33288 9.30671 7.19232 9.05678 6.94238C8.80695 6.69243 8.66624 6.3534 8.66615 6V2.66602C8.66598 2.48951 8.59561 2.32017 8.47084 2.19531C8.34584 2.07043 8.17586 2 7.99916 2Z"
-                  fill="currentColor" />
-              </svg>
-            </button>
-            <button class="icon-btn" id="copy-comments-btn" title="Copy all comments">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="comment-list-wrap">
-          <div id="comment-list"></div>
-          <div id="no-comments">
-            <img src="../assets/lucide_message-circle-dashed.svg" alt="No Comments" width="28" height="28"
-              style="opacity:0.2;">
-            <p>No Comment yet</p>
-          </div>
-        </div>
-      </aside>
-    </div>
-
-    <!-- ── Right Sidebar (Collect) ──────────────────── -->
-    <div id="collect-sidebar-wrap">
-      <div class="collect-resizer" id="collect-resizer"></div>
-      <aside id="collect-sidebar">
-        <div class="collect-sidebar-header">
-          <div class="collect-sidebar-title">Collect</div>
-          <div class="collect-sidebar-actions">
-            <button class="icon-btn" id="clear-ideas-btn" title="Clear all ideas">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-            </button>
-            <button class="icon-btn" id="copy-ideas-btn" title="Copy all ideas">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="collect-list-wrap">
-          <div id="collect-list"></div>
-          <div id="no-ideas">
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.2;"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
-            <p>No ideas yet</p>
-          </div>
-        </div>
-      </aside>
+    <!-- ── Right Sidebar (Unified) ─────────────────── -->
+    <div id="right-sidebar-wrap" class="ds-right-sidebar-wrap">
+      <!-- Content injected by RightSidebarComponent -->
     </div>
 
   </div><!-- /app-layout -->
@@ -947,6 +798,10 @@
           <textarea id="comment-input" placeholder="What’s your feedback"></textarea>
         </div>
         <div class="comment-form-actions">
+          <button id="expand-comment-btn" class="icon-btn" title="Expand to full editor">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+          </button>
+          <div style="flex:1"></div>
           <button id="cancel-comment" class="btn btn-ghost">Cancel</button>
           <button id="save-comment" class="btn btn-primary" disabled>Save</button>
         </div>
@@ -1026,6 +881,13 @@
 
   <!-- ── Scripts ─────────────────────────────────────── -->
   <script src="js/electron-bridge.js"></script>
+  <!-- Design System Core -->
+  <script src="js/components/design-system.js"></script>
+  <!-- Design System Components -->
+  <script src="js/components/organisms/change-action-view-bar.js"></script>
+  <script src="js/components/organisms/tab-bar.js"></script>
+  <script src="js/components/organisms/right-sidebar.js"></script>
+  
   <script src="js/tree.js"></script>
   <script src="js/workspace.js"></script>
   <script src="js/components/textarea.js"></script>
