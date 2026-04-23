@@ -16,7 +16,7 @@ class SettingsComponent {
    * Main render function that returns the content element
    */
   render() {
-    const container = DesignSystem.createElement('div', 'settings-container');
+    const container = DesignSystem.createElement('div', ['settings-container', 'settings-organism']);
 
     // 1. Appearance Group
     container.appendChild(this._createGroup('Appearance', [
@@ -41,7 +41,7 @@ class SettingsComponent {
     // 4. Background Group
     container.appendChild(this._createGroup('Background', [
       this._createSettingRow('Custom Background', this._createToggle('bg-toggle-mount')),
-      this._createBackgroundGrid()
+      this._createBackgroundGridWrapper()
     ]));
 
     return container;
@@ -120,18 +120,38 @@ class SettingsComponent {
 
   _createZoomControl(type) {
     const ctrl = DesignSystem.createElement('div', 'setting-control-col');
+    const currentVal = type === 'text' ? AppState.settings.textZoom : AppState.settings.codeZoom;
+    
     const slider = DesignSystem.createElement('input', 'zoom-slider', {
       type: 'range',
       id: `${type}-zoom-slider`,
       min: '50',
       max: '200',
-      step: '5',
-      value: '100'
+      step: '5'
     });
+    slider.value = currentVal || 100;
+
     const label = DesignSystem.createElement('span', 'zoom-val-label', {
       id: `${type}-zoom-val`,
-      text: '100%'
+      text: `${slider.value}%`
     });
+
+    slider.addEventListener('input', (e) => {
+      const val = e.target.value;
+      label.innerText = `${val}%`;
+      if (type === 'text') {
+        AppState.settings.textZoom = parseInt(val, 10);
+        localStorage.setItem('md-text-zoom', val);
+      } else {
+        AppState.settings.codeZoom = parseInt(val, 10);
+        localStorage.setItem('md-code-zoom', val);
+      }
+      if (typeof applyTheme === 'function') applyTheme();
+      if (typeof AppState !== 'undefined' && AppState.savePersistentState) {
+        AppState.savePersistentState();
+      }
+    });
+
     ctrl.appendChild(slider);
     ctrl.appendChild(label);
     return ctrl;
@@ -144,6 +164,12 @@ class SettingsComponent {
       role: 'switch',
       html: '<div class="switch-indicator"></div>'
     });
+  }
+
+  _createBackgroundGridWrapper() {
+    const wrapper = DesignSystem.createElement('div', 'bg-grid-wrapper', { id: 'bg-grid-wrapper' });
+    wrapper.appendChild(this._createBackgroundGrid());
+    return wrapper;
   }
 
   _createBackgroundGrid() {

@@ -288,45 +288,70 @@ const DraftModule = (() => {
 
     const key = `drafts_v2_${workspaceId}`;
     const saved = localStorage.getItem(key);
+    
+    // ── Orphan Cleaning ───────────────────────────────────
+    // We only keep drafts that are actually in the tab list
+    const tabsKey = `tabs_${workspaceId}`;
+    const savedTabs = localStorage.getItem(tabsKey);
+    let openDraftIds = [];
+    if (savedTabs) {
+      try {
+        const tabData = JSON.parse(savedTabs);
+        openDraftIds = (tabData.openFiles || []).filter(f => f && f.startsWith('__DRAFT_'));
+      } catch(e) {}
+    }
+
     if (saved) {
       try {
-        drafts = JSON.parse(saved);
+        const allDrafts = JSON.parse(saved);
+        drafts = {};
         
-        // Auto-cleanup: remove drafts older than 3 days
-        const maxAge = 3 * 24 * 60 * 60 * 1000;
-        const now = Date.now();
-        let changed = false;
-        for (const id in drafts) {
-          if (now - (drafts[id].lastTouched || 0) > maxAge) {
-            delete drafts[id];
-            changed = true;
+        // 1. Restore only drafts that are in open tabs
+        openDraftIds.forEach(id => {
+          if (allDrafts[id]) {
+            drafts[id] = allDrafts[id];
           }
+        });
+
+        // 2. Migration fallback for legacy key (one-time)
+        const oldKey = `draft_${workspaceId}`;
+        const oldSaved = localStorage.getItem(oldKey);
+        if (Object.keys(drafts).length === 0 && oldSaved) {
+            const oldData = JSON.parse(oldSaved);
+            const legacyId = `__DRAFT_LEGACY_${Date.now()}__`;
+            drafts[legacyId] = {
+              draftContent: oldData.draftContent || '',
+              renderedHtml: oldData.renderedHtml || '',
+              lastTouched: Date.now()
+            };
+            localStorage.removeItem(oldKey);
         }
-        if (changed) saveToStorage();
+        
+        saveToStorage();
       } catch (e) {
         console.error('Error parsing draft data', e);
         drafts = {};
       }
     } else {
-      // Fallback to old key if v2 not exists (migration)
-      const oldKey = `draft_${workspaceId}`;
-      const oldSaved = localStorage.getItem(oldKey);
-      if (oldSaved) {
-        try {
-          const oldData = JSON.parse(oldSaved);
-          drafts = {
-            '__DRAFT_LEGACY__': {
-              draftContent: oldData.draftContent || '',
-              renderedHtml: oldData.renderedHtml || '',
-              lastTouched: Date.now()
-            }
-          };
-          saveToStorage();
-        } catch(e) {}
-      } else {
-        drafts = {};
-      }
+      drafts = {};
     }
+  }
+
+  /**
+   * Explicitly initialize a new draft to prevent ghost content
+   * and ensure correct numbering.
+   */
+  function createDraft(id) {
+    if (!id) return;
+    drafts[id] = {
+      draftContent: '',
+      renderedHtml: '',
+      lastTouched: Date.now(),
+      viewMode: 'edit'
+    };
+    ensureDraftMeta(id);
+    saveToStorage();
+    return drafts[id];
   }
 
   async function clear(id) {
@@ -390,7 +415,7 @@ const DraftModule = (() => {
     }
   }
 
-  return { init, toggleFooter, updateHeader, syncPreview, renderPreview, clear, getDraftContent, setDraftContent, getRenderedHtml, saveToStorage, loadFromStorage, getDraftViewMode, setDraftViewMode, getDisplayName };
+  return { init, toggleFooter, updateHeader, syncPreview, renderPreview, clear, getDraftContent, setDraftContent, getRenderedHtml, saveToStorage, loadFromStorage, getDraftViewMode, setDraftViewMode, getDisplayName, createDraft };
 })();
 
 window.DraftModule = DraftModule;

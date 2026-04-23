@@ -154,7 +154,11 @@ const DesignSystem = (() => {
     createHeaderAction: (iconName, title, onClick) => {
       const iconHtml = ICONS[iconName] || iconName;
       const btn = createElement('button', 'ds-header-action', { 'title': title, 'html': iconHtml });
-      if (onClick) btn.onclick = onClick;
+      if (onClick) {
+        btn.addEventListener('click', (e) => {
+          onClick(e);
+        });
+      }
       return btn;
     },
     
@@ -195,8 +199,11 @@ const DesignSystem = (() => {
       });
 
       confirmBtn.onclick = async () => {
-        if (onConfirm) await onConfirm();
-        popover.close();
+        try {
+          if (onConfirm) await onConfirm();
+        } finally {
+          popover.close();
+        }
       };
       cancelBtn.onclick = () => {
         if (onCancel) onCancel();

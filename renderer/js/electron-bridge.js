@@ -141,6 +141,42 @@
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
       return res.json();
     },
+    moveFile: async (oldPath, newPath) => {
+      const res = await fetch('/api/file-ops/move', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ oldPath, newPath })
+      });
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      return res.json();
+    },
+    copyFile: async (srcPath, destPath) => {
+      const res = await fetch('/api/file-ops/copy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ srcPath, destPath })
+      });
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      return res.json();
+    },
+    createFile: async (filePath, content = '') => {
+      const res = await fetch('/api/file-ops/create-file', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: filePath, content })
+      });
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      return res.json();
+    },
+    createFolder: async (folderPath) => {
+      const res = await fetch('/api/file-ops/create-folder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: folderPath })
+      });
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      return res.json();
+    },
     
     // Custom
     rebuildApp: () => {

@@ -2,7 +2,9 @@
 const TabsModule = (function () {
   const state = {
     openFiles: [], // Array of file paths
-    activeFile: null
+    activeFile: null,
+    selectedFiles: [], // Array of selected file paths
+    lastSelectedFile: null // For shift-range selection
   };
 
   let tabBar = null;
@@ -11,9 +13,19 @@ const TabsModule = (function () {
     // Initialize the TabBar component with MDpreview-specific logic
     tabBar = TabBar.init({
       mount: document.getElementById('tab-bar-container'),
-      onTabSwitch: (path) => {
-        if (typeof window.loadFile === 'function') {
-          window.loadFile(path);
+      onTabSwitch: (path, modifiers = {}) => {
+        const { shiftKey, metaKey, ctrlKey, altKey } = modifiers;
+        const modKey = metaKey || ctrlKey || altKey;
+
+        if (shiftKey) {
+          selectRange(path);
+        } else if (modKey) {
+          toggleSelect(path);
+        } else {
+          deselectAll();
+          if (typeof window.loadFile === 'function') {
+            window.loadFile(path);
+          }
         }
       },
       onTabClose: (path) => {
@@ -33,21 +45,12 @@ const TabsModule = (function () {
           updateSidebarToggleIcon(nowCollapsed);
         }
       },
+      // New: Context menu actions
+      onCloseOthers: (path) => closeOthers(path),
+      onCloseAll: () => closeAll(),
+      onCloseSelected: () => closeSelected(),
+
       rightActions: [
-        {
-          id: 'rebuild',
-          title: 'Rebuild & Relaunch',
-          icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path d="M16 16h5v5" /></svg>`,
-          onClick: () => {
-          DesignSystem.showConfirm({
-            title: 'Rebuild App',
-            message: 'Rebuild and relaunch the application?',
-            onConfirm: () => {
-              window.electronAPI.rebuildApp();
-            }
-          });
-          }
-        },
         {
           id: 'scroll-top',
           title: 'Scroll to top',
@@ -72,7 +75,7 @@ const TabsModule = (function () {
         {
           id: 'shortcuts',
           title: 'Keyboard Shortcuts',
-          icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+          icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" ry="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/><path d="M18 8h.01"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/><path d="M7 16h10"/></svg>`,
           onClick: () => {
             if (typeof toggleShortcutsPopover === 'function') {
               toggleShortcutsPopover();
@@ -102,8 +105,6 @@ const TabsModule = (function () {
     document.addEventListener('fullscreenchange', () => {
       const isFS = !!document.fullscreenElement;
       document.body.classList.toggle('is-fullscreen', isFS);
-      // We could update the icon in the action bar here if needed by re-rendering
-      // but for now, we follow the simple approach.
     });
 
     // Handle Sidebar toggle icon initial state
@@ -132,12 +133,18 @@ const TabsModule = (function () {
       activeFile: state.activeFile
     };
     localStorage.setItem(key, JSON.stringify(data));
+    
+    // Trigger global state sync if possible
+    if (AppState.savePersistentState) {
+      AppState.savePersistentState();
+    }
   }
 
   function switchWorkspace(workspaceId) {
     if (!workspaceId) {
       state.openFiles = [];
       state.activeFile = null;
+      state.selectedFiles = [];
       render();
       return;
     }
@@ -163,6 +170,7 @@ const TabsModule = (function () {
       state.activeFile = null;
     }
     
+    state.selectedFiles = [];
     render();
 
     if (state.activeFile) {
@@ -184,8 +192,164 @@ const TabsModule = (function () {
       state.openFiles.push(filePath);
     }
     state.activeFile = filePath;
+    state.lastSelectedFile = filePath;
+    deselectAll();
     saveToStorage();
     render();
+  }
+
+  // ── Multi-selection Logic ───────────────────────────────
+  function toggleSelect(path, skipSync = false) {
+    const idx = state.selectedFiles.indexOf(path);
+    if (idx > -1) {
+      state.selectedFiles.splice(idx, 1);
+    } else {
+      state.selectedFiles.push(path);
+    }
+    state.lastSelectedFile = path;
+    render();
+    if (!skipSync && typeof TreeModule !== 'undefined') {
+        TreeModule.syncSelectionFromTabs(state.selectedFiles);
+    }
+  }
+
+  function selectRange(path, skipSync = false) {
+    if (!state.lastSelectedFile || !state.openFiles.includes(state.lastSelectedFile)) {
+      toggleSelect(path, skipSync);
+      return;
+    }
+
+    const startIdx = state.openFiles.indexOf(state.lastSelectedFile);
+    const endIdx = state.openFiles.indexOf(path);
+    const min = Math.min(startIdx, endIdx);
+    const max = Math.max(startIdx, endIdx);
+
+    const currentSet = new Set(state.selectedFiles);
+    for (let i = min; i <= max; i++) {
+      currentSet.add(state.openFiles[i]);
+    }
+    state.selectedFiles = Array.from(currentSet);
+    render();
+    if (!skipSync && typeof TreeModule !== 'undefined') {
+        TreeModule.syncSelectionFromTabs(state.selectedFiles);
+    }
+  }
+
+  function selectAll(skipSync = false) {
+    state.selectedFiles = [...state.openFiles];
+    render();
+    if (!skipSync && typeof TreeModule !== 'undefined') {
+        TreeModule.syncSelectionFromTabs(state.selectedFiles);
+    }
+  }
+
+  function deselectAll(skipSync = false) {
+    if (state.selectedFiles.length === 0) return; // Optimization: Already empty
+    state.selectedFiles = [];
+    render();
+    if (!skipSync && typeof TreeModule !== 'undefined') {
+        TreeModule.syncSelectionFromTabs([]);
+    }
+  }
+
+  function syncSelectionFromTree(paths) {
+    // Only select paths that are currently open in tabs
+    const filtered = paths.filter(p => state.openFiles.includes(p));
+    
+    // Optimization: Compare if selection actually changed
+    const current = state.selectedFiles;
+    if (current.length === filtered.length && current.every((v, i) => v === filtered[i])) {
+      return;
+    }
+
+    state.selectedFiles = filtered;
+    render();
+  }
+
+  // ── Batch Closing Logic ────────────────────────────────
+
+  async function closeAll() {
+    const files = [...state.openFiles];
+    const drafts = files.filter(f => f.startsWith("__DRAFT_"));
+
+    if (drafts.length > 0) {
+      DesignSystem.showConfirm({
+        title: "Discard All Drafts",
+        message: `Are you sure you want to discard all ${drafts.length} drafts? This cannot be undone.`,
+        onConfirm: () => {
+          files.forEach(f => _proceedRemove(f, true));
+          saveToStorage();
+          if (typeof DraftModule !== 'undefined' && AppState.currentWorkspace) {
+            DraftModule.loadFromStorage(AppState.currentWorkspace.id);
+          }
+          render();
+        }
+      });
+    } else {
+      files.forEach(f => _proceedRemove(f, true));
+      saveToStorage();
+      if (typeof DraftModule !== 'undefined' && AppState.currentWorkspace) {
+        DraftModule.loadFromStorage(AppState.currentWorkspace.id);
+      }
+      render();
+    }
+  }
+
+  function closeOthers(path) {
+    const files = state.openFiles.filter(f => f !== path);
+    const drafts = files.filter(f => f.startsWith("__DRAFT_"));
+
+    if (drafts.length > 0) {
+      DesignSystem.showConfirm({
+        title: "Discard Drafts",
+        message: `This will discard ${drafts.length} unsaved drafts. Continue?`,
+        onConfirm: () => {
+          files.forEach(f => _proceedRemove(f, true));
+          saveToStorage();
+          if (typeof DraftModule !== 'undefined' && AppState.currentWorkspace) {
+            DraftModule.loadFromStorage(AppState.currentWorkspace.id);
+          }
+          render();
+        }
+      });
+    } else {
+      files.forEach(f => _proceedRemove(f, true));
+      saveToStorage();
+      if (typeof DraftModule !== 'undefined' && AppState.currentWorkspace) {
+        DraftModule.loadFromStorage(AppState.currentWorkspace.id);
+      }
+      render();
+    }
+  }
+
+  function closeSelected() {
+    const files = [...state.selectedFiles];
+    if (files.length === 0) return;
+
+    const drafts = files.filter(f => f.startsWith("__DRAFT_"));
+    if (drafts.length > 0) {
+      DesignSystem.showConfirm({
+        title: "Discard Selected Drafts",
+        message: `Discard ${drafts.length} selected drafts?`,
+        onConfirm: () => {
+          files.forEach(f => _proceedRemove(f, true));
+          state.selectedFiles = [];
+          saveToStorage();
+          if (typeof DraftModule !== 'undefined' && AppState.currentWorkspace) {
+            DraftModule.loadFromStorage(AppState.currentWorkspace.id);
+          }
+          render();
+        }
+      });
+    } else {
+      files.forEach(f => _proceedRemove(f, true));
+      state.selectedFiles = [];
+      saveToStorage();
+      if (typeof DraftModule !== 'undefined' && AppState.currentWorkspace) {
+        DraftModule.loadFromStorage(AppState.currentWorkspace.id);
+      }
+      render();
+    }
   }
 
   function remove(filePath, skipConfirm = false) {
@@ -218,38 +382,45 @@ const TabsModule = (function () {
       return;
     }
 
+    _proceedRemove(filePath);
+  }
+
+  function _proceedRemove(filePath, batch = false) {
+    const index = state.openFiles.indexOf(filePath);
+    if (index === -1) return;
+
     // Cleanup logic for Draft Mode
     if (filePath && filePath.startsWith("__DRAFT_")) {
       if (typeof DraftModule !== "undefined") DraftModule.clear(filePath);
       if (typeof EditorModule !== "undefined") EditorModule.setDirty(false);
     }
 
-    _proceedRemove(filePath);
-  }
-
-  function _proceedRemove(filePath) {
-    const index = state.openFiles.indexOf(filePath);
-    if (index === -1) return;
-
     state.openFiles.splice(index, 1);
 
+    // Remove from selection if present
+    const sIdx = state.selectedFiles.indexOf(filePath);
+    if (sIdx > -1) state.selectedFiles.splice(sIdx, 1);
+
     if (state.activeFile === filePath) {
-      // [User Preference] Always go to empty state when active file is removed
       state.activeFile = null;
       if (typeof window.AppState !== 'undefined') window.AppState.currentFile = null;
       if (typeof window.setNoFile === 'function') {
         window.setNoFile();
       }
     }
-    saveToStorage();
-    render();
+
+    if (!batch) {
+      saveToStorage();
+      render();
+    }
   }
 
   function render() {
     if (tabBar) {
       tabBar.setState({
         openFiles: state.openFiles,
-        activeFile: state.activeFile
+        activeFile: state.activeFile,
+        selectedFiles: state.selectedFiles
       });
     }
 
@@ -262,14 +433,32 @@ const TabsModule = (function () {
     }
   }
 
+  function reorder(oldIndex, newIndex) {
+    if (oldIndex === newIndex) return;
+    const files = [...state.openFiles];
+    const [draggedItem] = files.splice(oldIndex, 1);
+    files.splice(newIndex, 0, draggedItem);
+    
+    state.openFiles = files;
+    saveToStorage();
+    render();
+  }
+
   return {
     init,
     open,
     remove,
     render,
     switchWorkspace,
+    selectAll,
+    deselectAll,
+    closeAll,
+    closeOthers,
+    closeSelected,
+    reorder,
+    syncSelectionFromTree,
     getActive: () => state.activeFile,
-    getOpenFiles: () => state.openFiles
+    getOpenFiles: () => state.openFiles,
+    getSelectedFiles: () => state.selectedFiles
   };
 })();
- 

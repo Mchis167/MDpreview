@@ -20,12 +20,16 @@ class TabBarComponent {
       onTabClose: options.onTabClose || (() => {}),
       onAddTab: options.onAddTab || (() => {}),
       onToggleSidebar: options.onToggleSidebar || (() => {}),
+      onCloseOthers: options.onCloseOthers || (() => {}),
+      onCloseAll: options.onCloseAll || (() => {}),
+      onCloseSelected: options.onCloseSelected || (() => {}),
       rightActions: options.rightActions || []
     };
 
     this.state = {
       openFiles: [],
-      activeFile: null
+      activeFile: null,
+      selectedFiles: []
     };
 
     this.init();
@@ -131,9 +135,10 @@ class TabBarComponent {
     }
 
     const isActive = path === this.state.activeFile;
+    const isSelected = this.state.selectedFiles.includes(path);
 
     const item = document.createElement('div');
-    item.className = `tab-item ${isActive ? 'active' : ''}`;
+    item.className = `tab-item ${isActive ? 'active' : ''} ${isSelected ? 'selected' : ''}`;
     item.title = path;
 
     const dot = isDraft ? '<span class="tab-bar__draft-dot"></span>' : '';
@@ -146,9 +151,26 @@ class TabBarComponent {
       </div>
     `;
 
+    item.onmousedown = (e) => {
+      if (e.button !== 0) return; // Left click only
+      if (e.target.closest('.tab-bar__close')) return;
+      this._initTabDrag(e, item, path);
+    };
+
     item.onclick = (e) => {
         if (e.target.closest('.tab-bar__close')) return;
-        this.options.onTabSwitch(path);
+        this.options.onTabSwitch(path, {
+          shiftKey: e.shiftKey,
+          ctrlKey: e.ctrlKey,
+          metaKey: e.metaKey,
+          altKey: e.altKey
+        });
+    };
+
+    item.oncontextmenu = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this._showContextMenu(e, path);
     };
     
     item.querySelector('.tab-bar__close').onclick = (e) => {
@@ -160,12 +182,225 @@ class TabBarComponent {
   }
 
   /**
+   * VIP Drag & Drop Engine for Tabs (Horizontal)
+   */
+  _initTabDrag(e, itemEl, path) {
+    const tabList = itemEl.closest('.tab-bar__list');
+    if (!tabList) return;
+
+    const rect = itemEl.getBoundingClientRect();
+    const startX = e.clientX;
+    const itemWidth = rect.width;
+    const siblings = Array.from(tabList.querySelectorAll('.tab-item'));
+    const itemIdx = siblings.indexOf(itemEl);
+    
+    let currentIdx = itemIdx;
+    let dragProxy = null;
+    let isDraggingStarted = false;
+    let animationFrameId = null;
+    let currentX = e.clientX;
+
+    // Pre-calculate sibling centers
+    const sibCenters = siblings.map(sib => {
+      const r = sib.getBoundingClientRect();
+      return r.left + r.width / 2;
+    });
+
+    const updateUI = () => {
+      if (!dragProxy) return;
+
+      const deltaX = currentX - startX;
+      dragProxy.style.transform = `translateX(${deltaX}px) scale(1.02)`;
+
+      let newIdx = itemIdx;
+      let minDist = Infinity;
+      sibCenters.forEach((center, i) => {
+        const dist = Math.abs(currentX - center);
+        if (dist < minDist) {
+          minDist = dist;
+          newIdx = i;
+        }
+      });
+
+      siblings.forEach((sib, idx) => {
+        if (sib === itemEl) return;
+        if (idx > itemIdx && idx <= newIdx) {
+          sib.style.transform = `translateX(-${itemWidth}px)`;
+        } else if (idx < itemIdx && idx >= newIdx) {
+          sib.style.transform = `translateX(${itemWidth}px)`;
+        } else {
+          sib.style.transform = '';
+        }
+      });
+
+      currentIdx = newIdx;
+
+      // Auto-scroll logic
+      const listRect = tabList.getBoundingClientRect();
+      const threshold = 50;
+      if (currentX < listRect.left + threshold) tabList.scrollLeft -= 5;
+      if (currentX > listRect.right - threshold) tabList.scrollLeft += 5;
+
+      animationFrameId = requestAnimationFrame(updateUI);
+    };
+
+    const onMouseMove = (moveEvent) => {
+      currentX = moveEvent.clientX;
+      const dist = Math.abs(currentX - startX);
+
+      if (!isDraggingStarted && dist > 5) {
+        isDraggingStarted = true;
+        
+        // Create Proxy
+        const originalStyle = window.getComputedStyle(itemEl);
+        dragProxy = itemEl.cloneNode(true);
+        dragProxy.classList.add('is-dragging-vip');
+        dragProxy.style.width = `${rect.width}px`;
+        dragProxy.style.height = `${rect.height}px`;
+        dragProxy.style.left = `${rect.left}px`;
+        dragProxy.style.top = `${rect.top}px`;
+        dragProxy.style.background = originalStyle.backgroundColor !== 'rgba(0, 0, 0, 0)' 
+          ? originalStyle.backgroundColor 
+          : 'rgba(255, 255, 255, 0.08)';
+        
+        document.body.appendChild(dragProxy);
+        itemEl.classList.add('tab-item-placeholder');
+        tabList.classList.add('is-dragging-active');
+        animationFrameId = requestAnimationFrame(updateUI);
+      }
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+      if (!isDraggingStarted) return;
+
+      if (dragProxy) {
+        // Snap proxy to final position
+        dragProxy.style.transition = 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+        const targetCenter = sibCenters[currentIdx];
+        const finalX = targetCenter - (rect.left + rect.width / 2);
+        dragProxy.style.transform = `translateX(${finalX}px) scale(1)`;
+
+        setTimeout(() => {
+          // Perform surgical DOM move
+          tabList.classList.add('is-handing-off');
+          
+          if (currentIdx !== itemIdx) {
+            const target = siblings[currentIdx];
+            if (currentIdx < itemIdx) {
+              tabList.insertBefore(itemEl, target);
+            } else {
+              tabList.insertBefore(itemEl, target.nextSibling);
+            }
+            // Update state in TabsModule
+            if (typeof TabsModule !== 'undefined') {
+              TabsModule.reorder(itemIdx, currentIdx);
+            }
+          }
+
+          itemEl.classList.remove('tab-item-placeholder');
+          tabList.classList.remove('is-dragging-active');
+          siblings.forEach(s => s.style.transform = '');
+
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              tabList.classList.remove('is-handing-off');
+              if (dragProxy) {
+                dragProxy.style.opacity = '0';
+                setTimeout(() => {
+                  if (dragProxy) dragProxy.remove();
+                  dragProxy = null;
+                }, 200);
+              }
+            });
+          });
+        }, 200);
+      }
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  }
+
+  /**
+   * Custom context menu for tabs
+   */
+  _showContextMenu(e, path) {
+    // Remove existing
+    const existing = document.querySelector('.ctx-menu');
+    if (existing) existing.remove();
+
+    const menu = document.createElement('div');
+    menu.className = 'ctx-menu';
+    menu.style.left = `${e.clientX}px`;
+    menu.style.top = `${e.clientY}px`;
+
+    const closeItem = this._createCtxItem('x', 'Close Tab', () => {
+      this.options.onTabClose(path);
+    });
+
+    const closeOthersItem = this._createCtxItem('minus-circle', 'Close Others', () => {
+      this.options.onCloseOthers(path);
+    });
+
+    const closeAllItem = this._createCtxItem('layers', 'Close All', () => {
+      this.options.onCloseAll();
+    });
+
+    menu.appendChild(closeItem);
+    menu.appendChild(closeOthersItem);
+    menu.appendChild(closeAllItem);
+
+    // Only show "Close Selected" if more than 1 selected
+    if (this.state.selectedFiles.length > 1) {
+      menu.appendChild(this._createCtxDivider());
+      const closeSelectedItem = this._createCtxItem('check-square', `Close Selected (${this.state.selectedFiles.length})`, () => {
+        this.options.onCloseSelected();
+      });
+      menu.appendChild(closeSelectedItem);
+    }
+
+    document.body.appendChild(menu);
+
+    const closeMenu = (ev) => {
+      if (!menu.contains(ev.target)) menu.remove();
+    };
+    document.addEventListener('mousedown', closeMenu, { once: true });
+  }
+
+  _createCtxItem(iconName, label, onClick) {
+    const item = document.createElement('div');
+    item.className = 'ctx-item';
+    const icon = (typeof DesignSystem !== 'undefined') ? DesignSystem.getIcon(iconName) : '';
+    item.innerHTML = `${icon} <span>${label}</span>`;
+    item.onclick = (e) => {
+      e.stopPropagation();
+      const menu = document.querySelector('.ctx-menu');
+      if (menu) menu.remove();
+      onClick();
+    };
+    return item;
+  }
+
+  _createCtxDivider() {
+    const d = document.createElement('div');
+    d.className = 'ctx-divider';
+    return d;
+  }
+
+
+  /**
    * Internal helper to create an action button
    */
   _createActionBtn(action) {
     const btn = DesignSystem.createHeaderAction(action.icon, action.title || '', (e) => {
       if (e) e.stopPropagation();
-      action.onClick();
+      if (typeof action.onClick === 'function') {
+        action.onClick();
+      }
     });
     return btn;
   }

@@ -11,6 +11,8 @@
   border-bottom: 1px solid var(--figma-divider, rgba(255, 255, 255, 0.05));
   user-select: none;
   min-width: 0;
+  position: relative;
+  z-index: 1100; /* Ensure it stays above floating bars (ChangeActionViewBar is 1000) */
 }
 
 /* Vertical Divider Utility */
@@ -102,6 +104,12 @@
   right: 0;
   height: 2px;
   background: rgba(255, 255, 255, 0.2);
+}
+
+.tab-item.selected {
+  background: rgba(var(--accent-rgb), 0.1);
+  border-bottom: 2px solid rgba(var(--accent-rgb), 0.3);
+  color: #fff;
 }
 
 .tab-bar__name {
@@ -205,6 +213,11 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
+.ds-header-action svg,
+.ds-header-action svg * {
+  pointer-events: none !important;
+}
+
 /* Draft Indicator */
 .tab-bar__draft-dot {
   width: 6px;
@@ -222,3 +235,44 @@
 }
 
 /* Tooltip styles moved to design-system/atoms/tooltip.css */
+
+/* ── VIP Drag & Drop ─────────────────────────────────────── */
+
+.tab-bar__list.is-dragging-active .tab-item {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+/* Original item being dragged */
+.tab-item-placeholder {
+  opacity: 0 !important; /* Hide original but keep space */
+  pointer-events: none;
+}
+
+/* The floating proxy tab */
+.is-dragging-vip {
+  position: fixed !important;
+  z-index: 9999 !important;
+  pointer-events: none !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 6px;
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 8px;
+  color: #fff;
+  font-size: 13px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Disable transitions during surgical DOM move */
+.tab-bar__list.is-handing-off .tab-item {
+  transition: none !important;
+}
+

@@ -25,7 +25,7 @@ class ShortcutsComponent {
           { label: 'Focus Search', keys: ['Ctrl', 'F'] },
           { label: 'Scroll to Top', keys: ['Ctrl', '↑'] },
           { label: 'Scroll to Bottom', keys: ['Ctrl', '↓'] },
-          { label: 'Toggle Fullscreen', keys: ['F11'] }
+          { label: 'Toggle Fullscreen', keys: this.isMac ? ['Ctrl', 'Shift', 'F'] : ['F11'] }
         ]
       },
       {
@@ -38,11 +38,20 @@ class ShortcutsComponent {
         ]
       },
       {
+        title: 'Tab Management',
+        items: [
+          { label: 'Select All Tabs', keys: ['Ctrl', 'A'] },
+          { label: 'Close All Tabs', keys: ['Ctrl', 'Shift', 'W'] },
+          { label: 'Deselect Tabs', keys: ['Esc'] },
+          { label: 'Range Selection', keys: ['Shift', 'Click'] },
+          { label: 'Multi-selection', keys: ['Ctrl', 'Click'] }
+        ]
+      },
+      {
         title: 'General',
         items: [
           { label: 'Workspace Picker', keys: ['Ctrl', 'O'] },
-          { label: 'Rebuild & Relaunch', keys: ['Ctrl', 'R'] },
-          { label: 'Close Tab', keys: ['Ctrl', 'W'] },
+          { label: 'Close Active Tab', keys: ['Ctrl', 'W'] },
           { label: 'Keyboard Shortcuts', keys: ['Ctrl', '/'] },
           { label: 'Open Settings', keys: ['Ctrl', ','] },
           { label: 'Close / Cancel', keys: ['Esc'] }
@@ -63,6 +72,8 @@ class ShortcutsComponent {
         item.keys.forEach(key => {
           let keyText = key;
           if (this.isMac && key === 'Ctrl') keyText = '⌘';
+          if (this.isMac && key === 'Shift') keyText = '⇧';
+          if (this.isMac && key === 'Option') keyText = '⌥';
           
           const kbd = DesignSystem.createElement('kbd', '', { text: keyText });
           keysContainer.appendChild(kbd);

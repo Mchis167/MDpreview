@@ -2,6 +2,11 @@
    sidebar.css — Left sidebar: structure, navigation, search, tree
    ============================================================ */
 
+:root {
+  --apple-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --lift-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
 /* ── Container ─────────────────────────────────────────── */
 #sidebar-left {
   width: 100%;
@@ -366,8 +371,108 @@
   align-items: center;
   justify-content: space-between;
   height: 32px;
-  padding: 0 4px;
+  padding: 0 16px;
   flex-shrink: 0;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.header-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Professional Drag Styles ─────────────── */
+.tree-item-placeholder {
+  opacity: 0 !important;
+  /* Completely invisible ghost */
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  pointer-events: none;
+  animation: none !important;
+}
+
+/* Release all sibling transforms when dragging starts */
+.folder-children.is-dragging-active .tree-item,
+#file-tree.is-dragging-active .tree-item {
+  animation: none !important;
+  /* CUSTOM FLUID BEZIER for the 'floaty' feel */
+  transition: transform 0.45s cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+/* Suppress MOVEMENT but allow color/opacity fades during hand-off */
+.folder-children.is-handing-off .tree-item,
+#file-tree.is-handing-off .tree-item {
+  animation: none !important;
+  transition: transform 0s !important;
+  /* Snap position instantly, let others fade */
+}
+
+#file-tree.is-dragging-active .tree-item {
+  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.tree-item.drag-over-top::before,
+.tree-item.drag-over-bottom::after {
+  display: none;
+  /* Hide old line indicator */
+}
+
+.tree-item.drag-over-top::before {
+  top: -1px;
+}
+
+.tree-item.drag-over-bottom::after {
+  bottom: -1px;
+}
+
+/* ── Standard Drag Proxy (Move mode) ─────────────── */
+.standard-drag-proxy {
+  position: fixed;
+  pointer-events: none;
+  z-index: 10000;
+  background: rgba(var(--accent-rgb), 0.9);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  will-change: transform, left, top;
+}
+
+.standard-drag-proxy i {
+  font-size: 16px;
+}
+
+.standard-drag-proxy .drag-badge {
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.tree-item.is-dragging-source {
+  opacity: 0.4 !important;
+  transition: opacity 0.2s;
 }
 
 .all-file-header .section-label {
@@ -394,19 +499,30 @@
 /* ── File Tree ─────────────────────────────────────────── */
 .sidebar-tree-scroll {
   flex: 1;
-  padding: 8px 8px 0;
-  /* padding-top: 20px as requested */
+  padding: 0 8px;
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 0;
   display: flex;
   flex-direction: column;
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE/Edge */
+}
+
+.sidebar-tree-scroll::-webkit-scrollbar {
+  display: none;
+  /* Chrome/Safari */
 }
 
 #file-tree {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-height: 100%;
+  padding-bottom: 120px;
+  /* Large dead-zone at bottom for context menu */
 }
 
 .tree-item {
@@ -420,15 +536,17 @@
   font-size: 14px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.4);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.4s var(--apple-ease), background 0.2s, opacity 0.2s;
   border: 1px solid transparent;
   position: relative;
   min-width: 0;
-  animation: treeItemEntry 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: calc(var(--stagger, 0) * 0.02s);
+  will-change: transform;
+  user-select: none;
+  /* animation: treeItemEntry 0.5s var(--apple-ease) both; */
+  /* animation-delay: calc(var(--stagger, 0) * 0.02s); */
 }
 
-@keyframes treeItemEntry {
+/* @keyframes treeItemEntry {
   from {
     opacity: 0;
     transform: translateY(8px) scale(0.98);
@@ -438,12 +556,11 @@
     opacity: 1;
     transform: translateY(0) scale(1);
   }
-}
+} */
 
 .tree-item:hover {
   background: rgba(255, 255, 255, 0.04);
   color: rgba(255, 255, 255, 0.7);
-  transform: translateX(4px);
 }
 
 .tree-item.active {
@@ -452,6 +569,12 @@
   color: #fff;
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25), 0 0 15px rgba(var(--accent-rgb), 0.11);
   padding: 6px 12px;
+}
+
+.tree-item.selected {
+  background: rgba(var(--accent-rgb), 0.1);
+  border-color: rgba(var(--accent-rgb), 0.2);
+  color: #fff;
 }
 
 .tree-item.active::after {
@@ -465,6 +588,28 @@
   /* Figma Glow */
   margin-left: auto;
   flex-shrink: 0;
+}
+
+/* Folder Hover State during Drag (Move mode) */
+.tree-item.drag-hover {
+  background: rgba(var(--accent-rgb), 0.15) !important;
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.2) !important;
+  color: #fff !important;
+  transform: none !important;
+}
+
+#file-tree.drag-hover-root {
+  background: rgba(var(--accent-rgb), 0.03) !important;
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.3) inset, 0 0 20px rgba(var(--accent-rgb), 0.05) inset !important;
+  border-radius: 12px;
+  transform: none !important;
+}
+
+.tree-item.drag-hover-secondary {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  opacity: 0.8;
 }
 
 /* ── Item Delete Button (Issue: Delete file directly) ── */

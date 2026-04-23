@@ -24,6 +24,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   deleteFile:    (filePath)          => ipcRenderer.invoke('delete-file', filePath),
   duplicateFile: (filePath)          => ipcRenderer.invoke('duplicate-file', filePath),
   renameFile:    (oldPath, newPath) => ipcRenderer.invoke('rename-file', oldPath, newPath),
+  moveFile:      (oldPath, newPath) => ipcRenderer.invoke('move-file', oldPath, newPath),
+  copyFile:      (srcPath, destPath) => ipcRenderer.invoke('copy-file', srcPath, destPath),
+  createFile:    (filePath, content) => ipcRenderer.invoke('create-file', filePath, content),
+  createFolder:  (folderPath)        => ipcRenderer.invoke('create-folder', folderPath),
   
   // Custom
   rebuildApp: () => ipcRenderer.send('rebuild-app')

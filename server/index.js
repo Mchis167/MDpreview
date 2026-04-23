@@ -73,6 +73,7 @@ app.post('/api/set-watch-dir', (req, res) => {
   res.json({ success: true, watchDir: dir });
 });
 
+app.use('/api', require('./routes/state'));
 app.use('/api', require('./routes/files'));
 app.use('/api', require('./routes/render'));
 app.use('/api', require('./routes/workspaces'));

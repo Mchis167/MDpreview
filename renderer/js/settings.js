@@ -48,13 +48,9 @@ const SettingsModule = (() => {
     const bgToggleContainer = document.getElementById('bg-toggle-mount');
 
     const updateGridVisibility = (enabled) => {
-      if (imageGrid) {
-        imageGrid.style.display = enabled ? 'grid' : 'none';
-        // Handle label sibling visibility as well
-        const gridLabel = imageGrid.previousElementSibling;
-        if (gridLabel && gridLabel.classList.contains('settings-label')) {
-          gridLabel.style.display = enabled ? 'block' : 'none';
-        }
+      const wrapper = document.getElementById('bg-grid-wrapper');
+      if (wrapper) {
+        wrapper.style.display = enabled ? 'block' : 'none';
       }
     };
 
@@ -67,6 +63,9 @@ const SettingsModule = (() => {
           AppState.settings[stateKey] = val;
           localStorage.setItem(storageKey, val);
           if (typeof TreeModule !== 'undefined') TreeModule.load();
+          if (typeof AppState !== 'undefined' && AppState.savePersistentState) {
+            AppState.savePersistentState();
+          }
         }
       });
     };
@@ -75,34 +74,6 @@ const SettingsModule = (() => {
     mountToggle('empty-toggle-mount',  'hideEmptyFolders', 'md-hide-empty');
     mountToggle('flat-toggle-mount',   'flatView', 'md-flat-view');
 
-    // ── Text Zoom ─────────────────────────────────────────────
-    const zoomSlider = document.getElementById('text-zoom-slider');
-    const zoomVal    = document.getElementById('text-zoom-val');
-    if (zoomSlider && zoomVal) {
-      zoomSlider.value = AppState.settings.textZoom || 100;
-      zoomVal.innerText = `${zoomSlider.value}%`;
-      zoomSlider.addEventListener('input', (e) => {
-        const val = e.target.value;
-        zoomVal.innerText = `${val}%`;
-        AppState.settings.textZoom = parseInt(val, 10);
-        localStorage.setItem('md-text-zoom', val);
-        applyTheme();
-      });
-    }
-
-    const codeZoomSlider = document.getElementById('code-zoom-slider');
-    const codeZoomVal    = document.getElementById('code-zoom-val');
-    if (codeZoomSlider && codeZoomVal) {
-      codeZoomSlider.value = AppState.settings.codeZoom || 100;
-      codeZoomVal.innerText = `${codeZoomSlider.value}%`;
-      codeZoomSlider.addEventListener('input', (e) => {
-        const val = e.target.value;
-        codeZoomVal.innerText = `${val}%`;
-        AppState.settings.codeZoom = parseInt(val, 10);
-        localStorage.setItem('md-code-zoom', val);
-        applyTheme();
-      });
-    }
 
     if (bgToggleContainer) {
       SwitchToggleModule.init({
@@ -113,6 +84,9 @@ const SettingsModule = (() => {
           localStorage.setItem('md-bg-enabled', val);
           updateGridVisibility(val);
           applyTheme();
+          if (typeof AppState !== 'undefined' && AppState.savePersistentState) {
+            AppState.savePersistentState();
+          }
         }
       });
     }
@@ -144,6 +118,9 @@ const SettingsModule = (() => {
         item.classList.add('active');
         
         applyTheme();
+        if (typeof AppState !== 'undefined' && AppState.savePersistentState) {
+          AppState.savePersistentState();
+        }
       });
       
       container.appendChild(item);

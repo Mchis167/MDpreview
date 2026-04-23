@@ -380,6 +380,16 @@
   color: #fff;
 }
 
+.ctx-item.active {
+  background: rgba(var(--accent-rgb), 0.1);
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+.ctx-item.active svg {
+  color: var(--accent-color);
+}
+
 .ctx-divider {
   height: 1px;
   background: rgba(255, 255, 255, 0.08);

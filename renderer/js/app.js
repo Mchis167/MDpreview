@@ -17,7 +17,7 @@ window.AppState = {
   commentMode:      false,
   socket:           null,
   
-  // Theme & Explorer settings (persisted in localStorage)
+  // Theme & Explorer settings (persisted in localStorage + Server)
   settings: {
     accentColor:      localStorage.getItem('md-accent-color') || '#ffbf48',
     bgEnabled:        localStorage.getItem('md-bg-enabled') === 'true',
@@ -29,6 +29,109 @@ window.AppState = {
     flatView:         localStorage.getItem('md-flat-view') === 'true',
     fontText:         localStorage.getItem('md-font-text') || 'Inter',
     fontCode:         localStorage.getItem('md-font-code') || 'Roboto Mono'
+  },
+
+  /**
+   * Loads the global state from the server and merges it with localStorage
+   */
+  async loadPersistentState() {
+    try {
+      const res = await fetch('/api/state');
+      if (!res.ok) return;
+      const data = await res.json();
+      
+      const hasServerData = data && (data.settings || data.allTabs);
+
+      // 1. Restore Settings
+      if (data.settings) {
+        Object.assign(this.settings, data.settings);
+        Object.keys(data.settings).forEach(key => {
+          const storageKey = this._getStorageKey(key);
+          if (storageKey) localStorage.setItem(storageKey, data.settings[key]);
+        });
+      }
+      
+      // 2. Restore Tabs for all workspaces
+      if (data.allTabs) {
+        Object.keys(data.allTabs).forEach(wsId => {
+          localStorage.setItem(`tabs_${wsId}`, JSON.stringify(data.allTabs[wsId]));
+          localStorage.setItem(`draft_${wsId}`, JSON.stringify(data.allDrafts?.[wsId] || []));
+        });
+      }
+
+      // 3. First-time sync: If server is empty but local has data, push to server
+      if (!hasServerData) {
+        const hasLocalData = Object.keys(localStorage).some(k => k.startsWith('tabs_') || k.startsWith('md-'));
+        if (hasLocalData) {
+          console.log('AppState: Initializing server state from local data...');
+          this.savePersistentState();
+        }
+      }
+
+      applyTheme();
+    } catch (e) {
+      console.warn('Failed to load persistent state from server:', e);
+    }
+  },
+
+  /**
+   * Saves the current state to the server (with debouncing)
+   */
+  async savePersistentState() {
+    if (this._saveTimer) clearTimeout(this._saveTimer);
+    
+    this._saveTimer = setTimeout(async () => {
+      try {
+        // Collect all tab and draft data from localStorage
+        const allTabs = {};
+        const allDrafts = {};
+        
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key.startsWith('tabs_')) {
+            const wsId = key.replace('tabs_', '');
+            try { allTabs[wsId] = JSON.parse(localStorage.getItem(key)); } catch(e){}
+          }
+          if (key.startsWith('draft_')) {
+            const wsId = key.replace('draft_', '');
+            try { allDrafts[wsId] = JSON.parse(localStorage.getItem(key)); } catch(e){}
+          }
+        }
+
+        const state = {
+          settings: this.settings,
+          allTabs,
+          allDrafts,
+          lastUpdated: new Date().toISOString()
+        };
+
+        await fetch('/api/state', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(state)
+        });
+        
+        this._saveTimer = null;
+      } catch (e) {
+        console.warn('Failed to save state to server:', e);
+      }
+    }, 500); // Wait 500ms after the last change
+  },
+
+  _getStorageKey(settingsKey) {
+    const map = {
+      accentColor: 'md-accent-color',
+      bgEnabled: 'md-bg-enabled',
+      bgImage: 'md-bg-image',
+      textZoom: 'md-text-zoom',
+      codeZoom: 'md-code-zoom',
+      showHidden: 'md-show-hidden',
+      hideEmptyFolders: 'md-hide-empty',
+      flatView: 'md-flat-view',
+      fontText: 'md-font-text',
+      fontCode: 'md-font-code'
+    };
+    return map[settingsKey];
   },
 
   getFileViewMode(path) {
@@ -82,6 +185,14 @@ window.AppState = {
     if (mode === 'draft') {
       const isSwitching = !!targetId;
       const draftId = targetId || `__DRAFT_${Date.now()}__`;
+
+      // ── Explicit Initialization for NEW Draft ─────────────
+      if (!isSwitching && typeof DraftModule !== 'undefined') {
+        DraftModule.createDraft(draftId);
+        if (typeof EditorModule !== 'undefined') {
+          EditorModule.setOriginalContent('');
+        }
+      }
 
       // 1. Store and switch to Draft virtual file
       if (AppState.currentFile !== draftId) {
@@ -187,6 +298,10 @@ function applyTheme() {
   // Update fonts
   root.style.setProperty('--font-text', s.fontText);
   root.style.setProperty('--font-code', s.fontCode);
+  
+  // Update Select Arrow SVG with dynamic color
+  const arrowSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="${s.accentColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
+  root.style.setProperty('--select-arrow', `url("data:image/svg+xml,${encodeURIComponent(arrowSvg)}")`);
   
   // Custom Background Logic
   const bgLayer = document.getElementById('app-background');
@@ -412,8 +527,11 @@ function updateSidebarToggleIcon(isCollapsed) {
 }
 
 // ── Boot ─────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  // 0. Initial theme application
+document.addEventListener('DOMContentLoaded', async () => {
+  // 1. Load persistent state from server (priority over localStorage)
+  await AppState.loadPersistentState();
+
+  // 2. Initial UI setup
   applyTheme();
 
   // 1. Core UI Components First
@@ -440,8 +558,9 @@ document.addEventListener('DOMContentLoaded', () => {
   
   if (typeof CollectModule !== 'undefined') CollectModule.init(); // collect.js
   if (typeof CommentsModule !== 'undefined') CommentsModule.init(); // comments.js
-
+  
   setTimeout(() => {
+    if (typeof TreeModule !== 'undefined') TreeModule.init();
     if (typeof WorkspaceModule !== 'undefined') WorkspaceModule.init();
     RecentlyViewedModule.render();
   }, 0);

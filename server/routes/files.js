@@ -39,12 +39,18 @@ router.get('/files', async (req, res) => {
 
           if (stat.isDirectory()) {
             const subDir = await buildTree(childFull, childRelative);
+            subDir.mtime = stat.mtimeMs; // Add mtime for directories
             // If hideEmpty is on, only add folder if it has children
             if (!hideEmpty || subDir.children.length > 0) {
               node.children.push(subDir);
             }
           } else if (child.endsWith('.md')) {
-            node.children.push({ name: child, path: childRelative, type: 'file' });
+            node.children.push({ 
+              name: child, 
+              path: childRelative, 
+              type: 'file',
+              mtime: stat.mtimeMs // Add mtime for files
+            });
           }
         } catch (e) {
           // skip inaccessible files
