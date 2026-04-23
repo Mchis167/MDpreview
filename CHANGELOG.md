@@ -4,66 +4,21 @@ All notable changes to this project will be documented in this file.
 
 
 
-## [Not Commited] — 2026-04-23 22:45
+## [1.4.0] — 2026-04-23 22:45
 
 ### Added
 - **Standard Move Drag Engine**: Implemented a dedicated "Move" mode for non-custom sort methods, featuring semi-transparent source items and a compact, glassy ghost proxy with accent color.
 - **Intelligent Drop Detection**: Supports dropping onto folders, specific files (moving to their parent), and empty spaces (moving to root) with elegant visual highlights.
 - **Proactive Metadata Sync**: Added `_syncCustomOrder` helper to automatically update custom order metadata during Move, Rename, and Create operations, eliminating "ghost" entries.
-
-### Fixed
-- **Recursive Folder Deletion**: Resolved a critical UI hang by implementing recursive directory deletion using `fs.rmSync` in the backend.
-- **UI Resilience**: Hardened the Design System's confirmation modal and tree deletion handlers with `try...finally` blocks to ensure the UI remains interactive on errors.
-- **Path Resolution Security**: Hardened server-side path resolution for macOS/Windows to handle case-insensitivity and prevent partial directory name traversal.
-
-### Changed
-- **Decoupled Drag Logic**: Reverted and decoupled the "VIP Reorder" engine from standard move operations to preserve the high-precision reordering calibration.
-- **Refined Indicators**: Replaced layout-shifting borders and rough dashed outlines with non-intrusive `box-shadow` rings for a more "thanh thoát" aesthetic.
-
-## [Not Commited] — 2026-04-23 22:15
-
-### Added
 - **Global Flattened Level-based Drag Engine**: Replaced the sibling-only drag logic with a global mapping system that supports cross-parent reordering and level-based (indentation) targeting via X-axis movement.
 - **Hybrid Spreading Effect**: Re-implemented the physical spreading gap where items slide up to fill holes and slide down to create new ones, supporting non-contiguous multi-selections.
 - **Performance Optimizations**: Implemented **Binary Search ($O(\log N)$)** for nearest target detection and **Hardware Acceleration** (`will-change: transform`) for smooth 60fps rendering in large trees.
 - **Auto-Collapse on Drag**: Folders now automatically collapse when they start being dragged to keep the UI clean and prevent layout clutter.
-
-### Changed
-- **Professional Minimalist UI**: Removed the horizontal line and circle indicator in favor of the more intuitive physical gap (Spreading effect) for a cleaner "Zero-Clutter" aesthetic.
-- **Improved Root Move Detection**: Simplified the "Move to Root" logic to use explicit targets (Header and Bottom Dead-zone) to avoid conflicts with in-folder reordering.
-
-### Fixed
-- **Custom Sort Type Bias**: Fixed a bug where folders were always forced to the top even in "Custom Sort" mode, which caused items to "snap back" to the folder group.
-- **Scattered Multi-drag Gaps**: Improved logic to correctly fill multiple gaps when dragging non-contiguous items.
-- **Scroll Coordinate Accuracy**: Integrated `scrollDelta` into all coordinate calculations to prevent UI drift and indicator misalignment during auto-scrolling.
-- **Critical Reference Errors**: Resolved various syntax and reference errors (e.g., orphaned `dragIndicator`) that caused the UI to freeze during drag operations.
-
-## [Not Commited] — 2026-04-23 21:05
-
-### Added
 - **Server-side State API**: Triển khai lớp lưu trữ `/api/state` để lưu cài đặt, tab và bản nháp vào file `app_state.json` phía server.
 - **Premium Tab Bar Reordering**: Implemented a "Zero-Destruction" horizontal drag-and-drop engine for tabs with VIP physics and auto-scroll.
 - **Đồng bộ xuyên môi trường**: Đạt được sự thống nhất dữ liệu giữa Electron, Trình duyệt và Chế độ ẩn danh bằng cách sử dụng server làm nguồn dữ liệu duy nhất (Source of Truth).
 - **Logic tự động khởi tạo**: Thêm quy trình di chuyển dữ liệu tự động giúp đẩy dữ liệu từ `localStorage` cũ lên server trong lần đầu khởi chạy.
 - **Khóa thực thể duy nhất (Single Instance Lock)**: Triển khai `requestSingleInstanceLock` trong `main.js` để ngăn chặn xung đột cổng và đảm bảo tính nhất quán cho bản Electron.
-
-### Changed
-- **Tái cấu trúc Settings**: Chuyển logic zoom và toggle vào bên trong `SettingsComponent` để tăng tính đóng gói và độ tin cậy.
-- **Phím tắt macOS chuẩn**: Cập nhật phím tắt Toàn màn hình hỗ trợ `⌘+⌃+F` và `⌘+⇧+F` cùng hệ thống biểu tượng phím premium (`⌘`, `⇧`, `⌥`).
-- **Lưu trạng thái Debounced**: Áp dụng kỹ thuật debounce 500ms cho tất cả các thao tác lưu lên server để tối ưu hóa hiệu năng mạng và I/O.
-- **Chuẩn hóa quy trình khởi động**: Sắp xếp lại trình tự boot trong `app.js` để đảm bảo trạng thái toàn cục được khôi phục trước khi các module UI khởi tạo.
-
-### Fixed
-- **Lỗi Settings Regression**: Khắc phục hàng loạt lỗi UI bao gồm mất color picker, các nút gạt không hoạt động và hiển thị sai grid ảnh nền.
-- **Tính ổn định của TabBar**: Sửa lỗi `ReferenceError` và khôi phục các hàm persistence bị mất giúp hệ thống Tab hoạt động tin cậy hơn.
-- **Xung đột phím tắt Search**: Thắt chặt điều kiện kích hoạt `Cmd+F` để không làm gián đoạn các tổ hợp phím hệ thống của macOS.
-- **Icon Dropdown động**: Sửa lỗi mất mũi tên dropdown bằng hệ thống biến CSS SVG động, tự động thay đổi màu theo `accentColor`.
-- **Scaling Text Zoom**: Sửa lỗi thanh trượt zoom không cập nhật nhãn phần trăm và không thay đổi kích thước văn bản thực tế.
-- **Lưu trữ Electron**: Giải quyết triệt để vấn đề mất tab và cài đặt khi khởi động lại Electron do thay đổi origin cổng port.
-
-## [Not Commited] — 2026-04-23 12:30
-
-### Added
 - **Zero-Destruction DND Engine**: Re-engineered the sidebar reordering system to use surgical DOM manipulation instead of destructive re-renders, achieving flicker-free Apple-style movement.
 - **Global Render Lock**: Implemented `isGlobalDragging` state to suppress background socket/timer updates during active drag operations, preventing UI interference.
 - **Surgical Position Audit**: Developed an internal layout tracking system (`JUMP-TRACKER` and `Identity Audit`) to detect and eliminate sub-pixel layout shifts and node recreations.
@@ -74,7 +29,34 @@ All notable changes to this project will be documented in this file.
 - **Smart Custom Order Persistence**: Implemented automatic custom-order updates during file renaming to preserve manual sorting positions.
 - **Workspace Metadata Enhancement**: Updated backend to include `mtime` (modified time) in the file tree response for precise time-based sorting.
 
+### Fixed
+- **Recursive Folder Deletion**: Resolved a critical UI hang by implementing recursive directory deletion using `fs.rmSync` in the backend.
+- **UI Resilience**: Hardened the Design System's confirmation modal and tree deletion handlers with `try...finally` blocks to ensure the UI remains interactive on errors.
+- **Path Resolution Security**: Hardened server-side path resolution for macOS/Windows to handle case-insensitivity and prevent partial directory name traversal.
+- **Custom Sort Type Bias**: Fixed a bug where folders were always forced to the top even in "Custom Sort" mode, which caused items to "snap back" to the folder group.
+- **Scattered Multi-drag Gaps**: Improved logic to correctly fill multiple gaps when dragging non-contiguous items.
+- **Scroll Coordinate Accuracy**: Integrated `scrollDelta` into all coordinate calculations to prevent UI drift and indicator misalignment during auto-scrolling.
+- **Critical Reference Errors**: Resolved various syntax and reference errors (e.g., orphaned `dragIndicator`) that caused the UI to freeze during drag operations.
+- **Lỗi Settings Regression**: Khắc phục hàng loạt lỗi UI bao gồm mất color picker, các nút gạt không hoạt động và hiển thị sai grid ảnh nền.
+- **Tính ổn định của TabBar**: Sửa lỗi `ReferenceError` và khôi phục các hàm persistence bị mất giúp hệ thống Tab hoạt động tin cậy hơn.
+- **Xung đột phím tắt Search**: Thắt chặt điều kiện kích hoạt `Cmd+F` để không làm gián đoạn các tổ hợp phím hệ thống của macOS.
+- **Icon Dropdown động**: Sửa lỗi mất mũi tên dropdown bằng hệ thống biến CSS SVG động, tự động thay đổi màu theo `accentColor`.
+- **Scaling Text Zoom**: Sửa lỗi thanh trượt zoom không cập nhật nhãn phần trăm và không thay đổi kích thước văn bản thực tế.
+- **Lưu trữ Electron**: Giải quyết triệt để vấn đề mất tab và cài đặt khi khởi động lại Electron do thay đổi origin cổng port.
+- **Structural DND Jump**: Resolved a critical layout bug by moving the entire `tree-node-wrapper` instead of just the inner `tree-item`, preserving DOM integrity and CSS spacing.
+- **Micro-flicker and Flash**: Eliminated visual artifacts by removing the redundant `render(true)` call and implementing invisible placeholders (`opacity: 0`).
+- **Sorting Reliability**: Resolved issues with sorting stale metadata by ensuring the Node.js server correctly extracts and serves file modification timestamps.
+- **Shortcut Context Safety**: Restricted global keyboard shortcuts to prevent interference when typing in input fields or textareas.
+
 ### Changed
+- **Decoupled Drag Logic**: Reverted and decoupled the "VIP Reorder" engine from standard move operations to preserve the high-precision reordering calibration.
+- **Refined Indicators**: Replaced layout-shifting borders and rough dashed outlines with non-intrusive `box-shadow` rings for a more "thanh thoát" aesthetic.
+- **Professional Minimalist UI**: Removed the horizontal line and circle indicator in favor of the more intuitive physical gap (Spreading effect) for a cleaner "Zero-Clutter" aesthetic.
+- **Improved Root Move Detection**: Simplified the "Move to Root" logic to use explicit targets (Header and Bottom Dead-zone) to avoid conflicts with in-folder reordering.
+- **Tái cấu trúc Settings**: Chuyển logic zoom và toggle vào bên trong `SettingsComponent` để tăng tính đóng gói và độ tin cậy.
+- **Phím tắt macOS chuẩn**: Cập nhật phím tắt Toàn màn hình hỗ trợ `⌘+⌃+F` và `⌘+⇧+F` cùng hệ thống biểu tượng phím premium (`⌘`, `⇧`, `⌥`).
+- **Lưu trạng thái Debounced**: Áp dụng kỹ thuật debounce 500ms cho tất cả các thao tác lưu lên server để tối ưu hóa hiệu năng mạng và I/O.
+- **Chuẩn hóa quy trình khởi động**: Sắp xếp lại trình tự boot trong `app.js` để đảm bảo trạng thái toàn cục được khôi phục trước khi các module UI khởi tạo.
 - **Premium Drag Physics**: Refined the reordering feel with custom fluid `cubic-bezier(0.2, 0, 0, 1)` curves, creating a high-end "floaty" tactile experience for sibling displacement.
 - **Instant UI Experience**: Removed item entrance animations and hover offsets in `sidebar.css` to achieve immediate visual feedback and zero-latency navigation.
 - **Intelligent Hand-off Logic**: Optimized the final 'drop' sequence with a temporary transition lock (`is-handing-off`) to prevent siblings from "floating back" to old positions, ensuring they snap instantly to their new locations.
@@ -85,12 +67,6 @@ All notable changes to this project will be documented in this file.
   - Bidirectional Selection Bridge: Selecting items in the Sidebar instantly highlights corresponding tabs and vice-versa.
   - Enhanced Deselection: Integrated global `Escape` and "Click-to-Deselect" logic for both Sidebar and Tab Bar.
 - **Global UI Polishing**: Applied consistent accent-color highlighting across all selected components for a unified workspace aesthetic.
-
-### Fixed
-- **Structural DND Jump**: Resolved a critical layout bug by moving the entire `tree-node-wrapper` instead of just the inner `tree-item`, preserving DOM integrity and CSS spacing.
-- **Micro-flicker and Flash**: Eliminated visual artifacts by removing the redundant `render(true)` call and implementing invisible placeholders (`opacity: 0`).
-- **Sorting Reliability**: Resolved issues with sorting stale metadata by ensuring the Node.js server correctly extracts and serves file modification timestamps.
-- **Shortcut Context Safety**: Restricted global keyboard shortcuts to prevent interference when typing in input fields or textareas.
 
 ## [1.3.0] — 2026-04-23 09:30
 
@@ -168,83 +144,18 @@ All notable changes to this project will be documented in this file.
 
 ## [1.1.0] — 2026-04-23 01:40
 
-
 ### Added
 - **Design System Icon Registry**: Implemented a central `ICONS` registry in `design-system.js` for instant, reliable SVG rendering without DOM scanning delays.
 - **Icon Aliasing**: Added support for standard Lucide names (e.g., `trash-2`, `message-square`, `book-open`, `pen-line`) within the registry for better developer experience and compatibility.
-
-### Changed
-- **Sidebar Action Architecture**: Fully migrated Right Sidebar module headers to use the `DesignSystem.createHeaderAction` component, ensuring unified 48x48 action buttons.
-- **Component Modernization**: Refactored `TabBarComponent` and `ChangeActionViewBarComponent` to utilize the new Icon Registry, eliminating "text-as-icon" rendering bugs and improving performance.
-- **Floating Selection Triggers**: Updated `CommentsModule` and `CollectModule` triggers to use the registry, ensuring visual consistency and 100% rendering reliability.
-- **Standardized Delete Styling**: Updated `ds-item-delete-btn` with unified padding and SVG injection via `DesignSystem.getIcon('x')`.
-
-### Removed
-- **Legacy SVG Constants**: Deleted dozens of redundant SVG string constants across `comments.js` and `collect.js`, significantly cleaning up the codebase.
-
-### Fixed
-- **Icon Rendering Regressions**: Resolved issues where icons (specifically `trash-2`) were displaying as raw text due to improper manual gán `innerHTML`.
-- **Sidebar Header Alignment**: Refined Right Sidebar header padding (`0 0 0 16px`) and action group alignment to ensure a perfectly balanced, premium UI.
-
-## [1.1.0] — 2026-04-23 01:15
-
-### Added
 - **Word-Level Highlighting**: Implemented precise, robust text range highlighting for both **Comments** and **Collect** (Bookmark) modules using a `DocumentFragment` wrapping system.
 - **Auto-Fix Legacy Data**: Added a server-side routine to automatically repair null IDs in existing comment/bookmark files, ensuring data integrity.
 - **Mode-Aware UI Filtering**: Implemented a `data-active-mode` gating system to only show relevant highlights (Comment vs Collect) when the specific mode is active.
 - **Interactive Navigation**: Added automatic scrolling and pulse-highlight feedback when clicking on items in the Right Sidebar.
 - **Floating Design System Triggers**: Restored and upgraded the floating `comment-trigger` and `collect-trigger` with premium Glassmorphism and animation.
-
-### Changed
-- **Right Sidebar Architecture**: Fully migrated `CommentsModule` and `CollectModule` to the unified `RightSidebar` (Organism) component, reducing redundant UI logic.
-- **Design System Compliance**: Updated sidebar list items with `Roboto Mono` labels, `ds-text-clamp-5` for snippets, and consistent multi-layered shadows.
-
-### Fixed
-- **Comment Duplication Bug**: Resolved a critical regression where editing a comment created a duplicate record due to missing ID preservation in the frontend.
-- **Web Version API Parity**: Fixed a server-side spread operator bug in the Express routes that caused ID corruption (`null` IDs) in the web environment.
-- **Functional Sidebar Regressions**: Fixed missing SVG constants (`svgTrash`, `svgMsg`) and event binding failures in the sidebar boot sequence.
-- **Interactive "X" Button**: Fixed the delete button failure by resolving the underlying null-ID issue.
-
-## [1.1.0] — 2026-04-23 00:26
-
-### Added
 - **Agent Rule: Mandatory Changelog Review**: Updated `.agents/rules/readchangelog.md` to force all AI agents to read `CHANGELOG.md` at the start of every session for better context retention.
-
-## [1.1.0] — 2026-04-23 00:25
-
-### Added
 - **Atomic TabBar Component**: Implemented a fully modular `TabBarComponent` (Organism) with a dynamic "Right Action" configuration system.
 - **Scalable Action System**: Added support for extensible header actions (Rebuild, Fullscreen, Settings) within the new TabBar architecture.
-
-### Changed
-- **Architectural Decoupling**: Refactored `TabsModule` to act as a pure state controller, syncing application state with the `TabBarComponent` via an observer-style pattern.
-- **Keyboard Shortcut Unification**: Updated global listeners in `toolbar.js` to target new Design System class names, ensuring 100% functional parity for `Mod+1/2/3/4` and `Mod+B`.
-- **Legacy Pruning**: Deleted `renderer/css/tabs.css` and removed obsolete event listeners from `renderer/js/toolbar.js`, reducing JS bloat by ~150 lines.
-
-### Fixed
-- **Sidebar Selection Persistence**: Resolved a bug in `sidebar.js` where the "Recently Viewed" highlight remained active even when the workspace had no open tabs.
-- **Editor Mode Synchronization**: Updated `editor.js` to correctly switch back to Read Mode using the new component selectors after saving or canceling edits.
-
-## [1.1.0] — 2026-04-23 00:20
-
-### Added
 - **Mutual Exclusion Sidebar Logic**: Implemented a "Single Sidebar" rule to ensure only one right-hand panel (Comment or Collect) is open at a time.
-
-### Changed
-- **Renamed Component**: Completed the migration from `SecondaryToolbar` to **`ChangeActionViewBar`**, updating all CSS, JS, and HTML references.
-- **State Globalization**: Moved `AppState` to `window.AppState` to resolve cross-script visibility issues.
-- **Boot Sequence Optimization**: Reordered the application initialization in `app.js` to guarantee UI components (like the Action Bar) are ready before the first workspace load.
-- **Sidebar UI Reliability**: Added `!important` CSS overrides for sidebar widths to prevent manual resizer values from blocking the collapse transition.
-
-### Fixed
-- **Mode Switching Regression**: Resolved the issue where "New Draft" (`__DRAFT_MODE__`) failed to automatically trigger 'Edit' mode.
-- **Ghost Toolbar Fix**: Ensured the `ChangeActionViewBar` strictly hides when no file is active or during `setNoFile` triggers.
-- **Edge Browser Support**: Fixed "Invalid Property" warnings for `backdrop-filter` by refining CSS property ordering.
-- **Overlapping Sidebar Bug**: Fixed a UI collision where both Comment and Collect sidebars could appear simultaneously.
-
-## [1.1.0] — 2026-04-22
-
-### Added
 - **Premium Scroll Experience**: Implemented a smooth alpha-mask fade on the top and bottom edges of the Markdown viewer (`#md-viewer`).
 - **Flexible Mask Configuration**: Added CSS variables for independent control of edge fading:
   - `--mask-top`: Controls the fade depth at the top edge (currently optimized at `240px`).
@@ -252,5 +163,35 @@ All notable changes to this project will be documented in this file.
 - **Edge Polish**: Eliminated "hard cuts" (chém cứng) where content meets the container boundaries, improving overall aesthetic fluidity.
 
 ### Changed
+- **Sidebar Action Architecture**: Fully migrated Right Sidebar module headers to use the `DesignSystem.createHeaderAction` component, ensuring unified 48x48 action buttons.
+- **Component Modernization**: Refactored `TabBarComponent` and `ChangeActionViewBarComponent` to utilize the new Icon Registry, eliminating "text-as-icon" rendering bugs and improving performance.
+- **Floating Selection Triggers**: Updated `CommentsModule` and `CollectModule` triggers to use the registry, ensuring visual consistency and 100% rendering reliability.
+- **Standardized Delete Styling**: Updated `ds-item-delete-btn` with unified padding and SVG injection via `DesignSystem.getIcon('x')`.
+- **Right Sidebar Architecture**: Fully migrated `CommentsModule` and `CollectModule` to the unified `RightSidebar` (Organism) component, reducing redundant UI logic.
+- **Design System Compliance**: Updated sidebar list items with `Roboto Mono` labels, `ds-text-clamp-5` for snippets, and consistent multi-layered shadows.
+- **Architectural Decoupling**: Refactored `TabsModule` to act as a pure state controller, syncing application state with the `TabBarComponent` via an observer-style pattern.
+- **Keyboard Shortcut Unification**: Updated global listeners in `toolbar.js` to target new Design System class names, ensuring 100% functional parity for `Mod+1/2/3/4` and `Mod+B`.
+- **Legacy Pruning**: Deleted `renderer/css/tabs.css` and removed obsolete event listeners from `renderer/js/toolbar.js`, reducing JS bloat by ~150 lines.
+- **Renamed Component**: Completed the migration from `SecondaryToolbar` to **`ChangeActionViewBar`**, updating all CSS, JS, and HTML references.
+- **State Globalization**: Moved `AppState` to `window.AppState` to resolve cross-script visibility issues.
+- **Boot Sequence Optimization**: Reordered the application initialization in `app.js` to guarantee UI components (like the Action Bar) are ready before the first workspace load.
+- **Sidebar UI Reliability**: Added `!important` CSS overrides for sidebar widths to prevent manual resizer values from blocking the collapse transition.
 - Updated `renderer/css/markdown.css` to integrate the linear-gradient masking system.
 - Adjusted `#md-viewer` layout properties to support hardware-accelerated masking.
+
+### Removed
+- **Legacy SVG Constants**: Deleted dozens of redundant SVG string constants across `comments.js` and `collect.js`, significantly cleaning up the codebase.
+
+### Fixed
+- **Icon Rendering Regressions**: Resolved issues where icons (specifically `trash-2`) were displaying as raw text due to improper manual gán `innerHTML`.
+- **Sidebar Header Alignment**: Refined Right Sidebar header padding (`0 0 0 16px`) and action group alignment to ensure a perfectly balanced, premium UI.
+- **Comment Duplication Bug**: Resolved a critical regression where editing a comment created a duplicate record due to missing ID preservation in the frontend.
+- **Web Version API Parity**: Fixed a server-side spread operator bug in the Express routes that caused ID corruption (`null` IDs) in the web environment.
+- **Functional Sidebar Regressions**: Fixed missing SVG constants (`svgTrash`, `svgMsg`) and event binding failures in the sidebar boot sequence.
+- **Interactive "X" Button**: Fixed the delete button failure by resolving the underlying null-ID issue.
+- **Sidebar Selection Persistence**: Resolved a bug in `sidebar.js` where the "Recently Viewed" highlight remained active even when the workspace had no open tabs.
+- **Editor Mode Synchronization**: Updated `editor.js` to correctly switch back to Read Mode using the new component selectors after saving or canceling edits.
+- **Mode Switching Regression**: Resolved the issue where "New Draft" (`__DRAFT_MODE__`) failed to automatically trigger 'Edit' mode.
+- **Ghost Toolbar Fix**: Ensured the `ChangeActionViewBar` strictly hides when no file is active or during `setNoFile` triggers.
+- **Edge Browser Support**: Fixed "Invalid Property" warnings for `backdrop-filter` by refining CSS property ordering.
+- **Overlapping Sidebar Bug**: Fixed a UI collision where both Comment and Collect sidebars could appear simultaneously.
