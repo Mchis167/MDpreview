@@ -1,0 +1,52 @@
+/* ============================================================
+   design-system/atoms/tooltip.css
+   ============================================================ */
+
+.ds-tooltip-container {
+  position: relative;
+}
+
+.ds-tooltip {
+  position: absolute;
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  z-index: 2000;
+}
+
+/* Position: Bottom (Default) */
+.ds-tooltip-bottom {
+  top: 110%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+}
+
+.ds-tooltip-bottom::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Hover triggers */
+.ds-tooltip-trigger:hover .ds-tooltip,
+.is-disabled:hover .ds-tooltip {
+  opacity: 1;
+}
+
+.ds-tooltip-trigger:hover .ds-tooltip-bottom,
+.is-disabled:hover .ds-tooltip-bottom {
+  transform: translateX(-50%) translateY(0);
+}

@@ -3,9 +3,6 @@
    ============================================================ */
 
 const DesignSystem = (() => {
-  /**
-   * Helper to create a DOM element with classes and attributes
-   */
   const ICONS = {
     'trash': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>`,
     'trash-2': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>`,
@@ -24,9 +21,8 @@ const DesignSystem = (() => {
     'plus': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`
   };
 
-
   /**
-   * Helper to create a DOM element with classes and attributes
+   * Private: Helper to create a DOM element
    */
   function createElement(tag, className, attributes = {}) {
     const el = document.createElement(tag);
@@ -38,38 +34,134 @@ const DesignSystem = (() => {
         el.className = className;
       }
     }
-    for (const [key, value] of Object.entries(attributes)) {
-      if (key === 'text') el.textContent = value;
-      else if (key === 'html') el.innerHTML = value;
-      else el.setAttribute(key, value);
+    if (attributes) {
+      Object.keys(attributes).forEach(key => {
+        if (key === 'text') {
+          el.textContent = attributes[key];
+        } else if (key === 'html') {
+          el.innerHTML = attributes[key];
+        } else {
+          el.setAttribute(key, attributes[key]);
+        }
+      });
     }
     return el;
   }
 
+  /**
+   * Private: Create a Popover Shield
+   */
+  function createPopoverShield(options = {}) {
+    const { 
+      title = 'Modal', 
+      content = '', 
+      footer = null,
+      className = '',
+      width = null,
+      hasBackdrop = true,
+      showHeader = true,
+      position = null,
+      container = document.body,
+      onClose = null 
+    } = options;
+
+    const shieldClass = hasBackdrop ? 'ds-popover-shield' : 'ds-popover-floating';
+    const shield = createElement('div', shieldClass);
+    const isBody = container === document.body;
+    shield.style.position = isBody ? 'fixed' : 'absolute';
+
+    const card = createElement('div', ['ds-popover-card', className]);
+    if (width) card.style.width = width;
+    if (position) {
+      if (position.top) card.style.top = position.top;
+      if (position.right) card.style.right = position.right;
+      if (position.bottom) card.style.bottom = position.bottom;
+      if (position.left) card.style.left = position.left;
+      card.style.position = 'fixed';
+      card.style.margin = '0';
+    }
+
+    const header = createElement('div', 'ds-popover-header');
+    const titleEl = createElement('h2', 'ds-popover-title', { text: title });
+    const closeBtn = createElement('button', 'ds-popover-close', { html: ICONS['x'] || '✕' });
+
+    const body = createElement('div', 'ds-popover-body');
+    if (content instanceof HTMLElement) {
+      body.appendChild(content);
+    } else if (typeof content === 'string') {
+      body.innerHTML = content;
+    }
+
+    if (showHeader) {
+      header.appendChild(titleEl);
+      header.appendChild(closeBtn);
+      card.appendChild(header);
+    }
+    card.appendChild(body);
+
+    if (footer) {
+      const footerEl = createElement('div', 'ds-popover-footer');
+      if (footer instanceof HTMLElement) {
+        footerEl.appendChild(footer);
+      } else {
+        footerEl.innerHTML = footer;
+      }
+      card.appendChild(footerEl);
+    }
+
+    shield.appendChild(card);
+
+    const closeAction = () => {
+      shield.classList.remove('show');
+      setTimeout(() => {
+        shield.remove();
+        if (onClose) onClose();
+      }, 250);
+    };
+
+    closeBtn.onclick = closeAction;
+    shield.onclick = (e) => {
+      if (hasBackdrop && e.target === shield) closeAction();
+    };
+
+    container.appendChild(shield);
+    setTimeout(() => shield.classList.add('show'), 10);
+
+    if (!hasBackdrop) {
+      const clickAway = (e) => {
+        if (!card.contains(e.target)) {
+          closeAction();
+          document.removeEventListener('click', clickAway, true);
+        }
+      };
+      setTimeout(() => document.addEventListener('click', clickAway, true), 100);
+    }
+
+    const popoverInstance = { shield, card, body, close: closeAction };
+    shield.__popover = popoverInstance;
+    return popoverInstance;
+  }
+
+  /**
+   * Public API
+   */
   return {
     createElement,
-    ICONS,
-    /**
-     * Helper to get an icon SVG from the registry
-     */
+    createPopoverShield,
+    
     getIcon: (name) => ICONS[name] || '',
-    /**
-     * Helper to create a 48x48 square action button
-     */
+
     createHeaderAction: (iconName, title, onClick) => {
-      const iconHtml = ICONS[iconName] || iconName; // Fallback to raw string if not in registry
-      
-      const btn = createElement('button', 'ds-header-action', {
-        'title': title,
-        'html': iconHtml
-      });
+      const iconHtml = ICONS[iconName] || iconName;
+      const btn = createElement('button', 'ds-header-action', { 'title': title, 'html': iconHtml });
       if (onClick) btn.onclick = onClick;
       return btn;
     },
+    
+    createTooltip: (text, position = 'bottom') => {
+      return createElement('div', ['ds-tooltip', `ds-tooltip-${position}`], { text });
+    },
 
-    /**
-     * Helper to create a select dropdown
-     */
     createSelect: (options = [], currentVal, onChange) => {
       const select = createElement('select', 'ds-select');
       options.forEach(opt => {
@@ -83,118 +175,82 @@ const DesignSystem = (() => {
       return select;
     },
 
-    /**
-     * Create a Popover Shield (Backdrop + Modal Container)
-     * Highly reusable for Settings, Workspace Picker, Confirm Modals, etc.
-     */
-    createPopoverShield: (options = {}) => {
-      const { 
-        title = 'Modal', 
-        content = '', 
-        footer = null,
-        className = '',
-        width = null,
-        hasBackdrop = true,
-        showHeader = true,
-        position = null, // { top, right, bottom, left }
-        container = document.body,
-        onClose = null 
-      } = options;
+    showConfirm: ({ title, message, onConfirm, onCancel }) => {
+      const content = createElement('div', 'ds-confirm-content');
+      content.innerHTML = `<p class="ds-confirm-message">${message}</p>`;
 
-      const shieldClass = hasBackdrop ? 'ds-popover-shield' : 'ds-popover-floating';
-      const shield = createElement('div', shieldClass);
+      const footer = createElement('div', 'ds-confirm-footer');
+      const cancelBtn = createElement('button', 'ds-btn ds-btn-ghost', { text: 'Cancel' });
+      const confirmBtn = createElement('button', 'ds-btn ds-btn-primary', { text: 'Confirm' });
       
-      // If mounting to body, use fixed. If mounting to sub-container, use absolute.
-      const isBody = container === document.body;
-      shield.style.position = isBody ? 'fixed' : 'absolute';
+      footer.appendChild(cancelBtn);
+      footer.appendChild(confirmBtn);
 
-      const card = createElement('div', ['ds-popover-card', className]);
-      
-      if (width) card.style.width = width;
-      if (position) {
-        if (position.top) card.style.top = position.top;
-        if (position.right) card.style.right = position.right;
-        if (position.bottom) card.style.bottom = position.bottom;
-        if (position.left) card.style.left = position.left;
-        card.style.position = 'fixed';
-        card.style.margin = '0';
-      }
-
-      // ── Header ──────────────────────────────────────────
-      const header = createElement('div', 'ds-popover-header');
-      const titleEl = createElement('h2', 'ds-popover-title', { text: title });
-      const closeBtn = createElement('button', 'ds-popover-close', {
-        html: ICONS['x'] || '✕'
+      const popover = createPopoverShield({
+        title,
+        content,
+        footer,
+        width: '400px',
+        className: 'ds-modal-confirm'
       });
 
-      // ── Body ────────────────────────────────────────────
-      const body = createElement('div', 'ds-popover-body');
-      if (content instanceof HTMLElement) {
-        body.appendChild(content);
-      } else if (typeof content === 'string') {
-        body.innerHTML = content;
-      }
+      confirmBtn.onclick = async () => {
+        if (onConfirm) await onConfirm();
+        popover.close();
+      };
+      cancelBtn.onclick = () => {
+        if (onCancel) onCancel();
+        popover.close();
+      };
+    },
 
-      // ── Assemble ────────────────────────────────────────
-      if (showHeader) {
-        header.appendChild(titleEl);
-        header.appendChild(closeBtn);
-        card.appendChild(header);
-      }
-      card.appendChild(body);
+    showPrompt: (options) => {
+      const { title, message, placeholder, defaultValue = '', onConfirm, onCancel } = options;
+      const content = createElement('div', 'ds-prompt-content');
+      const label = createElement('label', 'ds-field-label', { text: message });
+      const input = createElement('input', 'ds-input', { type: 'text', placeholder: placeholder, value: defaultValue });
+      
+      content.appendChild(label);
+      content.appendChild(input);
 
-      // ── Footer (Optional) ───────────────────────────────
-      if (footer) {
-        const footerEl = createElement('div', 'ds-popover-footer');
-        if (footer instanceof HTMLElement) {
-          footerEl.appendChild(footer);
-        } else {
-          footerEl.innerHTML = footer;
+      const footer = createElement('div', 'ds-confirm-footer');
+      const cancelBtn = createElement('button', 'ds-btn ds-btn-ghost', { text: 'Cancel' });
+      const confirmBtn = createElement('button', 'ds-btn ds-btn-primary', { text: 'Continue' });
+      
+      footer.appendChild(cancelBtn);
+      footer.appendChild(confirmBtn);
+
+      const popover = createPopoverShield({
+        title,
+        content,
+        footer,
+        width: '440px',
+        className: 'ds-modal-prompt'
+      });
+
+      setTimeout(() => input.focus(), 150);
+
+      confirmBtn.onclick = async () => {
+        const val = input.value.trim();
+        if (!val) {
+          input.classList.add('ds-input-error');
+          input.focus();
+          return;
         }
-        card.appendChild(footerEl);
-      }
-
-      shield.appendChild(card);
-
-      const closeAction = () => {
-        shield.classList.remove('show');
-        setTimeout(() => {
-          shield.remove();
-          if (onClose) onClose();
-        }, 250); // Match CSS transition
+        if (onConfirm) await onConfirm(val);
+        popover.close();
       };
 
-      closeBtn.onclick = closeAction;
-      shield.onclick = (e) => {
-        if (hasBackdrop && e.target === shield) closeAction();
+      input.oninput = () => input.classList.remove('ds-input-error');
+      input.onkeydown = (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); confirmBtn.click(); }
+        if (e.key === 'Escape') { e.preventDefault(); cancelBtn.click(); }
       };
 
-      // Auto-show
-      container.appendChild(shield);
-      setTimeout(() => shield.classList.add('show'), 10);
-
-      // Global click-away for non-backdrop floating popovers
-      if (!hasBackdrop) {
-        const clickAway = (e) => {
-          if (!card.contains(e.target)) {
-            closeAction();
-            document.removeEventListener('click', clickAway, true);
-          }
-        };
-        // Delay adding listener to avoid immediate trigger from the button that opened it
-        setTimeout(() => document.addEventListener('click', clickAway, true), 100);
-      }
-
-      // Store instance for child interaction
-      const popoverInstance = {
-        shield,
-        card,
-        body,
-        close: closeAction
+      cancelBtn.onclick = () => {
+        if (onCancel) onCancel();
+        popover.close();
       };
-      shield.__popover = popoverInstance;
-
-      return popoverInstance;
     }
   };
 })();

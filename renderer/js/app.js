@@ -7,6 +7,9 @@
      sidebar.js  — Mode switcher, search, resizer
    ============================================================ */
 
+// ── Mode Persistence (Hybrid State) ─────────────────────────
+const sessionModes = {}; // Memory-only for regular files
+
 window.AppState = {
   currentFile:      null,
   currentWorkspace: null,
@@ -28,23 +31,71 @@ window.AppState = {
     fontCode:         localStorage.getItem('md-font-code') || 'Roboto Mono'
   },
 
+  getFileViewMode(path) {
+    if (!path) return 'read';
+    // Case 1: Draft (Persistent via DraftModule)
+    if (path.startsWith('__DRAFT_')) {
+      return (typeof DraftModule !== 'undefined') ? (DraftModule.getDraftViewMode(path) || 'read') : 'read';
+    }
+    // Case 2: Regular File (Session-only)
+    return sessionModes[path] || 'read';
+  },
+
+  setFileViewMode(path, mode) {
+    if (!path) return;
+    // Case 1: Draft
+    if (path.startsWith('__DRAFT_')) {
+      if (typeof DraftModule !== 'undefined') DraftModule.setDraftViewMode(path, mode);
+    } else {
+      // Case 2: Regular File
+      sessionModes[path] = mode;
+    }
+  },
+
   /**
    * Called when sidebar mode changes (Space <-> Draft)
    */
-  onModeChange(mode) {
-    console.log('[App] onModeChange:', mode);
+  async onModeChange(mode, targetId) {
+    // ── Dirty check before switching mode/file ────────────
+    if (AppState.currentMode === 'edit' && typeof EditorModule !== 'undefined' && EditorModule.isDirty()) {
+      const isDraft = AppState.currentFile && AppState.currentFile.startsWith('__DRAFT_');
+      const isFirstEdit = EditorModule.getOriginalContent() === '';
+
+      if (isDraft || isFirstEdit) {
+        await EditorModule.save();
+      } else {
+        // For non-draft files, we might want to confirm, 
+        // but since onModeChange is often a side-effect of a UI click,
+        // we'll at least try to save if it's a draft.
+        // If it's a real file, show confirm.
+        DesignSystem.showConfirm({
+          title: 'Unsaved Changes',
+          message: 'You have unsaved changes. Save them before switching?',
+          onConfirm: async () => {
+            await EditorModule.save();
+            this.onModeChange(mode, targetId);
+          }
+        });
+        return;
+      }
+    }
     if (mode === 'draft') {
+      const isSwitching = !!targetId;
+      const draftId = targetId || `__DRAFT_${Date.now()}__`;
+
       // 1. Store and switch to Draft virtual file
-      if (AppState.currentFile !== '__DRAFT_MODE__') {
+      if (AppState.currentFile !== draftId) {
         ScrollModule.save(AppState.currentFile);
-        AppState.lastMarkdownFile = AppState.currentFile;
-        AppState.currentFile = '__DRAFT_MODE__';
-        ScrollModule.restore('__DRAFT_MODE__');
+        if (!AppState.currentFile || !AppState.currentFile.startsWith('__DRAFT_')) {
+          AppState.lastMarkdownFile = AppState.currentFile;
+        }
+        AppState.currentFile = draftId;
+        ScrollModule.restore(draftId);
       }
 
       // 2. Load Draft-specific comments
       if (typeof CommentsModule !== 'undefined') {
-        CommentsModule.loadForFile('__DRAFT_MODE__');
+        CommentsModule.loadForFile(draftId);
       }
       
       // 3. Clear triggers if in comment mode (they will be re-applied to Draft preview)
@@ -64,12 +115,21 @@ window.AppState = {
 
       // 5. Ensure Draft tab is open
       if (typeof TabsModule !== 'undefined') {
-        TabsModule.open('__DRAFT_MODE__');
+        TabsModule.open(draftId);
       }
 
-      // 6. Refresh toolbar UI state: Force 'edit' for new Draft
+      // 6. Refresh toolbar UI state
       if (typeof AppState.updateToolbarUI === 'function') {
-        AppState.updateToolbarUI('edit');
+        let targetMode = AppState.getFileViewMode(draftId);
+        if (!isSwitching) {
+          targetMode = 'edit'; // New draft always starts in Edit
+        } else {
+          const content = (typeof DraftModule !== 'undefined') ? DraftModule.getDraftContent(draftId) : '';
+          if (!content || content.trim() === '') {
+            targetMode = 'edit';
+          }
+        }
+        AppState.updateToolbarUI(targetMode);
       }
 
       const mdContent = document.getElementById('md-content');
@@ -81,12 +141,11 @@ window.AppState = {
       // Mode: space
       // 1. Restore the original file
       if (AppState.lastMarkdownFile) {
-        ScrollModule.save('__DRAFT_MODE__');
         AppState.currentFile = AppState.lastMarkdownFile;
         AppState.lastMarkdownFile = null;
       }
 
-      if (AppState.currentFile && AppState.currentFile !== '__DRAFT_MODE__') {
+      if (AppState.currentFile && !AppState.currentFile.startsWith('__DRAFT_')) {
         loadFile(AppState.currentFile);
       } else {
         setNoFile();
@@ -157,6 +216,12 @@ function initSocket() {
 
   AppState.socket.on('tree-changed', () => { TreeModule.load(); });
 
+  AppState.socket.on('file-deleted', ({ file }) => {
+    if (typeof TabsModule !== 'undefined') TabsModule.remove(file, true);
+    if (typeof RecentlyViewedModule !== 'undefined') RecentlyViewedModule.remove(file);
+    TreeModule.load();
+  });
+
   AppState.socket.on('workspace-changed', () => {
     TreeModule.load();
     setNoFile();
@@ -165,30 +230,58 @@ function initSocket() {
 }
 
 // ── File Loading ─────────────────────────────────────────────
+let loadTicket = 0;
+
 async function loadFile(filePath) {
   if (!AppState.currentWorkspace) return;
 
+  const currentTicket = ++loadTicket;
+
   // 1. Dirty check if we are in 'edit' mode before switching files
-  if (AppState.currentMode === 'edit') {
-    if (typeof EditorModule !== 'undefined' && EditorModule.isDirty()) {
-      if (confirm(`You have unsaved changes in the current file. Save them before switching to ${filePath.split('/').pop()}?`)) {
-        const saved = await EditorModule.save();
-        if (!saved) return; // Cancel switch if save failed
-      }
+  if (AppState.currentMode === 'edit' && typeof EditorModule !== 'undefined' && EditorModule.isDirty()) {
+    const isDraft = AppState.currentFile && AppState.currentFile.startsWith('__DRAFT_');
+    const isFirstEdit = EditorModule.getOriginalContent() === '';
+
+    if (isDraft || isFirstEdit) {
+      // Auto-save and proceed silently
+      await EditorModule.save();
+    } else {
+      DesignSystem.showConfirm({
+        title: 'Unsaved Changes',
+        message: `You have unsaved changes. Save them before switching to ${filePath.split('/').pop()}?`,
+        onConfirm: async () => {
+           const saved = await EditorModule.save();
+           if (saved) loadFile(filePath);
+        }
+      });
+      return;
     }
   }
 
   let data = { html: '' };
-  if (filePath === '__DRAFT_MODE__') {
+  if (filePath && filePath.startsWith('__DRAFT_')) {
     // For Draft, we don't fetch from server, we sync from DraftModule
     if (typeof DraftModule !== 'undefined') {
-      data.html = DraftModule.getRenderedHtml ? DraftModule.getRenderedHtml() : '';
+      data.html = DraftModule.getRenderedHtml ? DraftModule.getRenderedHtml(filePath) : '';
     }
   } else {
-    const res = await fetch(`/api/render?file=${encodeURIComponent(filePath)}`);
-    if (!res.ok) throw new Error(`Failed to load file: ${filePath}`);
-    data = await res.json();
+    try {
+      const res = await fetch(`/api/render?file=${encodeURIComponent(filePath)}`);
+      if (currentTicket !== loadTicket) return; // Cancel if newer request started
+      
+      if (!res.ok) {
+        if (res.status === 404) {
+          return;
+        }
+        throw new Error(`Failed to load file: ${filePath} (Status: ${res.status})`);
+      }
+      data = await res.json();
+    } catch (err) {
+      return;
+    }
   }
+
+  if (currentTicket !== loadTicket) return;
 
   // Save current scroll before switching
   if (AppState.currentFile) {
@@ -216,16 +309,25 @@ async function loadFile(filePath) {
   
   try {
     if (typeof CommentsModule !== 'undefined') await CommentsModule.loadForFile(filePath);
-  } catch (e) { console.error('[App] CommentsModule error:', e); }
+  } catch (e) { }
 
   try {
     if (typeof CollectModule !== 'undefined') CollectModule.loadForFile(filePath);
-  } catch (e) { console.error('[App] CollectModule error:', e); }
+  } catch (e) { }
 
   RecentlyViewedModule.add(filePath);
 
   if (typeof AppState.updateToolbarUI === 'function') {
-    const targetMode = (filePath === '__DRAFT_MODE__') ? 'edit' : 'read';
+    let targetMode = AppState.getFileViewMode(filePath);
+    
+    // Draft specific override: always force Edit if empty
+    if (filePath && filePath.startsWith('__DRAFT_')) {
+      const content = (typeof DraftModule !== 'undefined') ? DraftModule.getDraftContent(filePath) : '';
+      if (!content || content.trim() === '') {
+        targetMode = 'edit';
+      }
+    }
+    
     AppState.updateToolbarUI(targetMode);
   } else if (AppState.commentMode && typeof CommentsModule !== 'undefined') {
     CommentsModule.applyCommentMode();
@@ -236,14 +338,16 @@ async function loadFile(filePath) {
 }
 
 function setNoFile() {
-  // console.log('[App] setNoFile triggered');
   AppState.currentFile = null;
+  AppState.currentMode = 'read';
 
   const emptyState = document.getElementById('empty-state');
   const mdContent  = document.getElementById('md-content');
+  const editViewer = document.getElementById('edit-viewer');
 
   if (emptyState) emptyState.style.display = 'flex';
   if (mdContent)  mdContent.style.display  = 'none';
+  if (editViewer) editViewer.style.display = 'none';
 
   updateHeaderUI();
 
@@ -358,7 +462,7 @@ function hexToRgb(hex) {
 /**
  * Global Toast Notification
  */
-function showToast(message) {
+function showToast(message, type = 'success') {
   let container = document.getElementById('toast-container');
   if (!container) {
     container = document.createElement('div');
@@ -366,27 +470,40 @@ function showToast(message) {
     container.className = 'toast-container';
     container.innerHTML = `
       <div class="toast-content">
-        <div class="toast-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 12 2 2 4-4"/><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
-        </div>
+        <div class="toast-icon"></div>
         <div class="toast-message"></div>
-        <div class="toast-close" onclick="this.closest('.toast-container').classList.remove('show')">
+        <div class="toast-close">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </div>
       </div>
     `;
     document.body.appendChild(container);
+    
+    container.querySelector('.toast-close').onclick = () => {
+      container.classList.remove('show');
+    };
   }
   
-  container.querySelector('.toast-message').textContent = message;
+  const content = container.querySelector('.toast-content');
+  const icon = container.querySelector('.toast-icon');
+  const messageEl = container.querySelector('.toast-message');
   
-  // Clear any existing timer
-  if (container._timer) clearTimeout(container._timer);
+  // Set Type
+  content.className = `toast-content ${type}`;
+  messageEl.textContent = message;
+  
+  // Set Icon
+  if (type === 'error') {
+    icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+  } else {
+    icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 12 2 2 4-4"/><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>`;
+  }
   
   container.classList.add('show');
   
+  // Auto hide
+  if (container._timer) clearTimeout(container._timer);
   container._timer = setTimeout(() => {
     container.classList.remove('show');
-  }, 3000);
+  }, 4000);
 }
-

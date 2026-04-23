@@ -88,7 +88,10 @@ function startWatcher(dir) {
     .watch(dir, { ignored: /(node_modules|\.git)/, persistent: true, ignoreInitial: true })
     .on('change',    (fp) => io.emit('file-changed', { file: path.relative(dir, fp) }))
     .on('add',       ()   => io.emit('tree-changed'))
-    .on('unlink',    ()   => io.emit('tree-changed'))
+    .on('unlink',    (fp) => {
+      io.emit('file-deleted', { file: path.relative(dir, fp) });
+      io.emit('tree-changed');
+    })
     .on('addDir',    ()   => io.emit('tree-changed'))
     .on('unlinkDir', ()   => io.emit('tree-changed'));
 }

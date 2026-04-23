@@ -25,7 +25,13 @@ Workflow này đảm bảo mọi thay đổi trong dự án đều được ghi 
 > [!IMPORTANT]
 > **MANDATORY**: Luôn luôn sử dụng tag `[Not Commited]` cho các bản ghi mới nhất. Tuyệt đối không tự ý gán số version (như 1.1.0) khi các thay đổi chưa được commit và release chính thức.
 
-*   **Không ghi đè**: Mọi phần mới phải được thêm vào như một block mới hoặc append vào block `[Not Commited]` hiện có mà không làm mất dữ liệu trước đó.
+*   **TUYỆT ĐỐI KHÔNG GHI ĐÈ**: Cấm thay thế (replace) toàn bộ block cũ nếu không chắc chắn đã bao gồm đầy đủ nội dung cũ bên trong nội dung thay thế.
+*   **Surgical Edit (Chỉnh sửa chuẩn xác)**: Ưu tiên dùng `multi_replace_file_content` để chèn dòng vào các mục `### Added`, `### Changed`, `### Fixed` thay vì viết lại cả block `## [Not Commited]`.
+*   **Quy trình Kiểm tra (Verification)**:
+    1.  Đọc file `CHANGELOG.md` để lấy nội dung hiện tại.
+    2.  Soạn thảo nội dung mới.
+    3.  Thực hiện "Merge" (Gộp) thủ công trong bộ nhớ, đảm bảo không có dòng nào bị mất.
+    4.  Sử dụng công cụ thay thế với TargetContent cực kỳ cụ thể.
 *   **Ngôn ngữ**: Sử dụng ngôn ngữ thống nhất (Tiếng Anh hoặc Tiếng Việt).
 
 

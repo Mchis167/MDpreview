@@ -144,7 +144,7 @@
     
     // Custom
     rebuildApp: () => {
-      alert('Rebuild is only available in the desktop app.');
+      if (typeof showToast === 'function') showToast('Rebuild is only available in the desktop app.', 'error');
     }
   };
 })();

@@ -4,6 +4,7 @@ const RecentlyViewedModule = (() => {
   const STORAGE_KEY = 'mdpreview_recent_';
 
   function add(filePath) {
+    if (filePath && filePath.startsWith('__DRAFT_')) return; // Ignore draft in recent
     const ws = AppState.currentWorkspace;
     if (!ws || !filePath) return;
     const key = STORAGE_KEY + ws.id;
@@ -138,6 +139,16 @@ function initSidebarModeSwitcher() {
       }
 
       if (mode === 'draft') {
+        const currentFile = AppState.currentFile;
+        const isAlreadyDraft = currentFile && currentFile.startsWith('__DRAFT_');
+        
+        if (!isAlreadyDraft) {
+          // If not currently on a draft, trigger AppState to find/create one
+          if (typeof AppState !== 'undefined' && typeof AppState.onModeChange === 'function') {
+            AppState.onModeChange('draft');
+          }
+        }
+
         if (mdHeader) mdHeader.style.display = 'none';
         expView.style.display = 'none';
         searchView.style.display = 'none';

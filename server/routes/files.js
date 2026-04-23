@@ -123,4 +123,19 @@ router.post('/file/save', (req, res) => {
   }
 });
 
+// Check if file exists
+router.get('/file/exists', (req, res) => {
+  const watchDir = req.watchDir;
+  const filePath = req.query.path;
+  if (!watchDir || !filePath) return res.status(400).json({ error: 'Missing params' });
+
+  try {
+    const fullPath = resolvePath(watchDir, filePath);
+    const exists = fs.existsSync(fullPath);
+    res.json({ exists });
+  } catch (err) {
+    res.json({ exists: false });
+  }
+});
+
 module.exports = router;

@@ -1,19 +1,12 @@
 /* ============================================================
-   draft.js — Logic for Draft tab
+   draft.js — Logic for Multiple Draft tabs
    ============================================================ */
 
 const DraftModule = (() => {
-  let displayedContent = '';
-  let draftContent     = '';
-  let renderedHtml     = '';
+  // Map of drafts: { [draftId]: { draftContent, renderedHtml, lastTouched } }
+  let drafts = {};
   
   const elements = {
-    chatComponent:  null,
-    chatInput:      null,
-    extraInput:     null,
-    previewBtn:     null,
-    statusBadge:    null,
-    statusText:     null,
     variants: {
       placeholder: null,
       input:       null
@@ -51,20 +44,14 @@ const DraftModule = (() => {
     }
   }
 
-  function updateBadgeState(currentVal) {
-    // No longer used since badge is removed
-  }
+  async function renderPreview(content, id) {
+    const draftId = id || (window.AppState ? AppState.currentFile : null);
+    if (!draftId || !draftId.startsWith('__DRAFT_')) return;
 
-  async function renderPreview(content) {
-    const finalContent = content || draftContent;
+    if (!drafts[draftId]) drafts[draftId] = { lastTouched: Date.now() };
+    
+    const finalContent = content !== undefined ? content : (drafts[draftId].draftContent || '');
     if (!finalContent) return;
-
-    // Check for existing comments
-    if (typeof CommentsModule !== 'undefined' && CommentsModule.getCommentCount() > 0) {
-        // Automatically clear comments or ask? 
-        // For Draft mode, let's just clear them to keep it snappy
-        await CommentsModule.clear();
-    }
 
     try {
       const res = await fetch('/api/render-raw', {
@@ -79,14 +66,11 @@ const DraftModule = (() => {
       // Update Viewer
       const emptyState = document.getElementById('empty-state');
       const mdContent  = document.getElementById('md-content');
-      const wsNameEl   = document.getElementById('header-workspace-name');
-      const fileNameEl = document.getElementById('header-file-name');
 
       if (emptyState) emptyState.style.display = 'none';
       if (mdContent) {
         const inner = mdContent.querySelector('.md-content-inner') || mdContent;
         inner.innerHTML = data.html;
-        renderedHtml = data.html; // Store for tab switching
         
         // Only show mdContent if NOT in edit mode
         if (AppState.currentMode !== 'edit') {
@@ -100,12 +84,13 @@ const DraftModule = (() => {
         if (typeof CodeBlockModule !== 'undefined') CodeBlockModule.process(inner);
       }
 
-      if (wsNameEl)  wsNameEl.innerText = (AppState.currentWorkspace ? AppState.currentWorkspace.name : 'DRAFT').toUpperCase() + '.';
-      if (fileNameEl) fileNameEl.innerText = 'Draft Preview';
+      // Update header
+      updateHeader('draft');
 
       // Update local state
-      displayedContent = finalContent;
-      draftContent     = finalContent;
+      drafts[draftId].renderedHtml = data.html;
+      drafts[draftId].draftContent = finalContent;
+      drafts[draftId].lastTouched = Date.now();
       
       saveToStorage(); // Persist rendered draft
       
@@ -115,12 +100,11 @@ const DraftModule = (() => {
       }
       
       // Reset scroll
-      document.getElementById('md-viewer').scrollTop = 0;
+      const viewer = document.getElementById('md-viewer');
+      if (viewer) viewer.scrollTop = 0;
 
     } catch (err) {
       console.error(err);
-    } finally {
-      // Done
     }
   }
 
@@ -138,7 +122,10 @@ const DraftModule = (() => {
     const fileNameEl = document.getElementById('header-file-name');
 
     if (mode === 'draft') {
-      if (wsNameEl) wsNameEl.innerText = 'NEW DRAFT';
+      const draftId = AppState.currentFile;
+      displayName = getDisplayName(draftId).toUpperCase();
+
+      if (wsNameEl) wsNameEl.innerText = displayName;
       if (fileNameEl) {
         fileNameEl.style.display = 'none';
       }
@@ -151,8 +138,69 @@ const DraftModule = (() => {
   }
 
   // ── Helper ────────────────────────────────────────────────
-  function getDraftContent() { return draftContent; }
-  function setDraftContent(val) { draftContent = val; }
+  function getDraftContent(id) { 
+    const draftId = id || (window.AppState ? AppState.currentFile : null);
+    if (!draftId || !drafts[draftId]) return '';
+    return drafts[draftId].draftContent || ''; 
+  }
+
+  function getDraftViewMode(id) {
+    const draftId = id || (window.AppState ? AppState.currentFile : null);
+    return drafts[draftId] ? (drafts[draftId].viewMode || null) : null;
+  }
+
+  function setDraftViewMode(id, mode) {
+    const draftId = id || (window.AppState ? AppState.currentFile : null);
+    if (!draftId) return;
+    ensureDraftMeta(draftId);
+    drafts[draftId].viewMode = mode;
+    saveToStorage();
+  }
+
+  function getDisplayName(id) {
+    const draftId = id || (window.AppState ? AppState.currentFile : null);
+    if (!draftId) return 'New Draft';
+    
+    ensureDraftMeta(draftId);
+    return drafts[draftId].displayName || 'Draft';
+  }
+
+  function ensureDraftMeta(id) {
+    if (!drafts[id]) drafts[id] = {};
+    if (!drafts[id].displayName) {
+      // Find the smallest available positive integer not in use
+      const usedNumbers = new Set(
+        Object.values(drafts)
+          .map(d => d.displayName)
+          .filter(name => name && name.startsWith('Draft '))
+          .map(name => parseInt(name.replace('Draft ', ''), 10))
+          .filter(num => !isNaN(num))
+      );
+
+      let nextNum = 1;
+      while (usedNumbers.has(nextNum)) {
+        nextNum++;
+      }
+
+      drafts[id].displayName = `Draft ${nextNum}`;
+      drafts[id].lastTouched = Date.now();
+    }
+  }
+  
+  function setDraftContent(val, id) { 
+    const draftId = id || (window.AppState ? AppState.currentFile : null);
+    if (!draftId) return;
+    ensureDraftMeta(draftId);
+    drafts[draftId].draftContent = val; 
+    drafts[draftId].lastTouched = Date.now();
+    saveToStorage();
+  }
+
+  function getRenderedHtml(id) {
+    const draftId = id || (window.AppState ? AppState.currentFile : null);
+    if (!draftId || !drafts[draftId]) return '';
+    return drafts[draftId].renderedHtml || '';
+  }
 
   // ── File Import & Drag-and-Drop ────────────────────────────
   async function handleFileImport() {
@@ -208,92 +256,119 @@ const DraftModule = (() => {
           const content = await file.text();
           _setChatInput(content);
         } else {
-          alert('Please drop a Markdown (.md) file.');
+          if (typeof showToast === 'function') showToast('Please drop a Markdown (.md) file.', 'error');
         }
       }
     });
   }
 
   function _setChatInput(content) {
-    draftContent = content;
-    saveToStorage(); // Persist change
-    renderPreview(content);
+    const draftId = window.AppState ? AppState.currentFile : null;
+    if (!draftId) return;
+    
+    if (!drafts[draftId]) drafts[draftId] = {};
+    drafts[draftId].draftContent = content;
+    drafts[draftId].lastTouched = Date.now();
+    
+    saveToStorage(); 
+    renderPreview(content, draftId);
   }
 
   function saveToStorage() {
     if (typeof AppState === 'undefined' || !AppState.currentWorkspace) return;
-    const key = `draft_${AppState.currentWorkspace.id}`;
-    const data = {
-      displayedContent,
-      draftContent,
-      renderedHtml
-    };
-    localStorage.setItem(key, JSON.stringify(data));
+    const key = `drafts_v2_${AppState.currentWorkspace.id}`;
+    localStorage.setItem(key, JSON.stringify(drafts));
   }
 
   function loadFromStorage(workspaceId) {
     if (!workspaceId) {
-      displayedContent = '';
-      draftContent = '';
-      renderedHtml = '';
+      drafts = {};
       return;
     }
 
-    const key = `draft_${workspaceId}`;
+    const key = `drafts_v2_${workspaceId}`;
     const saved = localStorage.getItem(key);
     if (saved) {
       try {
-        const data = JSON.parse(saved);
-        displayedContent = data.displayedContent || '';
-        draftContent = data.draftContent || '';
-        renderedHtml = data.renderedHtml || '';
+        drafts = JSON.parse(saved);
+        
+        // Auto-cleanup: remove drafts older than 3 days
+        const maxAge = 3 * 24 * 60 * 60 * 1000;
+        const now = Date.now();
+        let changed = false;
+        for (const id in drafts) {
+          if (now - (drafts[id].lastTouched || 0) > maxAge) {
+            delete drafts[id];
+            changed = true;
+          }
+        }
+        if (changed) saveToStorage();
       } catch (e) {
         console.error('Error parsing draft data', e);
-        displayedContent = '';
-        draftContent = '';
-        renderedHtml = '';
+        drafts = {};
       }
     } else {
-      displayedContent = '';
-      draftContent = '';
-      renderedHtml = '';
+      // Fallback to old key if v2 not exists (migration)
+      const oldKey = `draft_${workspaceId}`;
+      const oldSaved = localStorage.getItem(oldKey);
+      if (oldSaved) {
+        try {
+          const oldData = JSON.parse(oldSaved);
+          drafts = {
+            '__DRAFT_LEGACY__': {
+              draftContent: oldData.draftContent || '',
+              renderedHtml: oldData.renderedHtml || '',
+              lastTouched: Date.now()
+            }
+          };
+          saveToStorage();
+        } catch(e) {}
+      } else {
+        drafts = {};
+      }
     }
   }
 
-  async function clear() {
-    displayedContent = '';
-    draftContent = '';
-    renderedHtml = '';
+  async function clear(id) {
+    const draftId = id || (window.AppState ? AppState.currentFile : null);
+    if (!draftId) return;
 
-    const chatInput = document.getElementById('draft-chat-input');
-    const extraInput = document.getElementById('draft-extra-input');
-    if (chatInput) chatInput.value = '';
-    if (extraInput) extraInput.value = '';
+    delete drafts[draftId];
 
-    // Clear expanded input if exist
-    const expandedInput = document.getElementById('draft-expanded-input');
-    if (expandedInput) expandedInput.value = '';
+    if (draftId === (window.AppState ? AppState.currentFile : null)) {
+      if (typeof EditorModule !== 'undefined') {
+        EditorModule.setOriginalContent('');
+      }
+    }
 
-    updateBadgeState('');
-    saveToStorage(); // Clear from storage too
+    saveToStorage();
     syncPreview();
   }
 
-  // Sync the main viewer with Draft's displayedContent
+  // Sync the main viewer with Draft's content
   function syncPreview() {
+    const draftId = window.AppState ? AppState.currentFile : null;
     const emptyState = document.getElementById('empty-state');
     const mdContent  = document.getElementById('md-content');
     
-    if (!displayedContent || !renderedHtml) {
+    const data = drafts[draftId];
+    
+    if (!data || !data.draftContent) {
       if (emptyState) {
         emptyState.style.display = 'flex';
-        // Restore default text if needed
         const h2 = emptyState.querySelector('h2');
         const p  = emptyState.querySelector('p');
         if (h2) h2.innerText = 'MDpreview';
-        if (p)  p.innerText = 'Select a Markdown file from the sidebar or click the workspace switcher to get started.';
+        if (p)  p.innerText = 'Draft is empty or not found.';
       }
       if (mdContent)  mdContent.style.display  = 'none';
+      return;
+    }
+
+    if (!data.renderedHtml) {
+      // If content exists but HTML is missing (e.g. rapid switch before save finished),
+      // trigger a silent render to fill the gap.
+      renderPreview(data.draftContent, draftId);
       return;
     }
 
@@ -302,7 +377,7 @@ const DraftModule = (() => {
     if (mdContent) {
       mdContent.style.display = 'block';
       const inner = mdContent.querySelector('.md-content-inner') || mdContent;
-      inner.innerHTML = renderedHtml;
+      inner.innerHTML = data.renderedHtml;
       
       // Diagrams need to be reprocessed since we updated innerHTML
       if (typeof processMermaid === 'function') processMermaid(inner);
@@ -315,6 +390,7 @@ const DraftModule = (() => {
     }
   }
 
-  return { init, toggleFooter, updateHeader, syncPreview, renderPreview, clear, getDraftContent, setDraftContent, getRenderedHtml: () => renderedHtml, saveToStorage, loadFromStorage };
+  return { init, toggleFooter, updateHeader, syncPreview, renderPreview, clear, getDraftContent, setDraftContent, getRenderedHtml, saveToStorage, loadFromStorage, getDraftViewMode, setDraftViewMode, getDisplayName };
 })();
 
+window.DraftModule = DraftModule;

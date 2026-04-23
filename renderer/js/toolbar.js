@@ -11,10 +11,12 @@ function initToolbarBtns() {
 }
 
 // ── Keyboard Shortcuts Popover ───────────────────────────
+let _shortcutsCtrl = null;
+
 function initShortcutsPopover() {
   const btn = document.getElementById('shortcuts-btn');
-  if (!btn) return null;
-
+  // Even if btn is missing, we want the toggle logic for other triggers
+  
   let activePopover = null;
 
   const toggle = () => {
@@ -32,15 +34,20 @@ function initShortcutsPopover() {
     }
   };
 
-  btn.addEventListener('click', (e) => { 
-    e.stopPropagation(); 
-    toggle(); 
-  });
+  if (btn) {
+    btn.addEventListener('click', (e) => { 
+      e.stopPropagation(); 
+      toggle(); 
+    });
+  }
 
-  return { 
+  _shortcutsCtrl = { 
     close: () => { if (activePopover) activePopover.close(); }, 
     toggle 
   };
+  
+  window.toggleShortcutsPopover = toggle;
+  return _shortcutsCtrl;
 }
 
 // ── Global Keyboard Shortcuts ────────────────────────────
@@ -49,7 +56,6 @@ function initGlobalShortcuts() {
   if (!shortcutsCtrl) return;
 
   const isMac = /Mac|iPhone|iPod|iPad/.test(navigator.platform) || (navigator.userAgentData && navigator.userAgentData.platform === 'macOS');
-
 
   document.addEventListener('keydown', (e) => {
     const mod = isMac ? e.metaKey : e.ctrlKey;
@@ -98,10 +104,13 @@ function initGlobalShortcuts() {
     // ── Mod+R — Rebuild & Relaunch ────────────────────────
     if (mod && e.key === 'r') {
       e.preventDefault();
-      // Rebuild is now in the TabBar, but we can trigger it via global electronAPI
-      if (confirm('Rebuild and relaunch the application?')) {
-        window.electronAPI.rebuildApp();
-      }
+      DesignSystem.showConfirm({
+        title: 'Rebuild App',
+        message: 'Rebuild and relaunch the application?',
+        onConfirm: () => {
+          window.electronAPI.rebuildApp();
+        }
+      });
       return;
     }
 
@@ -115,60 +124,46 @@ function initGlobalShortcuts() {
       return;
     }
 
-    // Skip remaining shortcuts when focused in a text field
-    if (inInput) return;
-
-    // ── Mod+1/2/3/4 — Mode switch ─────────────────────────
-    if (mod && e.key === '1') {
-      e.preventDefault();
-      document.querySelector('.ds-segment-item[data-mode="read"]')?.click();
-      return;
-    }
-    if (mod && e.key === '2') {
-      e.preventDefault();
-      document.querySelector('.ds-segment-item[data-mode="edit"]')?.click();
-      return;
-    }
-    if (mod && e.key === '3') {
-      e.preventDefault();
-      document.querySelector('.ds-segment-item[data-mode="comment"]')?.click();
-      return;
-    }
-    if (mod && e.key === '4') {
-      e.preventDefault();
-      document.querySelector('.ds-segment-item[data-mode="collect"]')?.click();
+    // ── Mod+S — Save ───────────────────────────────────
+    if (mod && e.key === 's') {
+      // Always allow save, let EditorModule handle logic
+      if (typeof EditorModule !== 'undefined') {
+        e.preventDefault();
+        EditorModule.save();
+      }
       return;
     }
 
     // ── Mod+B — Toggle sidebar ──────────────────────────
     if (mod && e.key === 'b') {
       e.preventDefault();
-      // Use the new toggle logic exposed in TabsModule/TabBar
       const btn = document.querySelector('.tab-bar__toggle-btn');
       if (btn) btn.click();
       return;
     }
 
-    // ── Mod+S — Save (edit mode only) ───────────────────
-    if (mod && e.key === 's') {
-      if (typeof AppState !== 'undefined' && AppState.currentMode === 'edit') {
-        e.preventDefault();
-        if (typeof EditorModule !== 'undefined') EditorModule.save();
-      }
+    // ── Mod+1/2/3/4 — Mode switch ─────────────────────────
+    if (mod && (e.key === '1' || e.key === '2' || e.key === '3' || e.key === '4')) {
+      e.preventDefault();
+      const modeMap = { '1': 'read', '2': 'edit', '3': 'comment', '4': 'collect' };
+      document.querySelector(`.ds-segment-item[data-mode="${modeMap[e.key]}"]`)?.click();
       return;
     }
+
+    // Skip remaining UI-only shortcuts when focused in a text field
+    if (inInput) return;
 
     // ── Mod+↑/↓ — Scroll to top/bottom ─────────────────
     if (mod && e.key === 'ArrowUp') {
       e.preventDefault();
       const viewer = document.getElementById('md-viewer');
-      if (viewer) viewer.scrollTo({ top: 0, behavior: 'smooth' });
+      if (viewer) viewer.scrollTo({ top: 0, behavior: 'auto' });
       return;
     }
     if (mod && e.key === 'ArrowDown') {
       e.preventDefault();
       const viewer = document.getElementById('md-viewer');
-      if (viewer) viewer.scrollTo({ top: viewer.scrollHeight, behavior: 'smooth' });
+      if (viewer) viewer.scrollTo({ top: viewer.scrollHeight, behavior: 'auto' });
       return;
     }
 

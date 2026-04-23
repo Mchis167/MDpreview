@@ -81,17 +81,28 @@ class TabBarComponent {
     });
     this.mount.appendChild(tabList);
 
-    // ── 3. Add Tab Section ──────────────────────────────
+    // ── 3. Add Tab Section (Next to List) ────────────────
     const addTabWrapper = document.createElement('div');
-    addTabWrapper.className = 'tab-bar__add-btn-container';
+    const draftCount = this.state.openFiles.filter(p => p && p.startsWith('__DRAFT_')).length;
+    const isLimitReached = draftCount >= 20;
+
+    addTabWrapper.className = `tab-bar__add-btn-container ${isLimitReached ? 'is-disabled' : ''}`;
     addTabWrapper.innerHTML = `
-      <div class="tab-bar__add-btn" title="New Draft">
+      <div class="tab-bar__add-btn" title="${isLimitReached ? '' : 'New Draft'}">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
         </svg>
       </div>
     `;
-    addTabWrapper.onclick = () => this.options.onAddTab();
+    
+    if (isLimitReached) {
+      const tooltip = DesignSystem.createTooltip('Draft limit reached (max 20)');
+      addTabWrapper.appendChild(tooltip);
+    }
+
+    addTabWrapper.onclick = () => {
+      if (!isLimitReached) this.options.onAddTab();
+    };
     this.mount.appendChild(addTabWrapper);
 
     // ── 4. Right Section: Action Group ──────────────────
@@ -112,8 +123,13 @@ class TabBarComponent {
    * Internal helper to create a tab item molecule
    */
   _createTabItem(path) {
-    const isDraft = path === '__DRAFT_MODE__';
-    const fileName = isDraft ? 'New Draft' : path.split('/').pop();
+    const isDraft = path && path.startsWith('__DRAFT_');
+    let fileName = path.split('/').pop();
+    
+    if (isDraft) {
+      fileName = (typeof DraftModule !== 'undefined') ? DraftModule.getDisplayName(path) : 'Draft';
+    }
+
     const isActive = path === this.state.activeFile;
 
     const item = document.createElement('div');

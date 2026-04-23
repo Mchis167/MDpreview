@@ -60,12 +60,16 @@ const CollectModule = (() => {
 
   function clearAll() {
     if (!ideas.length) return;
-    if (confirm('Clear all collected ideas for this file?')) {
-      ideas = [];
-      _saveToStorage();
-      _renderList();
-      _markLinesWithIdeas();
-    }
+    DesignSystem.showConfirm({
+      title: 'Clear Collected Ideas',
+      message: 'Are you sure you want to clear all collected ideas for this file?',
+      onConfirm: () => {
+        ideas = [];
+        _saveToStorage();
+        _renderList();
+        _markLinesWithIdeas();
+      }
+    });
   }
 
   // ── Copy Functionality ───────────────────────────────────
@@ -135,7 +139,7 @@ const CollectModule = (() => {
     if (!idea.lineStart) return;
     const targetLine = document.querySelector(`.md-line[data-line="${idea.lineStart}"]`);
     if (targetLine) {
-      targetLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      targetLine.scrollIntoView({ behavior: 'auto', block: 'center' });
       targetLine.classList.add('pulse-highlight-collect');
       setTimeout(() => targetLine.classList.remove('pulse-highlight-collect'), 2000);
     }

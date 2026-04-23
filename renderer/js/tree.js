@@ -154,46 +154,50 @@ const TreeModule = (() => {
         deleteBtn.onclick = async (e) => {
           e.stopPropagation();
           const fileName = node.path.split('/').pop();
-          if (confirm(`Are you sure you want to delete "${fileName}"? This action cannot be undone.`)) {
-            if (!window.electronAPI || !window.electronAPI.deleteFile) {
-              alert('Error: File deletion API not available.');
-              return;
-            }
-            // Build absolute path — tree stores relative paths, IPC needs absolute
-            const wsPath = AppState.currentWorkspace ? AppState.currentWorkspace.path : '';
-            const absPath = wsPath ? wsPath.replace(/\/$/, '') + '/' + node.path : node.path;
-            const result = await window.electronAPI.deleteFile(absPath);
-            if (result.success) {
-              if (typeof showToast === 'function') showToast(`Deleted ${fileName}`);
-              
-              // Remove from recently viewed and scroll persistence if exists
-              if (typeof RecentlyViewedModule !== 'undefined') {
-                RecentlyViewedModule.remove(node.path);
+          DesignSystem.showConfirm({
+            title: 'Delete File',
+            message: `Are you sure you want to delete "${fileName}"? This action cannot be undone.`,
+            onConfirm: async () => {
+              if (!window.electronAPI || !window.electronAPI.deleteFile) {
+                if (typeof showToast === 'function') showToast('Error: File deletion API not available.', 'error');
+                return;
               }
-              if (typeof ScrollModule !== 'undefined') {
-                ScrollModule.remove(node.path);
-              }
-
-              // If it was the active file, clear view
-              if (AppState.currentFile === node.path) {
-                AppState.currentFile = null;
-                const mdContent = document.getElementById('md-content');
-                const editViewer = document.getElementById('edit-viewer');
-                const emptyState = document.getElementById('empty-state');
+              // Build absolute path — tree stores relative paths, IPC needs absolute
+              const wsPath = AppState.currentWorkspace ? AppState.currentWorkspace.path : '';
+              const absPath = wsPath ? wsPath.replace(/\/$/, '') + '/' + node.path : node.path;
+              const result = await window.electronAPI.deleteFile(absPath);
+              if (result.success) {
+                if (typeof showToast === 'function') showToast(`Deleted ${fileName}`);
                 
-                if (mdContent) mdContent.style.display = 'none';
-                if (editViewer) editViewer.style.display = 'none';
-                if (emptyState) emptyState.style.display = 'flex';
-                
-                if (typeof updateHeaderUI === 'function') updateHeaderUI();
-              }
+                // Remove from recently viewed and scroll persistence if exists
+                if (typeof RecentlyViewedModule !== 'undefined') {
+                  RecentlyViewedModule.remove(node.path);
+                }
+                if (typeof ScrollModule !== 'undefined') {
+                  ScrollModule.remove(node.path);
+                }
 
-              // Reload the tree
-              load();
-            } else {
-              alert(`Error deleting file: ${result.error}`);
+                // If it was the active file, clear view
+                if (AppState.currentFile === node.path) {
+                  AppState.currentFile = null;
+                  const mdContent = document.getElementById('md-content');
+                  const editViewer = document.getElementById('edit-viewer');
+                  const emptyState = document.getElementById('empty-state');
+                  
+                  if (mdContent) mdContent.style.display = 'none';
+                  if (editViewer) editViewer.style.display = 'none';
+                  if (emptyState) emptyState.style.display = 'flex';
+                  
+                  if (typeof updateHeaderUI === 'function') updateHeaderUI();
+                }
+
+                // Reload the tree
+                load();
+              } else {
+                if (typeof showToast === 'function') showToast(`Error deleting file: ${result.error}`, 'error');
+              }
             }
-          }
+          });
         };
       }
 
@@ -231,7 +235,7 @@ const TreeModule = (() => {
             const newRelativePath = res.path.replace(wsPath.replace(/\/$/, ''), '').replace(/^\//, '');
             setTimeout(() => loadFile(newRelativePath), 100);
           } else {
-            alert('Duplicate failed: ' + res.error);
+            if (typeof showToast === 'function') showToast('Duplicate failed: ' + res.error, 'error');
           }
         };
 
@@ -392,7 +396,7 @@ const TreeModule = (() => {
           }
           load();
         } else {
-          alert('Rename failed: ' + res.error);
+          if (typeof showToast === 'function') showToast('Rename failed: ' + res.error, 'error');
           label.innerText = originalText;
         }
       } else {

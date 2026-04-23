@@ -73,9 +73,20 @@ class MarkdownHelperComponent {
           `
         });
 
-        btn.onclick = () => {
+        btn.onmousedown = (e) => {
+          e.preventDefault(); // CRITICAL: Prevent focus loss from editor
+          e.stopPropagation();
           if (window.EditorModule) {
-            window.EditorModule.applyAction(item.action);
+            // Mapping actions to tags for insertText
+            const map = {
+              'b': ['**', '**'], 'i': ['*', '*'], 'bi': ['***', '***'], 's': ['~~', '~~'], 'c': ['`', '`'],
+              'h1': ['# ', ''], 'h2': ['## ', ''], 'h3': ['### ', ''], 'h': ['#### ', ''], 'h5': ['##### ', ''], 'h6': ['###### ', ''],
+              'ul': ['- ', ''], 'ol': ['1. ', ''], 'tl': ['- [ ] ', ''], 'tl-checked': ['- [x] ', ''],
+              'q': ['> ', ''], 'l': ['[', '](url)'], 'img': ['![', '](url)'], 'cb': ['```\n', '\n```'],
+              'tb': ['| Col 1 | Col 2 |\n| --- | --- |\n| Cell 1 | Cell 2 |', ''], 'hr': ['---\n', ''], 'fn': ['[^1]', '']
+            };
+            const tags = map[item.action] || ['', ''];
+            window.EditorModule.insertText(tags[0], tags[1]);
           }
         };
 

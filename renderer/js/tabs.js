@@ -39,9 +39,13 @@ const TabsModule = (function () {
           title: 'Rebuild & Relaunch',
           icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path d="M16 16h5v5" /></svg>`,
           onClick: () => {
-            if (confirm('Rebuild and relaunch the application?')) {
+          DesignSystem.showConfirm({
+            title: 'Rebuild App',
+            message: 'Rebuild and relaunch the application?',
+            onConfirm: () => {
               window.electronAPI.rebuildApp();
             }
+          });
           }
         },
         {
@@ -50,7 +54,7 @@ const TabsModule = (function () {
           icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" /></svg>`,
           onClick: () => {
             const viewer = document.getElementById('md-viewer');
-            if (viewer) viewer.scrollTo({ top: 0, behavior: 'smooth' });
+            if (viewer) viewer.scrollTo({ top: 0, behavior: 'auto' });
           }
         },
         {
@@ -62,6 +66,16 @@ const TabsModule = (function () {
               document.documentElement.requestFullscreen();
             } else {
               document.exitFullscreen();
+            }
+          }
+        },
+        {
+          id: 'shortcuts',
+          title: 'Keyboard Shortcuts',
+          icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+          onClick: () => {
+            if (typeof toggleShortcutsPopover === 'function') {
+              toggleShortcutsPopover();
             }
           }
         },
@@ -174,37 +188,59 @@ const TabsModule = (function () {
     render();
   }
 
-  function remove(filePath, e) {
-    if (e) e.stopPropagation();
-
-    if (filePath === '__DRAFT_MODE__') {
-      const confirmed = confirm('Are you sure you want to discard this draft? This cannot be undone.');
-      if (!confirmed) return;
-      if (typeof DraftModule !== 'undefined' && typeof DraftModule.clear === 'function') {
-        DraftModule.clear();
+  function remove(filePath, skipConfirm = false) {
+    if (filePath && filePath.startsWith("__DRAFT_") && !skipConfirm) {
+      // Skip confirmation if draft is empty
+      let content = "";
+      if (
+        window.AppState &&
+        AppState.currentMode === "edit" &&
+        filePath === AppState.currentFile
+      ) {
+        content = document.getElementById("edit-textarea")?.value || "";
+      } else if (typeof DraftModule !== "undefined") {
+        content = DraftModule.getDraftContent(filePath);
       }
+
+      if (!content || content.trim() === "") {
+        _proceedRemove(filePath);
+        return;
+      }
+
+      DesignSystem.showConfirm({
+        title: "Discard Draft",
+        message:
+          "Are you sure you want to discard this draft? This cannot be undone.",
+        onConfirm: () => {
+          remove(filePath, true); // Recursive call with skipConfirm = true
+        },
+      });
+      return;
     }
 
+    // Cleanup logic for Draft Mode
+    if (filePath && filePath.startsWith("__DRAFT_")) {
+      if (typeof DraftModule !== "undefined") DraftModule.clear(filePath);
+      if (typeof EditorModule !== "undefined") EditorModule.setDirty(false);
+    }
+
+    _proceedRemove(filePath);
+  }
+
+  function _proceedRemove(filePath) {
     const index = state.openFiles.indexOf(filePath);
     if (index === -1) return;
 
     state.openFiles.splice(index, 1);
 
     if (state.activeFile === filePath) {
-      if (state.openFiles.length > 0) {
-        const nextIndex = Math.min(index, state.openFiles.length - 1);
-        const nextFile = state.openFiles[nextIndex];
-        if (typeof window.loadFile === 'function') {
-          window.loadFile(nextFile);
-        }
-      } else {
-        state.activeFile = null;
-        if (typeof window.setNoFile === 'function') {
-          window.setNoFile();
-        }
+      // [User Preference] Always go to empty state when active file is removed
+      state.activeFile = null;
+      if (typeof window.AppState !== 'undefined') window.AppState.currentFile = null;
+      if (typeof window.setNoFile === 'function') {
+        window.setNoFile();
       }
     }
-    
     saveToStorage();
     render();
   }

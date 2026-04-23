@@ -85,6 +85,16 @@
   flex: 1;
 }
 
+/* ── Error Variant ── */
+.toast-content.error {
+  border-color: rgba(255, 69, 0, 0.3);
+}
+
+.toast-content.error .toast-icon,
+.toast-content.error .toast-message {
+  color: var(--accent-red);
+}
+
 .toast-close {
   width: 16px;
   height: 16px;

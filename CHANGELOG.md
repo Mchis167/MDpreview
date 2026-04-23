@@ -3,17 +3,70 @@
 All notable changes to this project will be documented in this file.
 
 
-## [Not Commited] — 2026-04-23 05:43
+
+## [Not Commited] — 2026-04-23 09:26
+
+### Added
+- **Hybrid Mode Persistence**: Implemented a sophisticated state-restoration system. Drafts now persist their view mode (`Read/Edit/Comment`) in `localStorage` across app restarts, while regular files maintain their mode within the current session's memory (defaulting to safe `Read` mode on restart).
+- **Persistent Draft Naming**: Assigned permanent `displayName` metadata to drafts upon creation. This prevents drafts from being renamed (e.g., "Draft 3" becoming "Draft 2") when intermediate tabs are closed.
+- **Smart Enumeration (Gap Filling)**: Refined the draft naming logic to automatically find the smallest available positive integer, ensuring a compact and organized draft list.
+- **Atomic Tooltip Component**: Created a reusable `ds-tooltip` atom in the Design System with smooth animations and flexible positioning, replacing legacy browser tooltips.
+- **Draft Limit Visual Feedback**: Added a premium helper tooltip and error-state hover effect to the "Add Tab" button when the 20-draft limit is reached.
+- **Smart Markdown Logic**: Upgraded `EditorModule` with intelligent wrapping/unwrapping for styles (Bold, Italic) and smart block-prefix replacement (e.g., instantly switching between H1-H6, Lists, and Quotes).
+- **Smart Filename Generation**: Implemented auto-incrementing default names (e.g., `untitled 1.md`) by scanning the workspace directory before saving.
+- **File Conflict Detection**: Added a proactive check and confirmation modal to warn users before overwriting existing files during the save flow.
+- **File Existence API**: Created a new server endpoint `/api/file/exists` to support safe saving workflows.
+
+### Changed
+- **Draft-to-File Workflow**: Optimized the save-to-workspace flow to bypass redundant "Unsaved Changes" dialogs and automatically transition to `View` mode.
+- **File Deletion Lifecycle**: Refined the tab removal logic to always return to a clean **Empty State** when the active file is deleted, ensuring a predictable user experience.
+- **Recently Viewed Filtering**: Explicitly excluded `__DRAFT_MODE__` from the Recently Viewed sidebar to keep the history focused on actual files.
+- **Hardened State Sync**: Updated `setNoFile` to reset `AppState.currentMode` to `read`, eliminating "ghost" dirty states and unexpected unsaved changes warnings.
+
+### Fixed
+- **Button Styling Regressions**: Resolved a major UI bug where global buttons appeared abnormally large and rounded by removing conflicting CSS overrides in `popover-shield.css`.
+- **Workspace Context Leakage**: Fixed a data corruption bug where switching workspaces caused stale tab/draft state to leak into the new context by hardening the boot sequence.
+- **Focus Persistence**: Resolved a bug in `MarkdownHelperComponent` where clicking help items would steal focus from the editor, using `onmousedown` prevention.
+- **Path Traversal Protection**: Hardened the server-side rendering route with a safe path resolution helper to prevent 404 errors and security risks with relative paths.
+- **Tab Sync Syntax Error**: Fixed a critical syntax error in `tabs.js` related to duplicated function closures during state updates.
+
+## [1.2.1] — 2026-04-23 08:05 (Previous Session Summary)
+
+### Added
+- **Multi-line Selection Sync (TC-13)**: Upgraded the `Edit` mode transition to support multi-line selection matching, searching within a 500-character context window for 100% accurate cursor restoration.
+- **Focus-Persistence Mechanism**: Implemented `mousedown` prevention on toolbar items to stop the browser from clearing document selection during mode transitions.
+- **Safe Rebuild Prompt**: Added a Design System confirmation modal for the "Rebuild & Relaunch" action to prevent accidental data loss.
+
+### Changed
+- **Instant Interaction Pipeline**: Globally eliminated "Smooth Scroll" behavior in both CSS and JavaScript modules (`tabs.js`, `collect.js`, `comments.js`, `toolbar.js`) to achieve immediate, snappier UI transitions.
+- **Viewport-Aware Sync**: Replaced legacy scroll-percentage syncing with a precise, line-based line scanning algorithm that identifies the exact topmost visible element in `Read` mode.
+- **Dynamic "Add Tab" Placement**: Relocated the Plus button to follow the tab list dynamically (`flex: 0 1 auto`), ensuring it stays next to the last tab when few are open and pins to the right edge during overflow without overlapping content.
+- **Transparency-Optimized Borders**: Refactored the Tab Bar to use `border-left` logic (excluding first-child), eliminating the "double-opacity" visual bug caused by overlapping semi-transparent dividers.
+- **Markdown Helper Interactivity**: Refined the Markdown Helper popover to prevent focus theft from the editor, allowing seamless style application without losing the cursor.
+- **Draft-to-File Lifecycle**: Automated the UI state transition to hide Draft actions immediately after a successful "Save to Workspace" event.
+
+### Fixed
+- **TC-13 "Jump to End" Bug**: Resolved a critical regression where switching to `Edit` mode would incorrectly default the scroll position to the bottom of the document.
+- **TabBar Layout Squashing**: Fixed a responsive bug where right-side action buttons were being crushed or overlapping tabs on narrow windows using `flex-shrink: 0` and `min-width: 0`.
+- **Right Sidebar Syntax Error**: Fixed a `ReferenceError` in `right-sidebar.js` caused by a stray character during component initialization.
+- **Workspace Delete Persistence**: Ensured all destructive workspace actions utilize the standardized `DesignSystem.showConfirm` flow for UI consistency.
+
+## [1.2.0] — 2026-04-23 05:44
 
 ### Added
 - **Inline Workspace Renaming**: Implemented seamless renaming by double-clicking the workspace name within the picker, featuring a focused input state and keyboard support (Enter/Esc).
 - **Modernized Folder Browsing**: Integrated a native-feel folder picker in `WorkspaceFormComponent` using `webkitdirectory` for web fallbacks, eliminating manual path entry.
 - **Ghost Folder Prevention**: Added `TreeModule.clear()` to ensure the sidebar file tree is instantly wiped during workspace transitions.
+- **Context-Aware Highlighting**: Implemented a robust "Global Offset" search logic in `comments.js` that uses surrounding text fingerprints to accurately distinguish between identical keywords, especially within complex structures like Markdown tables.
+- **Line-Wide Selection Context**: Upgraded `_getSelectionContext` to capture surrounding text from the entire `.md-line` instead of just the immediate text node, ensuring uniqueness for short, repeated words.
 
 ### Changed
 - **Popover Shield Migration**: Fully transitioned Workspace Management from legacy modals to the premium Popover Shield Design System.
 - **Standardized Action Buttons**: Migrated workspace delete buttons to the global `ds-item-delete-btn` class for unified hover aesthetics across the app.
 - **Stateful UI Refresh**: Refactored `workspace.js` to use a dynamic `refreshContent` logic, ensuring the UI stays in sync after adding, renaming, or deleting workspaces.
+- **Optimized Comment Export**: Updated the `copyAll` feature to normalize whitespace and newlines in exported reports, producing a cleaner, more professional output while maintaining raw data for internal highlighting.
+- **Component Modernization**: Refactored the `RightSidebarComponent` empty state to utilize the centralized `DesignSystem.getIcon` registry, ensuring reliable icon rendering.
+- **Sidebar Search UI**: Refined `.sidebar-search-container` padding in `sidebar.css` to improve visual balance.
 
 ### Removed
 - **Legacy UI Pruning**: Deleted ~150 lines of obsolete rendering logic (`_renderList`), old event bindings, and redundant variables from `workspace.js`.
@@ -22,20 +75,6 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - **Module Reference Errors**: Resolved multiple `ReferenceError` bugs (`_closeModal`, `_closePanel`) caused by deprecated modal function calls.
 - **UI Synchronization**: Fixed a bug where the workspace listing failed to update its content after data modifications without a manual reload.
-
-## [Not Commited] — 2026-04-23 03:05
-
-
-### Added
-- **Context-Aware Highlighting**: Implemented a robust "Global Offset" search logic in `comments.js` that uses surrounding text fingerprints to accurately distinguish between identical keywords, especially within complex structures like Markdown tables.
-- **Line-Wide Selection Context**: Upgraded `_getSelectionContext` to capture surrounding text from the entire `.md-line` instead of just the immediate text node, ensuring uniqueness for short, repeated words.
-
-### Changed
-- **Optimized Comment Export**: Updated the `copyAll` feature to normalize whitespace and newlines in exported reports, producing a cleaner, more professional output while maintaining raw data for internal highlighting.
-- **Component Modernization**: Refactored the `RightSidebarComponent` empty state to utilize the centralized `DesignSystem.getIcon` registry, ensuring reliable icon rendering.
-- **Sidebar Search UI**: Refined `.sidebar-search-container` padding in `sidebar.css` to improve visual balance.
-
-### Fixed
 - **Highlight Visibility Gating**: Resolved a regression where comment highlights were visible in all application modes by removing redundant, ungated CSS rules in `markdown.css`.
 - **DOM Runtime Error**: Fixed a `TypeError` in `_getSelectionContext` by ensuring `.closest()` is only called on Element nodes, correctly handling selections that start within Text nodes.
 

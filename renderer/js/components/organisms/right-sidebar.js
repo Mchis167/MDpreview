@@ -12,7 +12,7 @@ class RightSidebarComponent {
   constructor(options = {}) {
     this.mount = options.mount || document.getElementById('right-sidebar-wrap');
     this.storageKey = options.storageKey || 'mdpreview_sidebar_right_width';
-    
+
     this.state = {
       isOpen: false,
       title: '',
@@ -55,68 +55,80 @@ class RightSidebarComponent {
   render() {
     if (!this.mount) return;
 
-    // 1. Clear and Update Wrap Classes
-    this.mount.innerHTML = '';
-    this.mount.className = 'ds-right-sidebar-wrap';
+    // 1. Initial setup of static structure if not present
+    if (!this.mount.querySelector('.ds-right-sidebar')) {
+      this.mount.innerHTML = '';
+      this.mount.className = 'ds-right-sidebar-wrap';
+
+      const resizer = DesignSystem.createElement('div', 'ds-right-sidebar-resizer');
+      this.mount.appendChild(resizer);
+      this._attachResizerEvents(resizer);
+
+      const sidebar = DesignSystem.createElement('aside', 'ds-right-sidebar');
+      sidebar.innerHTML = `
+        <div class="ds-sidebar-header">
+          <div class="ds-sidebar-title"></div>
+          <div class="ds-sidebar-actions"></div>
+        </div>
+        <div class="ds-sidebar-content-wrap">
+          <div class="ds-sidebar-list"></div>
+        </div>
+      `;
+      this.mount.appendChild(sidebar);
+    }
+
+    const sidebarWrap = this.mount;
+    const sidebar = sidebarWrap.querySelector('.ds-right-sidebar');
+    const titleEl = sidebar.querySelector('.ds-sidebar-title');
+    const actionsEl = sidebar.querySelector('.ds-sidebar-actions');
+    const listEl = sidebar.querySelector('.ds-sidebar-list');
+    const contentWrap = sidebar.querySelector('.ds-sidebar-content-wrap');
+
+    // 2. Update Classes & Width
+    sidebarWrap.classList.toggle('open', this.state.isOpen);
     if (this.state.isOpen) {
-      this.mount.classList.add('open');
       const savedWidth = localStorage.getItem(this.storageKey);
       if (savedWidth) {
-        this.mount.style.setProperty('--sidebar-right-width', savedWidth + 'px');
+        sidebarWrap.style.setProperty('--sidebar-right-width', savedWidth + 'px');
       }
     }
 
-    // 2. Create Resizer
-    const resizer = DesignSystem.createElement('div', 'ds-right-sidebar-resizer');
-    this.mount.appendChild(resizer);
-    this._attachResizerEvents(resizer);
-
-    // 3. Main Sidebar Container
-    const sidebar = DesignSystem.createElement('aside', 'ds-right-sidebar');
-    
-    // ── Header ──
-    const header = DesignSystem.createElement('div', 'ds-sidebar-header');
-    const title = DesignSystem.createElement('div', 'ds-sidebar-title', { text: this.state.title });
-    const actions = DesignSystem.createElement('div', 'ds-sidebar-actions');
-    
+    // 3. Update Header
+    titleEl.textContent = this.state.title;
+    actionsEl.innerHTML = '';
     this.state.actions.forEach(action => {
       const btn = DesignSystem.createHeaderAction(action.icon, action.title, (e) => {
         e.stopPropagation();
         action.onClick();
       });
-      actions.appendChild(btn);
+      actionsEl.appendChild(btn);
     });
-    
-    header.appendChild(title);
-    header.appendChild(actions);
-    sidebar.appendChild(header);
 
-    // ── Content ──
-    const contentWrap = DesignSystem.createElement('div', 'ds-sidebar-content-wrap');
-    const list = DesignSystem.createElement('div', 'ds-sidebar-list');
-    
+    // 4. Update List Content
+    listEl.innerHTML = '';
+    // Clear previous empty state if any
+    const existingEmpty = contentWrap.querySelector('.ds-sidebar-empty');
+    if (existingEmpty) existingEmpty.remove();
+
     if (this.state.items.length === 0) {
+      listEl.style.display = 'none';
       const empty = DesignSystem.createElement('div', 'ds-sidebar-empty');
       const iconHtml = DesignSystem.getIcon ? DesignSystem.getIcon(this.state.emptyState.icon) : this.state.emptyState.icon;
-      
+
       empty.innerHTML = `
         <div class="ds-sidebar-empty-icon">${iconHtml}</div>
         <p>${this.state.emptyState.text}</p>
       `;
       contentWrap.appendChild(empty);
     } else {
-
+      listEl.style.display = 'block';
       this.state.items.forEach((item, index) => {
         if (this.state.renderItem) {
           const itemEl = this.state.renderItem(item, index);
-          list.appendChild(itemEl);
+          listEl.appendChild(itemEl);
         }
       });
-      contentWrap.appendChild(list);
     }
-    
-    sidebar.appendChild(contentWrap);
-    this.mount.appendChild(sidebar);
   }
 
   // ── Private Helpers ──
@@ -148,12 +160,12 @@ class RightSidebarComponent {
       resizer.classList.remove('is-resizing');
       document.body.style.cursor = 'default';
       document.body.style.userSelect = 'auto';
-      
+
       const currentWidth = parseInt(getComputedStyle(this.mount).getPropertyValue('--sidebar-right-width'));
       if (currentWidth) {
         localStorage.setItem(this.storageKey, currentWidth);
       }
-      
+
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup', onUp);
     };

@@ -146,6 +146,16 @@ function _sanitize(html) {
     .replace(/on\w+="[^"]*"/gi, ''); // Remove inline event handlers
 }
 
+// Helper to resolve absolute path safely within watchDir
+function resolvePath(watchDir, filePath) {
+  const fullPath = path.isAbsolute(filePath) ? path.normalize(filePath) : path.resolve(watchDir, filePath);
+  const normalizedWatchDir = path.normalize(watchDir);
+  if (!fullPath.startsWith(normalizedWatchDir)) {
+    throw new Error('Security Error: Path traversal detected.');
+  }
+  return fullPath;
+}
+
 router.get('/render', (req, res) => {
   const watchDir = req.watchDir;
   const file     = req.query.file;
@@ -153,18 +163,16 @@ router.get('/render', (req, res) => {
   if (!watchDir) return res.status(400).json({ error: 'No workspace set' });
   if (!file)     return res.status(400).json({ error: 'Missing file param' });
 
-  const full     = path.join(watchDir, file);
-  const relative = path.relative(watchDir, full);
-  if (relative.startsWith('..') || path.isAbsolute(relative)) {
-    return res.status(403).json({ error: 'Forbidden' });
-  }
-
   try {
-    const content    = fs.readFileSync(full, 'utf8');
+    const fullPath   = resolvePath(watchDir, file);
+    const content    = fs.readFileSync(fullPath, 'utf8');
     const html       = renderWithLineNumbers(content);
     const totalLines = content.split('\n').length;
     res.json({ html, file, totalLines });
-  } catch {
+  } catch (err) {
+    if (err.message.includes('Security Error')) {
+      return res.status(403).json({ error: err.message });
+    }
     res.status(404).json({ error: 'File not found' });
   }
 });

@@ -15,7 +15,8 @@
   color: var(--text-90);
   font-family: var(--font-code);
   font-size: 14px;
-  padding: 80px 32px 120px 32px; /* Top=80px, Bottom=120px for toolbar area */
+  padding: 120px 32px 120px 32px;
+  /* Top=80px, Bottom=120px for toolbar area */
   resize: none;
   outline: none;
   line-height: 1.6;
@@ -23,7 +24,8 @@
 
 .edit-toolbar-container {
   position: absolute;
-  bottom: 20px; /* Margin to bottom edge = 20px */
+  bottom: 20px;
+  /* Margin to bottom edge = 20px */
   left: 50%;
   transform: translateX(-50%);
   width: auto;
@@ -36,7 +38,8 @@
   background: var(--layer-modal);
   border: 1px solid var(--border-sidebar);
   border-radius: var(--radius-pill);
-  height: 48px; /* Standardize height for calc */
+  height: 48px;
+  /* Standardize height for calc */
   padding: 0 12px;
   display: flex;
   align-items: center;
@@ -60,7 +63,8 @@
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
-  position: relative; /* For tooltips */
+  position: relative;
+  /* For tooltips */
 }
 
 /* ── Custom Premium Tooltips ────────────────────────── */
@@ -81,14 +85,15 @@
   opacity: 0;
   transition: opacity 0.2s, transform 0.2s;
   z-index: 1000;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .edit-tool-btn:hover::after {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
-  transition-delay: 0.2s; /* Slight delay for better feel */
+  transition-delay: 0.2s;
+  /* Slight delay for better feel */
 }
 
 /* Arrow */
@@ -114,7 +119,8 @@
 
 /* Hide native title on hover to prevent double tooltip */
 .edit-tool-btn:hover {
-  text-decoration: none; /* Just a trigger */
+  text-decoration: none;
+  /* Just a trigger */
 }
 
 .edit-tool-btn:hover {
@@ -171,20 +177,24 @@
 /* ── Markdown Help Popover (Figma Parity) ────────────────── */
 
 .edit-help-popover {
-  position: fixed; /* Fixed position to not affect parent scroll */
-  bottom: 80px; /* 20px margin + 48px toolbar + 12px spacing = 80px */
+  position: fixed;
+  /* Fixed position to not affect parent scroll */
+  bottom: 80px;
+  /* 20px margin + 48px toolbar + 12px spacing = 80px */
   left: 50%;
   transform: translateX(-50%);
   width: 640px;
   height: 80%;
-  min-height: 600px; 
-  max-height: calc(100vh - 120px); /* Safety with respect to viewport */
+  min-height: 600px;
+  max-height: calc(100vh - 120px);
+  /* Safety with respect to viewport */
   background: #111;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;
   display: none;
   flex-direction: column;
-  z-index: 1000; /* High z-index for fixed menu */
+  z-index: 1000;
+  /* High z-index for fixed menu */
   box-shadow: 0 32px 64px rgba(0, 0, 0, 0.8);
   overflow: clip;
   animation: popoverFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -196,8 +206,15 @@
 }
 
 @keyframes popoverFadeIn {
-  from { opacity: 0; transform: translate(-50%, 20px) scale(0.98); }
-  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
 }
 
 /* Sticky Header */
@@ -244,9 +261,11 @@
 .help-content-scroll::-webkit-scrollbar {
   width: 6px;
 }
+
 .help-content-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .help-content-scroll::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
@@ -332,8 +351,15 @@
 }
 
 @keyframes ctxFade {
-  from { opacity: 0; transform: scale(0.95) translateY(-5px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .ctx-item {
@@ -381,7 +407,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  border-radius: 100px; /* Fully rounded */
+  border-radius: 100px;
+  /* Fully rounded */
   cursor: pointer;
   transition: background 0.2s;
   margin-bottom: 2px;
@@ -392,7 +419,8 @@
 }
 
 .recent-item.active {
-  background: rgba(255, 255, 255, 0.08); /* Figma Parity */
+  background: rgba(255, 255, 255, 0.08);
+  /* Figma Parity */
   position: relative;
 }
 
@@ -400,9 +428,11 @@
   content: '';
   width: 6px;
   height: 6px;
-  background: #ffbf48; /* Figma Orange */
+  background: #ffbf48;
+  /* Figma Orange */
   border-radius: 50%;
-  box-shadow: 0 0 8px #ffe1a9; /* Figma Glow */
+  box-shadow: 0 0 8px #ffe1a9;
+  /* Figma Glow */
   margin-left: 8px;
   flex-shrink: 0;
 }

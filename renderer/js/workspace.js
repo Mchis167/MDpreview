@@ -55,14 +55,33 @@ const WorkspaceModule = (() => {
 
     // Dirty check before switching workspace
     if (AppState.currentMode === 'edit' && typeof EditorModule !== 'undefined' && EditorModule.isDirty()) {
-      if (!confirm('You have unsaved changes. Switch workspace anyway?')) return;
+      const isDraft = AppState.currentFile && AppState.currentFile.startsWith('__DRAFT_');
+      const isFirstEdit = EditorModule.getOriginalContent() === '';
+
+      if (isDraft || isFirstEdit) {
+        await EditorModule.save();
+      } else {
+        DesignSystem.showConfirm({
+          title: 'Unsaved Changes',
+          message: 'You have unsaved changes. Switch workspace anyway?',
+          onConfirm: async () => {
+            await _proceedSwitch(id);
+          }
+        });
+        return;
+      }
     }
 
+    await _proceedSwitch(id);
+  }
+
+  async function _proceedSwitch(id) {
     const ws = workspaces.find(w => w.id === id);
     activeId = id;
+    AppState.currentWorkspace = ws; // CRITICAL: Update AppState before context switches
     AppState.currentFile = null;
     await window.electronAPI.setActiveWorkspace(id);
-    CommentsModule.clearUI();
+    if (typeof CommentsModule !== 'undefined') CommentsModule.clearUI();
     setNoFile();
 
     // Switch tabs context
@@ -154,10 +173,14 @@ const WorkspaceModule = (() => {
           refreshContent();
         },
         onDelete: async (ws) => {
-          if (confirm(`Remove workspace "${ws.name}"?`)) {
-            await remove(ws.id);
-            refreshContent();
-          }
+          DesignSystem.showConfirm({
+            title: 'Delete Workspace',
+            message: `Are you sure you want to remove workspace "${ws.name}"? This action cannot be undone.`,
+            onConfirm: async () => {
+              await remove(ws.id);
+              refreshContent();
+            }
+          });
         }
       });
       popover.body.appendChild(component.render());
@@ -178,10 +201,14 @@ const WorkspaceModule = (() => {
         refreshContent();
       },
       onDelete: async (ws) => {
-        if (confirm(`Remove workspace "${ws.name}"?`)) {
-          await remove(ws.id);
-          refreshContent();
-        }
+        DesignSystem.showConfirm({
+          title: 'Delete Workspace',
+          message: `Are you sure you want to remove workspace "${ws.name}"? This action cannot be undone.`,
+          onConfirm: async () => {
+            await remove(ws.id);
+            refreshContent();
+          }
+        });
       }
     });
   }

@@ -53,11 +53,12 @@ const CommentsModule = (() => {
     const ws   = AppState.currentWorkspace;
     const file = AppState.currentFile;
     if (!ws || !file) return;
-    if (!confirm('Delete this comment?')) return;
+
     comments = await window.electronAPI.deleteComment(ws.id, file, commentId);
     _clearHighlights();
     _renderList();
     _markLinesWithComments();
+    if (typeof showToast === 'function') showToast('Comment removed');
   }
 
   // ── Clear all comments for current file ──────────────────────
@@ -83,7 +84,7 @@ const CommentsModule = (() => {
     ];
     
     // Check for Additional Content if in AI mode
-    if (file === '__DRAFT_MODE__') {
+    if (file && file.startsWith('__DRAFT_')) {
       const extra = document.getElementById('ai-extra-input')?.value.trim();
       if (extra) {
         lines.push(`================================================================`);
@@ -148,7 +149,7 @@ const CommentsModule = (() => {
     sidebar.setupModule({
       title: 'Comment',
       actions: [
-        { id: 'clear', icon: 'trash', title: 'Clear all comments', onClick: () => { if (comments.length && confirm('Clear all comments?')) clear(); } },
+        { id: 'clear', icon: 'trash', title: 'Clear all comments', onClick: () => clear() },
         { id: 'copy', icon: 'copy', title: 'Copy all comments', onClick: copyAll }
       ],
       items: comments,
@@ -218,7 +219,7 @@ const CommentsModule = (() => {
 
     const targetLine = document.querySelector(`.md-line[data-line="${comment.lineStart}"]`);
     if (targetLine) {
-      targetLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      targetLine.scrollIntoView({ behavior: 'auto', block: 'center' });
       targetLine.classList.add('pulse-highlight');
       setTimeout(() => targetLine.classList.remove('pulse-highlight'), 2000);
 
@@ -333,9 +334,22 @@ const CommentsModule = (() => {
         }
       }
 
-      // Fallback
+      // Fallback: Search for selected text alone if fingerprint fails
       if (globalStartIdx === -1) {
+        const cleanText = c.selectedText.trim();
+        // Try exact match first
         globalStartIdx = fullContent.indexOf(c.selectedText);
+        
+        // Try normalized whitespace match if exact fails
+        if (globalStartIdx === -1) {
+          const normalizedContent = fullContent.replace(/\s+/g, ' ');
+          const normalizedSelected = cleanText.replace(/\s+/g, ' ');
+          const normIdx = normalizedContent.indexOf(normalizedSelected);
+          if (normIdx !== -1) {
+             // This is a rough estimation, but better than no highlight
+             globalStartIdx = normIdx; 
+          }
+        }
       }
 
       if (globalStartIdx !== -1) {

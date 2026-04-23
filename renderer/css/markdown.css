@@ -9,7 +9,6 @@
   padding: 0 96px;
   /* Removed top/bottom padding (0) */
   position: relative;
-  scroll-behavior: smooth;
   min-height: 0;
   user-select: text;
 

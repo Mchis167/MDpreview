@@ -168,7 +168,7 @@ const SettingsModule = (() => {
         let customBgs = _getCustomBgs();
         for (const file of files) {
           if (customBgs.length >= 5) {
-            alert("Maximum 5 custom images allowed.");
+            if (typeof showToast === 'function') showToast("Maximum 5 custom images allowed.", 'error');
             break;
           }
           const base64 = await _toBase64(file);
