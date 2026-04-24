@@ -141,37 +141,6 @@
   margin-left: 4px;
 }
 
-.btn-ghost {
-  background: transparent;
-  border: none;
-  color: var(--text-90);
-  padding: 6px 16px;
-  border-radius: var(--radius-pill);
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.btn-primary-pill {
-  background: var(--accent-color);
-  border: none;
-  color: #000;
-  padding: 6px 16px;
-  border-radius: var(--radius-pill);
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.btn-primary-pill:hover {
-  opacity: 0.9;
-}
 
 /* ── Markdown Help Popover ────────────────────────── */
 /* ── Markdown Help Popover (Figma Parity) ────────────────── */
@@ -378,6 +347,23 @@
 .ctx-item:hover {
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
+}
+
+.ctx-item.danger {
+  color: #ef4444;
+}
+
+.ctx-item.danger:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.ctx-item.danger svg {
+  color: #ef4444;
+}
+
+.ctx-item.danger .ctx-icon {
+  opacity: 1 !important;
 }
 
 .ctx-item.active {

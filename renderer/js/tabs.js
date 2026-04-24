@@ -24,7 +24,9 @@ const TabsModule = (function () {
         } else {
           deselectAll();
           if (typeof window.loadFile === 'function') {
-            window.loadFile(path);
+            window.loadFile(path).catch(err => {
+              remove(path);
+            });
           }
         }
       },
@@ -444,10 +446,35 @@ const TabsModule = (function () {
     render();
   }
 
+  function swap(oldPath, newPath) {
+    const index = state.openFiles.indexOf(oldPath);
+    if (index !== -1) {
+      state.openFiles[index] = newPath;
+      
+      if (state.activeFile === oldPath) {
+        state.activeFile = newPath;
+        if (typeof window.AppState !== 'undefined') window.AppState.currentFile = newPath;
+      }
+
+      const sIdx = state.selectedFiles.indexOf(oldPath);
+      if (sIdx !== -1) {
+        state.selectedFiles[sIdx] = newPath;
+      }
+
+      if (state.lastSelectedFile === oldPath) {
+        state.lastSelectedFile = newPath;
+      }
+
+      saveToStorage();
+      render();
+    }
+  }
+
   return {
     init,
     open,
     remove,
+    swap,
     render,
     switchWorkspace,
     selectAll,

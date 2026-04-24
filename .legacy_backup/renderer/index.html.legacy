@@ -127,6 +127,47 @@
 
         <div class="sidebar-divider"></div>
 
+        <div id="sidebar-draft-view" style="display:none">
+          <!-- Variant: Placeholder -->
+          <div id="draft-placeholder-variant" class="draft-variant">
+            <div class="sidebar-draft-placeholder">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 8V4H8" />
+                <rect width="16" height="12" x="4" y="8" rx="2" />
+                <path d="M2 14h2" />
+                <path d="M20 14h2" />
+                <path d="M15 13v2" />
+                <path d="M9 13v2" />
+              </svg>
+              <div class="sidebar-draft-label">Draft</div>
+              <div class="sidebar-draft-sublabel">Coming soon</div>
+            </div>
+          </div>
+
+          <!-- Variant: Active Draft Info -->
+          <div id="draft-input-variant" class="draft-variant" style="display:none">
+            <div class="sidebar-draft-placeholder">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z" />
+              </svg>
+              <div class="sidebar-draft-label">Draft Mode</div>
+              <div class="sidebar-draft-sublabel">Use the Edit tab to modify content</div>
+
+              <button id="draft-quick-import" class="draft-import-btn" style="margin-top: 20px; width: 100%;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3v12" />
+                  <path d="m8 11 4 4 4-4" />
+                  <path d="M8 5H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-4" />
+                </svg>
+                <span>Quick Import</span>
+              </button>
+            </div>
+          </div>
+        </div>
 
         <div id="sidebar-search-view" style="display:none">
           <div class="sidebar-search-container" id="sidebar-search-mount">
@@ -152,6 +193,24 @@
             </div>
           </div>
 
+          <!-- Draft Mode Footer (Badge Variant) -->
+          <div class="status-indicator-badge" id="draft-footer" style="display:none">
+            <div class="status-badge-inner is-updated" id="draft-status-badge">
+              <div class="status-badge-icon">
+                <!-- Check Icon (Updated) -->
+                <svg class="icon-check" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <!-- Minus Icon (Pending) -->
+                <svg class="icon-minus" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+              </div>
+              <span class="status-badge-text">Content Updated</span>
+            </div>
+          </div>
         </div>
 
       </aside>
@@ -438,10 +497,6 @@
   <script src="js/components/organisms/right-sidebar.js"></script>
   <script src="js/components/organisms/comment-form-component.js"></script>
 
-  <script src="js/services/file-service.js"></script>
-  <script src="js/services/tree-drag-manager.js"></script>
-  <script src="js/services/sidebar-controller.js"></script>
-  <script src="js/services/recently-viewed-service.js"></script>
   <script src="js/tree.js"></script>
   <script src="js/workspace.js"></script>
   <script src="js/components/organisms/workspace-picker-component.js"></script>

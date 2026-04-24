@@ -12,10 +12,13 @@
 
 @import url('tokens.css');
 @import url('design-system.css');
+@import url('design-system/atoms/icon-action-button.css');
+@import url('design-system/molecules/sidebar-section-header.css');
 @import url('textarea.css');
 @import url('switch-toggle.css');
 @import url('layout.css');
 @import url('sidebar.css');
+@import url('design-system/organisms/tree-view.css');
 @import url('toolbar.css');
 @import url('markdown.css');
 @import url('design-system/organisms/right-sidebar.css');

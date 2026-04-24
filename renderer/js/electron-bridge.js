@@ -177,6 +177,10 @@
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
       return res.json();
     },
+    revealInFinder: async (filePath) => {
+      console.log('Reveal in finder not supported in browser:', filePath);
+      return { success: false, error: 'Not supported in browser' };
+    },
     
     // Custom
     rebuildApp: () => {

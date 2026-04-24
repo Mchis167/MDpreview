@@ -18,6 +18,7 @@
   gap: var(--ds-space-sm);
   white-space: nowrap;
   user-select: none;
+  letter-spacing: -0.02em;
 }
 
 .ds-btn-primary {
@@ -26,7 +27,7 @@
 }
 
 .ds-btn-primary:hover {
-  background: var(--ds-accent-hover);
+  background: var(--accent-hover);
   transform: translateY(-1px);
 }
 

@@ -3,6 +3,69 @@
 All notable changes to this project will be documented in this file.
 
 
+## [1.5.0] — 2026-04-25 02:41
+
+### Added
+- **Workspace Integration**: Bổ sung tính năng "Open Workspace in Finder" vào menu chuột phải tại vùng trống của cây thư mục, hỗ trợ tối đa cho ứng dụng Electron.
+- **FileService Module**: Triển khai `FileService.js` tập trung hóa toàn bộ các lệnh Electron IPC (fetch, create, delete, rename, move), giúp tách biệt hoàn toàn logic nghiệp vụ file khỏi UI.
+- **Design System V2 Standardization**:
+    - **IconActionButton Expansion**: Bổ sung các variant `isPrimary` (nền accent, chữ dark) và `isLarge` (32x32px) để phục vụ các thành phần giao diện nổi bật.
+    - **Global Design Tokens**: Khai báo `--accent-hover-layer` và `--accent-hover` cho phép tạo hiệu ứng sáng lên 10% đồng nhất cho mọi thành phần dùng màu accent.
+    - **SidebarActionButton & SidebarSectionHeader**: Triển khai các Component nguyên tử và phân tử cho Sidebar, hỗ trợ icon động và quản lý tooltip tập trung.
+    - **Centralized Icon Registry**: Tích hợp các icon chuẩn (`search`, `sort`, `chevron-down`, `file`, `message-circle-plus`) vào `DesignSystem` để phục vụ kiến trúc Component mới.
+- **Full Session Persistence (Server Sync)**:
+    - Triển khai đồng bộ trạng thái cây thư mục (**Expanded Folders**) và thứ tự sắp xếp tùy chỉnh (**Custom Order**).
+    - Tích hợp ghi nhớ vị trí cuộn trang (**Scroll Position**) cho từng file, đồng bộ xuyên suốt các phiên làm việc và tab.
+    - Đồng bộ chế độ xem (**View Modes**: Read/Edit/Comment) riêng biệt cho từng file, không bị reset khi tải lại trang.
+- **Enhanced Draft Content Persistence**: Nâng cấp cơ chế lưu trữ nội dung bản nháp (**Draft Content**), đảm bảo toàn bộ văn bản soạn thảo được đồng bộ lên server.
+- **UI Layout Persistence**: Ghi nhớ và đồng bộ độ rộng của **Sidebar (Trái & Phải)** cùng trạng thái đóng/mở của các mục chức năng.
+- **UI Extension Masking & Smart Rename**: 
+    - Khởi tạo cơ chế tự động ẩn đuôi file `.md` trên toàn bộ giao diện và khi đổi tên, giúp không gian làm việc gọn gàng.
+    - Tự động thêm lại đuôi `.md` khi lưu nếu người dùng không nhập, tránh xóa nhầm extension.
+- **Advanced DND Engine (Drag and Drop)**:
+    - **Area-Aware DND Detection**: Kết hợp `elementFromPoint` với tính toán tọa độ để nhận diện vùng thả file chính xác (70% "Into", 15% Reorder).
+    - **Root-Drop Support**: Cho phép kéo thả file ra vùng trống của sidebar để di chuyển ra thư mục gốc (`.drag-hover-root`).
+    - **Multi-select Drag**: Hỗ trợ kéo thả cùng lúc nhiều file đã chọn trong cả chế độ Standard và Custom order.
+- **Professional Rename UX**: Hỗ trợ "Smart Click" (click vào item đang chọn để đổi tên), phím tắt **Enter/F2** và lưu giữ input đổi tên ngay cả khi file system re-render ngầm.
+
+### Changed
+- **Sidebar UX & Architecture Refactor (V2)**:
+    - **UI/Logic Decoupling**: Chuyển đổi `TreeModule` sang sử dụng `FileService` cho mọi thao tác dữ liệu. Tách logic UI khỏi core logic của Tree (`_handleClick`, `_handleRename`, `_handleMouseDown`).
+    - **Centralization**: Hợp nhất hoàn toàn kiến trúc hiển thị của **File Explorer** và **Recently Viewed** qua `TreeItemComponent` và `SidebarSectionHeader`.
+    - **CSS Modularization**: Chuyển logic styling từ `sidebar.css` sang `tree-view.css` và trích xuất style của **Workspace Picker** sang module Design System chuyên biệt. Đơn giản hóa `index.html`.
+    - **Layout Refinement**: Tối ưu hóa chế độ tìm kiếm (ẩn Header), tinh chỉnh margin/padding và dọn dẹp các đường kẻ phân cách để đạt được giao diện hiện đại.
+- **Premium Drag-and-Drop Fidelity**:
+    - **Zero-Artifact Dragging**: Thiết lập `visibility: hidden` cho item gốc khi kéo (VIP Drag) để không bị chồng lấp. Cố định hiệu ứng dãn khoảng trống ở mức **1 item**.
+    - **Smart Indentation Guide**: Tự động ẩn thanh kẻ dọc khi một thư mục trở nên "trống tạm thời".
+    - **Improved Detection Robustness**: Thay thế việc phụ thuộc vào `elementFromPoint` bằng tính toán tọa độ hình học, xóa bỏ dead zones.
+    - **Automatic Cleanup**: Tự động dọn dẹp "Custom Order" trong thư mục nguồn khi di chuyển file.
+- **Enhanced Multi-selection & Interaction Logic**:
+    - **Smart Shift+Click**: Tự động dùng file đang mở làm mốc bắt đầu nếu chưa chọn file nào.
+    - **Non-destructive Selection**: Chọn nhiều file (Cmd/Shift + Click) giờ đây không tự động mở file, tránh gián đoạn luồng công việc.
+    - **Zero-Latency Navigation**: Tách tính năng Rename khỏi double-click để ưu tiên mở file ngay lập tức. Khôi phục logic Mouse Leave mượt mà.
+- **Unified Floating Triggers & UI Cleanup**:
+    - Chuẩn hóa **Comment Trigger** và **Bookmark Trigger** sang dùng `IconActionButton`.
+    - Loại bỏ hiệu ứng `box-shadow` mặc định để mang đến thiết kế "Flat & Minimalist".
+    - Hợp nhất cấu hình giao diện vào `AppState.settings` để quản lý tập trung.
+
+### Fixed
+- **Critical System Crash Stabilization**: Khắc phục triệt để lỗi `ReferenceError: getSessionModes/saveSessionModes is not defined`, lỗi `SyntaxError` khai báo trùng biến trong `tree.js`, và lỗi `TreeModule is not defined`.
+- **View Mode Persistence**: Sửa lỗi đồng bộ `sessionModes` để giữ lại chế độ Read/Edit khi reload trang.
+- **Sidebar UI & DND Regressions**:
+    - Khắc phục các lỗi hiển thị: giao diện tìm kiếm bị bóp méo, thanh đường dẫn dọc của thư mục bị lệch trong lúc kéo, icon file bị mất hoặc sai tỉ lệ.
+    - Giải quyết lỗi `ReferenceError: nearBottom` để tính toán offset DND hiển thị chuẩn xác.
+    - Sửa lỗi click vào thư mục để kéo gây ra hiệu ứng đóng/mở ngoài ý muốn; giải quyết tình trạng kẹt trạng thái `.drag-hover` sau khi thả chuột.
+    - Sửa lỗi mất chọn nhiều file bằng Cmd/Shift + Click.
+- **Auto-rename Focus Loss**: Khắc phục vấn đề ô nhập liệu đổi tên bị mất focus khi File Watcher re-render tree ở dưới nền.
+- **Module Compatibility Hotfix**: Khôi phục `setActiveFile` trong `RecentlyViewedModule` và hướng gọi `SidebarModule.activateSearch` để chặn lỗi crash ứng dụng.
+- **debug-v2.js Persistence**: Phục hồi file `debug-v2.js` để ổn định việc A/B testing giao diện Sidebar V2.
+
+### Removed
+- **Legacy Draft & File Hygiene**: 
+    - Xóa hoàn toàn bộ chuyển đổi Mode (Markdown/Draft) cũ, "New Draft" trong menu chuột phải, và các state/helper dư thừa ở `app.js`.
+    - Di chuyển các file `.legacy` vào mục `.legacy_backup` để dọn kho.
+- **Redundant Style & CSS Pruning**: Xóa bỏ các class CSS rác, Dead Code liên quan đến Drag-over cũ (hơn 100 dòng), và logic chèn SVG cứng (chuyển qua Icon Registry tập trung).
+
 
 ## [1.4.0] — 2026-04-23 22:45
 

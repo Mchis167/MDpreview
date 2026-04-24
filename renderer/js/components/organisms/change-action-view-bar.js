@@ -20,7 +20,25 @@ class ChangeActionViewBarComponent {
       { id: 'collect', icon: 'bookmark', title: 'Collect Mode' }
     ];
 
+    this.lastClickedLine = null;
     this.init();
+  }
+
+  _setupClickTracker() {
+    const mdContent = document.getElementById('md-content');
+    if (!mdContent) return;
+    
+    mdContent.addEventListener('click', (e) => {
+      let el = e.target;
+      while (el && el !== mdContent && !el.hasAttribute('data-line') && !el.hasAttribute('data-source-line')) {
+        el = el.parentElement;
+      }
+      
+      if (el) {
+        this.lastClickedLine = parseInt(el.getAttribute('data-line') || el.getAttribute('data-source-line'), 10);
+      // console.log(`[ClickSync] Tracked click at line: ${this.lastClickedLine}`);
+      }
+    });
   }
 
   init() {
@@ -137,12 +155,9 @@ class ChangeActionViewBarComponent {
 
     // ── Sync Logic (Capture while still visible) ──────────
     const prevMode = AppState.currentMode;
-    let syncData = null;
-    if ((prevMode === 'read' || prevMode === 'comment') && targetMode === 'edit') {
-      syncData = this.captureReadViewSyncData();
-    } else if (prevMode === 'edit' && targetMode !== 'edit') {
-      syncData = { line: this.captureEditorLine() };
-    }
+    const syncData = (prevMode === 'edit') 
+      ? this.captureEditorSyncData() 
+      : (prevMode === 'read' || prevMode === 'comment' || prevMode === 'collect' ? this.captureReadViewSyncData() : null);
 
     // ── Dirty Check ───────────────────────────────────────
     if (prevMode === 'edit' && targetMode !== 'edit' && typeof EditorModule !== 'undefined' && EditorModule.isDirty()) {
@@ -231,9 +246,19 @@ class ChangeActionViewBarComponent {
         }
       }
 
+      // ── Sync Draft Preview ──────────────────────────────
+      if (AppState.currentFile && AppState.currentFile.startsWith('__DRAFT_')) {
+        if (typeof DraftModule !== 'undefined') DraftModule.syncPreview();
+      }
+
+      // ── Re-bind click tracker for new content ──
+      this._setupClickTracker();
+
       // Sync scroll: coming from edit, jump to where the cursor was
-      if (prevMode === 'edit' && syncData && syncData.line) {
-        requestAnimationFrame(() => this.scrollReadViewToLine(syncData.line));
+      if (prevMode === 'edit' && syncData) {
+        requestAnimationFrame(() => {
+          this.scrollReadViewToLine(syncData.line, syncData.selectionText, syncData.isRealSelection);
+        });
       }
     } else if (targetMode === 'edit') {
       const currentSelection = window.getSelection().toString().trim();
@@ -251,6 +276,16 @@ class ChangeActionViewBarComponent {
       
       if (typeof CommentsModule !== 'undefined') CommentsModule.removeCommentMode();
       if (typeof CollectModule !== 'undefined') CollectModule.removeCollectMode();
+    }
+
+    // ── Apply Subtle Fade-In Animation (Only for Major Mode Swaps) ──
+    const isMajorChange = (prevMode === 'edit' || targetMode === 'edit');
+    const activeView = (targetMode === 'edit') ? editViewer : mdContent;
+    
+    if (isMajorChange && activeView) {
+      activeView.classList.remove('ds-sync-fade-in');
+      void activeView.offsetWidth; // Force reflow
+      activeView.classList.add('ds-sync-fade-in');
     }
 
     // ── Draft Actions ─────────────────────────────────────
@@ -275,27 +310,46 @@ class ChangeActionViewBarComponent {
     if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
       const range = sel.getRangeAt(0);
       if (mdContent.contains(range.commonAncestorContainer)) {
-        let node = range.startContainer.nodeType === Node.TEXT_NODE
-          ? range.startContainer.parentElement
-          : range.startContainer;
+        const node = range.startContainer;
+        let el = node.nodeType === 1 ? node : node.parentElement;
+        
+        while (el && el !== mdContent && !el.hasAttribute('data-line') && !el.hasAttribute('data-source-line')) {
+          el = el.parentElement;
+        }
 
-        while (node && node !== mdContent) {
-          if (node.dataset && node.dataset.line) {
-            const line = parseInt(node.dataset.line, 10);
-            const selectionText = sel.toString(); // Don't trim, preserve exact match
-            return { line, selectionText };
-          }
-          node = node.parentElement;
+        if (el) {
+          const line = parseInt(el.getAttribute('data-line') || el.getAttribute('data-source-line'), 10);
+          const selectionText = sel.toString();
+          
+          const textBeforeContent = el.innerText.substring(0, range.startOffset);
+          const offset = textBeforeContent.length;
+
+          /*
+          console.log('[SelectionSync-Capture]', {
+            line,
+            offset,
+            textBeforeContent: `"${textBeforeContent}"`,
+            selectionText: `"${selectionText}"`,
+            targetElement: el.tagName,
+            nodeType: node.nodeType
+          });
+          */
+
+          return { line, offset, length: selectionText.length, selectionText };
         }
       }
     }
 
-    // 2. Fallback: Find Top Visible Line
-    const lines = Array.from(mdContent.querySelectorAll('[data-line]'));
+    // ── 2. Fallback: Last Clicked Line (NEW) ───────────
+    if (this.lastClickedLine) {
+      // console.log(`[ClickSync] Using last clicked line: ${this.lastClickedLine}`);
+      return { line: this.lastClickedLine };
+    }
+
+    // ── 3. Fallback: Top Visible Line ──────────────────
+    const lines = Array.from(mdContent.querySelectorAll('[data-line], [data-source-line]'));
     const viewerRect = viewer.getBoundingClientRect();
-    const threshold = viewerRect.top + 60; 
-
-
+    const threshold = viewerRect.top + 100; 
 
     const topLineEl = lines.find(el => {
       const rect = el.getBoundingClientRect();
@@ -303,13 +357,11 @@ class ChangeActionViewBarComponent {
     });
     
     if (topLineEl) {
-      const line = parseInt(topLineEl.dataset.line, 10);
+      const line = parseInt(topLineEl.dataset.line || topLineEl.dataset.sourceLine, 10);
       return { line };
     }
 
-    // 3. Last Resort: Scroll Percentage
     const scrollPct = viewer.scrollTop / (viewer.scrollHeight - viewer.clientHeight || 1);
-
     return { scrollPct };
   }
 
@@ -318,41 +370,145 @@ class ChangeActionViewBarComponent {
     return data.line || null;
   }
 
-  captureEditorLine() {
+  captureEditorSyncData() {
     const textarea = document.getElementById('edit-textarea');
-    if (!textarea) return null;
-    const pos = textarea.selectionStart;
-    const textBefore = textarea.value.substring(0, pos);
-    return textBefore.split('\n').length;
+    if (!textarea) return {};
+    
+    const posStart = textarea.selectionStart;
+    const posEnd = textarea.selectionEnd;
+    const text = textarea.value;
+    const lines = text.split('\n');
+    
+    const textBefore = text.substring(0, posStart);
+    const lineIndex = textBefore.split('\n').length - 1;
+    const line = lineIndex + 1;
+    
+    let selectionText = text.substring(posStart, posEnd);
+    let isRealSelection = selectionText.trim().length > 0;
+    
+    // ── UX Improvement: If no selection, use the current line as context ──
+    if (!isRealSelection) {
+      const currentLineText = lines[lineIndex] || '';
+      // Clean up Markdown symbols for better HTML matching
+      selectionText = currentLineText.replace(/[#*`_~\[\]()]/g, '').trim();
+    }
+    
+    const scrollPct = textarea.scrollTop / (textarea.scrollHeight - textarea.clientHeight || 1);
+
+    return { line, selectionText, scrollPct, isRealSelection };
   }
 
-  scrollEditorToLine(lineNum) {
+  scrollEditorToLine(lineNum, offset = 0, length = 0) {
     const textarea = document.getElementById('edit-textarea');
     if (!textarea || !lineNum) return;
+    
     const lines = textarea.value.split('\n');
     let charPos = 0;
+    
+    // Calculate character position of the start of the line
     for (let i = 0; i < Math.min(lineNum - 1, lines.length - 1); i++) {
       charPos += lines[i].length + 1;
     }
+
+    // Add offset within the line
+    charPos += offset;
+
     textarea.focus();
-    textarea.setSelectionRange(charPos, charPos);
+    
+    if (length > 0) {
+      textarea.setSelectionRange(charPos, charPos + length);
+    } else {
+      textarea.setSelectionRange(charPos, charPos);
+    }
+
+    // Scroll textarea to the position
+    const lineHeight = 24; // Approximate
+    textarea.scrollTop = (lineNum - 5) * lineHeight; 
   }
 
-  scrollReadViewToLine(lineNum) {
-    if (!lineNum) return;
+  scrollReadViewToLine(line, selectionText = '', isRealSelection = false) {
     const viewer = document.getElementById('md-viewer');
-    if (!viewer) return;
+    const mdContent = document.getElementById('md-content');
+    if (!viewer || !mdContent) return;
 
-    let target = viewer.querySelector(`[data-line="${lineNum}"]`);
-    if (!target) {
-      const allLines = Array.from(viewer.querySelectorAll('[data-line]'));
-      if (!allLines.length) return;
-      target = allLines.reduce((closest, el) =>
-        Math.abs(parseInt(el.dataset.line) - lineNum) < Math.abs(parseInt(closest.dataset.line) - lineNum)
-          ? el : closest
-      );
-    }
-    if (target) target.scrollIntoView({ block: 'center', behavior: 'auto' });
+    let attempts = 0;
+    const maxAttempts = 5;
+    let lastTop = -1;
+    let stableCount = 0;
+
+    const tryScroll = () => {
+      let target = null;
+      
+      // 1. Try search by selectionText first (most precise)
+      if (selectionText && selectionText.trim().length > 3) {
+        // CLEANUP: Remove MD syntax characters for matching against rendered HTML
+        const cleanSearchText = selectionText.replace(/[#*`_~\[\]()]/g, '').trim();
+        const words = cleanSearchText.split(/\s+/).filter(w => w.length > 2);
+        
+        if (words.length > 0) {
+          const walker = document.createTreeWalker(mdContent, NodeFilter.SHOW_TEXT, null, false);
+          let node;
+          while (node = walker.nextNode()) {
+            const content = node.textContent;
+            // Check if the node contains at least the longest word and most other words
+            const matches = words.every(word => content.includes(word));
+            
+            if (matches) {
+              target = node.parentElement;
+              // console.log(`[ScrollSync] Found text match in <${target.tagName}>: "${content.substring(0, 30)}..."`);
+              break;
+            }
+          }
+        }
+      }
+
+      // 2. Fallback to line number
+      if (!target) {
+        target = mdContent.querySelector(`[data-line="${line}"], [data-source-line="${line}"]`);
+      }
+      
+      if (target) {
+        const currentTop = target.getBoundingClientRect().top + window.scrollY;
+        
+        if (Math.abs(currentTop - lastTop) < 1) {
+          stableCount++;
+        } else {
+          stableCount = 0;
+        }
+        
+        lastTop = currentTop;
+
+        if (stableCount >= 3 || attempts >= maxAttempts) {
+          target.scrollIntoView({ behavior: 'auto', block: 'center' });
+          
+          // ── Visual Feedback: Real Selection ONLY if user selected it in Editor ──
+          if (isRealSelection) {
+            try {
+              const range = document.createRange();
+              const selection = window.getSelection();
+              range.selectNodeContents(target);
+              selection.removeAllRanges();
+              selection.addRange(range);
+            } catch(e) {}
+          }
+
+          setTimeout(() => {
+            const finalTop = target.getBoundingClientRect().top + window.scrollY;
+            if (Math.abs(finalTop - lastTop) > 10) {
+              target.scrollIntoView({ behavior: 'auto', block: 'center' });
+            }
+          }, 400);
+          return;
+        }
+      }
+
+      attempts++;
+      if (attempts < maxAttempts) {
+        requestAnimationFrame(tryScroll);
+      }
+    };
+
+    requestAnimationFrame(tryScroll);
   }
 
   async loadRawContent() {

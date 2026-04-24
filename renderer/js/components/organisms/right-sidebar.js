@@ -40,9 +40,13 @@ class RightSidebarComponent {
    */
   setupModule(config) {
     this.state = {
-      ...this.state,
-      ...config,
-      isOpen: true
+      isOpen: true,
+      title: config.title || '',
+      actions: config.actions || [],
+      items: config.items || [],
+      renderItem: config.renderItem || null,
+      emptyState: config.emptyState || { icon: '', text: '' },
+      currentModuleId: config.currentModuleId || null
     };
     this.render();
   }
@@ -164,6 +168,10 @@ class RightSidebarComponent {
       const currentWidth = parseInt(getComputedStyle(this.mount).getPropertyValue('--sidebar-right-width'));
       if (currentWidth) {
         localStorage.setItem(this.storageKey, currentWidth);
+        if (typeof AppState !== 'undefined') {
+          AppState.settings.rightSidebarWidth = currentWidth;
+          if (AppState.savePersistentState) AppState.savePersistentState();
+        }
       }
 
       window.removeEventListener('mousemove', onMove);

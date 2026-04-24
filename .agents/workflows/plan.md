@@ -2,7 +2,7 @@
 description: Lập kế hoạch chi tiết trước khi thực hiện bất kỳ thay đổi mã nguồn nào.
 ---
 
-# 📝 Plan-First Workflow
+📝 Plan-First Workflow
 
 Workflow này bắt buộc AI phải phân tích kỹ lưỡng và lập kế hoạch thực hiện (Implementation Plan) trước khi bắt đầu viết code thật.
 

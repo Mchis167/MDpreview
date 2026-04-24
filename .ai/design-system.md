@@ -20,6 +20,26 @@ Logic điều khiển được chia theo cấp độ tương ứng với CSS.
 
 ---
 
+## 🧭 Phân loại Thành phần (Component Categorization)
+
+Để đảm bảo tính tái sử dụng và khả năng mở rộng, chúng ta phân loại các thành phần UI thành hai nhóm chính:
+
+### 1. Thành phần Hệ thống (Generic Components)
+Đây là các thành phần "vô tri" về mặt nghiệp vụ, nằm trực tiếp trong bộ lõi của Design System.
+- **Vị trí:** `renderer/js/components/design-system.js`.
+- **Đặc điểm:** Không chứa logic của ứng dụng (ví dụ: không biết về "file", "workspace"). Chỉ nhận dữ liệu thô và hiển thị.
+- **Ví dụ:** Modal, Tooltip, Confirm Dialog, Select, Generic Button.
+- **Tiền tố:** Luôn sử dụng `.ds-` trong CSS.
+
+### 2. Thành phần Tính năng (Feature Components)
+Đây là các thành phần được xây dựng để giải quyết một bài toán cụ thể của ứng dụng, sử dụng các "nguyên liệu" từ Design System.
+- **Vị trí JS:** `renderer/js/components/[feature]/` (ví dụ: `renderer/js/components/molecules/tree-item.js`).
+- **Vị trí CSS:** `renderer/css/design-system/[atomic-level]/[feature].css` (ví dụ: `renderer/css/design-system/organisms/tree-view.css`).
+- **Đặc điểm:** Chứa logic nghiệp vụ (Business Logic). Biết rõ về cấu trúc dữ liệu của ứng dụng.
+- **Ví dụ:** TreeView, CommentList, WorkspacePicker.
+
+---
+
 ## 🎨 Quy tắc đặt tên (Naming Conventions)
 
 ### 1. CSS Classes

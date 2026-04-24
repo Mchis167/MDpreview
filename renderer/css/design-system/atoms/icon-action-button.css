@@ -1,0 +1,60 @@
+/* ══════════════════════════════════════════════════
+   icon-action-button.css — Atomic Design (Atom)
+   Styles for small icon action buttons (24x24) with 16x16 icons.
+   Used in Sidebar, Right Sidebar, and Toolbars.
+   ══════════════════════════════════════════════════ */
+
+.ds-icon-action-btn {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-20);
+    border-radius: 6px;
+    transition: all 0.2s var(--apple-ease);
+    flex-shrink: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+}
+
+.ds-icon-action-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-60);
+}
+
+.ds-icon-action-btn.is-danger:hover {
+    background: rgba(255, 69, 58, 0.1);
+    color: #ff453a;
+}
+
+/* ── Primary Variant ── */
+.ds-icon-action-btn.is-primary {
+    background: var(--accent-color);
+    color: var(--ds-text-dark);
+}
+
+.ds-icon-action-btn.is-primary:hover {
+    background: var(--accent-hover);
+    transform: scale(1.1);
+}
+
+/* ── Large Size ── */
+.ds-icon-action-btn.is-large {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+}
+
+.ds-icon-action-btn.is-large svg {
+    width: 18px !important;
+    height: 18px !important;
+}
+
+.ds-icon-action-btn svg {
+    width: 16px !important;
+    height: 16px !important;
+    stroke-width: 2.2px;
+}

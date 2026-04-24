@@ -1,0 +1,52 @@
+# Workflow: Standardize to Design System (`/standardize-ds`)
+
+Workflow này hướng dẫn Agent thực hiện chuẩn hóa các thành phần UI cũ (Legacy) sang các Component đã được đóng gói trong Design System (V2).
+
+## 🎯 Mục tiêu
+- Loại bỏ các nút bấm sử dụng class cũ (`.btn`, `.btn-primary`, `.btn-ghost`).
+- Thay thế việc chèn SVG thủ công bằng `IconActionButton` hoặc `DesignSystem.getIcon`.
+- Chuẩn hóa các thanh tiêu đề (Headers) và các mục danh sách (Items).
+
+---
+
+## 🛠️ Quy trình thực hiện (Dành cho Agent)
+
+### Bước 1: Kiểm toán (UI Audit)
+Tìm kiếm các đoạn code sử dụng:
+1.  Class nút bấm cũ: `grep_search 'class=".*btn.*"'` (không có tiền tố `ds-`).
+2.  Chèn icon thủ công: Tìm các đoạn `<svg>` hoặc sử dụng `DesignSystem.getIcon` mà không thông qua Component.
+3.  Cấu trúc Header thủ công: Các khối `div` có class `*-header` hoặc `section-label`.
+
+### Bước 2: Chuyển đổi Component (Conversion)
+
+#### 1. Nút bấm hành động nhỏ (Icon Buttons)
+Nếu thấy các nút bấm nhỏ (24x24 hoặc 32x32) chỉ chứa icon:
+- **Hành động**: Chuyển sang `new IconActionButton({ ... })`.
+- **CSS**: Đảm bảo container của nút sử dụng Flexbox để căn giữa.
+
+#### 2. Nút bấm chức năng (Action Buttons)
+Nếu thấy các nút "Save", "Cancel", "Continue":
+- **Hành động**: Sử dụng `DesignSystem.createButton({ label, variant, ... })`.
+- **Class**: Hoặc gán class `ds-btn ds-btn-primary` (hoặc `ghost`).
+
+#### 3. Tiêu đề mục (Section Headers)
+Nếu thấy các tiêu đề trong Sidebar hoặc Right Sidebar:
+- **Hành động**: Sử dụng `new SidebarSectionHeader({ title, actions: [...] })`.
+
+### Bước 3: Dọn dẹp CSS (Styling Cleanup)
+1.  Xóa các selector cũ (`.btn`, `.btn-primary`, v.v.) trong file CSS của module.
+2.  Thay thế các giá trị hardcode bằng CSS Variables:
+    - Màu sắc: `var(--ds-accent-orange)`, `var(--text-90)`, v.v.
+    - Spacing: `var(--ds-space-md)`, `12px`, `16px` (theo lưới 4px).
+    - Bo góc: `var(--ds-radius-md)`.
+
+### Bước 4: Kiểm tra (Verification)
+- [ ] Các nút bấm có cùng chiều cao (28px cho nút thường, 24px cho icon button).
+- [ ] Hiệu ứng hover đồng nhất.
+- [ ] Icon hiển thị đúng kích thước (thường là 16x16 bên trong nút).
+- [ ] Layout không bị vỡ sau khi thay đổi `height` từ cố định sang `min-height` hoặc `auto`.
+
+---
+
+> [!TIP]
+> Luôn ưu tiên sử dụng `IconActionButton` cho các thao tác phụ (Edit, Delete, Sort) để giữ giao diện thanh thoát.

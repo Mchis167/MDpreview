@@ -175,30 +175,31 @@ const CommentsModule = (() => {
           snippet = _esc(snippet);
         }
 
-        item.innerHTML = `
-          <div class="ds-item-header">
-            <div class="ds-item-header-group">
-              <div class="ds-item-label">${lineRef.toUpperCase()}</div>
-              <div class="ds-item-snippet">${snippet}</div>
-            </div>
-            <button class="ds-item-delete-btn" data-id="${c.id}" title="Delete">
-              ${DesignSystem.getIcon('x')}
-            </button>
-          </div>
-          <div class="ds-item-body">${_esc(c.text)}</div>
-        `;
+        const header = DesignSystem.createElement('div', 'ds-item-header');
+        const headerGroup = DesignSystem.createElement('div', 'ds-item-header-group');
+        headerGroup.appendChild(DesignSystem.createElement('div', 'ds-item-label', { text: lineRef.toUpperCase() }));
+        headerGroup.appendChild(DesignSystem.createElement('div', 'ds-item-snippet', { html: snippet }));
+
+        const deleteBtn = new IconActionButton({
+          iconName: 'x',
+          title: 'Delete',
+          isDanger: true,
+          className: 'ds-item-delete-btn',
+          onClick: () => remove(c.id)
+        });
+
+        header.appendChild(headerGroup);
+        header.appendChild(deleteBtn.render());
+
+        const body = DesignSystem.createElement('div', 'ds-item-body', { html: _esc(c.text) });
+
+        item.appendChild(header);
+        item.appendChild(body);
 
         item.onmouseenter = () => _highlightLines(c.lineStart, c.lineEnd);
         item.onmouseleave = () => _clearHighlights();
         item.onclick      = () => _onItemClick(c);
         
-        const delBtn = item.querySelector('.ds-item-delete-btn');
-        if (delBtn) {
-          delBtn.addEventListener('click', e => {
-            e.stopPropagation();
-            remove(c.id);
-          });
-        }
         return item;
       }
     });
@@ -430,11 +431,16 @@ const CommentsModule = (() => {
 
   function applyCommentMode() {
     if (!floatingTrigger) {
-      floatingTrigger = document.createElement('button');
-      floatingTrigger.className = 'comment-trigger';
-      floatingTrigger.innerHTML = DesignSystem.getIcon('message');
-      floatingTrigger.title     = 'Add comment to selection';
-      floatingTrigger.addEventListener('click', _onTriggerClick);
+      const triggerBtn = new IconActionButton({
+        iconName: 'message-circle-plus',
+        title: 'Add comment to selection',
+        isPrimary: true,
+        isLarge: true,
+        className: 'comment-trigger',
+        onClick: (e) => _onTriggerClick(e)
+      });
+      
+      floatingTrigger = triggerBtn.render();
       document.body.appendChild(floatingTrigger);
     }
     

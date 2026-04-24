@@ -263,31 +263,80 @@ const EditorModule = (() => {
     const text = _textarea.value;
     let targetChar = -1;
 
-    // 1. Precise Selection Match within Line
-    // 1. Precise Selection Match (Multi-line aware)
-    if (context.line && context.selectionText) {
+    // 1. Precise Selection Match (Multi-line + Offset aware)
+    if (context.line && context.selectionText && context.selectionText.length > 2) {
       const lines = text.split('\n');
       let startOfLine = 0;
-      for (let i = 0; i < context.line - 1; i++) {
-        startOfLine += lines[i].length + 1;
+      
+      // Safe line traversal
+      const maxLine = Math.min(context.line - 1, lines.length);
+      for (let i = 0; i < maxLine; i++) {
+        startOfLine += (lines[i] ? lines[i].length : 0) + 1;
       }
       
-      // Search for the selection text starting from the predicted line
-      // We look slightly before and after in case line numbers are slightly off
-      const searchRange = 500; // Look within 500 chars
-      const searchStart = Math.max(0, startOfLine - searchRange);
-      const searchEnd = Math.min(text.length, startOfLine + context.selectionText.length + searchRange);
-      const searchText = text.substring(searchStart, searchEnd);
+      // Attempt 1: Fast offset-based match
+      const predictedPos = startOfLine + (context.offset || 0);
+      const sample = text.substring(predictedPos, predictedPos + context.selectionText.length);
       
-      const offsetInSearch = searchText.indexOf(context.selectionText);
-      
-      if (offsetInSearch !== -1) {
-        targetChar = searchStart + offsetInSearch;
-        _textarea.setSelectionRange(targetChar, targetChar + context.selectionText.length);
+      if (sample === context.selectionText) {
+        targetChar = predictedPos;
+      } else {
+        // Attempt 2: Smart Fuzzy Regex Match (Sandwich Strategy)
+        const allWords = context.selectionText.trim().split(/[\s,.\-()]+/).filter(w => w.length > 2);
+        if (allWords.length > 0) {
+          // Use first 5 and last 5 words to create a "Sandwich" regex
+          const headWords = allWords.slice(0, 5);
+          const tailWords = allWords.length > 10 ? allWords.slice(-5) : [];
+          
+          const buildPattern = (words) => words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('[^a-zA-ZÀ-ỹ]*');
+          
+          let fuzzyPattern = buildPattern(headWords);
+          if (tailWords.length > 0) {
+            fuzzyPattern += '.*?' + buildPattern(tailWords);
+          }
+          
+          const regex = new RegExp(fuzzyPattern, 'si'); // 's' flag to allow . to match newlines
+          
+          // console.log(`[SelectionSync-Focus] Created Sandwich Pattern: /${fuzzyPattern.substring(0, 50)}.../si`);
+
+          // First search near the predicted line
+          const searchRange = 3000;
+          const searchStart = Math.max(0, startOfLine - searchRange);
+          const searchEnd = Math.min(text.length, startOfLine + searchRange * 2);
+          const localText = text.substring(searchStart, searchEnd);
+          
+          let match = regex.exec(localText);
+          if (match) {
+            targetChar = searchStart + match.index;
+            // console.log(`[SelectionSync-Focus] Fuzzy match found near line ${context.line}`);
+          } else {
+            // console.log(`[SelectionSync-Focus] Local fuzzy match failed, searching globally...`);
+            regex.lastIndex = 0;
+            match = regex.exec(text);
+            if (match) {
+              targetChar = match.index;
+              // console.log(`[SelectionSync-Focus] Global fuzzy match found at index ${targetChar}`);
+            } else {
+              // Attempt 4: Longest word fallback (last resort)
+              const longestWord = allWords.reduce((a, b) => a.length > b.length ? a : b);
+              // console.log(`[SelectionSync-Focus] Global match failed. Attempting longest word fallback: "${longestWord}"`);
+              const wordIdx = text.indexOf(longestWord);
+              if (wordIdx !== -1) {
+                targetChar = wordIdx;
+                // console.log(`[SelectionSync-Focus] Longest word match found at index ${targetChar}`);
+              }
+            }
+          }
+
+          if (targetChar !== -1) {
+            const matchLen = match ? match[0].length : allWords.reduce((a, b) => a.length > b.length ? a : b).length;
+            _textarea.setSelectionRange(targetChar, targetChar + matchLen);
+          }
+        }
       }
     }
 
-    // 2. Line fallback
+    // 2. Simple Line Fallback (only if fuzzy match failed and we have no better option)
     if (targetChar === -1 && context.line) {
       const lines = text.split('\n');
       let absPos = 0;
@@ -295,8 +344,8 @@ const EditorModule = (() => {
       for (let i = 0; i < targetLineIdx; i++) {
         absPos += lines[i].length + 1;
       }
-      targetChar = absPos;
-      _textarea.setSelectionRange(absPos, absPos);
+      targetChar = absPos + (context.offset || 0);
+      _textarea.setSelectionRange(targetChar, targetChar + (context.length || 0));
     }
 
     // 3. String Search fallback

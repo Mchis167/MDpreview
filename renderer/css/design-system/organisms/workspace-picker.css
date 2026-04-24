@@ -1,0 +1,58 @@
+/* ============================================================
+   workspace-picker.css — Sidebar Workspace Selection (V2 Organism)
+   ============================================================ */
+
+.workspace-picker {
+  padding: 5px;
+  flex-shrink: 0;
+}
+
+#workspace-switcher {
+  width: 100%;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 12px 4px 20px;
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: calc(var(--radius-lg) - 4px);
+}
+
+#workspace-switcher:hover {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.ws-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+}
+
+.ws-label {
+  font-family: var(--font-text);
+  font-weight: 500;
+  font-size: 10px;
+  line-height: 16px;
+  text-transform: uppercase;
+  color: var(--text-20);
+  letter-spacing: 0.05em;
+}
+
+#workspace-name {
+  font-family: var(--font-text);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--text-90);
+}
+
+.ws-chevron {
+  color: var(--text-20);
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}

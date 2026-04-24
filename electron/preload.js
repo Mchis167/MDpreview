@@ -28,6 +28,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   copyFile:      (srcPath, destPath) => ipcRenderer.invoke('copy-file', srcPath, destPath),
   createFile:    (filePath, content) => ipcRenderer.invoke('create-file', filePath, content),
   createFolder:  (folderPath)        => ipcRenderer.invoke('create-folder', folderPath),
+  revealInFinder: (filePath)          => ipcRenderer.invoke('reveal-in-finder', filePath),
   
   // Custom
   rebuildApp: () => ipcRenderer.send('rebuild-app')

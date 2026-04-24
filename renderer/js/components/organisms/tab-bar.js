@@ -142,10 +142,14 @@ class TabBarComponent {
     item.title = path;
 
     const dot = isDraft ? '<span class="tab-bar__draft-dot"></span>' : '';
+    let displayLabel = fileName;
+    if (!isDraft && displayLabel.toLowerCase().endsWith('.md')) {
+      displayLabel = displayLabel.substring(0, displayLabel.length - 3);
+    }
 
     item.innerHTML = `
       ${dot}
-      <span class="tab-bar__name">${fileName}</span>
+      <span class="tab-bar__name">${displayLabel}</span>
       <div class="tab-bar__close" title="Close tab">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </div>

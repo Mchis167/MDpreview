@@ -16,6 +16,8 @@
 
   --accent-color:   var(--accent-orange);
   --accent-rgb:     255, 191, 72;
+  --accent-hover-layer: linear-gradient(0deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1));
+  --accent-hover:   var(--accent-hover-layer), var(--accent-color);
   --accent-green:   #22c55e;
 
   --glass-sidebar:  linear-gradient(166deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);

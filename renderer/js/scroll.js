@@ -75,6 +75,9 @@ const ScrollModule = (() => {
   function _persist() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(positions));
+      if (typeof AppState !== 'undefined' && AppState.savePersistentState) {
+        AppState.savePersistentState();
+      }
     } catch (e) {
       console.error('Failed to persist scroll positions', e);
     }

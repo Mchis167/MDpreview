@@ -1,0 +1,540 @@
+/* ============================================================
+   sidebar.css — Left sidebar: structure, navigation, search, tree
+   ============================================================ */
+
+:root {
+  --apple-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --lift-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* ── Container ─────────────────────────────────────────── */
+#sidebar-left {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135.17deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  overflow: visible;
+  position: relative;
+}
+
+.sidebar-resizer {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 20;
+  transition: background 0.2s;
+}
+
+.sidebar-resizer:hover {
+  background: rgba(var(--accent-rgb), 0.2);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.1);
+}
+
+/* ── Sidebar Divider ── */
+.sidebar-divider {
+  height: 1px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+/* ── Mode Switcher (Markdown / AI Response) ────────────── */
+.sidebar-mode-switcher {
+  padding: 12px 12px 8px 12px;
+  flex-shrink: 0;
+}
+
+.sidebar-mode-control {
+  display: flex;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 24px;
+  padding: 5px;
+  position: relative;
+}
+
+.mode-indicator {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: calc(50% - 5px);
+  height: calc(100% - 10px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 0;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: 0px 4px 6px -4px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-mode-btn {
+  flex: 1;
+  padding: 7px 16px;
+  border-radius: 16px;
+  font-family: var(--font-text);
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  text-align: center;
+  border: none;
+  background: transparent !important;
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+  box-shadow: none !important;
+}
+
+.sidebar-mode-btn.active {
+  color: #fff;
+}
+
+/* ── Draft Response Placeholder ───────────────────────────── */
+#sidebar-draft-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.sidebar-draft-placeholder {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--text-20);
+  padding: 24px;
+}
+
+.sidebar-draft-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-50);
+}
+
+.sidebar-draft-sublabel {
+  font-family: var(--font-code);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-20);
+}
+
+/* ── Workspace Picker ──────────────────────────────────── */
+.workspace-picker {
+  padding: 5px;
+  flex-shrink: 0;
+}
+
+#workspace-switcher {
+  width: 100%;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 12px 4px 20px;
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: calc(var(--radius-lg) - 4px);
+}
+
+#workspace-switcher:hover {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.ws-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  /* Align by line-height */
+}
+
+.ws-label {
+  font-family: var(--font-text);
+  font-weight: 500;
+  font-size: 10px;
+  line-height: 16px;
+  text-transform: uppercase;
+  color: var(--text-20);
+  letter-spacing: 0.05em;
+}
+
+#workspace-name {
+  font-family: var(--font-text);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--text-90);
+}
+
+.ws-chevron {
+  color: var(--text-20);
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+
+#recently-viewed-section.collapsed #recently-viewed-list {
+  display: none;
+}
+
+#recently-viewed-section.collapsed #recently-viewed-toggle svg {
+  transform: rotate(-90deg);
+}
+
+.sidebar-section {
+  flex-shrink: 0;
+}
+
+/* ── Explorer & Search Views ───────────────────────────── */
+#sidebar-explorer-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#recently-viewed-section {
+  flex-shrink: 0;
+}
+
+#file-explorer-section,
+#search-results-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+#sidebar-search-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: visible;
+}
+
+/* Search Mode Input Row */
+.sidebar-search-container {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  flex-shrink: 0;
+}
+
+.sidebar-search-input-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.sidebar-search-inner {
+  flex: 1;
+  height: 36px;
+  padding-left: 12px;
+  padding-right: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: none;
+}
+
+.sidebar-search-inner:focus-within {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.sidebar-search-inner .search-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--text-20);
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.sidebar-search-inner input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  background: none;
+  border: none;
+  outline: none;
+  height: 100%;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--text-90);
+}
+
+.sidebar-search-inner input::placeholder {
+  color: var(--text-20);
+}
+
+.exit-search-btn {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-60);
+  transition: all 0.2s;
+}
+
+.exit-search-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* ── File Tree (Container) ── */
+.sidebar-tree-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  /* Mask Fade Effect */
+  --top-fade: 0px;
+  -webkit-mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black var(--top-fade),
+      black calc(100% - 16px),
+      transparent 100%);
+  mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black var(--top-fade),
+      black calc(100% - 16px),
+      transparent 100%);
+  transition: --top-fade 0.2s;
+  /* Note: Requires @property to animate, but works as toggle too */
+}
+
+.sidebar-tree-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+#file-tree {
+  min-height: 0;
+  flex-shrink: 0;
+}
+
+/* ── Footer: Hot Reload Badge ──────────────────────────── */
+.sidebar-footer {
+  padding: 12px 12px 12px;
+  border-top: 1px solid var(--border-light);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: stretch;
+}
+
+.hot-reload-badge {
+  background: rgba(5, 46, 22, 0.2);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  width: 100%;
+}
+
+.hr-badge-left {
+  display: flex;
+  align-items: center;
+}
+
+.hr-badge-label {
+  font-family: var(--font-code);
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent-green);
+  line-height: 1;
+  display: block;
+}
+
+.hr-badge-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.bar {
+  width: 2px;
+  border-radius: var(--radius-pill);
+}
+
+.bar-1,
+.bar-3 {
+  height: 8px;
+  background: rgba(34, 197, 94, 0.4);
+}
+
+.bar-2 {
+  height: 12px;
+  background: var(--accent-green);
+}
+
+/* ── Draft Response Variants ──────────────────── */
+.draft-view-container {
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.draft-import-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-pill);
+  color: var(--text-70);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.draft-import-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.draft-import-btn svg {
+  color: var(--text-40);
+  transition: color 0.2s;
+}
+
+.draft-import-btn:hover svg {
+  color: #fff;
+}
+
+/* Drag Over State */
+.draft-variant.drag-over {
+  background: rgba(var(--accent-rgb), 0.05);
+  box-shadow: inset 0 0 20px rgba(var(--accent-rgb), 0.1);
+}
+
+.draft-view-container .textarea-component {
+  width: 100%;
+}
+
+.draft-view-container .btn-block {
+  width: 100%;
+  margin-top: 4px;
+}
+
+/* Status Badge Variant */
+.status-indicator-badge {
+  width: 100%;
+}
+
+.status-badge-inner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.status-badge-inner.is-updated {
+  background: rgba(5, 46, 22, 0.2);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.status-badge-inner.is-pending {
+  background: rgba(255, 191, 72, 0.1);
+  border: 1px solid rgba(255, 191, 72, 0.2);
+}
+
+.status-badge-inner .status-badge-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-green);
+}
+
+.status-badge-inner.is-pending .status-badge-icon {
+  color: var(--accent-orange);
+}
+
+.status-badge-inner .status-badge-text {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent-green);
+}
+
+.status-badge-inner.is-pending .status-badge-text {
+  color: var(--accent-orange);
+}
+
+/* Icon Toggling */
+.status-badge-inner .icon-check {
+  display: block;
+}
+
+.status-badge-inner .icon-minus {
+  display: none;
+}
+
+.status-badge-inner.is-pending .icon-check {
+  display: none;
+}
+
+.status-badge-inner.is-pending .icon-minus {
+  display: block;
+}
+
+.draft-variant {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+}
+
+/* Tree Bottom Spacer */

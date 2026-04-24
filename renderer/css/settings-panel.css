@@ -17,42 +17,12 @@
 .collect-trigger {
   position: fixed;
   z-index: 1500;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--accent-color);
-  color: #000;
   display: none;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s;
 }
 
 .comment-trigger.show,
 .collect-trigger.show {
   display: flex;
-  animation: triggerPop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.comment-trigger:hover,
-.collect-trigger:hover {
-  transform: scale(1.1);
-  background: var(--accent-hover, #ffce74);
-}
-
-@keyframes triggerPop {
-  0% {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
 }
 
 .setting-title {

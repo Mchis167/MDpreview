@@ -105,6 +105,17 @@ function register(ipcMain) {
       return { success: false, error: error.message };
     }
   });
+
+  ipcMain.handle('reveal-in-finder', async (event, filePath) => {
+    try {
+      const { shell } = require('electron');
+      if (!fs.existsSync(filePath)) throw new Error('Path does not exist');
+      shell.showItemInFolder(filePath);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
 }
 
 module.exports = { register };

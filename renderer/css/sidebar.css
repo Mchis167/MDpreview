@@ -46,172 +46,22 @@
   flex-shrink: 0;
 }
 
-/* ── Mode Switcher (Markdown / AI Response) ────────────── */
-.sidebar-mode-switcher {
-  padding: 12px 12px 8px 12px;
-  flex-shrink: 0;
+/* Mode Switcher styles moved to design-system/molecules/mode-switcher.css */
+
+
+/* Workspace Picker styles moved to design-system/organisms/workspace-picker.css */
+
+
+#recently-viewed-section.collapsed #recently-viewed-list {
+  display: none;
 }
 
-.sidebar-mode-control {
-  display: flex;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 24px;
-  padding: 5px;
-  position: relative;
+#recently-viewed-section.collapsed #recently-viewed-toggle svg {
+  transform: rotate(-90deg);
 }
 
-.mode-indicator {
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  width: calc(50% - 5px);
-  height: calc(100% - 10px);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: 0;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  box-shadow: 0px 4px 6px -4px rgba(0, 0, 0, 0.2);
-}
-
-.sidebar-mode-btn {
-  flex: 1;
-  padding: 7px 16px;
-  border-radius: 16px;
-  font-family: var(--font-text);
-  font-size: 12px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.5);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  white-space: nowrap;
-  text-align: center;
-  border: none;
-  background: transparent !important;
-  position: relative;
-  z-index: 1;
-  cursor: pointer;
-  box-shadow: none !important;
-}
-
-.sidebar-mode-btn.active {
-  color: #fff;
-}
-
-/* ── Draft Response Placeholder ───────────────────────────── */
-#sidebar-draft-view {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.sidebar-draft-placeholder {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  color: var(--text-20);
-  padding: 24px;
-}
-
-.sidebar-draft-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-50);
-}
-
-.sidebar-draft-sublabel {
-  font-family: var(--font-code);
-  font-size: 10px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-20);
-}
-
-/* ── Workspace Picker ──────────────────────────────────── */
-.workspace-picker {
-  padding: 5px;
-  flex-shrink: 0;
-}
-
-#workspace-switcher {
-  width: 100%;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 20px;
-  background: rgba(0, 0, 0, 0.1);
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  border-radius: calc(var(--radius-lg) - 4px);
-}
-
-#workspace-switcher:hover {
-  background: rgba(0, 0, 0, 0.15);
-}
-
-.ws-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0;
-  /* Align by line-height */
-}
-
-.ws-label {
-  font-family: var(--font-text);
-  font-weight: 500;
-  font-size: 10px;
-  line-height: 16px;
-  text-transform: uppercase;
-  color: var(--text-20);
-  letter-spacing: 0.05em;
-}
-
-#workspace-name {
-  font-family: var(--font-text);
-  font-weight: 600;
-  font-size: 15px;
-  line-height: 20px;
-  color: var(--text-90);
-}
-
-.ws-chevron {
-  color: var(--text-20);
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-
-/* ── Section Labels ────────────────────────────────────── */
 .sidebar-section {
-  padding: 0 12px 16px;
   flex-shrink: 0;
-}
-
-#recently-viewed-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.section-label {
-  font-family: var(--font-code);
-  font-weight: 500;
-  font-size: 10px;
-  text-transform: uppercase;
-  color: var(--text-20);
-  margin-bottom: 8px;
-  padding: 0 4px;
-  letter-spacing: 0.05em;
 }
 
 /* ── Explorer & Search Views ───────────────────────────── */
@@ -221,8 +71,18 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  padding: 17px 0;
-  /* Gap between sections */
+}
+
+#recently-viewed-section {
+  flex-shrink: 0;
+}
+
+#file-explorer-section,
+#search-results-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 #sidebar-search-view {
@@ -237,7 +97,7 @@
 .sidebar-search-container {
   width: 100%;
   box-sizing: border-box;
-  padding: 12px 16px;
+  padding: 20px 16px 12px;
   flex-shrink: 0;
 }
 
@@ -314,402 +174,40 @@
   color: #fff;
 }
 
-/* ── Recently Viewed ───────────────────────────────────── */
-.recent-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 32px;
-  padding: 0 12px;
-  border-radius: var(--radius-pill);
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  color: var(--text-50);
-  border: 1px solid transparent;
-}
-
-.recent-item:hover {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.recent-item.active {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25), 0px 0px 15px 0px rgba(var(--accent-rgb), 0.11);
-  color: var(--text-90);
-}
-
-.recent-item.active::after {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: var(--accent-color);
-  border-radius: 50%;
-  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
-.recent-item-icon {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-
-.recent-item-label {
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 20px;
-}
-
-/* ── All File Header (label + search icon) ─────────────── */
-.all-file-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 32px;
-  padding: 0 16px;
-  flex-shrink: 0;
-  margin-top: 8px;
-  margin-bottom: 8px;
-}
-
-.header-actions-group {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* ── Professional Drag Styles ─────────────── */
-.tree-item-placeholder {
-  opacity: 0 !important;
-  /* Completely invisible ghost */
-  background: transparent !important;
-  border: 1px solid transparent !important;
-  pointer-events: none;
-  animation: none !important;
-}
-
-/* Release all sibling transforms when dragging starts */
-.folder-children.is-dragging-active .tree-item,
-#file-tree.is-dragging-active .tree-item {
-  animation: none !important;
-  /* CUSTOM FLUID BEZIER for the 'floaty' feel */
-  transition: transform 0.45s cubic-bezier(0.2, 0, 0, 1) !important;
-}
-
-/* Suppress MOVEMENT but allow color/opacity fades during hand-off */
-.folder-children.is-handing-off .tree-item,
-#file-tree.is-handing-off .tree-item {
-  animation: none !important;
-  transition: transform 0s !important;
-  /* Snap position instantly, let others fade */
-}
-
-#file-tree.is-dragging-active .tree-item {
-  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1);
-}
-
-.tree-item.drag-over-top::before,
-.tree-item.drag-over-bottom::after {
-  display: none;
-  /* Hide old line indicator */
-}
-
-.tree-item.drag-over-top::before {
-  top: -1px;
-}
-
-.tree-item.drag-over-bottom::after {
-  bottom: -1px;
-}
-
-/* ── Standard Drag Proxy (Move mode) ─────────────── */
-.standard-drag-proxy {
-  position: fixed;
-  pointer-events: none;
-  z-index: 10000;
-  background: rgba(var(--accent-rgb), 0.9);
-  color: #fff;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transform: translate(-50%, -50%);
-  will-change: transform, left, top;
-}
-
-.standard-drag-proxy i {
-  font-size: 16px;
-}
-
-.standard-drag-proxy .drag-badge {
-  background: #ef4444;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 800;
-  width: 18px;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  position: absolute;
-  top: -6px;
-  left: -6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-}
-
-.tree-item.is-dragging-source {
-  opacity: 0.4 !important;
-  transition: opacity 0.2s;
-}
-
-.all-file-header .section-label {
-  margin-bottom: 0;
-}
-
-.search-icon-btn {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-20);
-  border-radius: 8px;
-  transition: all 0.2s;
-  flex-shrink: 0;
-}
-
-.search-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text-50);
-}
-
-/* ── File Tree ─────────────────────────────────────────── */
+/* ── File Tree (Container) ── */
 .sidebar-tree-scroll {
   flex: 1;
-  padding: 0 8px;
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 0;
   display: flex;
   flex-direction: column;
   scrollbar-width: none;
-  /* Firefox */
   -ms-overflow-style: none;
-  /* IE/Edge */
+
+  /* Mask Fade Effect */
+  --top-fade: 0px;
+  -webkit-mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black var(--top-fade),
+      black calc(100% - 16px),
+      transparent 100%);
+  mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black var(--top-fade),
+      black calc(100% - 16px),
+      transparent 100%);
+  transition: --top-fade 0.2s;
+  /* Note: Requires @property to animate, but works as toggle too */
 }
 
 .sidebar-tree-scroll::-webkit-scrollbar {
   display: none;
-  /* Chrome/Safari */
 }
 
 #file-tree {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-height: 100%;
-  padding-bottom: 120px;
-  /* Large dead-zone at bottom for context menu */
-}
-
-.tree-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border-radius: 100px;
-  /* Fully rounded */
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.4);
-  transition: transform 0.4s var(--apple-ease), background 0.2s, opacity 0.2s;
-  border: 1px solid transparent;
-  position: relative;
-  min-width: 0;
-  will-change: transform;
-  user-select: none;
-  /* animation: treeItemEntry 0.5s var(--apple-ease) both; */
-  /* animation-delay: calc(var(--stagger, 0) * 0.02s); */
-}
-
-/* @keyframes treeItemEntry {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.98);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-} */
-
-.tree-item:hover {
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.tree-item.active {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25), 0 0 15px rgba(var(--accent-rgb), 0.11);
-  padding: 6px 12px;
-}
-
-.tree-item.selected {
-  background: rgba(var(--accent-rgb), 0.1);
-  border-color: rgba(var(--accent-rgb), 0.2);
-  color: #fff;
-}
-
-.tree-item.active::after {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: #ffbf48;
-  /* Figma Orange */
-  border-radius: 50%;
-  box-shadow: 0 0 8px #ffe1a9;
-  /* Figma Glow */
-  margin-left: auto;
+  min-height: 0;
   flex-shrink: 0;
-}
-
-/* Folder Hover State during Drag (Move mode) */
-.tree-item.drag-hover {
-  background: rgba(var(--accent-rgb), 0.15) !important;
-  border-color: var(--accent-color) !important;
-  box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.2) !important;
-  color: #fff !important;
-  transform: none !important;
-}
-
-#file-tree.drag-hover-root {
-  background: rgba(var(--accent-rgb), 0.03) !important;
-  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.3) inset, 0 0 20px rgba(var(--accent-rgb), 0.05) inset !important;
-  border-radius: 12px;
-  transform: none !important;
-}
-
-.tree-item.drag-hover-secondary {
-  background: rgba(255, 255, 255, 0.03) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
-  opacity: 0.8;
-}
-
-/* ── Item Delete Button (Issue: Delete file directly) ── */
-.item-delete-btn {
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-20);
-  border-radius: 6px;
-  opacity: 0;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  margin-left: 4px;
-  flex-shrink: 0;
-}
-
-.tree-item:hover .item-delete-btn {
-  opacity: 1;
-}
-
-.item-delete-btn:hover {
-  background: rgba(239, 68, 68, 0.15);
-  /* red-500 bg */
-  color: #ef4444;
-  /* red-500 text */
-}
-
-/* Ensure label doesn't overlap delete button */
-.tree-item.active .item-delete-btn {
-  margin-right: 8px;
-  /* Offset from active dot */
-}
-
-.item-icon-wrap {
-  width: 16px;
-  height: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.2);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Only files get the circular background container */
-.tree-item-file .item-icon-wrap,
-.recent-item .item-icon-wrap {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 50%;
-}
-
-.tree-item-file.active .item-icon-wrap,
-.recent-item.active .item-icon-wrap {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-}
-
-/* If active folder, just color change without circle wrap */
-.tree-item-directory.active .item-icon-wrap {
-  color: #fff;
-  background: transparent;
-}
-
-.item-label {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 20px;
-}
-
-.item-chevron {
-  opacity: 0.3;
-  transition: transform 0.2s;
-  flex-shrink: 0;
-  width: 12px;
-}
-
-.folder-children {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-top: 2px;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
-  max-height: 2000px;
-  opacity: 1;
-}
-
-.folder-children.hidden {
-  display: flex;
-  max-height: 0;
-  opacity: 0;
-  pointer-events: none;
-  margin-top: 0;
-}
-
-.folder-children .tree-item {
-  padding-left: 32px;
 }
 
 /* ── Footer: Hot Reload Badge ──────────────────────────── */
@@ -771,130 +269,5 @@
   background: var(--accent-green);
 }
 
-/* ── Draft Response Variants ──────────────────── */
-.draft-view-container {
-  padding: 20px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
 
-.draft-import-btn {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 10px 20px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-pill);
-  color: var(--text-70);
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  width: 100%;
-  margin-bottom: 4px;
-}
-
-.draft-import-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.1);
-  color: #fff;
-}
-
-.draft-import-btn svg {
-  color: var(--text-40);
-  transition: color 0.2s;
-}
-
-.draft-import-btn:hover svg {
-  color: #fff;
-}
-
-/* Drag Over State */
-.draft-variant.drag-over {
-  background: rgba(var(--accent-rgb), 0.05);
-  box-shadow: inset 0 0 20px rgba(var(--accent-rgb), 0.1);
-}
-
-.draft-view-container .textarea-component {
-  width: 100%;
-}
-
-.draft-view-container .btn-block {
-  width: 100%;
-  margin-top: 4px;
-}
-
-/* Status Badge Variant */
-.status-indicator-badge {
-  width: 100%;
-}
-
-.status-badge-inner {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 6px;
-  padding: 10px 16px;
-  border-radius: var(--radius-pill);
-  width: 100%;
-  transition: all 0.3s ease;
-}
-
-.status-badge-inner.is-updated {
-  background: rgba(5, 46, 22, 0.2);
-  border: 1px solid rgba(34, 197, 94, 0.2);
-}
-
-.status-badge-inner.is-pending {
-  background: rgba(255, 191, 72, 0.1);
-  border: 1px solid rgba(255, 191, 72, 0.2);
-}
-
-.status-badge-inner .status-badge-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--accent-green);
-}
-
-.status-badge-inner.is-pending .status-badge-icon {
-  color: var(--accent-orange);
-}
-
-.status-badge-inner .status-badge-text {
-  font-family: 'Roboto Mono', monospace;
-  font-weight: 700;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--accent-green);
-}
-
-.status-badge-inner.is-pending .status-badge-text {
-  color: var(--accent-orange);
-}
-
-/* Icon Toggling */
-.status-badge-inner .icon-check {
-  display: block;
-}
-
-.status-badge-inner .icon-minus {
-  display: none;
-}
-
-.status-badge-inner.is-pending .icon-check {
-  display: none;
-}
-
-.status-badge-inner.is-pending .icon-minus {
-  display: block;
-}
-
-.draft-variant {
-  display: none;
-  flex: 1;
-  flex-direction: column;
-}
+/* Tree Bottom Spacer */

@@ -602,6 +602,15 @@
   animation: pulse-bg 2s cubic-bezier(0.4, 0, 0.6, 1);
 }
 
+@keyframes ds-fade-in-subtle {
+  0% { opacity: 0; transform: translateY(4px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.ds-sync-fade-in {
+  animation: ds-fade-in-subtle 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 @keyframes pulse-bg {
 
   0%,
@@ -683,31 +692,14 @@
 /* Floating Comment Trigger */
 .comment-trigger {
   position: fixed;
-  /* Changed to fixed for easier positioning via JS */
-  width: 32px;
-  height: 32px;
-  background: var(--accent-color);
-  border: 2px solid rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  color: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
   opacity: 0;
   pointer-events: none;
   z-index: 1000;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .comment-trigger.show {
   opacity: 1;
   pointer-events: auto;
-}
-
-.comment-trigger:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.3);
 }
 
 .comment-item-snippet .highlight-selection {

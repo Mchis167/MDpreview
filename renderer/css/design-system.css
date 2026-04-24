@@ -6,6 +6,8 @@
 @import url('design-system/atoms/button.css');
 @import url('design-system/atoms/tooltip.css');
 @import url('design-system/molecules/segmented-control.css');
+@import url('design-system/molecules/mode-switcher.css');
+@import url('design-system/organisms/workspace-picker.css');
 @import url('design-system/organisms/change-action-view-bar.css');
 @import url('design-system/organisms/tab-bar.css');
 @import url('design-system/organisms/comment-form.css');

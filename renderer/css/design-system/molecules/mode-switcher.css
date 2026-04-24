@@ -1,0 +1,56 @@
+/* ============================================================
+   mode-switcher.css — Sidebar Mode Toggle (V2 Molecule)
+   ============================================================ */
+
+.sidebar-mode-switcher {
+  padding: 12px 12px 8px 12px;
+  flex-shrink: 0;
+}
+
+.sidebar-mode-control {
+  display: flex;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 24px;
+  padding: 5px;
+  position: relative;
+}
+
+.mode-indicator {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: calc(50% - 5px);
+  height: calc(100% - 10px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 0;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: 0px 4px 6px -4px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-mode-btn {
+  flex: 1;
+  padding: 7px 16px;
+  border-radius: 16px;
+  font-family: var(--font-text);
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  text-align: center;
+  border: none;
+  background: transparent !important;
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+  box-shadow: none !important;
+}
+
+.sidebar-mode-btn.active {
+  color: #fff;
+}

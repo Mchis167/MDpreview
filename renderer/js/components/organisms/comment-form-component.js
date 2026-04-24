@@ -32,8 +32,8 @@ const CommentFormComponent = (() => {
               <div class="ds-comment-form__secondary-action"></div>
               <div style="flex:1"></div>
               <div class="ds-comment-form__btn-stack">
-                <button class="ds-comment-form__cancel-btn btn btn-ghost">Cancel</button>
-                <button class="ds-comment-form__save-btn btn btn-primary" disabled>Save</button>
+                <button class="ds-comment-form__cancel-btn ds-btn ds-btn-ghost">Cancel</button>
+                <button class="ds-comment-form__save-btn ds-btn ds-btn-primary" disabled>Save</button>
               </div>
             </div>
 
@@ -140,8 +140,12 @@ const CommentFormComponent = (() => {
 
     _renderSecondaryAction(container, icon, title, callback) {
       container.innerHTML = '';
-      const btn = DesignSystem.createHeaderAction(icon, title, callback);
-      container.appendChild(btn);
+      const btn = new IconActionButton({
+        iconName: icon,
+        title: title,
+        onClick: callback
+      });
+      container.appendChild(btn.render());
     }
 
     setMode(mode) {

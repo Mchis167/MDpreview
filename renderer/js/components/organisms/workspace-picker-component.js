@@ -102,16 +102,15 @@ class WorkspacePickerComponent {
         const actions = DesignSystem.createElement('div', 'ws-list-item-actions');
         
         // Use global Design System delete button class
-        const delBtn = DesignSystem.createElement('button', 'ds-item-delete-btn', {
-          html: DesignSystem.getIcon ? DesignSystem.getIcon('x') : '✕',
-          title: 'Remove Workspace'
+        const deleteBtn = new IconActionButton({
+          iconName: 'x',
+          title: 'Remove Workspace',
+          isDanger: true,
+          className: 'ds-item-delete-btn',
+          onClick: () => this.onDelete(ws)
         });
-        delBtn.onclick = (e) => {
-          e.stopPropagation();
-          this.onDelete(ws);
-        };
 
-        actions.appendChild(delBtn);
+        actions.appendChild(deleteBtn.render());
         rightCol.appendChild(actions);
 
         item.appendChild(leftCol);

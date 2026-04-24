@@ -1,0 +1,303 @@
+/* ── Recently Viewed ────────────────────────────────────────── */
+const RecentlyViewedModule = (() => {
+  const MAX_RECENT = 3;
+  const STORAGE_KEY = 'mdpreview_recent_';
+  let treeComp = null;
+
+  function add(filePath) {
+    if (filePath && filePath.startsWith('__DRAFT_')) return; // Ignore draft in recent
+    const ws = AppState.currentWorkspace;
+    if (!ws || !filePath) return;
+    const key = STORAGE_KEY + ws.id;
+    let recent = _getRaw(key);
+    recent = recent.filter(p => p !== filePath);
+    recent.unshift(filePath);
+    recent = recent.slice(0, MAX_RECENT);
+    localStorage.setItem(key, JSON.stringify(recent));
+    if (typeof AppState !== 'undefined' && AppState.savePersistentState) AppState.savePersistentState();
+    render();
+  }
+
+  function remove(filePath) {
+    const ws = AppState.currentWorkspace;
+    if (!ws || !filePath) return;
+    const key = STORAGE_KEY + ws.id;
+    let recent = _getRaw(key);
+    recent = recent.filter(p => p !== filePath);
+    localStorage.setItem(key, JSON.stringify(recent));
+    if (typeof AppState !== 'undefined' && AppState.savePersistentState) AppState.savePersistentState();
+    render();
+  }
+
+  function swap(oldPath, newPath) {
+    const ws = AppState.currentWorkspace;
+    if (!ws) return;
+    const key = STORAGE_KEY + ws.id;
+    let recent = _getRaw(key);
+    const idx = recent.indexOf(oldPath);
+    if (idx !== -1) {
+      recent[idx] = newPath;
+      localStorage.setItem(key, JSON.stringify(recent));
+      if (typeof AppState !== 'undefined' && AppState.savePersistentState) AppState.savePersistentState();
+      render();
+    }
+  }
+
+  function _getRaw(key) {
+    const data = localStorage.getItem(key);
+    try { return data ? JSON.parse(data) : []; } catch (e) { return []; }
+  }
+
+  function render() {
+    const ws = AppState.currentWorkspace;
+    if (!ws) return;
+    const list = document.getElementById('recently-viewed-list');
+    const section = document.getElementById('recently-viewed-section');
+    if (!list || !section) return;
+
+    const recentPaths = _getRaw(STORAGE_KEY + ws.id);
+    if (recentPaths.length === 0) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+
+    const nodes = recentPaths.map(path => ({
+      path,
+      name: path.split('/').pop(),
+      type: 'file'
+    }));
+
+    if (!treeComp) {
+      treeComp = new TreeViewComponent({
+        mount: list,
+        onClick: async (e, node) => {
+          e.stopPropagation();
+          try { await loadFile(node.path); } catch (err) { remove(node.path); }
+        },
+        onDelete: (e, node) => {
+          e.stopPropagation();
+          remove(node.path);
+        },
+        onMouseDown: () => { },
+        onMouseLeave: () => { },
+        onContextMenu: (e, node, itemEl) => {
+          if (typeof TreeModule !== 'undefined') TreeModule.handleContextMenu(e, node, itemEl);
+        },
+        showSpacer: true,
+        spacerHeight: '8px'
+      });
+    }
+
+    treeComp.update(nodes, [], '', '', AppState.currentFile);
+  }
+
+  function setActiveFile(filePath) {
+    // Trong V2, Component tự quyết định active dựa trên AppState.currentFile
+    // Chúng ta chỉ cần trigger render để cập nhật UI
+    render();
+  }
+
+  function init() {
+    const section = document.getElementById('recently-viewed-section');
+    const mount = document.getElementById('recently-viewed-header-mount');
+    
+    if (section && mount) {
+      const isCollapsed = (typeof AppState !== 'undefined' && AppState.settings.recentCollapsed) || localStorage.getItem('mdpreview_recent_collapsed') === 'true';
+      if (isCollapsed) section.classList.add('collapsed');
+      
+      const toggleBtn = new IconActionButton({
+        id: 'recently-viewed-toggle',
+        title: 'Toggle section',
+        iconName: 'chevron-down',
+        onClick: (e) => {
+          const collapsed = section.classList.toggle('collapsed');
+          localStorage.setItem('mdpreview_recent_collapsed', collapsed);
+          if (typeof AppState !== 'undefined') {
+            AppState.settings.recentCollapsed = collapsed;
+            if (AppState.savePersistentState) AppState.savePersistentState();
+          }
+        }
+      });
+      
+      const header = new SidebarSectionHeader({
+        title: 'RECENTLY VIEWED',
+        actions: [toggleBtn]
+      });
+
+      mount.innerHTML = '';
+      mount.appendChild(header.render());
+    }
+  }
+
+  return { add, remove, swap, render, setActiveFile, init };
+})();
+
+function initSidebarModeSwitcher() {
+  const btns = document.querySelectorAll('.sidebar-mode-btn');
+  const indicator = document.getElementById('mode-indicator');
+  const mdHeader = document.getElementById('sidebar-md-header');
+  const expView = document.getElementById('sidebar-explorer-view');
+  const searchView = document.getElementById('sidebar-search-view');
+  const aiView = document.getElementById('sidebar-draft-view');
+
+  function updateIndicator(btn) {
+    if (!indicator) return;
+    const idx = Array.from(btns).indexOf(btn);
+    indicator.style.transform = `translateX(${idx * 100}%)`;
+  }
+
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      btns.forEach(b => b.classList.toggle('active', b === btn));
+      updateIndicator(btn);
+
+      const mode = btn.dataset.smode;
+
+      if (typeof AppState !== 'undefined' && typeof AppState.onModeChange === 'function') {
+        AppState.onModeChange(mode);
+      }
+
+      if (mode === 'draft') {
+        const currentFile = AppState.currentFile;
+        const isAlreadyDraft = currentFile && currentFile.startsWith('__DRAFT_');
+
+        if (!isAlreadyDraft) {
+          if (typeof AppState !== 'undefined' && typeof AppState.onModeChange === 'function') {
+            AppState.onModeChange('draft');
+          }
+        }
+
+        if (mdHeader) mdHeader.style.display = 'none';
+        expView.style.display = 'none';
+        searchView.style.display = 'none';
+        if (aiView) aiView.style.display = 'flex';
+        if (typeof DraftModule !== 'undefined') {
+          DraftModule.toggleFooter('draft');
+          DraftModule.updateHeader('draft');
+        }
+      } else {
+        if (aiView) aiView.style.display = 'none';
+        if (mdHeader) mdHeader.style.display = '';
+        expView.style.display = 'flex';
+        searchView.style.display = 'none';
+        if (typeof DraftModule !== 'undefined') {
+          DraftModule.toggleFooter('markdown');
+          DraftModule.updateHeader('markdown');
+        }
+      }
+    });
+  });
+
+  const active = document.querySelector('.sidebar-mode-btn.active');
+  if (active) updateIndicator(active);
+}
+
+function initSidebarRevamp() {
+  const mount = document.getElementById('sidebar-search-mount');
+  const expView = document.getElementById('sidebar-explorer-view');
+  const searchView = document.getElementById('sidebar-search-view');
+  const mdHeader = document.getElementById('sidebar-md-header');
+  const enterBtn = document.getElementById('enter-search-btn');
+
+  const searchResults = document.getElementById('search-results-list');
+
+  // Helper to toggle dividers
+  const toggleDividers = (visible) => {
+    document.querySelectorAll('.sidebar-divider').forEach(d => {
+      d.style.display = visible ? 'block' : 'none';
+    });
+  };
+
+  if (!mount || !enterBtn) return;
+
+  // Safety check: Ensure SearchComponent is loaded
+  if (typeof SearchComponent === 'undefined') {
+    console.warn('SearchComponent not found. Search feature disabled.');
+    return;
+  }
+
+  // Initialize the reusable component
+  const searchBar = SearchComponent.create({
+    placeholder: 'Search...',
+    onInput: (val) => {
+      TreeModule.search(val.trim());
+    },
+    onExit: () => {
+      expView.style.display = 'flex';
+      if (mdHeader) mdHeader.style.display = '';
+      searchView.style.display = 'none';
+      toggleDividers(true);
+
+      // Clear all search data
+      searchBar.clear();
+      TreeModule.search('');
+      if (searchResults) searchResults.innerHTML = '';
+    }
+  });
+
+  mount.appendChild(searchBar);
+
+  enterBtn.addEventListener('click', () => {
+    expView.style.display = 'none';
+    if (mdHeader) mdHeader.style.display = 'none';
+    searchView.style.display = 'flex';
+    toggleDividers(false);
+
+    // Auto focus and clear any leftover state just in case
+    setTimeout(() => {
+      searchBar.clear();
+      TreeModule.search('');
+      searchBar.focus();
+    }, 50);
+  });
+
+  // Handle Escape key globally when search is active
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && searchView.style.display === 'flex') {
+      const exitBtn = searchBar.querySelector('.exit-search-btn');
+      if (exitBtn) exitBtn.click();
+    }
+  });
+}
+
+function initSidebarResizer() {
+  const sidebar = document.getElementById('sidebar-left-wrap');
+  const resizer = document.getElementById('sidebar-resizer');
+  if (!sidebar || !resizer) return;
+
+  let isResizing = false;
+
+  // Load saved width
+  const savedWidth = localStorage.getItem('mdpreview_sidebar_left_width');
+  if (savedWidth) {
+    sidebar.style.width = savedWidth + 'px';
+  }
+
+  resizer.addEventListener('mousedown', () => {
+    isResizing = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  });
+
+  window.addEventListener('mousemove', e => {
+    if (!isResizing) return;
+    const rect = sidebar.getBoundingClientRect();
+    const newWidth = e.clientX - rect.left;
+    if (newWidth >= 256 && newWidth <= 600) {
+      sidebar.style.width = `${newWidth}px`;
+    }
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (!isResizing) return;
+    isResizing = false;
+    document.body.style.cursor = 'default';
+    document.body.style.userSelect = 'auto';
+
+    // Save width
+    const currentWidth = sidebar.offsetWidth;
+    localStorage.setItem('mdpreview_sidebar_left_width', currentWidth);
+    if (typeof AppState !== 'undefined') {
+      AppState.settings.sidebarWidth = currentWidth;
+      if (AppState.savePersistentState) AppState.savePersistentState();
+    }
+  });
+}

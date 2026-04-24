@@ -5,6 +5,7 @@
 const DraftModule = (() => {
   // Map of drafts: { [draftId]: { draftContent, renderedHtml, lastTouched } }
   let drafts = {};
+  let renderTicket = 0;
   
   const elements = {
     variants: {
@@ -51,7 +52,17 @@ const DraftModule = (() => {
     if (!drafts[draftId]) drafts[draftId] = { lastTouched: Date.now() };
     
     const finalContent = content !== undefined ? content : (drafts[draftId].draftContent || '');
-    if (!finalContent) return;
+    
+    // ── Ticket System for Race Conditions ──────────────────
+    const currentTicket = ++renderTicket;
+
+    if (!finalContent || finalContent.trim() === '') {
+      if (mdContent) {
+        const inner = mdContent.querySelector('.md-content-inner') || mdContent;
+        if (inner) inner.innerHTML = '';
+      }
+      return;
+    }
 
     try {
       const res = await fetch('/api/render-raw', {
@@ -62,6 +73,9 @@ const DraftModule = (() => {
 
       if (!res.ok) throw new Error('Render failed');
       const data = await res.json();
+
+      // Cancel if a newer render request was started
+      if (currentTicket !== renderTicket) return;
 
       // Update Viewer
       const emptyState = document.getElementById('empty-state');
@@ -278,6 +292,9 @@ const DraftModule = (() => {
     if (typeof AppState === 'undefined' || !AppState.currentWorkspace) return;
     const key = `drafts_v2_${AppState.currentWorkspace.id}`;
     localStorage.setItem(key, JSON.stringify(drafts));
+    
+    // Trigger server sync
+    if (AppState.savePersistentState) AppState.savePersistentState();
   }
 
   function loadFromStorage(workspaceId) {
@@ -289,31 +306,12 @@ const DraftModule = (() => {
     const key = `drafts_v2_${workspaceId}`;
     const saved = localStorage.getItem(key);
     
-    // ── Orphan Cleaning ───────────────────────────────────
-    // We only keep drafts that are actually in the tab list
-    const tabsKey = `tabs_${workspaceId}`;
-    const savedTabs = localStorage.getItem(tabsKey);
-    let openDraftIds = [];
-    if (savedTabs) {
-      try {
-        const tabData = JSON.parse(savedTabs);
-        openDraftIds = (tabData.openFiles || []).filter(f => f && f.startsWith('__DRAFT_'));
-      } catch(e) {}
-    }
-
     if (saved) {
       try {
         const allDrafts = JSON.parse(saved);
-        drafts = {};
+        drafts = allDrafts || {};
         
-        // 1. Restore only drafts that are in open tabs
-        openDraftIds.forEach(id => {
-          if (allDrafts[id]) {
-            drafts[id] = allDrafts[id];
-          }
-        });
-
-        // 2. Migration fallback for legacy key (one-time)
+        // 1. Migration fallback for legacy key (one-time)
         const oldKey = `draft_${workspaceId}`;
         const oldSaved = localStorage.getItem(oldKey);
         if (Object.keys(drafts).length === 0 && oldSaved) {
@@ -386,7 +384,13 @@ const DraftModule = (() => {
         if (h2) h2.innerText = 'MDpreview';
         if (p)  p.innerText = 'Draft is empty or not found.';
       }
-      if (mdContent)  mdContent.style.display  = 'none';
+      if (mdContent) {
+        mdContent.style.display = 'none';
+        // ── Surgical Cleanup ─────────────────────────────────
+        // Clear innerHTML to prevent "ghost content" from previous files
+        const inner = mdContent.querySelector('.md-content-inner') || mdContent;
+        if (inner) inner.innerHTML = '';
+      }
       return;
     }
 

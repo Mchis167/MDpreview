@@ -113,22 +113,27 @@ const CollectModule = (() => {
       renderItem: (idea, index) => {
         const lineRef = idea.lineStart ? `LINE ${idea.lineStart}` : `IDEA ${index + 1}`;
         const item = DesignSystem.createElement('div', 'ds-sidebar-item');
-        item.innerHTML = `
-          <div class="ds-item-header">
-            <span class="ds-item-label">${lineRef}</span>
-            <button class="ds-item-delete-btn" title="Remove">
-              ${DesignSystem.getIcon('x')}
-            </button>
-          </div>
-          <div class="ds-item-body ds-text-clamp-5">${_esc(idea.text)}</div>
-        `;
+        
+        const header = DesignSystem.createElement('div', 'ds-item-header');
+        const label = DesignSystem.createElement('span', 'ds-item-label', { text: lineRef });
+        
+        const deleteBtn = new IconActionButton({
+          iconName: 'x',
+          title: 'Remove',
+          isDanger: true,
+          className: 'ds-item-delete-btn',
+          onClick: () => removeIdea(idea.id)
+        });
+
+        header.appendChild(label);
+        header.appendChild(deleteBtn.render());
+
+        const body = DesignSystem.createElement('div', 'ds-item-body ds-text-clamp-5', { html: _esc(idea.text) });
+
+        item.appendChild(header);
+        item.appendChild(body);
         
         item.onclick = () => _onItemClick(idea);
-
-        item.querySelector('.ds-item-delete-btn').onclick = (e) => {
-          e.stopPropagation();
-          removeIdea(idea.id);
-        };
         
         return item;
       }
@@ -238,11 +243,15 @@ const CollectModule = (() => {
 
   function applyCollectMode() {
     if (!trigger) {
-      trigger = document.createElement('button');
-      trigger.className = 'collect-trigger';
-      trigger.innerHTML = DesignSystem.getIcon('bookmark');
-      trigger.title = 'Bookmark selection';
-      trigger.onclick = _onTriggerClick;
+      const triggerBtn = new IconActionButton({
+        iconName: 'bookmark',
+        title: 'Bookmark selection',
+        isPrimary: true,
+        isLarge: true,
+        className: 'collect-trigger',
+        onClick: (e) => _onTriggerClick(e)
+      });
+      trigger = triggerBtn.render();
       document.body.appendChild(trigger);
     }
     
