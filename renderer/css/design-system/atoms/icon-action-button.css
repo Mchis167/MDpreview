@@ -10,8 +10,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-20);
-    border-radius: 6px;
+    color: var(--text-40);
+    border-radius: var(--ds-radius-md);
     transition: all 0.2s var(--apple-ease);
     flex-shrink: 0;
     border: none;
@@ -45,7 +45,7 @@
 .ds-icon-action-btn.is-large {
     width: 32px;
     height: 32px;
-    border-radius: 8px;
+    border-radius: var(--ds-radius-lg);
 }
 
 .ds-icon-action-btn.is-large svg {

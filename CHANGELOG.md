@@ -3,7 +3,79 @@
 All notable changes to this project will be documented in this file.
 
 
-## [1.6.0] — 2026-04-25 07:55
+
+## [Not Commited] — 2026-04-25 11:20
+
+### Added
+- **ContextMenuComponent (Molecule)**: Tái cấu trúc Menu chuột phải thành thành phần nguyên tử (Atomic Component) độc lập, hỗ trợ render động, phân tách logic và tái sử dụng dễ dàng.
+- **Global Sidebar Shortcuts**: Kích hoạt hệ thống phím tắt toàn cục cho Workspace Explorer: `⌘N` (New File), `⇧⌘N` (New Folder), `⌘D` (Duplicate), `⌘⌫` (Delete) và `Enter` (Rename).
+- **Premium KBD Styling**: Triển khai phong cách phím vật lý (KBD) nổi khối 3D cho các phím tắt trong Context Menu và bảng hướng dẫn, mang lại giao diện chuyên nghiệp như macOS.
+- **Shortcut Indicators**: Bổ sung hiển thị phím tắt (Trailing Indicators) cho toàn bộ các hành động trong Sidebar và Tab Bar (Close Tab: `⌘W`).
+- **Sidebar & Workspace Guide**: Bổ sung mục quản lý file vào bảng hướng dẫn phím tắt (`ShortcutsComponent`) với đầy đủ các tổ hợp phím mới.
+
+### Changed
+- **Unified Context Menu API**: Đồng bộ hóa cách khởi tạo menu chuột phải trên toàn bộ ứng dụng (`tree.js`, `tab-bar.js`) thông qua `DesignSystem.createContextMenu()`.
+- **Smart Positioning Engine**: Nâng cấp thuật toán nhận diện biên cửa sổ, tự động lật (flip) hoặc đẩy (shift) menu nếu vị trí click sát mép màn hình để không bị mất nội dung.
+- **Enhanced Shortcuts Guide**: Tự động chuyển đổi tên phím thành biểu tượng hệ thống (như `Backspace` thành `⌫`) trên môi trường macOS.
+- **CSS Architecture**: Di chuyển toàn bộ style của Context Menu từ `editor.css` sang module chuyên biệt `design-system/molecules/context-menu.css`.
+
+### Fixed
+- **Memory Leak & Event Safety**: Khắc phục lỗi rò rỉ bộ nhớ bằng cách quản lý vòng đời listener `mousedown` và thêm "Guard Clause" ngăn chặn lỗi `TypeError` khi menu đóng bất ngờ.
+- **Auto-Close Logic**: Tự động đóng Context Menu đang mở ngay khi người dùng thực hiện hành động thông qua phím tắt, đảm bảo giao diện luôn sạch sẽ.
+- **Responsive KBD Symbols**: Tối ưu hóa kích thước và độ đậm (weight) cho các ký hiệu đặc biệt (`⌘`, `⇧`) giúp chúng hiển thị rõ nét và cân đối trong khung phím.
+
+## [Not Commited] — 2026-04-25 10:52
+
+### Added
+- **Import/Move from System**: Triển khai tính năng **Import (Copy)** và **Move** file từ hệ điều hành vào Workspace, hỗ trợ chọn nhiều file cùng lúc từ cửa sổ hệ thống.
+- **System IPC Bridge**: Bổ sung `open-file-dialog` IPC handler và API `openFiles` hỗ trợ multi-selections và tùy chỉnh tiêu đề cửa sổ chọn file.
+- **New Lucide Icons**: Tích hợp thêm các icon `copy-plus` và `folder-input` vào DesignSystem phục vụ tính năng quản lý file từ bên ngoài.
+
+### Changed
+- **Fluid Drag Physics**: Nâng cấp công cụ kéo thả (DND) cho cả **Tab Bar** và **Sidebar Tree** hỗ trợ di chuyển tự do trên cả hai trục (X và Y), mang lại cảm giác kéo "thả phanh" và mượt mà hơn.
+- **Refined Drag Scale**: Điều chỉnh tỉ lệ thu nhỏ vật thể đang kéo xuống `0.9` (thay vì scale up) để không gian kéo thả thoáng hơn và không che khuất mục tiêu.
+- **SVG Consolidation**: Chuyển đổi toàn bộ các mã SVG cứng (Sort icons, Chevron) trong `tree.js` và `tree-item.js` sang sử dụng tập trung qua `DesignSystem.getIcon()`.
+- **Standardized Root Menu**: Refactor menu chuột phải tại vùng trống của cây thư mục sang sử dụng `DesignSystem.createContextMenu()`, đảm bảo tính nhất quán về UI và logic.
+
+### Fixed
+- **Indentation Line Ghosting**: Tự động ẩn các đường kẻ dọc (indent lines) của thư mục khi đang kéo thả thông qua class `.is-dragging-active`, giúp giao diện sạch sẽ và tránh lệch layout.
+- **FileService Stabilization**: Khắc phục lỗi `ReferenceError: openFolder` và lỗi treo module `FileService` sau khi refactor code.
+- **Context Menu Icon Consistency**: Áp dụng quy tắc CSS chung để đảm bảo mọi icon trong menu chuột phải luôn hiển thị ở kích thước chuẩn `16x16px`.
+
+## [Not Commited] — 2026-04-25 10:05
+
+### Added
+- **Smooth Sidebar Transitions**: Triển khai hiệu ứng đóng/mở mượt mà cho các mục Sidebar sử dụng `max-height` và `opacity`, mang lại cảm giác premium và tự nhiên.
+- **Auto-Expand on Drag**: Tự động mở các mục sidebar đang đóng khi người dùng kéo file đè lên trên (hover) trong khoảng 600ms, giúp thao tác kéo thả thuận tiện hơn.
+- **Global Drag Performance Guard**: Thêm trạng thái `.is-dragging` toàn cục để tối ưu hóa hiệu năng, tắt các transition không cần thiết trong quá trình kéo thả phức tạp.
+- **Sidebar State Persistence**: Tích hợp ghi nhớ trạng thái đóng/mở của "Recently Viewed", "All Files" và "Search Results" vào `AppState` và `localStorage`.
+
+### Changed
+- **SidebarSectionHeader Component**: Tái cấu trúc thành phần tiêu đề sidebar hỗ trợ các nhóm hành động (actions), dấu phân cách (dividers) và logic đóng/mở tích hợp.
+- **Standardized Sections**: Hợp nhất và chuẩn hóa giao diện cho toàn bộ các mục chức năng trong Sidebar (Explorer, Recently Viewed, Search).
+- **Refined Animation Easing**: Sử dụng `var(--apple-ease)` và tinh chỉnh `max-height` riêng biệt cho từng mục để đảm bảo tốc độ co giãn luôn "hợp lý" và ổn định.
+
+### Fixed
+- **Workspace Switcher Squashing**: Khắc phục lỗi hiển thị khiến bộ chọn workspace bị bóp nghẹt về chiều ngang sau khi đóng vùng tìm kiếm.
+- **Sidebar Layout Jumps**: Giải quyết triệt để hiện tượng nhảy layout (snap) và hẫng khi đóng mở nhờ sử dụng kỹ thuật `flex: 0 0 auto` kết hợp `max-height`.
+- **Renaming Input Lock**: Ngăn chặn hành động đóng/mở sidebar khi người dùng đang thực hiện đổi tên file để bảo vệ dữ liệu và tránh xung đột giao diện.
+
+## [Not Commited] — 2026-04-25 08:55
+
+### Added
+- **Global Tab Deselect**: Thêm trình lắng nghe sự kiện click toàn cục và phím tắt **Escape** cho Tab Bar, giúp tự động bỏ chọn các tab khi click ra ngoài hoặc nhấn Esc (nhất quán với Sidebar).
+- **Recently Viewed History**: Cải tiến logic "Recently Viewed" để loại bỏ file đang mở hiện tại khỏi danh sách hiển thị, biến nó thành một thanh lịch sử thực thụ thay vì danh sách file đang mở.
+
+### Changed
+- **Independent Tab/Tree Selection**: Tách biệt hoàn toàn logic chọn nhiều mục (Multi-selection) giữa Tab Bar và Sidebar, cho phép người dùng thực hiện các thao tác lô (batch operations) độc lập ở mỗi vùng.
+- **Enhanced Focus Shift**: Tự động dọn dẹp vùng chọn ở Sidebar khi người dùng chuyển tab (click bình thường), giúp giao diện luôn tập trung vào nội dung đang làm việc.
+- **Recently Viewed Capacity**: Tăng giới hạn lưu trữ lịch sử lên 10 mục và hiển thị 5 mục gần nhất (không tính file active).
+
+### Fixed
+- **Infinite Skeleton Loading**: Khắc phục lỗi kẹt ở trạng thái loading (skeleton) vĩnh viễn khi click vào một tab đang được chọn hoặc đang active.
+
+
+## [1.6.0] — 2026-04-25 07:55O
 
 ### Added
 - **EditorModule.revert()**: Cơ chế khôi phục nội dung về trạng thái ban đầu (`_originalContent`) và làm sạch Undo/Redo stack.

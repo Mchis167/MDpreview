@@ -101,6 +101,24 @@ const FileService = (() => {
     }
 
     /**
+     * Open native file picker (multi-selection)
+     */
+    async function openFiles(options = {}) {
+        return await window.electronAPI.openFiles(options);
+    }
+
+    /**
+     * Copy a file or folder
+     */
+    async function copyFile(srcAbs, destAbs) {
+        const res = await window.electronAPI.copyFile(srcAbs, destAbs);
+        if (!res.success) {
+            if (typeof showToast === 'function') showToast(`Error copying item: ${res.error}`, 'error');
+        }
+        return res;
+    }
+
+    /**
      * Open native folder picker
      */
     async function openFolder() {
@@ -115,8 +133,10 @@ const FileService = (() => {
         renameFile,
         duplicateFile,
         moveFile,
+        copyFile,
         revealInFinder,
-        openFolder
+        openFolder,
+        openFiles
     };
 })();
 

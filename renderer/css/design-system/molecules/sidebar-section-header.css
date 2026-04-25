@@ -6,27 +6,65 @@
 .sidebar-section-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 0;
     height: 32px;
-    padding: 0 8px 0 16px;
+    padding: 0 8px 0 6px;
     flex-shrink: 0;
-    margin-top: 4px;
-    margin-bottom: 4px;
+    margin-top: var(--ds-space-xs);
+    margin-bottom: var(--ds-space-xs);
+    transition: background 0.2s var(--apple-ease);
+    border-radius: var(--ds-radius-sm);
+}
+
+.sidebar-section-header[style*="cursor: pointer"]:hover .section-label,
+.sidebar-section-header[style*="cursor: pointer"]:hover .section-toggle-btn {
+    opacity: 0.9;
+    color: var(--text-70);
+}
+
+.section-toggle-btn {
+    width: 24px !important;
+    height: 24px !important;
+    background: none !important;
+    border: none !important;
+    opacity: 0.4;
+    transition: transform 0.3s var(--apple-ease), opacity 0.2s !important;
+}
+
+.section-toggle-btn:hover {
+    opacity: 0.8;
+}
+
+/* Rotation logic when the parent section is collapsed */
+.sidebar-section.collapsed .section-toggle-btn {
+    transform: rotate(-90deg);
 }
 
 .sidebar-section-header .section-label {
+    flex: 1;
     font-family: var(--font-code);
     font-weight: 500;
-    font-size: 10px;
+    font-size: var(--ds-font-xs);
     text-transform: uppercase;
-    color: var(--text-20);
+    color: var(--text-60);
+    opacity: 0.6;
     margin-bottom: 0;
-    padding: 0 8px;
+    padding: 0 4px;
     letter-spacing: 0.05em;
+    pointer-events: none;
+    transition: all 0.2s var(--apple-ease);
 }
 
 .header-actions-group {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--ds-space-xs);
+}
+
+.header-action-divider {
+    width: 1px;
+    height: 14px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0 4px;
+    flex-shrink: 0;
 }

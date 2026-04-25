@@ -138,7 +138,7 @@ class SidebarLeftComponent {
     const searchView = document.getElementById('sidebar-search-view');
     const dividers = this.mount.querySelectorAll('.sidebar-divider');
 
-    if (mdHeader) mdHeader.style.display = 'flex';
+    if (mdHeader) mdHeader.style.display = 'block';
     if (expView) expView.style.display = 'none';
     if (searchView) searchView.style.display = 'none';
 

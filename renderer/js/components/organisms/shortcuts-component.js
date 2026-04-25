@@ -18,9 +18,10 @@ class ShortcutsComponent {
       {
         title: 'Navigation',
         items: [
-          { label: 'Switch to Read mode', keys: ['Ctrl', '1'] },
-          { label: 'Switch to Edit mode', keys: ['Ctrl', '2'] },
-          { label: 'Switch to Comment mode', keys: ['Ctrl', '3'] },
+          { label: 'Switch to Read mode', keys: ['1'] },
+          { label: 'Switch to Edit mode', keys: ['2'] },
+          { label: 'Switch to Comment mode', keys: ['3'] },
+          { label: 'Switch to Collect mode', keys: ['4'] },
           { label: 'Toggle Sidebar', keys: ['Ctrl', 'B'] },
           { label: 'Focus Search', keys: ['Ctrl', 'F'] },
           { label: 'Scroll to Top', keys: ['Ctrl', '↑'] },
@@ -45,6 +46,18 @@ class ShortcutsComponent {
           { label: 'Deselect Tabs', keys: ['Esc'] },
           { label: 'Range Selection', keys: ['Shift', 'Click'] },
           { label: 'Multi-selection', keys: ['Ctrl', 'Click'] }
+        ]
+      },
+      {
+        title: 'Sidebar & Workspace',
+        items: [
+          { label: 'New File', keys: ['Ctrl', 'N'] },
+          { label: 'New Folder', keys: ['Ctrl', 'Shift', 'N'] },
+          { label: 'Rename Selected', keys: ['Enter'] },
+          { label: 'Duplicate File', keys: ['Ctrl', 'D'] },
+          { label: 'Delete Selected', keys: this.isMac ? ['Ctrl', 'Backspace'] : ['Delete'] },
+          { label: 'Toggle Sidebar', keys: ['Ctrl', 'B'] },
+          { label: 'Focus Search', keys: ['Ctrl', 'F'] }
         ]
       },
       {
@@ -74,6 +87,7 @@ class ShortcutsComponent {
           if (this.isMac && key === 'Ctrl') keyText = '⌘';
           if (this.isMac && key === 'Shift') keyText = '⇧';
           if (this.isMac && key === 'Option') keyText = '⌥';
+          if (this.isMac && key === 'Backspace') keyText = '⌫';
           
           const kbd = DesignSystem.createElement('kbd', '', { text: keyText });
           keysContainer.appendChild(kbd);

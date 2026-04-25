@@ -16,13 +16,13 @@ class TabBarComponent {
   constructor(options = {}) {
     this.mount = options.mount || document.getElementById('tab-bar-container');
     this.options = {
-      onTabSwitch: options.onTabSwitch || (() => {}),
-      onTabClose: options.onTabClose || (() => {}),
-      onAddTab: options.onAddTab || (() => {}),
-      onToggleSidebar: options.onToggleSidebar || (() => {}),
-      onCloseOthers: options.onCloseOthers || (() => {}),
-      onCloseAll: options.onCloseAll || (() => {}),
-      onCloseSelected: options.onCloseSelected || (() => {}),
+      onTabSwitch: options.onTabSwitch || (() => { }),
+      onTabClose: options.onTabClose || (() => { }),
+      onAddTab: options.onAddTab || (() => { }),
+      onToggleSidebar: options.onToggleSidebar || (() => { }),
+      onCloseOthers: options.onCloseOthers || (() => { }),
+      onCloseAll: options.onCloseAll || (() => { }),
+      onCloseSelected: options.onCloseSelected || (() => { }),
       rightActions: options.rightActions || []
     };
 
@@ -37,8 +37,8 @@ class TabBarComponent {
 
   init() {
     if (!this.mount) {
-        console.warn('TabBarComponent: mount point not found.');
-        return;
+      console.warn('TabBarComponent: mount point not found.');
+      return;
     }
     this.render();
   }
@@ -57,7 +57,7 @@ class TabBarComponent {
    */
   render() {
     if (!this.mount) return;
-    
+
     // Clear and set base class
     this.mount.innerHTML = '';
     this.mount.className = 'tab-bar-container';
@@ -98,7 +98,7 @@ class TabBarComponent {
         </svg>
       </div>
     `;
-    
+
     if (isLimitReached) {
       const tooltip = DesignSystem.createTooltip('Draft limit reached (max 20)');
       addTabWrapper.appendChild(tooltip);
@@ -112,7 +112,7 @@ class TabBarComponent {
     // ── 4. Right Section: Action Group ──────────────────
     const actionsWrapper = document.createElement('div');
     actionsWrapper.className = 'tab-bar__actions-right';
-    
+
     this.options.rightActions.forEach(action => {
       if (action.type === 'divider') {
         actionsWrapper.appendChild(this._createActionDivider());
@@ -129,7 +129,7 @@ class TabBarComponent {
   _createTabItem(path) {
     const isDraft = path && path.startsWith('__DRAFT_');
     let fileName = path.split('/').pop();
-    
+
     if (isDraft) {
       fileName = (typeof DraftModule !== 'undefined') ? DraftModule.getDisplayName(path) : 'Draft';
     }
@@ -162,13 +162,13 @@ class TabBarComponent {
     };
 
     item.onclick = (e) => {
-        if (e.target.closest('.tab-bar__close')) return;
-        this.options.onTabSwitch(path, {
-          shiftKey: e.shiftKey,
-          ctrlKey: e.ctrlKey,
-          metaKey: e.metaKey,
-          altKey: e.altKey
-        });
+      if (e.target.closest('.tab-bar__close')) return;
+      this.options.onTabSwitch(path, {
+        shiftKey: e.shiftKey,
+        ctrlKey: e.ctrlKey,
+        metaKey: e.metaKey,
+        altKey: e.altKey
+      });
     };
 
     item.oncontextmenu = (e) => {
@@ -176,7 +176,7 @@ class TabBarComponent {
       e.stopPropagation();
       this._showContextMenu(e, path);
     };
-    
+
     item.querySelector('.tab-bar__close').onclick = (e) => {
       e.stopPropagation();
       this.options.onTabClose(path);
@@ -194,15 +194,17 @@ class TabBarComponent {
 
     const rect = itemEl.getBoundingClientRect();
     const startX = e.clientX;
+    const startY = e.clientY;
     const itemWidth = rect.width;
     const siblings = Array.from(tabList.querySelectorAll('.tab-item'));
     const itemIdx = siblings.indexOf(itemEl);
-    
+
     let currentIdx = itemIdx;
     let dragProxy = null;
     let isDraggingStarted = false;
     let animationFrameId = null;
     let currentX = e.clientX;
+    let currentY = e.clientY;
 
     // Pre-calculate sibling centers
     const sibCenters = siblings.map(sib => {
@@ -214,7 +216,8 @@ class TabBarComponent {
       if (!dragProxy) return;
 
       const deltaX = currentX - startX;
-      dragProxy.style.transform = `translateX(${deltaX}px) scale(1.02)`;
+      const deltaY = currentY - startY;
+      dragProxy.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.9)`;
 
       let newIdx = itemIdx;
       let minDist = Infinity;
@@ -250,11 +253,12 @@ class TabBarComponent {
 
     const onMouseMove = (moveEvent) => {
       currentX = moveEvent.clientX;
-      const dist = Math.abs(currentX - startX);
+      currentY = moveEvent.clientY;
+      const dist = Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2));
 
       if (!isDraggingStarted && dist > 5) {
         isDraggingStarted = true;
-        
+
         // Create Proxy
         const originalStyle = window.getComputedStyle(itemEl);
         dragProxy = itemEl.cloneNode(true);
@@ -263,10 +267,10 @@ class TabBarComponent {
         dragProxy.style.height = `${rect.height}px`;
         dragProxy.style.left = `${rect.left}px`;
         dragProxy.style.top = `${rect.top}px`;
-        dragProxy.style.background = originalStyle.backgroundColor !== 'rgba(0, 0, 0, 0)' 
-          ? originalStyle.backgroundColor 
+        dragProxy.style.background = originalStyle.backgroundColor !== 'rgba(0, 0, 0, 0)'
+          ? originalStyle.backgroundColor
           : 'rgba(255, 255, 255, 0.08)';
-        
+
         document.body.appendChild(dragProxy);
         itemEl.classList.add('tab-item-placeholder');
         tabList.classList.add('is-dragging-active');
@@ -291,7 +295,7 @@ class TabBarComponent {
         setTimeout(() => {
           // Perform surgical DOM move
           tabList.classList.add('is-handing-off');
-          
+
           if (currentIdx !== itemIdx) {
             const target = siblings[currentIdx];
             if (currentIdx < itemIdx) {
@@ -333,66 +337,23 @@ class TabBarComponent {
    * Custom context menu for tabs
    */
   _showContextMenu(e, path) {
-    // Remove existing
-    const existing = document.querySelector('.ctx-menu');
-    if (existing) existing.remove();
-
-    const menu = document.createElement('div');
-    menu.className = 'ctx-menu';
-    menu.style.left = `${e.clientX}px`;
-    menu.style.top = `${e.clientY}px`;
-
-    const closeItem = this._createCtxItem('x', 'Close Tab', () => {
-      this.options.onTabClose(path);
-    });
-
-    const closeOthersItem = this._createCtxItem('minus-circle', 'Close Others', () => {
-      this.options.onCloseOthers(path);
-    });
-
-    const closeAllItem = this._createCtxItem('layers', 'Close All', () => {
-      this.options.onCloseAll();
-    });
-
-    menu.appendChild(closeItem);
-    menu.appendChild(closeOthersItem);
-    menu.appendChild(closeAllItem);
+    const items = [
+      { label: 'Close Tab', icon: 'x', shortcut: '⌘W', onClick: () => this.options.onTabClose(path) },
+      { label: 'Close Others', icon: 'minus', onClick: () => this.options.onCloseOthers(path) },
+      { label: 'Close All', icon: 'layers', onClick: () => this.options.onCloseAll() }
+    ];
 
     // Only show "Close Selected" if more than 1 selected
     if (this.state.selectedFiles.length > 1) {
-      menu.appendChild(this._createCtxDivider());
-      const closeSelectedItem = this._createCtxItem('check-square', `Close Selected (${this.state.selectedFiles.length})`, () => {
-        this.options.onCloseSelected();
+      items.push({ divider: true });
+      items.push({ 
+        label: `Close Selected (${this.state.selectedFiles.length})`, 
+        icon: 'check-square', 
+        onClick: () => this.options.onCloseSelected() 
       });
-      menu.appendChild(closeSelectedItem);
     }
 
-    document.body.appendChild(menu);
-
-    const closeMenu = (ev) => {
-      if (!menu.contains(ev.target)) menu.remove();
-    };
-    document.addEventListener('mousedown', closeMenu, { once: true });
-  }
-
-  _createCtxItem(iconName, label, onClick) {
-    const item = document.createElement('div');
-    item.className = 'ctx-item';
-    const icon = (typeof DesignSystem !== 'undefined') ? DesignSystem.getIcon(iconName) : '';
-    item.innerHTML = `${icon} <span>${label}</span>`;
-    item.onclick = (e) => {
-      e.stopPropagation();
-      const menu = document.querySelector('.ctx-menu');
-      if (menu) menu.remove();
-      onClick();
-    };
-    return item;
-  }
-
-  _createCtxDivider() {
-    const d = document.createElement('div');
-    d.className = 'ctx-divider';
-    return d;
+    DesignSystem.createContextMenu(e, items);
   }
 
 
@@ -424,12 +385,12 @@ class TabBarComponent {
 
 // Export for Design System
 window.TabBar = (() => {
-    let instance = null;
-    return {
-        init: (options) => {
-            if (!instance) instance = new TabBarComponent(options);
-            return instance;
-        },
-        getInstance: () => instance
-    };
+  let instance = null;
+  return {
+    init: (options) => {
+      if (!instance) instance = new TabBarComponent(options);
+      return instance;
+    },
+    getInstance: () => instance
+  };
 })();

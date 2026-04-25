@@ -14,6 +14,7 @@
 @import url('design-system.css');
 @import url('design-system/atoms/icon-action-button.css');
 @import url('design-system/molecules/sidebar-section-header.css');
+@import url('design-system/molecules/context-menu.css');
 @import url('textarea.css');
 @import url('switch-toggle.css');
 @import url('layout.css');

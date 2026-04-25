@@ -6,6 +6,8 @@
  */
 const TreeDragManager = (() => {
   let isDragging = false;
+  let autoExpandTimer = null;
+  let lastHoveredHeader = null;
 
   // ── Drag Persistence Variables ─────────────────────────────
   let dragProxy = null;
@@ -77,10 +79,9 @@ const TreeDragManager = (() => {
       if (!isDragging) return;
 
       const deltaY = currentY - dragStartY;
+      const deltaX = currentX - dragStartX;
       const scrollDelta = dragScrollCont ? (dragScrollCont.scrollTop - dragInitialScroll) : 0;
-      if (dragProxy) dragProxy.style.transform = `translateY(${deltaY + scrollDelta}px) scale(1.02)`;
-      
-      const relativeMouseY = currentY + scrollDelta;
+      if (dragProxy) dragProxy.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.9)`;
 
       // 1. DYNAMIC TARGET SEARCH (Accounting for current offsets)
       let nearestIdx = -1;
@@ -210,6 +211,9 @@ const TreeDragManager = (() => {
 
       if (!isDraggingStarted && dist > 5) {
         isDraggingStarted = true;
+        document.body.classList.add('is-dragging');
+        const treeContainer = document.getElementById('file-tree');
+        if (treeContainer) treeContainer.classList.add('is-dragging-active');
         
         // Auto-collapse dragged folder ONLY when drag actually starts
         if (node.type === 'directory' && node.expanded) {
@@ -255,6 +259,27 @@ const TreeDragManager = (() => {
 
         animationFrameId = requestAnimationFrame(updateUI);
       }
+
+      // ── Auto-expand logic for collapsed sections ──
+      const elUnder = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
+      const headerUnder = elUnder ? elUnder.closest('.sidebar-section-header') : null;
+      if (headerUnder && headerUnder.closest('.sidebar-section.collapsed')) {
+          if (lastHoveredHeader !== headerUnder) {
+              if (autoExpandTimer) clearTimeout(autoExpandTimer);
+              lastHoveredHeader = headerUnder;
+              autoExpandTimer = setTimeout(() => {
+                  if (isDragging && lastHoveredHeader === headerUnder) {
+                      headerUnder.click();
+                  }
+              }, 600);
+          }
+      } else {
+          if (autoExpandTimer) {
+              clearTimeout(autoExpandTimer);
+              autoExpandTimer = null;
+          }
+          lastHoveredHeader = null;
+      }
     };
 
     const onMouseUp = async () => {
@@ -276,6 +301,7 @@ const TreeDragManager = (() => {
 
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
+      document.body.classList.remove('is-dragging');
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
 
       if (!isDraggingStarted) {
@@ -293,16 +319,6 @@ const TreeDragManager = (() => {
         if (currentOrder.length === 0) {
           const pNode = destParentPath === '' ? treeData : _findNodeByPath(treeData, destParentPath);
           currentOrder = (pNode ? (destParentPath === '' ? pNode : pNode.children) : []).map(c => c.name);
-        }
-
-        // Logic for "Between" vs "Into" vs "RootDrop"
-        if (target.type === 'between' && !target.isRootDrop) {
-          const nearName = target.nearPath.split('/').pop();
-          let idx = currentOrder.indexOf(nearName);
-          if (target.isAfter) idx++;
-          target.index = idx;
-        } else if (target.isRootDrop) {
-          target.index = currentOrder.length;
         }
 
         // Calculate source folder for cleanup
@@ -324,18 +340,18 @@ const TreeDragManager = (() => {
           if (srcRel !== destRel) {
             const srcAbs = (wsPath + '/' + srcRel).replace(/\/\//g, '/');
             const destAbs = (wsPath + '/' + destRel).replace(/\/\//g, '/');
-            
-            if (item.type === 'directory' && destRel.startsWith(item.path + '/')) continue; 
+
+            if (item.type === 'directory' && destRel.startsWith(item.path + '/')) continue;
 
             const res = await FileService.moveFile(srcAbs, destAbs);
             if (res.success) {
               movedCount++;
-              
+
               // PERSISTENCE SYNC
               if (AppState.currentFile === srcRel) AppState.currentFile = destRel;
               if (typeof RecentlyViewedModule !== 'undefined') RecentlyViewedModule.swap(srcRel, destRel);
               if (typeof TabsModule !== 'undefined') TabsModule.swap(srcRel, destRel);
-              
+
               // Update selection map
               if (oldSelectedPaths.includes(srcRel)) {
                 newSelectedPaths.push(destRel);
@@ -353,14 +369,37 @@ const TreeDragManager = (() => {
           state.selectedPaths = newSelectedPaths;
         }
 
-        // Update Custom Orders: Remove from SOURCE, Insert into TARGET
-        if (sourceOrderKey !== orderKey) {
-          const oldSourceOrder = [...(state.customOrders[sourceOrderKey] || [])];
-          state.customOrders[sourceOrderKey] = oldSourceOrder.filter(name => !draggedNames.includes(name));
-        }
+        // Update Custom Orders: Remove from every unique SOURCE folder, then Insert into TARGET.
+        // Build a per-source-folder map so multi-folder selections are all cleaned correctly.
+        const sourceCleanupMap = new Map();
+        draggedItems.forEach(di => {
+          const parent = di.path.substring(0, di.path.lastIndexOf('/')) || '';
+          const key = parent || 'root';
+          if (!sourceCleanupMap.has(key)) sourceCleanupMap.set(key, new Set());
+          sourceCleanupMap.get(key).add(di.path.split('/').pop());
+        });
+        sourceCleanupMap.forEach((names, srcKey) => {
+          if (srcKey !== orderKey && state.customOrders[srcKey]) {
+            state.customOrders[srcKey] = state.customOrders[srcKey].filter(n => !names.has(n));
+          }
+        });
 
+        // Filter dragged items out FIRST, then find insertion index in the cleaned array.
+        // This avoids off-by-one when the dragged item sits before the target in the original order.
         currentOrder = currentOrder.filter(name => !draggedNames.includes(name));
-        let insertIdx = target.index;
+        let insertIdx;
+        if (target.type === 'between' && !target.isRootDrop) {
+          const nearName = target.nearPath.split('/').pop();
+          insertIdx = currentOrder.indexOf(nearName);
+          if (insertIdx === -1) {
+            insertIdx = currentOrder.length;
+          } else if (target.isAfter) {
+            insertIdx++;
+          }
+        } else {
+          // 'into' or rootDrop: always append at end of target folder
+          insertIdx = currentOrder.length;
+        }
         if (insertIdx > currentOrder.length) insertIdx = currentOrder.length;
         currentOrder.splice(insertIdx, 0, ...draggedNames);
         state.customOrders[orderKey] = currentOrder;
@@ -424,6 +463,8 @@ const TreeDragManager = (() => {
 
       if (!isDraggingStarted && dist > 8) {
         isDraggingStarted = true;
+        document.body.classList.add('is-dragging');
+        if (container) container.classList.add('is-dragging-active');
         
         // 1. Create Proxy (Compact stack style)
         dragProxy = document.createElement('div');
@@ -528,12 +569,33 @@ const TreeDragManager = (() => {
             }
           }
         }
+
+        // ── Auto-expand logic for collapsed sections ──
+        const headerUnder = elUnder ? elUnder.closest('.sidebar-section-header') : null;
+        if (headerUnder && headerUnder.closest('.sidebar-section.collapsed')) {
+            if (lastHoveredHeader !== headerUnder) {
+                if (autoExpandTimer) clearTimeout(autoExpandTimer);
+                lastHoveredHeader = headerUnder;
+                autoExpandTimer = setTimeout(() => {
+                    if (isDragging && lastHoveredHeader === headerUnder) {
+                        headerUnder.click();
+                    }
+                }, 600);
+            }
+        } else {
+            if (autoExpandTimer) {
+                clearTimeout(autoExpandTimer);
+                autoExpandTimer = null;
+            }
+            lastHoveredHeader = null;
+        }
       }
     };
 
     const onMouseUp = async () => {
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
+      document.body.classList.remove('is-dragging');
 
       if (!isDraggingStarted) {
         isDragging = false;
@@ -550,6 +612,7 @@ const TreeDragManager = (() => {
           el.classList.remove('drag-hover', 'drag-hover-secondary');
         });
         treeContainer.classList.remove('drag-hover-root');
+        treeContainer.classList.remove('is-dragging-active');
       }
 
       // 2. Perform Move

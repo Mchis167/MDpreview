@@ -18,11 +18,11 @@ const TreeModule = (() => {
   let searchV2Component = null;
 
   const SORT_ICONS = {
-    alphabetical_asc: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 13h6"/><path d="m2 16 4.5-9 4.5 9"/><path d="M18 16V7"/><path d="m14 11 4-4 4 4"/></svg>`, // lucide:a-arrow-up
-    alphabetical_desc: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 13h6"/><path d="m2 16 4.5-9 4.5 9"/><path d="M18 7v9"/><path d="m14 12 4 4 4-4"/></svg>`, // lucide:a-arrow-down
-    time_asc: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 18 4-4 4 4"/><path d="M16 2v4"/><path d="M18 22v-8"/><path d="M21 11.3V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7.3"/><path d="M3 10h18"/><path d="M8 2v4"/></svg>`, // lucide:calendar-arrow-up
-    time_desc: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 18 4 4 4-4"/><path d="M16 2v4"/><path d="M18 14v8"/><path d="M21 11.3V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7.3"/><path d="M3 10h18"/><path d="M8 2v4"/></svg>`, // lucide:calendar-arrow-down
-    custom: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.1 6.27a2 2 0 0 0 0 3.46l9.07 4.09a2 2 0 0 0 1.66 0l9.07-4.09a2 2 0 0 0 0-3.46z"/><path d="m2.1 14.73 9.07 4.09a2 2 0 0 0 1.66 0l9.07-4.09"/><path d="m2.1 10.54 9.07 4.09a2 2 0 0 0 1.66 0l9.07-4.09"/></svg>` // lucide:layers
+    alphabetical_asc: DesignSystem.getIcon('sort-alpha-asc'),
+    alphabetical_desc: DesignSystem.getIcon('sort-alpha-desc'),
+    time_asc: DesignSystem.getIcon('sort-time-asc'),
+    time_desc: DesignSystem.getIcon('sort-time-desc'),
+    custom: DesignSystem.getIcon('sort-custom')
   };
 
   function init() {
@@ -39,8 +39,11 @@ const TreeModule = (() => {
       onClick: (e) => {
         _hideContextMenu();
         const items = [
-          { label: 'New File', icon: 'file-plus', onClick: () => _createNewItem('root', 'file') },
-          { label: 'New Folder', icon: 'folder-plus', onClick: () => _createNewItem('root', 'directory') }
+          { label: 'New File', icon: 'file-plus', shortcut: '⌘N', onClick: () => _createNewItem('root', 'file') },
+          { label: 'New Folder', icon: 'folder-plus', shortcut: '⇧⌘N', onClick: () => _createNewItem('root', 'directory') },
+          { divider: true },
+          { label: 'Import from System', icon: 'copy-plus', onClick: () => _handleImportFromSystem('root', 'copy') },
+          { label: 'Move into Workspace', icon: 'folder-input', onClick: () => _handleImportFromSystem('root', 'move') }
         ];
         if (typeof DesignSystem !== 'undefined') DesignSystem.createContextMenu(e, items);
       }
@@ -65,7 +68,15 @@ const TreeModule = (() => {
     // 2. Initialize Section Header
     const header = new SidebarSectionHeader({
       title: 'ALL FILES',
-      actions: [addBtn, sortBtn, searchBtn]
+      collapsible: {
+        sectionId: 'file-explorer-section',
+        storageKey: 'mdpreview_explorer_collapsed',
+        appStateKey: 'explorerCollapsed'
+      },
+      actions: [
+        [addBtn],
+        [sortBtn, searchBtn]
+      ]
     });
 
     const mount = document.getElementById('file-explorer-header-mount');
@@ -77,7 +88,11 @@ const TreeModule = (() => {
     const searchMount = document.getElementById('search-results-header-mount');
     if (searchMount) {
       const searchHeader = new SidebarSectionHeader({
-        title: 'SEARCH RESULTS'
+        title: 'SEARCH RESULTS',
+        collapsible: {
+          sectionId: 'search-results-section',
+          storageKey: 'mdpreview_search_collapsed'
+        }
       });
       searchMount.innerHTML = '';
       searchMount.appendChild(searchHeader.render());
@@ -108,12 +123,42 @@ const TreeModule = (() => {
       // Ignore if user is typing in an input or textarea
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
+      const isMod = e.metaKey || e.ctrlKey;
+      const isShift = e.shiftKey;
+
       if (e.key === 'Escape') {
         deselectAll();
       }
 
+      // ⌘N: New File
+      if (isMod && e.key === 'n' && !isShift) {
+        e.preventDefault();
+        _hideContextMenu();
+        _handleNewItemShortcut('file');
+      }
+
+      // ⇧⌘N: New Folder
+      if (isMod && isShift && e.key === 'n') {
+        e.preventDefault();
+        _hideContextMenu();
+        _handleNewItemShortcut('directory');
+      }
+
+      // ⌘D: Duplicate
+      if (isMod && e.key === 'd') {
+        e.preventDefault();
+        _hideContextMenu();
+        if (state.selectedPaths.length === 1) {
+          const path = state.selectedPaths[0];
+          const node = _findNodeByPath(treeData, path);
+          if (node) _handleDuplicate(null, node);
+        }
+      }
+
       if (e.key === 'Enter' || e.key === 'F2') {
         if (state.selectedPaths.length === 1) {
+          e.preventDefault();
+          _hideContextMenu();
           const path = state.selectedPaths[0];
           const container = document.getElementById('file-tree');
           const el = container.querySelector(`.tree-item[data-path="${path}"]`);
@@ -123,11 +168,29 @@ const TreeModule = (() => {
       }
 
       if (e.key === 'Delete' || e.key === 'Backspace') {
-        if (state.selectedPaths.length > 0) {
+        // On Mac, Cmd+Backspace is the standard for delete
+        const isMacDelete = (navigator.platform.toUpperCase().indexOf('MAC') >= 0) ? isMod : true;
+        if (isMacDelete && state.selectedPaths.length > 0) {
+          e.preventDefault();
+          _hideContextMenu();
           _handleBatchOp('delete');
         }
       }
     });
+
+    function _handleNewItemShortcut(type) {
+      let targetPath = 'root';
+      if (state.selectedPaths.length > 0) {
+        const lastPath = state.selectedPaths[state.selectedPaths.length - 1];
+        const node = _findNodeByPath(treeData, lastPath);
+        if (node) {
+          targetPath = node.type === 'directory' 
+            ? node.path 
+            : (node.path.substring(0, node.path.lastIndexOf('/')) || 'root');
+        }
+      }
+      _createNewItem(targetPath, type);
+    }
 
     // Root Context Menu & Scroll Mask
     const container = document.querySelector('.sidebar-tree-scroll');
@@ -140,43 +203,22 @@ const TreeModule = (() => {
         // If clicking on an item, let its own context menu handle it
         if (e.target.closest('.tree-item')) return;
 
-        e.preventDefault();
-        e.stopPropagation();
-        _hideContextMenu();
+        const targetPath = 'root';
+        const items = [
+          { label: 'New File', icon: 'file-plus', shortcut: '⌘N', onClick: () => _createNewItem(targetPath, 'file') },
+          { label: 'New Folder', icon: 'folder-plus', shortcut: '⇧⌘N', onClick: () => _createNewItem(targetPath, 'directory') },
+          { divider: true },
+          { label: 'Import from System', icon: 'copy-plus', onClick: () => _handleImportFromSystem(targetPath, 'copy') },
+          { label: 'Move into Workspace', icon: 'folder-input', onClick: () => _handleImportFromSystem(targetPath, 'move') },
+          { divider: true },
+          { label: 'Open Workspace in Finder', icon: 'external-link', onClick: () => {
+            if (typeof AppState !== 'undefined' && AppState.currentWorkspace) {
+              FileService.revealInFinder(AppState.currentWorkspace.path);
+            }
+          }}
+        ];
 
-        const menu = document.createElement('div');
-        menu.className = 'ctx-menu';
-        menu.style.left = `${e.clientX}px`;
-        menu.style.top = `${e.clientY}px`;
-
-        const newFileItem = document.createElement('div');
-        newFileItem.className = 'ctx-item';
-        newFileItem.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M9 15h6"/><path d="M12 12v6"/></svg> New File`;
-        newFileItem.onclick = () => { _hideContextMenu(); _createNewItem('root', 'file'); };
-        menu.appendChild(newFileItem);
-
-        const newFolderItem = document.createElement('div');
-        newFolderItem.className = 'ctx-item';
-        newFolderItem.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg> New Folder`;
-        newFolderItem.onclick = () => { _hideContextMenu(); _createNewItem('root', 'directory'); };
-        menu.appendChild(newFolderItem);
-
-        menu.appendChild(document.createElement('div')).className = 'ctx-divider';
-
-        const openFinderItem = document.createElement('div');
-        openFinderItem.className = 'ctx-item';
-        openFinderItem.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> Open Workspace in Finder`;
-        openFinderItem.onclick = () => {
-          _hideContextMenu();
-          if (typeof AppState !== 'undefined' && AppState.currentWorkspace) {
-            FileService.revealInFinder(AppState.currentWorkspace.path);
-          }
-        };
-        menu.appendChild(openFinderItem);
-
-        document.body.appendChild(menu);
-        const closeMenu = (ev) => { if (!menu.contains(ev.target)) _hideContextMenu(); };
-        document.addEventListener('mousedown', closeMenu, { once: true });
+        DesignSystem.createContextMenu(e, items);
       };
     }
   }
@@ -455,16 +497,19 @@ const TreeModule = (() => {
         const targetPath = isFolder ? node.path : (node.path.substring(0, node.path.lastIndexOf('/')) || 'root');
 
         items = [
-          { label: 'Rename', icon: 'edit', onClick: () => _handleRename(e, node, itemEl) },
-          { label: 'Duplicate', icon: 'copy', onClick: () => _handleDuplicate(e, node) },
+          { label: 'Rename', icon: 'edit', shortcut: 'Enter', onClick: () => _handleRename(e, node, itemEl) },
+          { label: 'Duplicate', icon: 'copy', shortcut: '⌘D', onClick: () => _handleDuplicate(e, node) },
           { divider: true },
-          { label: 'New File', icon: 'file-plus', onClick: () => _createNewItem(targetPath, 'file') },
-          { label: 'New Folder', icon: 'folder-plus', onClick: () => _createNewItem(targetPath, 'directory') },
+          { label: 'New File', icon: 'file-plus', shortcut: '⌘N', onClick: () => _createNewItem(targetPath, 'file') },
+          { label: 'New Folder', icon: 'folder-plus', shortcut: '⇧⌘N', onClick: () => _createNewItem(targetPath, 'directory') },
+          { divider: true },
+          { label: 'Import from System', icon: 'copy-plus', onClick: () => _handleImportFromSystem(node, 'copy') },
+          { label: 'Move into Workspace', icon: 'folder-input', onClick: () => _handleImportFromSystem(node, 'move') },
           { divider: true },
           { label: 'Reveal in Finder', icon: 'external-link', onClick: () => _handleRevealInFinder(e, node) },
           { label: 'Copy Relative Path', icon: 'clipboard', onClick: () => _handleCopyPath(node, 'relative') },
           { divider: true },
-          { label: 'Delete', icon: 'trash', danger: true, onClick: () => _handleDelete(e, node) }
+          { label: 'Delete', icon: 'trash', danger: true, shortcut: '⌘⌫', onClick: () => _handleDelete(e, node) }
         ];
       } else {
         items = [
@@ -496,6 +541,42 @@ const TreeModule = (() => {
     const wsPath = AppState.currentWorkspace ? AppState.currentWorkspace.path : '';
     const absPath = (wsPath.replace(/\/$/, '') + '/' + node.path).replace(/\/\//g, '/');
     FileService.revealInFinder(absPath);
+  }
+
+  async function _handleImportFromSystem(targetNodeOrPath, mode = 'copy') {
+    const filePaths = await FileService.openFiles({
+      title: mode === 'move' ? 'Move Files into Workspace' : 'Import Files from System'
+    });
+    if (!filePaths || filePaths.length === 0) return;
+
+    let targetDir = 'root';
+    if (typeof targetNodeOrPath === 'object') {
+      targetDir = targetNodeOrPath.type === 'directory' 
+        ? targetNodeOrPath.path 
+        : (targetNodeOrPath.path.substring(0, targetNodeOrPath.path.lastIndexOf('/')) || 'root');
+    }
+
+    const wsPath = AppState.currentWorkspace ? AppState.currentWorkspace.path : '';
+    const destFolderAbs = (wsPath.replace(/\/$/, '') + '/' + (targetDir === 'root' ? '' : targetDir)).replace(/\/\//g, '/');
+
+    let successCount = 0;
+    for (const srcAbs of filePaths) {
+      const fileName = srcAbs.split(/[\\/]/).pop();
+      const destAbs = (destFolderAbs + '/' + fileName).replace(/\/\//g, '/');
+      
+      let res;
+      if (mode === 'move') {
+        res = await FileService.moveFile(srcAbs, destAbs);
+      } else {
+        res = await FileService.copyFile(srcAbs, destAbs);
+      }
+      if (res.success) successCount++;
+    }
+
+    if (successCount > 0) {
+      if (typeof showToast === 'function') showToast(`${mode === 'move' ? 'Moved' : 'Imported'} ${successCount} files`);
+      load();
+    }
   }
 
   function _handleCopyPath(node, type = 'relative') {
@@ -536,61 +617,46 @@ const TreeModule = (() => {
   }
 
   function _showSortMenu(e) {
-    _hideContextMenu();
-    const menu = document.createElement('div');
-    menu.className = 'ctx-menu';
-    menu.style.left = `${e.clientX}px`;
-    menu.style.top = `${e.clientY}px`;
-
     const methods = [
-      { id: 'alphabetical', label: 'Name', icons: { asc: SORT_ICONS.alphabetical_asc, desc: SORT_ICONS.alphabetical_desc } },
-      { id: 'time', label: 'Last Updated', icons: { asc: SORT_ICONS.time_asc, desc: SORT_ICONS.time_desc } },
-      { id: 'custom', label: 'Custom Order', icon: SORT_ICONS.custom }
+      { id: 'alphabetical', label: 'Name', icons: { asc: 'sort-alpha-asc', desc: 'sort-alpha-desc' } },
+      { id: 'time', label: 'Last Updated', icons: { asc: 'sort-time-asc', desc: 'sort-time-desc' } },
+      { id: 'custom', label: 'Custom Order', icon: 'sort-custom' }
     ];
 
-    function setSortMethod(method) {
-      state.sortMethod = method;
-      localStorage.setItem('mdpreview_sort_method', method);
-      if (typeof AppState !== 'undefined') {
-        AppState.settings.sortMethod = method;
-        if (AppState.savePersistentState) AppState.savePersistentState();
-      }
-      load();
-    }
-
-    methods.forEach(m => {
+    const items = methods.map(m => {
       const isCurrent = state.sortMethod.startsWith(m.id);
-      const item = document.createElement('div');
-      item.className = 'ctx-item' + (isCurrent ? ' active' : '');
-
       let displayIcon = '';
+      let targetMethod = '';
+
       if (m.id === 'custom') {
         displayIcon = m.icon;
+        targetMethod = 'custom';
       } else {
         const isDesc = isCurrent && state.sortMethod.endsWith('_desc');
         displayIcon = isDesc ? m.icons.desc : m.icons.asc;
+        targetMethod = isCurrent 
+          ? (state.sortMethod.endsWith('_asc') ? m.id + '_desc' : m.id + '_asc')
+          : m.id + '_asc';
       }
 
-      let checkmark = isCurrent ? `<svg style="margin-left:auto;" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>` : '';
-
-      item.innerHTML = `${displayIcon} <span>${m.label}</span> ${checkmark}`;
-      item.onclick = () => {
-        if (m.id === 'custom') {
-          setSortMethod('custom');
-        } else {
-          if (state.sortMethod === m.id + '_asc') setSortMethod(m.id + '_desc');
-          else setSortMethod(m.id + '_asc');
+      return {
+        label: m.label,
+        icon: displayIcon,
+        active: isCurrent,
+        onClick: () => {
+          state.sortMethod = targetMethod;
+          localStorage.setItem('mdpreview_sort_method', targetMethod);
+          if (typeof AppState !== 'undefined') {
+            AppState.settings.sortMethod = targetMethod;
+            if (AppState.savePersistentState) AppState.savePersistentState();
+          }
+          _updateSortBtnIcon();
+          load();
         }
-        _updateSortBtnIcon();
-        _hideContextMenu();
-        render();
       };
-      menu.appendChild(item);
     });
 
-    document.body.appendChild(menu);
-    const closeMenu = (ev) => { if (!menu.contains(ev.target)) _hideContextMenu(); };
-    document.addEventListener('mousedown', closeMenu, { once: true });
+    DesignSystem.createContextMenu(e, items);
   }
 
   function search(q) {
@@ -680,7 +746,6 @@ const TreeModule = (() => {
     else state.selectedPaths.push(path);
     state.lastSelectedPath = path;
     _syncSelectionUI();
-    if (!skipSync && typeof TabsModule !== 'undefined') TabsModule.syncSelectionFromTree(state.selectedPaths);
   }
 
   function selectRange(path, skipSync = false) {
@@ -695,19 +760,20 @@ const TreeModule = (() => {
     state.selectedPaths = Array.from(new Set([...state.selectedPaths, ...range]));
     state.lastSelectedPath = path;
     _syncSelectionUI();
-    if (!skipSync && typeof TabsModule !== 'undefined') TabsModule.syncSelectionFromTree(state.selectedPaths);
   }
 
   function deselectAll(skipSync = false) {
     state.selectedPaths = [];
     state.lastSelectedPath = null;
     _syncSelectionUI();
-    if (!skipSync && typeof TabsModule !== 'undefined') TabsModule.syncSelectionFromTree([]);
   }
 
   function syncSelectionFromTabs(paths) {
+    // Disabled: Independent selection between Sidebar and TabBar
+    /*
     state.selectedPaths = [...paths];
     _syncSelectionUI();
+    */
   }
 
   function _syncSelectionUI() {
@@ -865,6 +931,7 @@ const TreeModule = (() => {
     clear,
     deselectAll,
     syncSelectionFromTabs,
+    getState: () => state,
     // API for Components
     handleToggle: _handleToggle,
     handleClick: _handleClick,

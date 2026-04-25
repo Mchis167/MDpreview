@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('electronAPI', {
   // Folder picker
   openFolder: () => ipcRenderer.invoke('open-folder-dialog'),
+  openFiles: (options) => ipcRenderer.invoke('open-file-dialog', options),
 
   // Server watch dir
   setWatchDir: (dirPath) => ipcRenderer.invoke('set-watch-dir', dirPath),

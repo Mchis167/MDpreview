@@ -62,6 +62,16 @@ ipcMain.handle('open-folder-dialog', async () => {
   return result.filePaths[0];
 });
 
+ipcMain.handle('open-file-dialog', async (event, options = {}) => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openFile', 'multiSelections'],
+    title: options.title || 'Select Files to Import',
+    filters: options.filters || []
+  });
+  if (result.canceled || !result.filePaths.length) return [];
+  return result.filePaths;
+});
+
 // --- IPC: Update server watch dir ---
 ipcMain.handle('set-watch-dir', async (event, dirPath) => {
   if (serverModule) serverModule.setWatchDir(dirPath);

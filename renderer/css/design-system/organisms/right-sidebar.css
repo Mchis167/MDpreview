@@ -45,8 +45,8 @@
   display: flex;
   flex-direction: column;
   background: var(--glass-sidebar);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(var(--ds-blur-md));
+  -webkit-backdrop-filter: blur(var(--ds-blur-md));
   border: 1px solid var(--border-sidebar);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -54,7 +54,7 @@
 
 /* ── Header ── */
 .ds-sidebar-header {
-  height: 48px;
+  height: 40px;
   flex-shrink: 0;
   padding: 0 0 0 16px;
   border-bottom: 1px solid var(--border-main);
@@ -64,7 +64,7 @@
 }
 
 .ds-sidebar-title {
-  font-size: 14px;
+  font-size: var(--ds-font-lg);
   font-weight: 700;
   color: var(--text-90);
   flex: 1;
@@ -103,7 +103,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: var(--ds-space-lg);
   width: 100%;
   color: var(--text-30);
   text-align: center;
@@ -113,7 +113,7 @@
 
 .ds-sidebar-empty p {
   font-family: 'Roboto Mono', monospace;
-  font-size: 11px;
+  font-size: var(--ds-font-sm);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -127,7 +127,7 @@
 .ds-sidebar-item {
   display: flex;
   flex-direction: column;
-  padding: 16px;
+  padding: var(--ds-space-lg);
   border-bottom: 1px solid var(--border-main);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
@@ -147,13 +147,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: var(--ds-space-sm);
 }
 
 .ds-item-label {
   font-family: 'Roboto Mono', monospace;
   font-weight: 600;
-  font-size: 10px;
+  font-size: var(--ds-font-xs);
   text-transform: uppercase;
   color: var(--text-50);
   letter-spacing: 0.05em;
@@ -171,13 +171,13 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--ds-space-xs);
   min-width: 0;
 }
 
 .ds-item-snippet {
   font-family: 'Roboto Mono', monospace;
-  font-size: 10px;
+  font-size: var(--ds-font-xs);
   color: var(--text-20);
   white-space: nowrap;
   overflow: hidden;
@@ -189,11 +189,11 @@
   background: rgba(var(--accent-rgb), 0.2);
   color: var(--accent-color);
   padding: 0 2px;
-  border-radius: 2px;
+  border-radius: var(--ds-radius-xs);
 }
 
 .ds-item-body {
-  font-size: 13px;
+  font-size: var(--ds-font-base);
   color: var(--text-70);
   line-height: 20px;
   word-break: break-word;
@@ -205,5 +205,5 @@
   line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  font-size: 12px;
+  font-size: var(--ds-font-md);
 }

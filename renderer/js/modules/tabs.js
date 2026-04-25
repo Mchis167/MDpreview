@@ -23,10 +23,18 @@ const TabsModule = (function () {
           toggleSelect(path);
         } else {
           deselectAll();
-          if (typeof window.loadFile === 'function') {
-            window.loadFile(path).catch(err => {
-              remove(path);
-            });
+          
+          // Focus shift: Clear sidebar selection when switching files via tabs
+          if (typeof TreeModule !== 'undefined') {
+            TreeModule.deselectAll(true);
+          }
+
+          if (path !== state.activeFile) {
+            if (typeof window.loadFile === 'function') {
+              window.loadFile(path).catch(err => {
+                remove(path);
+              });
+            }
           }
         }
       },
@@ -115,6 +123,27 @@ const TabsModule = (function () {
     // Handle Sidebar toggle icon initial state
     const isCollapsed = localStorage.getItem('mdpreview_sidebar_left_collapsed') === 'true';
     updateSidebarToggleIcon(isCollapsed);
+
+    // Global click to deselect tabs
+    document.addEventListener('mousedown', (e) => {
+      const isSafeZone = !!e.target.closest(
+        '.tab-item, ' +               // Tab items themselves
+        '.tab-bar-container, ' +      // Entire tab bar area
+        '.ctx-menu, .modal'           // UI overlays
+      );
+
+      if (!isSafeZone) {
+        deselectAll();
+      }
+    });
+
+    // Global keyboard shortcuts for tabs
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'Escape') {
+        deselectAll();
+      }
+    });
   }
 
   function updateSidebarToggleIcon(isCollapsed) {
@@ -213,9 +242,6 @@ const TabsModule = (function () {
     }
     state.lastSelectedFile = path;
     render();
-    if (!skipSync && typeof TreeModule !== 'undefined') {
-        TreeModule.syncSelectionFromTabs(state.selectedFiles);
-    }
   }
 
   function selectRange(path, skipSync = false) {
@@ -235,40 +261,30 @@ const TabsModule = (function () {
     }
     state.selectedFiles = Array.from(currentSet);
     render();
-    if (!skipSync && typeof TreeModule !== 'undefined') {
-        TreeModule.syncSelectionFromTabs(state.selectedFiles);
-    }
   }
 
   function selectAll(skipSync = false) {
     state.selectedFiles = [...state.openFiles];
     render();
-    if (!skipSync && typeof TreeModule !== 'undefined') {
-        TreeModule.syncSelectionFromTabs(state.selectedFiles);
-    }
   }
 
   function deselectAll(skipSync = false) {
     if (state.selectedFiles.length === 0) return; // Optimization: Already empty
     state.selectedFiles = [];
     render();
-    if (!skipSync && typeof TreeModule !== 'undefined') {
-        TreeModule.syncSelectionFromTabs([]);
-    }
   }
 
   function syncSelectionFromTree(paths) {
-    // Only select paths that are currently open in tabs
+    // Disabled: Independent selection between Tabs and Tree
+    /*
     const filtered = paths.filter(p => state.openFiles.includes(p));
-    
-    // Optimization: Compare if selection actually changed
     const current = state.selectedFiles;
     if (current.length === filtered.length && current.every((v, i) => v === filtered[i])) {
       return;
     }
-
     state.selectedFiles = filtered;
     render();
+    */
   }
 
   // ── Batch Closing Logic ────────────────────────────────

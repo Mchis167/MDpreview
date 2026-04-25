@@ -16,7 +16,7 @@ let _shortcutsCtrl = null;
 function initShortcutsPopover() {
   const btn = document.getElementById('shortcuts-btn');
   // Even if btn is missing, we want the toggle logic for other triggers
-  
+
   let activePopover = null;
 
   const toggle = () => {
@@ -35,17 +35,17 @@ function initShortcutsPopover() {
   };
 
   if (btn) {
-    btn.addEventListener('click', (e) => { 
-      e.stopPropagation(); 
-      toggle(); 
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggle();
     });
   }
 
-  _shortcutsCtrl = { 
-    close: () => { if (activePopover) activePopover.close(); }, 
-    toggle 
+  _shortcutsCtrl = {
+    close: () => { if (activePopover) activePopover.close(); },
+    toggle
   };
-  
+
   window.toggleShortcutsPopover = toggle;
   return _shortcutsCtrl;
 }
@@ -150,12 +150,16 @@ function initGlobalShortcuts() {
       return;
     }
 
-    // ── Mod+1/2/3/4 — Mode switch ─────────────────────────
-    if (mod && !e.shiftKey && !e.ctrlKey && (e.key === '1' || e.key === '2' || e.key === '3' || e.key === '4')) {
-      e.preventDefault();
-      const modeMap = { '1': 'read', '2': 'edit', '3': 'comment', '4': 'collect' };
-      document.querySelector(`.ds-segment-item[data-mode="${modeMap[e.key]}"]`)?.click();
-      return;
+    // ── 1/2/3/4 or Mod+1/2/3/4 — Mode switch ──────────────
+    const isNumericModeKey = (e.key === '1' || e.key === '2' || e.key === '3' || e.key === '4');
+    if (isNumericModeKey && !e.shiftKey && !e.altKey) {
+      // Switch if modifier is pressed OR if not typing in an input
+      if (mod || !inInput) {
+        e.preventDefault();
+        const modeMap = { '1': 'read', '2': 'edit', '3': 'comment', '4': 'collect' };
+        document.querySelector(`.ds-segment-item[data-mode="${modeMap[e.key]}"]`)?.click();
+        return;
+      }
     }
 
     // Skip remaining UI-only shortcuts when focused in a text field
@@ -176,8 +180,8 @@ function initGlobalShortcuts() {
     }
 
     // ── Fullscreen ───────────────────────────────────────
-    const isFullscreenKey = isMac 
-      ? (e.metaKey && (e.ctrlKey || e.shiftKey) && e.key.toLowerCase() === 'f') 
+    const isFullscreenKey = isMac
+      ? (e.metaKey && (e.ctrlKey || e.shiftKey) && e.key.toLowerCase() === 'f')
       : (e.key === 'F11');
 
     if (isFullscreenKey) {

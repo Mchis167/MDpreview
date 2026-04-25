@@ -69,7 +69,7 @@
   padding: 0;
   color: var(--text-90);
   font-family: inherit;
-  font-size: 13px;
+  font-size: var(--ds-font-base);
   line-height: 20px;
   resize: none !important;
   outline: none !important;
@@ -84,12 +84,12 @@
   align-items: center;
   background: rgba(0, 0, 0, 0.1);
   border-top: 1px solid var(--border-main, rgba(255, 255, 255, 0.05));
-  padding: 12px;
+  padding: var(--ds-space-md);
 }
 
 .ds-comment-form__btn-stack {
   display: flex;
-  gap: 8px;
+  gap: var(--ds-space-sm);
 }
 
 
@@ -112,13 +112,13 @@
   height: 100%;
   display: flex;
   align-items: center;
-  padding-right: 12px;
+  padding-right: var(--ds-space-md);
 }
 
 
 .ds-comment-form__header-label {
   font-family: 'Roboto Mono', monospace;
-  font-size: 10px;
+  font-size: var(--ds-font-xs);
   font-weight: 600;
   color: var(--text-50);
   text-transform: uppercase;
@@ -126,11 +126,11 @@
 }
 
 .ds-comment-form__read-body {
-  padding: 16px 20px 20px;
+  padding: var(--ds-space-lg) 20px 20px;
 }
 
 .ds-comment-form__display {
-  font-size: 13px;
+  font-size: var(--ds-font-base);
   line-height: 20px;
   color: var(--text-90);
   white-space: pre-wrap;

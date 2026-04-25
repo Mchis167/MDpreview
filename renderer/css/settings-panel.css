@@ -26,7 +26,7 @@
 }
 
 .setting-title {
-  font-size: 16px;
+  font-size: var(--ds-font-xl);
   font-weight: 700;
   color: var(--text-90);
 }
@@ -37,7 +37,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: var(--ds-radius-lg);
   color: var(--text-60);
   transition: all 0.2s;
 }
@@ -54,18 +54,18 @@
   border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--ds-space-xl);
   padding-top: 20px;
 }
 
 .setting-group-title {
   font-family: var(--font-code);
-  font-size: 10px;
+  font-size: var(--ds-font-xs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--accent-color);
-  margin-bottom: 12px;
+  margin-bottom: var(--ds-space-md);
   opacity: 0.8;
 }
 
@@ -78,15 +78,15 @@
 }
 
 .setting-label {
-  font-size: 14px;
+  font-size: var(--ds-font-lg);
   font-weight: 600;
   color: var(--text-90);
 }
 
 .color-selector {
   display: flex;
-  gap: 8px;
-  padding-right: 12px;
+  gap: var(--ds-space-sm);
+  padding-right: var(--ds-space-md);
 }
 
 .color-item {
@@ -118,7 +118,7 @@
 .setting-control-col {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--ds-space-md);
   flex: 1;
   max-width: 240px;
 }
@@ -129,7 +129,7 @@
   appearance: none;
   height: 4px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
+  border-radius: var(--ds-radius-xs);
   outline: none;
   cursor: pointer;
 }
@@ -152,7 +152,7 @@
 .zoom-val-label {
   min-width: 40px;
   text-align: right;
-  font-size: 13px;
+  font-size: var(--ds-font-base);
   font-weight: 600;
   color: var(--accent-color);
   font-family: var(--font-code);
@@ -164,11 +164,11 @@
   outline: none;
   color: var(--accent-color);
   font-family: var(--font-code);
-  font-size: 13px;
+  font-size: var(--ds-font-base);
   font-weight: 600;
   cursor: pointer;
-  padding: 4px 26px 4px 8px;
-  border-radius: 6px;
+  padding: var(--ds-space-xs) 26px 4px 8px;
+  border-radius: var(--ds-radius-md);
   transition: all 0.2s;
   text-align: right;
   -webkit-appearance: none;
@@ -187,9 +187,9 @@
 .bg-image-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: var(--ds-space-lg);
   width: 100%;
-  padding: 12px 0;
+  padding: var(--ds-space-md) 0;
 }
 
 .bg-image-item {
@@ -229,10 +229,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--ds-space-sm);
   color: var(--text-70);
   font-family: var(--font-code);
-  font-size: 10px;
+  font-size: var(--ds-font-xs);
   text-transform: uppercase;
 }
 

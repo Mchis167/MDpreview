@@ -21,7 +21,7 @@
   background: var(--ds-bg-toolbar);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
-  border-radius: 12px;
+  border-radius: var(--ds-radius-xl);
   border: 1px solid var(--ds-border-toolbar);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
   pointer-events: auto;

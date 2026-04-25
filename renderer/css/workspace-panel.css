@@ -35,7 +35,7 @@
 .ws-list-item-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--ds-space-md);
   width: 45%;
   /* Name column */
   min-width: 0;
@@ -54,12 +54,12 @@
 .ws-list-item-name-wrap {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--ds-space-md);
   min-width: 0;
 }
 
 .ws-list-item-name {
-  font-size: 14px;
+  font-size: var(--ds-font-lg);
   font-weight: 600;
   color: var(--text-90);
   white-space: nowrap;
@@ -76,7 +76,7 @@
 }
 
 .ws-list-item-path {
-  font-size: 11px;
+  font-size: var(--ds-font-sm);
   color: var(--text-20);
   font-family: var(--font-code);
   letter-spacing: 0.05em;
@@ -88,7 +88,7 @@
 .ws-list-item-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--ds-space-md);
   flex-shrink: 0;
   width: 80px;
   /* Actions column */
@@ -101,7 +101,7 @@
   color: var(--accent-color);
   background: rgba(var(--accent-rgb), 0.1);
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: var(--ds-radius-sm);
   letter-spacing: 0.05em;
   flex-shrink: 0;
 }
@@ -109,11 +109,11 @@
 .ws-inline-edit-input {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--accent-color);
-  border-radius: 4px;
-  color: #fff;
-  font-size: 14px;
+  border-radius: var(--ds-radius-sm);
+  color: var(--ds-text-100);
+  font-size: var(--ds-font-lg);
   font-weight: 600;
-  padding: 4px 8px;
+  padding: var(--ds-space-xs) 8px;
   width: 100%;
   outline: none;
   font-family: inherit;
@@ -121,7 +121,7 @@
 
 .ws-list-item-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--ds-space-sm);
 }
 
 /* Connect the global delete button to our list item hover state */
@@ -133,13 +133,13 @@
 .ws-add-action-btn {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--ds-space-md);
   padding: 20px;
   margin: 0 8px;
   cursor: pointer;
   color: var(--accent-color);
   font-weight: 700;
-  font-size: 14px;
+  font-size: var(--ds-font-lg);
   transition: background 0.2s;
   border-radius: var(--radius-md);
   margin-top: -4px;
@@ -157,7 +157,7 @@
   justify-content: center;
   background: rgba(var(--accent-rgb), 0.1);
   border-radius: 50%;
-  font-size: 16px;
+  font-size: var(--ds-font-xl);
 }
 
 /* ── Add Workspace Modal ───────────────────────────────── */
@@ -184,8 +184,8 @@
   padding: 40px;
   text-align: center;
   box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
+  backdrop-filter: blur(var(--ds-blur-xl));
+  -webkit-backdrop-filter: blur(var(--ds-blur-xl));
 }
 
 .aws-popover-shield .ds-popover-body {
@@ -213,10 +213,10 @@
 }
 
 .aws-title {
-  font-size: 24px;
+  font-size: var(--ds-font-3xl);
   font-weight: 800;
-  color: #fff;
-  margin-bottom: 8px;
+  color: var(--ds-text-100);
+  margin-bottom: var(--ds-space-sm);
   letter-spacing: -0.02em;
   text-align: center;
   /* Centered */
@@ -225,7 +225,7 @@
 .aws-subtitle {
   color: var(--text-40);
   font-size: 15px;
-  margin-bottom: 32px;
+  margin-bottom: var(--ds-space-xxl);
   line-height: 1.5;
   text-align: center;
   /* Centered */
@@ -240,7 +240,7 @@
 
 .aws-field-label {
   font-family: var(--font-code);
-  font-size: 11px;
+  font-size: var(--ds-font-sm);
   font-weight: 700;
   color: var(--text-20);
   text-transform: uppercase;
@@ -253,12 +253,12 @@
 .aws-input {
   width: 100%;
   height: 44px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--ds-glass-hover);
   border: 1px solid var(--border-main);
   border-radius: var(--radius-pill);
   padding: 0 20px;
-  color: #fff;
-  font-size: 14px;
+  color: var(--ds-text-100);
+  font-size: var(--ds-font-lg);
   font-family: inherit;
   outline: none;
   margin-bottom: 20px;
@@ -267,8 +267,8 @@
 
 .aws-browse-row {
   display: flex;
-  gap: 8px;
-  margin-bottom: 32px;
+  gap: var(--ds-space-sm);
+  margin-bottom: var(--ds-space-xxl);
 }
 
 .aws-browse-row .aws-input {
@@ -282,8 +282,8 @@
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-main);
   border-radius: var(--radius-pill);
-  color: #fff;
-  font-size: 13px;
+  color: var(--ds-text-100);
+  font-size: var(--ds-font-base);
   font-weight: 600;
   transition: background 0.2s;
 }
@@ -294,7 +294,7 @@
 
 .aws-actions {
   display: flex;
-  gap: 12px;
+  gap: var(--ds-space-md);
 }
 
 #confirm-workspace-btn {
@@ -369,7 +369,7 @@
 
 #zoom-close:hover {
   background: rgba(255, 255, 255, 0.15);
-  color: #fff;
+  color: var(--ds-text-100);
 }
 
 #zoom-controls-bar {
@@ -381,8 +381,8 @@
   align-items: center;
   gap: 2px;
   background: rgba(10, 10, 15, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(var(--ds-blur-md));
+  -webkit-backdrop-filter: blur(var(--ds-blur-md));
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 999px;
   padding: 6px 10px;
@@ -404,12 +404,12 @@
 
 .zoom-ctrl-btn:hover {
   background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  color: var(--ds-text-100);
 }
 
 #zoom-pct {
   font-family: var(--font-code);
-  font-size: 11px;
+  font-size: var(--ds-font-sm);
   font-weight: 600;
   color: rgba(255, 255, 255, 0.5);
   min-width: 44px;

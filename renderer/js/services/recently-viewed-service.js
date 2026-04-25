@@ -5,7 +5,7 @@
  * Standard: Atomic Design V2 (Service).
  */
 const RecentlyViewedModule = (() => {
-  const MAX_RECENT = 3;
+  const MAX_RECENT = 10;
   const STORAGE_KEY = 'mdpreview_recent_';
   let treeComp = null;
 
@@ -60,7 +60,12 @@ const RecentlyViewedModule = (() => {
     const section = document.getElementById('recently-viewed-section');
     if (!list || !section) return;
 
-    const recentPaths = _getRaw(STORAGE_KEY + ws.id);
+    let recentPaths = _getRaw(STORAGE_KEY + ws.id);
+    
+    // Filter out current active file and limit display to 5 items
+    const activeFile = (typeof AppState !== 'undefined') ? AppState.currentFile : null;
+    recentPaths = recentPaths.filter(path => path !== activeFile).slice(0, 5);
+
     if (recentPaths.length === 0) { section.style.display = 'none'; return; }
     section.style.display = 'block';
 
@@ -99,32 +104,17 @@ const RecentlyViewedModule = (() => {
   }
 
   function init() {
-    const section = document.getElementById('recently-viewed-section');
     const mount = document.getElementById('recently-viewed-header-mount');
     
-    if (section && mount) {
-      const isCollapsed = (typeof AppState !== 'undefined' && AppState.settings.recentCollapsed) || localStorage.getItem('mdpreview_recent_collapsed') === 'true';
-      if (isCollapsed) section.classList.add('collapsed');
-      
-      const toggleBtn = new IconActionButton({
-        id: 'recently-viewed-toggle',
-        title: 'Toggle section',
-        iconName: 'chevron-down',
-        onClick: (e) => {
-          const collapsed = section.classList.toggle('collapsed');
-          localStorage.setItem('mdpreview_recent_collapsed', collapsed);
-          if (typeof AppState !== 'undefined') {
-            AppState.settings.recentCollapsed = collapsed;
-            if (AppState.savePersistentState) AppState.savePersistentState();
-          }
-        }
-      });
-      
+    if (mount) {
       const header = new SidebarSectionHeader({
         title: 'RECENTLY VIEWED',
-        actions: [toggleBtn]
+        collapsible: {
+          sectionId: 'recently-viewed-section',
+          storageKey: 'mdpreview_recent_collapsed',
+          appStateKey: 'recentCollapsed'
+        }
       });
-
       mount.innerHTML = '';
       mount.appendChild(header.render());
     }

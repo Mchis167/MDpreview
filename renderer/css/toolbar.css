@@ -30,7 +30,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
+  gap: var(--ds-space-sm);
 }
 
 /* Header Text Block */
@@ -40,12 +40,12 @@
   justify-content: center;
   gap: 2px;
   min-width: 0;
-  margin-left: 12px;
+  margin-left: var(--ds-space-md);
 }
 
 .header-label {
   font-family: var(--font-code);
-  font-size: 10px;
+  font-size: var(--ds-font-xs);
   font-weight: 500;
   color: var(--text-20);
   text-transform: uppercase;
@@ -55,7 +55,7 @@
 
 .header-value {
   font-family: var(--font-text);
-  font-size: 14px;
+  font-size: var(--ds-font-lg);
   font-weight: 500;
   color: var(--text-60);
   white-space: nowrap;
@@ -99,7 +99,7 @@
   position: relative;
   z-index: 1;
   padding: 6px 24px;
-  font-size: 12px;
+  font-size: var(--ds-font-md);
   font-weight: 600;
   color: var(--text-50);
   transition: color 0.2s;
@@ -108,7 +108,7 @@
 }
 
 .mode-segment.active {
-  color: #fff;
+  color: var(--ds-text-100);
 }
 
 /* Action Buttons */
@@ -119,11 +119,11 @@
   align-items: center;
   justify-content: center;
   color: var(--text-40);
-  border-radius: 8px;
+  border-radius: var(--ds-radius-lg);
   transition: background 0.2s, color 0.2s;
 }
 
 .toolbar-btn:hover {
   background: rgba(255, 255, 255, 0.05);
-  color: #fff;
+  color: var(--ds-text-100);
 }
