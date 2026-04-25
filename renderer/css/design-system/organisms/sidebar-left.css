@@ -1,0 +1,151 @@
+/* ══════════════════════════════════════════════════
+   SIDEBAR LEFT ORGANISM — PREMIUM GLASSMORPHISM
+   Unified structure for Explorer, Search and Footer
+   ════════════════════════════════════════════════════ */
+
+#sidebar-left {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--glass-sidebar, linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--ds-border-toolbar, rgba(255, 255, 255, 0.08));
+  border-radius: var(--ds-radius-lg);
+  overflow: visible;
+  position: relative;
+  box-shadow: var(--lift-shadow);
+}
+
+/* ── Collapse Logic ── */
+.sidebar-section.collapsed #recently-viewed-list,
+.sidebar-section.collapsed .sidebar-tree-scroll,
+.sidebar-section.collapsed .sidebar-divider {
+  display: none !important;
+}
+
+.sidebar-section.collapsed {
+  flex: 0 0 auto !important;
+  margin-bottom: 0;
+}
+
+/* ── Resizer ── */
+.sidebar-resizer {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 20;
+  transition: background 0.2s;
+}
+
+.sidebar-resizer:hover,
+.sidebar-resizer.is-resizing {
+  background: rgba(var(--accent-rgb), 0.2);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.1);
+}
+
+/* ── Sidebar Divider ── */
+.sidebar-divider {
+  height: 1px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+  margin: var(--ds-space-xs) 0;
+}
+
+/* ── Views Structure ── */
+#sidebar-explorer-view,
+#sidebar-search-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.sidebar-section {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+#file-explorer-section,
+#search-results-section {
+  flex: 1;
+}
+
+/* ── Scroll Container ── */
+.sidebar-tree-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  /* Mask Fade Effect */
+  --top-fade: 0px;
+  -webkit-mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black var(--top-fade),
+      black calc(100% - 16px),
+      transparent 100%);
+  mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black var(--top-fade),
+      black calc(100% - 16px),
+      transparent 100%);
+}
+
+.sidebar-tree-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Footer: Status Badge ── */
+.sidebar-footer {
+  padding: var(--ds-space-md);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+.hot-reload-badge {
+  background: rgba(5, 46, 22, 0.2);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: var(--ds-radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  width: 100%;
+}
+
+.hr-badge-label {
+  font-family: var(--font-code);
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent-green, #22c55e);
+  line-height: 1;
+}
+
+.hr-badge-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.bar {
+  width: 2px;
+  border-radius: var(--ds-radius-full);
+}
+
+.bar-1, .bar-3 { height: 8px; background: rgba(34, 197, 94, 0.4); }
+.bar-2 { height: 12px; background: var(--accent-green, #22c55e); }

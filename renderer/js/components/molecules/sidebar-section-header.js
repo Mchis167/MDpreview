@@ -18,48 +18,51 @@ class SidebarSectionHeader {
         // ── Handle Collapsible logic ──
         if (this.collapsible) {
             const { sectionId, storageKey, appStateKey } = this.collapsible;
-            const section = document.getElementById(sectionId);
             
-            if (section) {
-                // Determine initial state
-                const isCollapsed = (appStateKey && AppState.settings[appStateKey]) || 
-                                    localStorage.getItem(storageKey) === 'true';
-                
-                if (isCollapsed) section.classList.add('collapsed');
+            // Determine initial state
+            const isCollapsed = (appStateKey && AppState.settings && AppState.settings[appStateKey]) || 
+                                localStorage.getItem(storageKey) === 'true';
+            
+            const toggleBtn = new IconActionButton({
+                className: 'section-toggle-btn',
+                iconName: 'chevron-down',
+                onClick: null // We'll handle it on the header level
+            });
+            header.appendChild(toggleBtn.render());
 
-                const toggleBtn = new IconActionButton({
-                    className: 'section-toggle-btn',
-                    iconName: 'chevron-down',
-                    onClick: null // We'll handle it on the header level
-                });
-                header.appendChild(toggleBtn.render());
+            // Make entire header clickable
+            header.style.cursor = 'pointer';
+            header.onclick = (e) => {
+                // BUG FIX: Bỏ qua nếu người dùng click vào các nút Action hoặc bên trong Action
+                if (e.target.closest('.header-actions-group') || e.target.closest('.ds-btn')) {
+                    return;
+                }
 
-                // Make entire header clickable
-                header.style.cursor = 'pointer';
-                header.onclick = (e) => {
-                    // BLOCK: If user is currently renaming a file, don't allow toggling layout
-                    if (window.TreeModule && window.TreeModule.getState) {
-                        const treeState = window.TreeModule.getState();
-                        if (treeState.renamingPath) {
-                            console.warn('SidebarSectionHeader: Toggle blocked while renaming.');
-                            return;
-                        }
+                const section = document.getElementById(sectionId);
+                if (!section) return;
+
+                // BLOCK: If user is currently renaming a file, don't allow toggling layout
+                if (window.TreeModule && window.TreeModule.getState) {
+                    const treeState = window.TreeModule.getState();
+                    if (treeState.renamingPath) {
+                        console.warn('SidebarSectionHeader: Toggle blocked while renaming.');
+                        return;
                     }
+                }
 
-                    section.classList.add('is-animating');
-                    const collapsed = section.classList.toggle('collapsed');
-                    localStorage.setItem(storageKey, collapsed);
-                    if (appStateKey && typeof AppState !== 'undefined') {
-                        AppState.settings[appStateKey] = collapsed;
-                        if (AppState.savePersistentState) AppState.savePersistentState();
-                    }
+                const collapsed = section.classList.toggle('collapsed');
+                localStorage.setItem(storageKey, collapsed);
+                if (appStateKey && typeof AppState !== 'undefined') {
+                    AppState.settings[appStateKey] = collapsed;
+                    if (AppState.savePersistentState) AppState.savePersistentState();
+                }
+            };
 
-                    // Clean up animation class after transition
-                    section.addEventListener('transitionend', () => {
-                        section.classList.remove('is-animating');
-                    }, { once: true });
-                };
-            }
+            // Set initial class on mount (using a small timeout to ensure DOM presence)
+            setTimeout(() => {
+                const section = document.getElementById(sectionId);
+                if (section && isCollapsed) section.classList.add('collapsed');
+            }, 0);
         }
 
         // Title/Label

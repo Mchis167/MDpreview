@@ -54,7 +54,7 @@ main {
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   border: 1px solid var(--border-main);
-  border-radius: var(--radius-lg);
+  border-radius: var(--ds-radius-lg);
   overflow: hidden;
   position: relative;
 }

@@ -9,24 +9,60 @@
   --ds-border-toolbar: rgba(255, 255, 255, 0.08);
 
   --ds-accent-orange: #ffbf48;
+  --ds-accent-color: var(--ds-accent-orange);
 
   --ds-text-primary: rgba(255, 255, 255, 0.9);
   --ds-text-secondary: rgba(255, 255, 255, 0.5);
   --ds-text-dark: rgba(0, 0, 0, 0.9);
+
+  /* ── Unified Text Tokens (Legacy Support) ──────────────── */
+  --text-90: rgba(255, 255, 255, 0.9);
+  --text-70: rgba(255, 255, 255, 0.7);
+  --text-60: rgba(255, 255, 255, 0.6);
+  --text-50: rgba(255, 255, 255, 0.5);
+  --text-40: rgba(255, 255, 255, 0.4);
+  --text-30: rgba(255, 255, 255, 0.3);
+  --text-20: rgba(255, 255, 255, 0.2);
+  --text-10: rgba(255, 255, 255, 0.1);
 
   /* ── Spacing ───────────────────────────────────────────── */
   --ds-space-xs: 4px;
   --ds-space-sm: 8px;
   --ds-space-md: 12px;
   --ds-space-lg: 16px;
+  --ds-space-xl: 24px;
+  --ds-space-xxl: 32px;
 
   /* ── Radius ────────────────────────────────────────────── */
+  --ds-radius-xs: 4px;
   --ds-radius-sm: 6px;
   --ds-radius-md: 8px;
   --ds-radius-lg: 12px;
+  --ds-radius-xl: 20px;
   --ds-radius-full: 999px;
+
+  /* ── Typography ────────────────────────────────────────── */
+  --ds-font-xs: 11px;
+  --ds-font-sm: 12px;
+  --ds-font-md: 13px;
+  --ds-font-base: 14px;
+  --ds-font-lg: 15px;
+  --ds-font-xl: 18px;
+
+  /* ── Effects ───────────────────────────────────────────── */
+  --ds-blur-md: 12px;
+  --ds-blur-lg: 20px;
+  --lift-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
 
   /* ── Transitions ───────────────────────────────────────── */
   --ds-transition-fast: 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   --ds-transition-main: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --apple-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ── Compatibility Aliases ─────────────────────────────── */
+  --radius-lg: var(--ds-radius-lg);
+  --radius-md: var(--ds-radius-md);
+  --radius-sm: var(--ds-radius-sm);
+  --border-sidebar: rgba(255, 255, 255, 0.08);
+  --border-main: rgba(255, 255, 255, 0.05);
 }
