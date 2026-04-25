@@ -77,25 +77,32 @@ const DraftModule = (() => {
       // Cancel if a newer render request was started
       if (currentTicket !== renderTicket) return;
 
-      // Update Viewer
-      const emptyState = document.getElementById('empty-state');
-      const mdContent  = document.getElementById('md-content');
+      // Update via MarkdownViewer
+      const viewer = MarkdownViewer.getInstance();
+      if (viewer) {
+        viewer.setState({
+          mode: AppState.currentMode === 'edit' ? 'edit' : 'read',
+          file: draftId,
+          content: finalContent,
+          html: data.html
+        });
+      } else {
+        // Legacy fallback
+        const emptyState = document.getElementById('empty-state');
+        const mdContent  = document.getElementById('md-content');
 
-      if (emptyState) emptyState.style.display = 'none';
-      if (mdContent) {
-        const inner = mdContent.querySelector('.md-content-inner') || mdContent;
-        inner.innerHTML = data.html;
-        
-        // Only show mdContent if NOT in edit mode
-        if (AppState.currentMode !== 'edit') {
-            mdContent.style.display = 'block';
+        if (emptyState) emptyState.style.display = 'none';
+        if (mdContent) {
+          const inner = mdContent.querySelector('.md-content-inner') || mdContent;
+          inner.innerHTML = data.html;
+          
+          if (AppState.currentMode !== 'edit') {
+              mdContent.style.display = 'block';
+          }
+          
+          if (typeof processMermaid === 'function') processMermaid(inner);
+          if (typeof CodeBlockModule !== 'undefined') CodeBlockModule.process(inner);
         }
-        
-        // Process Mermaid (global from app.js / mermaid.js)
-        if (typeof processMermaid === 'function') processMermaid(inner);
-        
-        // Process Code Blocks (global from code-blocks.js)
-        if (typeof CodeBlockModule !== 'undefined') CodeBlockModule.process(inner);
       }
 
       // Update header
@@ -114,8 +121,8 @@ const DraftModule = (() => {
       }
       
       // Reset scroll
-      const viewer = document.getElementById('md-viewer');
-      if (viewer) viewer.scrollTop = 0;
+      const scrollViewer = document.getElementById('md-viewer-mount');
+      if (scrollViewer) scrollViewer.scrollTop = 0;
 
     } catch (err) {
       console.error(err);
@@ -401,21 +408,28 @@ const DraftModule = (() => {
       return;
     }
 
-    // Restore previously rendered content
-    if (emptyState) emptyState.style.display = 'none';
-    if (mdContent) {
-      mdContent.style.display = 'block';
-      const inner = mdContent.querySelector('.md-content-inner') || mdContent;
-      inner.innerHTML = data.renderedHtml;
-      
-      // Diagrams need to be reprocessed since we updated innerHTML
-      if (typeof processMermaid === 'function') processMermaid(inner);
-      
-      // Process Code Blocks
-      if (typeof CodeBlockModule !== 'undefined') CodeBlockModule.process(inner);
-      
-      // Update header
+    // Update via MarkdownViewer
+    const viewer = MarkdownViewer.getInstance();
+    if (viewer) {
+      viewer.setState({
+        mode: AppState.currentMode === 'edit' ? 'edit' : 'read',
+        file: draftId,
+        content: data.draftContent,
+        html: data.renderedHtml
+      });
       updateHeader('draft');
+    } else {
+      // Legacy fallback
+      if (emptyState) emptyState.style.display = 'none';
+      if (mdContent) {
+        mdContent.style.display = 'block';
+        const inner = mdContent.querySelector('.md-content-inner') || mdContent;
+        inner.innerHTML = data.renderedHtml;
+        
+        if (typeof processMermaid === 'function') processMermaid(inner);
+        if (typeof CodeBlockModule !== 'undefined') CodeBlockModule.process(inner);
+        updateHeader('draft');
+      }
     }
   }
 

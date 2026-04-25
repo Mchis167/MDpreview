@@ -28,6 +28,26 @@ class TreeViewComponent {
         this.render();
     }
 
+    /**
+     * Render trạng thái chờ chuyên nghiệp với Skeleton
+     */
+    renderSkeleton(count = 8) {
+        if (!this.mount) return;
+        this.mount.classList.add('ds-tree-view');
+        this.mount.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+            const row = document.createElement('div');
+            row.className = 'skeleton-row';
+            // Tạo độ dài ngẫu nhiên cho thanh text để trông tự nhiên hơn
+            const randomWidth = Math.floor(Math.random() * 40) + 40; 
+            row.innerHTML = `
+                <div class="skeleton skeleton-icon" style="width: 14px; height: 14px; margin-left: ${i > 3 ? '12px' : '0'}"></div>
+                <div class="skeleton skeleton-text" style="width: ${randomWidth}%; height: 12px;"></div>
+            `;
+            this.mount.appendChild(row);
+        }
+    }
+
     render() {
         if (!this.mount) return;
 

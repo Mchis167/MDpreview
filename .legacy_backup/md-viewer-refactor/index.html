@@ -99,9 +99,193 @@
           <!-- TabBarComponent will mount here -->
         </div>
 
-        <!-- Content (Dynamic Markdown Viewer Component) -->
-        <div id="md-viewer-mount">
-          <!-- MarkdownViewerComponent will mount here -->
+        <!-- Change Action View Bar is now handled by Design System (js/components/organisms/change-action-view-bar.js) -->
+
+        <!-- Content (md viewer only — comment sidebar is a sibling of main) -->
+        <div id="md-viewer">
+          <div id="md-content" style="display:none;">
+            <div class="md-content-inner"></div>
+          </div>
+
+          <!-- Edit mode editor -->
+          <div id="edit-viewer" style="display:none;">
+            <textarea id="edit-textarea" placeholder="Start writing..."></textarea>
+
+            <div class="edit-toolbar-container">
+
+              <div class="edit-toolbar">
+                <!-- Help Toggle -->
+                <div class="edit-action-group">
+                  <div class="edit-tool-btn" id="edit-help-btn" title="Markdown Help">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                      <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div class="edit-divider"></div>
+
+                <!-- Action Group 1: Typography -->
+                <div class="edit-action-group">
+                  <div class="edit-tool-btn" data-action="h" title="Heading">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M6 12h12" />
+                      <path d="M6 20V4" />
+                      <path d="M18 20V4" />
+                    </svg>
+                  </div>
+                  <div class="edit-tool-btn" data-action="b" title="Bold">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14 12a4 4 0 0 0 0-8H6v8" />
+                      <path d="M15 20a4 4 0 0 0 0-8H6v8" />
+                    </svg>
+                  </div>
+                  <div class="edit-tool-btn" data-action="i" title="Italic">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="19" x2="10" y1="4" y2="4" />
+                      <line x1="14" x2="5" y1="20" y2="20" />
+                      <line x1="15" x2="9" y1="4" y2="20" />
+                    </svg>
+                  </div>
+                  <div class="edit-tool-btn" data-action="s" title="Strikethrough">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M16 4H9a3 3 0 0 0-2.83 4" />
+                      <path d="M14 12a4 4 0 0 1 0 8H6" />
+                      <line x1="4" x2="20" y1="12" y2="12" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div class="edit-divider"></div>
+
+                <!-- Action Group 2: Content -->
+                <div class="edit-action-group">
+                  <div class="edit-tool-btn" data-action="q" title="Quote">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17 6H3" />
+                      <path d="M21 12H8" />
+                      <path d="M21 18H8" />
+                      <path d="M3 12v6" />
+                    </svg>
+                  </div>
+                  <div class="edit-tool-btn" data-action="l" title="Link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                    </svg>
+                  </div>
+                  <div class="edit-tool-btn" data-action="img" title="Image">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                      <circle cx="9" cy="9" r="2" />
+                      <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                    </svg>
+                  </div>
+                  <div class="edit-tool-btn" data-action="hr" title="Divider">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="5" x2="19" y1="12" y2="12" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div class="edit-divider"></div>
+
+                <!-- Action Group 3: Lists -->
+                <div class="edit-action-group">
+                  <div class="edit-tool-btn" data-action="ul" title="Unordered List">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="8" x2="21" y1="6" y2="6" />
+                      <line x1="8" x2="21" y1="12" y2="12" />
+                      <line x1="8" x2="21" y1="18" y2="18" />
+                      <line x1="3" x2="3.01" y1="6" y2="6" />
+                      <line x1="3" x2="3.01" y1="12" y2="12" />
+                      <line x1="3" x2="3.01" y1="18" y2="18" />
+                    </svg>
+                  </div>
+                  <div class="edit-tool-btn" data-action="ol" title="Numbered List">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="10" x2="21" y1="6" y2="6" />
+                      <line x1="10" x2="21" y1="12" y2="12" />
+                      <line x1="10" x2="21" y1="18" y2="18" />
+                      <path d="M4 6h1v4" />
+                      <path d="M4 10h2" />
+                      <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1" />
+                    </svg>
+                  </div>
+                  <div class="edit-tool-btn" data-action="tl" title="Task List">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect width="18" height="18" x="3" y="3" rx="2" />
+                      <path d="m9 12 2 2 4-4" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div class="edit-divider"></div>
+
+                <!-- Action Group 4: Code & Advanced -->
+                <div class="edit-action-group">
+                  <div class="edit-tool-btn" data-action="c" title="Code">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="16 18 22 12 16 6" />
+                      <polyline points="8 6 2 12 8 18" />
+                    </svg>
+                  </div>
+                  <div class="edit-tool-btn" data-action="cb" title="Code Block">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="m18 16 4-4-4-4" />
+                      <path d="m6 8-4 4 4 4" />
+                      <path d="m14.5 4-5 16" />
+                    </svg>
+                  </div>
+                  <div class="edit-tool-btn" data-action="tb" title="Table">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect width="18" height="18" x="3" y="3" rx="2" />
+                      <path d="M3 9h18" />
+                      <path d="M3 15h18" />
+                      <path d="M9 3v18" />
+                      <path d="M15 3v18" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div class="edit-divider"></div>
+
+                <!-- Final Action Group -->
+                <div class="edit-button-group">
+                  <button class="btn-ghost" id="edit-cancel-btn">Cancel</button>
+                  <button class="btn-primary-pill" id="edit-save-btn">Save</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div id="empty-state">
+            <div class="illus-wrap">
+              <img src="../assets/Central Illustration.png" alt="MDpreview Welcome" class="center-illus">
+            </div>
+            <div class="empty-state-text">
+              <h2>MDpreview</h2>
+              <p>Select a Markdown file from the sidebar or<br>click the workspace switcher to get started.</p>
+            </div>
+          </div>
         </div>
 
       </div><!-- /glass-main -->
@@ -185,7 +369,6 @@
   <script src="js/components/organisms/change-action-view-bar.js"></script>
   <script src="js/components/organisms/sidebar-left.js"></script>
   <script src="js/components/organisms/tab-bar.js"></script>
-  <script src="js/components/organisms/markdown-viewer-component.js"></script>
   <script src="js/components/organisms/right-sidebar.js"></script>
   <script src="js/components/organisms/comment-form-component.js"></script>
   <script src="js/components/organisms/workspace-picker-component.js"></script>
@@ -196,7 +379,6 @@
 
   <!-- Services -->
   <script src="js/services/file-service.js"></script>
-  <script src="js/services/markdown-logic-service.js"></script>
   <script src="js/services/tree-drag-manager.js"></script>
   <script src="js/services/sidebar-controller.js"></script>
   <script src="js/services/recently-viewed-service.js"></script>

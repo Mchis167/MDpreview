@@ -197,7 +197,26 @@ const TreeModule = (() => {
 
   async function load() {
     if (TreeDragManager.getIsDragging()) return; // Block loading while dragging
-    // ... rest of load logic
+
+    // Show professional skeleton state
+    const container = document.getElementById('file-tree');
+    if (container) {
+      if (!v2Component) {
+        v2Component = new TreeViewComponent({
+          mount: container,
+          onClick: _handleClick,
+          onMouseDown: _handleMouseDown,
+          onContextMenu: _handleContextMenu,
+          onDelete: _handleDelete,
+          onRename: _handleRename,
+          onFinishRename: _finishRename,
+          onMouseLeave: _handleMouseLeave,
+          showSpacer: true
+        });
+      }
+      v2Component.renderSkeleton(10);
+    }
+
     const expandedPaths = new Set();
     const saveExpanded = (nodes) => {
       nodes.forEach(n => {

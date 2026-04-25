@@ -31,7 +31,11 @@ const WorkspaceModule = (() => {
     AppState.currentWorkspace = ws;
 
     const lbl = document.getElementById('workspace-name');
-    if (lbl) lbl.textContent = ws ? ws.name : 'Add Workspace';
+    if (lbl) {
+      lbl.textContent = ws ? ws.name : 'Add Workspace';
+      lbl.classList.remove('skeleton', 'skeleton-text');
+      lbl.style.width = ''; // Reset custom skeleton width
+    }
 
     if (ws) {
       if (window.electronAPI) {
@@ -148,7 +152,11 @@ const WorkspaceModule = (() => {
   function _renderSwitcher() {
     const ws = workspaces.find(w => w.id === activeId);
     const lbl = document.getElementById('workspace-name');
-    if (lbl) lbl.textContent = ws ? ws.name : 'Add Workspace';
+    if (lbl) {
+      lbl.textContent = ws ? ws.name : 'Add Workspace';
+      lbl.classList.remove('skeleton', 'skeleton-text');
+      lbl.style.width = '';
+    }
   }
 
   function _openPanel() {

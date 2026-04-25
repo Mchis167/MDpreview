@@ -20,25 +20,7 @@ class ChangeActionViewBarComponent {
       { id: 'collect', icon: 'bookmark', title: 'Collect Mode' }
     ];
 
-    this.lastClickedLine = null;
     this.init();
-  }
-
-  _setupClickTracker() {
-    const mdContent = document.getElementById('md-content');
-    if (!mdContent) return;
-    
-    mdContent.addEventListener('click', (e) => {
-      let el = e.target;
-      while (el && el !== mdContent && !el.hasAttribute('data-line') && !el.hasAttribute('data-source-line')) {
-        el = el.parentElement;
-      }
-      
-      if (el) {
-        this.lastClickedLine = parseInt(el.getAttribute('data-line') || el.getAttribute('data-source-line'), 10);
-      // console.log(`[ClickSync] Tracked click at line: ${this.lastClickedLine}`);
-      }
-    });
   }
 
   init() {
@@ -130,24 +112,22 @@ class ChangeActionViewBarComponent {
   async updateUI(modeId) {
     if (!this.toolbarEl) return;
     if (typeof AppState === 'undefined') return;
-
-    /* console.log('[ChangeActionViewBar] updateUI:', { 
-      modeId, 
-      currentFile: AppState.currentFile, 
-      appMode: AppState.currentMode 
-    }); */
-
-    // Use AppState mode if modeId is not provided
-    const targetMode = modeId || AppState.currentMode || 'read';
-
-    // ── Visibility Check ──────────────────────────────────
-    const viewer      = document.getElementById('md-viewer');
     
     if (!this.isStandalone) {
         const hasFile = !!AppState.currentFile;
         this.container.style.display = hasFile ? 'flex' : 'none';
-        if (!hasFile) return;
+        if (!hasFile) return; // Safe: _isSyncing not yet set
     }
+
+    // Strict Sync Guard to prevent loops
+    if (this._isSyncing) return;
+    this._isSyncing = true;
+    window._isGlobalSyncing = true; // Global flag for other modules to honor
+
+    const targetMode = modeId || AppState.currentMode || 'read';
+
+    // ── Visibility Check ──────────────────────────────────
+    const viewer = document.getElementById('md-viewer-mount');
 
     if (viewer) {
       viewer.setAttribute('data-active-mode', targetMode);
@@ -171,13 +151,16 @@ class ChangeActionViewBarComponent {
                 title: 'Unsaved Changes',
                 message: 'You have unsaved changes. Save them before switching?',
                 onConfirm: async () => {
+                    this._isSyncing = false;
+                    window._isGlobalSyncing = false;
                     const saved = await EditorModule.save();
                     if (saved) {
                         this._proceedUpdateUI(targetMode, syncData, prevMode);
                     }
                 },
                 onCancel: () => {
-                    // Stay in edit mode if cancel
+                    this._isSyncing = false;
+                    window._isGlobalSyncing = false;
                     this.updateUI('edit');
                 }
             });
@@ -185,8 +168,16 @@ class ChangeActionViewBarComponent {
         }
     }
 
-    await this._proceedUpdateUI(targetMode, syncData, prevMode);
-    
+    try {
+      await this._proceedUpdateUI(targetMode, syncData, prevMode);
+    } finally {
+      // Small delay to let DOM settle after mode switch
+      setTimeout(() => {
+        this._isSyncing = false;
+        window._isGlobalSyncing = false;
+      }, 400);
+    }
+
     // Save mode preference
     if (AppState.currentFile && typeof AppState.setFileViewMode === 'function') {
         AppState.setFileViewMode(AppState.currentFile, targetMode);
@@ -219,21 +210,20 @@ class ChangeActionViewBarComponent {
       });
     }
 
-    // ── Manage Viewers ────────────────────────────────────
-    const mdContent   = document.getElementById('md-content');
-    const editViewer  = document.getElementById('edit-viewer');
-    const emptyState  = document.getElementById('empty-state');
-
-    if (mdContent)  mdContent.style.display  = 'none';
-    if (editViewer) editViewer.style.display = 'none';
-
     if (targetMode === 'read' || targetMode === 'comment' || targetMode === 'collect') {
-      if (AppState.currentFile) {
+      const viewerComp = MarkdownViewer.getInstance();
+      if (viewerComp) {
+        viewerComp.setState({ 
+          mode: targetMode,
+          file: AppState.currentFile
+        });
+      } else {
+        const mdContent   = document.getElementById('md-content');
+        const emptyState  = document.getElementById('empty-state');
         if (mdContent) mdContent.style.display = 'block';
         if (emptyState) emptyState.style.display = 'none';
       }
 
-      // Comments/Collect Modules - They handle RightSidebar setup/close internally
       if (typeof CommentsModule !== 'undefined') CommentsModule.removeCommentMode();
       if (typeof CollectModule !== 'undefined') CollectModule.removeCollectMode();
 
@@ -246,31 +236,39 @@ class ChangeActionViewBarComponent {
         }
       }
 
-      // ── Sync Draft Preview ──────────────────────────────
       if (AppState.currentFile && AppState.currentFile.startsWith('__DRAFT_')) {
         if (typeof DraftModule !== 'undefined') DraftModule.syncPreview();
       }
 
-      // ── Re-bind click tracker for new content ──
-      this._setupClickTracker();
-
-      // Sync scroll: coming from edit, jump to where the cursor was
       if (prevMode === 'edit' && syncData) {
         requestAnimationFrame(() => {
           this.scrollReadViewToLine(syncData.line, syncData.selectionText, syncData.isRealSelection);
         });
       }
     } else if (targetMode === 'edit') {
+      const viewerComp = MarkdownViewer.getInstance();
       const currentSelection = window.getSelection().toString().trim();
-      const currentScrollPct = mdContent ? (document.getElementById('md-viewer').scrollTop / (document.getElementById('md-viewer').scrollHeight - document.getElementById('md-viewer').clientHeight || 1)) : 0;
+      const mdContentMount = document.getElementById('md-content'); // Might not exist if we just switched
+      
+      const viewerMount = document.getElementById('md-viewer-mount');
+      const currentScrollPct = (mdContentMount && viewerMount) ? (viewerMount.scrollTop / (viewerMount.scrollHeight - viewerMount.clientHeight || 1)) : 0;
 
       if (AppState.currentFile) {
-        if (editViewer) editViewer.style.display = 'flex';
-        if (emptyState) emptyState.style.display = 'none';
+        if (viewerComp) {
+          // Set sync context for the editor component to consume on mount
+          if (syncData) AppState.lastSyncContext = syncData;
+
+          viewerComp.setState({ 
+            mode: 'edit',
+            file: AppState.currentFile
+          });
+        }
+        
         await this.loadRawContent();
         
+        // Secondary sync after content is loaded to ensure accuracy
         if (typeof EditorModule !== 'undefined' && syncData) {
-          EditorModule.focusWithContext(syncData);
+          EditorModule.focusWithContext({ ...syncData, _fileKey: AppState.currentFile || 'default' });
         }
       }
       
@@ -280,7 +278,7 @@ class ChangeActionViewBarComponent {
 
     // ── Apply Subtle Fade-In Animation (Only for Major Mode Swaps) ──
     const isMajorChange = (prevMode === 'edit' || targetMode === 'edit');
-    const activeView = (targetMode === 'edit') ? editViewer : mdContent;
+    const activeView = (targetMode === 'edit') ? document.getElementById('edit-viewer') : document.getElementById('md-content');
     
     if (isMajorChange && activeView) {
       activeView.classList.remove('ds-sync-fade-in');
@@ -302,7 +300,7 @@ class ChangeActionViewBarComponent {
   captureReadViewSyncData() {
     const sel = window.getSelection();
     const mdContent = document.getElementById('md-content');
-    const viewer = document.getElementById('md-viewer');
+    const viewer = document.getElementById('md-viewer-mount');
 
     if (!mdContent || !viewer) return { scrollPct: 0 };
 
@@ -321,48 +319,70 @@ class ChangeActionViewBarComponent {
           const line = parseInt(el.getAttribute('data-line') || el.getAttribute('data-source-line'), 10);
           const selectionText = sel.toString();
           
-          const textBeforeContent = el.innerText.substring(0, range.startOffset);
-          const offset = textBeforeContent.length;
+          // ── Robust Offset Calculation (Traversal) ──
+          let offset = 0;
+          const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
+          let n;
+          while (n = walker.nextNode()) {
+            if (n === range.startContainer) {
+              offset += range.startOffset;
+              break;
+            }
+            offset += n.textContent.length;
+          }
 
-          /*
-          console.log('[SelectionSync-Capture]', {
-            line,
-            offset,
-            textBeforeContent: `"${textBeforeContent}"`,
-            selectionText: `"${selectionText}"`,
-            targetElement: el.tagName,
-            nodeType: node.nodeType
-          });
-          */
-
-          return { line, offset, length: selectionText.length, selectionText };
+          return { line, offset, length: selectionText.length, selectionText, isRealSelection: true };
         }
       }
     }
 
-    // ── 2. Fallback: Last Clicked Line (NEW) ───────────
-    if (this.lastClickedLine) {
-      // console.log(`[ClickSync] Using last clicked line: ${this.lastClickedLine}`);
-      return { line: this.lastClickedLine };
-    }
-
-    // ── 3. Fallback: Top Visible Line ──────────────────
-    const lines = Array.from(mdContent.querySelectorAll('[data-line], [data-source-line]'));
+    // ── 2. Fallback: Center Visible Line (Strategic Anchor) ──
     const viewerRect = viewer.getBoundingClientRect();
-    const threshold = viewerRect.top + 100; 
-
-    const topLineEl = lines.find(el => {
-      const rect = el.getBoundingClientRect();
-      return rect.bottom > threshold;
-    });
+    const centerX = viewerRect.left + (viewerRect.width / 2);
+    const centerY = viewerRect.top + (viewerRect.height / 2);
     
-    if (topLineEl) {
-      const line = parseInt(topLineEl.dataset.line || topLineEl.dataset.sourceLine, 10);
-      return { line };
+    // Find element at visual center
+    let centerEl = document.elementFromPoint(centerX, centerY);
+    
+    // Traverse up to find a data-line
+    while (centerEl && centerEl !== mdContent && !centerEl.hasAttribute('data-line') && !centerEl.hasAttribute('data-source-line')) {
+      centerEl = centerEl.parentElement;
+    }
+    
+    if (centerEl) {
+      const line = parseInt(centerEl.getAttribute('data-line') || centerEl.getAttribute('data-source-line'), 10);
+      
+      // ── Deep Content Extraction (Recursive Filter) ──
+      const extractCleanText = (node) => {
+        let text = "";
+        node.childNodes.forEach(child => {
+          if (child.nodeType === Node.TEXT_NODE) {
+            text += child.textContent;
+          } else if (child.nodeType === Node.ELEMENT_NODE) {
+            // Filter out UI decorations AND internal SVG/Technical tags
+            const tagName = child.tagName.toUpperCase();
+            const style = window.getComputedStyle(child);
+            const isTechnicalTag = ['STYLE', 'DEFS', 'SCRIPT', 'METADATA', 'BUTTON', 'SVG'].includes(tagName);
+            const isUI = isTechnicalTag || 
+                         style.userSelect === 'none' ||
+                         child.classList.contains('code-block-header') ||
+                         child.hasAttribute('aria-hidden');
+            
+            if (!isUI) {
+              text += extractCleanText(child);
+            }
+          }
+        });
+        return text;
+      };
+
+      const selectionText = extractCleanText(centerEl).trim().substring(0, 200);
+      return { line, selectionText, isRealSelection: false };
     }
 
+    // ── 4. Final Fallback: Proportional Scroll ──
     const scrollPct = viewer.scrollTop / (viewer.scrollHeight - viewer.clientHeight || 1);
-    return { scrollPct };
+    return { scrollPct, isRealSelection: false };
   }
 
   captureReadViewLine() {
@@ -386,48 +406,38 @@ class ChangeActionViewBarComponent {
     let selectionText = text.substring(posStart, posEnd);
     let isRealSelection = selectionText.trim().length > 0;
     
-    // ── UX Improvement: If no selection, use the current line as context ──
+    // ── UX Improvement: Smart Neighborhood Context ──
     if (!isRealSelection) {
       const currentLineText = lines[lineIndex] || '';
-      // Clean up Markdown symbols for better HTML matching
-      selectionText = currentLineText.replace(/[#*`_~\[\]()]/g, '').trim();
+      const prevLineText = lines[lineIndex - 1] || '';
+      const nextLineText = lines[lineIndex + 1] || '';
+      
+      // If current line is noisy (separator, empty), pick neighbors
+      const isNoisy = (str) => !str.trim() || str.trim().match(/^[#*`_\-+=~> ]+$/);
+      
+      if (isNoisy(currentLineText)) {
+        selectionText = (!isNoisy(prevLineText) ? prevLineText : nextLineText).replace(/[#*`_~\[\]()>\-+\d.]/g, ' ').trim();
+      } else {
+        selectionText = currentLineText.replace(/[#*`_~\[\]()>\-+\d.]/g, ' ').trim();
+      }
     }
     
     const scrollPct = textarea.scrollTop / (textarea.scrollHeight - textarea.clientHeight || 1);
-
-    return { line, selectionText, scrollPct, isRealSelection };
+    return { line, selectionText, scrollPct, isRealSelection, offset: 0 };
   }
 
   scrollEditorToLine(lineNum, offset = 0, length = 0) {
     const textarea = document.getElementById('edit-textarea');
     if (!textarea || !lineNum) return;
-    
-    const lines = textarea.value.split('\n');
-    let charPos = 0;
-    
-    // Calculate character position of the start of the line
-    for (let i = 0; i < Math.min(lineNum - 1, lines.length - 1); i++) {
-      charPos += lines[i].length + 1;
+
+    if (window.MarkdownLogicService) {
+        const fileKey = window.AppState?.currentFile || 'default';
+        window.MarkdownLogicService.syncCursor(textarea, { line: lineNum, offset, length, _fileKey: fileKey });
     }
-
-    // Add offset within the line
-    charPos += offset;
-
-    textarea.focus();
-    
-    if (length > 0) {
-      textarea.setSelectionRange(charPos, charPos + length);
-    } else {
-      textarea.setSelectionRange(charPos, charPos);
-    }
-
-    // Scroll textarea to the position
-    const lineHeight = 24; // Approximate
-    textarea.scrollTop = (lineNum - 5) * lineHeight; 
   }
 
   scrollReadViewToLine(line, selectionText = '', isRealSelection = false) {
-    const viewer = document.getElementById('md-viewer');
+    const viewer = document.getElementById('md-viewer-mount');
     const mdContent = document.getElementById('md-content');
     if (!viewer || !mdContent) return;
 
@@ -439,25 +449,39 @@ class ChangeActionViewBarComponent {
     const tryScroll = () => {
       let target = null;
       
-      // 1. Try search by selectionText first (most precise)
+      // 1. Smart Keyword Search (DOM Sandwich)
       if (selectionText && selectionText.trim().length > 3) {
-        // CLEANUP: Remove MD syntax characters for matching against rendered HTML
-        const cleanSearchText = selectionText.replace(/[#*`_~\[\]()]/g, '').trim();
+        // Clean markdown symbols: # * ` _ ~ [ ] ( ) > - +
+        const cleanSearchText = selectionText.replace(/[#*`_~\[\]()>\-+\d.]/g, ' ').trim();
         const words = cleanSearchText.split(/\s+/).filter(w => w.length > 2);
         
         if (words.length > 0) {
-          const walker = document.createTreeWalker(mdContent, NodeFilter.SHOW_TEXT, null, false);
-          let node;
-          while (node = walker.nextNode()) {
-            const content = node.textContent;
-            // Check if the node contains at least the longest word and most other words
-            const matches = words.every(word => content.includes(word));
-            
-            if (matches) {
-              target = node.parentElement;
-              // console.log(`[ScrollSync] Found text match in <${target.tagName}>: "${content.substring(0, 30)}..."`);
-              break;
+          const allElements = Array.from(mdContent.querySelectorAll('[data-line], [data-source-line]'));
+          
+          // Find element with highest word density near the target line
+          let bestMatch = null;
+          let maxScore = 0;
+          const searchRange = 30; // Slightly larger range
+
+          allElements.forEach(el => {
+            const elLine = parseInt(el.getAttribute('data-line') || el.getAttribute('data-source-line'), 10);
+            if (Math.abs(elLine - line) > searchRange) return;
+
+            const content = el.textContent;
+            let score = 0;
+            words.forEach(word => {
+              if (content.includes(word)) score++;
+            });
+
+            if (score > maxScore) {
+              maxScore = score;
+              bestMatch = el;
             }
+          });
+
+          if (bestMatch && maxScore >= Math.min(words.length, 1)) {
+            target = bestMatch;
+            if (attempts === 0) {            }
           }
         }
       }
@@ -469,35 +493,48 @@ class ChangeActionViewBarComponent {
       
       if (target) {
         const currentTop = target.getBoundingClientRect().top + window.scrollY;
-        
-        if (Math.abs(currentTop - lastTop) < 1) {
-          stableCount++;
-        } else {
-          stableCount = 0;
-        }
-        
+        if (Math.abs(currentTop - lastTop) < 1) stableCount++;
+        else stableCount = 0;
         lastTop = currentTop;
 
         if (stableCount >= 3 || attempts >= maxAttempts) {
           target.scrollIntoView({ behavior: 'auto', block: 'center' });
-          
-          // ── Visual Feedback: Real Selection ONLY if user selected it in Editor ──
-          if (isRealSelection) {
+          // ── Post-Render Re-alignment (MutationObserver for async diagrams) ──
+          const reAlignObserver = new MutationObserver(() => {
+            if (target && target.isConnected) {
+              target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          });
+          reAlignObserver.observe(mdContent, { childList: true, subtree: true, attributeFilter: ['width', 'height'] });
+          setTimeout(() => reAlignObserver.disconnect(), 3000);
+          if (isRealSelection && selectionText) {
             try {
-              const range = document.createRange();
               const selection = window.getSelection();
-              range.selectNodeContents(target);
               selection.removeAllRanges();
-              selection.addRange(range);
+
+              // Walk text nodes to find exact position of selectionText
+              const walker = document.createTreeWalker(target, NodeFilter.SHOW_TEXT, null, false);
+              let found = false;
+              let node;
+              while ((node = walker.nextNode()) && !found) {
+                const idx = node.textContent.indexOf(selectionText);
+                if (idx !== -1) {
+                  const range = document.createRange();
+                  range.setStart(node, idx);
+                  range.setEnd(node, idx + selectionText.length);
+                  selection.addRange(range);
+                  found = true;
+                }
+              }
+
+              // Fallback: select whole element if exact text not found in a single node
+              if (!found) {
+                const range = document.createRange();
+                range.selectNodeContents(target);
+                selection.addRange(range);
+              }
             } catch(e) {}
           }
-
-          setTimeout(() => {
-            const finalTop = target.getBoundingClientRect().top + window.scrollY;
-            if (Math.abs(finalTop - lastTop) > 10) {
-              target.scrollIntoView({ behavior: 'auto', block: 'center' });
-            }
-          }, 400);
           return;
         }
       }
@@ -620,7 +657,6 @@ class ChangeActionViewBarComponent {
         if (typeof showToast === 'function') showToast('Failed to save file: ' + (errData.error || 'Unknown error'), 'error');
       }
     } catch (err) {
-      console.error(err);
       if (typeof showToast === 'function') showToast('Error saving file.', 'error');
     }
   }
@@ -670,3 +706,5 @@ const ChangeActionViewBar = (() => {
         getInstance: () => instance
     };
 })();
+// Export to window
+window.ChangeActionViewBar = ChangeActionViewBar;

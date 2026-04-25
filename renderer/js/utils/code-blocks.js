@@ -7,23 +7,26 @@ const CodeBlockModule = {
    * Process all code blocks in a container to add UI enhancements
    */
   process(container) {
+    if (!container) return;
     const codeBlocks = container.querySelectorAll('pre code');
     
     codeBlocks.forEach(codeEl => {
       const preEl = codeEl.parentElement;
+      if (!preEl || preEl.tagName !== 'PRE') return;
       if (preEl.classList.contains('code-block-processed')) return;
       
       // 1. Identify language
-      let lang = 'text';
+      let lang = 'TEXT';
       const langMatch = codeEl.className.match(/language-([^\s]+)/);
       if (langMatch) {
         lang = langMatch[1].toUpperCase();
       }
       
-      // 2. Create Wrapper & Header
+      // 2. Create Wrapper
       const wrapper = document.createElement('div');
       wrapper.className = 'premium-code-block';
       
+      // 3. Create Header
       const header = document.createElement('div');
       header.className = 'code-block-header';
       header.innerHTML = `
@@ -35,21 +38,24 @@ const CodeBlockModule = {
         </button>
       `;
       
-      // 3. Setup Copy Logic
+      // 4. Setup Copy Logic
       const copyBtn = header.querySelector('.code-block-copy');
-      copyBtn.addEventListener('click', () => {
-        const text = codeEl.innerText;
-        navigator.clipboard.writeText(text).then(() => {
-          this.showCopiedState(copyBtn);
+      if (copyBtn) {
+        copyBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const text = codeEl.innerText;
+          navigator.clipboard.writeText(text).then(() => {
+            this.showCopiedState(copyBtn);
+          });
         });
-      });
+      }
       
-      // 4. Rearrange DOM
-      preEl.parentNode.insertBefore(wrapper, preEl);
+      // 5. Rearrange DOM: Replace pre with wrapper containing header + pre
+      preEl.classList.add('code-block-processed');
+      preEl.replaceWith(wrapper);
       wrapper.appendChild(header);
       wrapper.appendChild(preEl);
-      
-      preEl.classList.add('code-block-processed');
     });
   },
 
@@ -74,3 +80,6 @@ const CodeBlockModule = {
     }, 2000);
   }
 };
+
+// Export to global scope
+window.CodeBlockModule = CodeBlockModule;

@@ -58,8 +58,11 @@ const TabsModule = (function () {
           title: 'Scroll to top',
           icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" /></svg>`,
           onClick: () => {
-            const viewer = document.getElementById('md-viewer');
-            if (viewer) viewer.scrollTo({ top: 0, behavior: 'auto' });
+            const mount = document.getElementById('md-viewer-mount');
+            if (mount) {
+              const scrollEl = mount.querySelector('#edit-textarea') || mount;
+              scrollEl.scrollTo({ top: 0, behavior: 'auto' });
+            }
           }
         },
         {
@@ -409,6 +412,11 @@ const TabsModule = (function () {
       if (typeof window.setNoFile === 'function') {
         window.setNoFile();
       }
+    }
+
+    // Cleanup logic for Scroll Position
+    if (window.ScrollModule) {
+      window.ScrollModule.remove(filePath);
     }
 
     if (!batch) {

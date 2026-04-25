@@ -3,6 +3,64 @@
 All notable changes to this project will be documented in this file.
 
 
+## [1.6.0] — 2026-04-25 07:55
+
+### Added
+- **EditorModule.revert()**: Cơ chế khôi phục nội dung về trạng thái ban đầu (`_originalContent`) và làm sạch Undo/Redo stack.
+- **MarkdownEditor._handleCancel()**: Phương thức điều phối việc khôi phục dữ liệu trước khi chuyển mode, đảm bảo tính nhất quán cho nút Cancel.
+- **Console Test Workflow**: Thêm `6.console-test.md` để quy định tiêu chuẩn tạo script automation test trên trình duyệt.
+- **Delta Cache Per-File**: Triển khai `syncCursor._deltaCache` để lưu trữ line offset bias riêng từng file, cho phép self-correction engine tự động điều chỉnh predictions dựa trên lịch sử đồng bộ.
+- **Precise DOM Selection (TreeWalker)**: Thay thế `selectNodeContents` bằng `TreeWalker` để tìm vị trí text chính xác từng kí tự, hỗ trợ đầy đủ selection trong các cấu trúc HTML lồng nhau phức tạp.
+- **End Extension Algorithm**: Thêm logic mở rộng match tới từ cuối cùng (length > 3) để tránh truncation khi bôi đen bị cắt ngắn so với dự kiến.
+- **Smart Quote Normalization**: Normalize curly/smart quotes thành space trước word splitting, ngăn chặn ký tự đính kèm vào từ tiếp theo.
+- **Resilient Scroll Restoration**: Tích hợp cơ chế khôi phục vị trí cuộn sử dụng `ResizeObserver`, đảm bảo cuộn chính xác 100% kể cả khi nội dung (ảnh, code block) có độ trễ khi render.
+- **Render Lock Protection**: Triển khai hệ thống khóa trạng thái (`window._isMDViewerRendering`) và **Smart Guard**, ngăn chặn hoàn toàn việc trình duyệt tự ý ghi đè vị trí 0px trong quá trình chuyển đổi giữa các Tab và View Mode.
+- **View Mode Integration**: Hỗ trợ đầy đủ chế độ `comment` (bình luận) và `collect` (gom nhóm) trong kiến trúc Atomic Viewer.
+- **Scroll Position Persistence**: Tích hợp cơ chế tự động ghi nhớ và khôi phục vị trí cuộn trang cho từng file.
+- **MarkdownLogicService**: Chiết xuất thuật toán xử lý văn bản và đồng bộ cursor (Sandwich Strategy) vào một Service độc lập.
+- **Logic Unit Testing**: Bổ sung bộ Unit Test tự động cho `MarkdownLogicService` (8 kịch bản) và Sidebar (5 kịch bản).
+- **Professional Loading States**: Triển khai hệ thống Skeleton Screen với hiệu ứng Shimmer cho toàn bộ ứng dụng.
+- **SidebarLeftComponent**: Đóng gói Left Sidebar thành một Organism chuyên biệt.
+
+### Changed
+- **Smart Selection Display**: Chỉ highlight selection khi user thực sự bôi đen.
+- **Removed Debug Logging**: Xóa hoàn toàn tất cả `console.group`, `console.log`, `console.error` dùng cho tracing.
+- **Sync Loop Prevention**: Tách riêng `_suppressScrollSync` token để ngăn chặn scroll listener trigger re-sync trong cùng frame.
+- **Mermaid Re-alignment Strategy**: Thay thế `setTimeout` bằng `MutationObserver` để đảm bảo scroll sau khi Mermaid render xong.
+- **Word Tokenization**: Mở rộng regex split và giảm min word length để hỗ trợ Tiếng Việt tốt hơn.
+- **Scroll Logic Decoupling**: Tách biệt việc quản lý scroll khỏi `AppState` toàn cục, mỗi container tự quản lý vị trí cuộn.
+- **Selection Sync (Sandwich Strategy)**: Nâng cấp thuật toán sử dụng `TreeWalker` và bảo toàn `Match Length`.
+- **Mermaid & Diagram Stability**: Nâng cấp trình xử lý Mermaid sử dụng `requestAnimationFrame`.
+- **Advanced Code Block Header**: Tái cấu trúc `CodeBlockModule` với giao diện Header chuyên nghiệp và nút Copy.
+- **Logic/UI Decoupling**: Hoàn thành việc tách biệt "bộ não" xử lý Markdown khỏi giao diện.
+- **Dynamic Scroll Container**: Refactor `ScrollModule` để hỗ trợ container động thông qua `setContainer()`.
+- **Architectural Modularization**: Hợp nhất và chuyển đổi logic sang cấu trúc hướng thành phần (Component-based).
+- **Directory Restructuring**: Đại tu cấu trúc thư mục `renderer/js` thành `core`, `modules`, `services`, `utils`, `components`.
+
+### Fixed
+- **Edit Mode Cancel Bug**: Khắc phục lỗi tự động gọi `save()` hoặc hiện Confirm Dialog khi nhấn Cancel.
+- **Critical: _isSyncing Permanent Lock**: Loại bỏ duplicate `hasFile` check gây lock khi khởi động app.
+- **Triple DOM Query Inefficiency**: Cache `viewerMount` element để tối ưu hiệu năng.
+- **Stale Element ID References**: Thay thế `md-viewer` → `md-viewer-mount` trên toàn hệ thống.
+- **Unguarded Component Callbacks**: Thêm check tồn tại cho các callback trong TreeItemComponent.
+- **Selection Flags Ignored**: Sửa lỗi flags `window._isGlobalSyncing` không được sử dụng hiệu quả.
+- **Zero-Scroll Overwrite**: Loại bỏ hiện tượng reset scroll về 0px khi chuyển mode hoặc tab.
+- **MarkdownPreview Crash**: Khắc phục lỗi `TypeError` khi truy cập file trong quá trình render.
+- **Boot Sequence Stabilization**: Tối ưu hóa trình tự khởi động trong `app.js`.
+
+### Removed
+- **Legacy Click Sync Handler**: Xóa `_setupClickTracker()` và logic đồng bộ dựa trên click cũ.
+- **Dead Code in Sync Timeout**: Xóa `_isSyncing_Internal` flag không sử dụng.
+- **Legacy UI & Static HTML**: Loại bỏ ~70 dòng HTML tĩnh khỏi `index.html`, chuyển sang render động.
+
+### Verified
+- ✅ All element IDs fixed (md-viewer → md-viewer-mount)
+- ✅ All component callbacks guarded
+- ✅ All debug logs removed
+- ✅ Sync lock issue resolved
+- ✅ Error handling comprehensive
+- ✅ Logic integrity via Unit Tests
+
 ## [1.5.0] — 2026-04-25 02:41
 
 ### Added

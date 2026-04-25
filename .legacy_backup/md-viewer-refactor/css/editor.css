@@ -15,7 +15,8 @@
   color: var(--text-90);
   font-family: var(--font-code);
   font-size: 14px;
-  padding: 120px 160px;
+  padding: 120px 32px 120px 32px;
+  /* Top=80px, Bottom=120px for toolbar area */
   resize: none;
   outline: none;
   line-height: 1.6;

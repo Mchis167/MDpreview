@@ -37,7 +37,7 @@ class TreeItemComponent {
         const isRenaming = node.path === this.state.renamingPath;
 
         const itemEl = document.createElement('div');
-        itemEl.className = `tree-item ${node.type === 'directory' ? 'tree-item-directory' : 'tree-item-file'} ${isActive ? 'active' : ''} ${isSelected ? 'selected' : ''} ${isRenaming ? 'renaming' : ''}`;
+        itemEl.className = `tree-item ${node.type === 'directory' ? 'tree-item-directory' : 'z'} ${isActive ? 'active' : ''} ${isSelected ? 'selected' : ''} ${isRenaming ? 'renaming' : ''}`;
         itemEl.style.setProperty('--stagger', idx);
         itemEl.dataset.path = node.path;
 
@@ -51,9 +51,9 @@ class TreeItemComponent {
                 <div class="item-icon-wrap">${icon}</div>
                 <input type="text" class="inline-rename-input" value="${this._esc(displayValue)}" />
             `;
-            
+
             const input = itemEl.querySelector('.inline-rename-input');
-            
+
             setTimeout(() => {
                 if (input) {
                     input.focus();
@@ -65,12 +65,12 @@ class TreeItemComponent {
                 if (input._done) return;
                 input._done = true;
                 let newName = input.value.trim();
-                
+
                 // Automatically append .md for files if missing
                 if (save && node.type === 'file' && newName && !newName.toLowerCase().endsWith('.md')) {
                     newName += '.md';
                 }
-                
+
                 this.options.onFinishRename(node, newName, save);
             };
 
@@ -84,7 +84,7 @@ class TreeItemComponent {
                 if (e.key === 'Escape') finish(false);
                 e.stopPropagation();
             };
-            
+
             // Prevent other clicks while renaming
             itemEl.onclick = (e) => e.stopPropagation();
         } else {
@@ -92,11 +92,11 @@ class TreeItemComponent {
             const chevronEl = document.createElement('div');
             chevronEl.className = 'item-chevron-wrap';
             chevronEl.innerHTML = chevron;
-            
+
             const iconWrap = document.createElement('div');
             iconWrap.className = 'item-icon-wrap';
             iconWrap.innerHTML = icon;
-            
+
             const label = document.createElement('span');
             label.className = 'item-label';
             label.textContent = this._formatName(node.name, node.type);
@@ -105,23 +105,25 @@ class TreeItemComponent {
             itemEl.appendChild(iconWrap);
             itemEl.appendChild(label);
 
-            const deleteBtn = new IconActionButton({
-                iconName: 'trash',
-                title: `Delete ${node.type}`,
-                isDanger: true,
-                className: 'item-delete-btn',
-                onClick: (e) => this.options.onDelete(e, node)
-            });
-            itemEl.appendChild(deleteBtn.render());
+            if (this.options.onDelete) {
+                const deleteBtn = new IconActionButton({
+                    iconName: 'trash',
+                    title: `Delete ${node.type}`,
+                    isDanger: true,
+                    className: 'item-delete-btn',
+                    onClick: (e) => this.options.onDelete(e, node)
+                });
+                itemEl.appendChild(deleteBtn.render());
+            }
 
             // ── Event Listeners (Restored) ──
-            itemEl.onclick = (e) => this.options.onClick(e, node, itemEl);
-            itemEl.onmousedown = (e) => this.options.onMouseDown(e, node, itemEl);
+            if (this.options.onClick) itemEl.onclick = (e) => this.options.onClick(e, node, itemEl);
+            if (this.options.onMouseDown) itemEl.onmousedown = (e) => this.options.onMouseDown(e, node, itemEl);
             itemEl.onmouseleave = (e) => {
                 if (this.options.onMouseLeave) this.options.onMouseLeave(e, node, itemEl);
             };
             itemEl.oncontextmenu = (e) => {
-                this.options.onContextMenu(e, node, itemEl);
+                if (this.options.onContextMenu) this.options.onContextMenu(e, node, itemEl);
             };
         }
 

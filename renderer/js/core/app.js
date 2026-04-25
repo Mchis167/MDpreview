@@ -11,6 +11,7 @@
 window.AppState = {
   currentFile: null,
   currentWorkspace: null,
+  currentMode: 'read',
   commentMode: false,
   socket: null,
 
@@ -236,7 +237,7 @@ window.AppState = {
       if (typeof CommentsModule !== 'undefined') CommentsModule.loadForFile(draftId);
       if (AppState.commentMode && typeof CommentsModule !== 'undefined') CommentsModule.removeCommentMode();
 
-      const viewer = document.getElementById('md-viewer');
+      const viewer = document.getElementById('md-viewer-mount');
       if (viewer) viewer.setAttribute('data-active-mode', 'draft');
 
       if (typeof DraftModule !== 'undefined') DraftModule.syncPreview();
@@ -350,7 +351,30 @@ async function loadFile(filePath) {
 
   const currentTicket = ++loadTicket;
 
-  // 1. Dirty check if we are in 'edit' mode before switching files
+  // ABSOLUTE FIRST PRIORITY: Save current scroll before ANY other logic fires
+  if (AppState.currentFile && window.ScrollModule) {
+    window.ScrollModule.save(AppState.currentFile);
+  }
+
+  // 0. Show skeleton immediately
+  const emptyState = document.getElementById('empty-state');
+  const mdContent = document.getElementById('md-content');
+  const inner = mdContent ? (mdContent.querySelector('.md-content-inner') || mdContent) : null;
+
+  if (emptyState) emptyState.style.display = 'none';
+  if (mdContent && inner) {
+    mdContent.style.display = 'block';
+    inner.innerHTML = ''; 
+    inner.classList.add('is-loading');
+  }
+
+  // Use component-based loader if available
+  const viewer = MarkdownViewer.getInstance();
+  if (viewer) {
+    viewer.setState({ mode: 'read', file: filePath, html: '<div class="skeleton-text" style="width: 100%; height: 200px;"></div>' });
+  }
+
+  // 1. Dirty check...
   if (AppState.currentMode === 'edit' && typeof EditorModule !== 'undefined' && EditorModule.isDirty()) {
     const isDraft = AppState.currentFile && AppState.currentFile.startsWith('__DRAFT_');
     const isFirstEdit = EditorModule.getOriginalContent() === '';
@@ -370,6 +394,7 @@ async function loadFile(filePath) {
       return;
     }
   }
+
 
   let data = { html: '' };
   if (filePath && filePath.startsWith('__DRAFT_')) {
@@ -393,26 +418,28 @@ async function loadFile(filePath) {
 
   if (currentTicket !== loadTicket) return;
 
-  // Save current scroll before switching
-  if (AppState.currentFile) {
-    ScrollModule.save(AppState.currentFile);
-  }
-
   AppState.currentFile = filePath;
   TabsModule.open(filePath);
 
-  const emptyState = document.getElementById('empty-state');
-  const mdContent = document.getElementById('md-content');
-
-  if (emptyState) emptyState.style.display = 'none';
-  if (mdContent) {
-    mdContent.style.display = 'block';
-    const inner = mdContent.querySelector('.md-content-inner') || mdContent;
-    inner.innerHTML = data.html;
-    mdContent.classList.add('fade-in');
-    setTimeout(() => mdContent.classList.remove('fade-in'), 300);
-    await processMermaid(inner); // processMermaid defined in mermaid.js
-    if (typeof CodeBlockModule !== 'undefined') CodeBlockModule.process(inner);
+  if (viewer) {
+    viewer.setState({ 
+      mode: AppState.getFileViewMode(filePath), 
+      file: filePath, 
+      content: data.raw || '', // We might need to fetch raw content if data.raw is missing
+      html: data.html 
+    });
+  } else {
+    // Legacy fallback (should not happen after refactor)
+    if (mdContent && inner) {
+      inner.innerHTML = data.html;
+      inner.classList.remove('is-loading');
+      
+      mdContent.classList.add('fade-in');
+      setTimeout(() => mdContent.classList.remove('fade-in'), 300);
+      
+      await processMermaid(inner);
+      if (typeof CodeBlockModule !== 'undefined') CodeBlockModule.process(inner);
+    }
   }
 
   updateHeaderUI();
@@ -444,20 +471,24 @@ async function loadFile(filePath) {
   }
 
   TreeModule.setActiveFile(filePath);
-  ScrollModule.restore(filePath);
 }
 
 function setNoFile() {
   AppState.currentFile = null;
   AppState.currentMode = 'read';
 
-  const emptyState = document.getElementById('empty-state');
-  const mdContent = document.getElementById('md-content');
-  const editViewer = document.getElementById('edit-viewer');
+  const viewer = MarkdownViewer.getInstance();
+  if (viewer) {
+    viewer.setState({ mode: 'empty', file: null, content: '', html: '' });
+  } else {
+    const emptyState = document.getElementById('empty-state');
+    const mdContent = document.getElementById('md-content');
+    const editViewer = document.getElementById('edit-viewer');
 
-  if (emptyState) emptyState.style.display = 'flex';
-  if (mdContent) mdContent.style.display = 'none';
-  if (editViewer) editViewer.style.display = 'none';
+    if (emptyState) emptyState.style.display = 'flex';
+    if (mdContent) mdContent.style.display = 'none';
+    if (editViewer) editViewer.style.display = 'none';
+  }
 
   updateHeaderUI();
 
@@ -534,6 +565,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyTheme();
 
   // 1. Core UI Components First
+  SidebarLeft.init();        // organisms/sidebar-left.js
   ChangeActionViewBar.init(); // organisms/change-action-view-bar.js
   RightSidebar.init();        // organisms/right-sidebar.js
 
@@ -548,7 +580,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 3. Functional Modules
   SettingsModule.init();     // settings.js
   DraftModule.init();        // draft.js
+  MarkdownViewer.init();      // organisms/markdown-viewer-component.js
   ScrollModule.init();       // scroll.js
+  ScrollModule.setContainer(document.getElementById('md-viewer-mount'));
 
   // 4. Tab System (triggers initial loadFile)
   TabsModule.init();         // tabs.js
