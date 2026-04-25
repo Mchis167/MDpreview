@@ -2,58 +2,51 @@
 .ctx-menu {
   position: fixed;
   z-index: 10000;
-  background: #1a1a1a;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--ds-radius-xl);
-  padding: 6px;
+  background: var(--ds-bg-surface);
+  border: 1px solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-shell);
+  padding: var(--ds-space-xs);
   min-width: 180px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
-  animation: ctxFade 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  backdrop-filter: blur(10px);
+  box-shadow: var(--ds-shadow-lg), 0 0 0 1px var(--ds-border-subtle);
+  animation: ctxFade 0.2s var(--ds-ease-spring);
+  backdrop-filter: blur(var(--ds-blur-md));
 }
 
 @keyframes ctxFade {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(-5px);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+  from { opacity: 0; transform: scale(0.95) translateY(-5px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .ctx-item {
-  padding: var(--ds-space-sm) 12px;
+  padding: var(--ds-space-sm) var(--ds-space-md);
   font-size: var(--ds-font-base);
   font-weight: 500;
-  color: var(--text-70);
-  border-radius: var(--ds-radius-lg);
+  color: var(--ds-text-secondary);
+  border-radius: var(--ds-radius-panel);
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: var(--ds-space-md);
-  transition: background 0.2s, color 0.2s;
+  transition: background var(--ds-transition-fast), color var(--ds-transition-fast);
 }
 
 .ctx-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--ds-text-100);
+  background: var(--ds-hover-lg);
+  color: var(--ds-text-inverse);
 }
 
 .ctx-item.danger {
-  color: #ef4444;
+  color: var(--ds-accent-red);
 }
 
 .ctx-item.danger:hover {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
+  background: var(--ds-red-a15);
+  color: var(--ds-accent-red);
 }
 
 .ctx-item.active {
-  background: rgba(var(--accent-rgb), 0.1);
-  color: var(--accent-color);
+  background: rgba(var(--ds-accent-rgb), 0.1);
+  color: var(--ds-accent);
   font-weight: 600;
 }
 
@@ -85,13 +78,8 @@
   flex-shrink: 0;
 }
 
-.ctx-item.active svg {
-  color: var(--accent-color);
-}
-
-.ctx-item.danger svg {
-  color: #ef4444;
-}
+.ctx-item.active svg { color: var(--ds-accent); }
+.ctx-item.danger svg { color: var(--ds-accent-red); }
 
 .ctx-label {
   flex: 1;
@@ -106,35 +94,35 @@
 }
 
 .ctx-shortcut kbd {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-70);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--ds-hover-md);
+  color: var(--ds-text-secondary);
+  border: 1px solid var(--ds-border-strong);
   border-bottom-width: 2px;
-  border-radius: 5px;
-  padding: 1px 6px;
+  border-radius: var(--ds-radius-chip);
+  padding: 1px var(--ds-space-xs);
   font-size: var(--ds-font-sm);
   font-weight: 700;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--ds-font-family-text);
   min-width: 20px;
   height: 20px;
   text-align: center;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 0 var(--ds-black-a30);
   line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all var(--ds-transition-fast);
 }
 
 .ctx-item:hover .ctx-shortcut kbd {
-  background: rgba(255, 255, 255, 0.2);
-  color: var(--ds-text-100);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: var(--ds-hover-lg);
+  color: var(--ds-text-inverse);
+  border-color: var(--ds-border-strong);
   transform: translateY(-1px);
 }
 
 .ctx-divider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.08);
-  margin: 6px;
+  background: var(--ds-border-strong);
+  margin: var(--ds-space-xs);
 }

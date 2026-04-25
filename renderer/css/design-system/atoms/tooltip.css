@@ -8,18 +8,18 @@
 
 .ds-tooltip {
   position: absolute;
-  background: #1a1a1a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: var(--ds-space-sm) 12px;
-  border-radius: var(--ds-radius-lg);
-  color: rgba(255, 255, 255, 0.8);
+  background: var(--ds-bg-surface);
+  border: 1px solid var(--ds-border-strong);
+  padding: var(--ds-space-sm) var(--ds-space-md);
+  border-radius: var(--ds-radius-panel);
+  color: var(--ds-text-primary);
   font-size: var(--ds-font-sm);
   font-weight: 500;
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  transition: all var(--ds-transition-fast);
+  box-shadow: var(--ds-shadow-md);
   z-index: 2000;
 }
 
@@ -37,7 +37,7 @@
   left: 50%;
   transform: translateX(-50%);
   border: 5px solid transparent;
-  border-bottom-color: rgba(255, 255, 255, 0.1);
+  border-bottom-color: var(--ds-border-strong);
 }
 
 /* Hover triggers */

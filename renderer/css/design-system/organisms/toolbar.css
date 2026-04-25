@@ -1,5 +1,5 @@
 /* ============================================================
-   toolbar.css — Top toolbar: breadcrumb, mode control, action buttons
+   toolbar.css — Top toolbar: breadcrumb, mode control, actions
    ============================================================ */
 
 #toolbar {
@@ -8,8 +8,8 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  border-bottom: 1px solid var(--border-main);
+  padding: 0 var(--ds-space-lg);
+  border-bottom: 1px solid var(--ds-border-default);
 }
 
 .toolbar-left {
@@ -44,20 +44,20 @@
 }
 
 .header-label {
-  font-family: var(--font-code);
+  font-family: var(--ds-font-family-code);
   font-size: var(--ds-font-xs);
   font-weight: 500;
-  color: var(--text-20);
+  color: var(--ds-text-disabled);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   line-height: 1;
 }
 
 .header-value {
-  font-family: var(--font-text);
+  font-family: var(--ds-font-family-text);
   font-size: var(--ds-font-lg);
   font-weight: 500;
-  color: var(--text-60);
+  color: var(--ds-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -67,8 +67,8 @@
 .toolbar-divider {
   width: 1px;
   height: 24px;
-  background: var(--border-main);
-  margin: 0 12px;
+  background: var(--ds-border-default);
+  margin: 0 var(--ds-space-md);
 }
 
 /* Segmented Control (Read / Comment) */
@@ -77,9 +77,9 @@
   display: flex;
   align-items: center;
   padding: 5px;
-  background: rgba(0, 0, 0, 0.4);
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--border-main);
+  background: var(--ds-black-a40);
+  border-radius: var(--ds-radius-shell);
+  border: 1px solid var(--ds-border-default);
 }
 
 #segment-bg {
@@ -87,10 +87,10 @@
   top: 5px;
   bottom: 5px;
   left: 5px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-lg);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  background: var(--ds-hover-lg);
+  border: 1px solid var(--ds-border-strong);
+  border-radius: max(0px, calc(var(--ds-radius-shell) - var(--ds-space-xs)));
+  transition: all var(--ds-transition-main);
   pointer-events: none;
   backdrop-filter: blur(2px);
 }
@@ -98,17 +98,17 @@
 .mode-segment {
   position: relative;
   z-index: 1;
-  padding: 6px 24px;
+  padding: 6px var(--ds-space-xl);
   font-size: var(--ds-font-md);
   font-weight: 600;
-  color: var(--text-50);
-  transition: color 0.2s;
+  color: var(--ds-text-secondary);
+  transition: color var(--ds-transition-fast);
   white-space: nowrap;
-  border-radius: var(--radius-lg);
+  border-radius: max(0px, calc(var(--ds-radius-shell) - var(--ds-space-xs)));
 }
 
 .mode-segment.active {
-  color: var(--ds-text-100);
+  color: var(--ds-text-inverse);
 }
 
 /* Action Buttons */
@@ -118,12 +118,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-40);
-  border-radius: var(--ds-radius-lg);
-  transition: background 0.2s, color 0.2s;
+  color: var(--ds-text-tertiary);
+  border-radius: var(--ds-radius-widget);
+  transition: background var(--ds-transition-fast), color var(--ds-transition-fast);
 }
 
 .toolbar-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--ds-text-100);
+  background: var(--ds-hover-md);
+  color: var(--ds-text-inverse);
 }

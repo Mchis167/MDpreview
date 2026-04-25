@@ -1,5 +1,5 @@
 /* ============================================================
-   textarea.css — Reusable Text Area Component with Expansion
+   textarea.css — Reusable Text Area Component
    ============================================================ */
 
 .textarea-component {
@@ -10,18 +10,18 @@
 .textarea-header {
   height: 32px;
   flex-shrink: 0;
-  padding: 0 12px;
+  padding: 0 var(--ds-space-md);
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .textarea-label {
-  font-family: var(--font-code);
+  font-family: var(--ds-font-family-code);
   font-weight: 500;
   font-size: var(--ds-font-xs);
   text-transform: uppercase;
-  color: var(--text-20);
+  color: var(--ds-text-disabled);
 }
 
 .textarea-expand-btn {
@@ -30,30 +30,30 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--ds-radius-md);
-  color: var(--text-20);
-  transition: background 0.2s, color 0.2s;
+  border-radius: var(--ds-radius-widget);
+  color: var(--ds-text-disabled);
+  transition: background var(--ds-transition-fast), color var(--ds-transition-fast);
   cursor: pointer;
 }
 
 .textarea-expand-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-90);
+  background: var(--ds-hover-md);
+  color: var(--ds-text-primary);
 }
 
 .textarea-container {
-  margin: 0 4px;
+  margin: 0 var(--ds-space-xs);
   padding: 10px 14px;
-  background: var(--layer-hover);
-  border: 1px solid var(--border-main);
-  border-radius: var(--radius-lg);
+  background: var(--ds-hover-sm);
+  border: 1px solid var(--ds-border-default);
+  border-radius: var(--ds-radius-panel);
   min-height: 90px;
-  transition: border-color 0.2s, background 0.2s;
+  transition: border-color var(--ds-transition-fast), background var(--ds-transition-fast);
 }
 
 .textarea-component.is-typing .textarea-container {
-  border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--ds-border-strong);
+  background: var(--ds-hover-md);
 }
 
 .textarea-input {
@@ -61,8 +61,8 @@
   height: 70px;
   background: transparent;
   border: none;
-  color: var(--text-90);
-  font-family: var(--font-text);
+  color: var(--ds-text-primary);
+  font-family: var(--ds-font-family-text);
   font-size: var(--ds-font-lg);
   line-height: 22px;
   resize: none;
@@ -72,18 +72,18 @@
 }
 
 .expanded-textarea-footer {
-  padding: 0 20px 20px;
+  padding: 0 var(--ds-space-xl) var(--ds-space-xl);
   display: flex;
   justify-content: flex-end;
   gap: var(--ds-space-md);
 }
 
 .textarea-input::placeholder {
-  color: var(--text-20);
+  color: var(--ds-text-disabled);
   opacity: 1;
 }
 
-/* ── Expanded Textarea Modal ────────────────────────────── */
+/* ── Expanded Textarea Modal ── */
 .expanded-textarea-modal {
   position: fixed;
   top: 0;
@@ -106,73 +106,56 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  animation: fadeIn 0.3s ease forwards;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+  background: var(--ds-black-a50);
+  backdrop-filter: blur(var(--ds-blur-lg));
+  -webkit-backdrop-filter: blur(var(--ds-blur-lg));
+  animation: fadeIn var(--ds-transition-main) forwards;
 }
 
 .expanded-textarea-container {
   position: relative;
   width: 724px;
   height: 534px;
-  background: #111111;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
+  background: var(--ds-bg-overlay);
+  border: 1px solid var(--ds-border-default);
+  border-radius: var(--ds-radius-shell);
   display: flex;
   flex-direction: column;
-  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5);
-  animation: modalScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  box-shadow: var(--ds-shadow-lg);
+  animation: modalScaleUp var(--ds-transition-main) forwards;
   overflow: clip;
 }
 
 @keyframes modalScaleUp {
-  0% {
-    opacity: 0;
-    transform: scale(0.9) translateY(20px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+  0%   { opacity: 0; transform: scale(0.9) translateY(20px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .expanded-textarea-header {
   height: 48px;
   flex-shrink: 0;
-  padding: var(--ds-space-md) 20px;
+  padding: var(--ds-space-md) var(--ds-space-xl);
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .expanded-textarea-header .textarea-label {
-  font-family: 'Roboto Mono', monospace;
+  font-family: var(--ds-font-family-code);
   font-weight: 500;
   font-size: var(--ds-font-xs);
   line-height: 16px;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.2);
+  color: var(--ds-text-disabled);
 }
 
 .expanded-textarea-body {
   flex: 1;
-  margin: 0 4px 4px 4px;
-  padding: 20px;
+  margin: 0 var(--ds-space-xs) var(--ds-space-xs) var(--ds-space-xs);
+  padding: var(--ds-space-xl);
   background: var(--ds-glass-hover);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--ds-border-default);
+  border-radius: max(0px, calc(var(--ds-radius-shell) - var(--ds-space-xs)));
   display: flex;
   overflow: clip;
 }
@@ -181,8 +164,8 @@
   flex: 1;
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.9);
-  font-family: 'Inter', sans-serif;
+  color: var(--ds-text-primary);
+  font-family: var(--ds-font-family-text);
   font-size: var(--ds-font-lg);
   line-height: 22px;
   resize: none;

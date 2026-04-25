@@ -8,7 +8,7 @@
   justify-content: center;
   height: 28px;
   padding: 0 var(--ds-space-md);
-  border-radius: var(--ds-radius-md);
+  border-radius: var(--ds-radius-widget);
   font-family: 'Inter', sans-serif;
   font-size: 13px;
   font-weight: 600;
@@ -22,12 +22,12 @@
 }
 
 .ds-btn-primary {
-  background: var(--ds-accent-orange);
-  color: var(--ds-text-dark);
+  background: var(--ds-accent);
+  color: var(--ds-text-on-accent);
 }
 
 .ds-btn-primary:hover {
-  background: var(--accent-hover);
+  background: var(--ds-accent-hover);
   transform: translateY(-1px);
 }
 
@@ -41,7 +41,7 @@
 }
 
 .ds-btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--ds-white-a05);
 }
 
 .ds-btn:disabled {
@@ -50,29 +50,28 @@
   transform: none !important;
 }
 
-/* ── Header Action (48x48 Square) ── */
-.ds-header-action {
-  width: 40px;
-  height: 100%;
-  display: flex;
+/* ── Legacy aliases (.btn → .ds-btn) ──────────────────────── */
+.btn {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  color: var(--text-40, rgba(255, 255, 255, 0.4));
-  background: transparent;
-  border: none;
+  justify-content: content;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: var(--ds-radius-pill);
+  font-family: var(--ds-font-family-text);
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  flex-shrink: 0;
+  transition: all var(--ds-transition-fast);
+  border: none;
+  gap: 8px;
+  white-space: nowrap;
 }
+.btn i, .btn svg { width: 14px; height: 14px; }
+.btn-primary { background: var(--ds-accent); color: var(--ds-text-on-accent); }
+.btn-primary:hover { background: var(--ds-accent-hover); }
+.btn-primary:disabled { background: var(--ds-accent); opacity: 0.2; cursor: not-allowed; }
+.btn-ghost { background: transparent; color: var(--ds-text-primary); }
+.btn-ghost:hover { background: var(--ds-hover-sm); }
+.btn-ghost:disabled { opacity: 0.2; cursor: not-allowed; }
 
-.ds-header-action:hover {
-  background: var(--glass-hover, rgba(255, 255, 255, 0.03));
-  color: var(--text-100, #fff);
-}
-
-.ds-header-action i,
-.ds-header-action svg {
-  width: 16px;
-  height: 16px;
-  stroke-width: 2.2px;
-}

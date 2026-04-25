@@ -194,9 +194,10 @@ const DesignSystem = (() => {
     
     getIcon: (name) => ICONS[name] || '',
 
-    createHeaderAction: (iconName, title, onClick) => {
+    createHeaderAction: (iconName, title, onClick, id) => {
       const iconHtml = ICONS[iconName] || iconName;
       const btn = createElement('button', 'ds-header-action', { 'title': title, 'html': iconHtml });
+      if (id) btn.dataset.actionId = id;
       if (onClick) {
         btn.addEventListener('click', (e) => {
           onClick(e);

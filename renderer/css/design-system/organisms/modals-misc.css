@@ -1,0 +1,263 @@
+/* ============================================================
+   modals-misc.css — Toast Notifications & Keyboard Shortcuts
+   ============================================================ */
+
+/* ── App Background Layer ── */
+#app-background {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.1;
+  pointer-events: none;
+  display: none;
+}
+
+.footer-icon-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ds-radius-sm);
+  color: var(--ds-text-tertiary);
+  transition: all var(--ds-transition-fast);
+}
+
+.footer-icon-btn:hover {
+  background: var(--ds-hover-sm);
+  color: var(--ds-text-primary);
+}
+
+.modal-toolbar-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--ds-border-default);
+  margin: 0 var(--ds-space-xs);
+}
+
+/* ── Toast Notification ── */
+.toast-container {
+  position: fixed;
+  top: var(--ds-space-lg);
+  right: var(--ds-space-lg);
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.4s var(--ds-ease-spring);
+  transform: translateX(20px);
+}
+
+.toast-container.show {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.toast-content {
+  background: var(--ds-bg-overlay);
+  border: 1px solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-panel);
+  padding: var(--ds-space-md) var(--ds-space-xl);
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-md);
+  box-shadow: var(--ds-shadow-lg);
+  min-width: 240px;
+}
+
+.toast-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--ds-accent-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.toast-message {
+  font-size: var(--ds-font-md);
+  font-weight: 600;
+  color: var(--ds-accent-green);
+  flex: 1;
+}
+
+.toast-content.error {
+  border-color: var(--ds-red-a30);
+}
+
+.toast-content.error .toast-icon,
+.toast-content.error .toast-message {
+  color: var(--ds-accent-red);
+}
+
+.toast-close {
+  width: 16px;
+  height: 16px;
+  color: var(--ds-text-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: color var(--ds-transition-fast);
+}
+
+.toast-close:hover {
+  color: var(--ds-text-inverse);
+}
+
+/* ── Keyboard Shortcuts Popover ── */
+.shortcuts-popover {
+  position: fixed;
+  top: 52px;
+  right: var(--ds-space-md);
+  width: 520px;
+  max-height: calc(100vh - 72px);
+  background: var(--ds-bg-overlay);
+  border: 1px solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-shell);
+  display: none;
+  flex-direction: column;
+  z-index: 1500;
+  box-shadow: var(--ds-shadow-lg);
+  overflow: clip;
+  animation: shortcutsFadeIn 0.25s var(--ds-ease-spring);
+  pointer-events: auto;
+}
+
+.shortcuts-popover.open {
+  display: flex;
+}
+
+@keyframes shortcutsFadeIn {
+  from { opacity: 0; transform: translateY(-12px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.shortcuts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ds-space-xl) var(--ds-space-xl);
+  background: var(--ds-hover-sm);
+  border-bottom: 1px solid var(--ds-border-default);
+  flex-shrink: 0;
+}
+
+.shortcuts-header-title {
+  font-size: var(--ds-font-xl);
+  font-weight: 700;
+  color: var(--ds-text-primary);
+}
+
+.shortcuts-close-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ds-radius-pill);
+  cursor: pointer;
+  color: var(--ds-text-tertiary);
+  transition: background var(--ds-transition-fast), color var(--ds-transition-fast);
+}
+
+.shortcuts-close-btn:hover {
+  background: var(--ds-hover-lg);
+  color: var(--ds-text-inverse);
+}
+
+.shortcuts-content-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--ds-space-xl) var(--ds-space-xl);
+}
+
+.shortcuts-content-scroll::-webkit-scrollbar { width: 4px; }
+.shortcuts-content-scroll::-webkit-scrollbar-track { background: transparent; }
+.shortcuts-content-scroll::-webkit-scrollbar-thumb {
+  background: var(--ds-border-strong);
+  border-radius: var(--ds-radius-pill);
+}
+
+.shortcuts-group {
+  margin-top: 0;
+}
+
+.shortcuts-group-title {
+  position: sticky;
+  top: 0;
+  background: var(--ds-bg-overlay);
+  padding: var(--ds-space-xl) 0 var(--ds-space-md) 0;
+  font-family: var(--ds-font-family-code);
+  font-size: var(--ds-font-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ds-accent);
+  border-bottom: 1px solid var(--ds-border-default);
+  margin-bottom: var(--ds-space-xs);
+  z-index: 1;
+  opacity: 0.85;
+}
+
+.shortcuts-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.shortcuts-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--ds-border-subtle);
+}
+
+.shortcuts-item:last-child {
+  border-bottom: none;
+}
+
+.shortcuts-label {
+  font-size: var(--ds-font-md);
+  font-weight: 500;
+  color: var(--ds-text-secondary);
+}
+
+.shortcuts-keys {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-xs);
+  flex-shrink: 0;
+}
+
+.shortcuts-keys kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 24px;
+  padding: 0 var(--ds-space-sm);
+  background: rgba(var(--ds-accent-rgb), 0.1);
+  color: var(--ds-accent);
+  border: 1px solid rgba(var(--ds-accent-rgb), 0.2);
+  border-bottom: 2px solid rgba(var(--ds-accent-rgb), 0.4);
+  border-radius: var(--ds-radius-sm);
+  font-family: var(--ds-font-family-text);
+  font-size: var(--ds-font-xs);
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  user-select: none;
+  box-shadow: var(--ds-shadow-sm);
+  transition: all var(--ds-transition-fast);
+}
+
+.shortcuts-item:hover .shortcuts-keys kbd {
+  background: rgba(var(--ds-accent-rgb), 0.15);
+  border-color: rgba(var(--ds-accent-rgb), 0.3);
+  transform: translateY(-1px);
+  box-shadow: var(--ds-shadow-md);
+}

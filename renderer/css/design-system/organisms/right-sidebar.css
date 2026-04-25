@@ -1,6 +1,5 @@
 /* ============================================================
-   ds-right-sidebar.css — Unified Right Sidebar Organism
-   Atomic Design System (Organism)
+   ds-right-sidebar.css — Organism
    ============================================================ */
 
 .ds-right-sidebar-wrap {
@@ -10,9 +9,10 @@
   flex-shrink: 0;
   margin-left: -4px;
   position: relative;
-  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-    min-width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-    margin-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    width     0.4s var(--ds-ease-spring),
+    min-width 0.4s var(--ds-ease-spring),
+    margin-left 0.4s var(--ds-ease-spring);
 }
 
 .ds-right-sidebar-wrap.open {
@@ -30,12 +30,12 @@
   height: 100%;
   cursor: col-resize;
   z-index: 10;
-  transition: background 0.2s;
+  transition: background var(--ds-transition-fast);
 }
 
 .ds-right-sidebar-resizer:hover,
 .ds-right-sidebar-resizer.is-resizing {
-  background: rgba(var(--accent-rgb), 0.3);
+  background: rgba(var(--ds-accent-rgb), 0.3);
 }
 
 /* ── Main Sidebar Container ── */
@@ -44,11 +44,11 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: var(--glass-sidebar);
+  background: var(--ds-glass-sidebar);
   backdrop-filter: blur(var(--ds-blur-md));
   -webkit-backdrop-filter: blur(var(--ds-blur-md));
-  border: 1px solid var(--border-sidebar);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-panel);
   overflow: hidden;
 }
 
@@ -56,8 +56,8 @@
 .ds-sidebar-header {
   height: 40px;
   flex-shrink: 0;
-  padding: 0 0 0 16px;
-  border-bottom: 1px solid var(--border-main);
+  padding: 0 0 0 var(--ds-space-lg);
+  border-bottom: 1px solid var(--ds-border-default);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -66,7 +66,7 @@
 .ds-sidebar-title {
   font-size: var(--ds-font-lg);
   font-weight: 700;
-  color: var(--text-90);
+  color: var(--ds-text-primary);
   flex: 1;
   text-transform: capitalize;
 }
@@ -105,14 +105,14 @@
   justify-content: center;
   gap: var(--ds-space-lg);
   width: 100%;
-  color: var(--text-30);
+  color: var(--ds-text-disabled);
   text-align: center;
   padding: 40px;
   pointer-events: none;
 }
 
 .ds-sidebar-empty p {
-  font-family: 'Roboto Mono', monospace;
+  font-family: var(--ds-font-family-code);
   font-size: var(--ds-font-sm);
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -123,24 +123,24 @@
   opacity: 0.2;
 }
 
-/* ── Item Styles (Generic) ── */
+/* ── Item Styles ── */
 .ds-sidebar-item {
   display: flex;
   flex-direction: column;
   padding: var(--ds-space-lg);
-  border-bottom: 1px solid var(--border-main);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-bottom: 1px solid var(--ds-border-default);
+  transition: all var(--ds-transition-fast);
   position: relative;
   cursor: pointer;
 }
 
 .ds-sidebar-item:hover {
-  background: var(--layer-hover);
+  background: var(--ds-hover-sm);
 }
 
 .ds-sidebar-item.is-selected {
-  background: rgba(var(--accent-rgb), 0.08);
-  border-left: 2px solid var(--accent-color);
+  background: rgba(var(--ds-accent-rgb), 0.08);
+  border-left: 2px solid var(--ds-accent);
 }
 
 .ds-item-header {
@@ -151,11 +151,11 @@
 }
 
 .ds-item-label {
-  font-family: 'Roboto Mono', monospace;
+  font-family: var(--ds-font-family-code);
   font-weight: 600;
   font-size: var(--ds-font-xs);
   text-transform: uppercase;
-  color: var(--text-50);
+  color: var(--ds-text-secondary);
   letter-spacing: 0.05em;
 }
 
@@ -176,9 +176,9 @@
 }
 
 .ds-item-snippet {
-  font-family: 'Roboto Mono', monospace;
+  font-family: var(--ds-font-family-code);
   font-size: var(--ds-font-xs);
-  color: var(--text-20);
+  color: var(--ds-text-disabled);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -186,15 +186,15 @@
 }
 
 .ds-item-snippet .highlight-selection {
-  background: rgba(var(--accent-rgb), 0.2);
-  color: var(--accent-color);
+  background: rgba(var(--ds-accent-rgb), 0.2);
+  color: var(--ds-accent);
   padding: 0 2px;
-  border-radius: var(--ds-radius-xs);
+  border-radius: var(--ds-radius-chip);
 }
 
 .ds-item-body {
   font-size: var(--ds-font-base);
-  color: var(--text-70);
+  color: var(--ds-text-secondary);
   line-height: 20px;
   word-break: break-word;
 }
@@ -202,7 +202,6 @@
 .ds-text-clamp-5 {
   display: -webkit-box;
   -webkit-line-clamp: 5;
-  line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
   font-size: var(--ds-font-md);

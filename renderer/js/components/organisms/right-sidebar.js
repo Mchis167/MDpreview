@@ -104,7 +104,7 @@ class RightSidebarComponent {
       const btn = DesignSystem.createHeaderAction(action.icon, action.title, (e) => {
         e.stopPropagation();
         action.onClick();
-      });
+      }, action.id);
       actionsEl.appendChild(btn);
     });
 

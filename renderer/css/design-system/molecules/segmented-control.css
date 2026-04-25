@@ -6,16 +6,16 @@
   display: flex;
   background: var(--ds-glass-hover);
   padding: 2px;
-  border-radius: var(--ds-radius-lg);
+  border-radius: var(--ds-radius-panel);
   gap: 2px;
   position: relative;
 }
 
 .ds-segment-indicator {
   position: absolute;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: var(--ds-radius-md);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  background: var(--ds-white-a08);
+  border-radius: max(0px, calc(var(--ds-radius-panel) - 2px));
+  box-shadow: 0 1px 2px var(--ds-black-a20);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
   z-index: 0;
@@ -27,7 +27,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--ds-radius-md);
+  border-radius: max(0px, calc(var(--ds-radius-panel) - 2px));
   color: var(--ds-text-secondary);
   cursor: pointer;
   transition: all var(--ds-transition-fast);
@@ -36,7 +36,7 @@
 }
 
 .ds-segment-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--ds-white-a05);
   color: var(--ds-text-primary);
 }
 

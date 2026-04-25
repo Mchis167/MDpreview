@@ -7,9 +7,9 @@
   position: fixed;
   z-index: 2000;
   width: 360px;
-  background: var(--layer-modal, #111);
-  border: 1px solid var(--border-sidebar, rgba(255, 255, 255, 0.08));
-  border-radius: var(--radius-lg, 16px);
+  background: var(--ds-bg-overlay);
+  border: 1px solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-panel);
   /* Figma Multi-layered Shadow (Node 25:161) */
   box-shadow:
     132px 97px 46px 0px rgba(0, 0, 0, 0),
@@ -56,7 +56,7 @@
 
 .ds-comment-form__input-wrap {
   padding: 20px;
-  border-bottom: 1px solid var(--border-main, rgba(255, 255, 255, 0.05));
+  border-bottom: 1px solid var(--ds-border-default);
   flex: 1;
 }
 
@@ -67,7 +67,7 @@
   background: transparent !important;
   border: none !important;
   padding: 0;
-  color: var(--text-90);
+  color: var(--ds-text-primary);
   font-family: inherit;
   font-size: var(--ds-font-base);
   line-height: 20px;
@@ -82,8 +82,8 @@
   min-height: 48px;
   justify-content: flex-end;
   align-items: center;
-  background: rgba(0, 0, 0, 0.1);
-  border-top: 1px solid var(--border-main, rgba(255, 255, 255, 0.05));
+  background: var(--ds-black-a20);
+  border-top: 1px solid var(--ds-border-default);
   padding: var(--ds-space-md);
 }
 
@@ -105,7 +105,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 0 0 16px;
-  border-bottom: 1px solid var(--border-main, rgba(255, 255, 255, 0.05));
+  border-bottom: 1px solid var(--ds-border-default);
 }
 
 .ds-comment-form__secondary-action {
@@ -120,7 +120,7 @@
   font-family: 'Roboto Mono', monospace;
   font-size: var(--ds-font-xs);
   font-weight: 600;
-  color: var(--text-50);
+  color: var(--ds-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -132,7 +132,7 @@
 .ds-comment-form__display {
   font-size: var(--ds-font-base);
   line-height: 20px;
-  color: var(--text-90);
+  color: var(--ds-text-primary);
   white-space: pre-wrap;
   word-break: break-word;
 }

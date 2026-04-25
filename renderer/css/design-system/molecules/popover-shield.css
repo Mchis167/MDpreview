@@ -1,0 +1,186 @@
+/* ============================================================
+   popover-shield.css — Generic Popover Shield (Modal Backdrop)
+   ============================================================ */
+
+.ds-popover-shield {
+  position: absolute;
+  inset: 0;
+  background: var(--ds-black-a40);
+  backdrop-filter: blur(var(--ds-blur-lg));
+  -webkit-backdrop-filter: blur(var(--ds-blur-lg));
+  z-index: 2500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: all var(--ds-transition-main);
+}
+
+.ds-popover-shield.show,
+.ds-popover-floating.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Floating Popover (No Backdrop) ── */
+.ds-popover-floating {
+  position: absolute;
+  inset: 0;
+  z-index: 2500;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ds-popover-floating .ds-popover-card {
+  pointer-events: auto;
+}
+
+.ds-popover-card {
+  width: 640px;
+  background: var(--ds-bg-overlay);
+  border: 1px solid var(--ds-border-default);
+  border-radius: var(--ds-radius-panel);
+  overflow: hidden;
+  box-shadow: var(--ds-shadow-lg);
+  transform: scale(0.96) translateY(12px);
+  opacity: 0;
+  transition:
+    transform 0.25s var(--ds-ease-spring),
+    opacity   0.25s var(--ds-ease-spring);
+  display: flex;
+  flex-direction: column;
+}
+
+.show .ds-popover-card {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+.ds-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ds-space-xl) var(--ds-space-lg) var(--ds-space-xl) var(--ds-space-xl);
+}
+
+.ds-popover-title {
+  font-size: var(--ds-font-xl);
+  font-weight: 700;
+  color: var(--ds-text-primary);
+}
+
+.ds-popover-close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ds-radius-widget);
+  color: var(--ds-text-secondary);
+  transition: all var(--ds-transition-fast);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.ds-popover-close:hover {
+  background: var(--ds-hover-sm);
+  color: var(--ds-text-primary);
+}
+
+.ds-popover-body {
+  padding: 0 0 var(--ds-space-sm) 0;
+  max-height: 75vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.ds-popover-body::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Reusable Group Card ── */
+.ds-popover-group {
+  background: var(--ds-hover-sm);
+  margin: 0 var(--ds-space-sm) var(--ds-space-md) var(--ds-space-sm);
+  padding: var(--ds-space-xl) var(--ds-space-xl) var(--ds-space-sm) var(--ds-space-xl);
+  border-radius: var(--ds-radius-widget);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ds-popover-group:last-child {
+  margin-bottom: 0;
+}
+
+.ds-popover-group-title {
+  font-family: var(--ds-font-family-code);
+  font-size: var(--ds-font-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ds-accent);
+  margin-bottom: var(--ds-space-md);
+  opacity: 0.8;
+}
+
+.ds-popover-footer {
+  padding: var(--ds-space-lg) var(--ds-space-xl);
+  border-top: 1px solid var(--ds-border-default);
+  background: var(--ds-hover-sm);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ds-space-md);
+}
+
+/* ── Confirm / Prompt Modal ── */
+.ds-confirm-content,
+.ds-prompt-content {
+  padding: var(--ds-space-sm) var(--ds-space-xl) var(--ds-space-xl) var(--ds-space-xl);
+}
+
+.ds-confirm-message {
+  font-size: var(--ds-font-base);
+  line-height: 1.6;
+  color: var(--ds-text-secondary);
+}
+
+.ds-prompt-content .ds-field-label {
+  display: block;
+  font-size: var(--ds-font-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ds-text-tertiary);
+  margin-bottom: var(--ds-space-sm);
+}
+
+.ds-prompt-content .ds-input {
+  width: 100%;
+  height: 44px;
+  background: var(--ds-hover-sm);
+  border: 1px solid var(--ds-border-default);
+  border-radius: var(--ds-radius-widget);
+  padding: 0 var(--ds-space-lg);
+  color: var(--ds-text-primary);
+  font-family: var(--ds-font-family-text);
+  font-size: var(--ds-font-base);
+  transition: all var(--ds-transition-fast);
+}
+
+.ds-prompt-content .ds-input:focus {
+  outline: none;
+  border-color: var(--ds-accent);
+  background: var(--ds-hover-md);
+}
+
+.ds-prompt-content .ds-input.ds-input-error {
+  border-color: var(--ds-accent-red);
+  background: rgba(255, 69, 0, 0.05);
+}

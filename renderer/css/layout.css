@@ -2,14 +2,34 @@
    layout.css — Top-level app layout: 3-column flex structure
    ============================================================ */
 
+/* ── Global Reset ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+button { background: none; border: none; cursor: pointer; font-family: inherit; }
+
+body {
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--ds-bg-base);
+  color: var(--ds-text-primary);
+  font-family: var(--ds-font-family-text);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--ds-white-a10); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ds-white-a20); }
+
 #app-layout {
   display: flex;
   height: 100%;
   width: 100%;
   padding: var(--ds-space-xl);
-  /* Default for windowed mode (to clear macOS buttons) */
   gap: var(--ds-space-xs);
-  transition: padding 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: padding var(--ds-transition-main);
 }
 
 #sidebar-left-wrap {
@@ -18,9 +38,10 @@
   overflow: hidden;
   flex-shrink: 0;
   margin-right: 0;
-  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-    min-width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-    margin-right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    width       0.4s var(--ds-ease-spring),
+    min-width   0.4s var(--ds-ease-spring),
+    margin-right 0.4s var(--ds-ease-spring);
   position: relative;
   height: 100%;
 }
@@ -29,13 +50,10 @@
   width: 0 !important;
   min-width: 0 !important;
   margin-right: -4px;
-  /* Hide gap */
 }
-
 
 body.is-fullscreen #app-layout {
   padding: var(--ds-space-sm);
-  /* Standard premium spacing in fullscreen */
 }
 
 main {
@@ -50,11 +68,11 @@ main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: var(--glass-main);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  border: 1px solid var(--border-main);
-  border-radius: var(--ds-radius-lg);
+  background: var(--ds-glass-main);
+  backdrop-filter: blur(var(--ds-blur-xs));
+  -webkit-backdrop-filter: blur(var(--ds-blur-xs));
+  border: 1px solid var(--ds-border-default);
+  border-radius: var(--ds-radius-panel);
   overflow: hidden;
   position: relative;
 }

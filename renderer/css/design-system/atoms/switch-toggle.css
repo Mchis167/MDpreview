@@ -1,0 +1,76 @@
+/* ============================================================
+   switch-toggle.css — Reusable Toggle Component
+   ============================================================ */
+
+.switch-toggle {
+  display: inline-flex;
+  align-items: center;
+  width: 52px;
+  height: 32px;
+  padding: var(--ds-space-xs);
+  background: var(--ds-black-a40);
+  border: 1px solid var(--ds-border-default);
+  border-radius: var(--ds-radius-pill);
+  cursor: pointer;
+  position: relative;
+  transition: all var(--ds-transition-main);
+  overflow: hidden;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.switch-toggle.on {
+  background: var(--ds-accent);
+  border-color: var(--ds-black-a20);
+}
+
+.switch-indicator {
+  width: 24px;
+  height: 24px;
+  background: var(--ds-hover-md);
+  border-radius: var(--ds-radius-pill);
+  transition: all 0.3s var(--ds-ease-spring);
+  transform: translateX(0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--ds-shadow-sm);
+}
+
+.switch-toggle.on .switch-indicator {
+  background: var(--ds-text-inverse);
+  transform: translateX(20px);
+  box-shadow: var(--ds-shadow-md);
+}
+
+.switch-toggle:hover {
+  background: var(--ds-hover-lg);
+}
+
+.switch-toggle.on:hover {
+  background: var(--ds-accent-hover);
+  border-color: var(--ds-text-inverse);
+}
+
+.switch-toggle:hover .switch-indicator {
+  background: var(--ds-border-strong);
+}
+
+.switch-toggle.on:hover .switch-indicator {
+  background: var(--ds-text-inverse);
+  box-shadow: 0 0 8px var(--ds-white-a30);
+}
+
+.switch-toggle:active .switch-indicator {
+  width: 28px;
+}
+
+.switch-toggle.on:active .switch-indicator {
+  transform: translateX(16px);
+}
+
+.switch-toggle.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}

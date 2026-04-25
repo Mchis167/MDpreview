@@ -168,13 +168,13 @@ function initGlobalShortcuts() {
     // ── Mod+↑/↓ — Scroll to top/bottom ─────────────────
     if (mod && e.key === 'ArrowUp') {
       e.preventDefault();
-      const viewer = document.getElementById('md-viewer');
+      const viewer = document.getElementById('md-viewer-mount');
       if (viewer) viewer.scrollTo({ top: 0, behavior: 'auto' });
       return;
     }
     if (mod && e.key === 'ArrowDown') {
       e.preventDefault();
-      const viewer = document.getElementById('md-viewer');
+      const viewer = document.getElementById('md-viewer-mount');
       if (viewer) viewer.scrollTo({ top: viewer.scrollHeight, behavior: 'auto' });
       return;
     }

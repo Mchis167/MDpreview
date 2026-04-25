@@ -21,8 +21,8 @@
   background: var(--ds-bg-toolbar);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
-  border-radius: var(--ds-radius-xl);
-  border: 1px solid var(--ds-border-toolbar);
+  border-radius: var(--ds-radius-shell);
+  border: 1px solid var(--ds-border-strong);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
   pointer-events: auto;
 }
@@ -35,8 +35,8 @@
 
 .ds-toolbar-divider {
   width: 1px;
-  height: stretch;
-  background: var(--ds-border-toolbar);
+  height: 20px;
+  background: var(--ds-border-strong);
 }
 
 .ds-toolbar-buttons {

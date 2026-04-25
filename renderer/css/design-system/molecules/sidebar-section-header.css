@@ -1,70 +1,68 @@
 /* ══════════════════════════════════════════════════
-   sidebar-section-header.css — Atomic Design (Molecule)
-   Styles for unified sidebar section headers.
+   sidebar-section-header.css — Molecule
    ══════════════════════════════════════════════════ */
 
 .sidebar-section-header {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    height: 32px;
-    padding: 0 8px 0 6px;
-    flex-shrink: 0;
-    margin-top: var(--ds-space-xs);
-    margin-bottom: var(--ds-space-xs);
-    transition: background 0.2s var(--apple-ease);
-    border-radius: var(--ds-radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 32px;
+  padding: 0 var(--ds-space-sm) 0 var(--ds-space-xs);
+  flex-shrink: 0;
+  margin-top: var(--ds-space-xs);
+  margin-bottom: var(--ds-space-xs);
+  transition: background var(--ds-transition-fast);
+  border-radius: var(--ds-radius-sm);
 }
 
 .sidebar-section-header[style*="cursor: pointer"]:hover .section-label,
 .sidebar-section-header[style*="cursor: pointer"]:hover .section-toggle-btn {
-    opacity: 0.9;
-    color: var(--text-70);
+  opacity: 0.9;
+  color: var(--ds-text-secondary);
 }
 
 .section-toggle-btn {
-    width: 24px !important;
-    height: 24px !important;
-    background: none !important;
-    border: none !important;
-    opacity: 0.4;
-    transition: transform 0.3s var(--apple-ease), opacity 0.2s !important;
+  width: 24px !important;
+  height: 24px !important;
+  background: none !important;
+  border: none !important;
+  opacity: 0.4;
+  transition: transform var(--ds-transition-main), opacity var(--ds-transition-fast) !important;
 }
 
 .section-toggle-btn:hover {
-    opacity: 0.8;
+  opacity: 0.8;
 }
 
-/* Rotation logic when the parent section is collapsed */
 .sidebar-section.collapsed .section-toggle-btn {
-    transform: rotate(-90deg);
+  transform: rotate(-90deg);
 }
 
 .sidebar-section-header .section-label {
-    flex: 1;
-    font-family: var(--font-code);
-    font-weight: 500;
-    font-size: var(--ds-font-xs);
-    text-transform: uppercase;
-    color: var(--text-60);
-    opacity: 0.6;
-    margin-bottom: 0;
-    padding: 0 4px;
-    letter-spacing: 0.05em;
-    pointer-events: none;
-    transition: all 0.2s var(--apple-ease);
+  flex: 1;
+  font-family: var(--ds-font-family-code);
+  font-weight: 500;
+  font-size: var(--ds-font-xs);
+  text-transform: uppercase;
+  color: var(--ds-text-secondary);
+  opacity: 0.6;
+  margin-bottom: 0;
+  padding: 0 var(--ds-space-xs);
+  letter-spacing: 0.05em;
+  pointer-events: none;
+  transition: all var(--ds-transition-fast);
 }
 
 .header-actions-group {
-    display: flex;
-    align-items: center;
-    gap: var(--ds-space-xs);
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-xs);
 }
 
 .header-action-divider {
-    width: 1px;
-    height: 14px;
-    background: rgba(255, 255, 255, 0.1);
-    margin: 0 4px;
-    flex-shrink: 0;
+  width: 1px;
+  height: 14px;
+  background: var(--ds-border-strong);
+  margin: 0 var(--ds-space-xs);
+  flex-shrink: 0;
 }

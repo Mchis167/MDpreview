@@ -1,28 +1,8 @@
 /* ============================================================
-   styles.css — Entry point. Imports all component stylesheets.
-   Edit the file for the specific component you need to change:
-     tokens.css   — CSS variables, reset, button components
-     layout.css   — App 3-column flex structure
-     sidebar.css  — Left sidebar: tree, search, mode switcher
-     toolbar.css  — Top toolbar, breadcrumb, segmented control
-     markdown.css — Markdown viewer, diagrams, empty state
-     comments.css — Right sidebar, comment list, comment form
-     modals.css   — Workspace panel, add-workspace, zoom modal
+   styles.css — App entry point.
+   design-system.css → tokens → atoms (reset, utilities) → molecules → organisms
+   layout.css        → global reset (uses tokens), 3-column skeleton
    ============================================================ */
 
-@import url('tokens.css');
 @import url('design-system.css');
-@import url('design-system/atoms/icon-action-button.css');
-@import url('design-system/molecules/sidebar-section-header.css');
-@import url('design-system/molecules/context-menu.css');
-@import url('textarea.css');
-@import url('switch-toggle.css');
 @import url('layout.css');
-@import url('design-system/organisms/tree-view.css');
-@import url('toolbar.css');
-@import url('markdown.css');
-@import url('design-system/organisms/right-sidebar.css');
-@import url('popover-shield.css');
-@import url('workspace-panel.css');
-@import url('settings-panel.css');
-@import url('modals-misc.css');

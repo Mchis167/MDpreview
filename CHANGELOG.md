@@ -2,7 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Not Commited] — 2026-04-25 13:45
 
+### Added
+- **Full Codebase Audit Post-Refactor**: Thực hiện kiểm tra toàn bộ codebase để xác nhận tính toàn vẹn logic sau refactor, mapping CSS chain, JS wiring, IPC channels, và xác định 2 bug thực tế + 3 vấn đề phụ.
+
+### Changed
+- **Header Action Button Wiring**: Nâng cấp `createHeaderAction()` để hỗ trợ `data-action-id` attribute, cho phép kết nối button DOM với action config một cách độc lập không phụ thuộc text label.
+- **CSS Architecture Cleanup**: Hoàn tất token migration — chuyển CSS reset, scrollbar, `.btn` legacy aliases từ `tokens.css` cũ vào đúng file của chúng (`layout.css`, `button.css`, `utilities.css`).
+- **Import Order Optimization**: Đổi thứ tự import CSS — `design-system.css` (tokens) trước `layout.css` để đảm bảo body reset có thể tham chiếu `--ds-*` tokens.
+
+### Fixed
+- **Cmd+↑/Cmd+↓ Broken Scroll-to-Top/Bottom**: Sửa `getElementById('md-viewer')` → `getElementById('md-viewer-mount')` trong `toolbar.js:171,177`. Element ID sai khiến shortcuts không hoạt động.
+- **Mermaid Zoom Modal % Label Not Updating**: Thêm `updateZoomPercent()` call trong wheel zoom handler `zoom.js:155`. Zoom via wheel không cập nhật percent display.
+- **Copy Comments Icon Animation Never Plays**: Thay `getElementById('copy-comments-btn')` → `querySelector('[data-action-id="copy"]')` trong `comments.js:131`. Button không có ID nên animation không chạy.
+- **Dead Code in Comments Module**: Xóa dòng dead code `const input = document.getElementById('comment-input')` từ `comments.js:641-644` (element đã bị xóa trong refactor cũ).
+
+### Removed
+- **Legacy tokens.css**: Xóa hoàn toàn file `renderer/css/tokens.css` vì nội dung đã được migrate sang các file chuyên biệt — tất cả CSS variables đã được `design-system/tokens.css` định nghĩa.
 
 ## [Not Commited] — 2026-04-25 11:20
 

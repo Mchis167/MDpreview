@@ -1,15 +1,37 @@
 /* ============================================================
-   design-system.css — Design System entry point
+   design-system.css — Single entry point for all DS components.
+   Import order: tokens → atoms → molecules → organisms
    ============================================================ */
 
+/* ── Tokens ─────────────────────────────────────────────── */
 @import url('design-system/tokens.css');
+
+/* ── Atoms ──────────────────────────────────────────────── */
+@import url('design-system/atoms/utilities.css');
 @import url('design-system/atoms/button.css');
+@import url('design-system/atoms/icon-action-button.css');
 @import url('design-system/atoms/tooltip.css');
+@import url('design-system/atoms/switch-toggle.css');
+@import url('design-system/atoms/textarea.css');
+
+/* ── Molecules ──────────────────────────────────────────── */
 @import url('design-system/molecules/segmented-control.css');
 @import url('design-system/molecules/mode-switcher.css');
-@import url('design-system/organisms/workspace-picker.css');
-@import url('design-system/organisms/change-action-view-bar.css');
-@import url('design-system/organisms/tab-bar.css');
-@import url('design-system/organisms/sidebar-left.css');
-@import url('design-system/organisms/comment-form.css');
+@import url('design-system/molecules/sidebar-section-header.css');
+@import url('design-system/molecules/context-menu.css');
+@import url('design-system/molecules/popover-shield.css');
 
+/* ── Organisms ──────────────────────────────────────────── */
+@import url('design-system/organisms/workspace-picker.css');
+@import url('design-system/organisms/sidebar-left.css');
+@import url('design-system/organisms/tree-view.css');
+@import url('design-system/organisms/tab-bar.css');
+@import url('design-system/organisms/toolbar.css');
+@import url('design-system/organisms/right-sidebar.css');
+@import url('design-system/organisms/comment-form.css');
+@import url('design-system/organisms/change-action-view-bar.css');
+@import url('design-system/organisms/workspace-panel.css');
+@import url('design-system/organisms/settings-panel.css');
+@import url('design-system/organisms/modals-misc.css');
+@import url('design-system/organisms/editor.css');
+@import url('design-system/organisms/markdown.css');

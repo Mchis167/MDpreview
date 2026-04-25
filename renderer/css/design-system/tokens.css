@@ -1,68 +1,214 @@
 /* ============================================================
-   design-system/tokens.css — Base tokens for MDPreview
+   design-system/tokens.css — Single source of truth.
+
+   3-tier architecture:
+     Tier 1 — Primitives  : Raw values (colors, sizes, easing)
+     Tier 2 — Alpha       : Pre-built opacity variants
+     Tier 3 — Semantic    : Named by purpose, references Tier 1-2
    ============================================================ */
 
 :root {
-  /* ── Colors ────────────────────────────────────────────── */
-  --ds-bg-toolbar: rgba(13, 13, 13, 0.5);
-  --ds-bg-toolbar-inner: rgba(255, 255, 255, 0.03);
-  --ds-border-toolbar: rgba(255, 255, 255, 0.08);
 
-  --ds-accent-orange: #ffbf48;
-  --ds-accent-color: var(--ds-accent-orange);
+  /* ════════════════════════════════════════════════════════
+     TIER 1 — PRIMITIVES
+     ════════════════════════════════════════════════════════ */
 
-  --ds-text-primary: rgba(255, 255, 255, 0.9);
-  --ds-text-secondary: rgba(255, 255, 255, 0.5);
-  --ds-text-dark: rgba(0, 0, 0, 0.9);
+  /* ── Brand Colors ──────────────────────────────────────── */
+  --ds-primitive-orange:     #ffbf48;
+  --ds-primitive-green:      #22c55e;
+  --ds-primitive-red:        #ff453a;
+  --ds-primitive-blue:       #1E90FF;
 
-  /* ── Unified Text Tokens (Legacy Support) ──────────────── */
-  --text-90: rgba(255, 255, 255, 0.9);
-  --text-70: rgba(255, 255, 255, 0.7);
-  --text-60: rgba(255, 255, 255, 0.6);
-  --text-50: rgba(255, 255, 255, 0.5);
-  --text-40: rgba(255, 255, 255, 0.4);
-  --text-30: rgba(255, 255, 255, 0.3);
-  --text-20: rgba(255, 255, 255, 0.2);
-  --text-10: rgba(255, 255, 255, 0.1);
+  /* RGB channels for alpha composition */
+  --ds-primitive-orange-rgb: 255, 191, 72;
+  --ds-primitive-green-rgb:  34, 197, 94;
+  --ds-primitive-red-rgb:    255, 69, 58;
+  --ds-primitive-blue-rgb:   30, 144, 255;
 
-  /* ── Spacing ───────────────────────────────────────────── */
-  --ds-space-xs: 4px;
-  --ds-space-sm: 8px;
-  --ds-space-md: 12px;
-  --ds-space-lg: 16px;
-  --ds-space-xl: 24px;
+  /* ── Base Backgrounds ──────────────────────────────────── */
+  --ds-primitive-base:    #151515;
+  --ds-primitive-surface: #1a1a1a;
+  --ds-primitive-deep:    #111111;
+  --ds-primitive-white:   #ffffff;
+  --ds-primitive-black:   #000000;
+
+  /* ── Spacing Scale ─────────────────────────────────────── */
+  --ds-space-xs:  4px;
+  --ds-space-sm:  8px;
+  --ds-space-md:  12px;
+  --ds-space-lg:  16px;
+  --ds-space-xl:  24px;
   --ds-space-xxl: 32px;
 
-  /* ── Radius ────────────────────────────────────────────── */
-  --ds-radius-xs: 4px;
-  --ds-radius-sm: 6px;
-  --ds-radius-md: 8px;
-  --ds-radius-lg: 12px;
-  --ds-radius-xl: 20px;
+  /* ── Radius Scale (Primitives) ─────────────────────────── */
+  --ds-radius-xs:   4px;
+  --ds-radius-sm:   6px;
+  --ds-radius-md:   8px;
+  --ds-radius-lg:   12px;
+  --ds-radius-xl:   20px;
+  --ds-radius-xxl:  24px;
   --ds-radius-full: 999px;
 
   /* ── Typography ────────────────────────────────────────── */
-  --ds-font-xs: 11px;
-  --ds-font-sm: 12px;
-  --ds-font-md: 13px;
-  --ds-font-base: 14px;
-  --ds-font-lg: 15px;
-  --ds-font-xl: 18px;
+  --ds-font-family-text: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --ds-font-family-code: 'Roboto Mono', ui-monospace, SFMono-Regular, monospace;
 
-  /* ── Effects ───────────────────────────────────────────── */
+  --ds-font-xs:   11px;
+  --ds-font-sm:   12px;
+  --ds-font-md:   13px;
+  --ds-font-base: 14px;
+  --ds-font-lg:   15px;
+  --ds-font-xl:   18px;
+
+  /* ── Easing ────────────────────────────────────────────── */
+  --ds-ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ds-ease-out:    cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Blur Scale ────────────────────────────────────────── */
+  --ds-blur-xs: 6px;
+  --ds-blur-sm: 8px;
   --ds-blur-md: 12px;
   --ds-blur-lg: 20px;
-  --lift-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  --ds-blur-xl: 32px;
+
+
+  /* ════════════════════════════════════════════════════════
+     TIER 2 — ALPHA PALETTE
+     Pre-built opacity variants. Use these everywhere instead
+     of writing rgba() by hand.
+     ════════════════════════════════════════════════════════ */
+
+  /* ── White alpha (for borders, layers, text tints) ─────── */
+  --ds-white-a02: rgba(255, 255, 255, 0.02);
+  --ds-white-a03: rgba(255, 255, 255, 0.03);
+  --ds-white-a04: rgba(255, 255, 255, 0.04);
+  --ds-white-a05: rgba(255, 255, 255, 0.05);
+  --ds-white-a08: rgba(255, 255, 255, 0.08);
+  --ds-white-a10: rgba(255, 255, 255, 0.10);
+  --ds-white-a12: rgba(255, 255, 255, 0.12);
+  --ds-white-a20: rgba(255, 255, 255, 0.20);
+  --ds-white-a30: rgba(255, 255, 255, 0.30);
+  --ds-white-a40: rgba(255, 255, 255, 0.40);
+  --ds-white-a60: rgba(255, 255, 255, 0.60);
+  --ds-white-a90: rgba(255, 255, 255, 0.90);
+
+  /* ── Black alpha (for overlays, shadows) ───────────────── */
+  --ds-black-a20: rgba(0, 0, 0, 0.20);
+  --ds-black-a30: rgba(0, 0, 0, 0.30);
+  --ds-black-a40: rgba(0, 0, 0, 0.40);
+  --ds-black-a50: rgba(0, 0, 0, 0.50);
+  --ds-black-a80: rgba(0, 0, 0, 0.80);
+  --ds-black-a90: rgba(0, 0, 0, 0.90);
+
+  /* ── Accent alpha (for status backgrounds, highlights) ─── */
+  --ds-orange-a08: rgba(var(--ds-primitive-orange-rgb), 0.08);
+  --ds-orange-a15: rgba(var(--ds-primitive-orange-rgb), 0.15);
+  --ds-orange-a30: rgba(var(--ds-primitive-orange-rgb), 0.30);
+
+  --ds-green-a15:  rgba(var(--ds-primitive-green-rgb), 0.15);
+  --ds-green-a20:  rgba(var(--ds-primitive-green-rgb), 0.20);
+  --ds-green-a40:  rgba(var(--ds-primitive-green-rgb), 0.40);
+
+  --ds-red-a08:    rgba(var(--ds-primitive-red-rgb), 0.08);
+  --ds-red-a10:    rgba(var(--ds-primitive-red-rgb), 0.10);
+  --ds-red-a15:    rgba(var(--ds-primitive-red-rgb), 0.15);
+  --ds-red-a30:    rgba(var(--ds-primitive-red-rgb), 0.30);
+
+
+  /* ════════════════════════════════════════════════════════
+     TIER 3 — SEMANTIC
+     Named by purpose. Always references Tier 1 or Tier 2.
+     ════════════════════════════════════════════════════════ */
+
+  /* ── Backgrounds ───────────────────────────────────────── */
+  --ds-bg-base:     var(--ds-primitive-base);
+  --ds-bg-surface:  var(--ds-primitive-surface);
+  --ds-bg-overlay:  var(--ds-primitive-deep);
+  --ds-bg-backdrop: var(--ds-black-a40);        /* modal/popover overlay */
+
+  --ds-bg-toolbar:       rgba(13, 13, 13, 0.5);
+  --ds-bg-toolbar-inner: var(--ds-white-a03);
+
+  --ds-glass-sidebar: linear-gradient(166deg, var(--ds-white-a05) 0%, rgba(255, 255, 255, 0.01) 100%);
+  --ds-glass-main:    linear-gradient(168deg, var(--ds-black-a20) 0%, var(--ds-black-a30) 100%);
+  --ds-glass-hover:   var(--ds-white-a05);
+
+  /* ── Borders ───────────────────────────────────────────── */
+  --ds-border-subtle:  var(--ds-white-a04);
+  --ds-border-default: var(--ds-white-a05);
+  --ds-border-strong:  var(--ds-white-a08);
+
+  /* ── Radius — Semantic Context Levels ──────────────────── */
+  /*
+   * 4 nesting levels. Use the level matching the component's
+   * visual depth — not a fixed pixel size.
+   *
+   *  shell   → outermost glass panels, modals
+   *  panel   → dropdowns, cards, sidebars, sections
+   *  widget  → buttons, inputs, toolbars, list rows
+   *  chip    → tags, badges, syntax highlights, indicators
+   *  pill    → toggles, avatars, fully-rounded elements
+   */
+  --ds-radius-shell:  var(--ds-radius-xxl);   /* 24px */
+  --ds-radius-panel:  var(--ds-radius-lg);    /* 12px */
+  --ds-radius-widget: var(--ds-radius-md);    /* 8px  */
+  --ds-radius-chip:   var(--ds-radius-xs);    /* 4px  */
+  --ds-radius-pill:   var(--ds-radius-full);  /* 999px */
+
+  /* ── Radius — Inset Formula ────────────────────────────── */
+  /*
+   * inner-radius = max(0px, outer-radius − padding)
+   * When outer radius or spacing changes, inner radii adjust
+   * automatically — no manual fixes needed.
+   */
+  --ds-radius-shell-inset:  max(0px, calc(var(--ds-radius-shell)  - var(--ds-space-xl)));
+  /*                                   24px - 24px = 0px (flush inner edge)             */
+  --ds-radius-panel-inset:  max(0px, calc(var(--ds-radius-panel)  - var(--ds-space-sm)));
+  /*                                   12px - 8px  = 4px                                */
+  --ds-radius-widget-inset: max(0px, calc(var(--ds-radius-widget) - var(--ds-space-xs)));
+  /*                                   8px  - 4px  = 4px                                */
+
+  /* ── Text ──────────────────────────────────────────────── */
+  --ds-text-primary:   var(--ds-white-a90);
+  --ds-text-secondary: var(--ds-white-a60);
+  --ds-text-tertiary:  var(--ds-white-a40);
+  --ds-text-disabled:  var(--ds-white-a20);
+  --ds-text-inverse:   var(--ds-primitive-white);  /* pure white */
+  --ds-text-on-accent: var(--ds-black-a90);        /* text on orange/colored bg */
+
+  /* ── Interactive Layers ────────────────────────────────── */
+  --ds-hover-sm: var(--ds-white-a03);
+  --ds-hover-md: var(--ds-white-a05);
+  --ds-hover-lg: var(--ds-white-a08);
+  --ds-active:   var(--ds-white-a10);
+
+  /* ── Accent ────────────────────────────────────────────── */
+  --ds-accent:         var(--ds-primitive-orange);
+  --ds-accent-rgb:     var(--ds-primitive-orange-rgb);
+  --ds-accent-hover:   linear-gradient(var(--ds-white-a10), var(--ds-white-a10)), var(--ds-accent);
+
+  --ds-accent-green:   var(--ds-primitive-green);
+  --ds-accent-red:     var(--ds-primitive-red);
+  --ds-accent-blue:    var(--ds-primitive-blue);
+
+  /* ── Status ────────────────────────────────────────────── */
+  --ds-status-success:    var(--ds-primitive-green);
+  --ds-status-success-bg: var(--ds-green-a15);
+  --ds-status-danger:     var(--ds-primitive-red);
+  --ds-status-danger-bg:  var(--ds-red-a10);
+  --ds-status-warning:    var(--ds-primitive-orange);
+  --ds-status-warning-bg: var(--ds-orange-a08);
+
+  /* ── Shadows ───────────────────────────────────────────── */
+  --ds-shadow-sm:   0 2px 8px var(--ds-black-a20);
+  --ds-shadow-md:   0 8px 24px rgba(0, 0, 0, 0.35);
+  --ds-shadow-lg:   0 20px 40px var(--ds-black-a50);
+  --ds-shadow-lift: 0 20px 40px var(--ds-black-a30), 0 0 0 1px var(--ds-white-a10);
+  --ds-shadow-glow: 0 0 20px var(--ds-orange-a30);
 
   /* ── Transitions ───────────────────────────────────────── */
-  --ds-transition-fast: 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-  --ds-transition-main: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  --apple-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --ds-transition-fast: 0.15s var(--ds-ease-spring);
+  --ds-transition-main: 0.3s  var(--ds-ease-spring);
+  --ds-transition-slow: 0.5s  var(--ds-ease-spring);
 
-  /* ── Compatibility Aliases ─────────────────────────────── */
-  --radius-lg: var(--ds-radius-lg);
-  --radius-md: var(--ds-radius-md);
-  --radius-sm: var(--ds-radius-sm);
-  --border-sidebar: rgba(255, 255, 255, 0.08);
-  --border-main: rgba(255, 255, 255, 0.05);
 }

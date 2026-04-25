@@ -128,7 +128,7 @@ const CommentsModule = (() => {
         }
         
         // Icon animation
-        const btn = document.getElementById('copy-comments-btn');
+        const btn = document.querySelector('.ds-header-action[data-action-id="copy"]');
         if (btn) {
             const originalIcon = btn.innerHTML;
             btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>`;
@@ -600,6 +600,33 @@ const CommentsModule = (() => {
     _clearHighlights();
   }
 
+  function _renderExpandedModal() {
+    if (document.getElementById('expanded-comment-modal')) return;
+    const el = document.createElement('div');
+    el.id = 'expanded-comment-modal';
+    el.className = 'expanded-textarea-modal';
+    el.innerHTML = `
+      <div class="expanded-textarea-backdrop"></div>
+      <div class="expanded-textarea-container">
+        <div class="expanded-textarea-header">
+          <div class="textarea-label">COMMENT FEEDBACK</div>
+          <button id="minimize-comment-btn" class="textarea-expand-btn" title="Minimize">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/>
+              <line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/>
+            </svg>
+          </button>
+        </div>
+        <div class="expanded-textarea-body">
+          <textarea id="expanded-comment-input" class="expanded-textarea-input" placeholder="What's your feedback..."></textarea>
+        </div>
+        <div class="expanded-textarea-footer">
+          <button id="expanded-save-comment" class="ds-btn ds-btn-primary">Save Comment</button>
+        </div>
+      </div>`;
+    document.body.appendChild(el);
+  }
+
   function _bindEvents() {
     const formComp = CommentFormComponent.getInstance();
     
@@ -612,9 +639,6 @@ const CommentsModule = (() => {
     });
 
     formComp.onExpand((text) => {
-      // Use existing expanded modal logic for now
-      const input = document.getElementById('comment-input'); // This might not work now that we removed it from HTML
-      // We need to sync with the expanded modal
       const modal = document.getElementById('expanded-comment-modal');
       const modalInput = document.getElementById('expanded-comment-input');
       if (modal && modalInput) {
@@ -661,6 +685,7 @@ const CommentsModule = (() => {
   }
 
   function init() {
+    _renderExpandedModal();
     _bindEvents();
   }
 
