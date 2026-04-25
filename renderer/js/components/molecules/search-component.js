@@ -60,3 +60,4 @@ const SearchComponent = (() => {
 
   return { create };
 })();
+window.SearchComponent = SearchComponent;

@@ -12,11 +12,11 @@
   border-radius: var(--ds-radius-panel);
   /* Figma Multi-layered Shadow (Node 25:161) */
   box-shadow:
-    132px 97px 46px 0px rgba(0, 0, 0, 0),
-    85px 62px 42px 0px rgba(0, 0, 0, 0.04),
-    48px 35px 35px 0px rgba(0, 0, 0, 0.13),
-    21px 16px 26px 0px rgba(0, 0, 0, 0.23),
-    5px 4px 14px 0px rgba(0, 0, 0, 0.26);
+    132px 97px 46px 0 rgba(0, 0, 0, 0),
+    85px 62px 42px 0 rgba(0, 0, 0, 0.04),
+    48px 35px 35px 0 rgba(0, 0, 0, 0.13),
+    21px 16px 26px 0 rgba(0, 0, 0, 0.23),
+    5px 4px 14px 0 rgba(0, 0, 0, 0.26);
   display: none;
   overflow: hidden;
   transition: opacity 0.2s, transform 0.2s;
@@ -134,7 +134,7 @@
   line-height: 20px;
   color: var(--ds-text-primary);
   white-space: pre-wrap;
-  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 /* ── Mode Transitions ──────────────────────────────────── */

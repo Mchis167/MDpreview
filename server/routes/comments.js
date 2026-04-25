@@ -63,7 +63,7 @@ router.post('/comments', (req, res) => {
   let resultComment;
 
   // Destructure to avoid overwriting id with null/undefined from frontend
-  const { id, createdAt, ...data } = commentData;
+  const { id, createdAt: _createdAt, ...data } = commentData;
 
   if (id) {
     const idx = comments.findIndex(c => c.id === id);

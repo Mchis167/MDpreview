@@ -52,7 +52,7 @@ router.get('/files', async (req, res) => {
               mtime: stat.mtimeMs // Add mtime for files
             });
           }
-        } catch (e) {
+        } catch (_e) {
           // skip inaccessible files
         }
       });
@@ -139,7 +139,7 @@ router.get('/file/exists', (req, res) => {
     const fullPath = resolvePath(watchDir, filePath);
     const exists = fs.existsSync(fullPath);
     res.json({ exists });
-  } catch (err) {
+  } catch (_err) {
     res.json({ exists: false });
   }
 });

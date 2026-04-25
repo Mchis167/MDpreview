@@ -1,198 +1,284 @@
 # MDpreview — AI Rules & Architecture Guide
 
-> This is the **single source of truth** for all AI agents working on this project.
-> All AI tools (Claude Code, Cursor, Windsurf, Copilot, Antigravity, etc.) must follow these rules.
+**Single source of truth** for AI agents. Reference: [ARCHITECTURE.md](../../ARCHITECTURE.md), [Workflows README](../workflows/README.md)
 
 ---
 
-## Agent Workflow (All AI Tools)
+## 🎯 Agent Workflow (5 Steps)
 
-For every non-trivial task (implementation, refactoring, bug fix):
+1. **Research** — Check GitHub project: `gh project item-list 3 --owner Mchis167 --format json`
+2. **Plan** — Create implementation_plan artifact using `/plan` workflow → STOP
+3. **Wait** — Do NOT proceed without user approval ("proceed", "approve", or feedback)
+4. **Execute** — Use `/smart-edit` workflow with surgical edits
+5. **Verify & Document** — Test, update `/changelog`, run `npm run lint`
 
-1. **Research** — Check the GitHub Project for relevant tasks: `gh project item-list 3 --owner Mchis167 --format json`
-2. **Plan** — Present an `implementation_plan` with proposed changes before touching code
-3. **Wait** — STOP after presenting the plan. Do NOT proceed until the user says "proceed", "approve", or gives feedback
-4. **Execute** — Only then make code changes
-5. **Status Update** — Immediately move the task to **"In review"** after changes are applied
-6. **Verify** — Present a `walkthrough` confirming the change works
-
-**Anti-patterns to avoid:**
-- Auto-proceeding after writing a plan
-- Leaving a task in "In progress" after code is changed
-- Assuming the plan is correct without user approval
-- **Auto-updating Changelog** — Never add entries to `CHANGELOG.md` unless the user explicitly requests it.
+**Anti-patterns:**
+- ❌ Auto-proceed after plan (wait for approval)
+- ❌ Leave task "In progress" after code changes (move to "In review")
+- ❌ Auto-update CHANGELOG (only when explicitly requested)
+- ❌ Bypass linting gates
+- ❌ Hardcode colors/spacing in CSS
+- ❌ Create global variables in JS
 
 ---
 
-## GitHub Project Management
+## 🏗️ Project Architecture
 
-**Project ID:** `PVT_kwHOBots8c4BTH09`
+```
+Electron App (MDpreview)
+├── main.js           ← Electron main process
+├── server.js         ← Express server (file API, socket.io)
+└── renderer/         ← UI (Vanilla JS + CSS)
+    ├── index.html    ← Single entry point (no fragments)
+    ├── css/
+    │   ├── design-system.css  ← Component imports
+    │   └── design-system/
+    │       ├── tokens.css     ← 3-tier tokens
+    │       ├── atoms/         ← Atomic components
+    │       ├── molecules/     ← Molecule components
+    │       └── organisms/     ← Organism components
+    └── js/
+        ├── core/       ← app.js, electron-bridge.js
+        ├── components/ ← atoms, molecules, organisms (IIFE modules)
+        ├── services/   ← Business logic (IIFE modules)
+        ├── modules/    ← Feature controllers (IIFE modules)
+        └── utils/      ← Pure functions (IIFE modules)
+```
 
-### Finding & prioritizing tasks
+---
+
+## 📐 CSS: 3-Tier Token System
+
+| Tier | Purpose | Format | Example |
+|------|---------|--------|---------|
+| **1: Primitives** | Raw values | `--ds-primitive-*` | `--ds-primitive-orange: #ffbf48` |
+| **2: Alpha Palette** | Opacity variants | `--ds-*-a[10-90]` | `--ds-white-a30: rgba(255,255,255,0.30)` |
+| **3: Semantic** | Purpose-named | `--ds-[category]-*` | `--ds-accent: var(--ds-primitive-orange)` |
+
+### CSS Component Pattern
+
+```css
+.ds-button {
+  --_bg: var(--ds-bg-base);      /* Local variable for variants */
+  --_color: var(--ds-text-primary);
+  
+  display: flex;
+  background: var(--_bg);        /* Use tokens only, never hardcode */
+  color: var(--_color);
+  transition: all var(--ds-transition-smooth);
+}
+
+.ds-button.ds-button--primary {
+  --_bg: var(--ds-accent);       /* Variant: override only what changes */
+  --_color: var(--ds-text-on-accent);
+}
+```
+
+### CSS Rules (Enforced)
+- ✅ Always use tokens: `var(--ds-...)`
+- ✅ Use local variables for variants: `--_varname`
+- ✅ Semantic naming: `--ds-[category]-[value]-[variant]`
+- ✅ Run `npm run lint:css` (0 errors mandatory)
+- ❌ No hardcoded colors/spacing
+- ❌ No CSS in styles.css (use `@import` only)
+
+---
+
+## 🔌 JavaScript: IIFE Module System
+
+### 5 Module Categories
+
+| Type | Path | Export | Example |
+|------|------|--------|---------|
+| **Components** | `renderer/js/components/[level]/[name].js` | `window.[Name]Component` | `IconActionButton` |
+| **Services** | `renderer/js/services/[name]-service.js` | `window.[Name]Service` | `FileService` |
+| **Modules** | `renderer/js/modules/[name].js` | `window.[Name]Module` | `TabsModule` |
+| **Utilities** | `renderer/js/utils/[name].js` | `window.[Name]Util` | `ZoomUtil` |
+| **Core** | `renderer/js/core/[name].js` | `window.[Name]` | `AppState` |
+
+### IIFE Pattern (Mandatory)
+
+```javascript
+const ModuleName = (() => {
+  'use strict';
+  let _state = {};
+  function _helper() { /* ... */ }
+  return { init() { /* ... */ } };
+})();
+window.ModuleName = ModuleName;  // Explicit export
+```
+
+### Script Pipeline (Correct Load Order)
+```
+Core (app.js)
+  ↓
+Atoms → Molecules → Organisms
+  ↓
+Services → Utilities
+  ↓
+Modules → Boot sequence
+```
+
+### JS Rules (Enforced)
+- ✅ IIFE pattern mandatory
+- ✅ Explicit `window.*` exports
+- ✅ Private functions prefix `_`: `function _helper() {}`
+- ✅ `const`/`let` only (no `var`)
+- ✅ Strict equality: `===` (never `==`)
+- ✅ `console.warn`/`console.error` only (no `console.log`)
+- ✅ Run `npm run lint:js` (0 errors mandatory)
+- ❌ No global state outside IIFE
+- ❌ No duplicated state (use `AppState`)
+
+---
+
+## 📚 Workflows (Use These!)
+
+**9 Core Workflows** + **4 Specialized** — Reference: [Workflows README](../workflows/README.md)
+
+| Workflow | Use | Command |
+|----------|-----|---------|
+| Smart Edit | Fix/update code | `/smart-edit` |
+| Discuss | Analyze without changes | `/discuss` |
+| Changelog | Document changes | `/changelog` |
+| GitHub | Release automation | `/github` |
+| Artifact Docs | Plan/test artifacts | `/artifact-docs` |
+| Console Test | Browser automation test | `/console-test` |
+| Token Mgmt | Add/update tokens | `/token-management` |
+| Module Creation | Create new module | `/module-creation` |
+| Linting Gates | Verify code quality | `/linting-gates` |
+| Atomic Gen | Create component | `/atomic-gen [name] [level]` |
+| Planning | Implementation plan | `/plan` |
+| Refactor | Legacy → Atomic | `/refactor-to-atomic` |
+| Test Cases | Design test suite | `/test [feature]` |
+
+---
+
+## ✅ Adding New Features — Checklist
+
+### New Atomic Component
+- [ ] Run `/atomic-gen [name] [level]` workflow
+- [ ] CSS: `renderer/css/design-system/[level]/[name].css` (use tokens only)
+- [ ] JS: `renderer/js/components/[level]/[name].js` (IIFE pattern if interactive)
+- [ ] Register: CSS import + script in index.html + init in app.js
+- [ ] Verify: `npm run lint` → 0 errors
+- [ ] Update: ARCHITECTURE.md + `/changelog`
+
+### New Feature Module
+- [ ] Use `/module-creation [name]` workflow
+- [ ] IIFE pattern + dependencies declared + window.* export
+- [ ] Register in index.html (correct order) + app.js init call
+- [ ] Verify: `npm run lint` → 0 errors
+- [ ] Update: ARCHITECTURE.md + `/changelog`
+
+### Bug Fix / Code Update
+- [ ] Use `/smart-edit` workflow (surgical edits, minimal diffs)
+- [ ] `npm run lint` after each edit
+- [ ] Use `/console-test` if interactive
+- [ ] Update `/changelog`
+
+---
+
+## 🛡️ Linting Gates (Zero-Error Policy)
+
+### CSS Linting (`npm run lint:css`)
+**Enforced rules:**
+- `color-no-invalid-hex` — Valid hex only
+- `no-duplicate-selectors` — No duplication
+- `length-zero-no-unit` — Use `0` not `0px`
+- `function-calc-no-unspaced-operator` — Space in `calc()`
+- `import-notation` — Use string form `@import "..."`
+
+### JavaScript Linting (`npm run lint:js`)
+**Enforced rules:**
+- `no-unused-vars` — Prefix unused with `_` (e.g., `_unused`, `_err`)
+- `no-undef` — Variables must be defined
+- `eqeqeq` — Use `===` never `==`
+- `no-console` — Only `warn`/`error` allowed
+- `no-var` — Use `const`/`let` only
+
+---
+
+## 🚫 Hard Rules (Never Do This)
+
+### CSS
+- ❌ Hardcode colors: Use `var(--ds-...)`
+- ❌ Hardcode spacing: Use `var(--ds-space-...)`
+- ❌ Write CSS in styles.css: Use `@import` only
+- ❌ Duplicate selectors: Merge into one definition
+- ❌ Unspaced operators in calc(): Add spaces
+
+### JavaScript
+- ❌ Global variables: Use IIFE + `window.*` exports
+- ❌ Duplicate state: Use `AppState` only
+- ❌ Use `var`: Use `const`/`let`
+- ❌ Loose equality `==`: Use `===`
+- ❌ `console.log`: Use `console.warn`/`console.error`
+
+### HTML
+- ❌ New HTML files: Only use `index.html`
+- ❌ Wrong sections: Respect section order
+
+### General
+- ❌ Bypass linting: `npm run lint` must pass
+- ❌ Skip `/changelog`: Always document
+- ❌ Assume plan correct: Wait for approval
+- ❌ Auto-proceed: Wait for explicit approval
+
+---
+
+## 🔗 References & Quick Links
+
+| File | Purpose |
+|------|---------|
+| [ARCHITECTURE.md](../../ARCHITECTURE.md) | Complete system documentation |
+| [Workflows README](../workflows/README.md) | All 13 workflows explained |
+| [.stylelintrc.json](../../.stylelintrc.json) | CSS linting rules (documented) |
+| [eslint.config.mjs](../../eslint.config.mjs) | JS linting rules (documented) |
+| [package.json](../../package.json) | npm scripts: `lint`, `lint:css`, `lint:js` |
+
+---
+
+## 📱 GitHub Project Status
+
 ```bash
-gh project item-list 3 --owner Mchis167 --format json
-gh issue view <number> --repo Mchis167/MDpreview
-```
-Priority order: `In progress` → `Ready` (P0 > P1 > P2) → `Backlog`
+# Project ID: PVT_kwHOBots8c4BTH09
 
-### Updating task status
-```bash
-gh project item-edit --project-id PVT_kwHOBots8c4BTH09 \
-  --id <ITEM_ID> \
-  --field-id PVTSSF_lAHOBots8c4BTH09zhAdKGY \
-  --single-select-option-id <OID>
+Status IDs:
+- Backlog:    f75ad846
+- Ready:      61e4505c
+- In progress: 47fc9ee4
+- In review:  df73e18b (set after code changes)
+- Done:       98236657
 ```
-
-| Status | Option ID | When to use |
-|--------|-----------|-------------|
-| Backlog | `f75ad846` | Not yet started |
-| Ready | `61e4505c` | Scoped and ready to pick up |
-| In progress | `47fc9ee4` | Agent starts planning/researching |
-| In review | `df73e18b` | Code changes applied — set this IMMEDIATELY |
-| Done | `98236657` | Human user confirms satisfied |
 
 ---
 
-## Project Architecture
+## 🎓 Summary: 3 Core Principles
 
-MDpreview is an Electron desktop app for previewing Markdown files.
+1. **Analysis-First** — Plan before code, wait for approval
+2. **Quality Gates** — Zero linting errors, mandatory
+3. **Minimal Diffs** — Surgical edits, no cleanup/reformat
 
+**Development Cycle:**
 ```
-main.js          ← Electron main process (window, IPC, tray)
-server.js        ← Express local server (file API, socket.io, hot reload)
-renderer/        ← UI (HTML + CSS + vanilla JS — no bundler)
+/discuss (analyze)
+  ↓
+/plan (create plan artifact)
+  ↓
+Wait for approval
+  ↓
+/smart-edit (implement per plan)
+  ↓
+/console-test (verify)
+  ↓
+/changelog (document)
+  ↓
+npm run lint (0 errors mandatory)
+  ↓
+Commit & PR
 ```
-
-### HTML — `renderer/index.html`
-
-Single file, no fragments. Section order:
-1. Overlay modals (workspace panel, add-workspace modal)
-2. `#app-layout` (left sidebar → main → right sidebar)
-3. Comment form popup (fixed position)
-4. Zoom modal (fixed position)
-5. `<script>` tags in load order
-
-**Rules:**
-- Add new HTML into the correct section (sidebar → inside `<aside id="sidebar-left">`, modal → before `#app-layout`)
-- Do NOT create new HTML files — only `index.html`
 
 ---
 
-### CSS — `renderer/css/`
-
-`styles.css` is the entry point — **`@import` only**, never write CSS directly into it.
-
-| File | Owns |
-|------|------|
-| `tokens.css` | `:root` variables, reset, `.btn` / `.btn-primary` / `.btn-ghost`, `.hidden` |
-| `layout.css` | `#app-layout`, `<main>`, `.glass-main` |
-| `sidebar.css` | Left sidebar: logo, mode switcher, workspace picker, tree, search, recently viewed, footer |
-| `toolbar.css` | `#toolbar`, breadcrumb, segmented control, `.toolbar-btn` |
-| `markdown.css` | `#md-viewer`, empty state, `#md-content`, mermaid, `.md-line`, `.comment-trigger` |
-| `comments.css` | Right sidebar, comment list, comment form popup |
-| `modals.css` | Workspace panel (`.ws-*`), add-workspace modal (`.aws-*`), zoom modal (`.zoom-ctrl-*`) |
-
-**Rules:**
-- New styles → find the correct file from the table above, never write into `styles.css`
-- New UI component → add a section with a `/* ── Name ── */` comment header
-- Always use CSS variables (`var(--accent-orange)`, `var(--border-main)`, etc.) — no hardcoded colors
-- **Design System**: All new components must follow [design-system.md](file:///Users/mchisdo/MDpreview/.ai/design-system.md) and Atomic Design principles.
-- New CSS file → add `@import url('filename.css');` to `styles.css` (keep `tokens.css` first)
-
----
-
-### JavaScript — `renderer/js/`
-
-No bundler, no module system. Each file is a global script. Load order = dependency order:
-
-```
-tree.js → workspace.js → comments.js → zoom.js → mermaid.js → toolbar.js → sidebar.js → app.js
-```
-
-| File | Domain | Global exports |
-|------|--------|----------------|
-| `tree.js` | File tree render, folder toggle, search | `TreeModule` |
-| `workspace.js` | Workspace CRUD, localStorage | `WorkspaceModule` |
-| `comments.js` | Comment form, list, save/load | `CommentsModule` |
-| `zoom.js` | Zoom modal: pan, zoom, controls | `openZoom`, `closeZoom`, `fitZoom`, `initZoom` |
-| `mermaid.js` | Mermaid config, diagram render, click-to-zoom | `initMermaid`, `processMermaid` |
-| `toolbar.js` | Toolbar buttons, Read/Comment toggle | `initToolbarBtns`, `initSegmentedControl` |
-| `sidebar.js` | Mode switcher, search enter/exit, resizer | `initSidebarModeSwitcher`, `initSidebarRevamp`, `initSidebarResizer` |
-| `app.js` | Central state, file loading, socket, boot | `AppState`, `loadFile`, `setNoFile` |
-
-**Global contract:**
-- `AppState` — shared state object, read by all modules. Never duplicate state elsewhere.
-- `loadFile(path)` — load and render a markdown file
-- `setNoFile()` — reset to no-file state
-- `openZoom(svgEl)` — called from `mermaid.js` to open zoom modal
-- `processMermaid(container)` — called from `app.js` after rendering HTML
-
-**Rules:**
-- New UI logic → write `init*()` in the correct domain file, call it from the boot sequence in `app.js` with a `// filename.js` comment
-- Shared state → add to `AppState`. Module-local state → keep local, don't pollute globals
-- New JS file → add `<script src="js/filename.js"></script>` in `index.html` before `app.js`, in dependency order
-
----
-
-## Adding New Features — Checklist
-
-### New UI behavior
-- [ ] Identify domain (toolbar / sidebar / modal / markdown viewer)
-- [ ] Write `init*()` in the correct JS file
-- [ ] Call it from `app.js` DOMContentLoaded with `// file.js` comment
-- [ ] Add styles to the correct CSS file
-
-### New modal
-- [ ] HTML before `#app-layout` in `index.html`
-- [ ] Styles in `modals.css`
-- [ ] JS in relevant domain file or new file
-
-### New JS file
-- [ ] Create in `renderer/js/`
-- [ ] Add `<script>` tag in `index.html` before `app.js`
-- [ ] Position after any files this one depends on
-- [ ] Update the table above
-
-### New CSS file
-- [ ] Create in `renderer/css/`
-- [ ] Add `@import` to `styles.css`
-- [ ] Keep `tokens.css` as the first import
-
----
-
-## Hard Rules — Never Do This
-
-- Write CSS directly into `styles.css`
-- Put toolbar logic in `sidebar.js` or vice versa (keep domains clean)
-- Hardcode colors like `#ffbf48`, `#0e0e12` — use `var(--accent-orange)`, `var(--bg-base)`, etc.
-- Create new HTML files in `renderer/` — only `index.html`
-- Add frameworks or bundlers — vanilla JS is intentional
-- Duplicate shared state — everything goes through `AppState`
-- Modify `main.js` or `server.js` for UI-only changes
-
----
-
-## Dependency Diagram
-
-```
-index.html
-├── css/styles.css
-│   ├── tokens.css     ← CSS variables (always first)
-│   ├── layout.css
-│   ├── sidebar.css
-│   ├── toolbar.css
-│   ├── markdown.css
-│   ├── comments.css
-│   └── modals.css
-│
-└── js/ (load order)
-    ├── tree.js        → TreeModule
-    ├── workspace.js   → WorkspaceModule  (needs TreeModule, setNoFile)
-    ├── comments.js    → CommentsModule   (needs AppState)
-    ├── zoom.js        → openZoom
-    ├── mermaid.js     → processMermaid   (needs openZoom)
-    ├── toolbar.js     (needs AppState.commentMode)
-    ├── sidebar.js     (needs DOM)
-    └── app.js         → AppState, loadFile, setNoFile
-                          (needs processMermaid, CommentsModule, TreeModule)
-```
+**Last Updated:** 2026-04-25 | **Version:** 2.0 | **Status:** Current ✅

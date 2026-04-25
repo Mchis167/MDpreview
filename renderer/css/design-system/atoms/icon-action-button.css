@@ -1,59 +1,64 @@
-/* ══════════════════════════════════════════════════
-   icon-action-button.css — Atom
-   Small icon action buttons (24×24) with 16×16 icons.
-   ══════════════════════════════════════════════════ */
+/* ============================================================
+   design-system/atoms/icon-action-button.css
+   Uses --_ local variables so variants override props, not rules.
+   ============================================================ */
 
 .ds-icon-action-btn {
-  width: 24px;
-  height: 24px;
+  /* ── Local Variables ── */
+  --_size:        24px;
+  --_radius:      var(--ds-radius-widget);
+  --_bg:          transparent;
+  --_color:       var(--ds-text-tertiary);
+  --_bg-hover:    var(--ds-hover-md);
+  --_color-hover: var(--ds-text-secondary);
+
+  width: var(--_size);
+  height: var(--_size);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-text-tertiary);
-  border-radius: var(--ds-radius-widget);
-  transition: all var(--ds-transition-fast);
-  flex-shrink: 0;
+  border-radius: var(--_radius);
+  background: var(--_bg);
+  color: var(--_color);
   border: none;
-  background: transparent;
   cursor: pointer;
   padding: 0;
+  flex-shrink: 0;
+  transition: all var(--ds-transition-fast);
 }
 
 .ds-icon-action-btn:hover {
-  background: var(--ds-hover-md);
-  color: var(--ds-text-secondary);
-}
-
-.ds-icon-action-btn.is-danger:hover {
-  background: var(--ds-red-a10);
-  color: var(--ds-accent-red);
-}
-
-/* ── Primary Variant ── */
-.ds-icon-action-btn.is-primary {
-  background: var(--ds-accent);
-  color: var(--ds-text-on-accent);
-}
-
-.ds-icon-action-btn.is-primary:hover {
-  background: var(--ds-accent-hover);
-  transform: scale(1.1);
-}
-
-/* ── Large Size ── */
-.ds-icon-action-btn.is-large {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--ds-radius-widget);
-}
-
-.ds-icon-action-btn.is-large svg {
-  width: 18px !important;
-  height: 18px !important;
+  background: var(--_bg-hover);
+  color: var(--_color-hover);
 }
 
 .ds-icon-action-btn svg {
   width: 16px !important;
   height: 16px !important;
   stroke-width: 2.2px;
+}
+
+/* ── Variants (only override changed props) ─────────────── */
+.ds-icon-action-btn.is-danger {
+  --_bg-hover:    var(--ds-red-a10);
+  --_color-hover: var(--ds-accent-red);
+}
+
+.ds-icon-action-btn.is-primary {
+  --_bg:          var(--ds-accent);
+  --_color:       var(--ds-text-on-accent);
+  --_bg-hover:    var(--ds-accent-hover);
+  --_color-hover: var(--ds-text-on-accent);
+}
+
+.ds-icon-action-btn.is-primary:hover { transform: scale(1.1); }
+
+.ds-icon-action-btn.is-large {
+  --_size:   32px;
+  --_radius: var(--ds-radius-widget);
+}
+
+.ds-icon-action-btn.is-large svg {
+  width: 18px !important;
+  height: 18px !important;
 }

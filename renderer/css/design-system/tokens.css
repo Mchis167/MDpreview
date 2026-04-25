@@ -28,9 +28,9 @@
   /* ── Base Backgrounds ──────────────────────────────────── */
   --ds-primitive-base:    #151515;
   --ds-primitive-surface: #1a1a1a;
-  --ds-primitive-deep:    #111111;
-  --ds-primitive-white:   #ffffff;
-  --ds-primitive-black:   #000000;
+  --ds-primitive-deep:    #111;
+  --ds-primitive-white:   #fff;
+  --ds-primitive-black:   #000;
 
   /* ── Spacing Scale ─────────────────────────────────────── */
   --ds-space-xs:  4px;
@@ -157,15 +157,15 @@
 
   /* ── Radius — Inset Formula ────────────────────────────── */
   /*
-   * inner-radius = max(0px, outer-radius − padding)
+   * inner-radius = max(0, outer-radius − padding)
    * When outer radius or spacing changes, inner radii adjust
    * automatically — no manual fixes needed.
    */
-  --ds-radius-shell-inset:  max(0px, calc(var(--ds-radius-shell)  - var(--ds-space-xl)));
+  --ds-radius-shell-inset:  max(0, calc(var(--ds-radius-shell) - var(--ds-space-xl)));
   /*                                   24px - 24px = 0px (flush inner edge)             */
-  --ds-radius-panel-inset:  max(0px, calc(var(--ds-radius-panel)  - var(--ds-space-sm)));
+  --ds-radius-panel-inset:  max(0, calc(var(--ds-radius-panel) - var(--ds-space-sm)));
   /*                                   12px - 8px  = 4px                                */
-  --ds-radius-widget-inset: max(0px, calc(var(--ds-radius-widget) - var(--ds-space-xs)));
+  --ds-radius-widget-inset: max(0, calc(var(--ds-radius-widget) - var(--ds-space-xs)));
   /*                                   8px  - 4px  = 4px                                */
 
   /* ── Text ──────────────────────────────────────────────── */

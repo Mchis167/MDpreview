@@ -162,7 +162,7 @@ const SettingsModule = (() => {
   function _getCustomBgs() {
     try {
       return JSON.parse(localStorage.getItem('mdpreview_custom_bg_images') || '[]');
-    } catch (e) { return []; }
+    } catch (_e) { return []; }
   }
 
   function _toBase64(file) {
@@ -233,3 +233,4 @@ const SettingsModule = (() => {
 
   return { init, open, close, updateFont };
 })();
+window.SettingsModule = SettingsModule;

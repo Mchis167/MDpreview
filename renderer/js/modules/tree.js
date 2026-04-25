@@ -443,7 +443,7 @@ const TreeModule = (() => {
         _handleToggle(node);
       } else {
         if (window.loadFile) {
-          window.loadFile(node.path).catch(err => {
+          window.loadFile(node.path).catch(_err => {
             console.warn('Failed to load file from tree click:', node.path);
           });
         }
@@ -452,7 +452,7 @@ const TreeModule = (() => {
     }
   }
 
-  async function _handleRename(e, node, itemEl) {
+  async function _handleRename(e, node, _itemEl) {
     if (e && e.stopPropagation) e.stopPropagation();
     state.renamingPath = node.path;
     render(true); // Re-render to show input
@@ -594,7 +594,7 @@ const TreeModule = (() => {
     else TreeDragManager.initStandardDrag(e, itemEl, node, context);
   }
 
-  function _handleMouseLeave(e, node, itemEl) {
+  function _handleMouseLeave(e, node, _itemEl) {
     if (TreeDragManager.getIsDragging()) return;
     if (node.type !== 'directory') return;
     const idx = state.selectedPaths.indexOf(node.path);
@@ -740,7 +740,7 @@ const TreeModule = (() => {
   }
 
   // ── Multi-selection Helpers ─────────────────────────────
-  function toggleSelect(path, skipSync = false) {
+  function toggleSelect(path, _skipSync = false) {
     const idx = state.selectedPaths.indexOf(path);
     if (idx > -1) state.selectedPaths.splice(idx, 1);
     else state.selectedPaths.push(path);
@@ -748,7 +748,7 @@ const TreeModule = (() => {
     _syncSelectionUI();
   }
 
-  function selectRange(path, skipSync = false) {
+  function _selectRange(path, skipSync = false) {
     const allVisible = Array.from(document.querySelectorAll('.tree-item'));
     const allPaths = allVisible.map(el => el.dataset.path);
     const startIdx = allPaths.indexOf(state.lastSelectedPath);
@@ -762,13 +762,13 @@ const TreeModule = (() => {
     _syncSelectionUI();
   }
 
-  function deselectAll(skipSync = false) {
+  function deselectAll(_skipSync = false) {
     state.selectedPaths = [];
     state.lastSelectedPath = null;
     _syncSelectionUI();
   }
 
-  function syncSelectionFromTabs(paths) {
+  function syncSelectionFromTabs(_paths) {
     // Disabled: Independent selection between Sidebar and TabBar
     /*
     state.selectedPaths = [...paths];

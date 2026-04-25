@@ -15,7 +15,7 @@ function loadWorkspaces(dataDir) {
     const file = getWorkspacesFile(dataDir);
     if (!fs.existsSync(file)) return { workspaces: [], activeWorkspaceId: null };
     return JSON.parse(fs.readFileSync(file, 'utf8'));
-  } catch (e) {
+  } catch (_e) {
     return { workspaces: [], activeWorkspaceId: null };
   }
 }

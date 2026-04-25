@@ -178,7 +178,7 @@
       return res.json();
     },
     revealInFinder: async (filePath) => {
-      console.log('Reveal in finder not supported in browser:', filePath);
+      console.warn('Reveal in finder not supported in browser:', filePath);
       return { success: false, error: 'Not supported in browser' };
     },
     

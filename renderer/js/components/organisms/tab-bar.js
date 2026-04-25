@@ -188,7 +188,7 @@ class TabBarComponent {
   /**
    * VIP Drag & Drop Engine for Tabs (Horizontal)
    */
-  _initTabDrag(e, itemEl, path) {
+  _initTabDrag(e, itemEl, _path) {
     const tabList = itemEl.closest('.tab-bar__list');
     if (!tabList) return;
 

@@ -4,6 +4,9 @@
    openZoom() is a global called from mermaid.js
    ============================================================ */
 
+(() => {
+'use strict';
+
 let zoomScale = 1, zoomX = 0, zoomY = 0;
 let zoomMoving = false, zoomStartX = 0, zoomStartY = 0;
 let _zoomNatW = 0, _zoomNatH = 0;
@@ -156,3 +159,8 @@ function initZoom() {
     updateZoomPercent();
   }, { passive: false });
 }
+
+window.openZoom = openZoom;
+window.initZoom = initZoom;
+
+})();

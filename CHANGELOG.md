@@ -2,94 +2,45 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Not Commited] — 2026-04-25 13:45
-
-### Added
-- **Full Codebase Audit Post-Refactor**: Thực hiện kiểm tra toàn bộ codebase để xác nhận tính toàn vẹn logic sau refactor, mapping CSS chain, JS wiring, IPC channels, và xác định 2 bug thực tế + 3 vấn đề phụ.
-
-### Changed
-- **Header Action Button Wiring**: Nâng cấp `createHeaderAction()` để hỗ trợ `data-action-id` attribute, cho phép kết nối button DOM với action config một cách độc lập không phụ thuộc text label.
-- **CSS Architecture Cleanup**: Hoàn tất token migration — chuyển CSS reset, scrollbar, `.btn` legacy aliases từ `tokens.css` cũ vào đúng file của chúng (`layout.css`, `button.css`, `utilities.css`).
-- **Import Order Optimization**: Đổi thứ tự import CSS — `design-system.css` (tokens) trước `layout.css` để đảm bảo body reset có thể tham chiếu `--ds-*` tokens.
-
-### Fixed
-- **Cmd+↑/Cmd+↓ Broken Scroll-to-Top/Bottom**: Sửa `getElementById('md-viewer')` → `getElementById('md-viewer-mount')` trong `toolbar.js:171,177`. Element ID sai khiến shortcuts không hoạt động.
-- **Mermaid Zoom Modal % Label Not Updating**: Thêm `updateZoomPercent()` call trong wheel zoom handler `zoom.js:155`. Zoom via wheel không cập nhật percent display.
-- **Copy Comments Icon Animation Never Plays**: Thay `getElementById('copy-comments-btn')` → `querySelector('[data-action-id="copy"]')` trong `comments.js:131`. Button không có ID nên animation không chạy.
-- **Dead Code in Comments Module**: Xóa dòng dead code `const input = document.getElementById('comment-input')` từ `comments.js:641-644` (element đã bị xóa trong refactor cũ).
-
-### Removed
-- **Legacy tokens.css**: Xóa hoàn toàn file `renderer/css/tokens.css` vì nội dung đã được migrate sang các file chuyên biệt — tất cả CSS variables đã được `design-system/tokens.css` định nghĩa.
-
-## [Not Commited] — 2026-04-25 11:20
+## [1.7.0] — 2026-04-25 23:20
 
 ### Added
 - **ContextMenuComponent (Molecule)**: Tái cấu trúc Menu chuột phải thành thành phần nguyên tử (Atomic Component) độc lập, hỗ trợ render động, phân tách logic và tái sử dụng dễ dàng.
 - **Global Sidebar Shortcuts**: Kích hoạt hệ thống phím tắt toàn cục cho Workspace Explorer: `⌘N` (New File), `⇧⌘N` (New Folder), `⌘D` (Duplicate), `⌘⌫` (Delete) và `Enter` (Rename).
-- **Premium KBD Styling**: Triển khai phong cách phím vật lý (KBD) nổi khối 3D cho các phím tắt trong Context Menu và bảng hướng dẫn, mang lại giao diện chuyên nghiệp như macOS.
-- **Shortcut Indicators**: Bổ sung hiển thị phím tắt (Trailing Indicators) cho toàn bộ các hành động trong Sidebar và Tab Bar (Close Tab: `⌘W`).
-- **Sidebar & Workspace Guide**: Bổ sung mục quản lý file vào bảng hướng dẫn phím tắt (`ShortcutsComponent`) với đầy đủ các tổ hợp phím mới.
-
-### Changed
-- **Unified Context Menu API**: Đồng bộ hóa cách khởi tạo menu chuột phải trên toàn bộ ứng dụng (`tree.js`, `tab-bar.js`) thông qua `DesignSystem.createContextMenu()`.
-- **Smart Positioning Engine**: Nâng cấp thuật toán nhận diện biên cửa sổ, tự động lật (flip) hoặc đẩy (shift) menu nếu vị trí click sát mép màn hình để không bị mất nội dung.
-- **Enhanced Shortcuts Guide**: Tự động chuyển đổi tên phím thành biểu tượng hệ thống (như `Backspace` thành `⌫`) trên môi trường macOS.
-- **CSS Architecture**: Di chuyển toàn bộ style của Context Menu từ `editor.css` sang module chuyên biệt `design-system/molecules/context-menu.css`.
-
-### Fixed
-- **Memory Leak & Event Safety**: Khắc phục lỗi rò rỉ bộ nhớ bằng cách quản lý vòng đời listener `mousedown` và thêm "Guard Clause" ngăn chặn lỗi `TypeError` khi menu đóng bất ngờ.
-- **Auto-Close Logic**: Tự động đóng Context Menu đang mở ngay khi người dùng thực hiện hành động thông qua phím tắt, đảm bảo giao diện luôn sạch sẽ.
-- **Responsive KBD Symbols**: Tối ưu hóa kích thước và độ đậm (weight) cho các ký hiệu đặc biệt (`⌘`, `⇧`) giúp chúng hiển thị rõ nét và cân đối trong khung phím.
-
-## [Not Commited] — 2026-04-25 10:52
-
-### Added
 - **Import/Move from System**: Triển khai tính năng **Import (Copy)** và **Move** file từ hệ điều hành vào Workspace, hỗ trợ chọn nhiều file cùng lúc từ cửa sổ hệ thống.
 - **System IPC Bridge**: Bổ sung `open-file-dialog` IPC handler và API `openFiles` hỗ trợ multi-selections và tùy chỉnh tiêu đề cửa sổ chọn file.
-- **New Lucide Icons**: Tích hợp thêm các icon `copy-plus` và `folder-input` vào DesignSystem phục vụ tính năng quản lý file từ bên ngoài.
-
-### Changed
-- **Fluid Drag Physics**: Nâng cấp công cụ kéo thả (DND) cho cả **Tab Bar** và **Sidebar Tree** hỗ trợ di chuyển tự do trên cả hai trục (X và Y), mang lại cảm giác kéo "thả phanh" và mượt mà hơn.
-- **Refined Drag Scale**: Điều chỉnh tỉ lệ thu nhỏ vật thể đang kéo xuống `0.9` (thay vì scale up) để không gian kéo thả thoáng hơn và không che khuất mục tiêu.
-- **SVG Consolidation**: Chuyển đổi toàn bộ các mã SVG cứng (Sort icons, Chevron) trong `tree.js` và `tree-item.js` sang sử dụng tập trung qua `DesignSystem.getIcon()`.
-- **Standardized Root Menu**: Refactor menu chuột phải tại vùng trống của cây thư mục sang sử dụng `DesignSystem.createContextMenu()`, đảm bảo tính nhất quán về UI và logic.
-
-### Fixed
-- **Indentation Line Ghosting**: Tự động ẩn các đường kẻ dọc (indent lines) của thư mục khi đang kéo thả thông qua class `.is-dragging-active`, giúp giao diện sạch sẽ và tránh lệch layout.
-- **FileService Stabilization**: Khắc phục lỗi `ReferenceError: openFolder` và lỗi treo module `FileService` sau khi refactor code.
-- **Context Menu Icon Consistency**: Áp dụng quy tắc CSS chung để đảm bảo mọi icon trong menu chuột phải luôn hiển thị ở kích thước chuẩn `16x16px`.
-
-## [Not Commited] — 2026-04-25 10:05
-
-### Added
 - **Smooth Sidebar Transitions**: Triển khai hiệu ứng đóng/mở mượt mà cho các mục Sidebar sử dụng `max-height` và `opacity`, mang lại cảm giác premium và tự nhiên.
 - **Auto-Expand on Drag**: Tự động mở các mục sidebar đang đóng khi người dùng kéo file đè lên trên (hover) trong khoảng 600ms, giúp thao tác kéo thả thuận tiện hơn.
-- **Global Drag Performance Guard**: Thêm trạng thái `.is-dragging` toàn cục để tối ưu hóa hiệu năng, tắt các transition không cần thiết trong quá trình kéo thả phức tạp.
-- **Sidebar State Persistence**: Tích hợp ghi nhớ trạng thái đóng/mở của "Recently Viewed", "All Files" và "Search Results" vào `AppState` và `localStorage`.
+- **Premium KBD Styling**: Triển khai phong cách phím vật lý (KBD) nổi khối 3D cho các phím tắt trong Context Menu và bảng hướng dẫn, mang lại giao diện chuyên nghiệp như macOS.
+- **Sidebar & Workspace Guide**: Bổ sung mục quản lý file vào bảng hướng dẫn phím tắt (`ShortcutsComponent`) với đầy đủ các tổ hợp phím mới.
+- **Global Tab Deselect**: Thêm trình lắng nghe sự kiện click toàn cục và phím tắt **Escape** cho Tab Bar, giúp tự động bỏ chọn các tab khi click ra ngoài hoặc nhấn Esc.
+- **Recently Viewed History**: Cải tiến logic "Recently Viewed" để loại bỏ file đang mở hiện tại khỏi danh sách hiển thị.
+- **Full Codebase Audit Post-Refactor**: Thực hiện kiểm tra toàn bộ codebase để xác nhận tính toàn vẹn logic sau refactor.
 
 ### Changed
-- **SidebarSectionHeader Component**: Tái cấu trúc thành phần tiêu đề sidebar hỗ trợ các nhóm hành động (actions), dấu phân cách (dividers) và logic đóng/mở tích hợp.
-- **Standardized Sections**: Hợp nhất và chuẩn hóa giao diện cho toàn bộ các mục chức năng trong Sidebar (Explorer, Recently Viewed, Search).
-- **Refined Animation Easing**: Sử dụng `var(--apple-ease)` và tinh chỉnh `max-height` riêng biệt cho từng mục để đảm bảo tốc độ co giãn luôn "hợp lý" và ổn định.
+- **Code Cleanup & Documentation**: Xóa hoàn toàn tất cả các debug logger (`console.group`, `console.log`, `console.error`) và bổ sung JSDoc chi tiết cho các hàm sync (`syncCursor`, `scrollReadViewToLine`, etc.).
+- **Smart Selection Display**: Chỉ bôi đen text khi user thực sự highlight (isRealSelection: true). Fallback scroll-by-line không tạo ra selection giả.
+- **CSS Architecture Cleanup**: Hoàn tất token migration — chuyển CSS reset, scrollbar, `.btn` legacy aliases vào đúng các file module.
+- **Unified Context Menu API**: Đồng bộ hóa cách khởi tạo menu chuột phải trên toàn bộ ứng dụng thông qua `DesignSystem.createContextMenu()`.
+- **Smart Positioning Engine**: Nâng cấp thuật toán nhận diện biên cửa sổ, tự động lật (flip) hoặc đẩy (shift) menu.
+- **Fluid Drag Physics**: Nâng cấp công cụ kéo thả cho cả Tab Bar và Sidebar Tree hỗ trợ di chuyển tự do trên cả hai trục (X và Y).
+- **Header Action Button Wiring**: Nâng cấp `createHeaderAction()` để hỗ trợ `data-action-id` attribute.
+- **SVG Consolidation**: Chuyển đổi toàn bộ các mã SVG cứng sang sử dụng tập trung qua `DesignSystem.getIcon()`.
+- **Independent Tab/Tree Selection**: Tách biệt hoàn toàn logic chọn nhiều mục (Multi-selection) giữa Tab Bar và Sidebar.
 
 ### Fixed
-- **Workspace Switcher Squashing**: Khắc phục lỗi hiển thị khiến bộ chọn workspace bị bóp nghẹt về chiều ngang sau khi đóng vùng tìm kiếm.
-- **Sidebar Layout Jumps**: Giải quyết triệt để hiện tượng nhảy layout (snap) và hẫng khi đóng mở nhờ sử dụng kỹ thuật `flex: 0 0 auto` kết hợp `max-height`.
-- **Renaming Input Lock**: Ngăn chặn hành động đóng/mở sidebar khi người dùng đang thực hiện đổi tên file để bảo vệ dữ liệu và tránh xung đột giao diện.
+- **Critical: Fuzzy Match Logic Broken After Refactor**: Lỗi cấu trúc if/else trong `syncCursor()` khiến fuzzy match bị skip khi exact match fail.
+- **Critical: scrollReadViewToLine maxAttempts Bug**: Sửa lỗi forced scroll không fire ở lần retry cuối cùng.
+- **Critical: ScrollModule ResizeObserver Race Condition**: Ngăn ResizeObserver override vị trí sync sau khi sync scroll thành công.
+- **Cmd+↑/Cmd+↓ Broken Scroll-to-Top/Bottom**: Sửa Element ID sai (`md-viewer` → `md-viewer-mount`) khiến shortcuts không hoạt động.
+- **Mermaid Zoom Modal % Label Not Updating**: Zoom via wheel giờ đây cập nhật đúng nhãn phần trăm.
+- **Memory Leak & Event Safety**: Khắc phục lỗi rò rỉ bộ nhớ trong Context Menu và thêm Guard Clauses.
+- **Workspace Switcher Squashing**: Khắc phục lỗi hiển thị khiến bộ chọn workspace bị bóp nghẹt.
+- **Sidebar Layout Jumps**: Giải quyết hiện tượng nhảy layout khi đóng mở sidebar.
+- **Infinite Skeleton Loading**: Khắc phục lỗi kẹt trạng thái loading khi click vào tab active.
 
-## [Not Commited] — 2026-04-25 08:55
-
-### Added
-- **Global Tab Deselect**: Thêm trình lắng nghe sự kiện click toàn cục và phím tắt **Escape** cho Tab Bar, giúp tự động bỏ chọn các tab khi click ra ngoài hoặc nhấn Esc (nhất quán với Sidebar).
-- **Recently Viewed History**: Cải tiến logic "Recently Viewed" để loại bỏ file đang mở hiện tại khỏi danh sách hiển thị, biến nó thành một thanh lịch sử thực thụ thay vì danh sách file đang mở.
-
-### Changed
-- **Independent Tab/Tree Selection**: Tách biệt hoàn toàn logic chọn nhiều mục (Multi-selection) giữa Tab Bar và Sidebar, cho phép người dùng thực hiện các thao tác lô (batch operations) độc lập ở mỗi vùng.
-- **Enhanced Focus Shift**: Tự động dọn dẹp vùng chọn ở Sidebar khi người dùng chuyển tab (click bình thường), giúp giao diện luôn tập trung vào nội dung đang làm việc.
-- **Recently Viewed Capacity**: Tăng giới hạn lưu trữ lịch sử lên 10 mục và hiển thị 5 mục gần nhất (không tính file active).
-
-### Fixed
-- **Infinite Skeleton Loading**: Khắc phục lỗi kẹt ở trạng thái loading (skeleton) vĩnh viễn khi click vào một tab đang được chọn hoặc đang active.
+### Removed
+- **Legacy tokens.css**: Xóa hoàn toàn file `renderer/css/tokens.css` sau khi hoàn tất migration.
 
 
 ## [1.6.0] — 2026-04-25 07:55O

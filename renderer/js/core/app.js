@@ -85,7 +85,7 @@ window.AppState = {
           k === 'mdpreview_expanded_paths'
         );
         if (hasLocalData) {
-          console.log('AppState: Initializing server state from local data...');
+          console.warn('AppState: Initializing server state from local data...');
           this.savePersistentState();
         }
       }
@@ -112,11 +112,11 @@ window.AppState = {
           if (!key) continue;
           if (key.startsWith('tabs_')) {
             const wsId = key.replace('tabs_', '');
-            try { allTabs[wsId] = JSON.parse(localStorage.getItem(key)); } catch (e) { }
+            try { allTabs[wsId] = JSON.parse(localStorage.getItem(key)); } catch (_e) { }
           }
           else if (key.startsWith('mdpreview_recent_')) {
             const wsId = key.replace('mdpreview_recent_', '');
-            try { allRecent[wsId] = JSON.parse(localStorage.getItem(key)); } catch (e) { }
+            try { allRecent[wsId] = JSON.parse(localStorage.getItem(key)); } catch (_e) { }
           }
         }
 
@@ -174,7 +174,7 @@ window.AppState = {
     try {
       const modes = JSON.parse(localStorage.getItem('mdpreview_session_modes') || '{}');
       return modes[path] || 'read';
-    } catch (e) {
+    } catch (_e) {
       return 'read';
     }
   },
@@ -188,7 +188,7 @@ window.AppState = {
         modes[path] = mode;
         localStorage.setItem('mdpreview_session_modes', JSON.stringify(modes));
         if (AppState.savePersistentState) AppState.savePersistentState();
-      } catch (e) { }
+      } catch (_e) { }
     }
   },
 
@@ -413,7 +413,7 @@ async function loadFile(filePath) {
         throw new Error(`Failed to load file: ${filePath} (Status: ${res.status})`);
       }
       data = await res.json();
-    } catch (err) {
+    } catch (_err) {
       return;
     }
   }
@@ -448,11 +448,11 @@ async function loadFile(filePath) {
 
   try {
     if (typeof CommentsModule !== 'undefined') await CommentsModule.loadForFile(filePath);
-  } catch (e) { }
+  } catch (_e) { }
 
   try {
     if (typeof CollectModule !== 'undefined') CollectModule.loadForFile(filePath);
-  } catch (e) { }
+  } catch (_e) { }
 
   RecentlyViewedModule.add(filePath);
 
@@ -534,29 +534,6 @@ function updateHeaderUI() {
   }
 }
 
-/**
- * Update Sidebar Toggle Icon to match Figma (Lucide style)
- */
-function updateSidebarToggleIcon(isCollapsed) {
-  const btn = document.getElementById('sidebar-toggle-btn');
-  if (!btn) return;
-
-  if (isCollapsed) {
-    // arrow-right-to-line
-    btn.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M17 12H3"/><path d="m11 18 6-6-6-6"/><path d="M21 5v14"/>
-      </svg>
-    `;
-  } else {
-    // arrow-left-to-line
-    btn.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="m9 6-6 6 6 6"/><path d="M3 12h12"/><path d="M21 19V5"/>
-      </svg>
-    `;
-  }
-}
 
 // ── Boot ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
@@ -662,3 +639,4 @@ function showToast(message, type = 'success') {
     container.classList.remove('show');
   }, 4000);
 }
+window.showToast = showToast;

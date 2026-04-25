@@ -206,3 +206,4 @@ const CommentFormComponent = (() => {
 
   return { getInstance: () => { if (!instance) instance = new CommentForm(); return instance; } };
 })();
+window.CommentFormComponent = CommentFormComponent;

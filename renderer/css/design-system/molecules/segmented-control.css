@@ -14,7 +14,7 @@
 .ds-segment-indicator {
   position: absolute;
   background: var(--ds-white-a08);
-  border-radius: max(0px, calc(var(--ds-radius-panel) - 2px));
+  border-radius: max(0, calc(var(--ds-radius-panel) - 2px));
   box-shadow: 0 1px 2px var(--ds-black-a20);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
@@ -27,7 +27,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: max(0px, calc(var(--ds-radius-panel) - 2px));
+  border-radius: max(0, calc(var(--ds-radius-panel) - 2px));
   color: var(--ds-text-secondary);
   cursor: pointer;
   transition: all var(--ds-transition-fast);

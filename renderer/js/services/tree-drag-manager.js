@@ -99,7 +99,7 @@ const TreeDragManager = (() => {
         if (target.splitIdx !== -1 && i >= target.splitIdx) offset += dragItemHeight;
 
         const currentTop = m.rect.top + offset;
-        const currentBottom = currentTop + dragItemHeight;
+        const _currentBottom = currentTop + dragItemHeight;
         const currentCenter = currentTop + dragItemHeight / 2;
 
         const dist = Math.abs(currentY - (currentCenter - scrollDelta));
@@ -323,7 +323,7 @@ const TreeDragManager = (() => {
 
         // Calculate source folder for cleanup
         const sourceParentPath = draggedItems[0].path.substring(0, draggedItems[0].path.lastIndexOf('/')) || '';
-        const sourceOrderKey = sourceParentPath || 'root';
+        const _sourceOrderKey = sourceParentPath || 'root';
 
         let movedCount = 0;
         const draggedNames = draggedItems.map(di => di.path.split('/').pop());

@@ -155,7 +155,7 @@
   padding: var(--ds-space-xl);
   background: var(--ds-glass-hover);
   border: 1px solid var(--ds-border-default);
-  border-radius: max(0px, calc(var(--ds-radius-shell) - var(--ds-space-xs)));
+  border-radius: max(0, calc(var(--ds-radius-shell) - var(--ds-space-xs)));
   display: flex;
   overflow: clip;
 }

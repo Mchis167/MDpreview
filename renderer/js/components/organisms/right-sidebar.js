@@ -142,7 +142,7 @@ class RightSidebarComponent {
   }
 
   _attachResizerEvents(resizer) {
-    resizer.addEventListener('mousedown', (e) => {
+    resizer.addEventListener('mousedown', (_e) => {
       this.isResizing = true;
       resizer.classList.add('is-resizing');
       document.body.style.cursor = 'col-resize';

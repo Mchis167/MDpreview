@@ -80,3 +80,4 @@ const SwitchToggleModule = (() => {
 
   return { init };
 })();
+window.SwitchToggleModule = SwitchToggleModule;

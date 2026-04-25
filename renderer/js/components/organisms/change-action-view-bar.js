@@ -135,8 +135,8 @@ class ChangeActionViewBarComponent {
 
     // ── Sync Logic (Capture while still visible) ──────────
     const prevMode = AppState.currentMode;
-    const syncData = (prevMode === 'edit') 
-      ? this.captureEditorSyncData() 
+    const syncData = (prevMode === 'edit')
+      ? this.captureEditorSyncData()
       : (prevMode === 'read' || prevMode === 'comment' || prevMode === 'collect' ? this.captureReadViewSyncData() : null);
 
     // ── Dirty Check ───────────────────────────────────────
@@ -247,11 +247,11 @@ class ChangeActionViewBarComponent {
       }
     } else if (targetMode === 'edit') {
       const viewerComp = MarkdownViewer.getInstance();
-      const currentSelection = window.getSelection().toString().trim();
+      const _currentSelection = window.getSelection().toString().trim();
       const mdContentMount = document.getElementById('md-content'); // Might not exist if we just switched
       
       const viewerMount = document.getElementById('md-viewer-mount');
-      const currentScrollPct = (mdContentMount && viewerMount) ? (viewerMount.scrollTop / (viewerMount.scrollHeight - viewerMount.clientHeight || 1)) : 0;
+      const _currentScrollPct = (mdContentMount && viewerMount) ? (viewerMount.scrollTop / (viewerMount.scrollHeight - viewerMount.clientHeight || 1)) : 0;
 
       if (AppState.currentFile) {
         if (viewerComp) {
@@ -295,7 +295,38 @@ class ChangeActionViewBarComponent {
   // ── Helper Methods (Migrated from toolbar.js) ─────────────
 
   /**
-   * Captures sync data from Read View (Selection or Top Visible Line)
+   * Captures a sync context snapshot from the Read View.
+   *
+   * Used when switching Read → Edit so the editor can open at the same
+   * content position the user was reading. Returns an object consumed by
+   * MarkdownLogicService.syncCursor().
+   *
+   * Priority order:
+   *   1. User selection (isRealSelection: true)
+   *      If the user has text highlighted in the Read view, captures the
+   *      selection text, its data-line number, and char offset within the
+   *      element. This is the most accurate anchor.
+   *
+   *   2. Center-visible line (isRealSelection: false)
+   *      Finds the element at the visual center of the viewport using
+   *      elementFromPoint(), extracts its plain text (filtering out UI
+   *      chrome like code-block headers, SVG, aria-hidden nodes).
+   *      The text is capped at 200 chars to keep fuzzy matching fast.
+   *
+   *   3. Proportional scroll fallback (isRealSelection: false)
+   *      Returns scrollPct (0–1) when no data-line element is found.
+   *      Consumed by syncCursor's scroll-only fallback path.
+   *
+   * NOTE on data-line vs raw line offset:
+   *   The HTML renderer assigns data-line numbers from the markdown token
+   *   stream, which may differ from raw file line numbers by 10–20 lines
+   *   in long files (due to YAML frontmatter, blank-line collapsing, etc.).
+   *   This is expected — MarkdownLogicService.syncCursor handles the offset
+   *   via its Fuzzy Match + Delta Cache mechanism.
+   *
+   * @returns {{ line, offset, selectionText, isRealSelection, length? }
+   *          | { line, selectionText, isRealSelection }
+   *          | { scrollPct, isRealSelection }}
    */
   captureReadViewSyncData() {
     const sel = window.getSelection();
@@ -380,7 +411,7 @@ class ChangeActionViewBarComponent {
       return { line, selectionText, isRealSelection: false };
     }
 
-    // ── 4. Final Fallback: Proportional Scroll ──
+    // ── 3. Final Fallback: Proportional Scroll ──
     const scrollPct = viewer.scrollTop / (viewer.scrollHeight - viewer.clientHeight || 1);
     return { scrollPct, isRealSelection: false };
   }
@@ -390,38 +421,61 @@ class ChangeActionViewBarComponent {
     return data.line || null;
   }
 
+  /**
+   * Captures a sync context snapshot from the Edit View (textarea).
+   *
+   * Used when switching Edit → Read so the Read view can scroll to the same
+   * content the user was editing. Returns an object consumed by
+   * scrollReadViewToLine().
+   *
+   * selectionText strategy:
+   *   - If user has text selected (isRealSelection: true) → use the raw
+   *     selection as-is. The Read view will highlight it if found.
+   *   - If cursor is on a "noisy" line (empty, separator like "---", or
+   *     purely markdown symbols) → use the nearest non-noisy neighbor line
+   *     (prev preferred over next) as the anchor text.
+   *   - Otherwise → use the current line text.
+   *
+   *   In both fallback cases, markdown formatting symbols are stripped
+   *   (# * ` _ ~ [ ] ( ) > - +) so the text can match the rendered HTML
+   *   which doesn't contain raw markdown syntax.
+   *   NOTE: digits and decimal points are intentionally preserved so that
+   *   "SESSION 3" and "$0.001279" remain distinguishable.
+   *
+   * @returns {{ line, selectionText, scrollPct, isRealSelection, offset: 0 }}
+   */
   captureEditorSyncData() {
     const textarea = document.getElementById('edit-textarea');
     if (!textarea) return {};
-    
+
     const posStart = textarea.selectionStart;
     const posEnd = textarea.selectionEnd;
     const text = textarea.value;
     const lines = text.split('\n');
-    
+
     const textBefore = text.substring(0, posStart);
     const lineIndex = textBefore.split('\n').length - 1;
     const line = lineIndex + 1;
-    
+
     let selectionText = text.substring(posStart, posEnd);
     let isRealSelection = selectionText.trim().length > 0;
-    
-    // ── UX Improvement: Smart Neighborhood Context ──
+
+    // ── Smart Neighborhood Context (when no active selection) ──
     if (!isRealSelection) {
       const currentLineText = lines[lineIndex] || '';
       const prevLineText = lines[lineIndex - 1] || '';
       const nextLineText = lines[lineIndex + 1] || '';
-      
-      // If current line is noisy (separator, empty), pick neighbors
+
+      // "Noisy" = empty or only markdown/separator characters
       const isNoisy = (str) => !str.trim() || str.trim().match(/^[#*`_\-+=~> ]+$/);
-      
+
       if (isNoisy(currentLineText)) {
-        selectionText = (!isNoisy(prevLineText) ? prevLineText : nextLineText).replace(/[#*`_~\[\]()>\-+\d.]/g, ' ').trim();
+        selectionText = (!isNoisy(prevLineText) ? prevLineText : nextLineText).replace(/[#*`_~\[\]()>\-+]/g, ' ').trim();
       } else {
-        selectionText = currentLineText.replace(/[#*`_~\[\]()>\-+\d.]/g, ' ').trim();
+        selectionText = currentLineText.replace(/[#*`_~\[\]()>\-+]/g, ' ').trim();
       }
     }
-    
+
     const scrollPct = textarea.scrollTop / (textarea.scrollHeight - textarea.clientHeight || 1);
     return { line, selectionText, scrollPct, isRealSelection, offset: 0 };
   }
@@ -436,6 +490,49 @@ class ChangeActionViewBarComponent {
     }
   }
 
+  /**
+   * Scrolls the Read View to the element that best matches (line, selectionText).
+   *
+   * Used when switching Edit → Read to bring the rendered HTML into alignment
+   * with the editor's cursor position.
+   *
+   * ── Matching strategy ──────────────────────────────────────────
+   *   1. Keyword Search (primary)
+   *      Strips markdown formatting symbols from selectionText (# * ` _ ~ etc.)
+   *      but keeps digits and decimal numbers intact.
+   *      Splits into words (length > 2), then scores every [data-line] element
+   *      within ±60 lines of the hint by counting how many words appear in its
+   *      textContent. The highest-scoring element wins; ties broken by proximity
+   *      to `line`.
+   *
+   *      The ±60 search range intentionally exceeds the typical data-line offset
+   *      (~10–20 lines) that arises because the HTML renderer's line numbering
+   *      diverges from raw textarea line numbers.
+   *
+   *   2. Exact line fallback
+   *      If keyword search scores 0, falls back to querySelector('[data-line=N]').
+   *
+   * ── Stability loop ─────────────────────────────────────────────
+   *   Runs inside requestAnimationFrame up to maxAttempts=5 times.
+   *   Scrolls only when the target element's bounding rect has been stable
+   *   for 3 consecutive frames (stableCount≥3) OR on the last attempt.
+   *   This handles documents with Mermaid diagrams or lazy images that
+   *   cause layout shifts after initial render.
+   *
+   * ── After scroll ───────────────────────────────────────────────
+   *   - Wraps scrollIntoView() with _suppressScrollSync=true so
+   *     ScrollModule's debounced listener does not save the sync position
+   *     as the "user scroll" position for future restores.
+   *   - Disconnects viewer._scrollObserver (set by ScrollModule.restore())
+   *     to prevent it from overriding the synced position when a Mermaid
+   *     diagram finishes rendering and triggers a resize event.
+   *   - If isRealSelection=true, re-creates the browser text selection on
+   *     the target element using a TreeWalker text-node search.
+   *
+   * @param {number}  line            - 1-based raw markdown line hint
+   * @param {string}  [selectionText] - Text to search for (from captureEditorSyncData)
+   * @param {boolean} [isRealSelection=false] - If true, re-highlight the text in Read view
+   */
   scrollReadViewToLine(line, selectionText = '', isRealSelection = false) {
     const viewer = document.getElementById('md-viewer-mount');
     const mdContent = document.getElementById('md-content');
@@ -448,20 +545,21 @@ class ChangeActionViewBarComponent {
 
     const tryScroll = () => {
       let target = null;
-      
+
       // 1. Smart Keyword Search (DOM Sandwich)
       if (selectionText && selectionText.trim().length > 3) {
         // Clean markdown symbols: # * ` _ ~ [ ] ( ) > - +
-        const cleanSearchText = selectionText.replace(/[#*`_~\[\]()>\-+\d.]/g, ' ').trim();
+        const cleanSearchText = selectionText.replace(/[#*`_~\[\]()>\-+]/g, ' ').trim();
         const words = cleanSearchText.split(/\s+/).filter(w => w.length > 2);
-        
+
         if (words.length > 0) {
           const allElements = Array.from(mdContent.querySelectorAll('[data-line], [data-source-line]'));
-          
+
           // Find element with highest word density near the target line
           let bestMatch = null;
           let maxScore = 0;
-          const searchRange = 30; // Slightly larger range
+          let bestDistance = Infinity;
+          const searchRange = 60; // Wider range to handle data-line vs raw line offset
 
           allElements.forEach(el => {
             const elLine = parseInt(el.getAttribute('data-line') || el.getAttribute('data-source-line'), 10);
@@ -473,20 +571,22 @@ class ChangeActionViewBarComponent {
               if (content.includes(word)) score++;
             });
 
-            if (score > maxScore) {
+            const distance = Math.abs(elLine - line);
+            // Prefer: higher score first, then closer line number as tiebreaker
+            if (score > maxScore || (score === maxScore && score > 0 && distance < bestDistance)) {
               maxScore = score;
               bestMatch = el;
+              bestDistance = distance;
             }
           });
 
           if (bestMatch && maxScore >= Math.min(words.length, 1)) {
             target = bestMatch;
-            if (attempts === 0) {            }
           }
         }
       }
 
-      // 2. Fallback to line number
+      // 2. Fallback to exact line number
       if (!target) {
         target = mdContent.querySelector(`[data-line="${line}"], [data-source-line="${line}"]`);
       }
@@ -497,16 +597,19 @@ class ChangeActionViewBarComponent {
         else stableCount = 0;
         lastTop = currentTop;
 
-        if (stableCount >= 3 || attempts >= maxAttempts) {
+        // Fix: use maxAttempts - 1 so forced scroll fires on the LAST queued attempt
+        if (stableCount >= 3 || attempts >= maxAttempts - 1) {
+          // ── Suppress scroll save while we scroll to sync position ──
+          window._suppressScrollSync = true;
           target.scrollIntoView({ behavior: 'auto', block: 'center' });
-          // ── Post-Render Re-alignment (MutationObserver for async diagrams) ──
-          const reAlignObserver = new MutationObserver(() => {
-            if (target && target.isConnected) {
-              target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-          });
-          reAlignObserver.observe(mdContent, { childList: true, subtree: true, attributeFilter: ['width', 'height'] });
-          setTimeout(() => reAlignObserver.disconnect(), 3000);
+          requestAnimationFrame(() => { window._suppressScrollSync = false; });
+
+          // ── Kill pending ScrollModule ResizeObserver to prevent it overriding sync position ──
+          if (viewer._scrollObserver) {
+            viewer._scrollObserver.disconnect();
+            viewer._scrollObserver = null;
+          }
+
           if (isRealSelection && selectionText) {
             try {
               const selection = window.getSelection();
@@ -533,7 +636,7 @@ class ChangeActionViewBarComponent {
                 range.selectNodeContents(target);
                 selection.addRange(range);
               }
-            } catch(e) {}
+            } catch(_e) {}
           }
           return;
         }
@@ -656,7 +759,7 @@ class ChangeActionViewBarComponent {
         const errData = await res.json();
         if (typeof showToast === 'function') showToast('Failed to save file: ' + (errData.error || 'Unknown error'), 'error');
       }
-    } catch (err) {
+    } catch (_err) {
       if (typeof showToast === 'function') showToast('Error saving file.', 'error');
     }
   }

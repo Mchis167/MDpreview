@@ -1,33 +1,39 @@
 /* ============================================================
    design-system/atoms/tooltip.css
+   Uses --_ local variables for position variants.
    ============================================================ */
 
-.ds-tooltip-container {
-  position: relative;
-}
+.ds-tooltip-container { position: relative; }
 
 .ds-tooltip {
+  /* ── Local Variables ── */
+  --_bg:      var(--ds-bg-surface);
+  --_color:   var(--ds-text-primary);
+  --_radius:  var(--ds-radius-panel);
+  --_shadow:  var(--ds-shadow-md);
+  --_offset:  10px;
+
   position: absolute;
-  background: var(--ds-bg-surface);
+  background: var(--_bg);
+  color: var(--_color);
   border: 1px solid var(--ds-border-strong);
+  border-radius: var(--_radius);
   padding: var(--ds-space-sm) var(--ds-space-md);
-  border-radius: var(--ds-radius-panel);
-  color: var(--ds-text-primary);
   font-size: var(--ds-font-sm);
   font-weight: 500;
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
+  box-shadow: var(--_shadow);
   transition: all var(--ds-transition-fast);
-  box-shadow: var(--ds-shadow-md);
   z-index: 2000;
 }
 
-/* Position: Bottom (Default) */
+/* ── Position: Bottom (default) ─────────────────────────── */
 .ds-tooltip-bottom {
   top: 110%;
   left: 50%;
-  transform: translateX(-50%) translateY(10px);
+  transform: translateX(-50%) translateY(var(--_offset));
 }
 
 .ds-tooltip-bottom::before {
@@ -40,7 +46,7 @@
   border-bottom-color: var(--ds-border-strong);
 }
 
-/* Hover triggers */
+/* ── Hover triggers ─────────────────────────────────────── */
 .ds-tooltip-trigger:hover .ds-tooltip,
 .is-disabled:hover .ds-tooltip {
   opacity: 1;

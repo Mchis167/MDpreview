@@ -157,7 +157,7 @@ const CommentsModule = (() => {
         icon: 'message',
         text: 'No Comment yet'
       },
-      renderItem: (c, index) => {
+      renderItem: (c, _index) => {
         const isRange = c.lineEnd && c.lineEnd > c.lineStart;
         const lineRef = isRange ? `L${c.lineStart}–L${c.lineEnd}` : `Line ${c.lineStart}`;
         const isSelected = activeCommentId && c.id && c.id === activeCommentId;
@@ -692,3 +692,4 @@ const CommentsModule = (() => {
 
   return { init, loadForFile, applyCommentMode, removeCommentMode, clearUI, clear, getCommentCount: () => comments.length };
 })();
+window.CommentsModule = CommentsModule;

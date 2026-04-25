@@ -89,7 +89,7 @@
   flex-direction: column;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  --top-fade: 0px;
+  --top-fade: 0;
   -webkit-mask-image: linear-gradient(to bottom,
       transparent 0%,
       black var(--top-fade),

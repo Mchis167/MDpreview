@@ -103,3 +103,4 @@ const TextAreaModule = (() => {
 
   return { init };
 })();
+window.TextAreaModule = TextAreaModule;

@@ -137,10 +137,10 @@ class MarkdownPreview {
     requestAnimationFrame(() => {
       try {
         if (window.processMermaid) window.processMermaid(inner);
-      } catch (e) { /* Mermaid error - gracefully skip */ }
+      } catch (_e) { /* Mermaid error - gracefully skip */ }
       try {
         if (window.CodeBlockModule) window.CodeBlockModule.process(inner);
-      } catch (e) { /* CodeBlock error - gracefully skip */ }
+      } catch (_e) { /* CodeBlock error - gracefully skip */ }
     });
   }
 

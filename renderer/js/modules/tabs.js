@@ -31,7 +31,7 @@ const TabsModule = (function () {
 
           if (path !== state.activeFile) {
             if (typeof window.loadFile === 'function') {
-              window.loadFile(path).catch(err => {
+              window.loadFile(path).catch(_err => {
                 remove(path);
               });
             }
@@ -195,7 +195,7 @@ const TabsModule = (function () {
         const data = JSON.parse(saved);
         state.openFiles = data.openFiles || [];
         state.activeFile = data.activeFile || null;
-      } catch (e) {
+      } catch (_e) {
         state.openFiles = [];
         state.activeFile = null;
       }
@@ -209,7 +209,7 @@ const TabsModule = (function () {
 
     if (state.activeFile) {
       if (typeof window.loadFile === 'function') {
-        window.loadFile(state.activeFile).catch(err => {
+        window.loadFile(state.activeFile).catch(_err => {
           remove(state.activeFile);
         });
       }
@@ -233,7 +233,7 @@ const TabsModule = (function () {
   }
 
   // ── Multi-selection Logic ───────────────────────────────
-  function toggleSelect(path, skipSync = false) {
+  function toggleSelect(path, _skipSync = false) {
     const idx = state.selectedFiles.indexOf(path);
     if (idx > -1) {
       state.selectedFiles.splice(idx, 1);
@@ -263,18 +263,18 @@ const TabsModule = (function () {
     render();
   }
 
-  function selectAll(skipSync = false) {
+  function selectAll(_skipSync = false) {
     state.selectedFiles = [...state.openFiles];
     render();
   }
 
-  function deselectAll(skipSync = false) {
+  function deselectAll(_skipSync = false) {
     if (state.selectedFiles.length === 0) return; // Optimization: Already empty
     state.selectedFiles = [];
     render();
   }
 
-  function syncSelectionFromTree(paths) {
+  function syncSelectionFromTree(_paths) {
     // Disabled: Independent selection between Tabs and Tree
     /*
     const filtered = paths.filter(p => state.openFiles.includes(p));
@@ -513,3 +513,4 @@ const TabsModule = (function () {
     getSelectedFiles: () => state.selectedFiles
   };
 })();
+window.TabsModule = TabsModule;

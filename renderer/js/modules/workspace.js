@@ -252,3 +252,4 @@ const WorkspaceModule = (() => {
   return { init, load, getActive: () => workspaces.find(w => w.id === activeId) };
 })();
 
+window.WorkspaceModule = WorkspaceModule;

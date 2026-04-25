@@ -337,3 +337,4 @@ const CollectModule = (() => {
     addIdea
   };
 })();
+window.CollectModule = CollectModule;

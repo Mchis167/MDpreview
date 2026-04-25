@@ -4,5 +4,5 @@
    layout.css        → global reset (uses tokens), 3-column skeleton
    ============================================================ */
 
-@import url('design-system.css');
-@import url('layout.css');
+@import 'design-system.css';
+@import 'layout.css';

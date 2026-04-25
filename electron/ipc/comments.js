@@ -57,7 +57,7 @@ function register(ipcMain) {
     let resultComment;
 
     // Destructure to avoid overwriting id with null/undefined from frontend
-    const { id, createdAt, ...data } = commentData;
+    const { id, createdAt: _createdAt, ...data } = commentData;
 
     if (id) {
       // Update existing

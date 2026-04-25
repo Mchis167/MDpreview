@@ -1,15 +1,24 @@
 /* ============================================================
-   switch-toggle.css — Reusable Toggle Component
+   design-system/atoms/switch-toggle.css
+   Uses --_ local variables so on/off states override cleanly.
    ============================================================ */
 
 .switch-toggle {
+  /* ── Local Variables ── */
+  --_bg:             var(--ds-black-a40);
+  --_bg-hover:       var(--ds-hover-lg);
+  --_border:         var(--ds-border-default);
+  --_indicator-bg:   var(--ds-hover-md);
+  --_indicator-x:    0;
+  --_indicator-size: 24px;
+
   display: inline-flex;
   align-items: center;
   width: 52px;
   height: 32px;
   padding: var(--ds-space-xs);
-  background: var(--ds-black-a40);
-  border: 1px solid var(--ds-border-default);
+  background: var(--_bg);
+  border: 1px solid var(--_border);
   border-radius: var(--ds-radius-pill);
   cursor: pointer;
   position: relative;
@@ -19,56 +28,46 @@
   flex-shrink: 0;
 }
 
+.switch-toggle:hover  { background: var(--_bg-hover); }
+
+/* ── On State ───────────────────────────────────────────── */
 .switch-toggle.on {
-  background: var(--ds-accent);
-  border-color: var(--ds-black-a20);
+  --_bg:           var(--ds-accent);
+  --_bg-hover:     var(--ds-accent-hover);
+  --_border:       var(--ds-black-a20);
+  --_indicator-bg: var(--ds-text-inverse);
+  --_indicator-x:  20px;
 }
 
+.switch-toggle.on:hover { border-color: var(--ds-text-inverse); }
+
+/* ── Indicator (the knob) ───────────────────────────────── */
 .switch-indicator {
-  width: 24px;
-  height: 24px;
-  background: var(--ds-hover-md);
+  width: var(--_indicator-size);
+  height: var(--_indicator-size);
+  background: var(--_indicator-bg);
   border-radius: var(--ds-radius-pill);
   transition: all 0.3s var(--ds-ease-spring);
-  transform: translateX(0);
+  transform: translateX(var(--_indicator-x));
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: var(--ds-shadow-sm);
 }
 
-.switch-toggle.on .switch-indicator {
-  background: var(--ds-text-inverse);
-  transform: translateX(20px);
-  box-shadow: var(--ds-shadow-md);
-}
+.switch-toggle.on .switch-indicator { box-shadow: var(--ds-shadow-md); }
 
-.switch-toggle:hover {
-  background: var(--ds-hover-lg);
-}
-
-.switch-toggle.on:hover {
-  background: var(--ds-accent-hover);
-  border-color: var(--ds-text-inverse);
-}
-
-.switch-toggle:hover .switch-indicator {
-  background: var(--ds-border-strong);
-}
-
-.switch-toggle.on:hover .switch-indicator {
+.switch-toggle:hover .switch-indicator     { background: var(--ds-border-strong); }
+.switch-toggle.on:hover .switch-indicator  {
   background: var(--ds-text-inverse);
   box-shadow: 0 0 8px var(--ds-white-a30);
 }
 
-.switch-toggle:active .switch-indicator {
-  width: 28px;
-}
+/* ── Active: stretch effect ─────────────────────────────── */
+.switch-toggle:active .switch-indicator        { width: 28px; }
+.switch-toggle.on:active .switch-indicator     { transform: translateX(16px); }
 
-.switch-toggle.on:active .switch-indicator {
-  transform: translateX(16px);
-}
-
+/* ── Disabled ───────────────────────────────────────────── */
 .switch-toggle.disabled {
   opacity: 0.4;
   cursor: not-allowed;

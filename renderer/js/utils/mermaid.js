@@ -4,6 +4,9 @@
    setupMermaidClicks() wires diagrams to openZoom() from zoom.js.
    ============================================================ */
 
+(() => {
+'use strict';
+
 function initMermaid() {
   if (typeof mermaid === 'undefined') return;
   mermaid.initialize({
@@ -48,6 +51,11 @@ async function processMermaid(container) {
 
 function setupMermaidClicks(container) {
   container.querySelectorAll('.mermaid').forEach(div => {
-    div.onclick = () => openZoom(div); // openZoom defined in zoom.js
+    div.onclick = () => window.openZoom(div);
   });
 }
+
+window.initMermaid = initMermaid;
+window.processMermaid = processMermaid;
+
+})();

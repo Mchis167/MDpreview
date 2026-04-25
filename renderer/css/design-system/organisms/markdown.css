@@ -241,7 +241,7 @@
   max-width: 100%;
   vertical-align: middle;
   white-space: pre-wrap;
-  word-break: break-word;
+  overflow-wrap: break-word;
   margin: 2px 0;
   line-height: 1.5;
   transition: all 0.2s;
@@ -315,7 +315,9 @@
 /* ── Mermaid Diagram Overrides (Fix Text Readability) ───── */
 .mermaid svg {
   color: var(--ds-text-inverse) !important;
-  /* Force pure white */
+  display: block;
+  max-width: 100%;
+  height: auto;
 }
 
 .mermaid .node rect,
@@ -634,11 +636,6 @@
   box-shadow: 0 0 20px rgba(var(--ds-accent-rgb), 0.08);
 }
 
-.mermaid svg {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
 
 /* ── Interaction Highlights ────────────────────────────── */
 .highlight-temp {
@@ -847,7 +844,7 @@
 
 /* Content inside details */
 #md-content details>*:not(summary) {
-  padding: 0px 0 24px 0;
+  padding: 0 0 24px 0;
   /* No left padding */
   color: var(--ds-text-secondary);
   line-height: 1.8;

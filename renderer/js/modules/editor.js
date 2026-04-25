@@ -135,7 +135,7 @@ const EditorModule = (() => {
       const se = _textarea.selectionEnd;
       _textarea.value = text;
       // Try to preserve selection if possible
-      try { _textarea.setSelectionRange(ss, se); } catch(e) {}
+      try { _textarea.setSelectionRange(ss, se); } catch(_e) {}
       _undoStack = [{ value: text, ss: 0, se: 0 }];
       _redoStack = [];
     }

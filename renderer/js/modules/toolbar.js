@@ -2,8 +2,11 @@
    toolbar.js — Toolbar action buttons and Keyboard Shortcuts
    ============================================================ */
 
+(() => {
+'use strict';
+
 /**
- * Legacy initializer. Most button logic is now handled by 
+ * Legacy initializer. Most button logic is now handled by
  * TabBarComponent or SecondaryToolbarComponent.
  */
 function initToolbarBtns() {
@@ -208,3 +211,8 @@ function initGlobalShortcuts() {
     }
   });
 }
+
+window.initToolbarBtns = initToolbarBtns;
+window.initGlobalShortcuts = initGlobalShortcuts;
+
+})();

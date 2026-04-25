@@ -11,7 +11,7 @@ marked.setOptions({
     if (lang && hljs.getLanguage(lang)) {
       try {
         return hljs.highlight(code, { language: lang }).value;
-      } catch (__) {}
+      } catch (_ignored) {}
     }
     return hljs.highlightAuto(code).value;
   },
@@ -35,8 +35,8 @@ function renderWithLineNumbers(content) {
 
     const lineStart  = currentLine;
     let tokenRaw     = token.raw;
-    let combinedHtml = '';
-    let tokenType    = token.type;
+
+
 
     // Advance counter for the current token
     const rawLines = tokenRaw.split('\n');
@@ -74,7 +74,7 @@ function renderWithLineNumbers(content) {
         
         // Sync the main loop's currentLine and index
         // We already added lineStart's first token lines, but we need to account for the rest
-        const extraLines = entireRaw.trimEnd().split('\n').length - rawLines.length;
+        const _extraLines = entireRaw.trimEnd().split('\n').length - rawLines.length;
         // currentLine += Math.max(0, extraLines); // Already handled by the inner tokens if we continued, but we skip them
         
         // Let's just recalculate currentLine properly
@@ -96,7 +96,7 @@ function renderWithLineNumbers(content) {
         } else {
           highlighted = hljs.highlightAuto(token.text).value;
         }
-      } catch (e) { highlighted = token.text; }
+      } catch (_e) { highlighted = token.text; }
       tokenHtml = `<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`;
     } else {
       tokenHtml = marked.parser([token]);

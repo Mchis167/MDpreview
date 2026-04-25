@@ -116,15 +116,10 @@
   transition-delay: 0.2s;
 }
 
-/* Hide native title on hover to prevent double tooltip */
-.edit-tool-btn:hover {
-  text-decoration: none;
-  /* Just a trigger */
-}
-
 .edit-tool-btn:hover {
   background: var(--ds-white-a05);
   color: var(--ds-text-inverse);
+  text-decoration: none;
 }
 
 .edit-divider {

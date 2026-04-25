@@ -33,7 +33,6 @@ const ScrollModule = (() => {
    * Set the element to watch for scroll events
    * @param {HTMLElement} el 
    */
-  let isListenerAttached = false;
 
   let activeFileInContainer = null;
 

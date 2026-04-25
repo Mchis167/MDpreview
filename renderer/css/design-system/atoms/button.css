@@ -1,48 +1,45 @@
 /* ============================================================
    design-system/atoms/button.css
+   Uses --_ local variables so variants override props, not rules.
    ============================================================ */
 
 .ds-btn {
+  /* ── Local Variables (overridable per variant) ── */
+  --_radius:          var(--ds-radius-widget);
+  --_pad-x:           var(--ds-space-md);
+  --_gap:             var(--ds-space-sm);
+  --_height:          28px;
+  --_bg:              transparent;
+  --_color:           var(--ds-text-primary);
+  --_bg-hover:        var(--ds-hover-md);
+  --_transform-hover: translateY(-1px);
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 28px;
-  padding: 0 var(--ds-space-md);
-  border-radius: var(--ds-radius-widget);
-  font-family: 'Inter', sans-serif;
-  font-size: 13px;
+  height: var(--_height);
+  padding: 0 var(--_pad-x);
+  border-radius: var(--_radius);
+  gap: var(--_gap);
+  background: var(--_bg);
+  color: var(--_color);
+  font-family: var(--ds-font-family-text);
+  font-size: var(--ds-font-md);
   font-weight: 600;
-  cursor: pointer;
-  transition: all var(--ds-transition-fast);
-  border: none;
-  gap: var(--ds-space-sm);
+  letter-spacing: -0.02em;
   white-space: nowrap;
   user-select: none;
-  letter-spacing: -0.02em;
+  border: none;
+  cursor: pointer;
+  transition: all var(--ds-transition-fast);
 }
 
-.ds-btn-primary {
-  background: var(--ds-accent);
-  color: var(--ds-text-on-accent);
+.ds-btn:hover {
+  background: var(--_bg-hover);
+  transform: var(--_transform-hover);
 }
 
-.ds-btn-primary:hover {
-  background: var(--ds-accent-hover);
-  transform: translateY(-1px);
-}
-
-.ds-btn-primary:active {
-  transform: translateY(0);
-}
-
-.ds-btn-ghost {
-  background: transparent;
-  color: var(--ds-text-primary);
-}
-
-.ds-btn-ghost:hover {
-  background: var(--ds-white-a05);
-}
+.ds-btn:active { transform: translateY(0); }
 
 .ds-btn:disabled {
   opacity: 0.3;
@@ -50,21 +47,39 @@
   transform: none !important;
 }
 
-/* ── Legacy aliases (.btn → .ds-btn) ──────────────────────── */
+/* ── Variants (only override changed properties) ───────── */
+.ds-btn-primary {
+  --_bg:             var(--ds-accent);
+  --_color:          var(--ds-text-on-accent);
+  --_bg-hover:       var(--ds-accent-hover);
+}
+
+.ds-btn-ghost {
+  --_bg:             transparent;
+  --_color:          var(--ds-text-primary);
+  --_bg-hover:       var(--ds-white-a05);
+  --_transform-hover: none;
+}
+
+/* ── Legacy aliases (.btn → .ds-btn) ──────────────────── */
 .btn {
+  --_radius: var(--ds-radius-pill);
+  --_height: 32px;
+  --_pad-x:  16px;
+
   display: inline-flex;
   align-items: center;
-  justify-content: content;
-  height: 32px;
-  padding: 0 16px;
-  border-radius: var(--ds-radius-pill);
+  justify-content: center;
+  height: var(--_height);
+  padding: 0 var(--_pad-x);
+  border-radius: var(--_radius);
   font-family: var(--ds-font-family-text);
-  font-size: 13px;
+  font-size: var(--ds-font-md);
   font-weight: 600;
   cursor: pointer;
   transition: all var(--ds-transition-fast);
   border: none;
-  gap: 8px;
+  gap: var(--ds-space-sm);
   white-space: nowrap;
 }
 .btn i, .btn svg { width: 14px; height: 14px; }
@@ -74,4 +89,3 @@
 .btn-ghost { background: transparent; color: var(--ds-text-primary); }
 .btn-ghost:hover { background: var(--ds-hover-sm); }
 .btn-ghost:disabled { opacity: 0.2; cursor: not-allowed; }
-

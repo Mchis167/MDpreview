@@ -196,7 +196,7 @@
   font-size: var(--ds-font-base);
   color: var(--ds-text-secondary);
   line-height: 20px;
-  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .ds-text-clamp-5 {

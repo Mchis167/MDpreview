@@ -89,7 +89,7 @@
   left: 5px;
   background: var(--ds-hover-lg);
   border: 1px solid var(--ds-border-strong);
-  border-radius: max(0px, calc(var(--ds-radius-shell) - var(--ds-space-xs)));
+  border-radius: max(0, calc(var(--ds-radius-shell) - var(--ds-space-xs)));
   transition: all var(--ds-transition-main);
   pointer-events: none;
   backdrop-filter: blur(2px);
@@ -104,7 +104,7 @@
   color: var(--ds-text-secondary);
   transition: color var(--ds-transition-fast);
   white-space: nowrap;
-  border-radius: max(0px, calc(var(--ds-radius-shell) - var(--ds-space-xs)));
+  border-radius: max(0, calc(var(--ds-radius-shell) - var(--ds-space-xs)));
 }
 
 .mode-segment.active {

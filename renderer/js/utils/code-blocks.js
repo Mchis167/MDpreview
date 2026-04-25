@@ -2,6 +2,9 @@
    code-blocks.js — Syntax highlighting enhancements, copy button, badges
    ============================================================ */
 
+(() => {
+'use strict';
+
 const CodeBlockModule = {
   /**
    * Process all code blocks in a container to add UI enhancements
@@ -81,5 +84,6 @@ const CodeBlockModule = {
   }
 };
 
-// Export to global scope
 window.CodeBlockModule = CodeBlockModule;
+
+})();

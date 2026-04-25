@@ -50,7 +50,7 @@ const RecentlyViewedModule = (() => {
 
   function _getRaw(key) {
     const data = localStorage.getItem(key);
-    try { return data ? JSON.parse(data) : []; } catch (e) { return []; }
+    try { return data ? JSON.parse(data) : []; } catch (_e) { return []; }
   }
 
   function render() {
@@ -80,7 +80,7 @@ const RecentlyViewedModule = (() => {
         mount: list,
         onClick: async (e, node) => {
           e.stopPropagation();
-          try { await loadFile(node.path); } catch (err) { remove(node.path); }
+          try { await loadFile(node.path); } catch (_err) { remove(node.path); }
         },
         onDelete: (e, node) => {
           e.stopPropagation();
@@ -99,7 +99,7 @@ const RecentlyViewedModule = (() => {
     treeComp.update(nodes, [], '', '', AppState.currentFile);
   }
 
-  function setActiveFile(filePath) {
+  function setActiveFile(_filePath) {
     render();
   }
 

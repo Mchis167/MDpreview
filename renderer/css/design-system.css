@@ -4,34 +4,34 @@
    ============================================================ */
 
 /* ── Tokens ─────────────────────────────────────────────── */
-@import url('design-system/tokens.css');
+@import 'design-system/tokens.css';
 
 /* ── Atoms ──────────────────────────────────────────────── */
-@import url('design-system/atoms/utilities.css');
-@import url('design-system/atoms/button.css');
-@import url('design-system/atoms/icon-action-button.css');
-@import url('design-system/atoms/tooltip.css');
-@import url('design-system/atoms/switch-toggle.css');
-@import url('design-system/atoms/textarea.css');
+@import 'design-system/atoms/utilities.css';
+@import 'design-system/atoms/button.css';
+@import 'design-system/atoms/icon-action-button.css';
+@import 'design-system/atoms/tooltip.css';
+@import 'design-system/atoms/switch-toggle.css';
+@import 'design-system/atoms/textarea.css';
 
 /* ── Molecules ──────────────────────────────────────────── */
-@import url('design-system/molecules/segmented-control.css');
-@import url('design-system/molecules/mode-switcher.css');
-@import url('design-system/molecules/sidebar-section-header.css');
-@import url('design-system/molecules/context-menu.css');
-@import url('design-system/molecules/popover-shield.css');
+@import 'design-system/molecules/segmented-control.css';
+@import 'design-system/molecules/mode-switcher.css';
+@import 'design-system/molecules/sidebar-section-header.css';
+@import 'design-system/molecules/context-menu.css';
+@import 'design-system/molecules/popover-shield.css';
 
 /* ── Organisms ──────────────────────────────────────────── */
-@import url('design-system/organisms/workspace-picker.css');
-@import url('design-system/organisms/sidebar-left.css');
-@import url('design-system/organisms/tree-view.css');
-@import url('design-system/organisms/tab-bar.css');
-@import url('design-system/organisms/toolbar.css');
-@import url('design-system/organisms/right-sidebar.css');
-@import url('design-system/organisms/comment-form.css');
-@import url('design-system/organisms/change-action-view-bar.css');
-@import url('design-system/organisms/workspace-panel.css');
-@import url('design-system/organisms/settings-panel.css');
-@import url('design-system/organisms/modals-misc.css');
-@import url('design-system/organisms/editor.css');
-@import url('design-system/organisms/markdown.css');
+@import 'design-system/organisms/workspace-picker.css';
+@import 'design-system/organisms/sidebar-left.css';
+@import 'design-system/organisms/tree-view.css';
+@import 'design-system/organisms/tab-bar.css';
+@import 'design-system/organisms/toolbar.css';
+@import 'design-system/organisms/right-sidebar.css';
+@import 'design-system/organisms/comment-form.css';
+@import 'design-system/organisms/change-action-view-bar.css';
+@import 'design-system/organisms/workspace-panel.css';
+@import 'design-system/organisms/settings-panel.css';
+@import 'design-system/organisms/modals-misc.css';
+@import 'design-system/organisms/editor.css';
+@import 'design-system/organisms/markdown.css';
