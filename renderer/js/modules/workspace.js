@@ -31,10 +31,14 @@ const WorkspaceModule = (() => {
     AppState.currentWorkspace = ws;
 
     const lbl = document.getElementById('workspace-name');
-    if (lbl) {
+    const switcher = AppState.components && AppState.components.workspaceSwitcher;
+
+    if (switcher) {
+      switcher.update(ws ? ws.name : 'Add Workspace');
+    } else if (lbl) {
       lbl.textContent = ws ? ws.name : 'Add Workspace';
       lbl.classList.remove('skeleton', 'skeleton-text');
-      lbl.style.width = ''; // Reset custom skeleton width
+      lbl.style.width = ''; 
     }
 
     if (ws) {
@@ -152,7 +156,11 @@ const WorkspaceModule = (() => {
   function _renderSwitcher() {
     const ws = workspaces.find(w => w.id === activeId);
     const lbl = document.getElementById('workspace-name');
-    if (lbl) {
+    const switcher = AppState.components && AppState.components.workspaceSwitcher;
+
+    if (switcher) {
+      switcher.update(ws ? ws.name : 'Add Workspace');
+    } else if (lbl) {
       lbl.textContent = ws ? ws.name : 'Add Workspace';
       lbl.classList.remove('skeleton', 'skeleton-text');
       lbl.style.width = '';
@@ -244,12 +252,10 @@ const WorkspaceModule = (() => {
   }
 
   function _bindPanelEvents() {
-    document.getElementById('workspace-switcher').addEventListener('click', () => {
-      _openPanel();
-    });
+    // Switcher click is now handled internally by WorkspaceSwitcherComponent
   }
 
-  return { init, load, getActive: () => workspaces.find(w => w.id === activeId) };
+  return { init, load, openPanel: _openPanel, getActive: () => workspaces.find(w => w.id === activeId) };
 })();
 
 window.WorkspaceModule = WorkspaceModule;

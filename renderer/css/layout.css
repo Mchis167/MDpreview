@@ -3,8 +3,20 @@
    ============================================================ */
 
 /* ── Global Reset ─────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-button { background: none; border: none; cursor: pointer; font-family: inherit; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
 
 body {
   height: 100vh;
@@ -18,10 +30,23 @@ body {
 }
 
 /* ── Scrollbar ─────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--ds-white-a10); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: var(--ds-white-a20); }
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ds-white-a10);
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ds-white-a20);
+}
 
 #app-layout {
   display: flex;
@@ -39,8 +64,8 @@ body {
   flex-shrink: 0;
   margin-right: 0;
   transition:
-    width       0.4s var(--ds-ease-spring),
-    min-width   0.4s var(--ds-ease-spring),
+    width 0.4s var(--ds-ease-spring),
+    min-width 0.4s var(--ds-ease-spring),
     margin-right 0.4s var(--ds-ease-spring);
   position: relative;
   height: 100%;
@@ -68,11 +93,11 @@ main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: var(--ds-glass-main);
+  background: var(--ds-bg-layer-main);
   backdrop-filter: blur(var(--ds-blur-xs));
   -webkit-backdrop-filter: blur(var(--ds-blur-xs));
   border: 1px solid var(--ds-border-default);
-  border-radius: var(--ds-radius-panel);
+  border-radius: var(--ds-radius-surface);
   overflow: hidden;
   position: relative;
 }

@@ -68,7 +68,7 @@ class RightSidebarComponent {
       this.mount.appendChild(resizer);
       this._attachResizerEvents(resizer);
 
-      const sidebar = DesignSystem.createElement('aside', 'ds-right-sidebar');
+      const sidebar = DesignSystem.createElement('aside', ['ds-right-sidebar', 'ds-sidebar-base']);
       sidebar.innerHTML = `
         <div class="ds-sidebar-header">
           <div class="ds-sidebar-title"></div>

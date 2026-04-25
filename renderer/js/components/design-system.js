@@ -30,6 +30,7 @@ const DesignSystem = (() => {
     'search': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>`,
     'sort': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 12-3-3-3 3" /><path d="m9 12 3 3 3-3" /><circle cx="12" cy="12" r="10" /></svg>`,
     'chevron-down': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`,
+    'chevron-right': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>`,
     'sort-alpha-asc': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 13h6"/><path d="m2 16 4.5-9 4.5 9"/><path d="M18 16V7"/><path d="m14 11 4-4 4 4"/></svg>`,
     'sort-alpha-desc': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 13h6"/><path d="m2 16 4.5-9 4.5 9"/><path d="M18 7v9"/><path d="m14 12 4 4 4-4"/></svg>`,
     'sort-time-asc': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 18 4-4 4 4"/><path d="M16 2v4"/><path d="M18 22v-8"/><path d="M21 11.3V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7.3"/><path d="M3 10h18"/><path d="M8 2v4"/></svg>`,
@@ -49,7 +50,12 @@ const DesignSystem = (() => {
     'code': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
     'terminal': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></svg>`,
     'table': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>`,
-    'help-circle': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+    'help-circle': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+    'settings': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></svg>`,
+    'keyboard': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" ry="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/><path d="M18 8h.01"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/><path d="M7 16h10"/></svg>`,
+    'sliders': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="10" y1="21" y2="21"/><line x1="4" x2="14" y1="14" y2="14"/><line x1="4" x2="8" y1="7" y2="7"/><line x1="14" x2="20" y1="21" y2="21"/><line x1="18" x2="20" y1="14" y2="14"/><line x1="12" x2="20" y1="7" y2="7"/><line x1="10" x2="10" y1="18" y2="24"/><line x1="14" x2="14" y1="11" y2="17"/><line x1="8" x2="8" y1="4" y2="10"/></svg>`,
+    'check': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`,
+    'chevron-up': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>`
   };
 
   /**
@@ -59,10 +65,13 @@ const DesignSystem = (() => {
     const el = document.createElement(tag);
     if (className) {
       if (Array.isArray(className)) {
-        const validClasses = className.filter(c => c && typeof c === 'string' && c.trim() !== '');
+        const validClasses = className
+          .flatMap(c => (typeof c === 'string' ? c.trim().split(/\s+/) : [c]))
+          .filter(c => c && typeof c === 'string' && c.trim() !== '');
         if (validClasses.length > 0) el.classList.add(...validClasses);
-      } else if (className && className.trim() !== '') {
-        el.className = className;
+      } else if (typeof className === 'string' && className.trim() !== '') {
+        const tokens = className.trim().split(/\s+/);
+        el.classList.add(...tokens);
       }
     }
     if (attributes) {
@@ -92,12 +101,13 @@ const DesignSystem = (() => {
       hasBackdrop = true,
       showHeader = true,
       position = null,
+      alignment = 'center', // 'center', 'bottom-left', or 'custom'
       container = document.body,
       onClose = null 
     } = options;
 
     const shieldClass = hasBackdrop ? 'ds-popover-shield' : 'ds-popover-floating';
-    const shield = createElement('div', shieldClass);
+    const shield = createElement('div', [shieldClass, `ds-popover-${alignment}`]);
     const isBody = container === document.body;
     shield.style.position = isBody ? 'fixed' : 'absolute';
 
@@ -181,15 +191,14 @@ const DesignSystem = (() => {
     createPopoverShield,
     
     createContextMenu: (e, items) => {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      const menu = new ContextMenuComponent({
-        event: e,
-        items: items
-      });
-      
-      return menu.render();
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (typeof ContextMenuComponent !== 'undefined') {
+        return ContextMenuComponent.open({ event: e, items });
+      }
+      return null;
     },
     
     getIcon: (name) => ICONS[name] || '',
@@ -224,9 +233,53 @@ const DesignSystem = (() => {
     },
 
     createButton: (options = {}) => {
-      const { label, variant = 'primary', onClick, disabled = false, className = '' } = options;
-      const btn = createElement('button', [`ds-btn`, `ds-btn-${variant}`, className]);
-      btn.textContent = label;
+      const { 
+        label, 
+        variant = 'primary', 
+        onClick, 
+        disabled = false, 
+        className = '',
+        leadingIcon = null,
+        trailingIcon = null,
+        offLabel = false,
+        title = null
+      } = options;
+
+      // Enforce single icon for off-label buttons
+      let activeLeadingIcon = leadingIcon;
+      let activeTrailingIcon = trailingIcon;
+      if (offLabel && activeLeadingIcon && activeTrailingIcon) {
+        activeTrailingIcon = null;
+      }
+      
+      const btn = createElement('button', [
+        `ds-btn`, 
+        `ds-btn-${variant}`, 
+        offLabel ? 'ds-btn-off-label' : '',
+        className
+      ]);
+
+      if (title || (offLabel && label)) {
+        btn.title = title || label;
+      }
+      
+      if (activeLeadingIcon) {
+        const iconHtml = ICONS[activeLeadingIcon] || activeLeadingIcon;
+        const span = createElement('span', 'ds-btn-icon-leading', { html: iconHtml });
+        btn.appendChild(span);
+      }
+      
+      if (label && !offLabel) {
+        const textSpan = createElement('span', 'ds-btn-text', { text: label });
+        btn.appendChild(textSpan);
+      }
+      
+      if (activeTrailingIcon) {
+        const iconHtml = ICONS[activeTrailingIcon] || activeTrailingIcon;
+        const span = createElement('span', 'ds-btn-icon-trailing', { html: iconHtml });
+        btn.appendChild(span);
+      }
+      
       if (disabled) btn.disabled = true;
       if (onClick) btn.onclick = onClick;
       return btn;

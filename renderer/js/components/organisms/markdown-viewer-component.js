@@ -13,6 +13,7 @@ class MarkdownViewerComponent {
       html: ''
     };
     this.activeComponent = null;
+    this._scrollTopBtn = null;
     this.init();
   }
 
@@ -79,11 +80,46 @@ class MarkdownViewerComponent {
         default:
           this.activeComponent = new MarkdownEmptyState({ mount: this.mount });
       }
+
+      // Add Floating Scroll Top Button if not in empty state
+      if (this.state.mode !== 'empty') {
+        this._renderFloatingScrollTop();
+      }
     } finally {
       // Small delay to ensure browser processed the DOM changes before unlocking
       setTimeout(() => {
         window._isMDViewerRendering = false;
       }, 300);
+    }
+  }
+
+  /**
+   * Create and manage the floating 'Scroll to Top' button
+   */
+  _renderFloatingScrollTop() {
+    this._scrollTopBtn = DesignSystem.createElement('div', 'floating-scroll-top', {
+      id: 'floating-scroll-top',
+      title: 'Scroll to top',
+      html: DesignSystem.getIcon('chevron-up')
+    });
+
+    this._scrollTopBtn.onclick = () => {
+      const scrollEl = this.mount.querySelector('#edit-textarea') || this.mount.querySelector('.md-content') || this.mount;
+      scrollEl.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    this.mount.appendChild(this._scrollTopBtn);
+
+    // Listen for scroll on the active container
+    const scrollEl = this.mount.querySelector('#edit-textarea') || this.mount.querySelector('.md-content') || this.mount;
+    if (scrollEl) {
+      scrollEl.onscroll = () => {
+        if (scrollEl.scrollTop > 300) {
+          this._scrollTopBtn.classList.add('is-visible');
+        } else {
+          this._scrollTopBtn.classList.remove('is-visible');
+        }
+      };
     }
   }
 }

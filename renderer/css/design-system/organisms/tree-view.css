@@ -17,9 +17,9 @@
 .tree-item {
   height: 30px;
   padding: 0 var(--ds-space-sm);
-  gap: var(--ds-space-xs);
+  gap: var(--ds-space-sm);
   font-size: var(--ds-font-md);
-  border-radius: var(--ds-radius-panel);
+  border-radius: var(--ds-radius-widget);
   background: transparent;
   transition: all var(--ds-transition-fast);
   display: flex;
@@ -78,7 +78,7 @@
   border-left-color: transparent !important;
 }
 
-.tree-node-wrapper:hover > .folder-children {
+.tree-node-wrapper:hover>.folder-children {
   border-left-color: var(--ds-border-strong);
 }
 
@@ -107,20 +107,27 @@
 
 /* ── Delete Button ── */
 .item-delete-btn {
-  width: 22px;
+  width: 0;
   height: 22px;
-  padding: var(--ds-space-xs);
+  padding: 0;
   opacity: 0;
+  margin-left: 0;
   border-radius: var(--ds-radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: auto;
+  overflow: hidden;
+  visibility: hidden;
+  flex-shrink: 0;
   transition: all var(--ds-transition-fast);
 }
 
 .tree-item:hover .item-delete-btn {
+  width: 22px;
+  padding: var(--ds-space-xs);
   opacity: 0.4;
+  margin-left: auto;
+  visibility: visible;
 }
 
 .item-delete-btn:hover {

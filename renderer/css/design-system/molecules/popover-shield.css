@@ -2,19 +2,20 @@
    popover-shield.css — Generic Popover Shield (Modal Backdrop)
    ============================================================ */
 
-.ds-popover-shield {
+.ds-popover-shield,
+.ds-popover-floating {
   position: absolute;
   inset: 0;
+  z-index: 2500;
+  pointer-events: none;
+  opacity: 0;
+  transition: all var(--ds-transition-main);
+}
+
+.ds-popover-shield {
   background: var(--ds-black-a40);
   backdrop-filter: blur(var(--ds-blur-lg));
   -webkit-backdrop-filter: blur(var(--ds-blur-lg));
-  z-index: 2500;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: all var(--ds-transition-main);
 }
 
 .ds-popover-shield.show,
@@ -23,15 +24,22 @@
   pointer-events: auto;
 }
 
-/* ── Floating Popover (No Backdrop) ── */
-.ds-popover-floating {
-  position: absolute;
-  inset: 0;
-  z-index: 2500;
-  pointer-events: none;
+/* ── Alignment Presets ── */
+.ds-popover-center {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.ds-popover-bottom-left {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 80px 32px;
+}
+
+.ds-popover-custom {
+  display: block;
 }
 
 .ds-popover-floating .ds-popover-card {
@@ -49,7 +57,7 @@
   opacity: 0;
   transition:
     transform 0.25s var(--ds-ease-spring),
-    opacity   0.25s var(--ds-ease-spring);
+    opacity 0.25s var(--ds-ease-spring);
   display: flex;
   flex-direction: column;
 }
@@ -182,5 +190,5 @@
 
 .ds-prompt-content .ds-input.ds-input-error {
   border-color: var(--ds-accent-red);
-  background: rgba(255, 69, 0, 0.05);
+  background: var(--ds-status-danger-bg);
 }

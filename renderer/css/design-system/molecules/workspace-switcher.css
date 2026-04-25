@@ -1,0 +1,75 @@
+/* ══════════════════════════════════════════════════
+   workspace-switcher.css — Molecule
+   Sidebar Workspace Selection Trigger
+   ══════════════════════════════════════════════════ */
+
+.ds-workspace-switcher-mount {
+  padding: var(--ds-space-xs);
+  flex-shrink: 0;
+}
+
+.ds-workspace-switcher-outer {
+  width: 100%;
+}
+
+.ds-workspace-switcher {
+  width: 100%;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ds-space-xs) var(--ds-space-md) var(--ds-space-xs) var(--ds-space-xl);
+  background: var(--ds-bg-layer-surface);
+  border: none;
+  cursor: pointer;
+  transition: all var(--ds-transition-fast);
+  border-radius: calc(var(--ds-radius-surface) - 4px);
+}
+
+.ds-workspace-switcher:hover {
+  background: var(--ds-bg-layer-surface-hover);
+}
+
+.ds-workspace-switcher .ws-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+}
+
+.ds-workspace-switcher .ws-label {
+  font-family: var(--ds-font-family-text);
+  font-weight: 500;
+  font-size: var(--ds-font-xs);
+  line-height: 16px;
+  text-transform: uppercase;
+  color: var(--ds-text-disabled);
+  letter-spacing: 0.05em;
+}
+
+.ds-workspace-switcher .ds-workspace-name {
+  font-family: var(--ds-font-family-text);
+  font-weight: 600;
+  font-size: var(--ds-font-lg);
+  line-height: 20px;
+  color: var(--ds-text-primary);
+}
+
+/* Skeleton state */
+.ds-workspace-switcher .ds-workspace-name.skeleton {
+  width: 80px;
+  height: 20px;
+}
+
+.ds-workspace-switcher .ws-chevron {
+  color: var(--ds-text-disabled);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ds-workspace-switcher .ws-chevron svg {
+  width: 16px;
+  height: 16px;
+}

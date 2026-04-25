@@ -1,3 +1,4 @@
+/* global SidebarLeft, ChangeActionViewBar, RightSidebar, io, initMermaid, initZoom, initToolbarBtns, initGlobalShortcuts, SidebarModule, SettingsModule, DraftModule, MarkdownViewer, ScrollModule, TabsModule, CollectModule, CommentsModule, TreeModule, WorkspaceModule, RecentlyViewedModule, processMermaid */
 /* ============================================================
    app.js — Core state, file loading, socket connection, boot
    Other responsibilities live in dedicated modules:

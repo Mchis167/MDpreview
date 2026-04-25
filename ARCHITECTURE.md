@@ -305,7 +305,10 @@ const IconActionButton = (() => {
 window.IconActionButton = IconActionButton;
 ```
 
-**Molecules:** `context-menu.js`, `search-component.js`, `sidebar-section-header.js`
+**Molecules:** `context-menu.js`, `search-component.js`, `sidebar-section-header.js`, `setting-toggle-item.js`
+- **ContextMenu**: Floating context menu with support for icons, labels, and shortcuts.
+- **SettingToggleItem**: Specialized row with label and switch toggle for settings menus.
+
 **Organisms:** `tab-bar.js`, `sidebar-left.js`, `markdown-viewer-component.js`, etc.
 
 #### 3. Services (`renderer/js/services/`)

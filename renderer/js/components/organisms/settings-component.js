@@ -31,14 +31,7 @@ class SettingsComponent {
       this._createSettingRow('Code Zoom', this._createZoomControl('code'))
     ]));
 
-    // 3. Explorer Group
-    container.appendChild(this._createGroup('Explorer', [
-      this._createSettingRow('Show Hidden Files', this._createToggle('hidden-toggle-mount')),
-      this._createSettingRow('Hide Empty Folders', this._createToggle('empty-toggle-mount')),
-      this._createSettingRow('Flat View', this._createToggle('flat-toggle-mount'))
-    ]));
-
-    // 4. Background Group
+    // 3. Background Group
     container.appendChild(this._createGroup('Background', [
       this._createSettingRow('Custom Background', this._createToggle('bg-toggle-mount')),
       this._createBackgroundGridWrapper()
@@ -195,17 +188,36 @@ class SettingsComponent {
   }
 
   /**
-   * Open the Settings UI in a Popover Shield
+   * Static instance to track open popover
+   */
+  static activeInstance = null;
+
+  /**
+   * Toggle the Settings UI (Singleton)
+   */
+  static toggle() {
+    if (this.activeInstance) {
+      this.activeInstance.close();
+    } else {
+      this.activeInstance = this.open();
+    }
+  }
+
+  /**
+   * Open the Settings UI in a floating popover (No backdrop)
    */
   static open() {
     const component = new SettingsComponent();
     const content = component.render();
     
     const popover = DesignSystem.createPopoverShield({
-      title: 'Setting',
+      title: 'Settings',
       content: content,
+      hasBackdrop: false,
+      alignment: 'bottom-left',
+      className: 'settings-dynamic-popover',
       onClose: () => {
-        // Cleanup if needed
+        SettingsComponent.activeInstance = null;
       }
     });
 

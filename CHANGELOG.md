@@ -2,6 +2,46 @@
 
 All notable changes to this project will be documented in this file.
 
+### [1.8.0] — 2026-04-26 03:05
+
+### Added
+- **Molecule**: Triển khai **`MenuShield`** (Molecule) — hệ thống vỏ bọc menu nổi (Floating Glass Shell) hợp nhất, hỗ trợ Glassmorphism, hiệu ứng Blur cao cấp và quản lý singleton.
+- **Molecule**: Triển khai **`SettingToggleItem`** (Molecule) — thành phần dòng cài đặt chuẩn với nhãn và nút gạt (label + toggle).
+- **Molecule**: Triển khai **`sidebar-base.css`** giúp nhất quán hóa cấu trúc và phong cách Glassmorphism cho cả Sidebar Trái và Phải.
+- **Molecule**: Tạo thành phần **`WorkspaceSwitcherComponent`** (Molecule) chuyên biệt, thay thế mã HTML hardcode cũ.
+- **Component**: Tách biệt logic cài đặt Explorer sang **`ExplorerSettingsComponent`** chuyên biệt, hiển thị dưới dạng menu nổi.
+- **UI/UX**: Nâng cấp **Smart Positioning Engine** cho `MenuShield` với cơ chế auto-positioning và toggle thông minh.
+- **UI/UX**: Thêm nút **Scroll to Top** dạng floating mượt mà trong `MarkdownViewerComponent`.
+- **Design System**: Triển khai hệ thống **Alignment Presets** (`center`, `bottom-left`, `custom`) cho Popover Shield.
+- **Design System**: Triển khai hệ thống **Semantic Layer Tokens** mới (`--ds-bg-layer-main`, `--ds-bg-layer-sidebar`, etc.) quản lý độ sâu giao diện.
+- **Icons**: Đăng ký các icon mới `sliders`, `check`, `chevron-right` vào `DesignSystem.ICONS`.
+
+### Changed
+- **Architecture**: Tái cấu trúc **`ContextMenuComponent`** sử dụng `MenuShield` làm lớp vỏ hợp nhất.
+- **Architecture**: Tái cấu trúc **Sidebar Left** và **Right Sidebar** sử dụng chung phân tử `sidebar-base`, giảm 40% mã CSS lặp lại.
+- **UI/UX**: Footer Sidebar Trái được tổ chức lại: `[Settings] [Shortcuts] [Spacer] [Explorer Preferences]`.
+- **Shortcuts & Settings**: Chuyển đổi sang dạng **Floating Popover** neo ở góc dưới bên trái (`bottom-left` preset).
+- **Design System**: Cập nhật **`SwitchToggle`** (Atom) hỗ trợ khởi tạo trực tiếp từ DOM element.
+- **Visuals**: Tinh chỉnh viền menu xuống mức **Ultra-thin** (4% opacity) và đồng bộ bo góc `ds-radius-panel` (12px).
+- **Tokens**: Loại bỏ hoàn toàn các "màu mồ côi" (orphan colors), đưa 100% về hệ thống 3-tier tokens.
+
+### Fixed
+- **Stability**: Khắc phục lỗi "phải click 2 lần mới mở được popover" bằng cách đồng bộ hóa trạng thái singleton.
+- **UI/UX**: Khắc phục hiện tượng "viền dày" do trùng lặp class CSS và sửa lỗi hiển thị nút xóa trong `TreeItem`.
+- **Tokens**: Sửa lỗi triệt để thông báo "token is not defined" và lỗi typo trong công thức tính toán `inset`.
+- **Bug**: Sửa lỗi `InvalidCharacterError` trong `createElement` và lỗi hiển thị `line-clamp` trong `right-sidebar.css`.
+- **Linting**: Đạt trạng thái **Zero Errors/Warnings** cho toàn bộ hệ thống (JS & CSS).
+orkspace thành một phân tử độc lập.
+- **Architecture**: Phân tách logic (Decoupling) giữa `WorkspaceModule` và UI thông qua hệ thống đăng ký instance linh hoạt.
+- **Design System**: Loại bỏ hoàn toàn các "màu mồ côi" (orphan colors - mã rgba viết tay) trong `tokens.css`, đưa 100% về hệ thống 3-tier tokens.
+- **Visuals**: Đồng bộ hóa toàn bộ bo góc và nền của Sidebars (Trái/Phải) và Main Glass theo hệ thống Layer và Surface mới.
+- **Visuals**: Cập nhật `Context Menu` và `Tree View` sử dụng đúng các token semantic radius (`surface` và `widget`).
+
+### Fixed
+- **Linting**: Đạt trạng thái **Zero Errors/Warnings** cho toàn bộ hệ thống (JS & CSS).
+- **CSS Architecture**: Khắc phục cảnh báo về thuộc tính không chuẩn trong `right-sidebar.css` bằng cách bổ sung `line-clamp` standard.
+- **Tokens**: Sửa lỗi typo quan trọng trong công thức tính toán `inset` tại `tokens.css`.
+
 ## [1.7.0] — 2026-04-25 23:20
 
 ### Added

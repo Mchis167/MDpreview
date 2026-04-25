@@ -13,7 +13,7 @@ const SwitchToggleModule = (() => {
    * @param {Function} options.onChange - Optional callback on change(isOn)
    */
   function init(options) {
-    const el = document.getElementById(options.containerId);
+    const el = options.element || document.getElementById(options.containerId);
     if (!el) {
       console.warn(`[SwitchToggleModule] Element not found: ${options.containerId}`);
       return null;

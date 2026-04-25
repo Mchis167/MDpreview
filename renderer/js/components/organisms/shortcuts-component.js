@@ -107,9 +107,27 @@ class ShortcutsComponent {
   }
 
   /**
-   * Open the Shortcuts UI in a floating popover (No backdrop)
+   * Static instance to track open popover
    */
-  static open() {
+  static activeInstance = null;
+
+  /**
+   * Toggle the Shortcuts UI (Singleton)
+   */
+  static toggle() {
+    if (this.activeInstance) {
+      this.activeInstance.close();
+      // activeInstance is nullified via the onClose callback passed in open()
+    } else {
+      this.activeInstance = this.open();
+    }
+  }
+
+  /**
+   * Open the Shortcuts UI in a floating popover (No backdrop)
+   * @param {Function} onClose - Optional callback when closed
+   */
+  static open(onClose = null) {
     const component = new ShortcutsComponent();
     const content = component.render();
     
@@ -118,10 +136,11 @@ class ShortcutsComponent {
       content: content,
       width: '480px',
       hasBackdrop: false,
+      alignment: 'bottom-left',
       className: 'shortcuts-dynamic-popover',
-      position: {
-        top: '60px',
-        right: '12px'
+      onClose: () => {
+        ShortcutsComponent.activeInstance = null;
+        if (onClose) onClose();
       }
     });
 

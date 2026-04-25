@@ -78,6 +78,8 @@ const RecentlyViewedModule = (() => {
     if (!treeComp) {
       treeComp = new TreeViewComponent({
         mount: list,
+        deleteIcon: 'x',
+        deleteTitle: 'Remove from history',
         onClick: async (e, node) => {
           e.stopPropagation();
           try { await loadFile(node.path); } catch (_err) { remove(node.path); }

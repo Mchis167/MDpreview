@@ -1,0 +1,58 @@
+/* ── Design System: Setting Toggle Item (Molecules) ── */
+
+.ds-setting-toggle-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ds-space-md) var(--ds-space-lg);
+  gap: var(--ds-space-md);
+  cursor: pointer;
+  border-radius: calc(var(--ds-radius-panel) - var(--ds-space-xs));
+  transition: background var(--ds-transition-fast), transform var(--ds-transition-fast);
+  min-height: 48px;
+  user-select: none;
+}
+
+.ds-setting-toggle-item:hover {
+  background: var(--ds-hover-sm);
+}
+
+.ds-setting-toggle-item:active {
+  transform: scale(0.99);
+}
+
+.ds-setting-toggle-label {
+  font-size: var(--ds-font-md);
+  font-weight: 500;
+  color: var(--ds-text-secondary);
+  flex: 1;
+  transition: color var(--ds-transition-fast);
+}
+
+.ds-setting-toggle-item:hover .ds-setting-toggle-label {
+  color: var(--ds-text-primary);
+}
+
+.ds-setting-toggle-control {
+  flex-shrink: 0;
+  pointer-events: none;
+  /* Let the row handle the click */
+}
+
+/* Variant for Menu Context style */
+.ds-setting-toggle-item--menu {
+  padding: var(--ds-space-sm) var(--ds-space-md);
+  min-height: 40px;
+  border-radius: var(--ds-radius-panel);
+}
+
+.ds-setting-toggle-item--menu .ds-setting-toggle-label {
+  font-size: var(--ds-font-md);
+}
+
+/* ── Settings Menu Panel (Floating context style) ── */
+.ds-settings-menu-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 220px;
+}

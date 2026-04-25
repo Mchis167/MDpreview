@@ -15,14 +15,17 @@
 @import 'design-system/atoms/textarea.css';
 
 /* ── Molecules ──────────────────────────────────────────── */
+@import 'design-system/molecules/workspace-switcher.css';
 @import 'design-system/molecules/segmented-control.css';
 @import 'design-system/molecules/mode-switcher.css';
 @import 'design-system/molecules/sidebar-section-header.css';
 @import 'design-system/molecules/context-menu.css';
 @import 'design-system/molecules/popover-shield.css';
+@import 'design-system/molecules/sidebar-base.css';
+@import 'design-system/molecules/setting-toggle-item.css';
+@import 'design-system/molecules/menu-shield.css';
 
 /* ── Organisms ──────────────────────────────────────────── */
-@import 'design-system/organisms/workspace-picker.css';
 @import 'design-system/organisms/sidebar-left.css';
 @import 'design-system/organisms/tree-view.css';
 @import 'design-system/organisms/tab-bar.css';

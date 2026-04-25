@@ -18,8 +18,7 @@ class TreeItemComponent {
         this.svgs = {
             chevron: DesignSystem.getIcon('chevron-down').replace('<svg', '<svg class="item-chevron"'),
             folder: DesignSystem.getIcon('folder'),
-            file: DesignSystem.getIcon('file'),
-            trash: DesignSystem.getIcon('trash')
+            file: DesignSystem.getIcon('file')
         };
     }
 
@@ -107,8 +106,8 @@ class TreeItemComponent {
 
             if (this.options.onDelete) {
                 const deleteBtn = new IconActionButton({
-                    iconName: 'trash',
-                    title: `Delete ${node.type}`,
+                    iconName: this.options.deleteIcon || 'trash',
+                    title: this.options.deleteTitle || `Delete ${node.type}`,
                     isDanger: true,
                     className: 'item-delete-btn',
                     onClick: (e) => this.options.onDelete(e, node)

@@ -862,3 +862,50 @@
     transform: translateY(0);
   }
 }
+
+/* ── Floating Scroll Top Button ────────────────────────── */
+.floating-scroll-top {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  width: 40px;
+  height: 40px;
+  background: var(--ds-bg-layer-surface);
+  backdrop-filter: blur(var(--ds-blur-md));
+  -webkit-backdrop-filter: blur(var(--ds-blur-md));
+  border: 1px solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-text-primary);
+  cursor: pointer;
+  z-index: 100;
+  opacity: 0;
+  transform: translateY(20px) scale(0.8);
+  pointer-events: none;
+  transition: all var(--ds-transition-normal) var(--ds-ease-spring);
+  box-shadow: var(--ds-shadow-lg);
+}
+
+.floating-scroll-top.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.floating-scroll-top:hover {
+  background: var(--ds-bg-layer-surface-hover);
+  color: var(--ds-accent);
+  border-color: var(--ds-accent-a40);
+  transform: translateY(-2px) scale(1.05);
+}
+
+.floating-scroll-top:active {
+  transform: translateY(0) scale(0.95);
+}
+
+.floating-scroll-top svg {
+  width: 20px;
+  height: 20px;
+}

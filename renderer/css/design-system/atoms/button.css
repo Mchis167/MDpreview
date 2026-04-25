@@ -5,13 +5,13 @@
 
 .ds-btn {
   /* ── Local Variables (overridable per variant) ── */
-  --_radius:          var(--ds-radius-widget);
-  --_pad-x:           var(--ds-space-md);
-  --_gap:             var(--ds-space-sm);
-  --_height:          28px;
-  --_bg:              transparent;
-  --_color:           var(--ds-text-primary);
-  --_bg-hover:        var(--ds-hover-md);
+  --_radius: var(--ds-radius-widget);
+  --_pad-x: var(--ds-space-md);
+  --_gap: 0;
+  --_height: 28px;
+  --_bg: transparent;
+  --_color: var(--ds-text-primary);
+  --_bg-hover: var(--ds-hover-md);
   --_transform-hover: translateY(-1px);
 
   display: inline-flex;
@@ -20,7 +20,7 @@
   height: var(--_height);
   padding: 0 var(--_pad-x);
   border-radius: var(--_radius);
-  gap: var(--_gap);
+  gap: var(--ds-space-xs);
   background: var(--_bg);
   color: var(--_color);
   font-family: var(--ds-font-family-text);
@@ -34,12 +34,27 @@
   transition: all var(--ds-transition-fast);
 }
 
+.ds-btn svg,
+.ds-btn i {
+  width: var(--ds-space-md);
+  height: var(--ds-space-md);
+  flex-shrink: 0;
+}
+
+/* ── Spacing logic (margin on label instead of gap) ───── */
+.ds-btn-text {
+  margin: 0 var(--ds-space-xs);
+}
+
 .ds-btn:hover {
   background: var(--_bg-hover);
+  color: var(--_color-hover, var(--_color));
   transform: var(--_transform-hover);
 }
 
-.ds-btn:active { transform: translateY(0); }
+.ds-btn:active {
+  transform: translateY(0);
+}
 
 .ds-btn:disabled {
   opacity: 0.3;
@@ -49,23 +64,45 @@
 
 /* ── Variants (only override changed properties) ───────── */
 .ds-btn-primary {
-  --_bg:             var(--ds-accent);
-  --_color:          var(--ds-text-on-accent);
-  --_bg-hover:       var(--ds-accent-hover);
+  --_bg: var(--ds-accent);
+  --_color: var(--ds-text-on-accent);
+  --_bg-hover: var(--ds-accent-hover);
 }
 
 .ds-btn-ghost {
-  --_bg:             transparent;
-  --_color:          var(--ds-text-primary);
-  --_bg-hover:       var(--ds-white-a05);
+  --_bg: transparent;
+  --_color: var(--ds-text-primary);
+  --_bg-hover: var(--ds-white-a05);
   --_transform-hover: none;
+}
+
+.ds-btn-subtitle {
+  --_bg: var(--ds-bg-layer-surface);
+  --_color: var(--ds-text-secondary);
+  --_bg-hover: var(--ds-bg-layer-surface-hover);
+  --_color-hover: var(--ds-text-primary);
+}
+
+.ds-btn-primary-pill {
+  --_bg: var(--ds-accent);
+  --_color: var(--ds-text-on-accent);
+  --_bg-hover: var(--ds-accent-hover);
+  --_radius: var(--ds-radius-pill);
+  --_pad-x: var(--ds-space-lg);
+}
+
+.ds-btn-off-label {
+  --_pad-x: 0;
+  --_gap: 0;
+  width: var(--_height);
+  justify-content: center;
 }
 
 /* ── Legacy aliases (.btn → .ds-btn) ──────────────────── */
 .btn {
   --_radius: var(--ds-radius-pill);
   --_height: 32px;
-  --_pad-x:  16px;
+  --_pad-x: 16px;
 
   display: inline-flex;
   align-items: center;
@@ -82,10 +119,38 @@
   gap: var(--ds-space-sm);
   white-space: nowrap;
 }
-.btn i, .btn svg { width: 14px; height: 14px; }
-.btn-primary { background: var(--ds-accent); color: var(--ds-text-on-accent); }
-.btn-primary:hover { background: var(--ds-accent-hover); }
-.btn-primary:disabled { background: var(--ds-accent); opacity: 0.2; cursor: not-allowed; }
-.btn-ghost { background: transparent; color: var(--ds-text-primary); }
-.btn-ghost:hover { background: var(--ds-hover-sm); }
-.btn-ghost:disabled { opacity: 0.2; cursor: not-allowed; }
+
+.btn i,
+.btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.btn-primary {
+  background: var(--ds-accent);
+  color: var(--ds-text-on-accent);
+}
+
+.btn-primary:hover {
+  background: var(--ds-accent-hover);
+}
+
+.btn-primary:disabled {
+  background: var(--ds-accent);
+  opacity: 0.2;
+  cursor: not-allowed;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ds-text-primary);
+}
+
+.btn-ghost:hover {
+  background: var(--ds-hover-sm);
+}
+
+.btn-ghost:disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+}

@@ -1,3 +1,4 @@
+/* global WorkspaceSwitcherComponent, WorkspaceModule, AppState, DesignSystem */
 /* ══════════════════════════════════════════════════
    SidebarLeftComponent.js — Navigation Organism
    Atomic Design System (Organism)
@@ -56,23 +57,11 @@ class SidebarLeftComponent {
     // 2. Create Aside
     const aside = document.createElement('aside');
     aside.id = 'sidebar-left';
+    aside.classList.add('ds-sidebar-base');
     
     aside.innerHTML = `
       <!-- Workspace Picker -->
-      <div class="workspace-picker" id="sidebar-md-header">
-        <div id="workspace-switcher-outer">
-          <button id="workspace-switcher">
-            <div class="ws-info">
-              <span class="ws-label">WORKSPACE</span>
-              <div id="workspace-name" class="skeleton skeleton-text" style="width: 80px; margin-top: 4px;"></div>
-            </div>
-            <svg class="ws-chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-        </div>
-      </div>
+      <div class="ds-workspace-switcher-mount" id="workspace-switcher-mount"></div>
 
       <!-- ── Explorer View ── -->
       <div id="sidebar-explorer-view">
@@ -103,18 +92,7 @@ class SidebarLeftComponent {
       </div>
 
       <!-- Footer Status -->
-      <div class="sidebar-footer">
-        <div class="hot-reload-badge" id="markdown-footer">
-          <div class="hr-badge-left">
-            <span class="hr-badge-label">Hot Reload Active</span>
-          </div>
-          <div class="hr-badge-bars">
-            <div class="bar bar-1"></div>
-            <div class="bar bar-2"></div>
-            <div class="bar bar-3"></div>
-          </div>
-        </div>
-      </div>
+      <div class="sidebar-footer" id="sidebar-footer-mount"></div>
     `;
 
     wrap.appendChild(aside);
@@ -126,6 +104,82 @@ class SidebarLeftComponent {
     wrap.appendChild(resizer);
 
     this.mount.appendChild(wrap);
+
+    // 4. Initialize Workspace Switcher
+    this._initWorkspaceSwitcher();
+    this._initFooterActions();
+  }
+
+  /**
+   * Initialize Footer Actions (Settings & Shortcuts)
+   */
+  _initFooterActions() {
+    const mount = document.getElementById('sidebar-footer-mount');
+    if (!mount) return;
+
+    const settingsBtn = DesignSystem.createButton({
+      label: 'Settings',
+      variant: 'subtitle',
+      leadingIcon: 'settings',
+      onClick: () => {
+        if (window.SettingsComponent) {
+          window.SettingsComponent.toggle();
+        }
+      }
+    });
+
+    const explorerSettingsBtn = DesignSystem.createButton({
+      label: 'Explorer Settings',
+      variant: 'subtitle',
+      leadingIcon: 'sliders',
+      offLabel: true,
+      onClick: (e) => {
+        if (window.ExplorerSettingsComponent) {
+          window.ExplorerSettingsComponent.toggle({ anchor: e.currentTarget });
+        }
+      }
+    });
+
+    const shortcutsBtn = DesignSystem.createButton({
+      label: 'Shortcuts',
+      variant: 'subtitle',
+      leadingIcon: 'keyboard',
+      offLabel: true,
+      onClick: () => {
+        if (window.ShortcutsComponent) {
+          window.ShortcutsComponent.toggle();
+        }
+      }
+    });
+
+    mount.appendChild(settingsBtn);
+    mount.appendChild(shortcutsBtn);
+    mount.appendChild(DesignSystem.createElement('div', 'sidebar-footer-spacer'));
+    mount.appendChild(explorerSettingsBtn);
+  }
+
+  /**
+   * Initialize the Workspace Switcher molecule
+   */
+  _initWorkspaceSwitcher() {
+    const mount = document.getElementById('workspace-switcher-mount');
+    if (!mount) return;
+
+    this.workspaceSwitcher = new WorkspaceSwitcherComponent({
+      onClick: () => {
+        if (typeof WorkspaceModule !== 'undefined') {
+          WorkspaceModule.openPanel();
+        }
+      }
+    });
+
+    mount.appendChild(this.workspaceSwitcher.render());
+    
+    // Register switcher instance in AppState for global access if needed
+    if (typeof AppState !== 'undefined') {
+      AppState.components = AppState.components || {};
+      AppState.components.workspaceSwitcher = this.workspaceSwitcher;
+    }
   }
 
   /**

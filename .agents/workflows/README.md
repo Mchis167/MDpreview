@@ -362,8 +362,10 @@ Tham khảo: [test-cases.md](test-cases.md)
 6. /console-test     → Verify tính năng
 7. /test             → Design test cases
 8. /changelog        → Cập nhật changelog
-9. /linting-gates    → Verify linting
-10. /github          → Release (nếu ready)
+9. /new-doc          → Tạo doc mới nếu module/tính năng chưa có doc
+   /update-docs      → Hoặc update doc hiện có nếu đã có
+10. /linting-gates   → Verify linting
+11. /github          → Release (nếu ready)
 ```
 
 ### Pattern 2: Fix bug
@@ -373,6 +375,7 @@ Tham khảo: [test-cases.md](test-cases.md)
 3. /console-test     → Verify fix
 4. /linting-gates    → Check linting
 5. /changelog        → Document fix
+6. /update-docs      → Cập nhật docs nếu behavior thay đổi
 ```
 
 ### Pattern 3: Refactor component
@@ -383,13 +386,15 @@ Tham khảo: [test-cases.md](test-cases.md)
 4. /smart-edit       → Fine-tune nếu cần
 5. /linting-gates    → Verify
 6. /changelog        → Document
+7. /update-docs      → Cập nhật docs (thường cần vì API thay đổi)
 ```
 
 ### Pattern 4: Release version
 ```
 1. /changelog        → Compile [Not Committed]
-2. /linting-gates    → Final check (0 errors)
-3. /github           → Commit + push + update version
+2. /update-docs      → Final docs check (iff need)
+3. /linting-gates    → Final check (0 errors)
+4. /github           → Commit + push + update version
 ```
 
 ---
@@ -401,6 +406,9 @@ Tham khảo: [test-cases.md](test-cases.md)
 | Smart Edit | `/smart-edit` | Fix/update code | Modified files |
 | Discuss | `/discuss [topic]` | Analyze, propose solutions | Analysis + proposals |
 | Changelog | `/changelog` | Document changes | Updated CHANGELOG.md |
+| **Update Docs** | **`/update-docs`** | **Cập nhật function docs (iff need)** | **Updated docs/function-docs/*** |
+| **New Doc** | **`/new-doc [module]`** | **Tạo doc mới cho tính năng / module mới** | **New file docs/function-docs/*** |
+| **Decision** | **`/decision`** | **Ghi lại quyết định thiết kế / kỹ thuật** | **New file docs/decisions/*** |
 | GitHub | `/github` | Release version | New commit, tag, updated CHANGELOG |
 | Artifact Docs | `/artifact-docs` | Create plan/test suite | Artifact artifact |
 | Console Test | `/console-test [feature]` | Test on console | JavaScript test script |
@@ -494,6 +502,9 @@ Tham khảo: [test-cases.md](test-cases.md)
 ├── 7.token-management.md    ← Token system
 ├── 8.module-creation.md     ← Module scaffolding
 ├── 9.linting-gates.md       ← Linting verification
+├── 15.update-docs.md        ← Cập nhật function docs (iff need)
+├── 16.new-doc.md            ← Tạo doc mới cho module/tính năng mới
+├── 17.decision.md           ← Ghi lại quyết định thiết kế / kỹ thuật
 ├── create-component.md      ← Atomic component creation
 ├── plan.md                  ← Implementation planning
 ├── refactor-component.md    ← Legacy refactoring

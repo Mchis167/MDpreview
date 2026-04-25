@@ -13,51 +13,8 @@ function initToolbarBtns() {
   // Currently empty, but kept for boot sequence consistency
 }
 
-// ── Keyboard Shortcuts Popover ───────────────────────────
-let _shortcutsCtrl = null;
-
-function initShortcutsPopover() {
-  const btn = document.getElementById('shortcuts-btn');
-  // Even if btn is missing, we want the toggle logic for other triggers
-
-  let activePopover = null;
-
-  const toggle = () => {
-    if (activePopover) {
-      activePopover.close();
-      activePopover = null;
-    } else if (window.ShortcutsComponent) {
-      activePopover = window.ShortcutsComponent.open();
-      // Reset reference when closed from inside
-      const originalClose = activePopover.close;
-      activePopover.close = () => {
-        originalClose();
-        activePopover = null;
-      };
-    }
-  };
-
-  if (btn) {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggle();
-    });
-  }
-
-  _shortcutsCtrl = {
-    close: () => { if (activePopover) activePopover.close(); },
-    toggle
-  };
-
-  window.toggleShortcutsPopover = toggle;
-  return _shortcutsCtrl;
-}
-
 // ── Global Keyboard Shortcuts ────────────────────────────
 function initGlobalShortcuts() {
-  const shortcutsCtrl = initShortcutsPopover();
-  if (!shortcutsCtrl) return;
-
   const isMac = /Mac|iPhone|iPod|iPad/.test(navigator.platform) || (navigator.userAgentData && navigator.userAgentData.platform === 'macOS');
 
   document.addEventListener('keydown', (e) => {
@@ -65,7 +22,9 @@ function initGlobalShortcuts() {
 
     // ── Escape: close overlays & deselect ─────────────────
     if (e.key === 'Escape') {
-      shortcutsCtrl.close();
+      if (window.ShortcutsComponent && window.ShortcutsComponent.activeInstance) {
+        window.ShortcutsComponent.activeInstance.close();
+      }
       if (typeof TabsModule !== 'undefined') TabsModule.deselectAll();
       if (typeof TreeModule !== 'undefined') TreeModule.deselectAll();
       return;
@@ -78,15 +37,17 @@ function initGlobalShortcuts() {
     // ── Mod+/ — Keyboard shortcuts popover ─────────────
     if (mod && e.key === '/') {
       e.preventDefault();
-      shortcutsCtrl.toggle();
+      if (window.ShortcutsComponent) {
+        window.ShortcutsComponent.toggle();
+      }
       return;
     }
 
     // ── Mod+, — Settings ───────────────────────────────
     if (mod && e.key === ',') {
       e.preventDefault();
-      if (typeof SettingsModule !== 'undefined') {
-        SettingsModule.open();
+      if (window.SettingsComponent) {
+        window.SettingsComponent.toggle();
       }
       return;
     }

@@ -1,0 +1,91 @@
+# Tabs Module (`renderer/js/modules/tabs.js`)
+
+> Quản lý danh sách tab đang mở, trạng thái active, multi-select và các batch operation.
+
+---
+
+## State
+
+| Property | Mô tả |
+|---|---|
+| `openFiles` | Mảng đường dẫn các file đang mở |
+| `activeFile` | File đang được xem |
+| `selectedFiles` | Set các file đang được chọn (multi-select) |
+
+State được persist vào localStorage, phân biệt theo workspace ID.
+
+---
+
+## Functions
+
+### `init()`
+Khởi tạo TabBar component, đăng ký các keyboard shortcuts và event listeners:
+- **Escape** — Deselect tất cả tab
+- **Mod+A** — Chọn tất cả tab (chỉ khi không focus vào input)
+- **Mod+W** — Đóng tab active hoặc các tab đang chọn
+- **Mod+Shift+W** — Đóng tất cả tab
+
+### `open(filePath)`
+Mở file trong tab. Nếu file đã có tab thì chỉ switch sang, không mở thêm. Sau đó gọi `loadFile()`.
+
+### `remove(filePath, skipConfirm?)`
+Đóng tab. Nếu file có draft chưa save sẽ hiện dialog xác nhận trừ khi `skipConfirm = true`.
+- Khi đóng tab active → tự động switch sang tab gần nhất
+- Khi đóng tab cuối → gọi `setNoFile()`
+
+### `swap(oldPath, newPath)`
+Thay thế path trong tab list — dùng sau khi rename file để tab không bị mất.
+
+### `reorder(oldIndex, newIndex)`
+Đổi thứ tự tab sau khi drag-and-drop.
+
+### `switchWorkspace(workspaceId)`
+Load lại danh sách tab đã lưu cho workspace mới từ localStorage.
+
+---
+
+## Multi-Select
+
+| Function | Hành động |
+|---|---|
+| `selectAll()` | Chọn tất cả tab đang mở |
+| `deselectAll()` | Bỏ chọn tất cả |
+| `toggleSelect(path)` | Toggle chọn/bỏ chọn một tab (Ctrl+click) |
+| `selectRange(path)` | Chọn range từ tab active đến tab được click (Shift+click) |
+
+---
+
+## Batch Operations
+
+### `closeAll()`
+Đóng tất cả tab. Nếu có draft chưa save → hiện xác nhận.
+
+### `closeOthers(path)`
+Đóng tất cả tab trừ `path`. Hữu ích qua context menu.
+
+### `closeSelected()`
+Đóng tất cả tab đang được chọn. Tương đương Mod+W khi có multi-select.
+
+---
+
+## Persistence
+
+### `saveToStorage()`
+Lưu `openFiles` vào localStorage với key `mdpreview_tabs_{workspaceId}`. Được gọi sau mỗi thay đổi.
+
+### `render()`
+Sync trạng thái sang TabBar component và highlight file active trong tree sidebar.
+
+---
+
+## Getters
+
+```js
+TabsModule.getActive()        // → string | null
+TabsModule.getOpenFiles()     // → string[]
+TabsModule.getSelectedFiles() // → string[]
+```
+
+---
+
+*Document — 2026-04-26*

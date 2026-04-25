@@ -54,27 +54,7 @@ const SettingsModule = (() => {
       }
     };
 
-    // ── Explorer Toggles ──────────────────────────────────────
-    const mountToggle = (id, stateKey, storageKey) => {
-      SwitchToggleModule.init({
-        containerId: id,
-        isOn: AppState.settings[stateKey],
-        onChange: (val) => {
-          AppState.settings[stateKey] = val;
-          localStorage.setItem(storageKey, val);
-          if (typeof TreeModule !== 'undefined') TreeModule.load();
-          if (typeof AppState !== 'undefined' && AppState.savePersistentState) {
-            AppState.savePersistentState();
-          }
-        }
-      });
-    };
-
-    mountToggle('hidden-toggle-mount', 'showHidden', 'md-show-hidden');
-    mountToggle('empty-toggle-mount',  'hideEmptyFolders', 'md-hide-empty');
-    mountToggle('flat-toggle-mount',   'flatView', 'md-flat-view');
-
-
+    // ── Background Toggle ──────────────────────────────────────
     if (bgToggleContainer) {
       SwitchToggleModule.init({
         containerId: 'bg-toggle-mount',

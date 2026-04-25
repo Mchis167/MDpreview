@@ -1,28 +1,27 @@
 /* ── Context Menu (Molecule) ────────────────────────── */
-.ctx-menu {
-  position: fixed;
-  z-index: 10000;
-  background: var(--ds-bg-surface);
-  border: 1px solid var(--ds-border-strong);
-  border-radius: var(--ds-radius-shell);
-  padding: var(--ds-space-xs);
-  min-width: 180px;
-  box-shadow: var(--ds-shadow-lg), 0 0 0 1px var(--ds-border-subtle);
-  animation: ctxFade 0.2s var(--ds-ease-spring);
-  backdrop-filter: blur(var(--ds-blur-md));
+.ctx-menu-container {
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes ctxFade {
-  from { opacity: 0; transform: scale(0.95) translateY(-5px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .ctx-item {
   padding: var(--ds-space-sm) var(--ds-space-md);
-  font-size: var(--ds-font-base);
+  font-size: var(--ds-font-md);
   font-weight: 500;
   color: var(--ds-text-secondary);
-  border-radius: var(--ds-radius-panel);
+  border-radius: calc(var(--ds-radius-panel) - var(--ds-space-xs));
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -78,8 +77,13 @@
   flex-shrink: 0;
 }
 
-.ctx-item.active svg { color: var(--ds-accent); }
-.ctx-item.danger svg { color: var(--ds-accent-red); }
+.ctx-item.active svg {
+  color: var(--ds-accent);
+}
+
+.ctx-item.danger svg {
+  color: var(--ds-accent-red);
+}
 
 .ctx-label {
   flex: 1;
@@ -94,19 +98,17 @@
 }
 
 .ctx-shortcut kbd {
-  background: var(--ds-hover-md);
-  color: var(--ds-text-secondary);
-  border: 1px solid var(--ds-border-strong);
-  border-bottom-width: 2px;
-  border-radius: var(--ds-radius-chip);
-  padding: 1px var(--ds-space-xs);
   font-size: var(--ds-font-sm);
   font-weight: 700;
   font-family: var(--ds-font-family-text);
+  background: var(--ds-hover-md);
+  color: var(--ds-text-secondary);
+  border: 1px solid var(--ds-border-subtle);
+  border-radius: var(--ds-radius-chip);
+  padding: 1px var(--ds-space-xs);
   min-width: 20px;
   height: 20px;
   text-align: center;
-  box-shadow: 0 1px 0 var(--ds-black-a30);
   line-height: 1;
   display: inline-flex;
   align-items: center;

@@ -1,0 +1,54 @@
+/* ── Design System: Menu Shield (Molecules) ── */
+
+.ds-menu-shield {
+  position: fixed;
+  z-index: 2000;
+  min-width: 200px;
+  max-width: 320px;
+  background: var(--ds-bg-overlay);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--ds-border-subtle);
+  border-radius: var(--ds-radius-panel);
+  box-shadow: var(--ds-shadow-lift);
+  padding: var(--ds-space-xs);
+  display: flex;
+  flex-direction: column;
+  animation: dsMenuFadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+@keyframes dsMenuFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Header style within shield (optional) */
+.ds-menu-shield-header {
+  padding: var(--ds-space-sm) var(--ds-space-md) var(--ds-space-md) var(--ds-space-md);
+  border-bottom: 1px solid var(--ds-border-subtle);
+  margin-bottom: var(--ds-space-xs);
+}
+
+.ds-menu-shield-title {
+  font-size: var(--ds-font-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ds-text-tertiary);
+  font-family: var(--ds-font-family-code);
+}
+
+/* Scrollable body if content is long */
+.ds-menu-shield-content {
+  overflow-y: auto;
+  max-height: 80vh;
+}
