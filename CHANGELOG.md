@@ -2,7 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-### [1.9.0] — 2026-04-27 10:40
+## [Not Committed] — 2026-04-27 10:45
+
+## [1.9.0] — 2026-04-27 10:40
 
 ### 🎉 Added
 - **Pin Tab Feature**: Triển khai khả năng ghim tab (Pin Tab) chuyên nghiệp:
