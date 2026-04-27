@@ -77,7 +77,7 @@
   display: flex;
   align-items: center;
   padding: 5px;
-  background: var(--ds-black-a40);
+  background: var(--ds-layer-control-default);
   border-radius: var(--ds-radius-shell);
   border: 1px solid var(--ds-border-default);
 }
@@ -87,7 +87,7 @@
   top: 5px;
   bottom: 5px;
   left: 5px;
-  background: var(--ds-hover-lg);
+  background: var(--ds-layer-subtle-selected);
   border: 1px solid var(--ds-border-strong);
   border-radius: max(0px, var(--ds-radius-shell) - var(--ds-space-xs));
   transition: all var(--ds-transition-main);
@@ -124,6 +124,6 @@
 }
 
 .toolbar-btn:hover {
-  background: var(--ds-hover-md);
+  background: var(--ds-layer-subtle-hover);
   color: var(--ds-text-inverse);
 }

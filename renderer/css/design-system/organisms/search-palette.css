@@ -12,7 +12,7 @@
   /* Keep layout active for transitions */
   justify-content: center;
   align-items: flex-start;
-  padding-top: 15vh;
+  padding-top: 10vh;
   visibility: hidden;
   pointer-events: none;
 }
@@ -24,7 +24,6 @@
 
 .ds-search-palette-box {
   width: 600px;
-  max-height: 58px;
   /* Start as search bar */
   background: var(--ds-white-a10);
   backdrop-filter: blur(var(--ds-blur-searchbox));
@@ -36,35 +35,23 @@
   display: flex;
   flex-direction: column;
   opacity: 0;
-  transition: opacity 0.1s ease;
+  transition:
+    opacity 0.3s ease,
+    width 0.3s var(--ds-ease-out),
+    max-height 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --_target-h: 58px;
+  max-height: var(--_target-h);
+}
+
+.ds-search-palette-box.is-shortcut-mode {
+  /* Dynamic height handled by JS */
 }
 
 .ds-search-palette-overlay.open .ds-search-palette-box {
   opacity: 1;
-  /* Phased Elastic Spring: Faster, overshoots, then settles */
-  animation: ds-palette-expand-full 1.5s var(--ds-ease-elastic) 0.1s both;
 }
 
-@keyframes ds-palette-expand-full {
-  0% {
-    max-height: 58px;
-  }
-
-  60% {
-    max-height: 610px;
-    /* Slight overshoot */
-  }
-
-  85% {
-    max-height: 595px;
-    /* Slight bounce back */
-  }
-
-  100% {
-    max-height: 600px;
-    /* Settle at final height */
-  }
-}
+/* Removed ds-palette-expand-full in favor of JS-driven dynamic height transition */
 
 /* ── Header ── */
 .palette-header {
@@ -97,7 +84,62 @@
   outline: none;
   color: var(--ds-text-primary);
   font-size: var(--ds-font-xl);
-  font-family: inherit;
+  font-family: var(--ds-font-family-text);
+}
+
+/* ── Filter Badge ── */
+.palette-badge-container:empty {
+  display: none;
+}
+
+.palette-badge {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--ds-accent);
+  font-size: var(--ds-font-xl);
+  font-family: var(--ds-font-family-text);
+  animation: ds-badge-pop 0.2s var(--ds-ease-out);
+  flex-shrink: 0;
+}
+
+.palette-badge::after {
+  content: ":";
+  margin-left: 2px;
+  opacity: 0.5;
+}
+
+@keyframes ds-badge-pop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ── Options Bar ── */
+.palette-options {
+  display: flex;
+  padding: var(--ds-space-md) var(--ds-space-lg) var(--ds-space-xs);
+  gap: var(--ds-space-xs);
+}
+
+.palette-options .ds-btn {
+  font-size: 12px;
+  font-weight: 500;
+  height: 24px;
+}
+
+.palette-options .ds-btn.is-active {
+  background: var(--ds-layer-surface-active);
+  border: 1px solid var(--ds-border-strong);
+  color: var(--ds-text-primary);
 }
 
 .palette-input::placeholder {
@@ -107,8 +149,43 @@
 
 /* ── Results ── */
 .palette-results {
-  max-height: 400px;
+  max-height: 500px;
+  /* Static limit for content, independent of morph variable */
   overflow-y: auto;
+  padding-bottom: 24px;
+  position: relative;
+  scrollbar-width: none;
+  /* Hide scrollbar in MDpreview style */
+}
+
+.palette-results.is-empty {
+  padding-bottom: 0;
+}
+
+.ds-search-palette-box.is-shortcut-mode .palette-results {
+  max-height: 700px;
+  /* Larger limit for shortcuts */
+}
+
+.palette-results::-webkit-scrollbar {
+  display: none;
+}
+
+.palette-results.is-scrollable {
+  /* Smart Mask Fading */
+  --_fade-top: 0;
+  --_fade-bottom: 24px;
+
+  -webkit-mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black var(--_fade-top),
+      black calc(100% - var(--_fade-bottom)),
+      transparent 100%);
+  mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black var(--_fade-top),
+      black calc(100% - var(--_fade-bottom)),
+      transparent 100%);
 }
 
 .palette-item {
@@ -120,11 +197,11 @@
 }
 
 .palette-item:hover {
-  background: var(--ds-hover-md);
+  background: var(--ds-layer-subtle-hover);
 }
 
 .palette-item.selected {
-  background: var(--ds-hover-lg);
+  background: var(--ds-layer-subtle-selected);
 }
 
 .palette-section-header {
@@ -134,6 +211,13 @@
   color: var(--ds-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.palette-divider {
+  height: 1px;
+  background: var(--ds-border-subtle);
+  margin: var(--ds-space-sm) var(--ds-space-lg);
+  opacity: 0.5;
 }
 
 .palette-empty-state {
@@ -203,7 +287,7 @@
 /* ── Footer ── */
 .palette-footer {
   padding: var(--ds-space-md) var(--ds-space-lg);
-  background: var(--ds-black-a20);
+  background: var(--ds-layer-control-default);
   border-top: 1px solid var(--ds-border-subtle);
   display: flex;
   align-items: center;
@@ -229,4 +313,25 @@ body.is-searching .ds-change-action-view-bar {
 
 body.is-searching .edit-toolbar-container {
   transform: translate(-50%, 20px) !important;
+}
+
+/* ── Shortcuts Styling ── */
+.palette-item.shortcut-item .palette-item-info {
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.palette-item-keys {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.palette-item-keys .ds-kbd {
+  font-size: 10px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
 }

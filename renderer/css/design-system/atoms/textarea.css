@@ -37,14 +37,14 @@
 }
 
 .textarea-expand-btn:hover {
-  background: var(--ds-hover-md);
+  background: var(--ds-layer-subtle-hover);
   color: var(--ds-text-primary);
 }
 
 .textarea-container {
   margin: 0 var(--ds-space-xs);
   padding: 10px 14px;
-  background: var(--ds-hover-sm);
+  background: var(--ds-layer-control-default);
   border: 1px solid var(--ds-border-default);
   border-radius: var(--ds-radius-panel);
   min-height: 90px;
@@ -53,7 +53,7 @@
 
 .textarea-component.is-typing .textarea-container {
   border-color: var(--ds-border-strong);
-  background: var(--ds-hover-md);
+  background: var(--ds-layer-control-hover);
 }
 
 .textarea-input {
@@ -106,7 +106,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: var(--ds-black-a50);
+  background: var(--ds-bg-backdrop);
   backdrop-filter: blur(var(--ds-blur-lg));
   -webkit-backdrop-filter: blur(var(--ds-blur-lg));
   animation: fadeIn var(--ds-transition-main) forwards;
@@ -116,7 +116,7 @@
   position: relative;
   width: 724px;
   height: 534px;
-  background: var(--ds-bg-overlay);
+  background: var(--ds-surface-overlay);
   border: 1px solid var(--ds-border-default);
   border-radius: var(--ds-radius-shell);
   display: flex;
@@ -127,8 +127,15 @@
 }
 
 @keyframes modalScaleUp {
-  0%   { opacity: 0; transform: scale(0.9) translateY(20px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .expanded-textarea-header {
@@ -153,7 +160,7 @@
   flex: 1;
   margin: 0 var(--ds-space-xs) var(--ds-space-xs) var(--ds-space-xs);
   padding: var(--ds-space-xl);
-  background: var(--ds-glass-hover);
+  background: var(--ds-layer-control-default);
   border: 1px solid var(--ds-border-default);
   border-radius: max(0px, var(--ds-radius-shell) - var(--ds-space-xs));
   display: flex;

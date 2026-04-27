@@ -49,17 +49,17 @@
 }
 
 .tree-item:hover {
-  background: var(--ds-hover-sm);
+  background: var(--ds-layer-subtle-hover);
   color: var(--ds-text-secondary);
 }
 
 .tree-item.active {
-  background: var(--ds-hover-md);
+  background: var(--ds-layer-subtle-active);
   color: var(--ds-text-primary);
 }
 
 .tree-item.selected {
-  background: var(--ds-hover-lg);
+  background: var(--ds-layer-subtle-selected);
 }
 
 /* ── Indent Guides ── */
@@ -67,7 +67,7 @@
   position: relative;
   margin-left: 13px;
   padding-left: var(--ds-space-md);
-  border-left: 1px solid var(--ds-hover-md);
+  border-left: 1px solid var(--ds-layer-subtle-selected);
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -136,7 +136,7 @@
 
 .item-delete-btn:hover {
   opacity: 1;
-  background: var(--ds-orange-a15);
+  background: var(--ds-layer-danger-hover);
   color: var(--ds-accent-red);
 }
 
@@ -166,7 +166,7 @@
   position: fixed;
   pointer-events: none;
   z-index: 10000;
-  background: var(--ds-bg-overlay);
+  background: var(--ds-surface-overlay);
   color: var(--ds-text-primary);
   padding: 10px;
   height: 24px;

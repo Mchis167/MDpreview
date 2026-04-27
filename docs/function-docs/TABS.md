@@ -83,7 +83,7 @@ Load lại danh sách tab và trạng thái ghim đã lưu cho workspace mới t
 Lưu `openFiles` vào localStorage với key `mdpreview_tabs_{workspaceId}`. Được gọi sau mỗi thay đổi.
 
 ### `render()`
-Sync trạng thái sang TabBar component và highlight file active trong tree sidebar.
+Sync trạng thái sang TabBar component và highlight file active trong tree sidebar. Trạng thái **Active** được ưu tiên hiển thị cao hơn trạng thái **Selected** để tránh xung đột màu sắc.
 
 ---
 

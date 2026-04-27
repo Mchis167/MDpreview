@@ -41,6 +41,10 @@ Ghi lại các quyết định thiết kế và kỹ thuật quan trọng trong 
 | 2026-04-27 | [20260427-tab-management-strategy.md](20260427-tab-management-strategy.md) | Chiến lược quản lý Tab: Ghim, Phân vùng và Co giãn | accepted |
 | 2026-04-27 | [20260427-tab-logic-visual-sync.md](20260427-tab-logic-visual-sync.md) | Đồng bộ logic tab với thứ tự hiển thị trực quan | accepted |
 | 2026-04-27 | [20260427-explicit-selection-closure.md](20260427-explicit-selection-closure.md) | Ưu tiên lựa chọn thủ công hơn tính bảo vệ của tab ghim | accepted |
+| 2026-04-27 | [20260427-systems-based-token-refactor.md](20260427-systems-based-token-refactor.md) | Tái cấu trúc Semantic Token theo Hệ thống (Systems-based) | accepted |
+| 2026-04-27 | [20260427-smart-button-spacing-logic.md](20260427-smart-button-spacing-logic.md) | Tự động hóa khoảng cách nút qua logic :only-child | accepted |
+| 2026-04-27 | [20260427-search-palette-height-logic.md](20260427-search-palette-height-logic.md) | Kiến trúc dãn nở chiều cao và tích hợp phím tắt cho Search Palette | accepted |
+| 2026-04-27 | [20260427-command-palette-evolution.md](20260427-command-palette-evolution.md) | Chiến lược tiến hóa Command Palette và tìm kiếm ngữ nghĩa | accepted |
 
 ---
 

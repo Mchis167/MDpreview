@@ -525,7 +525,11 @@ const TabsModule = (function () {
       // If newIndex is within pinned range, unpinned item moves to the very beginning of unpinned section
       const targetInDisplay = displayOrder[newIndex];
       let insertIdx = state.openFiles.indexOf(targetInDisplay);
-      if (insertIdx === -1) insertIdx = state.openFiles.length;
+      if (insertIdx === -1) {
+        insertIdx = state.openFiles.length;
+      } else if (newIndex > oldIndex) {
+        insertIdx++;
+      }
       
       state.openFiles.splice(insertIdx, 0, item);
     }

@@ -30,7 +30,7 @@
 }
 
 .ctx-item:hover {
-  background: var(--ds-hover-lg);
+  background: var(--ds-layer-subtle-hover);
   color: var(--ds-text-inverse);
 }
 
@@ -39,12 +39,12 @@
 }
 
 .ctx-item.danger:hover {
-  background: var(--ds-red-a15);
+  background: var(--ds-layer-danger-hover);
   color: var(--ds-accent-red);
 }
 
 .ctx-item.active {
-  background: rgba(var(--ds-accent-rgb), 0.1);
+  background: var(--ds-layer-subtle-active);
   color: var(--ds-accent);
   font-weight: 600;
 }
@@ -98,7 +98,7 @@
 }
 
 .ctx-item:hover .ds-kbd {
-  background: var(--ds-hover-lg);
+  background: var(--ds-layer-subtle-selected);
   color: var(--ds-text-inverse);
   border-color: var(--ds-border-strong);
 }

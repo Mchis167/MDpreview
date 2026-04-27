@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.10.0] — 2026-04-28 00:05
+
+### 🎉 Added
+- **Systems-Based Design Tokens**: Triển khai kiến trúc Semantic Token 3-tier mới giúp quản lý màu sắc theo ngữ cảnh sử dụng (Subtle, Accent, Surface, Control, Danger).
+- **Semantic Shortcut Search**: Hỗ trợ tìm kiếm phím tắt thông qua từ khóa đồng nghĩa (tags), giúp người dùng dễ dàng tìm thấy lệnh ngay cả khi không nhớ tên chính xác (ví dụ: gõ "xem" ra "Read Mode", "xóa" ra "Delete Selected").
+- **Extended Design System Icons**: Bổ sung bộ icon Lucide mới (`save`, `undo`, `redo`, `sidebar`, `maximize`, `mouse-pointer`, `arrow-up/down`, `briefcase`, `pin`) để hỗ trợ hiển thị trực quan hơn.
+- **Surface & Subtle Dark Systems**: Bổ sung hệ thống Layer Surface và Subtle Dark hỗ trợ các biến thể tương phản cao và ghost buttons.
+- **Search Result Count**: Bổ sung chỉ báo số lượng kết quả tìm thấy trong Palette, hỗ trợ hiển thị chính xác số ít/số nhiều.
+- **Architecture Decisions**: Ghi lại các quyết định kiến trúc quan trọng tại `docs/decisions/` (Systems-based Tokens, Command Palette Evolution, Height Logic).
+
+### 🔧 Changed
+- **Search Palette Morphing**: Tái cấu trúc `SearchPalette` (Organism) với khả năng dãn nở chiều cao động, hiệu ứng mờ (blur) và smart scroll mask.
+- **Shortcut Logic Refactor**: Chuyển đổi toàn bộ hệ thống phím tắt sang `SearchPalette`, hỗ trợ icon riêng biệt cho từng lệnh thay vì dùng chung icon bàn phím.
+- **Bulk Token Migration**: Di chuyển hơn 20 file CSS (Atoms, Molecules, Organisms) sang hệ thống Semantic Token mới, chuẩn hóa trạng thái hover/active/selected.
+- **TabBar Polish**: Cập nhật logic hiển thị tab (Active-wins) và tự động hóa khoảng cách nút qua logic `:only-child`.
+- **Integrated Filter Badge**: Chuyển đổi `.palette-badge` sang phong cách "text highlight" tích hợp thẳng vào ô input.
+
+### 🐛 Fixed
+- **Folder Search Logic**: Khắc phục lỗi hàm `_flatten` bỏ qua các node thư mục, giúp tính năng tìm kiếm Folder hoạt động chính xác.
+- **UI Consistency**: Hợp nhất các selector trùng lặp, triệt tiêu hiện tượng nhảy layout và đạt trạng thái **Zero Lint Errors**.
+- **Ghost Spacing**: Sửa lỗi khoảng trắng thừa trong header của Palette khi không có filter badge nào đang được kích hoạt.
+
+### 🗑 Removed
+- **Legacy Components**: Xóa bỏ hoàn toàn UI `ShortcutsComponent` cũ và các tàn dư CSS/JS (`modals-misc.css`, `toolbar.js`) để tối ưu hóa codebase.
+- **Legacy Tokens**: Loại bỏ hoàn toàn các token cũ (`hover-sm/md/lg`, `bg-overlay`, `bg-surface`) sau khi hoàn tất migration.
+
+
 ## [1.9.1] — 2026-04-27 12:35
 
 ### 🎉 Added

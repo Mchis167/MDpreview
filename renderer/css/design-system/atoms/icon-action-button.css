@@ -5,11 +5,11 @@
 
 .ds-icon-action-btn {
   /* ── Local Variables ── */
-  --_size:        24px;
-  --_radius:      var(--ds-radius-widget);
-  --_bg:          transparent;
-  --_color:       var(--ds-text-tertiary);
-  --_bg-hover:    var(--ds-hover-md);
+  --_size: 24px;
+  --_radius: var(--ds-radius-widget);
+  --_bg: transparent;
+  --_color: var(--ds-text-tertiary);
+  --_bg-hover: var(--ds-layer-subtle-hover);
   --_color-hover: var(--ds-text-secondary);
 
   width: var(--_size);
@@ -40,21 +40,23 @@
 
 /* ── Variants (only override changed props) ─────────────── */
 .ds-icon-action-btn.is-danger {
-  --_bg-hover:    var(--ds-red-a10);
+  --_bg-hover: var(--ds-layer-danger-hover);
   --_color-hover: var(--ds-accent-red);
 }
 
 .ds-icon-action-btn.is-primary {
-  --_bg:          var(--ds-accent);
-  --_color:       var(--ds-text-on-accent);
-  --_bg-hover:    var(--ds-accent-hover);
+  --_bg: var(--ds-layer-accent-default);
+  --_color: var(--ds-text-on-accent);
+  --_bg-hover: var(--ds-layer-accent-hover);
   --_color-hover: var(--ds-text-on-accent);
 }
 
-.ds-icon-action-btn.is-primary:hover { transform: scale(1.1); }
+.ds-icon-action-btn.is-primary:hover {
+  transform: scale(1.1);
+}
 
 .ds-icon-action-btn.is-large {
-  --_size:   32px;
+  --_size: 32px;
   --_radius: var(--ds-radius-widget);
 }
 

@@ -31,8 +31,8 @@ class TreeItemComponent {
         wrapper.dataset.nodeId = Math.random().toString(36).substring(2, 9);
         wrapper.className = 'tree-node-wrapper';
 
-        const isSelected = this.state.selectedPaths.includes(node.path);
         const isActive = node.path === this.state.currentFile;
+        const isSelected = this.state.selectedPaths.includes(node.path) && !isActive;
         const isRenaming = node.path === this.state.renamingPath;
 
         const itemEl = document.createElement('div');

@@ -94,7 +94,7 @@ Each tab contains:
 - **Hybrid Close Button**: 
     - **Inactive Tabs**: Sử dụng `absolute` positioning để triệt tiêu hiện tượng "nhảy" layout.
     - **Active Tab**: Sử dụng `static` flow để hiển thị hoàn hảo.
-- **Selection Support**: Highlight khi nằm trong `state.selectedFiles`.
+- **Selection Support**: Highlight khi nằm trong `state.selectedFiles` (Tự động bị ẩn nếu Tab đó đang ở trạng thái `active` để ưu tiên hiển thị highlight của file đang mở).
 - **Identification**: Thuộc tính `data-path` giúp TabPreview nhận diện file.
 
 ---
@@ -107,4 +107,4 @@ Each tab contains:
 
 ---
 
-*Document — 2026-04-27 10:30*
+*Document — 2026-04-27*

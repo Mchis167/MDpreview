@@ -1026,7 +1026,9 @@ const TreeModule = (() => {
 
   function _syncSelectionUI() {
     document.querySelectorAll('.tree-item').forEach(el => {
-      const isSelected = state.selectedPaths.includes(el.dataset.path);
+      const path = el.dataset.path;
+      const isActive = el.classList.contains('active');
+      const isSelected = state.selectedPaths.includes(path) && !isActive;
       el.classList.toggle('selected', isSelected);
     });
   }

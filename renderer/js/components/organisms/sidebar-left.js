@@ -159,8 +159,8 @@ class SidebarLeftComponent {
       leadingIcon: 'keyboard',
       offLabel: true,
       onClick: () => {
-        if (window.ShortcutsComponent) {
-          window.ShortcutsComponent.toggle();
+        if (window.SearchPalette) {
+          window.SearchPalette.show('shortcut');
         }
       }
     });

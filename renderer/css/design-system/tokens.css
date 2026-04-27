@@ -125,19 +125,54 @@
      Named by purpose. Always references Tier 1 or Tier 2.
      ════════════════════════════════════════════════════════ */
 
-  /* ── Layer Backgrounds (Semantic Elevation) ───────── */
-  --ds-bg-layer-main: var(--ds-glass-main);
-  --ds-bg-layer-sidebar: var(--ds-glass-sidebar);
+  /* ── Surface Layers (Static Backgrounds) ────────── */
+  --ds-surface-main: var(--ds-glass-main);
+  --ds-surface-sidebar: var(--ds-glass-sidebar);
+  --ds-surface-overlay: var(--ds-primitive-deep);
+  --ds-surface-card: var(--ds-white-a02);
 
-  --ds-bg-layer-surface: var(--ds-black-a20);
-  --ds-bg-layer-surface-hover: var(--ds-black-a35);
+  /* ── Interactive Layer Systems (Final Colors) ─── */
 
-  --ds-bg-layer-overlay: var(--ds-bg-overlay);
+  /* 1. Subtle System (Tree, List, Ghost Buttons) */
+  --ds-layer-subtle-default: transparent;
+  --ds-layer-subtle-hover: var(--ds-white-a02);
+  --ds-layer-subtle-selected: var(--ds-white-a03);
+  --ds-layer-subtle-active: var(--ds-white-a05);
+  --ds-layer-subtle-active-hover: var(--ds-white-08);
 
-  /* ── Backgrounds ───────────────────────────────────────── */
+  /* 2. Subtle Dark System (Alternative lists, dark ghost buttons) */
+  --ds-layer-subtle-dark-default: transparent;
+  --ds-layer-subtle-dark-hover: var(--ds-black-a05);
+  --ds-layer-subtle-dark-selected: var(--ds-black-a15);
+  --ds-layer-subtle-dark-active: var(--ds-black-a20);
+
+  /* 3. Accent System (Primary Buttons, Active States) */
+  --ds-layer-accent-default: var(--ds-accent);
+  --ds-layer-accent-hover: var(--ds-accent-hover);
+  --ds-layer-accent-active: linear-gradient(var(--ds-black-a10), var(--ds-black-a10)), var(--ds-accent);
+
+  /* 4. Surface System (Cards, Workspace Switcher) */
+  --ds-layer-surface-default: var(--ds-surface-card);
+  --ds-layer-surface-hover: var(--ds-white-a08);
+  --ds-layer-surface-active: var(--ds-white-a12);
+
+  /* 5. Surface Dark System (Inverse/Dark interactive surfaces) */
+  --ds-layer-surface-dark-default: var(--ds-black-a05);
+  --ds-layer-surface-dark-hover: var(--ds-black-a15);
+  --ds-layer-surface-dark-active: var(--ds-black-a20);
+
+  /* 6. Control System (Form Inputs) */
+  --ds-layer-control-default: var(--ds-black-a20);
+  --ds-layer-control-hover: var(--ds-black-a30);
+  --ds-layer-control-focus: var(--ds-black-a40);
+
+  /* 7. Danger System (Delete Actions) */
+  --ds-layer-danger-default: transparent;
+  --ds-layer-danger-hover: var(--ds-red-a15);
+  --ds-layer-danger-active: var(--ds-red-a30);
+
+  /* ── Backgrounds ────────────────────────────────────────── */
   --ds-bg-base: var(--ds-primitive-base);
-  --ds-bg-surface: var(--ds-primitive-surface);
-  --ds-bg-overlay: var(--ds-primitive-deep);
   --ds-bg-backdrop: var(--ds-black-a40);
   --ds-bg-popover-glass: var(--ds-white-a01);
 
@@ -186,12 +221,6 @@
   --ds-text-disabled: var(--ds-white-a20);
   --ds-text-inverse: var(--ds-primitive-white);
   --ds-text-on-accent: var(--ds-black-a90);
-
-  /* ── Interactive Layers ────────────────────────────────── */
-  --ds-hover-sm: var(--ds-white-a03);
-  --ds-hover-md: var(--ds-white-a05);
-  --ds-hover-lg: var(--ds-white-a08);
-  --ds-active: var(--ds-white-a10);
 
   /* ── Accent ────────────────────────────────────────────── */
   --ds-accent: var(--accent-color, var(--ds-primitive-orange));

@@ -163,7 +163,7 @@ class TabBarComponent {
     }
 
     const isActive = path === this.state.activeFile;
-    const isSelected = this.state.selectedFiles.includes(path);
+    const isSelected = this.state.selectedFiles.includes(path) && !isActive;
     const isPinned = this.state.pinnedFiles.includes(path);
     const isDirty = this.state.dirtyFiles.includes(path);
 

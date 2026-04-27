@@ -14,7 +14,7 @@
 }
 
 .ds-setting-toggle-item:hover {
-  background: var(--ds-hover-sm);
+  background: var(--ds-layer-subtle-hover);
 }
 
 .ds-setting-toggle-item:active {

@@ -5,11 +5,11 @@
 
 .switch-toggle {
   /* ── Local Variables ── */
-  --_bg:             var(--ds-black-a40);
-  --_bg-hover:       var(--ds-hover-lg);
-  --_border:         var(--ds-border-default);
-  --_indicator-bg:   var(--ds-hover-md);
-  --_indicator-x:    0;
+  --_bg: var(--ds-black-a40);
+  --_bg-hover: var(--ds-layer-subtle-selected);
+  --_border: var(--ds-border-default);
+  --_indicator-bg: var(--ds-layer-subtle-hover);
+  --_indicator-x: 0;
   --_indicator-size: 24px;
 
   display: inline-flex;
@@ -28,18 +28,22 @@
   flex-shrink: 0;
 }
 
-.switch-toggle:hover  { background: var(--_bg-hover); }
+.switch-toggle:hover {
+  background: var(--_bg-hover);
+}
 
 /* ── On State ───────────────────────────────────────────── */
 .switch-toggle.on {
-  --_bg:           var(--ds-accent);
-  --_bg-hover:     var(--ds-accent-hover);
-  --_border:       var(--ds-black-a20);
+  --_bg: var(--ds-accent);
+  --_bg-hover: var(--ds-accent-hover);
+  --_border: var(--ds-black-a20);
   --_indicator-bg: var(--ds-text-inverse);
-  --_indicator-x:  20px;
+  --_indicator-x: 20px;
 }
 
-.switch-toggle.on:hover { border-color: var(--ds-text-inverse); }
+.switch-toggle.on:hover {
+  border-color: var(--ds-text-inverse);
+}
 
 /* ── Indicator (the knob) ───────────────────────────────── */
 .switch-indicator {
@@ -55,17 +59,27 @@
   box-shadow: var(--ds-shadow-sm);
 }
 
-.switch-toggle.on .switch-indicator { box-shadow: var(--ds-shadow-md); }
+.switch-toggle.on .switch-indicator {
+  box-shadow: var(--ds-shadow-md);
+}
 
-.switch-toggle:hover .switch-indicator     { background: var(--ds-border-strong); }
-.switch-toggle.on:hover .switch-indicator  {
+.switch-toggle:hover .switch-indicator {
+  background: var(--ds-border-strong);
+}
+
+.switch-toggle.on:hover .switch-indicator {
   background: var(--ds-text-inverse);
   box-shadow: 0 0 8px var(--ds-white-a30);
 }
 
 /* ── Active: stretch effect ─────────────────────────────── */
-.switch-toggle:active .switch-indicator        { width: 28px; }
-.switch-toggle.on:active .switch-indicator     { transform: translateX(16px); }
+.switch-toggle:active .switch-indicator {
+  width: 28px;
+}
+
+.switch-toggle.on:active .switch-indicator {
+  transform: translateX(16px);
+}
 
 /* ── Disabled ───────────────────────────────────────────── */
 .switch-toggle.disabled {

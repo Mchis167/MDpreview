@@ -9,7 +9,7 @@
 
 .sidebar-mode-control {
   display: flex;
-  background: var(--ds-black-a40);
+  background: var(--ds-layer-control-default);
   border: 1px solid var(--ds-border-default);
   border-radius: var(--ds-radius-pill);
   padding: 5px;
@@ -22,7 +22,7 @@
   left: 5px;
   width: calc(50% - 5px);
   height: calc(100% - 10px);
-  background: var(--ds-hover-lg);
+  background: var(--ds-layer-subtle-selected);
   border: 1px solid var(--ds-border-strong);
   border-radius: var(--ds-radius-xl);
   transition: transform 0.4s var(--ds-ease-spring);

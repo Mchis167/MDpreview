@@ -126,11 +126,11 @@
 }
 
 .ds-sidebar-item:hover {
-  background: var(--ds-hover-sm);
+  background: var(--ds-layer-subtle-hover);
 }
 
 .ds-sidebar-item.is-selected {
-  background: rgba(var(--ds-accent-rgb), 0.08);
+  background: var(--ds-layer-subtle-selected);
   border-left: 2px solid var(--ds-accent);
 }
 

@@ -417,7 +417,7 @@
 }
 
 .code-block-copy:hover {
-  background: var(--ds-white-a12);
+  background: var(--ds-layer-subtle-hover);
   color: var(--ds-text-inverse);
   border-color: var(--ds-accent);
 }
@@ -708,7 +708,7 @@
 }
 
 #md-viewer-mount[data-active-mode="comment"] .comment-range:hover {
-  background: rgba(var(--ds-accent-rgb), 0.2);
+  background: var(--ds-layer-subtle-active-hover);
   border-bottom-color: var(--ds-accent);
 }
 
@@ -727,7 +727,7 @@
 }
 
 #md-viewer-mount[data-active-mode="collect"] .idea-range:hover {
-  background: rgba(var(--ds-accent-rgb), 0.25);
+  background: var(--ds-layer-subtle-active-hover);
   border-bottom-color: var(--ds-accent);
 }
 
@@ -870,7 +870,7 @@
   right: 24px;
   width: 40px;
   height: 40px;
-  background: var(--ds-bg-layer-surface);
+  background: var(--ds-layer-surface-default);
   backdrop-filter: blur(var(--ds-blur-md));
   -webkit-backdrop-filter: blur(var(--ds-blur-md));
   border: 1px solid var(--ds-border-strong);
@@ -895,7 +895,7 @@
 }
 
 .floating-scroll-top:hover {
-  background: var(--ds-bg-layer-surface-hover);
+  background: var(--ds-layer-surface-hover);
   color: var(--ds-accent);
   border-color: var(--ds-accent-a40);
   transform: translateY(-2px) scale(1.05);

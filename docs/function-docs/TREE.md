@@ -16,6 +16,7 @@ Fetch cấu trúc thư mục từ `FileService` và gọi `render()`. Gọi lạ
 Render `TreeViewComponent` V2 với dữ liệu hiện tại. `isQuickRender = true` bỏ qua animation skeleton để tăng tốc.
 - **Smart Re-mount**: Tự động nhận diện nếu mount point bị xóa (do Sidebar re-render) để khởi tạo lại component và bọc vào `ScrollContainer`.
 - **Smart Hidden Section**: Tự động ẩn hoàn toàn `#hidden-items-section` và divider đi kèm nếu không có file nào bị ẩn.
+- **Active-wins Priority**: Đảm bảo file đang active luôn giữ style `.active` (5% highlight) và không bị ghi đè bởi style `.selected` (5% highlight) ngay cả khi đang được chọn.
 - Khôi phục expansion state từ localStorage và highlight file đang active.
 
 ### `clear()`

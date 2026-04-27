@@ -120,4 +120,4 @@ Thứ tự khởi động nghiêm ngặt — **không thay đổi thứ tự**:
 
 ---
 
-*Document — 2026-04-26*
+*Document — 2026-04-27*

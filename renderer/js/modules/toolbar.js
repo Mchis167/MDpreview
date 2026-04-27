@@ -23,9 +23,6 @@ function initGlobalShortcuts() {
 
     // ── Escape: close overlays & deselect ─────────────────
     if (e.key === 'Escape') {
-      if (window.ShortcutsComponent && window.ShortcutsComponent.activeInstance) {
-        window.ShortcutsComponent.activeInstance.close();
-      }
       if (typeof TabsModule !== 'undefined') TabsModule.deselectAll();
       if (typeof TreeModule !== 'undefined') TreeModule.deselectAll();
       return;
@@ -35,11 +32,11 @@ function initGlobalShortcuts() {
     const activeTag = document.activeElement?.tagName;
     const inInput = activeTag === 'INPUT' || activeTag === 'TEXTAREA';
 
-    // ── Mod+/ — Keyboard shortcuts popover ─────────────
+    // ── Mod+/ — Keyboard shortcuts in Search Palette ───
     if (mod && e.key === '/') {
       e.preventDefault();
-      if (window.ShortcutsComponent) {
-        window.ShortcutsComponent.toggle();
+      if (window.SearchPalette) {
+        window.SearchPalette.show('shortcut');
       }
       return;
     }

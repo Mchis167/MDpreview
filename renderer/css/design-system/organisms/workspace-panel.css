@@ -24,11 +24,11 @@
 }
 
 .ws-list-item:hover {
-  background: var(--ds-hover-sm);
+  background: var(--ds-layer-subtle-hover);
 }
 
 .ws-list-item.active {
-  background: rgba(var(--ds-accent-rgb), 0.05);
+  background: var(--ds-layer-subtle-active);
 }
 
 .ws-list-item-left {
@@ -104,7 +104,7 @@
 }
 
 .ws-inline-edit-input {
-  background: var(--ds-hover-md);
+  background: var(--ds-layer-control-hover);
   border: 1px solid var(--ds-accent);
   border-radius: var(--ds-radius-sm);
   color: var(--ds-text-inverse);
@@ -174,7 +174,7 @@
 
 .aws-popover-shield .ds-popover-card {
   width: 480px;
-  background: var(--ds-bg-overlay);
+  background: var(--ds-surface-overlay);
   border: 1px solid var(--ds-border-default);
   border-radius: var(--ds-radius-shell);
   padding: var(--ds-space-xxl);
@@ -247,7 +247,7 @@
 .aws-input {
   width: 100%;
   height: 44px;
-  background: var(--ds-glass-hover);
+  background: var(--ds-layer-control-default);
   border: 1px solid var(--ds-border-default);
   border-radius: var(--ds-radius-pill);
   padding: 0 var(--ds-space-xl);
@@ -273,7 +273,7 @@
   height: 44px;
   padding: 0 var(--ds-space-xl);
   flex-shrink: 0;
-  background: var(--ds-hover-md);
+  background: var(--ds-layer-subtle-hover);
   border: 1px solid var(--ds-border-default);
   border-radius: var(--ds-radius-pill);
   color: var(--ds-text-inverse);
@@ -283,7 +283,7 @@
 }
 
 #browse-btn:hover {
-  background: var(--ds-hover-lg);
+  background: var(--ds-layer-subtle-selected);
 }
 
 .aws-actions {
@@ -350,7 +350,7 @@
   z-index: 10;
   width: 40px;
   height: 40px;
-  background: var(--ds-hover-lg);
+  background: var(--ds-layer-subtle-selected);
   border: 1px solid var(--ds-border-strong);
   border-radius: var(--ds-radius-pill);
   color: var(--ds-text-secondary);
@@ -362,7 +362,7 @@
 }
 
 #zoom-close:hover {
-  background: var(--ds-border-strong);
+  background: var(--ds-layer-subtle-hover);
   color: var(--ds-text-inverse);
 }
 
@@ -397,7 +397,7 @@
 }
 
 .zoom-ctrl-btn:hover {
-  background: var(--ds-hover-lg);
+  background: var(--ds-layer-subtle-hover);
   color: var(--ds-text-inverse);
 }
 

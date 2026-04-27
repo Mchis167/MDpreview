@@ -4,22 +4,22 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  
+
   min-width: 20px;
   height: 20px;
   padding: 0 6px;
-  
+
   font-family: var(--ds-font-family-text);
   font-size: 11px;
   font-weight: 700;
   line-height: 1;
   text-transform: uppercase;
-  
+
   color: var(--ds-text-secondary);
   background: var(--ds-white-a05);
   border: 1px solid var(--ds-border-subtle);
   border-radius: var(--ds-radius-chip);
-  
+
   transition: all var(--ds-transition-fast);
   user-select: none;
   pointer-events: none;
@@ -35,7 +35,7 @@
 
 /* Variant: Inverse (For light backgrounds or active states) */
 .ds-kbd--inverse {
-  background: var(--ds-hover-lg);
+  background: var(--ds-layer-subtle-selected);
   color: var(--ds-text-inverse);
   border-color: var(--ds-border-strong);
 }
