@@ -18,9 +18,13 @@
 
 ### `AppState.loadPersistentState()`
 Fetch state từ server (`GET /api/state`) và đồng bộ vào localStorage. Được gọi khi app khởi động.
+Trong quá trình boot, app có cơ chế **Self-Healing** (Tự phục hồi): nếu dữ liệu cấu hình trong localStorage bị hỏng (parse JSON thất bại), app sẽ tự động fallback về cấu trúc mặc định an toàn thay vì crash.
 
 ### `AppState.savePersistentState()`
 Debounced 500ms — POST toàn bộ state lên server. Được gọi sau mỗi thay đổi quan trọng.
+
+### `AppState._getStorageKey(key)`
+Delegate việc tìm kiếm storage key sang **`SettingsService.getStorageKey(key)`**. Đây là cơ chế duy nhất để xác định key lưu trữ, đảm bảo tính nhất quán giữa State và Persistence.
 
 ### `AppState.onModeChange(mode, targetId?)`
 Xử lý chuyển mode với dirty check:
@@ -47,16 +51,6 @@ Hàm trung tâm — được gọi mỗi khi người dùng mở một file.
 7. **Side effects** — Load comments, collect items, cập nhật toolbar, highlight tree
 
 **Quan trọng:** Luôn dùng `loadFile()` thay vì gọi `MarkdownViewer.setState()` trực tiếp để đảm bảo dirty check và side effects chạy đúng.
-
----
-
-## `applyTheme()`
-
-Inject CSS variables vào `document.documentElement` dựa trên `AppState.settings`:
-- `--accent-color`, `--accent-rgb`
-- `--font-body`, `--font-code`
-- `--zoom-level`
-- `--bg-image`, `--bg-enabled`
 
 ---
 
@@ -96,6 +90,8 @@ Các shortcut ở cấp app được đăng ký tập trung tại `toolbar.js`. 
 | **Mod+A** | Select all tabs |
 | **Mod+↑/↓** | Scroll to top/bottom |
 | **1/2/3/4** | Chuyển mode read/edit/comment/collect |
+| **Mod+[** | Collapse All Folders (Sidebar) |
+| **Shift+Mod+[** | Collapse Other Folders (Sidebar) |
 | **F11 / Cmd+Ctrl+F** | Fullscreen toggle |
 
 > Phía gọi (toolbar) không được tự lưu biến `isOpen` cho Settings hay Shortcuts — toàn bộ state do component tự quản lý qua Singleton Pattern. Xem [`docs/decisions/20260426-singleton-ui-pattern.md`](../decisions/20260426-singleton-ui-pattern.md).
@@ -108,16 +104,16 @@ Thứ tự khởi động nghiêm ngặt — **không thay đổi thứ tự**:
 
 ```
 1. AppState.loadPersistentState()   — Load state từ server
-2. applyTheme()                      — Apply CSS variables
+2. SettingsService.applyTheme()      — Cập nhật CSS variables từ SettingsService
 3. SidebarLeft.init()                — Khởi tạo sidebar trái
 4. ChangeActionViewBar.init()        — Khởi tạo sync bar
 5. RightSidebar.init()               — Khởi tạo sidebar phải
 6. initSocket()                      — Kết nối socket
 7. Mermaid.init()                    — Khởi tạo renderer diagram
-8. SettingsModule.init()             — Load settings UI
-9. DraftModule.init()                — Load drafts
-10. MarkdownViewer.init()            — Khởi tạo viewer
-11. ScrollModule.init()              — Khởi tạo scroll sync
+8. DraftModule.init()                — Load drafts
+9. MarkdownViewer.init()            — Khởi tạo viewer
+10. ScrollModule.init()              — Khởi tạo scroll sync
+11. TabPreview.init()                — Khởi tạo hover preview (molecules/tab-preview.js)
 12. TabsModule.init()                — Khởi tạo tabs
 13. setTimeout(0): Tree + Workspace  — Defer để DOM ổn định
 ```

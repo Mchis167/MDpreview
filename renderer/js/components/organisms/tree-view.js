@@ -77,16 +77,6 @@ class TreeViewComponent {
 
         renderNodes(this.state.treeData, fragment);
         
-        // Thêm khoảng trống ở dưới cùng để scroll thoải mái hơn (nếu được yêu cầu)
-        if (this.options.showSpacer !== false) {
-            const spacer = document.createElement('div');
-            spacer.className = 'tree-bottom-spacer';
-            if (this.options.spacerHeight) {
-                spacer.style.height = this.options.spacerHeight;
-            }
-            fragment.appendChild(spacer);
-        }
-
         this.mount.appendChild(fragment);
     }
 }

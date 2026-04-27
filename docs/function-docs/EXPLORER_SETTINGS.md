@@ -43,21 +43,14 @@ ExplorerSettingsComponent.toggle({ anchor: explorerSettingsBtn });
 Tạo DOM content của menu: danh sách `SettingToggleItem` rows cho từng setting.
 
 Settings hiển thị:
-| Label | `AppState.settings` key | localStorage key |
+| Label | `AppState.settings` key | Side Effect |
 |---|---|---|
-| Show Hidden Files | `showHidden` | `md-show-hidden` |
-| Hide Empty Folders | `hideEmptyFolders` | `md-hide-empty` |
-| Flat View | `flatView` | `md-flat-view` |
+| Show Hidden Files | `showHidden` | `TreeModule.load()` |
+| Hide Empty Folders | `hideEmptyFolders` | `TreeModule.load()` |
+| Flat View | `flatView` | `TreeModule.load()` |
+| Show Hidden in Search | `showHiddenInSearch` | Hiển thị file ẩn (làm mờ) khi tìm kiếm |
 
-Trả về DOM element — được truyền vào `MenuShield.open({ content })`.
-
-### `_updateSetting(key, storageKey, newVal)` *(private)*
-
-Xử lý khi user toggle một setting:
-1. Cập nhật `AppState.settings[key]`
-2. Persist vào `localStorage.setItem(storageKey, newVal)`
-3. Gọi `TreeModule.load()` để reload file tree ngay lập tức
-4. Gọi `AppState.savePersistentState()` để đồng bộ với server
+Khi một giá trị thay đổi, component gọi **`SettingsService.update(key, value)`**. Toàn bộ logic lưu trữ, refresh tree và đồng bộ server đã được tập trung hóa vào service này.
 
 ---
 

@@ -9,8 +9,8 @@ const TreeDragManager = (() => {
   let autoExpandTimer = null;
   let lastHoveredHeader = null;
 
-  // ── Drag Persistence Variables ─────────────────────────────
   let dragProxy = null;
+  window.DRAG_DEBUG = false;
   let dragStartY = 0;
   let dragStartX = 0;
   let dragStartRect = null;
@@ -30,29 +30,50 @@ const TreeDragManager = (() => {
     dragStartX = e.clientX;
     dragStartRect = itemEl.getBoundingClientRect();
     dragItemHeight = dragStartRect.height;
-    dragScrollCont = document.querySelector('.sidebar-tree-scroll');
-    dragInitialScroll = dragScrollCont ? dragScrollCont.scrollTop : 0;
-
     // 1. BUILD VISUAL MAP (Flattened Tree)
+    const treeViewport = document.getElementById('file-tree-mount');
     const treeContainer = document.getElementById('file-tree');
+    if (!treeViewport || !treeContainer) {
+      if (window.DRAG_DEBUG) console.warn('[VIP-Drag] Aborted: Missing viewports');
+      isDragging = false;
+      return;
+    }
+
+    // Correctly detect the scroll container for the main explorer
+    dragScrollCont = treeContainer.closest('.ds-scroll-container');
+    dragInitialScroll = dragScrollCont ? dragScrollCont.scrollTop : 0;
     const allWrappers = Array.from(treeContainer.querySelectorAll('.tree-node-wrapper'));
     const visualMap = allWrappers.map(wrapper => {
       const item = wrapper.querySelector('.tree-item');
       if (!item) return null;
       const path = item.dataset.path;
       const rect = item.getBoundingClientRect();
-      const level = (path.match(/\//g) || []).length;
-      return { el: item, wrapper, path, level, rect, type: item.classList.contains('tree-item-directory') ? 'directory' : 'file' };
+      const nodeData = _findNodeByPath(treeData, path);
+      return { el: item, wrapper, path, level: (path.match(/\//g) || []).length, rect, type: nodeData ? nodeData.type : (item.classList.contains('tree-item-directory') ? 'directory' : 'file') };
     }).filter(Boolean);
 
     // Multi-selection
     const isItemSelected = state.selectedPaths.includes(node.path);
     const draggedItems = isItemSelected 
       ? state.selectedPaths.map(p => {
-          const m = visualMap.find(item => item.path === p);
-          return m ? { path: p, name: p.split('/').pop(), el: m.el, wrapper: m.wrapper, type: m.type } : null;
+          // Find element anywhere in the sidebar (could be in All Files or Hidden)
+          const el = document.querySelector(`.tree-item[data-path="${p.replace(/'/g, "\\'")}"]`);
+          if (!el) return null;
+          const nodeData = _findNodeByPath(treeData, p);
+          return { 
+            path: p, 
+            name: p.split('/').pop(), 
+            el, 
+            wrapper: el.closest('.tree-node-wrapper'), 
+            type: nodeData ? nodeData.type : (el.classList.contains('tree-item-directory') ? 'directory' : 'file')
+          };
         }).filter(Boolean)
       : [{ path: node.path, name: node.name, el: itemEl, wrapper: itemEl.closest('.tree-node-wrapper'), type: node.type }];
+    
+    if (draggedItems.length === 0) {
+      isDragging = false;
+      return;
+    }
 
     // 2. PRE-CALCULATE DRAGGED MAP & PREFIX SUMS (O(N))
     const draggedPathsMap = new Set(draggedItems.map(di => di.path));
@@ -109,7 +130,27 @@ const TreeDragManager = (() => {
         }
       }
 
-      if (nearestIdx !== -1) {
+      // ── DETACHED TARGET DETECTION ──
+      const elsUnder = document.elementsFromPoint(currentX, currentY);
+      
+      // Check if we are inside the main tree viewport
+      const _isInsideTree = treeViewport.getBoundingClientRect().top <= currentY && 
+                            treeViewport.getBoundingClientRect().bottom >= currentY;
+
+      const hiddenSection = elsUnder.find(el => 
+        el.closest('#hidden-items-section') || 
+        el.closest('.sidebar-footer') || 
+        (el.classList.contains('sidebar-divider') && el.nextElementSibling?.id === 'hidden-items-section')
+      );
+
+      if (hiddenSection) {
+        target = { type: 'hidden-section' };
+        splitIdx = -1;
+
+        // Visual Highlight for Hidden Section
+        document.querySelectorAll('.drag-hover-section').forEach(el => el.classList.remove('drag-hover-section'));
+        // No visual highlight here, just setting target
+      } else if (nearestIdx !== -1) {
         const near = visualMap[nearestIdx];
         let spreadingOffset = -(dragItemHeight * draggedBeforeMap[nearestIdx]);
         // Re-apply split shift if necessary for this specific item's detection
@@ -137,41 +178,47 @@ const TreeDragManager = (() => {
         if (isOverRootArea) {
           target = { parentPath: '', level: 0, type: 'between', y: -1, isRootDrop: true, splitIdx: visualMap.length };
           splitIdx = visualMap.length; 
-        } else if (near.type === 'directory' && isOverMiddle && !draggedItems.some(di => di.path === near.path)) {
-          target = { parentPath: near.path, index: 0, level: near.level + 1, type: 'into', y: nearTop + itemHeight / 2, splitIdx: -1 };
-          splitIdx = -1; 
         } else {
-          const yPos = isOverTop ? nearTop : nearBottom;
-          if (isOverBottom) splitIdx++; 
-          
-          let dropLevel = near.level;
-          let dropParent = near.path.substring(0, near.path.lastIndexOf('/')) || '';
-
-          if (folderAreaUnder) {
-            const parentItem = folderAreaUnder.previousElementSibling;
-            if (parentItem && parentItem.classList.contains('tree-item')) {
-              dropParent = parentItem.getAttribute('data-path');
-              dropLevel = (dropParent.match(/\//g) || []).length + 1;
-            }
+          if (near.type === 'directory' && isOverMiddle && !draggedItems.some(di => di.path === near.path)) {
+            target = { parentPath: near.path, index: 0, level: near.level + 1, type: 'into', y: nearTop + itemHeight / 2, splitIdx: -1 };
+            splitIdx = -1; 
           } else {
-            const xDelta = currentX - dragStartX;
-            const levelShift = Math.round(xDelta / 20); 
-            if (levelShift < 0) {
-              for (let i = 0; i < Math.abs(levelShift); i++) {
-                if (dropParent) {
-                  dropLevel--;
-                  dropParent = dropParent.substring(0, dropParent.lastIndexOf('/')) || '';
+            const yPos = isOverTop ? nearTop : nearBottom;
+            if (isOverBottom) splitIdx++; 
+            
+            let dropLevel = near.level;
+            let dropParent = near.path.substring(0, near.path.lastIndexOf('/')) || '';
+
+            if (folderAreaUnder) {
+              const parentItem = folderAreaUnder.previousElementSibling;
+              if (parentItem && parentItem.classList.contains('tree-item')) {
+                dropParent = parentItem.getAttribute('data-path');
+                dropLevel = (dropParent.match(/\//g) || []).length + 1;
+              }
+            } else {
+              const xDelta = currentX - dragStartX;
+              const levelShift = Math.round(xDelta / 20); 
+              if (levelShift < 0) {
+                for (let i = 0; i < Math.abs(levelShift); i++) {
+                  if (dropParent) {
+                    dropLevel--;
+                    dropParent = dropParent.substring(0, dropParent.lastIndexOf('/')) || '';
+                  }
                 }
               }
             }
+            
+            target = { parentPath: dropParent, level: dropLevel, type: 'between', y: yPos, nearPath: near.path, isAfter: isOverBottom, splitIdx: splitIdx };
           }
-          
-          target = { parentPath: dropParent, level: dropLevel, type: 'between', y: yPos, nearPath: near.path, isAfter: isOverBottom, splitIdx: splitIdx };
         }
 
         // 2. OPTIMIZED SPREADING & HIGHLIGHTS
-        // Toggle Root Highlight
-        if (treeContainer) treeContainer.classList.toggle('drag-hover-root', !!target.isRootDrop);
+        // Toggle Root & Hidden Highlight (Minimalist Header-only)
+        const explorerHeader = document.querySelector('#file-explorer-header-mount .sidebar-section-header');
+        const hiddenHeader = document.querySelector('#hidden-items-header-mount .sidebar-section-header');
+        
+        if (explorerHeader) explorerHeader.classList.toggle('drag-hover-header', !!target.isRootDrop);
+        if (hiddenHeader) hiddenHeader.classList.toggle('drag-hover-header', target.type === 'hidden-section');
 
         visualMap.forEach((m, idx) => {
           // Visual Highlight for "Into" target
@@ -283,11 +330,20 @@ const TreeDragManager = (() => {
     };
 
     const onMouseUp = async () => {
-      const treeContainer = document.getElementById('file-tree');
-      if (treeContainer) {
-        treeContainer.classList.remove('is-dragging-active');
-        treeContainer.classList.remove('drag-hover-root');
+      const treeViewport = document.getElementById('file-tree-mount');
+      if (treeViewport) {
+        treeViewport.classList.remove('is-dragging-active');
+        treeViewport.classList.remove('drag-hover-root');
       }
+      const explorerHeader = document.querySelector('#file-explorer-header-mount .sidebar-section-header');
+      if (explorerHeader) explorerHeader.classList.remove('drag-hover-header');
+      const hiddenHeader = document.querySelector('#hidden-items-header-mount .sidebar-section-header');
+      if (hiddenHeader) {
+        hiddenHeader.classList.remove('drag-hover-header');
+        const safeZone = hiddenHeader.closest('#hidden-items-section')?.querySelector('.ds-drop-safe-zone');
+        if (safeZone) safeZone.remove();
+      }
+
       visualMap.forEach(m => {
         m.el.style.transform = '';
         m.el.classList.remove('drag-hover');
@@ -303,15 +359,23 @@ const TreeDragManager = (() => {
       document.removeEventListener('mouseup', onMouseUp);
       document.body.classList.remove('is-dragging');
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
-
-      if (!isDraggingStarted) {
+      
+      if (!isDraggingStarted || draggedItems.length === 0) {
         isDragging = false;
         return;
       }
 
       if (dragProxy) {
-        const destParentPath = target.parentPath;
-        const wsPath = AppState.currentWorkspace ? AppState.currentWorkspace.path : '';
+        if (target.type === 'hidden-section') {
+          const { handleBatchToggleHidden } = context;
+          const draggedPaths = draggedItems.map(di => di.path);
+          if (handleBatchToggleHidden) await handleBatchToggleHidden(true, draggedPaths, true);
+          isDragging = false;
+        } else {
+          const destParentPath = target.parentPath;
+          const wsPath = AppState.currentWorkspace ? AppState.currentWorkspace.path : '';
+          const hiddenPaths = new Set(AppState.settings.hiddenPaths || []);
+          const toUnhide = [];
         
         // Calculate new index in target parent
         let orderKey = destParentPath || 'root';
@@ -336,6 +400,8 @@ const TreeDragManager = (() => {
           const fileName = item.path.split('/').pop();
           const srcRel = item.path;
           const destRel = destParentPath ? (destParentPath + '/' + fileName) : fileName;
+
+          if (hiddenPaths.has(srcRel)) toUnhide.push(srcRel);
 
           if (srcRel !== destRel) {
             const srcAbs = (wsPath + '/' + srcRel).replace(/\/\//g, '/');
@@ -364,7 +430,12 @@ const TreeDragManager = (() => {
           }
         }
 
-        // Update state selection
+        if (toUnhide.length > 0) {
+          const { handleBatchToggleHidden } = context;
+          if (handleBatchToggleHidden) await handleBatchToggleHidden(false, toUnhide, true);
+        }
+
+        // Update state selection (After unhide to ensure it persists)
         if (newSelectedPaths.length > 0) {
           state.selectedPaths = newSelectedPaths;
         }
@@ -407,7 +478,7 @@ const TreeDragManager = (() => {
         localStorage.setItem('mdpreview_custom_orders', JSON.stringify(state.customOrders));
         if (typeof AppState !== 'undefined' && AppState.savePersistentState) AppState.savePersistentState();
 
-        if (movedCount > 0 || target.index !== -1) {
+        if (movedCount > 0 || target.index !== -1 || toUnhide.length > 0) {
           if (destParentPath) {
             const pNode = _findNodeByPath(treeData, destParentPath);
             if (pNode) pNode.expanded = true;
@@ -415,6 +486,7 @@ const TreeDragManager = (() => {
           isDragging = false;
           load();
         }
+      }
 
         dragProxy.style.opacity = '0';
         dragProxy.style.transform += ' scale(0.8)';
@@ -448,15 +520,30 @@ const TreeDragManager = (() => {
     let isDraggingStarted = false;
     let currentTargetEl = null;
     let targetPath = null;
+    let lastSecondaryTarget = null;
 
     const isItemSelected = state.selectedPaths.includes(node.path);
     const draggedPaths = isItemSelected ? [...state.selectedPaths] : [node.path];
-    const container = document.getElementById('file-tree');
+    const treeViewport = document.getElementById('file-tree-mount');
+    const container = itemEl.closest('.ds-tree-view'); // Dynamically detect container
+    if (!treeViewport || !container) {
+      if (window.DRAG_DEBUG) console.warn('[Standard-Drag] Aborted: Missing viewports');
+      return;
+    }
     const draggedItems = draggedPaths.map(p => {
       const el = container.querySelector(`.tree-item[data-path="${p.replace(/'/g, "\\'")}"]`);
       const nodeData = _findNodeByPath(treeData, p);
       return { path: p, el, type: nodeData ? nodeData.type : 'file', name: p.split('/').pop() };
     }).filter(di => di.el);
+
+    if (draggedItems.length === 0) {
+      isDragging = false;
+      return;
+    }
+
+    // Correctly detect the scroll container for the main explorer
+    const dragScrollCont = container.closest('.ds-scroll-container');
+    const _dragInitialScroll = dragScrollCont ? dragScrollCont.scrollTop : 0;
 
     const onMouseMove = (moveEvent) => {
       const dist = Math.sqrt(Math.pow(moveEvent.clientX - dragStartX, 2) + Math.pow(moveEvent.clientY - dragStartY, 2));
@@ -464,7 +551,7 @@ const TreeDragManager = (() => {
       if (!isDraggingStarted && dist > 8) {
         isDraggingStarted = true;
         document.body.classList.add('is-dragging');
-        if (container) container.classList.add('is-dragging-active');
+        if (treeViewport) treeViewport.classList.add('is-dragging-active');
         
         // 1. Create Proxy (Compact stack style)
         dragProxy = document.createElement('div');
@@ -493,17 +580,26 @@ const TreeDragManager = (() => {
 
         // 2. Dim sources
         draggedItems.forEach(di => di.el.classList.add('is-dragging-source'));
+
+        // 3. Create Safe Zone for Hidden Section
+        const hSection = document.getElementById('hidden-items-section');
+        if (hSection && !hSection.querySelector('.ds-drop-safe-zone')) {
+          const safeZone = document.createElement('div');
+          safeZone.className = 'ds-drop-safe-zone';
+          hSection.appendChild(safeZone);
+        }
       }
 
       if (isDraggingStarted && dragProxy) {
         dragProxy.style.left = `${moveEvent.clientX}px`;
         dragProxy.style.top = `${moveEvent.clientY}px`;
 
-        // 3. Target Detection (Optimized with Wrapper Awareness)
-        const elUnder = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
-        if (!elUnder) return;
+        // 3. Target Detection (Using elementsFromPoint for deep detection)
+        const elsUnder = document.elementsFromPoint(moveEvent.clientX, moveEvent.clientY);
+
+        if (elsUnder.length === 0) return;
         
-        // Find if we are over an item or a wrapper area
+        const elUnder = elsUnder[0]; // Primary element
         const itemUnder = elUnder.closest('.tree-item');
         const wrapperUnder = elUnder.closest('.tree-node-wrapper');
         
@@ -511,66 +607,87 @@ const TreeDragManager = (() => {
         let secondaryTarget = null;
         let finalPath = null;
 
-        if (itemUnder) {
-          const path = itemUnder.getAttribute('data-path');
-          const isDir = itemUnder.classList.contains('tree-item-directory');
-          
-          if (isDir) {
-            primaryTarget = itemUnder;
-            finalPath = path;
-          } else {
-            // Over a file: target is parent directory
-            secondaryTarget = itemUnder;
-            const parentPath = path.substring(0, path.lastIndexOf('/')) || '';
-            primaryTarget = document.querySelector(`.tree-item[data-path="${parentPath.replace(/'/g, "\\'")}"]`);
-            finalPath = parentPath;
-          }
-        } else if (wrapperUnder) {
-          // If in a gap but still within a wrapper (e.g. folder's expanded area)
-          const mainItem = wrapperUnder.querySelector(':scope > .tree-item');
-          if (mainItem && mainItem.classList.contains('tree-item-directory')) {
-            primaryTarget = mainItem;
-            finalPath = mainItem.getAttribute('data-path');
+        // ── Prioritize Hidden Section detection (Deep scan) ──
+        const hiddenSection = elsUnder.find(el => 
+            el.closest('#hidden-items-section') || 
+            el.closest('.sidebar-footer') || 
+            (el.classList.contains('sidebar-divider') && el.nextElementSibling?.id === 'hidden-items-section')
+        );
+
+        if (hiddenSection) {
+          primaryTarget = null;
+          secondaryTarget = null;
+          finalPath = null;
+          targetPath = '__HIDDEN__';
+        } else {
+          if (itemUnder) {
+            const path = itemUnder.getAttribute('data-path');
+            const isDir = itemUnder.classList.contains('tree-item-directory');
+            
+            if (isDir) {
+              primaryTarget = itemUnder;
+              finalPath = path;
+            } else {
+              secondaryTarget = itemUnder;
+              const parentPath = path.substring(0, path.lastIndexOf('/')) || '';
+              primaryTarget = document.querySelector(`.tree-item[data-path="${parentPath.replace(/'/g, "\\'")}"]`);
+              finalPath = parentPath;
+            }
+          } else if (wrapperUnder) {
+            const mainItem = wrapperUnder.querySelector(':scope > .tree-item');
+            if (mainItem && mainItem.classList.contains('tree-item-directory')) {
+              primaryTarget = mainItem;
+              finalPath = mainItem.getAttribute('data-path');
+            }
           }
         }
 
-        // Apply Highlights
-        if (currentTargetEl !== primaryTarget || secondaryTarget !== secondaryTarget) {
-          // Clear old
+        // ── NEW: CALCULATE FINAL TARGET PATH INDEPENDENTLY ──
+        let newTargetPath = null;
+        if (hiddenSection) {
+          newTargetPath = '__HIDDEN__';
+        } else if (finalPath !== null) {
+          newTargetPath = finalPath;
+        } else {
+          const treeRect = treeViewport.getBoundingClientRect();
+          const isInsideTree = moveEvent.clientX >= treeRect.left && moveEvent.clientX <= treeRect.right &&
+                               moveEvent.clientY >= treeRect.top && moveEvent.clientY <= treeRect.bottom;
+          if (isInsideTree) newTargetPath = ''; // Root
+        }
+        targetPath = newTargetPath;
+
+        // ── Minimalist Header Highlights ──
+        const explorerHeader = document.querySelector('#file-explorer-header-mount .sidebar-section-header');
+        const hiddenHeader = document.querySelector('#hidden-items-header-mount .sidebar-section-header');
+        
+        if (explorerHeader) explorerHeader.classList.toggle('drag-hover-header', targetPath === '');
+        if (hiddenHeader) hiddenHeader.classList.toggle('drag-hover-header', targetPath === '__HIDDEN__');
+
+        // Apply Item Highlights
+        if (currentTargetEl !== primaryTarget || lastSecondaryTarget !== secondaryTarget) {
+          lastSecondaryTarget = secondaryTarget;
+          
           const treeContainer = document.getElementById('file-tree');
           treeContainer.querySelectorAll('.drag-hover, .drag-hover-secondary').forEach(el => {
             el.classList.remove('drag-hover', 'drag-hover-secondary');
           });
-          treeContainer.classList.remove('drag-hover-root');
 
           currentTargetEl = primaryTarget;
           
-          if (primaryTarget) {
-            // Prevent dropping into itself or its own children
-            const isInvalid = draggedItems.some(di => finalPath === di.path || finalPath.startsWith(di.path + '/'));
+          if (targetPath === '__HIDDEN__') {
+            // No item highlights for hidden
+          } else if (primaryTarget) {
+            const isInvalid = draggedItems.some(di => targetPath === di.path || targetPath.startsWith(di.path + '/'));
             if (!isInvalid) {
               primaryTarget.classList.add('drag-hover');
               if (secondaryTarget) secondaryTarget.classList.add('drag-hover-secondary');
-              targetPath = finalPath;
-            } else {
-              targetPath = null;
             }
-          } else {
-            // Check for Root
-            const treeRect = treeContainer.getBoundingClientRect();
-            const isInsideTree = moveEvent.clientX >= treeRect.left && moveEvent.clientX <= treeRect.right &&
-                                 moveEvent.clientY >= treeRect.top && moveEvent.clientY <= treeRect.bottom;
-            if (isInsideTree) {
-              currentTargetEl = treeContainer;
-              currentTargetEl.classList.add('drag-hover-root');
-              targetPath = '';
-            } else {
-              targetPath = null;
-            }
+          } else if (targetPath === '') {
+            currentTargetEl = treeViewport;
           }
         }
 
-        // ── Auto-expand logic for collapsed sections ──
+        // ── Auto-expand logic ──
         const headerUnder = elUnder ? elUnder.closest('.sidebar-section-header') : null;
         if (headerUnder && headerUnder.closest('.sidebar-section.collapsed')) {
             if (lastHoveredHeader !== headerUnder) {
@@ -590,6 +707,13 @@ const TreeDragManager = (() => {
             lastHoveredHeader = null;
         }
       }
+
+      if (dragScrollCont) {
+        const rect = dragScrollCont.getBoundingClientRect();
+        const threshold = 60;
+        if (moveEvent.clientY < rect.top + threshold) dragScrollCont.scrollTop -= 5;
+        if (moveEvent.clientY > rect.bottom - threshold) dragScrollCont.scrollTop += 5;
+      }
     };
 
     const onMouseUp = async () => {
@@ -597,7 +721,7 @@ const TreeDragManager = (() => {
       document.removeEventListener('mouseup', onMouseUp);
       document.body.classList.remove('is-dragging');
 
-      if (!isDraggingStarted) {
+      if (!isDraggingStarted || draggedItems.length === 0) {
         isDragging = false;
         return;
       }
@@ -614,17 +738,37 @@ const TreeDragManager = (() => {
         treeContainer.classList.remove('drag-hover-root');
         treeContainer.classList.remove('is-dragging-active');
       }
+      
+      const explorerHeader = document.querySelector('#file-explorer-header-mount .sidebar-section-header');
+      if (explorerHeader) explorerHeader.classList.remove('drag-hover-header');
+      
+      const hiddenHeader = document.querySelector('#hidden-items-header-mount .sidebar-section-header');
+      if (hiddenHeader) {
+        hiddenHeader.classList.remove('drag-hover-header');
+        const hSection = hiddenHeader.closest('#hidden-items-section');
+        if (hSection) {
+          const safeZone = hSection.querySelector('.ds-drop-safe-zone');
+          if (safeZone) safeZone.remove();
+        }
+      }
 
       // 2. Perform Move
-      if (targetPath !== null) {
+      if (targetPath === '__HIDDEN__') {
+        const { handleBatchToggleHidden } = context;
+        if (handleBatchToggleHidden) await handleBatchToggleHidden(true, draggedPaths, true);
+      } else if (targetPath !== null) {
         const wsPath = AppState.currentWorkspace ? AppState.currentWorkspace.path : '';
         let movedCount = 0;
         const newSelectedPaths = [];
         const oldSelectedPaths = [...state.selectedPaths];
+        const hiddenPaths = new Set(AppState.settings.hiddenPaths || []);
+        const toUnhide = [];
 
         for (const item of draggedItems) {
           const srcRel = item.path;
           const destRel = targetPath ? (targetPath + '/' + item.name).replace(/\/\//g, '/') : item.name;
+
+          if (hiddenPaths.has(srcRel)) toUnhide.push(srcRel);
 
           if (srcRel !== destRel) {
             const srcAbs = (wsPath + '/' + srcRel).replace(/\/\//g, '/');
@@ -651,16 +795,24 @@ const TreeDragManager = (() => {
           }
         }
 
+        if (toUnhide.length > 0) {
+          const { handleBatchToggleHidden } = context;
+          if (handleBatchToggleHidden) {
+            await handleBatchToggleHidden(false, toUnhide, true);
+          }
+        }
+
         if (newSelectedPaths.length > 0) {
           state.selectedPaths = newSelectedPaths;
         }
 
-        if (movedCount > 0) {
+        if (movedCount > 0 || toUnhide.length > 0) {
           const pNode = _findNodeByPath(treeData, targetPath);
           if (pNode) pNode.expanded = true;
           load();
         }
       }
+
 
       isDragging = false;
     };

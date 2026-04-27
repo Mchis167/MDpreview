@@ -89,9 +89,7 @@ class ChangeActionViewBarComponent {
         };
 
         // Trigger initial state
-        setTimeout(() => {
-          this.updateUI(AppState.currentMode || 'read');
-        }, 100);
+        this.updateUI(AppState.currentMode || 'read');
     }
   }
 

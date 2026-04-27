@@ -156,7 +156,7 @@ class MarkdownPreview {
   }
 
   render() {
-    const container = DesignSystem.createElement('div', 'md-content', { id: 'md-content' });
+    const container = DesignSystem.createElement('div', 'md-content md-render-body', { id: 'md-content' });
     const inner = DesignSystem.createElement('div', 'md-content-inner');
     inner.innerHTML = this.html;
     

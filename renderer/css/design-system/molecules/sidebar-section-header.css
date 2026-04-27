@@ -27,6 +27,9 @@
   background: none !important;
   border: none !important;
   opacity: 0.4;
+}
+
+.sidebar-section.allow-transition .section-toggle-btn {
   transition: transform var(--ds-transition-main), opacity var(--ds-transition-fast) !important;
 }
 
@@ -59,10 +62,25 @@
   gap: var(--ds-space-xs);
 }
 
+.sidebar-section.allow-transition .header-actions-group {
+  transition: opacity var(--ds-transition-fast);
+}
+
+.sidebar-section.collapsed .header-actions-group {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .header-action-divider {
   width: 1px;
   height: 14px;
   background: var(--ds-border-strong);
   margin: 0 var(--ds-space-xs);
   flex-shrink: 0;
+}
+
+.sidebar-section-header.drag-hover-header .section-label {
+  opacity: 1;
+  color: var(--ds-accent-main);
+  text-shadow: 0 0 10px var(--ds-accent-a20);
 }

@@ -50,7 +50,7 @@
   width: 640px;
   background: var(--ds-bg-overlay);
   border: 1px solid var(--ds-border-default);
-  border-radius: var(--ds-radius-panel);
+  border-radius: var(--ds-radius-shell);
   overflow: hidden;
   box-shadow: var(--ds-shadow-lg);
   transform: scale(0.96) translateY(12px);
@@ -115,9 +115,9 @@
 /* ── Reusable Group Card ── */
 .ds-popover-group {
   background: var(--ds-hover-sm);
-  margin: 0 var(--ds-space-sm) var(--ds-space-md) var(--ds-space-sm);
+  margin: 0 var(--ds-space-sm) var(--ds-space-sm) var(--ds-space-sm);
   padding: var(--ds-space-xl) var(--ds-space-xl) var(--ds-space-sm) var(--ds-space-xl);
-  border-radius: var(--ds-radius-widget);
+  border-radius: var(--ds-radius-shell-inset);
   display: flex;
   flex-direction: column;
   overflow: hidden;

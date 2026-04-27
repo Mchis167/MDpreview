@@ -25,7 +25,24 @@ Bộ quy trình chuẩn hoá toàn diện để phát triển tính năng, quả
 
 ## 📋 Tất cả Workflows
 
-### 🏗️ Core Workflow System (1-9)
+### 🏗️ Core Workflow System (0-9)
+
+#### 0️⃣ `/startup` — Khởi động & Cập nhật bối cảnh
+**Mục đích:** Đảm bảo AI nắm vững bối cảnh, quy tắc và lịch sử dự án trước khi hành động.
+
+**Khi dùng:**
+- Ngay khi bắt đầu một phiên trò chuyện mới.
+- Khi chuyển sang một nhiệm vụ lớn hoặc module mới.
+
+**Key features:**
+- ✅ Mandatory read: rules, changelog, architecture.
+- ✅ Context audit: docs, decisions, function-docs.
+- ✅ Environment check: files, dependencies.
+- ✅ Briefing: Tóm tắt bối cảnh và đề xuất bước tiếp theo.
+
+**File:** [0.startup.md](0.startup.md)
+
+---
 
 #### 1️⃣ `/smart-edit` — Chỉnh sửa mã thông minh
 **Mục đích:** Sửa code với minimal diffs, surgical edits, không ghi đè toàn bộ file
@@ -493,6 +510,7 @@ Tham khảo: [test-cases.md](test-cases.md)
 ```
 .agents/workflows/
 ├── README.md (this file)
+├── 0.startup.md             ← Khởi động phiên làm việc
 ├── 1.smart-edit.md          ← Chỉnh sửa thông minh
 ├── 2.discuss.md             ← Phân tích & thảo luận
 ├── 3.changelog.md           ← Quản lý changelog

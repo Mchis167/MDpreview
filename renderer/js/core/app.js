@@ -1,4 +1,8 @@
-/* global SidebarLeft, ChangeActionViewBar, RightSidebar, io, initMermaid, initZoom, initToolbarBtns, initGlobalShortcuts, SidebarModule, SettingsModule, DraftModule, MarkdownViewer, ScrollModule, TabsModule, CollectModule, CommentsModule, TreeModule, WorkspaceModule, RecentlyViewedModule, processMermaid */
+/* global AppState, SidebarLeft, MarkdownViewer, RightSidebar, 
+   SettingsService, SearchPalette,
+   TreeModule, WorkspaceModule, CollectModule, 
+   SidebarModule, DraftModule, EditorModule, 
+   TabsModule, TabPreview, io */
 /* ============================================================
    app.js — Core state, file loading, socket connection, boot
    Other responsibilities live in dedicated modules:
@@ -26,6 +30,11 @@ window.AppState = {
     showHidden: localStorage.getItem('md-show-hidden') === 'true',
     hideEmptyFolders: localStorage.getItem('md-hide-empty') === 'true',
     flatView: localStorage.getItem('md-flat-view') === 'true',
+    hiddenPaths: (() => {
+      try { return JSON.parse(localStorage.getItem('md-hidden-paths') || '[]'); } 
+      catch (_e) { return []; }
+    })(),
+    showHiddenInSearch: localStorage.getItem('md-show-hidden-search') === 'true',
     fontText: localStorage.getItem('md-font-text') || 'Inter',
     fontCode: localStorage.getItem('md-font-code') || 'Roboto Mono',
     sortMethod: localStorage.getItem('mdpreview_sort_method') || 'alphabetical_asc',
@@ -91,7 +100,9 @@ window.AppState = {
         }
       }
 
-      applyTheme();
+      if (typeof SettingsService !== 'undefined') {
+        SettingsService.applyTheme();
+      }
     } catch (e) {
       console.warn('Failed to load persistent state from server:', e);
     }
@@ -146,26 +157,10 @@ window.AppState = {
   },
 
   _getStorageKey(settingsKey) {
-    const map = {
-      accentColor: 'md-accent-color',
-      bgEnabled: 'md-bg-enabled',
-      bgImage: 'md-bg-image',
-      textZoom: 'md-text-zoom',
-      codeZoom: 'md-code-zoom',
-      showHidden: 'md-show-hidden',
-      hideEmptyFolders: 'md-hide-empty',
-      flatView: 'md-flat-view',
-      fontText: 'md-font-text',
-      fontCode: 'md-font-code',
-      sortMethod: 'mdpreview_sort_method',
-      recentCollapsed: 'mdpreview_recent_collapsed',
-      explorerCollapsed: 'mdpreview_explorer_collapsed',
-      sidebarWidth: 'mdpreview_sidebar_left_width',
-      rightSidebarWidth: 'mdpreview_sidebar_right_width',
-      rightSidebarOpen: 'md-right-sidebar-open',
-      rightSidebarTab: 'md-right-sidebar-tab'
-    };
-    return map[settingsKey];
+    if (typeof SettingsService !== 'undefined') {
+      return SettingsService.getStorageKey(settingsKey);
+    }
+    return null;
   },
 
   getFileViewMode(path) {
@@ -261,50 +256,6 @@ window.AppState = {
     }
   }
 };
-
-/**
- * Apply theme settings to the document
- */
-function applyTheme() {
-  const root = document.documentElement;
-  const s = AppState.settings;
-
-  // Update zoom
-  root.style.setProperty('--preview-zoom', s.textZoom || 100);
-  root.style.setProperty('--code-zoom', s.codeZoom || 100);
-
-  // Update accent color (Hex)
-  root.style.setProperty('--accent-color', s.accentColor);
-
-  // Update accent color (RGB) for translucent tints
-  const rgb = hexToRgb(s.accentColor);
-  if (rgb) {
-    root.style.setProperty('--accent-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
-  }
-
-  // Update fonts
-  root.style.setProperty('--font-text', s.fontText);
-  root.style.setProperty('--font-code', s.fontCode);
-
-  // Update Select Arrow SVG with dynamic color
-  const arrowSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="${s.accentColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
-  root.style.setProperty('--select-arrow', `url("data:image/svg+xml,${encodeURIComponent(arrowSvg)}")`);
-
-  // Custom Background Logic
-  const bgLayer = document.getElementById('app-background');
-
-  if (bgLayer) {
-    if (s.bgEnabled && s.bgImage) {
-      bgLayer.style.backgroundImage = `url(${s.bgImage})`;
-      bgLayer.style.display = 'block';
-    } else {
-      bgLayer.style.display = 'none';
-    }
-  }
-}
-
-
-
 
 // ── Socket ───────────────────────────────────────────────────
 function initSocket() {
@@ -542,7 +493,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   await AppState.loadPersistentState();
 
   // 2. Initial UI setup
-  applyTheme();
+  if (typeof SettingsService !== 'undefined') {
+    SettingsService.applyTheme();
+  }
 
   // 1. Core UI Components First
   SidebarLeft.init();        // organisms/sidebar-left.js
@@ -556,12 +509,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   initToolbarBtns();      // toolbar.js
   initGlobalShortcuts();  // toolbar.js
   SidebarModule.init();      // sidebar.js
+  if (typeof SearchPalette !== 'undefined') SearchPalette.init();
 
   // 3. Functional Modules
-  SettingsModule.init();     // settings.js
+  if (typeof SettingsService !== 'undefined') {
+    SettingsService.applyTheme();
+  }
   DraftModule.init();        // draft.js
   MarkdownViewer.init();      // organisms/markdown-viewer-component.js
   ScrollModule.init();       // scroll.js
+  TabPreview.init();         // molecules/tab-preview.js
   ScrollModule.setContainer(document.getElementById('md-viewer-mount'));
 
   // 4. Tab System (triggers initial loadFile)
@@ -579,18 +536,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }, 0);
 });
-
-/**
- * Utility: Convert Hex to RGB
- */
-function hexToRgb(hex) {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  } : null;
-}
 
 /**
  * Global Toast Notification

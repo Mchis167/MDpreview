@@ -144,4 +144,25 @@ router.get('/file/exists', (req, res) => {
   }
 });
 
+// Get file metadata (mtime, size, etc.)
+router.get('/file/meta', (req, res) => {
+  const watchDir = req.watchDir;
+  const filePath = req.query.path;
+  if (!watchDir || !filePath) return res.status(400).json({ error: 'Missing params' });
+
+  try {
+    const fullPath = resolvePath(watchDir, filePath);
+    const stat = fs.statSync(fullPath);
+    res.json({
+      name: path.basename(fullPath),
+      path: filePath,
+      mtime: stat.mtimeMs,
+      size: stat.size,
+      birthtime: stat.birthtimeMs
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 module.exports = router;

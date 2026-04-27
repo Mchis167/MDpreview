@@ -30,6 +30,10 @@
   user-select: none;
 }
 
+.tree-item.is-hidden {
+  opacity: 0.5;
+}
+
 .tree-item .item-icon-wrap {
   width: 14px;
   height: 14px;

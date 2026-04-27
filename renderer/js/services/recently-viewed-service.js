@@ -66,13 +66,27 @@ const RecentlyViewedModule = (() => {
     const activeFile = (typeof AppState !== 'undefined') ? AppState.currentFile : null;
     recentPaths = recentPaths.filter(path => path !== activeFile).slice(0, 5);
 
-    if (recentPaths.length === 0) { section.style.display = 'none'; return; }
+    if (recentPaths.length === 0) { 
+      section.style.display = 'none'; 
+      const divider = section.nextElementSibling;
+      if (divider && divider.classList.contains('sidebar-divider')) {
+        divider.style.display = 'none';
+      }
+      return; 
+    }
+    
     section.style.display = 'block';
+    const divider = section.nextElementSibling;
+    if (divider && divider.classList.contains('sidebar-divider')) {
+      divider.style.display = 'block';
+    }
 
+    const hiddenPaths = new Set(AppState.settings.hiddenPaths || []);
     const nodes = recentPaths.map(path => ({
       path,
       name: path.split('/').pop(),
-      type: 'file'
+      type: 'file',
+      isHidden: hiddenPaths.has(path)
     }));
 
     if (!treeComp) {
@@ -122,7 +136,13 @@ const RecentlyViewedModule = (() => {
     }
   }
 
-  return { add, remove, swap, render, setActiveFile, init };
+  function getRecentFiles() {
+    const ws = AppState.currentWorkspace;
+    if (!ws) return [];
+    return _getRaw(STORAGE_KEY + ws.id);
+  }
+
+  return { add, remove, swap, render, setActiveFile, init, getRecentFiles };
 })();
 
 window.RecentlyViewedModule = RecentlyViewedModule;

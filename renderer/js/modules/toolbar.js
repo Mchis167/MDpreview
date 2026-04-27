@@ -1,3 +1,4 @@
+/* global TabsModule, TreeModule, EditorModule, SearchPalette */
 /* ============================================================
    toolbar.js — Toolbar action buttons and Keyboard Shortcuts
    ============================================================ */
@@ -52,10 +53,12 @@ function initGlobalShortcuts() {
       return;
     }
 
-    // ── Mod+F — Search (Strict check to avoid Fullscreen conflict) ────
-    if (mod && !e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === 'f') {
+    // ── Mod+F or Mod+P — Quick Open Search Palette ────
+    if (mod && !e.ctrlKey && !e.shiftKey && (e.key.toLowerCase() === 'f' || e.key.toLowerCase() === 'p')) {
       e.preventDefault();
-      document.getElementById('enter-search-btn')?.click();
+      if (typeof SearchPalette !== 'undefined') {
+        SearchPalette.show();
+      }
       return;
     }
 
@@ -109,7 +112,7 @@ function initGlobalShortcuts() {
     // ── Mod+B — Toggle sidebar ──────────────────────────
     if (mod && !e.shiftKey && !e.ctrlKey && e.key === 'b') {
       e.preventDefault();
-      const btn = document.querySelector('.tab-bar__toggle-btn');
+      const btn = document.getElementById('sidebar-toggle-btn');
       if (btn) btn.click();
       return;
     }

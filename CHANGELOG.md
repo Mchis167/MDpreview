@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file.
 
+### [1.9.0] — 2026-04-27 10:40
+
+### 🎉 Added
+- **Pin Tab Feature**: Triển khai khả năng ghim tab (Pin Tab) chuyên nghiệp:
+    - **Persistent State**: Trạng thái ghim được lưu trữ và khôi phục tự động theo từng Workspace.
+    - **Visual Branding**: Tự động hiển thị icon `pin` và áp dụng màu sắc nhấn (accent) cho viền dưới.
+    - **Resilient Tabs**: Các tab đã ghim không bị đóng bởi lệnh "Close All" hoặc "Close Others".
+- **Premium Tab Preview**: Nâng cấp tính năng hover preview với độ chính xác cao:
+    - **Mirror Viewport**: Sử dụng cơ chế 1:1 scroll parity, đồng bộ hoàn hảo với vị trí cuộn.
+    - **Smart Caching**: Hiển thị Preview tức thì (60s TTL) khi di chuyển giữa các tab.
+    - **High-Fidelity**: Hỗ trợ render lên đến 10,000 dòng cho các file cực lớn.
+- **Global Search Palette**: Nâng cấp toàn diện hệ thống tìm kiếm nhanh (Quick Open):
+    - Tích hợp **Recently Viewed** và **Smart Path Truncation**.
+    - **Debounce Logic**: Áp dụng độ trễ 150ms giúp tối ưu hiệu suất CPU.
+- **Hidden Items Management**: Tính năng **"Hidden from Tree"** giúp làm sạch không gian làm việc:
+    - Phím tắt **`Cmd + H`** để ẩn/hiện nhanh file và thư mục.
+    - Tự động đóng Tab khi file bị ẩn và hỗ trợ hiển thị mờ trong kết quả tìm kiếm.
+- **Centralized Settings Service**: Chuyển đổi sang mô hình quản lý cấu hình tập trung (`SettingsService`):
+    - Quản lý Mapping, Persistence (LocalStorage) và Side-effects tại một nơi duy nhất.
+    - Hỗ trợ **Dynamic Fonts** và **Accent Color** phản hồi tức thì.
+- **Design System Expansion**:
+    - **Atom ds-kbd**: Thành phần phím vật lý 3D chuẩn cho phím tắt.
+    - **Molecule ScrollContainer**: Vùng cuộn tái sử dụng với hiệu ứng mask-fade mượt mà.
+    - **Molecule SettingRow**: Thành phần dòng cài đặt chuẩn "Label | Control".
+- **Interaction Enhancements**:
+    - Hỗ trợ **Middle-click** để đóng tab và **Double-click** để toggle Pin.
+    - Bổ sung chỉ báo **"Dấu chấm vàng"** (Modified Indicator) cho file chưa lưu.
+- **Server Metadata API**: Bổ sung endpoint `/api/file/meta` truy xuất nhanh thông tin file (mtime, size).
+- **Advanced Tree Navigation**: Thêm lệnh **Collapse All** (`Cmd + [`) và **Collapse Others** (`Shift + Cmd + [`).
+
+### 🔧 Changed
+- **Elastic Tab Layout**: Tab tự động co giãn theo độ dài tên file (`flex: 0 1 auto`) và tối ưu diện tích cho tab ghim.
+- **Standardized DND**: Nâng cấp cơ chế **"Deep Scan"** và **"Invisible Shield"** tăng độ nhạy kéo thả.
+- **Sidebar UX**: Tái cấu trúc phân bổ không gian Sidebar, tự động ẩn section Hidden khi trống.
+- **Refined Masking**: Chuyển đổi hiệu ứng trailing mask sang trạng thái chỉ hiển thị khi hover.
+- **Architecture Refactor**: Tách biệt hoàn toàn Business Logic khỏi UI Components (Settings, Search).
+- **Performance Tuning**: Giảm thời gian chờ Preview (Debounce) xuống **300ms**.
+
+### 🐛 Fixed
+- **Server Payload Limit**: Khắc phục lỗi **`413 Payload Too Large`** bằng cách nâng giới hạn Express lên **50MB**.
+- **UI Consistency**: Hợp nhất các selector trùng lặp, triệt tiêu hiện tượng nhảy layout và đạt trạng thái **Zero Lint Errors**.
+- **Stability**: Sửa lỗi crash trong `tree.js` và `SearchPalette` liên quan đến null-safe checks.
+
+
 ### [1.8.0] — 2026-04-26 03:05
 
 ### Added

@@ -2,6 +2,8 @@
 const TabsModule = (function () {
   const state = {
     openFiles: [], // Array of file paths
+    pinnedFiles: [], // Array of pinned file paths
+    dirtyFiles: [], // Array of files with unsaved changes
     activeFile: null,
     selectedFiles: [], // Array of selected file paths
     lastSelectedFile: null // For shift-range selection
@@ -59,6 +61,8 @@ const TabsModule = (function () {
       onCloseOthers: (path) => closeOthers(path),
       onCloseAll: () => closeAll(),
       onCloseSelected: () => closeSelected(),
+      onPinTab: (path) => pin(path),
+      onUnpinTab: (path) => unpin(path),
 
       rightActions: [
         {
@@ -115,11 +119,12 @@ const TabsModule = (function () {
 
   function updateSidebarToggleIcon(isCollapsed) {
     const iconOpen = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6-6 6 6 6"/><path d="M3 12h12"/><path d="M21 19V5"/></svg>`;
-    const iconClosed = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18 6-6-6-6"/><path d="M21 12H9"/><path d="M3 5v14"/></svg>`;
+    const iconClosed = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5v14"/><path d="M21 12H9"/><path d="m15 18 6-6-6-6"/></svg>`;
     
-    const btn = document.querySelector('.tab-bar__toggle-btn');
+    const btn = document.getElementById('sidebar-toggle-btn');
     if (btn) {
       btn.innerHTML = isCollapsed ? iconClosed : iconOpen;
+      btn.title = isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar';
     }
   }
 
@@ -131,6 +136,7 @@ const TabsModule = (function () {
     const key = `tabs_${AppState.currentWorkspace.id}`;
     const data = {
       openFiles: state.openFiles,
+      pinnedFiles: state.pinnedFiles,
       activeFile: state.activeFile
     };
     localStorage.setItem(key, JSON.stringify(data));
@@ -161,6 +167,7 @@ const TabsModule = (function () {
       try {
         const data = JSON.parse(saved);
         state.openFiles = data.openFiles || [];
+        state.pinnedFiles = data.pinnedFiles || [];
         state.activeFile = data.activeFile || null;
       } catch (_e) {
         state.openFiles = [];
@@ -197,6 +204,45 @@ const TabsModule = (function () {
     deselectAll();
     saveToStorage();
     render();
+  }
+
+  function setDirty(path, isDirty) {
+    if (!path) return;
+    const idx = state.dirtyFiles.indexOf(path);
+    if (isDirty) {
+      if (idx === -1) {
+        state.dirtyFiles.push(path);
+        render();
+      }
+    } else {
+      if (idx > -1) {
+        state.dirtyFiles.splice(idx, 1);
+        render();
+      }
+    }
+  }
+
+  function pin(path) {
+    if (!path) return;
+    if (!state.pinnedFiles.includes(path)) {
+      state.pinnedFiles.push(path);
+      // Ensure it's in openFiles too
+      if (!state.openFiles.includes(path)) {
+        state.openFiles.push(path);
+      }
+      saveToStorage();
+      render();
+    }
+  }
+
+  function unpin(path) {
+    if (!path) return;
+    const idx = state.pinnedFiles.indexOf(path);
+    if (idx > -1) {
+      state.pinnedFiles.splice(idx, 1);
+      saveToStorage();
+      render();
+    }
   }
 
   // ── Multi-selection Logic ───────────────────────────────
@@ -257,7 +303,7 @@ const TabsModule = (function () {
   // ── Batch Closing Logic ────────────────────────────────
 
   async function closeAll() {
-    const files = [...state.openFiles];
+    const files = state.openFiles.filter(f => !state.pinnedFiles.includes(f));
     const drafts = files.filter(f => f.startsWith("__DRAFT_"));
 
     if (drafts.length > 0) {
@@ -284,7 +330,7 @@ const TabsModule = (function () {
   }
 
   function closeOthers(path) {
-    const files = state.openFiles.filter(f => f !== path);
+    const files = state.openFiles.filter(f => f !== path && !state.pinnedFiles.includes(f));
     const drafts = files.filter(f => f.startsWith("__DRAFT_"));
 
     if (drafts.length > 0) {
@@ -311,7 +357,7 @@ const TabsModule = (function () {
   }
 
   function closeSelected() {
-    const files = [...state.selectedFiles];
+    const files = state.selectedFiles.filter(f => !state.pinnedFiles.includes(f));
     if (files.length === 0) return;
 
     const drafts = files.filter(f => f.startsWith("__DRAFT_"));
@@ -389,6 +435,10 @@ const TabsModule = (function () {
     const sIdx = state.selectedFiles.indexOf(filePath);
     if (sIdx > -1) state.selectedFiles.splice(sIdx, 1);
 
+    // Remove from pinned if present
+    const pIdx = state.pinnedFiles.indexOf(filePath);
+    if (pIdx > -1) state.pinnedFiles.splice(pIdx, 1);
+
     if (state.activeFile === filePath) {
       state.activeFile = null;
       if (typeof window.AppState !== 'undefined') window.AppState.currentFile = null;
@@ -412,6 +462,8 @@ const TabsModule = (function () {
     if (tabBar) {
       tabBar.setState({
         openFiles: state.openFiles,
+        pinnedFiles: state.pinnedFiles,
+        dirtyFiles: state.dirtyFiles,
         activeFile: state.activeFile,
         selectedFiles: state.selectedFiles
       });
@@ -428,11 +480,40 @@ const TabsModule = (function () {
 
   function reorder(oldIndex, newIndex) {
     if (oldIndex === newIndex) return;
-    const files = [...state.openFiles];
-    const [draggedItem] = files.splice(oldIndex, 1);
-    files.splice(newIndex, 0, draggedItem);
     
-    state.openFiles = files;
+    // Calculate display order to identify what was actually dragged
+    const pinned = state.pinnedFiles.filter(f => state.openFiles.includes(f));
+    const unpinned = state.openFiles.filter(f => !state.pinnedFiles.includes(f));
+    const displayOrder = [...pinned, ...unpinned];
+    
+    const draggedItem = displayOrder[oldIndex];
+    if (!draggedItem) return;
+
+    const isPinned = state.pinnedFiles.includes(draggedItem);
+    
+    if (isPinned) {
+      // Reorder within pinnedFiles
+      const pOldIdx = state.pinnedFiles.indexOf(draggedItem);
+      // Pinned tabs are always at the start, so newIndex is relative to pinnedFiles
+      // but we need to ensure it doesn't exceed pinned length
+      const pNewIdx = Math.min(newIndex, pinned.length - 1);
+      
+      state.pinnedFiles.splice(pOldIdx, 1);
+      state.pinnedFiles.splice(pNewIdx, 0, draggedItem);
+    } else {
+      // Reorder within unpinned logic in openFiles
+      // This is trickier because openFiles contains everything
+      const [item] = state.openFiles.splice(state.openFiles.indexOf(draggedItem), 1);
+      
+      // Calculate where to insert in openFiles to match the intended newIndex in displayOrder
+      // If newIndex is within pinned range, unpinned item moves to the very beginning of unpinned section
+      const targetInDisplay = displayOrder[newIndex];
+      let insertIdx = state.openFiles.indexOf(targetInDisplay);
+      if (insertIdx === -1) insertIdx = state.openFiles.length;
+      
+      state.openFiles.splice(insertIdx, 0, item);
+    }
+    
     saveToStorage();
     render();
   }
@@ -465,6 +546,7 @@ const TabsModule = (function () {
     init,
     open,
     remove,
+    setDirty,
     swap,
     render,
     switchWorkspace,
@@ -474,6 +556,8 @@ const TabsModule = (function () {
     closeOthers,
     closeSelected,
     reorder,
+    pin,
+    unpin,
     syncSelectionFromTree,
     getActive: () => state.activeFile,
     getOpenFiles: () => state.openFiles,

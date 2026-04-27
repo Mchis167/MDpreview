@@ -13,8 +13,7 @@ class SidebarLeftComponent {
     this.mount = options.mount || document.getElementById('sidebar-left-mount');
     
     this.VIEWS = {
-      EXPLORER: 'explorer',
-      SEARCH: 'search'
+      EXPLORER: 'explorer'
     };
 
     this.state = {
@@ -68,30 +67,44 @@ class SidebarLeftComponent {
         <!-- Recently Viewed Section -->
         <div id="recently-viewed-section" class="sidebar-section">
           <div id="recently-viewed-header-mount"></div>
-          <div id="recently-viewed-list"></div>
+          <div class="sidebar-section-content">
+            <div class="sidebar-section-content-inner">
+              <div id="recently-viewed-list"></div>
+            </div>
+          </div>
         </div>
 
         <div class="sidebar-divider"></div>
 
-        <!-- File Explorer Section -->
-        <div id="file-explorer-section" class="sidebar-section">
-          <div id="file-explorer-header-mount"></div>
-          <div class="sidebar-tree-scroll">
-            <div id="file-tree"></div>
+        <!-- Main Trees Container (Always fills remaining space) -->
+        <div id="sidebar-main-trees">
+          <!-- File Explorer Section -->
+          <div id="file-explorer-section" class="sidebar-section">
+            <div id="file-explorer-header-mount"></div>
+            <div class="sidebar-section-content">
+              <div class="sidebar-section-content-inner">
+                <div id="file-tree-mount"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sidebar-divider"></div>
+
+          <!-- Hidden Items Section -->
+          <div id="hidden-items-section" class="sidebar-section">
+            <div id="hidden-items-header-mount"></div>
+            <div class="sidebar-section-content">
+              <div class="sidebar-section-content-inner">
+                <div id="hidden-items-mount"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- ── Search View ── -->
-      <div id="sidebar-search-view" style="display:none">
-        <div class="sidebar-search-container" id="sidebar-search-mount"></div>
-        <div id="search-results-section" class="sidebar-section">
-          <div id="search-results-header-mount"></div>
-          <div id="search-results-list" class="sidebar-tree-scroll"></div>
-        </div>
-      </div>
 
       <!-- Footer Status -->
+      <div class="sidebar-divider"></div>
       <div class="sidebar-footer" id="sidebar-footer-mount"></div>
     `;
 
@@ -131,7 +144,7 @@ class SidebarLeftComponent {
     const explorerSettingsBtn = DesignSystem.createButton({
       label: 'Explorer Settings',
       variant: 'subtitle',
-      leadingIcon: 'sliders',
+      leadingIcon: 'settings-2',
       offLabel: true,
       onClick: (e) => {
         if (window.ExplorerSettingsComponent) {
@@ -200,11 +213,6 @@ class SidebarLeftComponent {
       case this.VIEWS.EXPLORER:
         if (expView) expView.style.display = 'flex';
         dividers.forEach(d => d.style.display = 'block');
-        break;
-      case this.VIEWS.SEARCH:
-        if (mdHeader) mdHeader.style.display = 'none';
-        if (searchView) searchView.style.display = 'flex';
-        dividers.forEach(d => d.style.display = 'none');
         break;
     }
     this.state.currentView = viewName;

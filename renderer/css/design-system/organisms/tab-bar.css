@@ -32,22 +32,6 @@
   flex-shrink: 0;
 }
 
-.tab-bar__toggle-btn {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--ds-text-tertiary);
-  cursor: pointer;
-  transition: all var(--ds-transition-fast);
-}
-
-.tab-bar__toggle-btn:hover {
-  background: var(--ds-hover-sm);
-  color: var(--ds-text-inverse);
-}
-
 /* Tab List */
 .tab-bar__list {
   display: flex;
@@ -65,20 +49,21 @@
 }
 
 .tab-item {
-  width: 160px;
+  flex: 0 1 auto;
+  min-width: 100px;
+  max-width: 280px;
   height: 100%;
   display: flex;
   align-items: center;
-  padding: 0 var(--ds-space-lg);
-  gap: var(--ds-space-sm);
-  color: var(--ds-text-disabled);
+  padding: 0 var(--ds-space-sm);
+  gap: var(--ds-space-xs);
+  color: var(--ds-text-secondary);
   font-size: var(--ds-font-md);
   font-weight: 400;
   cursor: pointer;
   position: relative;
   border-left: 1px solid var(--ds-border-default);
   transition: all var(--ds-transition-fast);
-  flex-shrink: 0;
 }
 
 .tab-item:first-child {
@@ -102,7 +87,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: var(--ds-border-strong);
+  background: var(--ds-border-selected);
 }
 
 .tab-item.selected {
@@ -116,30 +101,63 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  padding: 0 var(--ds-space-xs);
+  mask-image: none;
+  -webkit-mask-image: none;
+  transition: mask-image var(--ds-transition-fast), -webkit-mask-image var(--ds-transition-fast);
+}
+
+/* Only show mask on hover to accommodate the close button without cutting off text prematurely */
+.tab-item:hover:not(.active) .tab-bar__name {
+  mask-image: linear-gradient(to right, black calc(100% - 120px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 120px), transparent 100%);
+}
+
+/* Disable mask for the active tab to show full content clearly */
+.tab-item.active .tab-bar__name {
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
 }
 
 .tab-bar__close {
-  display: flex;
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
-  opacity: 0;
-  transition: opacity var(--ds-transition-fast);
+  width: 18px;
+  height: 18px;
+  border-radius: var(--ds-radius-sm);
+  color: var(--ds-text-secondary);
+  transition: all var(--ds-transition-fast);
+  z-index: 5;
 }
 
-.tab-item.active .tab-bar__close,
-.tab-item:hover .tab-bar__close {
-  opacity: 0.5;
+/* Active tab uses normal flex flow for the close button (no overlap) */
+.tab-item.active .tab-bar__close {
+  position: static;
+  transform: none;
+  display: flex;
+  opacity: 1;
+  margin-left: var(--ds-space-xs);
 }
 
 .tab-bar__close:hover {
+  background: var(--ds-hover-sm);
+  color: var(--ds-text-inverse);
   opacity: 1 !important;
+}
+
+.tab-item:hover .tab-bar__close {
+  display: flex;
+  opacity: 0.6;
 }
 
 /* Add Tab */
 .tab-bar__add-btn-container {
-  width: 48px;
+  width: 40px;
   height: 100%;
   display: flex;
   align-items: center;
@@ -189,7 +207,7 @@
 }
 
 .ds-header-action {
-  width: 48px;
+  width: 40px;
   height: 100%;
   display: flex;
   align-items: center;
@@ -207,6 +225,8 @@
 .ds-header-action svg,
 .ds-header-action svg * {
   pointer-events: none !important;
+  width: var(--ds-space-md);
+  height: var(--ds-space-md);
 }
 
 .tab-bar__action-divider {
@@ -228,6 +248,57 @@
 
 .tab-item:not(.active) .tab-bar__draft-dot {
   opacity: 0.5;
+  box-shadow: none;
+}
+
+/* Pinned Tab */
+.tab-bar__pin-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-accent);
+  flex-shrink: 0;
+  transition: all var(--ds-transition-fast);
+}
+
+.tab-bar__pin-icon svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.5;
+}
+
+.tab-item.is-pinned:not(.active) .tab-bar__pin-icon {
+  opacity: 0.7;
+}
+
+.tab-item.is-pinned {
+  border-bottom: 1px solid rgba(var(--ds-accent-rgb), 0.2);
+  min-width: 44px;
+  max-width: 80px;
+  flex: 0 0 auto;
+}
+
+.tab-item.is-pinned.active {
+  border-bottom: none;
+}
+
+.tab-item.is-pinned:hover .tab-bar__name {
+  mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+}
+
+/* Dirty Indicator */
+.tab-bar__dirty-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--ds-status-warning);
+  border-radius: var(--ds-radius-pill);
+  flex-shrink: 0;
+  box-shadow: 0 0 4px var(--ds-status-warning);
+}
+
+.tab-item:not(.active) .tab-bar__dirty-dot {
+  opacity: 0.8;
   box-shadow: none;
 }
 

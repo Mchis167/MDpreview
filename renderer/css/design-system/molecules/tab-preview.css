@@ -1,0 +1,87 @@
+/* ── Design System: Tab Preview (Molecules) ── */
+
+.ds-tab-preview {
+  position: fixed;
+  width: 352px;
+  height: 272px;
+  background: var(--ds-bg-popover-glass);
+  backdrop-filter: blur(var(--ds-blur-lg));
+  -webkit-backdrop-filter: blur(var(--ds-blur-lg));
+  border: 1px solid var(--ds-border-default);
+  border-radius: var(--ds-radius-surface);
+  box-shadow: var(--ds-shadow-lg);
+  z-index: 2000;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px) scale(0.98);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.ds-tab-preview.ds-tab-preview--visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.ds-tab-preview__content-wrapper {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+/* The Mirror Viewport: Matches main canvas dimensions before scaling */
+.ds-tab-preview__mirror {
+  width: 800px;
+  /* height set via JS to match main viewer clientHeight */
+  flex-shrink: 0;
+  transform: scale(0.38);
+  transform-origin: top center;
+  overflow: hidden;
+  /* Scrolled via JS */
+  pointer-events: none;
+}
+
+.ds-tab-preview__content {
+  width: 100%;
+}
+
+.ds-tab-preview__mask {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(to bottom, transparent, var(--ds-bg-popover-glass));
+  pointer-events: none;
+}
+.ds-tab-preview__footer {
+  height: 32px;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid var(--ds-border-default);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--ds-space-md);
+  font-size: 11px;
+  color: var(--ds-text-tertiary);
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.ds-tab-preview__filename {
+  color: var(--ds-text-secondary);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60%;
+}
+
+.ds-tab-preview__stats {
+  font-size: 10px;
+  opacity: 0.8;
+}

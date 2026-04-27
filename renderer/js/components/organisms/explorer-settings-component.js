@@ -1,4 +1,4 @@
-/* global DesignSystem, AppState, TreeModule, SettingToggleItem, MenuShield */
+/* global DesignSystem, AppState, SettingsService, SettingToggleItem, MenuShield */
 /* ══════════════════════════════════════════════════
    ExplorerSettingsComponent.js — Explorer Preferences
    Sử dụng MenuShield để đồng nhất giao diện menu nổi.
@@ -16,17 +16,22 @@ class ExplorerSettingsComponent {
       { 
         label: 'Show Hidden Files', 
         isOn: settings.showHidden,
-        onChange: (val) => this._updateSetting('showHidden', 'md-show-hidden', val)
+        onChange: (val) => SettingsService.update('showHidden', val)
       },
       { 
         label: 'Hide Empty Folders', 
         isOn: settings.hideEmptyFolders,
-        onChange: (val) => this._updateSetting('hideEmptyFolders', 'md-hide-empty', val)
+        onChange: (val) => SettingsService.update('hideEmptyFolders', val)
       },
       { 
         label: 'Flat View', 
         isOn: settings.flatView,
-        onChange: (val) => this._updateSetting('flatView', 'md-flat-view', val)
+        onChange: (val) => SettingsService.update('flatView', val)
+      },
+      { 
+        label: 'Show Hidden in Search', 
+        isOn: settings.showHiddenInSearch,
+        onChange: (val) => SettingsService.update('showHiddenInSearch', val)
       }
     ];
 
@@ -67,22 +72,6 @@ class ExplorerSettingsComponent {
       content: content,
       className: 'ds-explorer-settings-shield'
     });
-  }
-
-  /**
-   * Private: Update setting and refresh tree
-   */
-  _updateSetting(key, storageKey, newVal) {
-    AppState.settings[key] = newVal;
-    localStorage.setItem(storageKey, newVal);
-    
-    if (typeof TreeModule !== 'undefined') {
-      TreeModule.load();
-    }
-
-    if (typeof AppState !== 'undefined' && AppState.savePersistentState) {
-      AppState.savePersistentState();
-    }
   }
 }
 

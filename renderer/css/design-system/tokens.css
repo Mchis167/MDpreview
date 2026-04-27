@@ -50,8 +50,8 @@
   --ds-radius-full: 999px;
 
   /* ── Typography ────────────────────────────────────────── */
-  --ds-font-family-text: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --ds-font-family-code: 'Roboto Mono', ui-monospace, SFMono-Regular, monospace;
+  --ds-font-family-text: var(--font-text, 'Inter'), -apple-system, BlinkMacSystemFont, sans-serif;
+  --ds-font-family-code: var(--font-code, 'Roboto Mono'), ui-monospace, SFMono-Regular, monospace;
 
   --ds-font-xs: 11px;
   --ds-font-sm: 12px;
@@ -62,6 +62,7 @@
 
   /* ── Easing ────────────────────────────────────────────── */
   --ds-ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ds-ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ds-ease-out: cubic-bezier(0.4, 0, 0.2, 1);
 
   /* ── Blur Scale ────────────────────────────────────────── */
@@ -138,6 +139,7 @@
   --ds-bg-surface: var(--ds-primitive-surface);
   --ds-bg-overlay: var(--ds-primitive-deep);
   --ds-bg-backdrop: var(--ds-black-a40);
+  --ds-bg-popover-glass: var(--ds-white-a01);
 
   --ds-bg-toolbar: var(--ds-black-a50);
   --ds-bg-toolbar-inner: var(--ds-white-a03);
@@ -150,6 +152,7 @@
   --ds-border-subtle: var(--ds-white-a04);
   --ds-border-default: var(--ds-white-a05);
   --ds-border-strong: var(--ds-white-a08);
+  --ds-border-selected: var(--ds-white-a30);
 
   /* ── Radius — Semantic Context Levels ──────────────────── */
   /*
@@ -171,10 +174,10 @@
   --ds-radius-pill: var(--ds-radius-full);
 
   /* ── Radius — Inset Formula ────────────────────────────── */
-  --ds-radius-shell-inset: max(0, calc(var(--ds-radius-shell) - var(--ds-space-xl)));
-  --ds-radius-surface-inset: max(0, calc(var(--ds-radius-surface) - var(--ds-space-md)));
-  --ds-radius-panel-inset: max(0, calc(var(--ds-radius-panel) - var(--ds-space-sm)));
-  --ds-radius-widget-inset: max(0, calc(var(--ds-radius-widget) - var(--ds-space-xs)));
+  --ds-radius-shell-inset: max(0px, var(--ds-radius-shell) - var(--ds-space-sm));
+  --ds-radius-surface-inset: max(0px, var(--ds-radius-surface) - var(--ds-space-md));
+  --ds-radius-panel-inset: max(0px, var(--ds-radius-panel) - var(--ds-space-sm));
+  --ds-radius-widget-inset: max(0px, var(--ds-radius-widget) - var(--ds-space-xs));
 
   /* ── Text ──────────────────────────────────────────────── */
   --ds-text-primary: var(--ds-white-a90);
@@ -191,8 +194,8 @@
   --ds-active: var(--ds-white-a10);
 
   /* ── Accent ────────────────────────────────────────────── */
-  --ds-accent: var(--ds-primitive-orange);
-  --ds-accent-rgb: var(--ds-primitive-orange-rgb);
+  --ds-accent: var(--accent-color, var(--ds-primitive-orange));
+  --ds-accent-rgb: var(--accent-rgb, var(--ds-primitive-orange-rgb));
   --ds-accent-hover: linear-gradient(var(--ds-white-a10), var(--ds-white-a10)), var(--ds-accent);
 
   --ds-accent-green: var(--ds-primitive-green);
@@ -212,10 +215,11 @@
   --ds-shadow-md: 0 8px 24px var(--ds-black-a35);
   --ds-shadow-lg: 0 20px 40px var(--ds-black-a50);
   --ds-shadow-lift: 0 20px 40px var(--ds-black-a30), 0 0 0 1px var(--ds-white-a10);
-  --ds-shadow-glow: 0 0 20px var(--ds-orange-a30);
+  --ds-shadow-glow: 0 0 20px rgba(var(--ds-accent-rgb), 0.3);
 
   /* ── Blur ───────────────────────────────────────────── */
   --ds-blur-sidebar: var(--ds-blur-xl);
+  --ds-blur-searchbox: var(--ds-blur-xl);
 
   /* ── Transitions ───────────────────────────────────────── */
   --ds-transition-fast: 0.15s var(--ds-ease-spring);

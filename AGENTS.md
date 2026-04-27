@@ -2,6 +2,6 @@
 
 All project rules, architecture guide, and GitHub workflow are in:
 
-**→ `.ai/rules.md`**
+**→ `.agents/rules/rules.md`**
 
 Read that file before making any changes.

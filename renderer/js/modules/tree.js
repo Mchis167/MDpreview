@@ -1,3 +1,5 @@
+/* global AppState, SettingsService, DesignSystem, FileService, TreeDragManager, 
+   TreeViewComponent, SidebarSectionHeader, SidebarModule, RecentlyViewedModule, showToast, ScrollContainer */
 /* ============================================================
    tree.js — Sidebar File Tree logic with Sorting and DND
    ============================================================ */
@@ -13,9 +15,9 @@ const TreeModule = (() => {
     expandedPaths: JSON.parse(localStorage.getItem('mdpreview_expanded_paths') || '[]'),
     customOrders: JSON.parse(localStorage.getItem('mdpreview_custom_orders') || '{}')
   };
+  let hiddenItemsV2Component = null;
 
   let v2Component = null;
-  let searchV2Component = null;
 
   const SORT_ICONS = {
     alphabetical_asc: DesignSystem.getIcon('sort-alpha-asc'),
@@ -98,6 +100,21 @@ const TreeModule = (() => {
       searchMount.appendChild(searchHeader.render());
     }
 
+    // 3. Initialize Hidden Items Header
+    const hiddenHeader = new SidebarSectionHeader({
+      title: 'HIDDEN FROM TREE',
+      defaultCollapsed: true,
+      collapsible: {
+        sectionId: 'hidden-items-section'
+      }
+    });
+
+    const hiddenMount = document.getElementById('hidden-items-header-mount');
+    if (hiddenMount) {
+      hiddenMount.innerHTML = '';
+      hiddenMount.appendChild(hiddenHeader.render());
+    }
+
     // Sync sort icon
     _updateSortBtnIcon();
 
@@ -160,8 +177,7 @@ const TreeModule = (() => {
           e.preventDefault();
           _hideContextMenu();
           const path = state.selectedPaths[0];
-          const container = document.getElementById('file-tree');
-          const el = container.querySelector(`.tree-item[data-path="${path}"]`);
+          const el = document.querySelector(`.tree-item[data-path="${path}"]`);
           const node = _findNodeByPath(treeData, path);
           if (el && node) _handleRename(null, node, el);
         }
@@ -176,51 +192,107 @@ const TreeModule = (() => {
           _handleBatchOp('delete');
         }
       }
+
+      // ⇧⌘H: Toggle Hidden
+      if (isMod && isShift && e.key.toLowerCase() === 'h') {
+        if (state.selectedPaths.length > 0) {
+          e.preventDefault();
+          _hideContextMenu();
+          const firstPath = state.selectedPaths[0];
+          const hiddenPaths = AppState.settings.hiddenPaths || [];
+          const isHiding = !hiddenPaths.includes(firstPath);
+          _handleBatchToggleHidden(isHiding, state.selectedPaths);
+        }
+      }
+
+      // ⌘[: Collapse All
+      if (isMod && !isShift && e.key === '[') {
+        e.preventDefault();
+        _hideContextMenu();
+        collapseAll();
+      }
+
+      // ⇧⌘[: Collapse Others
+      if (isMod && isShift && e.key === '[') {
+        e.preventDefault();
+        _hideContextMenu();
+        
+        let targetPath = null;
+        // Priority 1: Single selected folder
+        if (state.selectedPaths.length === 1) {
+          const node = _findNodeByPath(treeData, state.selectedPaths[0]);
+          if (node && node.type === 'directory') targetPath = node.path;
+        }
+        // Priority 2: Active file path
+        if (!targetPath && typeof AppState !== 'undefined') {
+          targetPath = AppState.currentFile;
+        }
+        
+        if (targetPath) collapseOthers(targetPath);
+      }
     });
 
     function _handleNewItemShortcut(type) {
       let targetPath = 'root';
+      const hiddenPaths = new Set(AppState.settings.hiddenPaths || []);
+
       if (state.selectedPaths.length > 0) {
         const lastPath = state.selectedPaths[state.selectedPaths.length - 1];
-        const node = _findNodeByPath(treeData, lastPath);
-        if (node) {
-          targetPath = node.type === 'directory' 
-            ? node.path 
-            : (node.path.substring(0, node.path.lastIndexOf('/')) || 'root');
+        
+        // If the selected path itself is hidden, default to root to protect hidden section
+        if (hiddenPaths.has(lastPath)) {
+          targetPath = 'root';
+        } else {
+          const node = _findNodeByPath(treeData, lastPath);
+          if (node) {
+            targetPath = node.type === 'directory' 
+              ? node.path 
+              : (node.path.substring(0, node.path.lastIndexOf('/')) || 'root');
+            
+            // Final check: if calculated target parent is hidden, fallback to root
+            if (hiddenPaths.has(targetPath)) targetPath = 'root';
+          }
         }
       }
       _createNewItem(targetPath, type);
     }
 
-    // Root Context Menu & Scroll Mask
-    const container = document.querySelector('.sidebar-tree-scroll');
-    if (container) {
-      container.addEventListener('scroll', () => {
-        const scrolled = container.scrollTop > 0;
-        container.style.setProperty('--top-fade', scrolled ? '16px' : '0px');
-      });
-      container.oncontextmenu = (e) => {
-        // If clicking on an item, let its own context menu handle it
-        if (e.target.closest('.tree-item')) return;
-
+    // Root Context Menu Handler for all scroll containers
+    document.addEventListener('contextmenu', (e) => {
+      const container = e.target.closest('.ds-scroll-container');
+      if (container && !e.target.closest('.tree-item')) {
+        e.preventDefault();
+        const isHiddenArea = !!e.target.closest('#hidden-items-section');
         const targetPath = 'root';
-        const items = [
-          { label: 'New File', icon: 'file-plus', shortcut: '⌘N', onClick: () => _createNewItem(targetPath, 'file') },
-          { label: 'New Folder', icon: 'folder-plus', shortcut: '⇧⌘N', onClick: () => _createNewItem(targetPath, 'directory') },
-          { divider: true },
-          { label: 'Import from System', icon: 'copy-plus', onClick: () => _handleImportFromSystem(targetPath, 'copy') },
-          { label: 'Move into Workspace', icon: 'folder-input', onClick: () => _handleImportFromSystem(targetPath, 'move') },
-          { divider: true },
+        
+        let items = [];
+        if (!isHiddenArea) {
+          items = [
+            { label: 'New File', icon: 'file-plus', shortcut: '⌘N', onClick: () => _createNewItem(targetPath, 'file') },
+            { label: 'New Folder', icon: 'folder-plus', shortcut: '⇧⌘N', onClick: () => _createNewItem(targetPath, 'directory') },
+            { divider: true },
+            { label: 'Import from System', icon: 'copy-plus', onClick: () => _handleImportFromSystem(targetPath, 'copy') },
+            { label: 'Move into Workspace', icon: 'folder-input', onClick: () => _handleImportFromSystem(targetPath, 'move') },
+            { divider: true },
+            { label: 'Collapse All Folders', icon: 'folder-minus', shortcut: '⌘[', onClick: () => collapseAll() },
+            { divider: true }
+          ];
+        }
+
+        items.push(
           { label: 'Open Workspace in Finder', icon: 'external-link', onClick: () => {
             if (typeof AppState !== 'undefined' && AppState.currentWorkspace) {
               FileService.revealInFinder(AppState.currentWorkspace.path);
             }
-          }}
-        ];
+          }},
+          { label: 'Refresh Tree', icon: 'refresh-cw', onClick: () => load() }
+        );
 
-        DesignSystem.createContextMenu(e, items);
-      };
-    }
+        if (typeof DesignSystem !== 'undefined') {
+          DesignSystem.createContextMenu(e, items);
+        }
+      }
+    });
   }
 
   function _updateSortBtnIcon() {
@@ -241,19 +313,29 @@ const TreeModule = (() => {
     if (TreeDragManager.getIsDragging()) return; // Block loading while dragging
 
     // Show professional skeleton state
-    const container = document.getElementById('file-tree');
-    if (container) {
+    // Show professional skeleton state
+    const mountPoint = document.getElementById('file-tree-mount');
+    if (mountPoint) {
+      let treeEl = document.getElementById('file-tree');
+      if (!treeEl) {
+        treeEl = document.createElement('div');
+        treeEl.id = 'file-tree';
+        const scrollContainer = ScrollContainer.create(treeEl, {
+          className: 'ds-scrollbar-thin'
+        });
+        mountPoint.appendChild(scrollContainer);
+      }
+
       if (!v2Component) {
         v2Component = new TreeViewComponent({
-          mount: container,
+          mount: treeEl,
           onClick: _handleClick,
           onMouseDown: _handleMouseDown,
           onContextMenu: _handleContextMenu,
           onDelete: _handleDelete,
           onRename: _handleRename,
           onFinishRename: _finishRename,
-          onMouseLeave: _handleMouseLeave,
-          showSpacer: true
+          onMouseLeave: _handleMouseLeave
         });
       }
       v2Component.renderSkeleton(10);
@@ -304,40 +386,121 @@ const TreeModule = (() => {
     render();
   }
 
-  function render(isQuickRender = false) {
+  function render(isQuickRender = false, overrideActivePath = null) {
     if (TreeDragManager.getIsDragging() && !isQuickRender) return;
 
     _sortNodesRecursively(treeData, '');
-    const filtered = filterTree(treeData, currentQuery);
+    
+    const hiddenPaths = new Set(AppState.settings.hiddenPaths || []);
 
-    // Initialize V2 Component if not exists
-    if (!v2Component) {
-      const container = document.getElementById('file-tree');
-      if (container) {
-        v2Component = new TreeViewComponent({
-          mount: container,
-          onClick: _handleClick,
-          onMouseDown: _handleMouseDown,
-          onContextMenu: _handleContextMenu,
-          onDelete: _handleDelete,
-          onRename: _handleRename,
-          onFinishRename: _finishRename,
-          onMouseLeave: _handleMouseLeave,
-          showSpacer: true
-        });
-      }
+    // 1. Filter Main Tree (Visible)
+    const filterVisible = (nodes) => {
+      return nodes.reduce((acc, node) => {
+        if (hiddenPaths.has(node.path)) return acc;
+        const newNode = { ...node };
+        if (node.type === 'directory' && node.children) {
+          newNode.children = filterVisible(node.children);
+        }
+        acc.push(newNode);
+        return acc;
+      }, []);
+    };
+
+    const visibleData = filterVisible(treeData);
+    const filtered = filterTree(visibleData, currentQuery);
+
+    // 2. Filter Hidden List
+    const getHidden = (nodes) => {
+      let out = [];
+      nodes.forEach(n => {
+        if (hiddenPaths.has(n.path)) {
+          out.push(n);
+        } else if (n.type === 'directory' && n.children) {
+          out = out.concat(getHidden(n.children));
+        }
+      });
+      return out;
+    };
+    const hiddenData = getHidden(treeData);
+
+    // ── Main Explorer Re-mounting Logic ──
+    const mountPoint = document.getElementById('file-tree-mount');
+    if (mountPoint && (!v2Component || !document.body.contains(v2Component.mount))) {
+      mountPoint.innerHTML = ''; // Ensure clean slate
+      const treeEl = document.createElement('div');
+      treeEl.id = 'file-tree';
+      const scrollContainer = ScrollContainer.create(treeEl, { className: 'ds-scrollbar-thin' });
+      mountPoint.appendChild(scrollContainer);
+
+      v2Component = new TreeViewComponent({
+        mount: treeEl,
+        onClick: _handleClick,
+        onMouseDown: _handleMouseDown,
+        onContextMenu: _handleContextMenu,
+        onDelete: _handleDelete,
+        onRename: _handleRename,
+        onFinishRename: _finishRename,
+        onMouseLeave: _handleMouseLeave
+      });
     }
 
-    // Update UI via V2 Component
+    // ── Hidden Items Re-mounting Logic ──
+    const hMountPoint = document.getElementById('hidden-items-mount');
+    if (hMountPoint && (!hiddenItemsV2Component || !document.body.contains(hiddenItemsV2Component.mount))) {
+      hMountPoint.innerHTML = '';
+      const hListEl = document.createElement('div');
+      hListEl.id = 'hidden-items-list';
+      const hScrollContainer = ScrollContainer.create(hListEl, { 
+        className: 'ds-scrollbar-thin'
+      });
+      hMountPoint.appendChild(hScrollContainer);
+
+      hiddenItemsV2Component = new TreeViewComponent({
+        mount: hListEl,
+        onClick: _handleClick,
+        onMouseDown: _handleMouseDown,
+        onContextMenu: _handleContextMenu,
+        onDelete: _handleDelete,
+        onRename: _handleRename,
+        onFinishRename: _finishRename,
+        onMouseLeave: _handleMouseLeave
+      });
+    }
+
+    // Update UI via Components
     if (v2Component) {
       v2Component.update(
         filtered,
         state.selectedPaths,
         currentQuery,
         state.sortMethod,
-        AppState.currentFile,
+        overrideActivePath || AppState.currentFile,
         state.renamingPath
       );
+    }
+
+    if (hiddenItemsV2Component) {
+      hiddenItemsV2Component.update(
+        hiddenData,
+        state.selectedPaths,
+        '',
+        state.sortMethod,
+        overrideActivePath || AppState.currentFile,
+        state.renamingPath
+      );
+    }
+
+    // ── NEW: Auto-hide Hidden Section if empty ──
+    const hiddenSection = document.getElementById('hidden-items-section');
+    if (hiddenSection) {
+      const hasHidden = hiddenData.length > 0;
+      hiddenSection.style.display = hasHidden ? 'flex' : 'none';
+      
+      // Also hide the divider before it
+      const divider = hiddenSection.previousElementSibling;
+      if (divider && divider.classList.contains('sidebar-divider')) {
+        divider.style.display = hasHidden ? 'block' : 'none';
+      }
     }
   }
 
@@ -380,14 +543,17 @@ const TreeModule = (() => {
    * Các hàm này tách biệt logic nghiệp vụ khỏi UI
    */
   async function _handleToggle(node) {
-    if (node.type !== 'directory') return;
-    node.expanded = !node.expanded;
+    // Find the real node in the original treeData to avoid toggling clones
+    const realNode = _findNodeByPath(treeData, node.path);
+    if (!realNode || realNode.type !== 'directory') return;
+
+    realNode.expanded = !realNode.expanded;
 
     // Persist expanded state
-    if (node.expanded) {
-      if (!state.expandedPaths.includes(node.path)) state.expandedPaths.push(node.path);
+    if (realNode.expanded) {
+      if (!state.expandedPaths.includes(realNode.path)) state.expandedPaths.push(realNode.path);
     } else {
-      state.expandedPaths = state.expandedPaths.filter(p => p !== node.path);
+      state.expandedPaths = state.expandedPaths.filter(p => p !== realNode.path);
     }
     localStorage.setItem('mdpreview_expanded_paths', JSON.stringify(state.expandedPaths));
     if (typeof AppState !== 'undefined' && AppState.savePersistentState) AppState.savePersistentState();
@@ -396,22 +562,26 @@ const TreeModule = (() => {
   }
 
   function _handleClick(e, node, itemEl) {
-    const isMulti = e.ctrlKey || e.metaKey;
-    const isShift = e.shiftKey;
+    const isMulti = e && (e.ctrlKey || e.metaKey);
+    const isShift = e && e.shiftKey;
+    const container = itemEl ? itemEl.closest('.ds-tree-view') : null;
+    const isChevron = e && e.target && e.target.closest('.item-chevron-wrap');
 
+    // 1. Handle Chevron Toggle (Independent of selection)
+    if (isChevron && node.type === 'directory') {
+      _handleToggle(node);
+      return;
+    }
+
+    // 2. Handle Selection Logic
     if (isMulti) {
-      // Toggle selection
       const idx = state.selectedPaths.indexOf(node.path);
       if (idx > -1) state.selectedPaths.splice(idx, 1);
       else state.selectedPaths.push(node.path);
       render(true);
-    } else if (isShift) {
-      // Range selection
+    } else if (isShift && container) {
       let lastPath = state.selectedPaths.length > 0 ? state.selectedPaths[state.selectedPaths.length - 1] : AppState.currentFile;
-
-      const container = document.getElementById('file-tree');
       const allItems = Array.from(container.querySelectorAll('.tree-item'));
-
       const startIdx = lastPath ? allItems.findIndex(el => el.dataset.path === lastPath) : -1;
       const endIdx = allItems.findIndex(el => el.dataset.path === node.path);
 
@@ -422,14 +592,12 @@ const TreeModule = (() => {
           if (!state.selectedPaths.includes(path)) state.selectedPaths.push(path);
         }
       } else {
-        // Fallback: If no starting point, just select this one
         if (!state.selectedPaths.includes(node.path)) state.selectedPaths.push(node.path);
       }
       render(true);
     } else {
-      // Standard selection
       const wasAlreadySelected = state.selectedPaths.length === 1 && state.selectedPaths[0] === node.path;
-      const isLabelClick = e.target.classList.contains('item-label');
+      const isLabelClick = e && e.target && e.target.classList.contains('item-label');
 
       state.selectedPaths = [node.path];
 
@@ -439,6 +607,8 @@ const TreeModule = (() => {
         return;
       }
 
+      // If clicking a directory (not chevron), we still toggle it for convenience
+      // but we ALSO select it.
       if (node.type === 'directory') {
         _handleToggle(node);
       } else {
@@ -448,7 +618,8 @@ const TreeModule = (() => {
           });
         }
       }
-      render(true);
+
+      render(true, node.path);
     }
   }
 
@@ -495,25 +666,58 @@ const TreeModule = (() => {
       if (!isMulti) {
         // Determine where to create new items: current folder or sibling of current file
         const targetPath = isFolder ? node.path : (node.path.substring(0, node.path.lastIndexOf('/')) || 'root');
+        const hiddenPaths = AppState.settings.hiddenPaths || [];
+        const isHidden = hiddenPaths.includes(node.path);
 
         items = [
-          { label: 'Rename', icon: 'edit', shortcut: 'Enter', onClick: () => _handleRename(e, node, itemEl) },
-          { label: 'Duplicate', icon: 'copy', shortcut: '⌘D', onClick: () => _handleDuplicate(e, node) },
-          { divider: true },
-          { label: 'New File', icon: 'file-plus', shortcut: '⌘N', onClick: () => _createNewItem(targetPath, 'file') },
-          { label: 'New Folder', icon: 'folder-plus', shortcut: '⇧⌘N', onClick: () => _createNewItem(targetPath, 'directory') },
-          { divider: true },
-          { label: 'Import from System', icon: 'copy-plus', onClick: () => _handleImportFromSystem(node, 'copy') },
-          { label: 'Move into Workspace', icon: 'folder-input', onClick: () => _handleImportFromSystem(node, 'move') },
-          { divider: true },
+          { label: 'Rename', icon: 'edit', shortcut: 'Enter', onClick: () => _handleRename(e, node, itemEl) }
+        ];
+
+        if (isFolder) {
+          items.push({ label: 'Collapse Other Folders', icon: 'chevrons-down-up', shortcut: '⇧⌘[', onClick: () => collapseOthers(node.path) });
+          items.push({ divider: true });
+        }
+
+        if (!isHidden) {
+          items.push(
+            { label: 'Duplicate', icon: 'copy', shortcut: '⌘D', onClick: () => _handleDuplicate(e, node) },
+            { divider: true },
+            { label: 'New File', icon: 'file-plus', shortcut: '⌘N', onClick: () => _createNewItem(targetPath, 'file') },
+            { label: 'New Folder', icon: 'folder-plus', shortcut: '⇧⌘N', onClick: () => _createNewItem(targetPath, 'directory') },
+            { divider: true },
+            { label: 'Import from System', icon: 'copy-plus', onClick: () => _handleImportFromSystem(node, 'copy') },
+            { label: 'Move into Workspace', icon: 'folder-input', onClick: () => _handleImportFromSystem(node, 'move') },
+            { divider: true }
+          );
+        } else {
+          items.push({ divider: true });
+        }
+
+        items.push(
           { label: 'Reveal in Finder', icon: 'external-link', onClick: () => _handleRevealInFinder(e, node) },
           { label: 'Copy Relative Path', icon: 'clipboard', onClick: () => _handleCopyPath(node, 'relative') },
           { divider: true },
+          { 
+            label: isHidden ? 'Unhide' : 'Hide from Tree', 
+            icon: isHidden ? 'eye' : 'eye-off', 
+            shortcut: '⇧⌘H',
+            onClick: () => _handleToggleHidden(node) 
+          },
+          { divider: true },
           { label: 'Delete', icon: 'trash', danger: true, shortcut: '⌘⌫', onClick: () => _handleDelete(e, node) }
-        ];
+        );
       } else {
+        const pathsForBatch = [...state.selectedPaths];
+        const hiddenPaths = AppState.settings.hiddenPaths || [];
+        const isCurrentlyHidden = hiddenPaths.includes(node.path);
+
         items = [
-          { label: `Delete (${state.selectedPaths.length} items)`, icon: 'trash', danger: true, onClick: () => _handleBatchOp('delete') },
+          { 
+            label: isCurrentlyHidden ? `Show (${pathsForBatch.length} items) in Tree` : `Hide (${pathsForBatch.length} items) from Tree`, 
+            icon: isCurrentlyHidden ? 'eye' : 'eye-off', 
+            onClick: () => _handleBatchToggleHidden(!isCurrentlyHidden, pathsForBatch) 
+          },
+          { label: `Delete (${pathsForBatch.length} items)`, icon: 'trash', danger: true, onClick: () => _handleBatchOp('delete') },
           { label: 'Copy Paths', icon: 'clipboard', onClick: () => _handleBatchCopyPaths() }
         ];
       }
@@ -589,7 +793,7 @@ const TreeModule = (() => {
   function _handleMouseDown(e, node, itemEl) {
     if (e.button !== 0) return; // Chỉ chuột trái
     const isCustomOrder = state.sortMethod === 'custom';
-    const context = { state, treeData, load, _findNodeByPath };
+    const context = { state, treeData, load, _findNodeByPath, handleToggleHidden: _handleToggleHidden, handleBatchToggleHidden: _handleBatchToggleHidden };
     if (isCustomOrder) TreeDragManager.initVIPDrag(e, itemEl, node, context);
     else TreeDragManager.initStandardDrag(e, itemEl, node, context);
   }
@@ -602,6 +806,49 @@ const TreeModule = (() => {
       state.selectedPaths.splice(idx, 1);
       render(true);
     }
+  }
+
+  function _handleToggleHidden(node) {
+    const hiddenPaths = AppState.settings.hiddenPaths || [];
+    const isHiding = !hiddenPaths.includes(node.path);
+    _handleBatchToggleHidden(isHiding, [node.path]);
+  }
+
+  async function _handleBatchToggleHidden(hide, explicitPaths = null, keepSelection = false) {
+    const currentHidden = new Set(AppState.settings.hiddenPaths || []);
+    const pathsToProcess = explicitPaths || [...state.selectedPaths];
+    
+    if (pathsToProcess.length === 0) return;
+
+    pathsToProcess.forEach(p => {
+      if (hide) {
+        currentHidden.add(p);
+        
+        // Tab Sync: Close tab if file/folder is hidden
+        if (typeof TabsModule !== 'undefined') {
+          // Use a spread copy to avoid index shifting bugs when removing from state.openFiles
+          const openFiles = [...(TabsModule.getOpenFiles() || [])];
+          openFiles.forEach(f => {
+            // Close if exact match or if file is inside hidden folder
+            if (f === p || f.startsWith(p + '/')) {
+              TabsModule.remove(f, true);
+            }
+          });
+        }
+      } else {
+        currentHidden.delete(p);
+      }
+    });
+    
+    if (!keepSelection) state.selectedPaths = []; 
+    
+    await SettingsService.update('hiddenPaths', Array.from(currentHidden));
+    
+    if (typeof showToast === 'function') {
+      showToast(`${hide ? 'Hidden' : 'Unhidden'} ${pathsToProcess.length} items`);
+    }
+    
+    render(true);
   }
 
   function _findNodeByPath(nodes, path) {
@@ -659,63 +906,64 @@ const TreeModule = (() => {
     DesignSystem.createContextMenu(e, items);
   }
 
-  function search(q) {
-    currentQuery = (q || '').toLowerCase();
-    const resultsCont = document.getElementById('search-results-list');
-    const resultsSection = document.getElementById('search-results-section');
-    if (resultsSection) resultsSection.classList.toggle('hidden', !currentQuery);
+  /**
+   * Helper to expand all parent directories for a given path
+   */
+  function _revealPath(path) {
+    if (!path) return false;
+    const segments = path.split('/');
+    if (segments.length <= 1) return false;
 
-    if (resultsCont) {
-      if (currentQuery) {
-        const matches = _flattenAndFilter(treeData || [], currentQuery);
+    let changed = false;
+    let currentPath = '';
 
-        if (!searchV2Component) {
-          searchV2Component = new TreeViewComponent({
-            mount: resultsCont,
-            onClick: _handleClick,
-            onMouseDown: _handleMouseDown,
-            onContextMenu: _handleContextMenu,
-            onDelete: _handleDelete,
-            onRename: _handleRename,
-            onFinishRename: _finishRename,
-            showSpacer: true
-          });
-        }
-
-        searchV2Component.update(matches, state.selectedPaths, currentQuery, state.sortMethod, AppState.currentFile, state.renamingPath);
-      } else {
-        resultsCont.innerHTML = '';
+    for (let i = 0; i < segments.length - 1; i++) {
+      currentPath = currentPath ? `${currentPath}/${segments[i]}` : segments[i];
+      if (!state.expandedPaths.includes(currentPath)) {
+        state.expandedPaths.push(currentPath);
+        const node = _findNodeByPath(treeData, currentPath);
+        if (node) node.expanded = true;
+        changed = true;
       }
     }
-    render();
-  }
 
-  function _flattenAndFilter(nodes, q) {
-    let out = [];
-    nodes.forEach(n => {
-      if (n.type === 'file' && n.name.toLowerCase().includes(q)) out.push(n);
-      if (n.type === 'directory' && n.children) out = out.concat(_flattenAndFilter(n.children, q));
-    });
-    return out;
+    if (changed) {
+      localStorage.setItem('mdpreview_expanded_paths', JSON.stringify(state.expandedPaths));
+    }
+    return changed;
   }
 
   function setActiveFile(filePath) {
-    const container = document.getElementById('file-tree');
-    if (!container) return;
+    if (!filePath) return;
 
-    // 1. Remove active class from previously active item
-    const prev = container.querySelector('.tree-item.active');
-    if (prev) {
-      if (prev.dataset.path === filePath) return; // Already active, skip
-      prev.classList.remove('active');
+    // 0. Auto-expand parent folders if collapsed
+    const changed = _revealPath(filePath);
+    if (changed) {
+      render(true);
     }
 
-    // 2. Add active class to the new path
-    if (filePath) {
-      // Use attribute selector for O(1) targeted DOM search instead of queryAll
+    const trees = document.querySelectorAll('.ds-tree-view');
+    if (!trees.length) return;
+
+    trees.forEach(container => {
+      // 1. Remove active class from previously active item in THIS container
+      const prev = container.querySelector('.tree-item.active');
+      if (prev) {
+        if (prev.dataset.path === filePath) return; // Already active in this container
+        prev.classList.remove('active');
+      }
+
+      // 2. Add active class to the new path if it exists in THIS container
       const current = container.querySelector(`.tree-item[data-path="${filePath.replace(/"/g, '\\"')}"]`);
-      if (current) current.classList.add('active');
-    }
+      if (current) {
+        current.classList.add('active');
+        
+        // 3. Ensure it's scrolled into view
+        requestAnimationFrame(() => {
+          current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+      }
+    });
   }
 
   function filterTree(nodes, q) {
@@ -910,6 +1158,54 @@ const TreeModule = (() => {
     }
   }
 
+  function collapseAll() {
+    const collapseNodes = (nodes) => {
+      nodes.forEach(node => {
+        if (node.type === 'directory') {
+          node.expanded = false;
+          if (node.children) collapseNodes(node.children);
+        }
+      });
+    };
+    collapseNodes(treeData);
+    state.expandedPaths = [];
+    localStorage.setItem('mdpreview_expanded_paths', JSON.stringify(state.expandedPaths));
+    if (typeof AppState !== 'undefined' && AppState.savePersistentState) AppState.savePersistentState();
+    render(true);
+  }
+
+  function collapseOthers(targetPath) {
+    if (!targetPath) return;
+    
+    // Calculate paths to keep expanded (all parent segments)
+    const segments = targetPath.split('/');
+    const pathsToKeep = new Set();
+    let current = '';
+    for (const segment of segments) {
+      current = current ? `${current}/${segment}` : segment;
+      pathsToKeep.add(current);
+    }
+
+    const collapseExcept = (nodes) => {
+      nodes.forEach(node => {
+        if (node.type === 'directory') {
+          if (!pathsToKeep.has(node.path)) {
+            node.expanded = false;
+          }
+          if (node.children) collapseExcept(node.children);
+        }
+      });
+    };
+    
+    collapseExcept(treeData);
+    
+    // Filter expandedPaths
+    state.expandedPaths = state.expandedPaths.filter(p => pathsToKeep.has(p));
+    localStorage.setItem('mdpreview_expanded_paths', JSON.stringify(state.expandedPaths));
+    if (typeof AppState !== 'undefined' && AppState.savePersistentState) AppState.savePersistentState();
+    render(true);
+  }
+
   function _esc(t) {
     const div = document.createElement('div');
     div.textContent = t;
@@ -926,7 +1222,11 @@ const TreeModule = (() => {
   return {
     init,
     load,
-    search,
+    getTreeData: () => treeData,
+    openFile: (path) => {
+      const node = _findNodeByPath(treeData, path);
+      if (node) _handleClick(null, node);
+    },
     setActiveFile,
     clear,
     deselectAll,
@@ -939,7 +1239,9 @@ const TreeModule = (() => {
     finishRename: _finishRename,
     handleDelete: _handleDelete,
     handleContextMenu: _handleContextMenu,
-    handleMouseDown: _handleMouseDown
+    handleMouseDown: _handleMouseDown,
+    handleToggleHidden: _handleToggleHidden,
+    handleBatchToggleHidden: _handleBatchToggleHidden // Exported for multi-select
   };
 })();
 

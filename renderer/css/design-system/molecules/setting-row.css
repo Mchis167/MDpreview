@@ -1,0 +1,30 @@
+/* ── Design System: Setting Row (Molecules) ── */
+
+.ds-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  width: 100%;
+  gap: var(--ds-space-md);
+}
+
+.ds-setting-row-label-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.ds-setting-row-label {
+  font-size: var(--ds-font-lg);
+  font-weight: 600;
+  color: var(--ds-text-primary);
+}
+
+.ds-setting-row-control-col {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-md);
+  flex: 1;
+  max-width: 240px;
+  justify-content: flex-end;
+}

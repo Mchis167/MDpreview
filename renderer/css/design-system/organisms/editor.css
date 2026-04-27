@@ -136,9 +136,6 @@
 }
 
 
-/* ── Markdown Help Popover ────────────────────────── */
-/* ── Markdown Help Popover (Figma Parity) ────────────────── */
-
 .edit-help-popover {
   position: fixed;
   /* Fixed position to not affect parent scroll */
@@ -344,10 +341,8 @@
   width: 6px;
   height: 6px;
   background: var(--ds-accent);
-  /* Figma Orange */
   border-radius: var(--ds-radius-pill);
-  box-shadow: 0 0 8px #ffe1a9;
-  /* Figma Glow */
+  box-shadow: var(--ds-shadow-glow);
   margin-left: 8px;
   flex-shrink: 0;
 }

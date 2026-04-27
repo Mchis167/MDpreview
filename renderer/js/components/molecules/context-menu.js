@@ -60,7 +60,7 @@ class ContextMenuComponent {
         const keys = specialKeys.includes(item.shortcut) ? [item.shortcut] : item.shortcut.split('');
         
         keys.forEach(key => {
-          shortcutWrap.appendChild(DesignSystem.createElement('kbd', '', { text: key }));
+          shortcutWrap.appendChild(DesignSystem.createElement('kbd', 'ds-kbd', { text: key }));
         });
         itemEl.appendChild(shortcutWrap);
       }

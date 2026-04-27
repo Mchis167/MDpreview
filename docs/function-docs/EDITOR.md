@@ -11,6 +11,7 @@ Gắn editor logic vào `<textarea>`. Phải gọi trước khi dùng bất kỳ
 - Khởi tạo undo/redo stacks với snapshot đầu tiên
 - Đăng ký keyboard shortcuts: **Mod+S**, **Mod+Z**, **Mod+Shift+Z**
 - Bắt đầu debounced snapshot (300ms) khi user gõ
+- Tự động gọi `TabsModule.setDirty()` để cập nhật chỉ báo thay đổi trên Tab Bar
 
 ### `unbind()`
 Gỡ bỏ tất cả event listeners và xóa stacks. Gọi khi chuyển khỏi edit mode.
@@ -39,7 +40,7 @@ Di chuyển tới snapshot sau (nếu đã undo trước đó). Snapshot mới s
 Lưu nội dung textarea:
 - Nếu file là **draft** → lưu qua DraftModule
 - Nếu là **file thật** → POST `/api/file` hoặc gọi Electron API
-- Sau khi save → gọi `setOriginalContent()` để reset dirty flag
+- Sau khi save → gọi `setOriginalContent()` để reset dirty flag và thông báo cho `TabsModule`.
 
 ### `isDirty()`
 So sánh nội dung hiện tại với `originalContent`. Trả về `true` nếu có thay đổi chưa lưu.
@@ -51,7 +52,7 @@ Cập nhật baseline. Gọi sau khi load file hoặc sau khi save thành công.
 Đánh dấu dirty/clean thủ công — dùng khi cần override dirty detection (ví dụ: sau auto-save).
 
 ### `revert()`
-Khôi phục textarea về `originalContent` và xóa toàn bộ undo/redo stacks.
+Khôi phục textarea về `originalContent`, xóa toàn bộ undo/redo stacks và thông báo "clean" cho `TabsModule`.
 
 ---
 
@@ -85,4 +86,4 @@ Focus vào textarea và đồng bộ con trỏ với read view — dùng khi chu
 
 ---
 
-*Document — 2026-04-26*
+*Document — 2026-04-27*

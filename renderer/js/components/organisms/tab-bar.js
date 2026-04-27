@@ -23,11 +23,15 @@ class TabBarComponent {
       onCloseOthers: options.onCloseOthers || (() => { }),
       onCloseAll: options.onCloseAll || (() => { }),
       onCloseSelected: options.onCloseSelected || (() => { }),
+      onPinTab: options.onPinTab || (() => { }),
+      onUnpinTab: options.onUnpinTab || (() => { }),
       rightActions: options.rightActions || []
     };
 
     this.state = {
       openFiles: [],
+      pinnedFiles: [],
+      dirtyFiles: [],
       activeFile: null,
       selectedFiles: []
     };
@@ -66,13 +70,13 @@ class TabBarComponent {
     const toggleWrapper = document.createElement('div');
     toggleWrapper.className = 'tab-bar__sidebar-toggle-wrapper';
     toggleWrapper.innerHTML = `
-      <div class="tab-bar__toggle-btn" title="Toggle Sidebar">
+      <div class="ds-header-action" title="Toggle Sidebar" id="sidebar-toggle-btn">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="m9 6-6 6 6 6"/><path d="M3 12h12"/><path d="M21 19V5"/>
         </svg>
       </div>
     `;
-    toggleWrapper.querySelector('.tab-bar__toggle-btn').onclick = () => this.options.onToggleSidebar();
+    toggleWrapper.querySelector('#sidebar-toggle-btn').onclick = () => this.options.onToggleSidebar();
     this.mount.appendChild(toggleWrapper);
 
     this.mount.appendChild(this._createDivider());
@@ -80,7 +84,13 @@ class TabBarComponent {
     // ── 2. Middle Section: Tab List ─────────────────────
     const tabList = document.createElement('div');
     tabList.className = 'tab-bar__list';
-    this.state.openFiles.forEach(path => {
+
+    // Separate pinned and unpinned tabs, maintaining pin order
+    const pinned = this.state.pinnedFiles.filter(f => this.state.openFiles.includes(f));
+    const unpinned = this.state.openFiles.filter(f => !this.state.pinnedFiles.includes(f));
+    const displayOrder = [...pinned, ...unpinned];
+
+    displayOrder.forEach(path => {
       tabList.appendChild(this._createTabItem(path));
     });
     this.mount.appendChild(tabList);
@@ -121,6 +131,24 @@ class TabBarComponent {
       }
     });
     this.mount.appendChild(actionsWrapper);
+
+    // Ensure active tab is visible
+    requestAnimationFrame(() => this._scrollToActive());
+  }
+
+  /**
+   * Scroll the active tab into view if it's overflowing
+   */
+  _scrollToActive() {
+    const list = this.mount.querySelector('.tab-bar__list');
+    const active = this.mount.querySelector('.tab-item.active');
+    if (!list || !active) return;
+
+    active.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'nearest'
+    });
   }
 
   /**
@@ -136,12 +164,17 @@ class TabBarComponent {
 
     const isActive = path === this.state.activeFile;
     const isSelected = this.state.selectedFiles.includes(path);
+    const isPinned = this.state.pinnedFiles.includes(path);
+    const isDirty = this.state.dirtyFiles.includes(path);
 
     const item = document.createElement('div');
-    item.className = `tab-item ${isActive ? 'active' : ''} ${isSelected ? 'selected' : ''}`;
-    item.title = path;
+    item.className = `tab-item ${isActive ? 'active' : ''} ${isSelected ? 'selected' : ''} ${isPinned ? 'is-pinned' : ''} ${isDirty ? 'is-dirty' : ''}`;
+    item.setAttribute('data-path', path);
 
     const dot = isDraft ? '<span class="tab-bar__draft-dot"></span>' : '';
+    const dirtyDot = (isDirty && !isDraft) ? '<span class="tab-bar__dirty-dot"></span>' : '';
+    const pinIconHtml = isPinned ? `<div class="tab-bar__pin-icon">${DesignSystem.getIcon('pin')}</div>` : '';
+
     let displayLabel = fileName;
     if (!isDraft && displayLabel.toLowerCase().endsWith('.md')) {
       displayLabel = displayLabel.substring(0, displayLabel.length - 3);
@@ -149,6 +182,8 @@ class TabBarComponent {
 
     item.innerHTML = `
       ${dot}
+      ${dirtyDot}
+      ${pinIconHtml}
       <span class="tab-bar__name">${displayLabel}</span>
       <div class="tab-bar__close" title="Close tab">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -156,7 +191,15 @@ class TabBarComponent {
     `;
 
     item.onmousedown = (e) => {
-      if (e.button !== 0) return; // Left click only
+      // Middle click to close
+      if (e.button === 1) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.options.onTabClose(path);
+        return;
+      }
+
+      if (e.button !== 0) return; // Left click only for drag
       if (e.target.closest('.tab-bar__close')) return;
       this._initTabDrag(e, item, path);
     };
@@ -169,6 +212,16 @@ class TabBarComponent {
         metaKey: e.metaKey,
         altKey: e.altKey
       });
+    };
+
+    item.ondblclick = (e) => {
+      e.preventDefault();
+      const isPinned = this.state.pinnedFiles.includes(path);
+      if (isPinned) {
+        this.options.onUnpinTab(path);
+      } else {
+        this.options.onPinTab(path);
+      }
     };
 
     item.oncontextmenu = (e) => {
@@ -205,6 +258,7 @@ class TabBarComponent {
     let animationFrameId = null;
     let currentX = e.clientX;
     let currentY = e.clientY;
+    const isPinnedDrag = itemEl.classList.contains('is-pinned');
 
     // Pre-calculate sibling centers
     const sibCenters = siblings.map(sib => {
@@ -216,12 +270,15 @@ class TabBarComponent {
       if (!dragProxy) return;
 
       const deltaX = currentX - startX;
-      const deltaY = currentY - startY;
-      dragProxy.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.9)`;
+      dragProxy.style.transform = `translate(${deltaX}px, 0px) scale(0.9)`;
 
       let newIdx = itemIdx;
       let minDist = Infinity;
       sibCenters.forEach((center, i) => {
+        // TC: Restrict dragging to same group (Pinned vs Unpinned)
+        const targetIsPinned = siblings[i].classList.contains('is-pinned');
+        if (targetIsPinned !== isPinnedDrag) return;
+
         const dist = Math.abs(currentX - center);
         if (dist < minDist) {
           minDist = dist;
@@ -231,6 +288,14 @@ class TabBarComponent {
 
       siblings.forEach((sib, idx) => {
         if (sib === itemEl) return;
+        
+        // TC: Only animate siblings in the same group
+        const sibIsPinned = sib.classList.contains('is-pinned');
+        if (sibIsPinned !== isPinnedDrag) {
+          sib.style.transform = '';
+          return;
+        }
+
         if (idx > itemIdx && idx <= newIdx) {
           sib.style.transform = `translateX(-${itemWidth}px)`;
         } else if (idx < itemIdx && idx >= newIdx) {
@@ -337,7 +402,10 @@ class TabBarComponent {
    * Custom context menu for tabs
    */
   _showContextMenu(e, path) {
+    const isPinned = this.state.pinnedFiles.includes(path);
     const items = [
+      { label: isPinned ? 'Unpin Tab' : 'Pin Tab', icon: isPinned ? 'pin-off' : 'pin', onClick: () => isPinned ? this.options.onUnpinTab(path) : this.options.onPinTab(path) },
+      { divider: true },
       { label: 'Close Tab', icon: 'x', shortcut: '⌘W', onClick: () => this.options.onTabClose(path) },
       { label: 'Close Others', icon: 'minus', onClick: () => this.options.onCloseOthers(path) },
       { label: 'Close All', icon: 'layers', onClick: () => this.options.onCloseAll() }

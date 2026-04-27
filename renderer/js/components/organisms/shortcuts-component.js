@@ -56,6 +56,9 @@ class ShortcutsComponent {
           { label: 'Rename Selected', keys: ['Enter'] },
           { label: 'Duplicate File', keys: ['Ctrl', 'D'] },
           { label: 'Delete Selected', keys: this.isMac ? ['Ctrl', 'Backspace'] : ['Delete'] },
+          { label: 'Hide / Unhide', keys: ['Ctrl', 'Shift', 'H'] },
+          { label: 'Collapse All Folders', keys: ['Ctrl', '['] },
+          { label: 'Collapse Other Folders', keys: ['Ctrl', 'Shift', '['] },
           { label: 'Toggle Sidebar', keys: ['Ctrl', 'B'] },
           { label: 'Focus Search', keys: ['Ctrl', 'F'] }
         ]

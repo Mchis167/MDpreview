@@ -9,6 +9,7 @@ class SidebarSectionHeader {
         this.actions = options.actions || []; // Array or nested array of IconActionButton
         this.className = options.className || '';
         this.collapsible = options.collapsible || null; // { sectionId, storageKey, appStateKey }
+        this.defaultCollapsed = options.defaultCollapsed || false;
     }
 
     render() {
@@ -21,7 +22,8 @@ class SidebarSectionHeader {
             
             // Determine initial state
             const isCollapsed = (appStateKey && AppState.settings && AppState.settings[appStateKey]) || 
-                                localStorage.getItem(storageKey) === 'true';
+                                (storageKey && localStorage.getItem(storageKey) === 'true') ||
+                                (this.defaultCollapsed && (!storageKey || localStorage.getItem(storageKey) === null));
             
             const toggleBtn = new IconActionButton({
                 className: 'section-toggle-btn',
@@ -49,6 +51,9 @@ class SidebarSectionHeader {
                         return;
                     }
                 }
+
+                // Enable transitions only on user interaction
+                section.classList.add('allow-transition');
 
                 const collapsed = section.classList.toggle('collapsed');
                 localStorage.setItem(storageKey, collapsed);

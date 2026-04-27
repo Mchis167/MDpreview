@@ -1,3 +1,4 @@
+/* global DesignSystem, SettingRow, SettingsService, AppState, SwitchToggleModule, showToast */
 /* ══════════════════════════════════════════════════
    SettingsComponent.js — Settings View Organism
    Atomic Design System (Organism)
@@ -6,7 +7,7 @@
 class SettingsComponent {
   constructor(options = {}) {
     this.options = {
-      onClose: options.onClose || (() => {})
+      onClose: options.onClose || (() => { })
     };
     this.mount = null;
     this.popover = null;
@@ -20,22 +21,55 @@ class SettingsComponent {
 
     // 1. Appearance Group
     container.appendChild(this._createGroup('Appearance', [
-      this._createSettingRow('Accent Color', this._createColorSelector())
+      SettingRow.create({
+        label: 'Accent Color',
+        control: this._createColorSelector()
+      })
     ]));
 
     // 2. Typography & Zoom Group
     container.appendChild(this._createGroup('Typography & Zoom', [
-      this._createSettingRow('Interface Font', this._createFontSelect('text')),
-      this._createSettingRow('Editor Font', this._createFontSelect('code')),
-      this._createSettingRow('Text Zoom', this._createZoomControl('text')),
-      this._createSettingRow('Code Zoom', this._createZoomControl('code'))
+      SettingRow.create({
+        label: 'Interface Font',
+        control: this._createFontSelect('text')
+      }),
+      SettingRow.create({
+        label: 'Editor Font',
+        control: this._createFontSelect('code')
+      }),
+      SettingRow.create({
+        label: 'Text Zoom',
+        control: this._createZoomControl('text')
+      }),
+      SettingRow.create({
+        label: 'Code Zoom',
+        control: this._createZoomControl('code')
+      })
     ]));
 
     // 3. Background Group
+    const toggleEl = DesignSystem.createElement('div', 'switch-toggle');
+    SwitchToggleModule.init({
+      element: toggleEl,
+      isOn: AppState.settings.bgEnabled,
+      onChange: (val) => {
+        if (typeof SettingsService !== 'undefined') {
+          SettingsService.update('bgEnabled', val);
+          this._updateGridVisibility(container, val);
+        }
+      }
+    });
+
     container.appendChild(this._createGroup('Background', [
-      this._createSettingRow('Custom Background', this._createToggle('bg-toggle-mount')),
+      SettingRow.create({
+        label: 'Custom Background',
+        control: toggleEl
+      }),
       this._createBackgroundGridWrapper()
     ]));
+
+    // Sync initial visibility
+    this._updateGridVisibility(container, AppState.settings.bgEnabled);
 
     return container;
   }
@@ -47,7 +81,7 @@ class SettingsComponent {
     if (title) {
       group.appendChild(this._createSectionTitle(title));
     }
-    
+
     children.forEach((child, index) => {
       group.appendChild(child);
       // Auto-insert divider between items, but not after the last item
@@ -55,7 +89,7 @@ class SettingsComponent {
         group.appendChild(this._createDivider());
       }
     });
-    
+
     return group;
   }
 
@@ -63,50 +97,74 @@ class SettingsComponent {
     return DesignSystem.createElement('div', 'ds-popover-group-title', { text });
   }
 
-  _createSettingRow(label, control) {
-    const row = DesignSystem.createElement('div', 'setting-item-row');
-    const labelCol = DesignSystem.createElement('div', 'setting-label-col');
-    labelCol.appendChild(DesignSystem.createElement('span', 'setting-label', { text: label }));
-    
-    row.appendChild(labelCol);
-    if (control) row.appendChild(control);
-    return row;
-  }
-
   _createDivider() {
     return DesignSystem.createElement('div', 'setting-divider');
   }
 
   _createColorSelector() {
-    return DesignSystem.createElement('div', 'color-selector');
+    const container = DesignSystem.createElement('div', 'color-selector');
+    const accentColors = [
+      { name: 'Orange', value: '#ffbf48' },
+      { name: 'Red',    value: '#FF4500' },
+      { name: 'Pink',   value: '#FF69B4' },
+      { name: 'Purple', value: '#9370DB' },
+      { name: 'Blue',   value: '#1E90FF' },
+      { name: 'Teal',   value: '#40E0D0' },
+      { name: 'Cyan',   value: '#00FFFF' },
+      { name: 'Lime',   value: '#00FF00' },
+      { name: 'Green',  value: '#ADFF2F' }
+    ];
+
+    accentColors.forEach(color => {
+      const item = DesignSystem.createElement('div', 'color-item', {
+        title: color.name
+      });
+      item.style.backgroundColor = color.value;
+      if (color.value === AppState.settings.accentColor) item.classList.add('active');
+
+      item.addEventListener('click', () => {
+        if (typeof SettingsService !== 'undefined') {
+          SettingsService.update('accentColor', color.value);
+          container.querySelectorAll('.color-item').forEach(el => el.classList.remove('active'));
+          item.classList.add('active');
+        }
+      });
+
+      container.appendChild(item);
+    });
+
+    return container;
   }
 
   _createFontSelect(type) {
     const fonts = type === 'text' ? [
-      'System Default', 'Inter', 'Be Vietnam Pro', 'Roboto', 'Open Sans', 'Montserrat', 'Lato', 
-      'Source Sans 3', 'Noto Sans', 'Nunito', 'Raleway', 'Work Sans', 
-      'Quicksand', 'Barlow', 'Jost', 'Public Sans', 'Rubik', 'Kanit', 
+      'System Default', 'Inter', 'Be Vietnam Pro', 'Roboto', 'Open Sans', 'Montserrat', 'Lato',
+      'Source Sans 3', 'Noto Sans', 'Nunito', 'Raleway', 'Work Sans',
+      'Quicksand', 'Barlow', 'Jost', 'Public Sans', 'Rubik', 'Kanit',
       'Outfit', 'Urbanist', 'Plus Jakarta Sans', 'Lexend', 'Syne',
-      'Figtree', 'Manrope', 'DM Sans', 'Sora', 'Space Grotesk', 'Mulish', 
-      'Cabin', 'Titillium Web', 'Heebo', 'Karla', 'Libre Franklin', 'Arimo', 
+      'Figtree', 'Manrope', 'DM Sans', 'Sora', 'Space Grotesk', 'Mulish',
+      'Cabin', 'Titillium Web', 'Heebo', 'Karla', 'Libre Franklin', 'Arimo',
       'Varela Round', 'Commissioner', 'Epilogue', 'Archivo', 'Chivo', 'Bricolage Grotesk'
     ] : [
-      'System Mono', 'Roboto Mono', 'Fira Code', 'JetBrains Mono', 'Source Code Pro', 
-      'Inconsolata', 'IBM Plex Mono', 'Ubuntu Mono', 'Space Mono', 
-      'Share Tech Mono', 'Victor Mono', 'Anonymous Pro', 'DM Mono', 
-      'PT Mono', 'Red Hat Mono', 'Sono', 'Spline Sans Mono', 'Xanh Mono', 
+      'System Mono', 'Roboto Mono', 'Fira Code', 'JetBrains Mono', 'Source Code Pro',
+      'Inconsolata', 'IBM Plex Mono', 'Ubuntu Mono', 'Space Mono',
+      'Share Tech Mono', 'Victor Mono', 'Anonymous Pro', 'DM Mono',
+      'PT Mono', 'Red Hat Mono', 'Sono', 'Spline Sans Mono', 'Xanh Mono',
       'Cousine', 'Nova Mono', 'Major Mono Display'
     ];
 
     let currentVal = type === 'text' ? AppState.settings.fontText : AppState.settings.fontCode;
-    
+
     // Normalize display value if it's the system default
     if (type === 'text' && currentVal === 'var(--font-text-system)') currentVal = 'System Default';
     if (type === 'code' && currentVal === 'var(--font-code-system)') currentVal = 'System Mono';
 
     return DesignSystem.createSelect(fonts, currentVal, (val) => {
-      if (typeof SettingsModule !== 'undefined') {
-        SettingsModule.updateFont(type, val);
+      if (typeof SettingsService !== 'undefined') {
+        let fontVal = val;
+        if (val === 'System Default') fontVal = 'var(--font-text-system)';
+        if (val === 'System Mono') fontVal = 'var(--font-code-system)';
+        SettingsService.update(type === 'text' ? 'fontText' : 'fontCode', fontVal);
       }
     });
   }
@@ -114,10 +172,9 @@ class SettingsComponent {
   _createZoomControl(type) {
     const ctrl = DesignSystem.createElement('div', 'setting-control-col');
     const currentVal = type === 'text' ? AppState.settings.textZoom : AppState.settings.codeZoom;
-    
+
     const slider = DesignSystem.createElement('input', 'zoom-slider', {
       type: 'range',
-      id: `${type}-zoom-slider`,
       min: '50',
       max: '200',
       step: '5'
@@ -125,23 +182,14 @@ class SettingsComponent {
     slider.value = currentVal || 100;
 
     const label = DesignSystem.createElement('span', 'zoom-val-label', {
-      id: `${type}-zoom-val`,
       text: `${slider.value}%`
     });
 
     slider.addEventListener('input', (e) => {
-      const val = e.target.value;
+      const val = parseInt(e.target.value, 10);
       label.innerText = `${val}%`;
-      if (type === 'text') {
-        AppState.settings.textZoom = parseInt(val, 10);
-        localStorage.setItem('md-text-zoom', val);
-      } else {
-        AppState.settings.codeZoom = parseInt(val, 10);
-        localStorage.setItem('md-code-zoom', val);
-      }
-      if (typeof applyTheme === 'function') applyTheme();
-      if (typeof AppState !== 'undefined' && AppState.savePersistentState) {
-        AppState.savePersistentState();
+      if (typeof SettingsService !== 'undefined') {
+        SettingsService.update(type === 'text' ? 'textZoom' : 'codeZoom', val);
       }
     });
 
@@ -150,41 +198,104 @@ class SettingsComponent {
     return ctrl;
   }
 
-  _createToggle(id) {
-    return DesignSystem.createElement('div', 'switch-toggle', {
-      id: id,
-      tabindex: '0',
-      role: 'switch',
-      html: '<div class="switch-indicator"></div>'
-    });
-  }
-
   _createBackgroundGridWrapper() {
-    const wrapper = DesignSystem.createElement('div', 'bg-grid-wrapper', { id: 'bg-grid-wrapper' });
+    const wrapper = DesignSystem.createElement('div', 'bg-grid-wrapper');
     wrapper.appendChild(this._createBackgroundGrid());
     return wrapper;
   }
 
   _createBackgroundGrid() {
     const bgGrid = DesignSystem.createElement('div', 'bg-image-grid');
-    bgGrid.innerHTML = `
-      <div class="bg-image-item bg-new-image" id="bg-upload-trigger">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-        <span>New Image</span>
-        <input type="file" id="bg-file-input" accept="image/*" style="display: none;" multiple>
-      </div>
-      <div id="custom-bg-list" style="display: contents;"></div>
-      <div class="bg-image-item">
-        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop" alt="Abstract 1">
-      </div>
-      <div class="bg-image-item">
-        <img src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop" alt="Abstract 2">
-      </div>
+    
+    // 1. Upload Trigger
+    const uploadItem = DesignSystem.createElement('div', ['bg-image-item', 'bg-new-image']);
+    uploadItem.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+      </svg>
+      <span>New Image</span>
     `;
+    const fileInput = DesignSystem.createElement('input', null, {
+      type: 'file',
+      accept: 'image/*',
+      style: 'display: none;',
+      multiple: true
+    });
+    uploadItem.appendChild(fileInput);
+
+    uploadItem.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', async (e) => {
+      const files = Array.from(e.target.files);
+      if (!files.length) return;
+      
+      for (const file of files) {
+        const base64 = await this._toBase64(file);
+        const added = SettingsService.addCustomBackground(base64);
+        if (!added && typeof showToast === 'function') {
+          showToast('Maximum 5 custom images allowed.', 'error');
+          break;
+        }
+      }
+      this._refreshGrid(bgGrid);
+    });
+
+    bgGrid.appendChild(uploadItem);
+
+    // 2. Custom & Preset Images
+    this._renderImageItems(bgGrid);
+
     return bgGrid;
+  }
+
+  _renderImageItems(container) {
+    const customBgs = this._getCustomBgs();
+    const presets = [
+      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop'
+    ];
+
+    [...customBgs, ...presets].forEach(src => {
+      const item = DesignSystem.createElement('div', 'bg-image-item');
+      if (src === AppState.settings.bgImage) item.classList.add('active');
+      item.innerHTML = `<img src="${src}" alt="Background">`;
+
+      item.addEventListener('click', () => {
+        if (typeof SettingsService !== 'undefined') {
+          SettingsService.update('bgImage', src);
+          container.querySelectorAll('.bg-image-item').forEach(el => el.classList.remove('active'));
+          item.classList.add('active');
+        }
+      });
+      container.appendChild(item);
+    });
+  }
+
+  _refreshGrid(container) {
+    // Keep only the first item (upload trigger)
+    const trigger = container.querySelector('.bg-new-image');
+    container.innerHTML = '';
+    container.appendChild(trigger);
+    this._renderImageItems(container);
+  }
+
+  _getCustomBgs() {
+    return SettingsService.getCustomBackgrounds();
+  }
+
+  _toBase64(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  _updateGridVisibility(container, enabled) {
+    const wrapper = container.querySelector('.bg-grid-wrapper');
+    if (wrapper) {
+      wrapper.style.display = enabled ? 'block' : 'none';
+    }
   }
 
   /**
@@ -207,9 +318,11 @@ class SettingsComponent {
    * Open the Settings UI in a floating popover (No backdrop)
    */
   static open() {
+    if (this.activeInstance) return this.activeInstance;
+
     const component = new SettingsComponent();
     const content = component.render();
-    
+
     const popover = DesignSystem.createPopoverShield({
       title: 'Settings',
       content: content,
@@ -221,11 +334,7 @@ class SettingsComponent {
       }
     });
 
-    // Re-initialize SettingsModule logic with the new DOM
-    if (typeof SettingsModule !== 'undefined') {
-      SettingsModule.init();
-    }
-    
+    this.activeInstance = popover;
     return popover;
   }
 }

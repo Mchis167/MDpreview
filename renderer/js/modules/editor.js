@@ -63,6 +63,11 @@ const EditorModule = (() => {
     _textarea.addEventListener('input', () => {
       if (_ignoreNextInput) { _ignoreNextInput = false; return; }
       _scheduleSnapshot();
+      
+      // Update Tab Dirty State
+      if (typeof TabsModule !== 'undefined' && AppState.currentFile) {
+        TabsModule.setDirty(AppState.currentFile, isDirty());
+      }
     });
 
     _textarea.addEventListener('keydown', (e) => {
@@ -114,6 +119,10 @@ const EditorModule = (() => {
     if (res.ok) {
       if (typeof showToast === 'function') showToast('File saved successfully');
       _originalContent = content; 
+      
+      if (typeof TabsModule !== 'undefined' && AppState.currentFile) {
+        TabsModule.setDirty(AppState.currentFile, false);
+      }
       
       // Return to read mode after successful save
       if (window.AppState && AppState.updateToolbarUI) {
@@ -176,6 +185,10 @@ const EditorModule = (() => {
       // Reset undo/redo stacks to sync with the reverted state
       _undoStack = [{ value: _textarea.value, ss: 0, se: 0 }];
       _redoStack = [];
+
+      if (typeof TabsModule !== 'undefined' && AppState.currentFile) {
+        TabsModule.setDirty(AppState.currentFile, false);
+      }
     }
   }
 

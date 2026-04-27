@@ -9,6 +9,8 @@
 | Property | Mô tả |
 |---|---|
 | `openFiles` | Mảng đường dẫn các file đang mở |
+| `pinnedFiles` | Mảng các file đã được ghim (Pin) |
+| `dirtyFiles` | Mảng các file đang có thay đổi chưa lưu |
 | `activeFile` | File đang được xem |
 | `selectedFiles` | Set các file đang được chọn (multi-select) |
 
@@ -19,7 +21,7 @@ State được persist vào localStorage, phân biệt theo workspace ID.
 ## Functions
 
 ### `init()`
-Khởi tạo TabBar component, đăng ký các keyboard shortcuts và event listeners:
+Khởi tạo TabBar component (`TabBarComponent.js`), đăng ký các keyboard shortcuts và event listeners:
 - **Escape** — Deselect tất cả tab
 - **Mod+A** — Chọn tất cả tab (chỉ khi không focus vào input)
 - **Mod+W** — Đóng tab active hoặc các tab đang chọn
@@ -37,10 +39,16 @@ Mở file trong tab. Nếu file đã có tab thì chỉ switch sang, không mở
 Thay thế path trong tab list — dùng sau khi rename file để tab không bị mất.
 
 ### `reorder(oldIndex, newIndex)`
-Đổi thứ tự tab sau khi drag-and-drop.
+Đổi thứ tự tab sau khi drag-and-drop. Logic tự động phân tách nhóm: các tab Pinned luôn nằm ở đầu và chỉ hoán đổi với nhau, các tab thường chỉ hoán đổi trong vùng Unpinned.
+
+### `pin(path)` / `unpin(path)`
+Ghim hoặc bỏ ghim một tab. Các tab đã ghim được chuyển lên đầu hàng và được bảo vệ khỏi lệnh `closeAll()`.
+
+### `setDirty(path, isDirty)`
+Đánh dấu một file có thay đổi chưa lưu để hiển thị chỉ báo "Dirty dot". Thường được gọi từ `EditorModule`.
 
 ### `switchWorkspace(workspaceId)`
-Load lại danh sách tab đã lưu cho workspace mới từ localStorage.
+Load lại danh sách tab và trạng thái ghim đã lưu cho workspace mới từ localStorage.
 
 ---
 
@@ -58,10 +66,10 @@ Load lại danh sách tab đã lưu cho workspace mới từ localStorage.
 ## Batch Operations
 
 ### `closeAll()`
-Đóng tất cả tab. Nếu có draft chưa save → hiện xác nhận.
+Đóng tất cả tab KHÔNG ĐƯỢC GHIM. Nếu có draft chưa save → hiện xác nhận.
 
 ### `closeOthers(path)`
-Đóng tất cả tab trừ `path`. Hữu ích qua context menu.
+Đóng tất cả tab trừ `path` và trừ các tab đang được ghim.
 
 ### `closeSelected()`
 Đóng tất cả tab đang được chọn. Tương đương Mod+W khi có multi-select.
@@ -88,4 +96,4 @@ TabsModule.getSelectedFiles() // → string[]
 
 ---
 
-*Document — 2026-04-26*
+*Document — 2026-04-27*

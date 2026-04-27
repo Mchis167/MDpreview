@@ -97,30 +97,10 @@
   opacity: 0.9;
 }
 
-.ctx-shortcut kbd {
-  font-size: var(--ds-font-sm);
-  font-weight: 700;
-  font-family: var(--ds-font-family-text);
-  background: var(--ds-hover-md);
-  color: var(--ds-text-secondary);
-  border: 1px solid var(--ds-border-subtle);
-  border-radius: var(--ds-radius-chip);
-  padding: 1px var(--ds-space-xs);
-  min-width: 20px;
-  height: 20px;
-  text-align: center;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--ds-transition-fast);
-}
-
-.ctx-item:hover .ctx-shortcut kbd {
+.ctx-item:hover .ds-kbd {
   background: var(--ds-hover-lg);
   color: var(--ds-text-inverse);
   border-color: var(--ds-border-strong);
-  transform: translateY(-1px);
 }
 
 .ctx-divider {

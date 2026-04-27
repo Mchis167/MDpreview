@@ -36,7 +36,7 @@ class TreeItemComponent {
         const isRenaming = node.path === this.state.renamingPath;
 
         const itemEl = document.createElement('div');
-        itemEl.className = `tree-item ${node.type === 'directory' ? 'tree-item-directory' : 'z'} ${isActive ? 'active' : ''} ${isSelected ? 'selected' : ''} ${isRenaming ? 'renaming' : ''}`;
+        itemEl.className = `tree-item ${node.type === 'directory' ? 'tree-item-directory' : ''} ${isActive ? 'active' : ''} ${isSelected ? 'selected' : ''} ${isRenaming ? 'renaming' : ''} ${node.isHidden ? 'is-hidden' : ''}`.trim();
         itemEl.style.setProperty('--stagger', idx);
         itemEl.dataset.path = node.path;
 

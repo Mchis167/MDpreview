@@ -13,6 +13,7 @@
 @import 'design-system/atoms/tooltip.css';
 @import 'design-system/atoms/switch-toggle.css';
 @import 'design-system/atoms/textarea.css';
+@import 'design-system/atoms/kbd.css';
 
 /* ── Molecules ──────────────────────────────────────────── */
 @import 'design-system/molecules/workspace-switcher.css';
@@ -24,6 +25,9 @@
 @import 'design-system/molecules/sidebar-base.css';
 @import 'design-system/molecules/setting-toggle-item.css';
 @import 'design-system/molecules/menu-shield.css';
+@import 'design-system/molecules/setting-row.css';
+@import 'design-system/molecules/scroll-container.css';
+@import 'design-system/molecules/tab-preview.css';
 
 /* ── Organisms ──────────────────────────────────────────── */
 @import 'design-system/organisms/sidebar-left.css';
@@ -38,3 +42,4 @@
 @import 'design-system/organisms/modals-misc.css';
 @import 'design-system/organisms/editor.css';
 @import 'design-system/organisms/markdown.css';
+@import 'design-system/organisms/search-palette.css';
