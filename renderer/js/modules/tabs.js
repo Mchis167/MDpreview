@@ -49,14 +49,7 @@ const TabsModule = (function () {
           AppState.onModeChange('draft');
         }
       },
-      onToggleSidebar: () => {
-        const sidebarWrap = document.getElementById('sidebar-left-wrap');
-        if (sidebarWrap) {
-          const nowCollapsed = sidebarWrap.classList.toggle('sidebar-collapsed');
-          localStorage.setItem('mdpreview_sidebar_left_collapsed', nowCollapsed);
-          updateSidebarToggleIcon(nowCollapsed);
-        }
-      },
+      onToggleSidebar: () => toggleSidebar(),
       // New: Context menu actions
       onCloseOthers: (path) => closeOthers(path),
       onCloseAll: () => closeAll(),
@@ -128,8 +121,20 @@ const TabsModule = (function () {
     }
   }
 
+  function toggleSidebar() {
+    const sidebarWrap = document.getElementById('sidebar-left-wrap');
+    if (sidebarWrap) {
+      const nowCollapsed = sidebarWrap.classList.toggle('sidebar-collapsed');
+      localStorage.setItem('mdpreview_sidebar_left_collapsed', nowCollapsed);
+      updateSidebarToggleIcon(nowCollapsed);
+      return nowCollapsed;
+    }
+    return false;
+  }
+
   // Exposed global for toolbar.js to call if needed (fallback)
   window.updateSidebarToggleIcon = updateSidebarToggleIcon;
+  window.toggleSidebar = toggleSidebar;
 
   function saveToStorage() {
     if (typeof AppState === 'undefined' || !AppState.currentWorkspace) return;
@@ -579,6 +584,7 @@ const TabsModule = (function () {
     pin,
     unpin,
     togglePin,
+    toggleSidebar,
     syncSelectionFromTree,
     getActive: () => state.activeFile,
     getOpenFiles: () => state.openFiles,

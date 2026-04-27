@@ -17,8 +17,8 @@
 }
 
 .ctx-item {
-  padding: var(--ds-space-sm) var(--ds-space-md);
-  font-size: var(--ds-font-md);
+  padding: var(--ds-space-xs) var(--ds-space-md);
+  font-size: var(--ds-font-sm);
   font-weight: 500;
   color: var(--ds-text-secondary);
   border-radius: calc(var(--ds-radius-panel) - var(--ds-space-xs));

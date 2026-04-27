@@ -261,9 +261,17 @@ const CollectModule = (() => {
   }
 
   function removeCollectMode() {
-    if (trigger) trigger.classList.remove('show');
+    if (trigger) {
+      trigger.classList.remove('show');
+      trigger.style.display = 'none';
+    }
     document.removeEventListener('mouseup', _handleSelection);
     document.removeEventListener('keyup', _handleSelection);
+    
+    // Clear selection to avoid re-triggering accidentally
+    if (window.getSelection) {
+      window.getSelection().removeAllRanges();
+    }
     
     const sidebar = RightSidebar.getInstance();
     if (sidebar) sidebar.close();
@@ -290,6 +298,7 @@ const CollectModule = (() => {
     const lastRect = rects[rects.length - 1];
     
     if (trigger) {
+      trigger.style.display = 'flex'; // Restore if hidden by removeCollectMode
       trigger.style.left = `${lastRect.right + 5}px`;
       trigger.style.top = `${lastRect.bottom + 5}px`;
 

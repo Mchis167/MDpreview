@@ -60,6 +60,23 @@ class MarkdownViewerComponent {
 
       this.mount.innerHTML = '';
       
+      // Update Secondary Toolbar visibility
+      if (window.EditToolbarComponent) {
+        const toolbar = window.EditToolbarComponent.getInstance();
+        if (this.state.mode === 'edit') {
+          toolbar.show({
+            onAction: (action) => {
+              if (window.EditorModule) window.EditorModule.applyAction(action);
+            },
+            onSave: () => this.activeComponent && this.activeComponent._save && this.activeComponent._save(),
+            onCancel: () => this.activeComponent && this.activeComponent._handleCancel && this.activeComponent._handleCancel(),
+            onHelp: () => window.MarkdownHelperComponent && window.MarkdownHelperComponent.open()
+          });
+        } else {
+          toolbar.hide();
+        }
+      }
+      
       switch(this.state.mode) {
         case 'read':
         case 'comment':
@@ -216,10 +233,7 @@ class MarkdownEditor {
     });
     textarea.value = this.content;
     
-    const toolbar = this._createToolbar();
-    
     container.appendChild(textarea);
-    container.appendChild(toolbar);
     this.mount.appendChild(container);
 
     // Initialize Editor Logic
@@ -239,89 +253,6 @@ class MarkdownEditor {
       window.MarkdownLogicService.syncCursor(textarea, ctx);
       window.AppState.lastSyncContext = null;
     }
-  }
-
-  _createToolbar() {
-    const wrap = DesignSystem.createElement('div', 'edit-toolbar-container');
-    const toolbar = DesignSystem.createElement('div', 'edit-toolbar');
-
-    // Group 1: Help
-    const groupHelp = this._createGroup([
-      { id: 'edit-help-btn', icon: 'help-circle', title: 'Markdown Help', onClick: () => window.MarkdownHelperComponent && window.MarkdownHelperComponent.open() }
-    ]);
-    toolbar.appendChild(groupHelp);
-    toolbar.appendChild(DesignSystem.createElement('div', 'edit-divider'));
-
-    // Group 2: Typography
-    const groupTypography = this._createGroup([
-      { action: 'h', icon: 'heading', title: 'Heading' },
-      { action: 'b', icon: 'bold', title: 'Bold' },
-      { action: 'i', icon: 'italic', title: 'Italic' },
-      { action: 's', icon: 'strikethrough', title: 'Strikethrough' }
-    ]);
-    toolbar.appendChild(groupTypography);
-    toolbar.appendChild(DesignSystem.createElement('div', 'edit-divider'));
-
-    // Group 3: Content
-    const groupContent = this._createGroup([
-      { action: 'q', icon: 'quote', title: 'Quote' },
-      { action: 'l', icon: 'link', title: 'Link' },
-      { action: 'img', icon: 'image', title: 'Image' },
-      { action: 'hr', icon: 'minus', title: 'Divider' }
-    ]);
-    toolbar.appendChild(groupContent);
-    toolbar.appendChild(DesignSystem.createElement('div', 'edit-divider'));
-
-    // Group 4: Lists
-    const groupLists = this._createGroup([
-      { action: 'ul', icon: 'list', title: 'Unordered List' },
-      { action: 'ol', icon: 'list-ordered', title: 'Numbered List' },
-      { action: 'tl', icon: 'check-square', title: 'Task List' }
-    ]);
-    toolbar.appendChild(groupLists);
-    toolbar.appendChild(DesignSystem.createElement('div', 'edit-divider'));
-
-    // Group 5: Advanced
-    const groupAdvanced = this._createGroup([
-      { action: 'c', icon: 'code', title: 'Inline Code' },
-      { action: 'cb', icon: 'terminal', title: 'Code Block' },
-      { action: 'tb', icon: 'table', title: 'Table' }
-    ]);
-    toolbar.appendChild(groupAdvanced);
-    toolbar.appendChild(DesignSystem.createElement('div', 'edit-divider'));
-
-    // Final Group: Actions
-    const groupActions = DesignSystem.createElement('div', 'edit-button-group');
-    const cancelBtn = DesignSystem.createButton({ label: 'Cancel', variant: 'ghost', onClick: () => this._handleCancel() });
-    const saveBtn = DesignSystem.createButton({ label: 'Save', variant: 'primary-pill', onClick: () => this._save() });
-    
-    groupActions.appendChild(cancelBtn);
-    groupActions.appendChild(saveBtn);
-    toolbar.appendChild(groupActions);
-
-    wrap.appendChild(toolbar);
-    return wrap;
-  }
-
-  _createGroup(items) {
-    const group = DesignSystem.createElement('div', 'edit-action-group');
-    items.forEach(item => {
-      const btn = DesignSystem.createElement('div', 'edit-tool-btn', { 
-        title: item.title,
-        'data-action': item.action || '',
-        html: DesignSystem.getIcon(item.icon)
-      });
-      if (item.id) btn.id = item.id;
-      if (item.onClick) {
-        btn.onclick = item.onClick;
-      } else {
-        btn.onclick = () => {
-          if (window.EditorModule) window.EditorModule.applyAction(item.action);
-        };
-      }
-      group.appendChild(btn);
-    });
-    return group;
   }
 
   _switchTo(mode) {

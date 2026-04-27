@@ -14,29 +14,6 @@
   display: none;
 }
 
-.footer-icon-btn {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--ds-radius-sm);
-  color: var(--ds-text-tertiary);
-  transition: all var(--ds-transition-fast);
-}
-
-.footer-icon-btn:hover {
-  background: var(--ds-layer-subtle-hover);
-  color: var(--ds-text-primary);
-}
-
-.modal-toolbar-divider {
-  width: 1px;
-  height: 16px;
-  background: var(--ds-border-default);
-  margin: 0 var(--ds-space-xs);
-}
-
 /* ── Toast Notification ── */
 .toast-container {
   position: fixed;

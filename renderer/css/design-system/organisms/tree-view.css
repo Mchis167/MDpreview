@@ -221,3 +221,18 @@
   display: block;
   pointer-events: none;
 }
+
+/* ── Inline Rename ── */
+.inline-rename-input {
+  background: var(--ds-surface-overlay);
+  border: 1.5px solid var(--ds-accent);
+  color: var(--ds-text-primary);
+  border-radius: var(--ds-radius-sm);
+  padding: 4px 8px;
+  font-size: 13px;
+  width: calc(100% - 20px);
+  outline: none;
+  font-family: inherit;
+  margin-left: 2px;
+  box-shadow: 0 0 0 4px rgba(var(--ds-accent-rgb), 0.1);
+}

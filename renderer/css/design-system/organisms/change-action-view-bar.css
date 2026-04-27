@@ -4,11 +4,11 @@
 
 .ds-change-action-view-bar-container {
   position: absolute;
-  top: 60px;
+  bottom: var(--ds-space-lg);
   left: 0;
   right: 0;
   width: 100%;
-  z-index: 1000;
+  z-index: var(--ds-z-index-overlay);
   display: none;
   justify-content: center;
   align-items: center;
@@ -16,22 +16,26 @@
 }
 
 .ds-change-action-view-bar {
+  --_bar-radius: var(--ds-radius-surface);
+  --_bar-padding: var(--ds-space-xs);
   display: flex;
   align-items: center;
   background: var(--ds-bg-toolbar);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  border-radius: var(--ds-radius-shell);
-  border: 1px solid var(--ds-border-strong);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(var(--ds-blur-lg));
+  backdrop-filter: blur(var(--ds-blur-lg));
+  border-radius: var(--_bar-radius);
+  border: 1px solid var(--ds-border-xstrong);
+  box-shadow: var(--ds-shadow-md);
   pointer-events: auto;
-  animation: toolbarSlideDown 0.5s var(--ds-ease-spring);
+  animation: toolbarSlideUp var(--ds-transition-slow) var(--ds-ease-spring);
 }
 
 .ds-toolbar-section-left {
+  --_section-radius: calc(var(--_bar-radius) - var(--_bar-padding));
   display: flex;
-  align-items: center;
-  margin: 5px;
+  align-items: stretch;
+  align-self: stretch;
+  margin: var(--_bar-padding);
 }
 
 .ds-toolbar-divider {
@@ -41,17 +45,23 @@
 }
 
 .ds-toolbar-buttons {
+  --_btn-radius: calc(var(--_bar-radius) - var(--_bar-padding));
   display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px;
+  align-items: stretch;
+  align-self: stretch;
+  gap: var(--ds-space-xs);
+  padding: var(--_bar-padding);
+}
+
+.ds-toolbar-buttons>* {
+  height: 100%;
 }
 
 
-@keyframes toolbarSlideDown {
+@keyframes toolbarSlideUp {
   from {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(20px);
   }
 
   to {

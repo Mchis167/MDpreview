@@ -45,6 +45,11 @@ Ghi lại các quyết định thiết kế và kỹ thuật quan trọng trong 
 | 2026-04-27 | [20260427-smart-button-spacing-logic.md](20260427-smart-button-spacing-logic.md) | Tự động hóa khoảng cách nút qua logic :only-child | accepted |
 | 2026-04-27 | [20260427-search-palette-height-logic.md](20260427-search-palette-height-logic.md) | Kiến trúc dãn nở chiều cao và tích hợp phím tắt cho Search Palette | accepted |
 | 2026-04-27 | [20260427-command-palette-evolution.md](20260427-command-palette-evolution.md) | Chiến lược tiến hóa Command Palette và tìm kiếm ngữ nghĩa | accepted |
+| 2026-04-28 | [20260428-adaptive-concentric-radius.md](20260428-adaptive-concentric-radius.md) | Chiến lược bo góc đồng tâm và thích ứng cho nested components | accepted |
+| 2026-04-28 | [20260428-edit-toolbar-layout-evolution.md](20260428-edit-toolbar-layout-evolution.md) | Tiến hóa Layout và chuẩn hóa Icon Scaling cho Edit Toolbar | accepted |
+| 2026-04-28 | [20260428-optimized-file-loading.md](20260428-optimized-file-loading.md) | Tối ưu hóa logic tải file và ổn định UI | accepted |
+| 2026-04-28 | [20260428-centralized-shortcut-strategy.md](20260428-centralized-shortcut-strategy.md) | Chiến lược Phím tắt Tập trung và Đánh chặn Toàn cục | accepted |
+
 
 ---
 

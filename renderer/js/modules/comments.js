@@ -451,11 +451,19 @@ const CommentsModule = (() => {
   }
 
   function removeCommentMode() {
-    if (floatingTrigger) floatingTrigger.classList.remove('show');
+    if (floatingTrigger) {
+      floatingTrigger.classList.remove('show');
+      floatingTrigger.style.display = 'none';
+    }
     document.removeEventListener('mouseup', _handleSelection);
     document.removeEventListener('keyup', _handleSelection);
     _clearHighlights();
     _hideForm();
+    
+    // Clear selection to avoid re-triggering accidentally
+    if (window.getSelection) {
+      window.getSelection().removeAllRanges();
+    }
     
     const sidebar = RightSidebar.getInstance();
     if (sidebar) sidebar.close();
@@ -488,6 +496,7 @@ const CommentsModule = (() => {
       if (left < 5) left = 5;
       if (top < 5) top = 5;
       if (top + 40 > window.innerHeight) top = window.innerHeight - 45;
+      floatingTrigger.style.display = 'flex'; // Restore if hidden by removeCommentMode
       floatingTrigger.style.left = `${left}px`;
       floatingTrigger.style.top  = `${top}px`;
       floatingTrigger.classList.add('show');

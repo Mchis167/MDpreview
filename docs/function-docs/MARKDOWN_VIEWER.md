@@ -67,20 +67,11 @@ Patch HTML khi content thay đổi mà không đổi mode — tránh re-mount v�
 ### `render()`
 Render editor layout:
 ```
-[Toolbar]
-[Textarea]
-[Save] [Cancel]
+[EditToolbarComponent] ← Managed independently (Organism)
+[Textarea]             ← Fixed height, scrollable
 ```
 
-Gọi `EditorModule.bindToElement(textarea)` sau khi mount.
-
-### `_createToolbar()`
-Tạo toolbar với các group:
-- **Typography**: heading, bold, italic, strikethrough
-- **Content**: link, image, quote, divider
-- **Lists**: bullet list, numbered list, checkbox
-- **Advanced**: code inline, code block, table
-- **Actions**: markdown helper, word count
+Gọi `EditorModule.bindToElement(textarea)` sau khi mount. `EditToolbarComponent` được kích hoạt thông qua `MarkdownViewer._setupToolbar()`.
 
 ### `destroy()`
 Gọi `EditorModule.unbind()` để dọn dẹp event listeners trước khi component bị remove.
@@ -139,4 +130,4 @@ Mỗi component tự nullify `activeInstance` qua `onClose` callback khi bị đ
 
 ---
 
-*Document — 2026-04-26*
+*Document — 2026-04-28*

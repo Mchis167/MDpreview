@@ -37,18 +37,22 @@ Lưu/đọc mode riêng biệt cho từng file trong localStorage. Dùng để k
 
 ---
 
-## `loadFile(filePath)`
+## `loadFile(filePath, options = {})`
 
 Hàm trung tâm — được gọi mỗi khi người dùng mở một file.
 
 **Flow:**
-1. **Dirty check** — Nếu file hiện tại đang có chỉnh sửa chưa lưu → hỏi người dùng
-2. **Race condition guard** — Dùng "ticket" để hủy load cũ nếu người dùng bấm file khác nhanh
-3. **Skeleton state** — Hiển thị loading skeleton trong khi fetch
+1. **Dirty check** — Nếu file hiện tại đang có chỉnh sửa chưa lưu → hỏi người dùng. **Quan trọng**: Bước này hiện được thực hiện trươc khi thay đổi bất kỳ trạng thái UI nào (như hiện skeleton).
+2. **Race condition guard** — Dùng "ticket" để hủy load cũ nếu người dùng bấm file khác nhanh.
+3. **Skeleton state** — Hiển thị loading skeleton trong khi fetch (trừ khi `options.silent = true`).
 4. **Fetch content** — `GET /api/file?path=...`
-5. **Draft check** — Nếu có draft → load draft thay vì file gốc
-6. **Render** — Gọi `MarkdownViewer.setState()` với content và mode
-7. **Side effects** — Load comments, collect items, cập nhật toolbar, highlight tree
+5. **Draft check** — Nếu có draft → load draft thay vì file gốc.
+6. **Render** — Gọi `MarkdownViewer.setState()` với content và mode.
+7. **Side effects** — Load comments, collect items, highlight tree, cập nhật trạng thái Tab.
+
+**Tham số `options`:**
+- `silent`: Nếu `true`, bỏ qua việc hiển thị skeleton. Dùng cho các bản cập nhật nội dung ngầm (socket `file-changed`).
+- `force`: Buộc tải lại ngay cả khi file đang active.
 
 **Quan trọng:** Luôn dùng `loadFile()` thay vì gọi `MarkdownViewer.setState()` trực tiếp để đảm bảo dirty check và side effects chạy đúng.
 
@@ -60,7 +64,7 @@ Kết nối Socket.IO tới server để nhận real-time events:
 
 | Event | Hành động |
 |---|---|
-| `file-changed` | Reload file nếu đang mở |
+| `file-changed` | Reload file nếu đang mở (dùng silent load để tránh flash skeleton) |
 | `tree-changed` | Reload file tree |
 | `file-deleted` | Đóng tab nếu đang mở |
 | `workspace-changed` | Đồng bộ workspace |
@@ -73,28 +77,23 @@ Hiển thị toast notification tự ẩn sau 4 giây. `type` có thể là `suc
 
 ---
 
-## Global Keyboard Shortcuts (`toolbar.js` — `initGlobalShortcuts()`)
+## Global Keyboard Shortcuts (`ShortcutService`)
 
-Các shortcut ở cấp app được đăng ký tập trung tại `toolbar.js`. Sau refactor, toolbar **không còn tự quản lý state** của Settings/Shortcuts — chỉ delegate sang component tương ứng:
+Các phím tắt toàn cục được quản lý tập trung qua `ShortcutService`. Tại `app.js`, ứng dụng định nghĩa các handler thực thi và đăng ký chúng với Service:
 
-| Shortcut | Hành động |
-|---|---|
-| **Mod+,** | `SettingsComponent.toggle()` |
-| **Mod+/** | `ShortcutsComponent.toggle()` |
-| **Mod+F** | Focus search |
-| **Mod+O** | `WorkspaceModule.openPanel()` |
-| **Mod+S** | Save file |
-| **Mod+B** | Toggle left sidebar |
-| **Mod+W** | Đóng tab active / selected |
-| **Mod+Shift+W** | Đóng tất cả tab |
-| **Mod+A** | Select all tabs |
-| **Mod+↑/↓** | Scroll to top/bottom |
-| **1/2/3/4** | Chuyển mode read/edit/comment/collect |
-| **Mod+[** | Collapse All Folders (Sidebar) |
-| **Shift+Mod+[** | Collapse Other Folders (Sidebar) |
-| **F11 / Cmd+Ctrl+F** | Fullscreen toggle |
+| Shortcut | ID Hành động | Logic thực thi |
+|---|---|---|
+| **Mod+,** | `open-settings` | `SettingsComponent.toggle()` |
+| **Mod+/** | `keyboard-shortcuts` | `ShortcutsComponent.toggle()` |
+| **Mod+P** | `focus-search` | `SearchPalette.show()` |
+| **Mod+O** | `workspace-picker` | `WorkspaceModule.openPanel()` |
+| **Mod+S** | `save-file` | `EditorModule.save()` |
+| **Mod+B** | `toggle-sidebar` | `TabsModule.toggleSidebar()` |
+| **Mod+W** | `close-active-tab` | `TabsModule.closeSelected()` |
+| **Mod+A** | `select-all-tabs` | `TabsModule.selectAll()` |
+| **1 / 2 / 3 / 4** | `mode-X` | `AppState.onModeChange(mode)` |
 
-> Phía gọi (toolbar) không được tự lưu biến `isOpen` cho Settings hay Shortcuts — toàn bộ state do component tự quản lý qua Singleton Pattern. Xem [`docs/decisions/20260426-singleton-ui-pattern.md`](../decisions/20260426-singleton-ui-pattern.md).
+> **Cơ chế:** Phím tắt được đánh chặn sớm ở **Capture Phase**. Khi người dùng đang gõ văn bản, chỉ các phím kết hợp với `Mod` hoặc `Alt` mới được thực thi để tránh xung đột với việc nhập liệu. Xem [`SHORTCUT_SERVICE.md`](SHORTCUT_SERVICE.md).
 
 ---
 
@@ -120,4 +119,4 @@ Thứ tự khởi động nghiêm ngặt — **không thay đổi thứ tự**:
 
 ---
 
-*Document — 2026-04-27*
+*Document — 2026-04-28*

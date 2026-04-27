@@ -315,6 +315,15 @@ class SettingsComponent {
   }
 
   /**
+   * Explicitly hide the Settings UI
+   */
+  static hide() {
+    if (this.activeInstance) {
+      this.activeInstance.close();
+    }
+  }
+
+  /**
    * Open the Settings UI in a floating popover (No backdrop)
    */
   static open() {

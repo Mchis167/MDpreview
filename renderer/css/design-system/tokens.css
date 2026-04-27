@@ -9,188 +9,190 @@
 
 :root {
 
-  /* ════════════════════════════════════════════════════════
+   /* ════════════════════════════════════════════════════════
      TIER 1 — PRIMITIVES
      ════════════════════════════════════════════════════════ */
 
-  /* ── Brand Colors ──────────────────────────────────────── */
-  --ds-primitive-orange: #ffbf48;
-  --ds-primitive-green: #22c55e;
-  --ds-primitive-red: #ff453a;
-  --ds-primitive-blue: #1E90FF;
+   /* ── Brand Colors ──────────────────────────────────────── */
+   --ds-primitive-orange: #ffbf48;
+   --ds-primitive-green: #22c55e;
+   --ds-primitive-red: #ff453a;
+   --ds-primitive-blue: #1E90FF;
 
-  /* RGB channels for alpha composition */
-  --ds-primitive-orange-rgb: 255, 191, 72;
-  --ds-primitive-green-rgb: 34, 197, 94;
-  --ds-primitive-red-rgb: 255, 69, 58;
-  --ds-primitive-blue-rgb: 30, 144, 255;
+   /* RGB channels for alpha composition */
+   --ds-primitive-orange-rgb: 255, 191, 72;
+   --ds-primitive-green-rgb: 34, 197, 94;
+   --ds-primitive-red-rgb: 255, 69, 58;
+   --ds-primitive-blue-rgb: 30, 144, 255;
 
-  /* ── Base Backgrounds ──────────────────────────────────── */
-  --ds-primitive-base: #151515;
-  --ds-primitive-surface: #1a1a1a;
-  --ds-primitive-deep: #111;
-  --ds-primitive-white: #fff;
-  --ds-primitive-black: #000;
+   /* ── Base Backgrounds ──────────────────────────────────── */
+   --ds-primitive-base: #151515;
+   --ds-primitive-surface: #1a1a1a;
+   --ds-primitive-deep: #111;
+   --ds-primitive-white: #fff;
+   --ds-primitive-black: #000;
 
-  /* ── Spacing Scale ─────────────────────────────────────── */
-  --ds-space-xs: 4px;
-  --ds-space-sm: 8px;
-  --ds-space-md: 12px;
-  --ds-space-lg: 16px;
-  --ds-space-xl: 24px;
-  --ds-space-xxl: 32px;
+   /* ── Spacing Scale ─────────────────────────────────────── */
+   --ds-space-2xs: 2px;
+   --ds-space-xs: 4px;
+   --ds-space-sm: 8px;
+   --ds-space-md: 12px;
+   --ds-space-lg: 16px;
+   --ds-space-xl: 24px;
+   --ds-space-xxl: 32px;
 
-  /* ── Radius Scale (Primitives) ─────────────────────────── */
-  --ds-radius-xs: 4px;
-  --ds-radius-sm: 6px;
-  --ds-radius-md: 8px;
-  --ds-radius-lg: 12px;
-  --ds-radius-xl: 16px;
-  --ds-radius-xxl: 24px;
-  --ds-radius-full: 999px;
+   /* ── Radius Scale (Primitives) ─────────────────────────── */
+   --ds-radius-xs: 4px;
+   --ds-radius-sm: 6px;
+   --ds-radius-md: 8px;
+   --ds-radius-lg: 12px;
+   --ds-radius-xl: 16px;
+   --ds-radius-xxl: 24px;
+   --ds-radius-full: 999px;
 
-  /* ── Typography ────────────────────────────────────────── */
-  --ds-font-family-text: var(--font-text, 'Inter'), -apple-system, BlinkMacSystemFont, sans-serif;
-  --ds-font-family-code: var(--font-code, 'Roboto Mono'), ui-monospace, SFMono-Regular, monospace;
+   /* ── Typography ────────────────────────────────────────── */
+   --ds-font-family-text: var(--font-text, 'Inter'), -apple-system, BlinkMacSystemFont, sans-serif;
+   --ds-font-family-code: var(--font-code, 'Roboto Mono'), ui-monospace, SFMono-Regular, monospace;
 
-  --ds-font-xs: 11px;
-  --ds-font-sm: 12px;
-  --ds-font-md: 13px;
-  --ds-font-base: 14px;
-  --ds-font-lg: 15px;
-  --ds-font-xl: 18px;
+   --ds-font-xs: 11px;
+   --ds-font-sm: 12px;
+   --ds-font-md: 13px;
+   --ds-font-base: 14px;
+   --ds-font-lg: 15px;
+   --ds-font-xl: 18px;
 
-  /* ── Easing ────────────────────────────────────────────── */
-  --ds-ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
-  --ds-ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ds-ease-out: cubic-bezier(0.4, 0, 0.2, 1);
+   /* ── Easing ────────────────────────────────────────────── */
+   --ds-ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+   --ds-ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
+   --ds-ease-out: cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* ── Blur Scale ────────────────────────────────────────── */
-  --ds-blur-xs: 6px;
-  --ds-blur-sm: 8px;
-  --ds-blur-md: 12px;
-  --ds-blur-lg: 20px;
-  --ds-blur-xl: 32px;
+   /* ── Blur Scale ────────────────────────────────────────── */
+   --ds-blur-xs: 6px;
+   --ds-blur-sm: 8px;
+   --ds-blur-md: 12px;
+   --ds-blur-lg: 20px;
+   --ds-blur-xl: 32px;
 
 
-  /* ════════════════════════════════════════════════════════
+   /* ════════════════════════════════════════════════════════
      TIER 2 — ALPHA PALETTE
      Pre-built opacity variants. Use these everywhere instead
      of writing rgba() by hand.
      ════════════════════════════════════════════════════════ */
 
-  /* ── White alpha (for borders, layers, text tints) ─────── */
-  --ds-white-a01: rgba(255, 255, 255, 0.01);
-  --ds-white-a02: rgba(255, 255, 255, 0.02);
-  --ds-white-a03: rgba(255, 255, 255, 0.03);
-  --ds-white-a04: rgba(255, 255, 255, 0.04);
-  --ds-white-a05: rgba(255, 255, 255, 0.05);
-  --ds-white-a08: rgba(255, 255, 255, 0.08);
-  --ds-white-a10: rgba(255, 255, 255, 0.10);
-  --ds-white-a12: rgba(255, 255, 255, 0.12);
-  --ds-white-a20: rgba(255, 255, 255, 0.20);
-  --ds-white-a30: rgba(255, 255, 255, 0.30);
-  --ds-white-a40: rgba(255, 255, 255, 0.40);
-  --ds-white-a60: rgba(255, 255, 255, 0.60);
-  --ds-white-a90: rgba(255, 255, 255, 0.90);
+   /* ── White alpha (for borders, layers, text tints) ─────── */
+   --ds-white-a01: rgba(255, 255, 255, 0.01);
+   --ds-white-a02: rgba(255, 255, 255, 0.02);
+   --ds-white-a03: rgba(255, 255, 255, 0.03);
+   --ds-white-a04: rgba(255, 255, 255, 0.04);
+   --ds-white-a05: rgba(255, 255, 255, 0.05);
+   --ds-white-a08: rgba(255, 255, 255, 0.08);
+   --ds-white-a10: rgba(255, 255, 255, 0.10);
+   --ds-white-a12: rgba(255, 255, 255, 0.12);
+   --ds-white-a20: rgba(255, 255, 255, 0.20);
+   --ds-white-a30: rgba(255, 255, 255, 0.30);
+   --ds-white-a40: rgba(255, 255, 255, 0.40);
+   --ds-white-a60: rgba(255, 255, 255, 0.60);
+   --ds-white-a90: rgba(255, 255, 255, 0.90);
 
-  /* ── Black alpha (for overlays, shadows) ───────────────── */
-  --ds-black-a05: rgba(0, 0, 0, 0.05);
-  --ds-black-a15: rgba(0, 0, 0, 0.15);
-  --ds-black-a20: rgba(0, 0, 0, 0.20);
-  --ds-black-a30: rgba(0, 0, 0, 0.30);
-  --ds-black-a35: rgba(0, 0, 0, 0.35);
-  --ds-black-a40: rgba(0, 0, 0, 0.40);
-  --ds-black-a50: rgba(0, 0, 0, 0.50);
-  --ds-black-a80: rgba(0, 0, 0, 0.80);
-  --ds-black-a90: rgba(0, 0, 0, 0.90);
+   /* ── Black alpha (for overlays, shadows) ───────────────── */
+   --ds-black-a05: rgba(0, 0, 0, 0.05);
+   --ds-black-a15: rgba(0, 0, 0, 0.15);
+   --ds-black-a20: rgba(0, 0, 0, 0.20);
+   --ds-black-a30: rgba(0, 0, 0, 0.30);
+   --ds-black-a35: rgba(0, 0, 0, 0.35);
+   --ds-black-a40: rgba(0, 0, 0, 0.40);
+   --ds-black-a50: rgba(0, 0, 0, 0.50);
+   --ds-black-a80: rgba(0, 0, 0, 0.80);
+   --ds-black-a90: rgba(0, 0, 0, 0.90);
 
-  /* ── Accent alpha (for status backgrounds, highlights) ─── */
-  --ds-orange-a08: rgba(var(--ds-primitive-orange-rgb), 0.08);
-  --ds-orange-a15: rgba(var(--ds-primitive-orange-rgb), 0.15);
-  --ds-orange-a30: rgba(var(--ds-primitive-orange-rgb), 0.30);
+   /* ── Accent alpha (for status backgrounds, highlights) ─── */
+   --ds-orange-a08: rgba(var(--ds-primitive-orange-rgb), 0.08);
+   --ds-orange-a15: rgba(var(--ds-primitive-orange-rgb), 0.15);
+   --ds-orange-a30: rgba(var(--ds-primitive-orange-rgb), 0.30);
 
-  --ds-green-a15: rgba(var(--ds-primitive-green-rgb), 0.15);
-  --ds-green-a20: rgba(var(--ds-primitive-green-rgb), 0.20);
-  --ds-green-a40: rgba(var(--ds-primitive-green-rgb), 0.40);
+   --ds-green-a15: rgba(var(--ds-primitive-green-rgb), 0.15);
+   --ds-green-a20: rgba(var(--ds-primitive-green-rgb), 0.20);
+   --ds-green-a40: rgba(var(--ds-primitive-green-rgb), 0.40);
 
-  --ds-red-a08: rgba(var(--ds-primitive-red-rgb), 0.08);
-  --ds-red-a10: rgba(var(--ds-primitive-red-rgb), 0.10);
-  --ds-red-a15: rgba(var(--ds-primitive-red-rgb), 0.15);
-  --ds-red-a30: rgba(var(--ds-primitive-red-rgb), 0.30);
+   --ds-red-a08: rgba(var(--ds-primitive-red-rgb), 0.08);
+   --ds-red-a10: rgba(var(--ds-primitive-red-rgb), 0.10);
+   --ds-red-a15: rgba(var(--ds-primitive-red-rgb), 0.15);
+   --ds-red-a30: rgba(var(--ds-primitive-red-rgb), 0.30);
 
 
-  /* ════════════════════════════════════════════════════════
+   /* ════════════════════════════════════════════════════════
      TIER 3 — SEMANTIC
      Named by purpose. Always references Tier 1 or Tier 2.
      ════════════════════════════════════════════════════════ */
 
-  /* ── Surface Layers (Static Backgrounds) ────────── */
-  --ds-surface-main: var(--ds-glass-main);
-  --ds-surface-sidebar: var(--ds-glass-sidebar);
-  --ds-surface-overlay: var(--ds-primitive-deep);
-  --ds-surface-card: var(--ds-white-a02);
+   /* ── Surface Layers (Static Backgrounds) ────────── */
+   --ds-surface-main: var(--ds-glass-main);
+   --ds-surface-sidebar: var(--ds-glass-sidebar);
+   --ds-surface-overlay: var(--ds-primitive-deep);
+   --ds-surface-card: var(--ds-white-a02);
 
-  /* ── Interactive Layer Systems (Final Colors) ─── */
+   /* ── Interactive Layer Systems (Final Colors) ─── */
 
-  /* 1. Subtle System (Tree, List, Ghost Buttons) */
-  --ds-layer-subtle-default: transparent;
-  --ds-layer-subtle-hover: var(--ds-white-a02);
-  --ds-layer-subtle-selected: var(--ds-white-a03);
-  --ds-layer-subtle-active: var(--ds-white-a05);
-  --ds-layer-subtle-active-hover: var(--ds-white-08);
+   /* 1. Subtle System (Tree, List, Ghost Buttons) */
+   --ds-layer-subtle-default: transparent;
+   --ds-layer-subtle-hover: var(--ds-white-a02);
+   --ds-layer-subtle-selected: var(--ds-white-a03);
+   --ds-layer-subtle-active: var(--ds-white-a05);
+   --ds-layer-subtle-active-hover: var(--ds-white-08);
 
-  /* 2. Subtle Dark System (Alternative lists, dark ghost buttons) */
-  --ds-layer-subtle-dark-default: transparent;
-  --ds-layer-subtle-dark-hover: var(--ds-black-a05);
-  --ds-layer-subtle-dark-selected: var(--ds-black-a15);
-  --ds-layer-subtle-dark-active: var(--ds-black-a20);
+   /* 2. Subtle Dark System (Alternative lists, dark ghost buttons) */
+   --ds-layer-subtle-dark-default: transparent;
+   --ds-layer-subtle-dark-hover: var(--ds-black-a05);
+   --ds-layer-subtle-dark-selected: var(--ds-black-a15);
+   --ds-layer-subtle-dark-active: var(--ds-black-a20);
 
-  /* 3. Accent System (Primary Buttons, Active States) */
-  --ds-layer-accent-default: var(--ds-accent);
-  --ds-layer-accent-hover: var(--ds-accent-hover);
-  --ds-layer-accent-active: linear-gradient(var(--ds-black-a10), var(--ds-black-a10)), var(--ds-accent);
+   /* 3. Accent System (Primary Buttons, Active States) */
+   --ds-layer-accent-default: var(--ds-accent);
+   --ds-layer-accent-hover: var(--ds-accent-hover);
+   --ds-layer-accent-active: linear-gradient(var(--ds-black-a10), var(--ds-black-a10)), var(--ds-accent);
 
-  /* 4. Surface System (Cards, Workspace Switcher) */
-  --ds-layer-surface-default: var(--ds-surface-card);
-  --ds-layer-surface-hover: var(--ds-white-a08);
-  --ds-layer-surface-active: var(--ds-white-a12);
+   /* 4. Surface System (Cards, Workspace Switcher) */
+   --ds-layer-surface-default: var(--ds-surface-card);
+   --ds-layer-surface-hover: var(--ds-white-a08);
+   --ds-layer-surface-active: var(--ds-white-a12);
 
-  /* 5. Surface Dark System (Inverse/Dark interactive surfaces) */
-  --ds-layer-surface-dark-default: var(--ds-black-a05);
-  --ds-layer-surface-dark-hover: var(--ds-black-a15);
-  --ds-layer-surface-dark-active: var(--ds-black-a20);
+   /* 5. Surface Dark System (Inverse/Dark interactive surfaces) */
+   --ds-layer-surface-dark-default: var(--ds-black-a05);
+   --ds-layer-surface-dark-hover: var(--ds-black-a15);
+   --ds-layer-surface-dark-active: var(--ds-black-a20);
 
-  /* 6. Control System (Form Inputs) */
-  --ds-layer-control-default: var(--ds-black-a20);
-  --ds-layer-control-hover: var(--ds-black-a30);
-  --ds-layer-control-focus: var(--ds-black-a40);
+   /* 6. Control System (Form Inputs) */
+   --ds-layer-control-default: var(--ds-black-a20);
+   --ds-layer-control-hover: var(--ds-black-a30);
+   --ds-layer-control-focus: var(--ds-black-a40);
 
-  /* 7. Danger System (Delete Actions) */
-  --ds-layer-danger-default: transparent;
-  --ds-layer-danger-hover: var(--ds-red-a15);
-  --ds-layer-danger-active: var(--ds-red-a30);
+   /* 7. Danger System (Delete Actions) */
+   --ds-layer-danger-default: transparent;
+   --ds-layer-danger-hover: var(--ds-red-a15);
+   --ds-layer-danger-active: var(--ds-red-a30);
 
-  /* ── Backgrounds ────────────────────────────────────────── */
-  --ds-bg-base: var(--ds-primitive-base);
-  --ds-bg-backdrop: var(--ds-black-a40);
-  --ds-bg-popover-glass: var(--ds-white-a01);
+   /* ── Backgrounds ────────────────────────────────────────── */
+   --ds-bg-base: var(--ds-primitive-base);
+   --ds-bg-backdrop: var(--ds-black-a40);
+   --ds-bg-popover-glass: var(--ds-white-a01);
 
-  --ds-bg-toolbar: var(--ds-black-a50);
-  --ds-bg-toolbar-inner: var(--ds-white-a03);
+   --ds-bg-toolbar: var(--ds-black-a50);
+   --ds-bg-toolbar-inner: var(--ds-white-a03);
 
-  --ds-glass-sidebar: linear-gradient(166deg, var(--ds-black-a05) 0%, var(--ds-black-a20) 100%);
-  --ds-glass-main: linear-gradient(168deg, var(--ds-black-a20) 0%, var(--ds-black-a30) 100%);
-  --ds-glass-hover: var(--ds-white-a05);
+   --ds-glass-sidebar: linear-gradient(166deg, var(--ds-black-a05) 0%, var(--ds-black-a20) 100%);
+   --ds-glass-main: linear-gradient(168deg, var(--ds-black-a20) 0%, var(--ds-black-a30) 100%);
+   --ds-glass-hover: var(--ds-white-a05);
 
-  /* ── Borders ───────────────────────────────────────────── */
-  --ds-border-subtle: var(--ds-white-a04);
-  --ds-border-default: var(--ds-white-a05);
-  --ds-border-strong: var(--ds-white-a08);
-  --ds-border-selected: var(--ds-white-a30);
+   /* ── Borders ───────────────────────────────────────────── */
+   --ds-border-subtle: var(--ds-white-a04);
+   --ds-border-default: var(--ds-white-a05);
+   --ds-border-strong: var(--ds-white-a08);
+   --ds-border-xstrong: var(--ds-white-a12);
+   --ds-border-selected: var(--ds-white-a30);
 
-  /* ── Radius — Semantic Context Levels ──────────────────── */
-  /*
+   /* ── Radius — Semantic Context Levels ──────────────────── */
+   /*
    * 4 nesting levels. Use the level matching the component's
    * visual depth — not a fixed pixel size.
    *
@@ -201,58 +203,67 @@
    *  pill    → toggles, avatars, fully-rounded elements
    */
 
-  --ds-radius-shell: var(--ds-radius-xxl);
-  --ds-radius-surface: var(--ds-radius-xl);
-  --ds-radius-panel: var(--ds-radius-lg);
-  --ds-radius-widget: var(--ds-radius-md);
-  --ds-radius-chip: var(--ds-radius-xs);
-  --ds-radius-pill: var(--ds-radius-full);
+   --ds-radius-shell: var(--ds-radius-xxl);
+   --ds-radius-surface: var(--ds-radius-xl);
+   --ds-radius-panel: var(--ds-radius-lg);
+   --ds-radius-widget: var(--ds-radius-md);
+   --ds-radius-chip: var(--ds-radius-xs);
+   --ds-radius-pill: var(--ds-radius-full);
 
-  /* ── Radius — Inset Formula ────────────────────────────── */
-  --ds-radius-shell-inset: max(0px, var(--ds-radius-shell) - var(--ds-space-sm));
-  --ds-radius-surface-inset: max(0px, var(--ds-radius-surface) - var(--ds-space-md));
-  --ds-radius-panel-inset: max(0px, var(--ds-radius-panel) - var(--ds-space-sm));
-  --ds-radius-widget-inset: max(0px, var(--ds-radius-widget) - var(--ds-space-xs));
+   /* ── Radius — Inset Formula ────────────────────────────── */
+   --ds-radius-shell-inset: max(0px, var(--ds-radius-shell) - var(--ds-space-sm));
+   --ds-radius-surface-inset: max(0px, var(--ds-radius-surface) - var(--ds-space-md));
+   --ds-radius-panel-inset: max(0px, var(--ds-radius-panel) - var(--ds-space-sm));
+   --ds-radius-widget-inset: max(0px, var(--ds-radius-widget) - var(--ds-space-xs));
 
-  /* ── Text ──────────────────────────────────────────────── */
-  --ds-text-primary: var(--ds-white-a90);
-  --ds-text-secondary: var(--ds-white-a60);
-  --ds-text-tertiary: var(--ds-white-a40);
-  --ds-text-disabled: var(--ds-white-a20);
-  --ds-text-inverse: var(--ds-primitive-white);
-  --ds-text-on-accent: var(--ds-black-a90);
+   /* ── Text ──────────────────────────────────────────────── */
+   --ds-text-primary: var(--ds-white-a90);
+   --ds-text-secondary: var(--ds-white-a60);
+   --ds-text-tertiary: var(--ds-white-a40);
+   --ds-text-disabled: var(--ds-white-a20);
+   --ds-text-inverse: var(--ds-primitive-white);
+   --ds-text-on-accent: var(--ds-black-a90);
 
-  /* ── Accent ────────────────────────────────────────────── */
-  --ds-accent: var(--accent-color, var(--ds-primitive-orange));
-  --ds-accent-rgb: var(--accent-rgb, var(--ds-primitive-orange-rgb));
-  --ds-accent-hover: linear-gradient(var(--ds-white-a10), var(--ds-white-a10)), var(--ds-accent);
+   /* ── Accent ────────────────────────────────────────────── */
+   --ds-accent: var(--accent-color, var(--ds-primitive-orange));
+   --ds-accent-rgb: var(--accent-rgb, var(--ds-primitive-orange-rgb));
+   --ds-accent-hover: linear-gradient(var(--ds-white-a10), var(--ds-white-a10)), var(--ds-accent);
 
-  --ds-accent-green: var(--ds-primitive-green);
-  --ds-accent-red: var(--ds-primitive-red);
-  --ds-accent-blue: var(--ds-primitive-blue);
+   --ds-accent-green: var(--ds-primitive-green);
+   --ds-accent-red: var(--ds-primitive-red);
+   --ds-accent-blue: var(--ds-primitive-blue);
 
-  /* ── Status ────────────────────────────────────────────── */
-  --ds-status-success: var(--ds-primitive-green);
-  --ds-status-success-bg: var(--ds-green-a15);
-  --ds-status-danger: var(--ds-primitive-red);
-  --ds-status-danger-bg: var(--ds-red-a10);
-  --ds-status-warning: var(--ds-primitive-orange);
-  --ds-status-warning-bg: var(--ds-orange-a08);
+   /* ── Status ────────────────────────────────────────────── */
+   --ds-status-success: var(--ds-primitive-green);
+   --ds-status-success-bg: var(--ds-green-a15);
+   --ds-status-danger: var(--ds-primitive-red);
+   --ds-status-danger-bg: var(--ds-red-a10);
+   --ds-status-warning: var(--ds-primitive-orange);
+   --ds-status-warning-bg: var(--ds-orange-a08);
 
-  /* ── Shadows ───────────────────────────────────────────── */
-  --ds-shadow-sm: 0 2px 8px var(--ds-black-a20);
-  --ds-shadow-md: 0 8px 24px var(--ds-black-a35);
-  --ds-shadow-lg: 0 20px 40px var(--ds-black-a50);
-  --ds-shadow-lift: 0 20px 40px var(--ds-black-a30), 0 0 0 1px var(--ds-white-a10);
-  --ds-shadow-glow: 0 0 20px rgba(var(--ds-accent-rgb), 0.3);
+   /* ── Shadows ───────────────────────────────────────────── */
+   --ds-shadow-xs: 0 1px 2px var(--ds-black-a20);
+   --ds-shadow-sm: 0 2px 8px var(--ds-black-a20);
+   --ds-shadow-md: 0 8px 24px var(--ds-black-a35);
+   --ds-shadow-lg: 0 20px 40px var(--ds-black-a50);
+   --ds-shadow-xl: 0 32px 64px var(--ds-black-a80);
+   --ds-shadow-lift: 0 20px 40px var(--ds-black-a30), 0 0 0 1px var(--ds-white-a10);
+   --ds-shadow-glow: 0 0 20px rgba(var(--ds-accent-rgb), 0.3);
 
-  /* ── Blur ───────────────────────────────────────────── */
-  --ds-blur-sidebar: var(--ds-blur-xl);
-  --ds-blur-searchbox: var(--ds-blur-xl);
+   /* ── Blur ───────────────────────────────────────────── */
+   --ds-blur-sidebar: var(--ds-blur-xl);
+   --ds-blur-searchbox: var(--ds-blur-xl);
 
-  /* ── Transitions ───────────────────────────────────────── */
-  --ds-transition-fast: 0.15s var(--ds-ease-spring);
-  --ds-transition-main: 0.3s var(--ds-ease-spring);
-  --ds-transition-slow: 0.5s var(--ds-ease-spring);
+   /* ── Z-Index Scale ─────────────────────────────────────── */
+   --ds-z-index-base: 1;
+   --ds-z-index-toolbar: 100;
+   --ds-z-index-overlay: 1000;
+   --ds-z-index-popover: 1100;
+   --ds-z-index-max: 9999;
+
+   /* ── Transitions ───────────────────────────────────────── */
+   --ds-transition-fast: 0.15s var(--ds-ease-spring);
+   --ds-transition-main: 0.3s var(--ds-ease-spring);
+   --ds-transition-slow: 0.5s var(--ds-ease-spring);
 
 }

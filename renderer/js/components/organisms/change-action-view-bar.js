@@ -30,26 +30,19 @@ class ChangeActionViewBarComponent {
 
     this.toolbarEl = DesignSystem.createElement('div', 'ds-change-action-view-bar');
     
-    // 2. Segmented Control Group (New Wrapper)
+    // 2. Segmented Control Group (Adaptive & Concentric)
     const leftSection = DesignSystem.createElement('div', 'ds-toolbar-section-left');
     
-    this.segmentedControl = DesignSystem.createElement('div', 'ds-segmented-control');
-    
-    // Add sliding indicator
-    this.indicator = DesignSystem.createElement('div', 'ds-segment-indicator');
-    this.segmentedControl.appendChild(this.indicator);
-
-    this.modes.forEach(mode => {
-      const item = DesignSystem.createElement('div', 'ds-segment-item', {
-        'data-mode': mode.id,
-        'title': mode.title,
-        'html': DesignSystem.getIcon(mode.icon)
-      });
-      
-      item.addEventListener('mousedown', (e) => e.preventDefault());
-      item.addEventListener('click', () => this.handleModeClick(mode.id));
-      this.segmentedControl.appendChild(item);
+    this.segmentedControlComponent = DesignSystem.createSegmentedControl({
+      items: this.modes,
+      activeId: AppState.currentMode || 'read',
+      onChange: (modeId) => this.handleModeClick(modeId),
+      // Use inherited variable from CSS
+      radius: 'var(--_section-radius)'
     });
+
+    this.segmentedControl = this.segmentedControlComponent.el;
+    this.indicator = this.segmentedControlComponent.indicator;
 
     leftSection.appendChild(this.segmentedControl);
 
@@ -59,15 +52,19 @@ class ChangeActionViewBarComponent {
     // 4. Draft Actions (Button Group)
     this.draftActions = DesignSystem.createElement('div', 'ds-toolbar-buttons');
     
-    const discardBtn = DesignSystem.createElement('button', ['ds-btn', 'ds-btn-ghost'], {
-      text: 'Discard Draft'
+    const discardBtn = DesignSystem.createButton({
+      label: 'Discard Draft',
+      variant: 'ghost',
+      radius: 'var(--_btn-radius)',
+      onClick: () => this.handleDiscard()
     });
-    discardBtn.addEventListener('click', () => this.handleDiscard());
 
-    const saveBtn = DesignSystem.createElement('button', ['ds-btn', 'ds-btn-primary'], {
-      text: 'Save to Workspace'
+    const saveBtn = DesignSystem.createButton({
+      label: 'Save to Workspace',
+      variant: 'primary',
+      radius: 'var(--_btn-radius)',
+      onClick: () => this.handleSave()
     });
-    saveBtn.addEventListener('click', () => this.handleSave());
 
     this.draftActions.appendChild(discardBtn);
     this.draftActions.appendChild(saveBtn);
@@ -189,23 +186,8 @@ class ChangeActionViewBarComponent {
     AppState.currentMode = targetMode;
 
     // ── Update Component UI ───────────────────────────────
-    const items = this.segmentedControl.querySelectorAll('.ds-segment-item');
-    let activeItem = null;
-
-    items.forEach(item => {
-      const mode = item.getAttribute('data-mode');
-      const isActive = mode === targetMode;
-      item.classList.toggle('active', isActive);
-      if (isActive) activeItem = item;
-    });
-
-    if (this.indicator && activeItem) {
-      requestAnimationFrame(() => {
-        this.indicator.style.width = `${activeItem.offsetWidth}px`;
-        this.indicator.style.height = `${activeItem.offsetHeight}px`;
-        this.indicator.style.left = `${activeItem.offsetLeft}px`;
-        this.indicator.style.top = `${activeItem.offsetTop}px`;
-      });
+    if (this.segmentedControlComponent) {
+      this.segmentedControlComponent.updateActive(targetMode);
     }
 
     if (targetMode === 'read' || targetMode === 'comment' || targetMode === 'collect') {
@@ -748,7 +730,7 @@ class ChangeActionViewBarComponent {
         if (typeof TabsModule !== 'undefined') {
           TabsModule.remove(AppState.currentFile, true);
           if (typeof loadFile === 'function') {
-            await loadFile(cleanName);
+            await loadFile(cleanName, { silent: true });
             // Force UI update to hide draft buttons
             await this.updateUI('read');
           }

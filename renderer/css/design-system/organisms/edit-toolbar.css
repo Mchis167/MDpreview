@@ -1,0 +1,41 @@
+/* ── Design System: Edit Toolbar (Organism) ── */
+
+.ds-edit-toolbar-container {
+  position: relative;
+  width: 100%;
+  z-index: var(--ds-z-index-toolbar);
+}
+
+.ds-edit-toolbar {
+  pointer-events: auto;
+  border-bottom: 1px solid var(--ds-border-subtle);
+  border-radius: 0;
+  height: 44px;
+  padding: 0 var(--ds-space-md) 0 44px;
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-md);
+}
+
+.ds-edit-toolbar-spacer {
+  flex: 1;
+}
+
+.ds-edit-action-group {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-md);
+}
+
+.ds-edit-toolbar-divider {
+  width: 1px;
+  height: 22px;
+  background: var(--ds-border-strong);
+}
+
+.ds-edit-button-group {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-sm);
+  margin-left: var(--ds-space-xs);
+}

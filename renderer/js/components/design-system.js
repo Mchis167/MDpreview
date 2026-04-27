@@ -74,6 +74,13 @@ const DesignSystem = (() => {
     'arrow-up': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>`,
     'arrow-down': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>`,
     'briefcase': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`,
+    'heading': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h12"/><path d="M6 20V4"/><path d="M18 20V4"/></svg>`,
+    'heading-1': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="m17 12 3-2v8"/></svg>`,
+    'heading-2': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M21 18h-4c0-4 4-3 4-6 0-1.5-2-2.5-4-1"/></svg>`,
+    'heading-3': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M17.5 10.5c1.7-1 3.5 0 3.5 1.5s-1.5 2-3 2c1.5 0 3 .5 3 2s-1.5 3-3.5 2"/></svg>`,
+    'heading-4': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M17 10v4h4"/><path d="M21 10v8"/></svg>`,
+    'heading-5': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M17 13v-3h4"/><path d="M17 17.7c.4.2.8.3 1.3.3 1.5 0 2.7-1.1 2.7-2.5S19.8 13 18.3 13H17"/></svg>`,
+    'heading-6': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><circle cx="19" cy="16" r="2"/><path d="M20 10c-2 0-3 1.7-3 3.5V16"/></svg>`,
     'pin': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9c-.39.2-.1.8.34.8h11.1a.5.5 0 0 0 .34-.8l-1.78-.9a2 2 0 0 1-1.11-1.79V4.5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0-.5.5v6.26Z"/></svg>`
   };
 
@@ -111,9 +118,9 @@ const DesignSystem = (() => {
    * Private: Create a Popover Shield
    */
   function createPopoverShield(options = {}) {
-    const { 
-      title = 'Modal', 
-      content = '', 
+    const {
+      title = 'Modal',
+      content = '',
       footer = null,
       className = '',
       width = null,
@@ -122,7 +129,7 @@ const DesignSystem = (() => {
       position = null,
       alignment = 'center', // 'center', 'bottom-left', or 'custom'
       container = document.body,
-      onClose = null 
+      onClose = null
     } = options;
 
     const shieldClass = hasBackdrop ? 'ds-popover-shield' : 'ds-popover-floating';
@@ -208,7 +215,7 @@ const DesignSystem = (() => {
   return {
     createElement,
     createPopoverShield,
-    
+
     createContextMenu: (e, items) => {
       if (e) {
         e.preventDefault();
@@ -219,7 +226,7 @@ const DesignSystem = (() => {
       }
       return null;
     },
-    
+
     getIcon: (name) => ICONS[name] || '',
 
     createHeaderAction: (iconName, title, onClick, id) => {
@@ -233,7 +240,7 @@ const DesignSystem = (() => {
       }
       return btn;
     },
-    
+
     createTooltip: (text, position = 'bottom') => {
       return createElement('div', ['ds-tooltip', `ds-tooltip-${position}`], { text });
     },
@@ -252,16 +259,17 @@ const DesignSystem = (() => {
     },
 
     createButton: (options = {}) => {
-      const { 
-        label, 
-        variant = 'primary', 
-        onClick, 
-        disabled = false, 
+      const {
+        label,
+        variant = 'primary',
+        onClick,
+        disabled = false,
         className = '',
         leadingIcon = null,
         trailingIcon = null,
         offLabel = false,
-        title = null
+        title = null,
+        radius = 'var(--ds-radius-widget)' // Initial value
       } = options;
 
       // Enforce single icon for off-label buttons
@@ -270,38 +278,96 @@ const DesignSystem = (() => {
       if (offLabel && activeLeadingIcon && activeTrailingIcon) {
         activeTrailingIcon = null;
       }
-      
+
       const btn = createElement('button', [
-        `ds-btn`, 
-        `ds-btn-${variant}`, 
+        `ds-btn`,
+        `ds-btn-${variant}`,
         offLabel ? 'ds-btn-off-label' : '',
         className
       ]);
 
+      btn.style.setProperty('--_radius', radius);
+
       if (title || (offLabel && label)) {
         btn.title = title || label;
       }
-      
+
       if (activeLeadingIcon) {
         const iconHtml = ICONS[activeLeadingIcon] || activeLeadingIcon;
         const span = createElement('span', 'ds-btn-icon-leading', { html: iconHtml });
         btn.appendChild(span);
       }
-      
+
       if (label && !offLabel) {
         const textSpan = createElement('span', 'ds-btn-text', { text: label });
         btn.appendChild(textSpan);
       }
-      
+
       if (activeTrailingIcon) {
         const iconHtml = ICONS[activeTrailingIcon] || activeTrailingIcon;
         const span = createElement('span', 'ds-btn-icon-trailing', { html: iconHtml });
         btn.appendChild(span);
       }
-      
+
       if (disabled) btn.disabled = true;
       if (onClick) btn.onclick = onClick;
       return btn;
+    },
+
+    createSegmentedControl: (options = {}) => {
+      const {
+        items = [],
+        activeId = null,
+        onChange = null,
+        radius = 'var(--ds-radius-panel)', // Initial value
+        className = ''
+      } = options;
+
+      const control = createElement('div', ['ds-segmented-control', className]);
+      control.style.setProperty('--_radius', radius);
+
+      const indicator = createElement('div', 'ds-segment-indicator');
+      control.appendChild(indicator);
+
+      items.forEach(itemData => {
+        const item = createElement('div', 'ds-segment-item', {
+          'data-id': itemData.id,
+          'title': itemData.title || '',
+          'html': DesignSystem.getIcon(itemData.icon)
+        });
+
+        if (itemData.id === activeId) item.classList.add('active');
+
+        item.addEventListener('mousedown', (e) => e.preventDefault());
+        item.addEventListener('click', () => {
+          if (onChange) onChange(itemData.id);
+        });
+
+        control.appendChild(item);
+      });
+
+      return {
+        el: control,
+        indicator,
+        updateActive: (id) => {
+          const allItems = control.querySelectorAll('.ds-segment-item');
+          let activeItem = null;
+          allItems.forEach(item => {
+            const isActive = item.getAttribute('data-id') === id;
+            item.classList.toggle('active', isActive);
+            if (isActive) activeItem = item;
+          });
+
+          if (indicator && activeItem) {
+            requestAnimationFrame(() => {
+              indicator.style.width = `${activeItem.offsetWidth}px`;
+              indicator.style.height = `${activeItem.offsetHeight}px`;
+              indicator.style.left = `${activeItem.offsetLeft}px`;
+              indicator.style.top = `${activeItem.offsetTop}px`;
+            });
+          }
+        }
+      };
     },
 
     showConfirm: ({ title, message, onConfirm, onCancel }) => {
@@ -311,7 +377,7 @@ const DesignSystem = (() => {
       const footer = createElement('div', 'ds-confirm-footer');
       const cancelBtn = createElement('button', 'ds-btn ds-btn-ghost', { text: 'Cancel' });
       const confirmBtn = createElement('button', 'ds-btn ds-btn-primary', { text: 'Confirm' });
-      
+
       footer.appendChild(cancelBtn);
       footer.appendChild(confirmBtn);
 
@@ -341,14 +407,14 @@ const DesignSystem = (() => {
       const content = createElement('div', 'ds-prompt-content');
       const label = createElement('label', 'ds-field-label', { text: message });
       const input = createElement('input', 'ds-input', { type: 'text', placeholder: placeholder, value: defaultValue });
-      
+
       content.appendChild(label);
       content.appendChild(input);
 
       const footer = createElement('div', 'ds-confirm-footer');
       const cancelBtn = createElement('button', 'ds-btn ds-btn-ghost', { text: 'Cancel' });
       const confirmBtn = createElement('button', 'ds-btn ds-btn-primary', { text: 'Continue' });
-      
+
       footer.appendChild(cancelBtn);
       footer.appendChild(confirmBtn);
 

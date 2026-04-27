@@ -135,128 +135,6 @@ const TreeModule = (() => {
       }
     });
 
-    // Keyboard Shortcuts
-    document.addEventListener('keydown', (e) => {
-      // Ignore if user is typing in an input or textarea
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-      const isMod = e.metaKey || e.ctrlKey;
-      const isShift = e.shiftKey;
-
-      if (e.key === 'Escape') {
-        deselectAll();
-      }
-
-      // ⌘N: New File
-      if (isMod && e.key === 'n' && !isShift) {
-        e.preventDefault();
-        _hideContextMenu();
-        _handleNewItemShortcut('file');
-      }
-
-      // ⇧⌘N: New Folder
-      if (isMod && isShift && e.key === 'n') {
-        e.preventDefault();
-        _hideContextMenu();
-        _handleNewItemShortcut('directory');
-      }
-
-      // ⌘D: Duplicate
-      if (isMod && e.key === 'd') {
-        e.preventDefault();
-        _hideContextMenu();
-        if (state.selectedPaths.length === 1) {
-          const path = state.selectedPaths[0];
-          const node = _findNodeByPath(treeData, path);
-          if (node) _handleDuplicate(null, node);
-        }
-      }
-
-      if (e.key === 'Enter' || e.key === 'F2') {
-        if (state.selectedPaths.length === 1) {
-          e.preventDefault();
-          _hideContextMenu();
-          const path = state.selectedPaths[0];
-          const el = document.querySelector(`.tree-item[data-path="${path}"]`);
-          const node = _findNodeByPath(treeData, path);
-          if (el && node) _handleRename(null, node, el);
-        }
-      }
-
-      if (e.key === 'Delete' || e.key === 'Backspace') {
-        // On Mac, Cmd+Backspace is the standard for delete
-        const isMacDelete = (navigator.platform.toUpperCase().indexOf('MAC') >= 0) ? isMod : true;
-        if (isMacDelete && state.selectedPaths.length > 0) {
-          e.preventDefault();
-          _hideContextMenu();
-          _handleBatchOp('delete');
-        }
-      }
-
-      // ⇧⌘H: Toggle Hidden
-      if (isMod && isShift && e.key.toLowerCase() === 'h') {
-        if (state.selectedPaths.length > 0) {
-          e.preventDefault();
-          _hideContextMenu();
-          const firstPath = state.selectedPaths[0];
-          const hiddenPaths = AppState.settings.hiddenPaths || [];
-          const isHiding = !hiddenPaths.includes(firstPath);
-          _handleBatchToggleHidden(isHiding, state.selectedPaths);
-        }
-      }
-
-      // ⌘[: Collapse All
-      if (isMod && !isShift && e.key === '[') {
-        e.preventDefault();
-        _hideContextMenu();
-        collapseAll();
-      }
-
-      // ⇧⌘[: Collapse Others
-      if (isMod && isShift && e.key === '[') {
-        e.preventDefault();
-        _hideContextMenu();
-        
-        let targetPath = null;
-        // Priority 1: Single selected folder
-        if (state.selectedPaths.length === 1) {
-          const node = _findNodeByPath(treeData, state.selectedPaths[0]);
-          if (node && node.type === 'directory') targetPath = node.path;
-        }
-        // Priority 2: Active file path
-        if (!targetPath && typeof AppState !== 'undefined') {
-          targetPath = AppState.currentFile;
-        }
-        
-        if (targetPath) collapseOthers(targetPath);
-      }
-    });
-
-    function _handleNewItemShortcut(type) {
-      let targetPath = 'root';
-      const hiddenPaths = new Set(AppState.settings.hiddenPaths || []);
-
-      if (state.selectedPaths.length > 0) {
-        const lastPath = state.selectedPaths[state.selectedPaths.length - 1];
-        
-        // If the selected path itself is hidden, default to root to protect hidden section
-        if (hiddenPaths.has(lastPath)) {
-          targetPath = 'root';
-        } else {
-          const node = _findNodeByPath(treeData, lastPath);
-          if (node) {
-            targetPath = node.type === 'directory' 
-              ? node.path 
-              : (node.path.substring(0, node.path.lastIndexOf('/')) || 'root');
-            
-            // Final check: if calculated target parent is hidden, fallback to root
-            if (hiddenPaths.has(targetPath)) targetPath = 'root';
-          }
-        }
-      }
-      _createNewItem(targetPath, type);
-    }
-
     // Root Context Menu Handler for all scroll containers
     document.addEventListener('contextmenu', (e) => {
       const container = e.target.closest('.ds-scroll-container');
@@ -293,6 +171,31 @@ const TreeModule = (() => {
         }
       }
     });
+  }
+
+  function _handleNewItemShortcut(type) {
+    let targetPath = 'root';
+    const hiddenPaths = new Set(AppState.settings.hiddenPaths || []);
+
+    if (state.selectedPaths.length > 0) {
+      const lastPath = state.selectedPaths[state.selectedPaths.length - 1];
+      
+      // If the selected path itself is hidden, default to root to protect hidden section
+      if (hiddenPaths.has(lastPath)) {
+        targetPath = 'root';
+      } else {
+        const node = _findNodeByPath(treeData, lastPath);
+        if (node) {
+          targetPath = node.type === 'directory' 
+            ? node.path 
+            : (node.path.substring(0, node.path.lastIndexOf('/')) || 'root');
+          
+          // Final check: if calculated target parent is hidden, fallback to root
+          if (hiddenPaths.has(targetPath)) targetPath = 'root';
+        }
+      }
+    }
+    _createNewItem(targetPath, type);
   }
 
   function _updateSortBtnIcon() {
@@ -612,7 +515,7 @@ const TreeModule = (() => {
       if (node.type === 'directory') {
         _handleToggle(node);
       } else {
-        if (window.loadFile) {
+        if (window.loadFile && AppState.currentFile !== node.path) {
           window.loadFile(node.path).catch(_err => {
             console.warn('Failed to load file from tree click:', node.path);
           });
@@ -1242,8 +1145,37 @@ const TreeModule = (() => {
     handleDelete: _handleDelete,
     handleContextMenu: _handleContextMenu,
     handleMouseDown: _handleMouseDown,
-    handleToggleHidden: _handleToggleHidden,
-    handleBatchToggleHidden: _handleBatchToggleHidden // Exported for multi-select
+    handleBatchToggleHidden: _handleBatchToggleHidden, // Exported for multi-select
+    collapseAll,
+    collapseOthers,
+    createNewFile: () => _handleNewItemShortcut('file'),
+    createNewFolder: () => _handleNewItemShortcut('directory'),
+    renameSelected: () => {
+      if (state.selectedPaths.length === 1) {
+        const path = state.selectedPaths[0];
+        const el = document.querySelector(`.tree-item[data-path="${path}"]`);
+        const node = _findNodeByPath(treeData, path);
+        if (el && node) _handleRename(null, node, el);
+      }
+    },
+    duplicateSelected: () => {
+      if (state.selectedPaths.length === 1) {
+        const path = state.selectedPaths[0];
+        const node = _findNodeByPath(treeData, path);
+        if (node) _handleDuplicate(null, node);
+      }
+    },
+    deleteSelected: () => {
+      if (state.selectedPaths.length > 0) _handleBatchOp('delete');
+    },
+    toggleHiddenItems: () => {
+      if (state.selectedPaths.length > 0) {
+        const firstPath = state.selectedPaths[0];
+        const hiddenPaths = AppState.settings.hiddenPaths || [];
+        const isHiding = !hiddenPaths.includes(firstPath);
+        _handleBatchToggleHidden(isHiding, state.selectedPaths);
+      }
+    }
   };
 })();
 

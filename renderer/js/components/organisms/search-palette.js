@@ -492,7 +492,8 @@ const SearchPalette = (() => {
     init: _init,
     show,
     hide,
-    toggle: () => _isOpen ? hide() : show()
+    toggle: () => _isOpen ? hide() : show(),
+    isOpen: () => _isOpen
   };
 })();
 

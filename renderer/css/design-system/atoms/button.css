@@ -95,14 +95,6 @@
   --_color-hover: var(--ds-text-primary);
 }
 
-.ds-btn-primary-pill {
-  --_bg: var(--ds-layer-accent-default);
-  --_color: var(--ds-text-on-accent);
-  --_bg-hover: var(--ds-layer-accent-hover);
-  --_radius: var(--ds-radius-pill);
-  --_pad-x: var(--ds-space-lg);
-}
-
 .ds-btn-off-label {
   --_pad-x: 0;
   --_gap: 0;
@@ -110,59 +102,3 @@
   justify-content: center;
 }
 
-/* ── Legacy aliases (.btn → .ds-btn) ──────────────────── */
-.btn {
-  --_radius: var(--ds-radius-pill);
-  --_height: 32px;
-  --_pad-x: 16px;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: var(--_height);
-  padding: 0 var(--_pad-x);
-  border-radius: var(--_radius);
-  font-family: var(--ds-font-family-text);
-  font-size: var(--ds-font-md);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--ds-transition-fast);
-  border: none;
-  gap: var(--ds-space-sm);
-  white-space: nowrap;
-}
-
-.btn i,
-.btn svg {
-  width: 14px;
-  height: 14px;
-}
-
-.btn-primary {
-  background: var(--ds-layer-accent-default);
-  color: var(--ds-text-on-accent);
-}
-
-.btn-primary:hover {
-  background: var(--ds-layer-accent-hover);
-}
-
-.btn-primary:disabled {
-  background: var(--ds-accent);
-  opacity: 0.2;
-  cursor: not-allowed;
-}
-
-.btn-ghost {
-  background: var(--ds-layer-subtle-default);
-  color: var(--ds-text-primary);
-}
-
-.btn-ghost:hover {
-  background: var(--ds-layer-subtle-hover);
-}
-
-.btn-ghost:disabled {
-  opacity: 0.2;
-  cursor: not-allowed;
-}

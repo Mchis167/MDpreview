@@ -2,8 +2,51 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.10.0] — 2026-04-28 00:05
+## [1.11.0] — 2026-04-28 07:00
 
+### 🎉 Added
+- **Centralized Shortcut System**: Triển khai `ShortcutService` làm "bộ não" điều phối toàn bộ phím tắt trong ứng dụng, tách biệt hoàn toàn logic đăng ký và thực thi.
+- **Shortcut Validation Suite**: 
+    - **V2 Audit Script**: Công cụ phân tích tĩnh kiểm tra tính toàn vẹn của handler và sự tồn tại của DOM.
+    - **Functional Stress Test**: Hệ thống kiểm tra tự động giả lập nhấn phím thực tế cho 30+ phím tắt, hỗ trợ quản lý focus (`blur()`) và kiểm tra trạng thái AppState.
+- **Multi-layer Mode Switching**: Hỗ trợ đồng thời phím số đơn (`1, 2, 3, 4`) và tổ hợp `Mod/Alt + Số` để chuyển chế độ xem linh hoạt trong mọi ngữ cảnh.
+- **Design System Icons**: Bổ sung bộ icon Lucide chuẩn cho `heading-1` đến `heading-6` vào `DesignSystem.ICONS`.
+- **Edit Toolbar Granularity**: Chia nhỏ công cụ Header thành 6 mức độ chọn trực tiếp (H1-H6) trong một nhóm riêng biệt.
+- **Design System Spacer**: Triển khai `.ds-edit-toolbar-spacer` (Molecule) hỗ trợ tạo khoảng trống linh hoạt để đẩy các nhóm hành động về phía bên phải.
+- **Extended Tokens**: Bổ sung các token mới: `--ds-space-2xs` (2px), `--ds-shadow-xl` (đổ bóng lớn cho popover), và hệ thống `Z-Index` định danh.
+- **Design System Component**: Bổ sung `DesignSystem.createSegmentedControl` hỗ trợ khởi tạo nhanh Molecule với bộ chỉ báo trượt (sliding indicator) và logic đồng bộ mode.
+- **Silent Loading Mode**: Cơ chế `silent` loading cho phép cập nhật nội dung file (sau khi save hoặc qua socket) mà không gây nhấp nháy Skeleton, mang lại trải nghiệm mượt mà.
+
+### 🔧 Changed
+- **Adaptive Radius System**: Chuẩn hoá toàn bộ các thành phần con trong `ChangeActionViewBar` và `SegmentedControl` theo công thức bo góc đồng tâm `calc(var(--_radius) - var(--_padding))`.
+- **Global Search Shortcut Evolution**: Chuyển đổi phím tắt tìm kiếm toàn cục từ `Mod+F` sang `Mod+P` để phù hợp với quy chuẩn Command Palette hiện đại (VS Code style).
+- **Edit Toolbar Evolution**:
+    - Chuyển đổi sang Layout dàn trải (Spread) giúp phân cấp rõ ràng nhóm công cụ và nhóm hành động (Save/Cancel).
+    - Giảm kích thước icon xuống mức mặc định (16px) cho toàn bộ thanh công cụ để tăng độ tinh tế.
+    - Cập nhật toàn bộ các nút bấm sang variant `primary` tiêu chuẩn (thay thế variant cũ).
+- **Toolbar Repositioning**:
+    - **ChangeActionViewBar**: Di chuyển xuống cạnh dưới màn hình (`bottom: 24px`) với hiệu ứng trượt lên (Slide Up).
+    - **EditToolbar**: Di chuyển lên phía trên trình soạn thảo (`top: 20px`), tích hợp Tooltip Premium đảo ngược hướng.
+- **Event Interception Upgrade**: Chuyển đổi sang `capture: true` cho listener toàn cục, cho phép `ShortcutService` đánh chặn phím tắt trước khi bị trình duyệt xử lý.
+- **Intelligent Input Bypass**: Mở rộng danh sách trắng cho phép điều hướng ứng dụng (Sidebar, Mode Switch) ngay cả khi đang soạn thảo văn bản.
+- **Markdown Viewer Masking**: Nâng cấp hệ thống Premium Scroll Mask cho trình xem Markdown, tối ưu hóa điểm dừng (stops) để tránh che khuất nội dung quan trọng.
+- **CSS Architecture Cleanup**: Tái cấu trúc `editor.css` và `markdown.css`, loại bỏ hoàn toàn các màu sắc/spacing hardcode, đồng bộ hóa 100% với Tier 3 Semantic Tokens.
+- **Tree Click Optimization**: Bổ sung cơ chế chặn tải lại file nếu người dùng click vào file đang mở trong sidebar.
+
+### 🐛 Fixed
+- **Shortcut Blocking Bug**: Khắc phục lỗi các phím tắt điều hướng bị chặn hoàn toàn khi người dùng đang focus vào trình soạn thảo.
+- **Infinite Skeleton Bug**: Khắc phục triệt để lỗi kẹt màn hình chờ vô hạn khi người dùng hủy bỏ việc chuyển file lúc đang có thay đổi chưa lưu.
+- **Sidebar Toggle Sync**: Sửa lỗi phím tắt `Mod+B` hoạt động không ổn định do phụ thuộc vào trạng thái click của phần tử UI ẩn.
+- **Loading Error Handling**: Bổ sung xử lý lỗi khi render Markdown thất bại, tự động xóa Skeleton và hiển thị thông báo lỗi.
+- **UI Alignment**: Khắc phục lỗi co giãn chiều cao (fill height) của các nút bấm bên trong `ChangeActionViewBar`.
+- **Concentric Radius Consistency**: Sửa lỗi bo góc không đồng bộ tại các góc của container thanh công cụ hành động.
+
+### 🗑 Removed
+- **Legacy Components**: Xoá bỏ hoàn toàn variant `.ds-btn-primary-pill` và các tàn dư bo tròn tuyệt đối (pill shape).
+- **Legacy CSS Trash**: Xoá file di sản `toolbar.css` và các selector mồ côi (`.footer-icon-btn`, `.btn` aliases).
+
+
+## [1.10.0] — 2026-04-28 00:05
 ### 🎉 Added
 - **Systems-Based Design Tokens**: Triển khai kiến trúc Semantic Token 3-tier mới giúp quản lý màu sắc theo ngữ cảnh sử dụng (Subtle, Accent, Surface, Control, Danger).
 - **Semantic Shortcut Search**: Hỗ trợ tìm kiếm phím tắt thông qua từ khóa đồng nghĩa (tags), giúp người dùng dễ dàng tìm thấy lệnh ngay cả khi không nhớ tên chính xác (ví dụ: gõ "xem" ra "Read Mode", "xóa" ra "Delete Selected").

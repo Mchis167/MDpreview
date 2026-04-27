@@ -1,15 +1,14 @@
 /* global AppState, SidebarLeft, MarkdownViewer, RightSidebar, 
-   SettingsService, SearchPalette,
+   SettingsService, SearchPalette, ShortcutsComponent, ShortcutService,
    TreeModule, WorkspaceModule, CollectModule, 
    SidebarModule, DraftModule, EditorModule, 
-   TabsModule, TabPreview, io */
+   EditToolbarComponent,
+   TabsModule, TabPreview, io, initMermaid, initZoom, initToolbarBtns, ScrollModule, RecentlyViewedModule, ChangeActionViewBar, CommentsModule */
 /* ============================================================
    app.js — Core state, file loading, socket connection, boot
    Other responsibilities live in dedicated modules:
      zoom.js     — Zoom modal
      mermaid.js  — Diagram rendering
-     toolbar.js  — Toolbar buttons + Read/Comment toggle
-     sidebar.js  — Mode switcher, search, resizer
    ============================================================ */
 
 
@@ -264,7 +263,7 @@ function initSocket() {
 
   AppState.socket.on('file-changed', ({ file }) => {
     if (file === AppState.currentFile) {
-      loadFile(AppState.currentFile).catch(() => { });
+      loadFile(AppState.currentFile, { silent: true }).catch(() => { });
 
       // ── UX-02 Polish: Sync original content if editor is clean ──
       if (AppState.currentMode === 'edit' && typeof EditorModule !== 'undefined') {
@@ -279,7 +278,6 @@ function initSocket() {
         }
       }
     }
-    TreeModule.load();
   });
 
   AppState.socket.on('tree-changed', () => { TreeModule.load(); });
@@ -300,8 +298,30 @@ function initSocket() {
 // ── File Loading ─────────────────────────────────────────────
 let loadTicket = 0;
 
-async function loadFile(filePath) {
+async function loadFile(filePath, options = {}) {
+  const silent = !!options.silent;
   if (!AppState.currentWorkspace) return;
+
+  // 1. Dirty check (PRIORITY: Before showing skeleton)
+  if (AppState.currentMode === 'edit' && typeof EditorModule !== 'undefined' && EditorModule.isDirty()) {
+    const isDraft = AppState.currentFile && AppState.currentFile.startsWith('__DRAFT_');
+    const isFirstEdit = EditorModule.getOriginalContent() === '';
+
+    if (isDraft || isFirstEdit) {
+      // Auto-save and proceed silently
+      await EditorModule.save();
+    } else if (AppState.currentFile !== filePath) { // Only prompt if switching files
+      DesignSystem.showConfirm({
+        title: 'Unsaved Changes',
+        message: `You have unsaved changes. Save them before switching to ${filePath.split('/').pop()}?`,
+        onConfirm: async () => {
+          const saved = await EditorModule.save();
+          if (saved) loadFile(filePath, options).catch(() => { });
+        }
+      });
+      return;
+    }
+  }
 
   const currentTicket = ++loadTicket;
 
@@ -310,62 +330,42 @@ async function loadFile(filePath) {
     window.ScrollModule.save(AppState.currentFile);
   }
 
-  // 0. Show skeleton immediately
-  const emptyState = document.getElementById('empty-state');
+  // 0. Show skeleton only if NOT silent
+  const viewer = MarkdownViewer.getInstance();
   const mdContent = document.getElementById('md-content');
   const inner = mdContent ? (mdContent.querySelector('.md-content-inner') || mdContent) : null;
+  const emptyState = document.getElementById('empty-state');
 
-  if (emptyState) emptyState.style.display = 'none';
-  if (mdContent && inner) {
-    mdContent.style.display = 'block';
-    inner.innerHTML = ''; 
-    inner.classList.add('is-loading');
-  }
-
-  // Use component-based loader if available
-  const viewer = MarkdownViewer.getInstance();
-  if (viewer) {
-    viewer.setState({ mode: 'read', file: filePath, html: '<div class="skeleton-text" style="width: 100%; height: 200px;"></div>' });
-  }
-
-  // 1. Dirty check...
-  if (AppState.currentMode === 'edit' && typeof EditorModule !== 'undefined' && EditorModule.isDirty()) {
-    const isDraft = AppState.currentFile && AppState.currentFile.startsWith('__DRAFT_');
-    const isFirstEdit = EditorModule.getOriginalContent() === '';
-
-    if (isDraft || isFirstEdit) {
-      // Auto-save and proceed silently
-      await EditorModule.save();
-    } else {
-      DesignSystem.showConfirm({
-        title: 'Unsaved Changes',
-        message: `You have unsaved changes. Save them before switching to ${filePath.split('/').pop()}?`,
-        onConfirm: async () => {
-          const saved = await EditorModule.save();
-          if (saved) loadFile(filePath).catch(() => { });
-        }
-      });
-      return;
+  if (!silent) {
+    if (emptyState) emptyState.style.display = 'none';
+    if (mdContent && inner) {
+      mdContent.style.display = 'block';
+      inner.innerHTML = ''; 
+      inner.classList.add('is-loading');
+    }
+    if (viewer) {
+      viewer.setState({ mode: 'read', file: filePath, html: '<div class="skeleton-text" style="width: 100%; height: 200px;"></div>' });
     }
   }
 
-
   let data = { html: '' };
   if (filePath && filePath.startsWith('__DRAFT_')) {
-    // For Draft, we don't fetch from server, we sync from DraftModule
     if (typeof DraftModule !== 'undefined') {
       data.html = DraftModule.getRenderedHtml ? DraftModule.getRenderedHtml(filePath) : '';
     }
   } else {
     try {
       const res = await fetch(`/api/render?file=${encodeURIComponent(filePath)}`);
-      if (currentTicket !== loadTicket) return; // Cancel if newer request started
+      if (currentTicket !== loadTicket) return;
 
       if (!res.ok) {
         throw new Error(`Failed to load file: ${filePath} (Status: ${res.status})`);
       }
       data = await res.json();
     } catch (_err) {
+      if (currentTicket === loadTicket && viewer) {
+        viewer.setState({ mode: 'read', file: filePath, html: '<div class="ds-error-state">Failed to render markdown.</div>' });
+      }
       return;
     }
   }
@@ -379,21 +379,13 @@ async function loadFile(filePath) {
     viewer.setState({ 
       mode: AppState.getFileViewMode(filePath), 
       file: filePath, 
-      content: data.raw || '', // We might need to fetch raw content if data.raw is missing
+      content: data.raw || '', 
       html: data.html 
     });
-  } else {
-    // Legacy fallback (should not happen after refactor)
-    if (mdContent && inner) {
-      inner.innerHTML = data.html;
-      inner.classList.remove('is-loading');
-      
-      mdContent.classList.add('fade-in');
-      setTimeout(() => mdContent.classList.remove('fade-in'), 300);
-      
-      await processMermaid(inner);
-      if (typeof CodeBlockModule !== 'undefined') CodeBlockModule.process(inner);
-    }
+  } else if (mdContent && inner) {
+    // Legacy fallback
+    inner.innerHTML = data.html;
+    inner.classList.remove('is-loading');
   }
 
   updateHeaderUI();
@@ -410,18 +402,11 @@ async function loadFile(filePath) {
 
   if (typeof AppState.updateToolbarUI === 'function') {
     let targetMode = AppState.getFileViewMode(filePath);
-
-    // Draft specific override: always force Edit if empty
     if (filePath && filePath.startsWith('__DRAFT_')) {
       const content = (typeof DraftModule !== 'undefined') ? DraftModule.getDraftContent(filePath) : '';
-      if (!content || content.trim() === '') {
-        targetMode = 'edit';
-      }
+      if (!content || content.trim() === '') targetMode = 'edit';
     }
-
     AppState.updateToolbarUI(targetMode);
-  } else if (AppState.commentMode && typeof CommentsModule !== 'undefined') {
-    CommentsModule.applyCommentMode();
   }
 
   TreeModule.setActiveFile(filePath);
@@ -501,13 +486,136 @@ document.addEventListener('DOMContentLoaded', async () => {
   SidebarLeft.init();        // organisms/sidebar-left.js
   ChangeActionViewBar.init(); // organisms/change-action-view-bar.js
   RightSidebar.init();        // organisms/right-sidebar.js
+  EditToolbarComponent.init(); // organisms/edit-toolbar-component.js
 
   // 2. Support Modules
   initSocket();
   initMermaid();          // mermaid.js
   initZoom();             // zoom.js
   initToolbarBtns();      // toolbar.js
-  initGlobalShortcuts();  // toolbar.js
+
+  // ── Shortcut Management ──
+  if (typeof ShortcutService !== 'undefined' && typeof ShortcutsComponent !== 'undefined') {
+    ShortcutService.init();
+    
+    // Register Default Groups from ShortcutsComponent
+    const isMac = ShortcutService.isMac();
+    const groups = ShortcutsComponent.getShortcutData(isMac);
+    
+    // Assign Handlers
+    const handlers = {
+      'mode-read': () => {
+        const btn = document.querySelector('.ds-segment-item[data-id="read"]');
+        if (btn) btn.click();
+        else if (window.AppState?.onModeChange) AppState.onModeChange('read');
+      },
+      'mode-edit': () => {
+        const btn = document.querySelector('.ds-segment-item[data-id="edit"]');
+        if (btn) btn.click();
+        else if (window.AppState?.onModeChange) AppState.onModeChange('edit');
+      },
+      'mode-comment': () => {
+        const btn = document.querySelector('.ds-segment-item[data-id="comment"]');
+        if (btn) btn.click();
+        else if (window.AppState?.onModeChange) AppState.onModeChange('comment');
+      },
+      'mode-collect': () => {
+        const btn = document.querySelector('.ds-segment-item[data-id="collect"]');
+        if (btn) btn.click();
+        else if (window.AppState?.onModeChange) AppState.onModeChange('collect');
+      },
+      'toggle-sidebar': () => {
+        if (window.TabsModule?.toggleSidebar) window.TabsModule.toggleSidebar();
+        else document.getElementById('sidebar-toggle-btn')?.click();
+      },
+      'focus-search': () => window.SearchPalette?.show(),
+      'scroll-top': () => document.getElementById('md-viewer-mount')?.scrollTo({ top: 0, behavior: 'smooth' }),
+      'scroll-bottom': () => {
+        const v = document.getElementById('md-viewer-mount');
+        if (v) v.scrollTo({ top: v.scrollHeight, behavior: 'smooth' });
+      },
+      'toggle-fullscreen': () => {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else document.exitFullscreen();
+      },
+      'save-file': () => window.EditorModule?.save(),
+      'undo': () => document.execCommand('undo'),
+      'redo': () => document.execCommand('redo'),
+      'markdown-helper': () => window.MarkdownHelperComponent?.open(),
+      'select-all-tabs': () => window.TabsModule?.selectAll(),
+      'close-active-tab': () => {
+        const active = window.TabsModule?.getActive();
+        if (active) window.TabsModule.remove(active);
+      },
+      'close-all-tabs': () => window.TabsModule?.closeAll(),
+      'toggle-pin-tab': () => {
+        const active = window.TabsModule?.getActive();
+        if (active) window.TabsModule.togglePin(active);
+      },
+      'deselect-tabs': () => {
+        if (window.TabsModule) window.TabsModule.deselectAll();
+        if (window.TreeModule) window.TreeModule.deselectAll();
+      },
+      'new-file': () => {
+        const btn = document.querySelector('[data-action-id="new-file"]');
+        if (btn) btn.click();
+        else if (window.TreeModule) window.TreeModule.createNewFile();
+      },
+      'new-folder': () => {
+         if (window.TreeModule) window.TreeModule.createNewFolder();
+      },
+      'rename-selected': () => {
+         if (window.TreeModule) window.TreeModule.renameSelected();
+      },
+      'duplicate-file': () => {
+         if (window.TreeModule) window.TreeModule.duplicateSelected();
+      },
+      'delete-selected': () => {
+         if (window.TreeModule) window.TreeModule.deleteSelected();
+      },
+      'workspace-picker': () => document.getElementById('workspace-switcher')?.click(),
+      'hide-unhide': () => {
+         if (window.TreeModule) window.TreeModule.toggleHiddenItems();
+      },
+      'collapse-all': () => {
+         if (window.TreeModule) window.TreeModule.collapseAll();
+      },
+      'collapse-others': () => {
+         if (window.TreeModule) {
+           const state = window.TreeModule.getState();
+           const target = state.selectedPaths.length > 0 ? state.selectedPaths[0] : null;
+           if (target) window.TreeModule.collapseOthers(target);
+         }
+      },
+      'keyboard-shortcuts': () => window.SearchPalette?.show('shortcut'),
+      'open-settings': () => window.SettingsComponent?.toggle(),
+      'close-cancel': () => {
+         // Close Search
+         if (window.SearchPalette && window.SearchPalette.isOpen()) {
+           window.SearchPalette.hide();
+         }
+         // Close Settings
+         if (window.SettingsComponent && window.SettingsComponent.activeInstance) {
+           window.SettingsComponent.hide();
+         }
+         // Global deselect
+         if (window.TabsModule) window.TabsModule.deselectAll();
+         if (window.TreeModule) window.TreeModule.deselectAll();
+      }
+    };
+
+    // Inject handlers into groups
+    groups.forEach(group => {
+      group.items.forEach(item => {
+        if (handlers[item.id]) {
+          item.handler = handlers[item.id];
+        }
+      });
+    });
+
+    ShortcutService.registerGroups(groups);
+  }
+
   SidebarModule.init();      // sidebar.js
   if (typeof SearchPalette !== 'undefined') SearchPalette.init();
 

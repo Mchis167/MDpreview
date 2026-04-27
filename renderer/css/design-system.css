@@ -33,10 +33,10 @@
 @import 'design-system/organisms/sidebar-left.css';
 @import 'design-system/organisms/tree-view.css';
 @import 'design-system/organisms/tab-bar.css';
-@import 'design-system/organisms/toolbar.css';
 @import 'design-system/organisms/right-sidebar.css';
 @import 'design-system/organisms/comment-form.css';
 @import 'design-system/organisms/change-action-view-bar.css';
+@import 'design-system/organisms/edit-toolbar.css';
 @import 'design-system/organisms/workspace-panel.css';
 @import 'design-system/organisms/settings-panel.css';
 @import 'design-system/organisms/modals-misc.css';

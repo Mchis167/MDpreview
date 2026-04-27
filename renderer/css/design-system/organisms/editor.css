@@ -14,132 +14,19 @@
   border: none;
   color: var(--ds-text-primary);
   font-family: var(--ds-font-family-code);
-  font-size: 14px;
-  padding: 120px 160px;
+  font-size: var(--ds-font-base);
+  padding: 80px 160px;
   resize: none;
   outline: none;
   line-height: 1.6;
 }
 
-.edit-toolbar-container {
-  position: absolute;
-  bottom: 20px;
-  /* Margin to bottom edge = 20px */
-  left: 50%;
-  transform: translateX(-50%);
-  width: auto;
-  pointer-events: none;
-  z-index: 100;
-}
-
-.edit-toolbar {
-  pointer-events: auto;
-  background: var(--ds-surface-overlay);
-  border: 1px solid var(--ds-border-strong);
-  border-radius: var(--ds-radius-pill);
-  height: 48px;
-  /* Standardize height for calc */
-  padding: 0 12px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 12px 32px var(--ds-black-a40);
-}
-
-.edit-action-group {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.edit-tool-btn {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--ds-text-tertiary);
-  border-radius: var(--ds-radius-widget);
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  position: relative;
-  /* For tooltips */
-}
-
-/* ── Custom Premium Tooltips ────────────────────────── */
-.edit-tool-btn::after {
-  content: attr(title);
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%) translateY(10px);
-  background: var(--ds-surface-overlay);
-  color: var(--ds-text-inverse);
-  padding: 6px 10px;
-  border-radius: var(--ds-radius-sm);
-  font-size: 11px;
-  font-weight: 500;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.2s, transform 0.2s;
-  z-index: 1000;
-  box-shadow: 0 4px 12px var(--ds-black-a30);
-  border: 1px solid var(--ds-white-a05);
-}
-
-.edit-tool-btn:hover::after {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-  transition-delay: 0.2s;
-  /* Slight delay for better feel */
-}
-
-/* Arrow */
-.edit-tool-btn::before {
-  content: "";
-  position: absolute;
-  bottom: calc(100% + 4px);
-  left: 50%;
-  transform: translateX(-50%) translateY(10px);
-  border: 4px solid transparent;
-  border-top-color: var(--ds-surface-overlay);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.2s, transform 0.2s;
-  z-index: 1000;
-}
-
-.edit-tool-btn:hover::before {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-  transition-delay: 0.2s;
-}
-
-.edit-tool-btn:hover {
-  background: var(--ds-white-a05);
-  color: var(--ds-text-inverse);
-  text-decoration: none;
-}
-
-.edit-divider {
-  width: 1px;
-  height: 22px;
-  background: var(--ds-border-strong);
-}
-
-.edit-button-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: 4px;
-}
 
 
 .edit-help-popover {
   position: fixed;
   /* Fixed position to not affect parent scroll */
-  bottom: 80px;
+  top: 80px;
   /* 20px margin + 48px toolbar + 12px spacing = 80px */
   left: 50%;
   transform: translateX(-50%);
@@ -153,11 +40,11 @@
   border-radius: var(--ds-radius-shell);
   display: none;
   flex-direction: column;
-  z-index: 1000;
+  z-index: var(--ds-z-index-overlay);
   /* High z-index for fixed menu */
-  box-shadow: 0 32px 64px var(--ds-black-a80);
+  box-shadow: var(--ds-shadow-xl);
   overflow: clip;
-  animation: popoverFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: popoverFadeIn var(--ds-transition-main);
   pointer-events: auto;
 }
 
@@ -200,7 +87,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--ds-radius-pill);
+  border-radius: var(--ds-radius-widget);
   cursor: pointer;
   color: var(--ds-text-tertiary);
   transition: background 0.2s, color 0.2s;
@@ -294,123 +181,4 @@
   border-radius: var(--ds-radius-sm);
   letter-spacing: 0.5px;
   text-transform: uppercase;
-}
-
-
-
-/* Inline Rename */
-.inline-rename-input {
-  background: var(--ds-surface-overlay);
-  border: 1.5px solid var(--ds-accent);
-  color: var(--ds-text-inverse);
-  border-radius: var(--ds-radius-sm);
-  padding: 4px 8px;
-  font-size: 13px;
-  width: calc(100% - 20px);
-  outline: none;
-  font-family: inherit;
-  margin-left: 2px;
-  box-shadow: 0 0 0 4px rgba(var(--ds-accent-rgb), 0.1);
-}
-
-/* Recently Viewed Item Polish */
-.recent-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  border-radius: var(--ds-radius-pill);
-  /* Fully rounded */
-  cursor: pointer;
-  transition: background 0.2s;
-  margin-bottom: 2px;
-}
-
-.recent-item:hover {
-  background: var(--ds-white-a05);
-}
-
-.recent-item.active {
-  background: var(--ds-layer-subtle-active);
-  /* Figma Parity */
-  position: relative;
-}
-
-.recent-item.active::after {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: var(--ds-accent);
-  border-radius: var(--ds-radius-pill);
-  box-shadow: var(--ds-shadow-glow);
-  margin-left: 8px;
-  flex-shrink: 0;
-}
-
-.recent-item-main {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-  min-width: 0;
-}
-
-.recent-item-label {
-  font-size: 13px;
-  color: var(--ds-text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.recent-item.active .recent-item-label {
-  color: var(--ds-text-inverse);
-  font-weight: 600;
-}
-
-.recent-clear-btn {
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--ds-radius-chip);
-  color: var(--ds-text-tertiary);
-  opacity: 0;
-  transition: opacity 0.2s, background 0.2s, color 0.2s;
-}
-
-.recent-item:hover .recent-clear-btn {
-  opacity: 1;
-}
-
-/* Hide clear btn when active to prioritize the dot indicator */
-.recent-item.active .recent-clear-btn {
-  display: none;
-}
-
-.recent-clear-btn:hover {
-  background: var(--ds-white-a10);
-  color: var(--ds-accent-red);
-}
-
-/* ── Header Polish ── */
-.toolbar-left {
-  flex: 1;
-  min-width: 0;
-  margin-right: 16px;
-}
-
-.header-text-block {
-  min-width: 0;
-  flex: 1;
-}
-
-.header-value {
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 600;
-  color: var(--ds-text-inverse);
 }

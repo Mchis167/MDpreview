@@ -12,24 +12,22 @@
   user-select: text;
 
   /* Premium Scroll Mask */
-  --mask-top: 240px;
+  --mask-top: 40px;
   --mask-bottom: 80px;
+  --mask-bottom-stop: 96%;
+  --_scroll-mask: linear-gradient(to bottom,
+      transparent 0%,
+      black var(--mask-top),
+      black calc(var(--mask-bottom-stop) - var(--mask-bottom)),
+      transparent var(--mask-bottom-stop));
 
-  mask-image: linear-gradient(to bottom,
-      transparent 0%,
-      black var(--mask-top),
-      black calc(100% - var(--mask-bottom)),
-      transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom,
-      transparent 0%,
-      black var(--mask-top),
-      black calc(100% - var(--mask-bottom)),
-      transparent 100%);
+  mask-image: var(--_scroll-mask);
+  -webkit-mask-image: var(--_scroll-mask);
 }
 
 .md-content-inner {
-  padding: 160px 0;
-  transition: opacity 0.3s ease;
+  padding: 120px 0;
+  transition: opacity var(--ds-transition-main);
 }
 
 /* ── Content Skeleton ──────────────────────────────────── */
@@ -745,17 +743,28 @@
   }
 }
 
-/* Floating Comment Trigger */
-.comment-trigger {
+/* Floating Triggers (Comment & Collect) */
+.comment-trigger,
+.collect-trigger {
   position: fixed;
   opacity: 0;
   pointer-events: none;
   z-index: 1000;
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: scale(0.8);
+  /* Premium Glassmorphism */
+  background: var(--ds-white-a10) !important;
+  backdrop-filter: blur(var(--ds-blur-md)) !important;
+  -webkit-backdrop-filter: blur(var(--ds-blur-md)) !important;
+  border: 1px solid var(--ds-white-a20) !important;
+  box-shadow: 0 8px 32px var(--ds-black-a30) !important;
 }
 
-.comment-trigger.show {
+.comment-trigger.show,
+.collect-trigger.show {
   opacity: 1;
   pointer-events: auto;
+  transform: scale(1);
 }
 
 .comment-item-snippet .highlight-selection {

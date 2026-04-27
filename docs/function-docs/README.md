@@ -10,11 +10,14 @@ Tài liệu các module và function quan trọng của MDpreview.
 
 | File | Mô tả |
 |---|---|
+| [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) | Centralized UI factory (Buttons, Segmented Control, Radius logic) |
 | [CORE_APP.md](CORE_APP.md) | Global state (AppState), loadFile, boot sequence, theme, socket |
 | [TABS.md](TABS.md) | Tab management, multi-select, batch close |
 | [EDITOR.md](EDITOR.md) | Textarea editor, undo/redo, dirty tracking, save |
 | [WORKSPACE.md](WORKSPACE.md) | Workspace CRUD, switching, Electron API integration |
 | [TREE.md](TREE.md) | File tree render, sort, search, drag-and-drop, file operations |
+| [SHORTCUT_SERVICE.md](SHORTCUT_SERVICE.md) | Hệ thống quản lý phím tắt tập trung (Service) |
+| [SHORTCUTS_COMPONENT.md](SHORTCUTS_COMPONENT.md) | Registry định nghĩa toàn bộ phím tắt và hành động |
 | [MARKDOWN_VIEWER.md](MARKDOWN_VIEWER.md) | Mode switching (read/edit/comment/collect), sub-component lifecycle |
 | [MENU_SHIELD.md](MENU_SHIELD.md) | Unified floating menu shell — positioning, glassmorphism, singleton |
 | [WORKSPACE_SWITCHER.md](WORKSPACE_SWITCHER.md) | Workspace name display molecule trong Sidebar header |
@@ -30,6 +33,7 @@ Tài liệu các module và function quan trọng của MDpreview.
 | [SEARCH_SERVICE.md](SEARCH_SERVICE.md) | Bộ não fuzzy search và scoring engine hỗ trợ tìm kiếm file/folder |
 | [TAB_BAR_COMPONENT.md](TAB_BAR_COMPONENT.md) | Organism quản lý thanh Tab (drag & drop, context menu) |
 | [TAB_PREVIEW.md](TAB_PREVIEW.md) | Hover Preview với Render Window strategy và Glassmorphism |
+| [EDIT_TOOLBAR.md](EDIT_TOOLBAR.md) | Thanh công cụ soạn thảo dàn trải với phân cấp Header H1-H6 |
 
 ---
 
