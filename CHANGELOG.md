@@ -2,7 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Not Committed] — 2026-04-27 10:45
+## [Not Committed] — 2026-04-27 12:30
+
+### 🎉 Added
+- **Pin Tab Shortcut**: Bổ sung phím tắt `Mod+Shift+P` giúp ghim/bỏ ghim tab đang active nhanh chóng.
+- **Tabs API**: Export hàm `togglePin` hỗ trợ đảo ngược trạng thái ghim của tab.
+
+### 🔧 Changed
+- **Pinned Tab Closure**: Cho phép lệnh "Close Selected" (Cmd+W khi chọn nhiều) đóng cả các tab đang được ghim nếu người dùng chủ động chọn chúng.
+- **Shortcuts Popover**: Tổ chức lại bảng hướng dẫn phím tắt chuyên nghiệp hơn, thêm phím tắt Pin Tab và loại bỏ các mục trùng lặp.
+
+### 🐛 Fixed
+- **Tab Selection Bug**: Sửa lỗi chọn dải tab (Shift+Click) hoạt động không chính xác khi danh sách có tab ghim. Logic đã được đồng bộ hóa hoàn toàn với thứ tự hiển thị trực quan.
 
 ## [1.9.0] — 2026-04-27 10:40
 

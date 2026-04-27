@@ -39,6 +39,8 @@ Ghi lại các quyết định thiết kế và kỹ thuật quan trọng trong 
 | 2026-04-27 | [20260427-tab-filename-masking.md](20260427-tab-filename-masking.md) | Sử dụng Gradient Masking để xử lý chồng đè tên file | accepted |
 | 2026-04-27 | [20260427-server-payload-limit.md](20260427-server-payload-limit.md) | Nâng giới hạn Payload Server lên 50MB cho file lớn | accepted |
 | 2026-04-27 | [20260427-tab-management-strategy.md](20260427-tab-management-strategy.md) | Chiến lược quản lý Tab: Ghim, Phân vùng và Co giãn | accepted |
+| 2026-04-27 | [20260427-tab-logic-visual-sync.md](20260427-tab-logic-visual-sync.md) | Đồng bộ logic tab với thứ tự hiển thị trực quan | accepted |
+| 2026-04-27 | [20260427-explicit-selection-closure.md](20260427-explicit-selection-closure.md) | Ưu tiên lựa chọn thủ công hơn tính bảo vệ của tab ghim | accepted |
 
 ---
 

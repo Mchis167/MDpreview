@@ -245,6 +245,22 @@ const TabsModule = (function () {
     }
   }
 
+  function togglePin(path) {
+    if (!path) return;
+    if (state.pinnedFiles.includes(path)) {
+      unpin(path);
+    } else {
+      pin(path);
+    }
+  }
+
+  // ── Private Helpers ─────────────────────────────────────
+  function _getDisplayOrder() {
+    const pinned = state.pinnedFiles.filter(f => state.openFiles.includes(f));
+    const unpinned = state.openFiles.filter(f => !state.pinnedFiles.includes(f));
+    return [...pinned, ...unpinned];
+  }
+
   // ── Multi-selection Logic ───────────────────────────────
   function toggleSelect(path, _skipSync = false) {
     const idx = state.selectedFiles.indexOf(path);
@@ -258,19 +274,20 @@ const TabsModule = (function () {
   }
 
   function selectRange(path, skipSync = false) {
-    if (!state.lastSelectedFile || !state.openFiles.includes(state.lastSelectedFile)) {
+    const displayOrder = _getDisplayOrder();
+    if (!state.lastSelectedFile || !displayOrder.includes(state.lastSelectedFile)) {
       toggleSelect(path, skipSync);
       return;
     }
 
-    const startIdx = state.openFiles.indexOf(state.lastSelectedFile);
-    const endIdx = state.openFiles.indexOf(path);
+    const startIdx = displayOrder.indexOf(state.lastSelectedFile);
+    const endIdx = displayOrder.indexOf(path);
     const min = Math.min(startIdx, endIdx);
     const max = Math.max(startIdx, endIdx);
 
     const currentSet = new Set(state.selectedFiles);
     for (let i = min; i <= max; i++) {
-      currentSet.add(state.openFiles[i]);
+      currentSet.add(displayOrder[i]);
     }
     state.selectedFiles = Array.from(currentSet);
     render();
@@ -357,7 +374,7 @@ const TabsModule = (function () {
   }
 
   function closeSelected() {
-    const files = state.selectedFiles.filter(f => !state.pinnedFiles.includes(f));
+    const files = [...state.selectedFiles];
     if (files.length === 0) return;
 
     const drafts = files.filter(f => f.startsWith("__DRAFT_"));
@@ -482,9 +499,7 @@ const TabsModule = (function () {
     if (oldIndex === newIndex) return;
     
     // Calculate display order to identify what was actually dragged
-    const pinned = state.pinnedFiles.filter(f => state.openFiles.includes(f));
-    const unpinned = state.openFiles.filter(f => !state.pinnedFiles.includes(f));
-    const displayOrder = [...pinned, ...unpinned];
+    const displayOrder = _getDisplayOrder();
     
     const draggedItem = displayOrder[oldIndex];
     if (!draggedItem) return;
@@ -496,7 +511,8 @@ const TabsModule = (function () {
       const pOldIdx = state.pinnedFiles.indexOf(draggedItem);
       // Pinned tabs are always at the start, so newIndex is relative to pinnedFiles
       // but we need to ensure it doesn't exceed pinned length
-      const pNewIdx = Math.min(newIndex, pinned.length - 1);
+      const pinnedCount = state.pinnedFiles.filter(f => state.openFiles.includes(f)).length;
+      const pNewIdx = Math.min(newIndex, pinnedCount - 1);
       
       state.pinnedFiles.splice(pOldIdx, 1);
       state.pinnedFiles.splice(pNewIdx, 0, draggedItem);
@@ -558,6 +574,7 @@ const TabsModule = (function () {
     reorder,
     pin,
     unpin,
+    togglePin,
     syncSelectionFromTree,
     getActive: () => state.activeFile,
     getOpenFiles: () => state.openFiles,

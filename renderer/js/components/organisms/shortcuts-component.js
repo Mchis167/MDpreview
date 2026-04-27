@@ -41,13 +41,15 @@ class ShortcutsComponent {
       {
         title: 'Tab Management',
         items: [
-          { label: 'Select All Tabs', keys: ['Ctrl', 'A'] },
-          { label: 'Close All Tabs', keys: ['Ctrl', 'Shift', 'W'] },
-          { label: 'Deselect Tabs', keys: ['Esc'] },
-          { label: 'Range Selection', keys: ['Shift', 'Click'] },
-          { label: 'Multi-selection', keys: ['Ctrl', 'Click'] }
-        ]
-      },
+           { label: 'Select All Tabs', keys: ['Ctrl', 'A'] },
+           { label: 'Close Active Tab', keys: ['Ctrl', 'W'] },
+           { label: 'Close All Tabs', keys: ['Ctrl', 'Shift', 'W'] },
+           { label: 'Toggle Pin Tab', keys: ['Ctrl', 'Shift', 'P'] },
+           { label: 'Deselect Tabs', keys: ['Esc'] },
+           { label: 'Range Selection', keys: ['Shift', 'Click'] },
+           { label: 'Multi-selection', keys: ['Ctrl', 'Click'] }
+         ]
+       },
       {
         title: 'Sidebar & Workspace',
         items: [
@@ -56,18 +58,15 @@ class ShortcutsComponent {
           { label: 'Rename Selected', keys: ['Enter'] },
           { label: 'Duplicate File', keys: ['Ctrl', 'D'] },
           { label: 'Delete Selected', keys: this.isMac ? ['Ctrl', 'Backspace'] : ['Delete'] },
-          { label: 'Hide / Unhide', keys: ['Ctrl', 'Shift', 'H'] },
-          { label: 'Collapse All Folders', keys: ['Ctrl', '['] },
-          { label: 'Collapse Other Folders', keys: ['Ctrl', 'Shift', '['] },
-          { label: 'Toggle Sidebar', keys: ['Ctrl', 'B'] },
-          { label: 'Focus Search', keys: ['Ctrl', 'F'] }
-        ]
-      },
+           { label: 'Workspace Picker', keys: ['Ctrl', 'O'] },
+           { label: 'Hide / Unhide', keys: ['Ctrl', 'Shift', 'H'] },
+           { label: 'Collapse All Folders', keys: ['Ctrl', '['] },
+           { label: 'Collapse Other Folders', keys: ['Ctrl', 'Shift', '['] }
+         ]
+       },
       {
         title: 'General',
         items: [
-          { label: 'Workspace Picker', keys: ['Ctrl', 'O'] },
-          { label: 'Close Active Tab', keys: ['Ctrl', 'W'] },
           { label: 'Keyboard Shortcuts', keys: ['Ctrl', '/'] },
           { label: 'Open Settings', keys: ['Ctrl', ','] },
           { label: 'Close / Cancel', keys: ['Esc'] }

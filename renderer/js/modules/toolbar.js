@@ -62,6 +62,16 @@ function initGlobalShortcuts() {
       return;
     }
 
+    // ── Mod+Shift+P — Toggle Pin Active Tab ───────────────
+    if (mod && e.shiftKey && e.key.toLowerCase() === 'p') {
+      e.preventDefault();
+      if (typeof TabsModule !== 'undefined') {
+        const active = TabsModule.getActive();
+        if (active) TabsModule.togglePin(active);
+      }
+      return;
+    }
+
     // ── Mod+O — Workspace Picker ─────────────────────────
     if (mod && !e.shiftKey && !e.ctrlKey && e.key === 'o') {
       e.preventDefault();
