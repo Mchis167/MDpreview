@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Not Committed] — 2026-04-27 12:30
+## [1.9.1] — 2026-04-27 12:35
 
 ### 🎉 Added
 - **Pin Tab Shortcut**: Bổ sung phím tắt `Mod+Shift+P` giúp ghim/bỏ ghim tab đang active nhanh chóng.
