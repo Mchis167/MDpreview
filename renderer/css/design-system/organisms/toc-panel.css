@@ -38,21 +38,24 @@
 
 /* ── TOC Header ── */
 .toc-header {
-  padding: var(--ds-space-sm) var(--ds-space-sm) var(--ds-space-sm) var(--ds-space-sm);
+  padding: var(--ds-space-sm) var(--ds-space-sm);
   display: flex;
   align-items: center;
   border-bottom: 1px solid var(--ds-border-subtle);
-  gap: var(--ds-space-md);
+  position: relative;
+  min-height: 48px; /* Ensure enough height for absolute title */
 }
 
 .toc-header h3 {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: var(--ds-font-md);
   font-weight: 700;
   color: var(--ds-text-primary);
   margin: 0;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  pointer-events: none; /* Allow clicks to pass through to underlying elements if any */
 }
 
 .toc-header .ds-spacer {
@@ -240,14 +243,28 @@
 }
 
 /* ── Floating TOC Button ── */
-.floating-toc-btn {
+.floating-action-group {
   position: absolute;
   top: var(--_toc-top);
   right: var(--_toc-right);
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-sm);
   z-index: var(--ds-z-index-popover);
+  pointer-events: none;
+}
+
+.floating-action-group > * {
+  pointer-events: auto;
+}
+
+.floating-toc-btn {
   transition: all var(--ds-transition-normal) var(--ds-ease-spring);
   box-shadow: var(--ds-shadow-lg);
-  pointer-events: auto;
+}
+
+.floating-combo-btn {
+  box-shadow: var(--ds-shadow-lg);
 }
 
 .floating-toc-btn.is-disabled {

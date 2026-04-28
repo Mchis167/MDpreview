@@ -28,7 +28,7 @@ const ProjectMap = (() => {
 
   let _mainViewer = null;
   let _scale = 0.15;
-  let _zoomFactor = 1.0;
+  let _zoomFactor = 0.7;
   let _updateTimer = null;
   let _currentContent = '';
   let _lastRequestId = 0;
@@ -184,7 +184,7 @@ const ProjectMap = (() => {
         }
       });
 
-      const zoomLabel = DesignSystem.createElement('span', 'ds-project-map__zoom-label', { text: '100%' });
+      const zoomLabel = DesignSystem.createElement('span', 'ds-project-map__zoom-label', { text: '70%' });
       
       const btnIn = DesignSystem.createButton({
         leadingIcon: 'plus',
@@ -192,7 +192,7 @@ const ProjectMap = (() => {
         offLabel: true,
         title: 'Zoom In',
         className: 'ds-project-map__btn-in',
-        disabled: true, // Initial 100%
+        disabled: false, // Initial 70%
         onClick: (e) => {
           e.stopPropagation();
           _zoomFactor = Math.min(1.0, _zoomFactor + 0.1);

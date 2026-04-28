@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.14.0] — 2026-04-29 03:40
+
+### 🎉 Added
+- **Floating Action Group**: Triển khai nhóm các nút hành động nổi (Floating Group) giúp quản lý tập trung toàn bộ overlay buttons (TOC, Share, Sync) tại một vị trí, giải quyết xung đột layout và sự kiện.
+- **Menu Shield & Anchored Positioning**: 
+    - Nâng cấp `MenuShield` với chiến lược định vị theo phần tử neo (Anchor).
+    - **Smart Flip & Bounds**: Tự động lật hướng (top/bottom/left/right) và giữ menu luôn nằm trong vùng an toàn của Viewport.
+    - **Frame Synchronization**: Sử dụng `requestAnimationFrame` để đảm bảo định vị chính xác tuyệt đối sau khi DOM được render.
+- **Combo Button Evolution**:
+    - Tái cấu trúc `ComboButton` theo mô hình **Local Variables Pattern**, cho phép ghi đè mọi thuộc tính (màu sắc, kích thước, hiệu ứng) theo từng variant.
+    - **High-Fidelity Transitions**: Bổ sung hiệu ứng xoay icon toggle khi mở menu và trạng thái `.is-open` chuyên nghiệp.
+- **Stable Layout Border Pattern**: Triển khai kỹ thuật **Transparent Border** trên toàn bộ hệ thống Button để triệt tiêu hiện tượng rung lắc layout (Layout Shift) khi chuyển đổi giữa các trạng thái hover/active.
+- **Share Icon Suite**: Bổ sung các icon `share` và `share-2` vào Registry nội bộ.
+- **Architecture ADRs**: 
+    - `menu-anchoring-strategy.md`: Quy định về cơ chế định vị menu thông minh.
+    - `stable-layout-border-pattern.md`: Quy chuẩn kỹ thuật về việc sử dụng border tàng hình để ổn định giao diện.
+
+### 🔧 Changed
+- **Design Tokens Polish**: Tái cấu trúc file `tokens.css` với định dạng thụt lề chuẩn và bổ sung các token border chuyên biệt (`--ds-border-selected-subtle`, `--ds-border-xsubtle`).
+- **Project Map Refinement**: 
+    - Tối ưu hóa màu sắc vùng highlight (viewport indicator) để tăng độ tương phản và thẩm mỹ.
+    - Tinh chỉnh khoảng cách thanh Zoom footer giúp giao diện gọn gàng hơn.
+- **TOC Header Center Alignment**: Chuyển đổi tiêu đề TOC sang định dạng căn giữa tuyệt đối (Absolute Centering), tạo sự cân bằng thị giác khi kết hợp với nút đóng và switcher.
+
+### 🐞 Fixed
+- **Menu Clipping**: Khắc phục triệt để lỗi menu bị mất một phần khi mở ở sát mép màn hình thông qua cơ chế Safe Padding mới.
+- **Layout Shift on Interaction**: Sửa lỗi giao diện bị nhảy 1px khi click hoặc hover vào các nút có viền trong hệ thống Design System.
+
 ## [1.13.0] — 2026-04-29 00:50
 
 ### 🎉 Added

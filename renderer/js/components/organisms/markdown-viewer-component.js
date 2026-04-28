@@ -14,6 +14,8 @@ class MarkdownViewerComponent {
     this.viewport = null;
     this._scrollTopBtn = null;
     this._tocBtn = null;
+    this._comboBtn = null;
+    this._floatingGroup = null;
     this._tocUpdateTimeout = null;
     this.init();
   }
@@ -67,6 +69,8 @@ class MarkdownViewerComponent {
       
       this.mount.innerHTML = '';
       this._tocBtn = null;
+      this._comboBtn = null;
+      this._floatingGroup = null;
       this._scrollTopBtn = null;
       
       // Reset TOC internal state to clear old content and show skeleton
@@ -151,8 +155,15 @@ class MarkdownViewerComponent {
     if (!this._scrollTopBtn) this._renderFloatingScrollTop();
     
     if (mode === 'read' || mode === 'comment' || mode === 'collect') {
-      if (!this._tocBtn) this._renderFloatingTOC();
-      this._tocBtn.style.display = 'flex';
+      if (!this._floatingGroup) this._renderFloatingActions();
+      
+      if (this._floatingGroup && !this.mount.contains(this._floatingGroup)) {
+        this.mount.appendChild(this._floatingGroup);
+      }
+
+      if (this._floatingGroup) {
+        this._floatingGroup.style.display = 'flex';
+      }
       
       if (TOCComponent && TOCComponent.isVisible()) {
         TOCComponent.show(this.mount);
@@ -162,7 +173,8 @@ class MarkdownViewerComponent {
         if (TOCComponent) TOCComponent.updateActiveHeading(this.viewport);
       };
     } else {
-      if (this._tocBtn) this._tocBtn.style.display = 'none';
+      if (this._floatingGroup) this._floatingGroup.style.display = 'none';
+      
       if (TOCComponent) {
         TOCComponent.hide();
         this.mount.classList.remove('has-toc');
@@ -222,9 +234,13 @@ class MarkdownViewerComponent {
   }
 
   /**
-   * Create and manage the floating TOC button
+   * Create and manage the floating action group (TOC + Combo)
    */
-  _renderFloatingTOC() {
+  _renderFloatingActions() {
+    this._floatingGroup = DesignSystem.createElement('div', 'floating-action-group');
+    this._floatingGroup.id = 'floating-action-group'; 
+
+    // 1. TOC Button
     this._tocBtn = DesignSystem.createButton({
       variant: 'subtitle',
       offLabel: true,
@@ -239,7 +255,33 @@ class MarkdownViewerComponent {
       if (TOCComponent) TOCComponent.toggle(this.mount);
     };
 
-    this.mount.prepend(this._tocBtn);
+    // 2. Combo Button
+    this._comboBtn = DesignSystem.createComboButton({
+      label: 'Share',
+      variant: 'subtitle',
+      leadingIcon: 'share-2',
+      className: 'floating-combo-btn',
+      tooltip: 'Share Document',
+      mainAction: () => {
+        console.warn('Share clicked');
+      },
+      toggleTooltip: 'More Actions',
+      toggleAction: () => {
+        DesignSystem.createMenu(this._comboBtn, [
+          { label: 'Copy Link', icon: 'link', onClick: () => console.warn('Copy Link') },
+          { label: 'Export PDF', icon: 'file-text', onClick: () => console.warn('Export PDF') },
+          { divider: true },
+          { label: 'Settings', icon: 'settings', onClick: () => {
+            if (window.AppState) window.AppState.onModeChange('settings');
+          }}
+        ], { align: 'right' });
+      }
+    });
+
+    this._floatingGroup.appendChild(this._tocBtn);
+    this._floatingGroup.appendChild(this._comboBtn);
+
+    this.mount.appendChild(this._floatingGroup);
     
     // Immediate initial sync
     this._updateTOC();

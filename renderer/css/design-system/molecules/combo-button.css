@@ -1,0 +1,144 @@
+/* ── Design System: Combo Button (Molecule) ── */
+/* Cloned from design-system/atoms/button.css local variable pattern */
+
+.ds-combo-btn {
+  /* ── Local Variables (overridable per variant) ── */
+  --_radius: var(--ds-radius-widget);
+  --_height: var(--ds-space-2xl);
+  --_bg: transparent;
+  --_color: var(--ds-text-primary);
+  --_bg-hover: var(--ds-layer-subtle-hover);
+  --_transform-hover: translateY(-1px);
+  --_divider: var(--ds-border-subtle);
+  --_opacity-toggle: 0.8;
+
+  display: inline-flex;
+  align-items: stretch;
+  height: var(--_height);
+  border-radius: var(--_radius);
+  background: var(--_bg);
+  color: var(--_color);
+  font-family: var(--ds-font-family-text);
+  font-size: var(--ds-font-md);
+  font-weight: 600;
+  transition: all var(--ds-transition-fast);
+  overflow: hidden;
+  user-select: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  /* Removed the default/click border effect */
+}
+
+.ds-combo-btn:hover {
+  background: var(--_bg-hover);
+  color: var(--_color-hover, var(--_color));
+  transform: var(--_transform-hover);
+  box-shadow: var(--ds-shadow-md);
+}
+
+.ds-combo-btn:active {
+  transform: translateY(0);
+}
+
+.ds-combo-btn svg,
+.ds-combo-btn i {
+  width: var(--ds-space-md);
+  height: var(--ds-space-md);
+  flex-shrink: 0;
+}
+
+/* ── Components ── */
+.ds-combo-btn-main {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--ds-space-sm);
+  gap: var(--ds-space-2xs);
+  color: inherit;
+  border-right: 1px solid var(--_divider);
+  transition: background var(--ds-transition-fast);
+}
+
+.ds-combo-btn-main .ds-btn-text {
+  margin: 0 var(--ds-space-2xs);
+}
+
+.ds-combo-btn-main:hover {
+  background: var(--ds-white-a05);
+}
+
+.ds-combo-btn-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ds-space-2xl);
+  color: inherit;
+  opacity: var(--_opacity-toggle);
+  transition: all var(--ds-transition-fast);
+}
+
+.ds-combo-btn-toggle:hover {
+  background: var(--ds-white-a05);
+  opacity: 1;
+}
+
+.ds-combo-btn-toggle svg {
+  transition: transform var(--ds-transition-main);
+}
+
+/* ── Variants (cloned from ds-btn) ── */
+.ds-combo-btn-primary {
+  --_bg: var(--ds-layer-accent-default);
+  --_color: var(--ds-text-on-accent);
+  --_bg-hover: var(--ds-layer-accent-hover);
+  --_divider: rgba(255, 255, 255, 0.2);
+}
+
+.ds-combo-btn-ghost,
+.ds-combo-btn-subtle-light {
+  --_bg: var(--ds-layer-subtle-default);
+  --_color: var(--ds-text-primary);
+  --_bg-hover: var(--ds-layer-subtle-hover);
+  --_transform-hover: none;
+}
+
+.ds-combo-btn-subtle-dark {
+  --_bg: var(--ds-layer-subtle-dark-default);
+  --_color: var(--ds-text-primary);
+  --_bg-hover: var(--ds-layer-subtle-dark-hover);
+  --_transform-hover: none;
+}
+
+.ds-combo-btn-subtitle {
+  --_bg: var(--ds-layer-surface-default);
+  --_color: var(--ds-text-secondary);
+  --_bg-hover: var(--ds-layer-surface-hover);
+  --_color-hover: var(--ds-text-primary);
+  --_divider: var(--ds-border-subtle);
+  backdrop-filter: blur(var(--ds-blur-md));
+  -webkit-backdrop-filter: blur(var(--ds-blur-md));
+}
+
+.ds-combo-btn[disabled],
+.ds-combo-btn.is-disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none !important;
+  pointer-events: none;
+}
+
+/* ── Open/Active State ──────────────────────────────── */
+.ds-combo-btn.is-open {
+  background: var(--_bg-hover) !important;
+  color: var(--_color-hover, var(--_color));
+  border: 1px solid var(--ds-border-selected-subtle);
+  box-shadow: var(--ds-shadow-md);
+  transform: translateY(0);
+}
+
+.ds-combo-btn.is-open .ds-combo-btn-toggle svg {
+  transform: rotate(180deg);
+}
+
+.ds-combo-btn.is-open .ds-combo-btn-toggle {
+  background: var(--ds-white-a05);
+}

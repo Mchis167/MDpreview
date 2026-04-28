@@ -69,12 +69,12 @@ class TabBarComponent {
     // ── 1. Left Section: Sidebar Toggle ──────────────────
     const toggleWrapper = document.createElement('div');
     toggleWrapper.className = 'tab-bar__sidebar-toggle-wrapper';
-    
+
     const isCollapsed = localStorage.getItem('mdpreview_sidebar_left_collapsed') === 'true';
     const initialIcon = isCollapsed ? 'sidebar-expand' : 'sidebar-collapse';
     const sidebarToggle = DesignSystem.createHeaderAction(initialIcon, 'Toggle Sidebar (Mod+B)', () => this.options.onToggleSidebar(), 'sidebar-toggle-btn');
     toggleWrapper.appendChild(sidebarToggle);
-    
+
     this.mount.appendChild(toggleWrapper);
 
     this.mount.appendChild(this._createDivider());
@@ -285,7 +285,7 @@ class TabBarComponent {
 
       siblings.forEach((sib, idx) => {
         if (sib === itemEl) return;
-        
+
         // TC: Only animate siblings in the same group
         const sibIsPinned = sib.classList.contains('is-pinned');
         if (sibIsPinned !== isPinnedDrag) {
@@ -411,10 +411,10 @@ class TabBarComponent {
     // Only show "Close Selected" if more than 1 selected
     if (this.state.selectedFiles.length > 1) {
       items.push({ divider: true });
-      items.push({ 
-        label: `Close Selected (${this.state.selectedFiles.length})`, 
-        icon: 'check-square', 
-        onClick: () => this.options.onCloseSelected() 
+      items.push({
+        label: `Close Selected (${this.state.selectedFiles.length})`,
+        icon: 'check-square',
+        onClick: () => this.options.onCloseSelected()
       });
     }
 

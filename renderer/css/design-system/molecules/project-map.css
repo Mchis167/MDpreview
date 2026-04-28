@@ -50,9 +50,9 @@
   top: 0;
   left: 0;
   width: 100%;
-  background: color-mix(in sRGB, var(--ds-accent) 10%, transparent);
+  background: color-mix(in sRGB, var(--ds-accent) 5%, transparent);
   border-top: 1px solid color-mix(in sRGB, var(--ds-accent) 10%, transparent);
-  border-bottom: 1px solid color-mix(in sRGB, var(--ds-accent) 20%, transparent);
+  border-bottom: 1px solid color-mix(in sRGB, var(--ds-accent) 10%, transparent);
   z-index: 10;
   pointer-events: none;
   transition: all var(--ds-transition-fast);
@@ -73,7 +73,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--ds-space-md);
+  gap: var(--ds-space-2xs);
   padding: var(--ds-space-2xs) var(--ds-space-sm);
   background: var(--ds-bg-popover-glass);
   border-top: 1px solid var(--ds-border-subtle);

@@ -48,6 +48,9 @@ Logic bên trong:
 ### `render()`
 Tạo sub-component phù hợp dựa trên `state.mode` và mount vào DOM.
 
+### `_renderFloatingActions()`
+Tạo nhóm các nút hành động nổi (Floating Action Group). Bao gồm nút Share (Combo Button) và các nút điều khiển chế độ xem (TOC, Project Map). Nhóm này được mount vào `#md-viewer-mount` dưới dạng overlay.
+
 ### `_renderFloatingScrollTop()`
 Tạo nút "↑ Scroll to top" floating. Hiển thị khi scroll > 300px, ẩn khi gần top.
 
@@ -141,4 +144,4 @@ Mỗi component tự nullify `activeInstance` qua `onClose` callback khi bị đ
 
 ---
 
-*Document — 2026-04-28*
+*Document — 2026-04-29*

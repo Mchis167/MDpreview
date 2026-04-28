@@ -56,6 +56,8 @@ Ghi lại các quyết định thiết kế và kỹ thuật quan trọng trong 
 | 2026-04-28 | [20260428-project-map-mirror-fidelity.md](20260428-project-map-mirror-fidelity.md) | Chiến lược Phản chiếu (Mirroring) cho Project Map | accepted |
 | 2026-04-28 | [20260428-project-map-scroll-stabilization.md](20260428-project-map-scroll-stabilization.md) | Chiến lược Ổn định Thanh cuộn cho Project Map | accepted |
 | 2026-04-28 | [20260428-project-map-zoom-interaction-strategy.md](20260428-project-map-zoom-interaction-strategy.md) | Chiến lược Zoom cục bộ và Tương tác Footer Bar cho Project Map | accepted |
+| 2026-04-29 | [20260429-menu-anchoring-strategy.md](20260429-menu-anchoring-strategy.md) | Chiến lược định vị Menu theo phần tử neo (Anchored Positioning) | accepted |
+| 2026-04-29 | [20260429-stable-layout-border-pattern.md](20260429-stable-layout-border-pattern.md) | Pattern ổn định Layout qua Border tàng hình (Transparent Border) | accepted |
 
 
 ---

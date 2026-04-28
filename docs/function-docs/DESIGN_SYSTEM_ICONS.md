@@ -51,4 +51,4 @@ Hệ thống sử dụng các icon từ bộ **Remix Icon** và **Lucide**, đư
 
 ---
 
-*Document — 2026-04-28*
+*Document — 2026-04-29*

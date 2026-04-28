@@ -41,7 +41,9 @@ const MenuShield = (() => {
     document.body.appendChild(shield);
 
     // 5. Positioning
-    _calculatePosition(shield, options);
+    requestAnimationFrame(() => {
+      _calculatePosition(shield, options);
+    });
 
     // 6. Event Listeners
     const _handleOutsideClick = (e) => {
@@ -94,47 +96,74 @@ const MenuShield = (() => {
     const { event, anchor, position } = options;
     const rect = el.getBoundingClientRect();
 
-    // Sync with Design Tokens
     const style = getComputedStyle(document.documentElement);
-    const margin = parseInt(style.getPropertyValue('--ds-space-lg')) || 8;
+    const margin = parseInt(style.getPropertyValue('--ds-space-xs')) || 4;
     const safePadding = parseInt(style.getPropertyValue('--ds-space-md')) || 12;
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
 
     let x = 0, y = 0;
+    let useRight = false;
+    let useBottom = false;
+    const align = options.align || 'auto';
 
     if (position) {
-      // 1. Manual position override
       x = position.x;
       y = position.y;
     } else if (event) {
-      // 2. Position by Mouse Event (standard context menu)
       x = event.clientX;
       y = event.clientY;
     } else if (anchor) {
-      // 3. Smart Anchor Positioning (Avoid overlapping the trigger)
       const anchorRect = anchor.getBoundingClientRect();
-      x = anchorRect.left;
 
-      // Determine if it should be above or below
+      // Horizontal Alignment
+      if (align === 'right') {
+        useRight = true;
+        x = screenWidth - anchorRect.right;
+      } else if (align === 'left') {
+        x = anchorRect.left;
+      } else {
+        if (anchorRect.left + rect.width > screenWidth - margin) {
+          useRight = true;
+          x = screenWidth - anchorRect.right;
+        } else {
+          x = anchorRect.left;
+        }
+      }
+
+      // Vertical Alignment
       const spaceBelow = screenHeight - anchorRect.bottom;
       if (spaceBelow < rect.height + margin && anchorRect.top > rect.height + margin) {
-        // Not enough space below, show ABOVE
-        y = anchorRect.top - rect.height - margin;
+        useBottom = true;
+        y = screenHeight - anchorRect.top + margin;
       } else {
-        // Show BELOW
         y = anchorRect.bottom + margin;
       }
     }
 
-    // 4. Global Screen Bounds Check (Safety Padding)
-    if (x + rect.width > screenWidth) x = screenWidth - rect.width - safePadding;
-    if (y + rect.height > screenHeight) y = screenHeight - rect.height - safePadding;
-    if (x < safePadding) x = safePadding;
-    if (y < safePadding) y = safePadding;
+    // Safety bounds for X
+    if (useRight) {
+      if (x < safePadding) x = safePadding;
+      el.style.right = `${x}px`;
+      el.style.left = 'auto';
+    } else {
+      if (x < safePadding) x = safePadding;
+      if (x + rect.width > screenWidth - safePadding) x = screenWidth - rect.width - safePadding;
+      el.style.left = `${x}px`;
+      el.style.right = 'auto';
+    }
 
-    el.style.left = `${x}px`;
-    el.style.top = `${y}px`;
+    // Safety bounds for Y
+    if (useBottom) {
+      if (y < safePadding) y = safePadding;
+      el.style.bottom = `${y}px`;
+      el.style.top = 'auto';
+    } else {
+      if (y < safePadding) y = safePadding;
+      if (y + rect.height > screenHeight - safePadding) y = screenHeight - rect.height - safePadding;
+      el.style.top = `${y}px`;
+      el.style.bottom = 'auto';
+    }
   }
 
   return {

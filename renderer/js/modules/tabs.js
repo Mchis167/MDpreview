@@ -25,7 +25,7 @@ const TabsModule = (function () {
           toggleSelect(path);
         } else {
           deselectAll();
-          
+
           // Focus shift: Clear sidebar selection when switching files via tabs
           if (typeof TreeModule !== 'undefined') {
             TreeModule.deselectAll(true);
@@ -145,7 +145,7 @@ const TabsModule = (function () {
       activeFile: state.activeFile
     };
     localStorage.setItem(key, JSON.stringify(data));
-    
+
     // Trigger global state sync if possible
     if (AppState.savePersistentState) {
       AppState.savePersistentState();
@@ -163,7 +163,7 @@ const TabsModule = (function () {
 
     const key = `tabs_${workspaceId}`;
     const saved = localStorage.getItem(key);
-    
+
     if (typeof DraftModule !== 'undefined') {
       DraftModule.loadFromStorage(workspaceId);
     }
@@ -182,7 +182,7 @@ const TabsModule = (function () {
       state.openFiles = [];
       state.activeFile = null;
     }
-    
+
     state.selectedFiles = [];
     render();
 
@@ -502,15 +502,15 @@ const TabsModule = (function () {
 
   function reorder(oldIndex, newIndex) {
     if (oldIndex === newIndex) return;
-    
+
     // Calculate display order to identify what was actually dragged
     const displayOrder = _getDisplayOrder();
-    
+
     const draggedItem = displayOrder[oldIndex];
     if (!draggedItem) return;
 
     const isPinned = state.pinnedFiles.includes(draggedItem);
-    
+
     if (isPinned) {
       // Reorder within pinnedFiles
       const pOldIdx = state.pinnedFiles.indexOf(draggedItem);
@@ -518,14 +518,14 @@ const TabsModule = (function () {
       // but we need to ensure it doesn't exceed pinned length
       const pinnedCount = state.pinnedFiles.filter(f => state.openFiles.includes(f)).length;
       const pNewIdx = Math.min(newIndex, pinnedCount - 1);
-      
+
       state.pinnedFiles.splice(pOldIdx, 1);
       state.pinnedFiles.splice(pNewIdx, 0, draggedItem);
     } else {
       // Reorder within unpinned logic in openFiles
       // This is trickier because openFiles contains everything
       const [item] = state.openFiles.splice(state.openFiles.indexOf(draggedItem), 1);
-      
+
       // Calculate where to insert in openFiles to match the intended newIndex in displayOrder
       // If newIndex is within pinned range, unpinned item moves to the very beginning of unpinned section
       const targetInDisplay = displayOrder[newIndex];
@@ -535,10 +535,10 @@ const TabsModule = (function () {
       } else if (newIndex > oldIndex) {
         insertIdx++;
       }
-      
+
       state.openFiles.splice(insertIdx, 0, item);
     }
-    
+
     saveToStorage();
     render();
   }
@@ -547,7 +547,7 @@ const TabsModule = (function () {
     const index = state.openFiles.indexOf(oldPath);
     if (index !== -1) {
       state.openFiles[index] = newPath;
-      
+
       if (state.activeFile === oldPath) {
         state.activeFile = newPath;
         if (typeof window.AppState !== 'undefined') window.AppState.currentFile = newPath;

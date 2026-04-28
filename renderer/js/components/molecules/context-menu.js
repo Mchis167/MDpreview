@@ -10,16 +10,18 @@ class ContextMenuComponent {
    * @param {Object} options
    */
   static open(options) {
-    const { event, items, onClose, className } = options;
+    const { event, anchor, items, onClose, className, ...rest } = options;
     
     const component = new ContextMenuComponent(items);
     const content = component.render();
 
     return MenuShield.open({
       event,
+      anchor,
       content,
       onClose,
-      className: className || 'ds-context-menu-shield'
+      className: className || 'ds-context-menu-shield',
+      ...rest
     });
   }
 

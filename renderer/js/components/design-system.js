@@ -156,6 +156,38 @@ const DesignSystem = (() => {
       return null;
     },
 
+    /**
+     * Create an anchored menu (dropdown style)
+     * @param {HTMLElement} anchor - The element to attach to
+     * @param {Array} items - Menu items
+     * @param {Object} options - Additional options
+     */
+    createMenu: (anchor, items, options = {}) => {
+      if (typeof ContextMenuComponent !== 'undefined') {
+        const { onClose, ...rest } = options;
+
+        // Auto-manage is-open state for combo buttons
+        if (anchor && anchor.classList.contains('ds-combo-btn')) {
+          anchor.classList.add('is-open');
+        }
+
+        const wrappedOnClose = () => {
+          if (anchor && anchor.classList.contains('ds-combo-btn')) {
+            anchor.classList.remove('is-open');
+          }
+          if (onClose) onClose();
+        };
+
+        return ContextMenuComponent.open({ 
+          anchor, 
+          items, 
+          onClose: wrappedOnClose,
+          ...rest 
+        });
+      }
+      return null;
+    },
+
     getIcon: (name) => ICONS[name] || '',
 
     createHeaderAction: (iconName, title, onClick, id, tooltipPos = 'bottom') => {
@@ -193,6 +225,80 @@ const DesignSystem = (() => {
       });
       if (onChange) select.onchange = (e) => onChange(e.target.value);
       return select;
+    },
+
+    createComboButton: (options = {}) => {
+      const {
+        label,
+        variant = 'subtitle',
+        leadingIcon = null,
+        mainAction,
+        toggleAction,
+        disabled = false,
+        className = '',
+        tooltip = null,
+        radius = 'var(--ds-radius-widget)'
+      } = options;
+
+      const container = createElement('div', [
+        'ds-combo-btn',
+        `ds-combo-btn-${variant}`,
+        className
+      ]);
+
+      container.style.setProperty('--_radius', radius);
+      if (disabled) {
+        container.classList.add('is-disabled');
+        // Actually button atoms use :disabled, but since this is a div, we use a class or attribute
+        container.setAttribute('disabled', 'true'); 
+      }
+
+      // Main Part
+      const main = createElement('div', 'ds-combo-btn-main');
+      if (leadingIcon) {
+        const iconHtml = ICONS[leadingIcon] || leadingIcon;
+        main.appendChild(createElement('span', 'ds-btn-icon-leading', { html: iconHtml }));
+      }
+      if (label) {
+        main.appendChild(createElement('span', 'ds-btn-text', { text: label }));
+      }
+      
+      if (!disabled && mainAction) {
+        main.onclick = (e) => {
+          e.stopPropagation();
+          mainAction(e);
+        };
+      }
+
+      // Toggle Part
+      const toggle = createElement('div', 'ds-combo-btn-toggle', {
+        html: ICONS['chevron-down'] || '▼'
+      });
+      
+      if (options.toggleTooltip) {
+        DesignSystem.applyTooltip(toggle, options.toggleTooltip, 'bottom');
+      }
+      
+      if (!disabled && toggleAction) {
+        toggle.onclick = (e) => {
+          e.stopPropagation();
+          // Toggle logic: If already open, close it
+          if (container.classList.contains('is-open')) {
+            if (typeof window.MenuShield !== 'undefined') window.MenuShield.close();
+            return;
+          }
+          toggleAction(e);
+        };
+      }
+
+      container.appendChild(main);
+      container.appendChild(toggle);
+
+      if (tooltip) {
+        DesignSystem.applyTooltip(container, tooltip, 'bottom');
+      }
+
+      return container;
     },
 
     createButton: (options = {}) => {
@@ -398,7 +504,7 @@ const DesignSystem = (() => {
       };
     },
 
-    initSmartTooltips: function() {
+    initSmartTooltips: function () {
       let tooltipEl = document.getElementById('ds-global-tooltip');
       if (!tooltipEl) {
         tooltipEl = document.createElement('div');
@@ -414,7 +520,7 @@ const DesignSystem = (() => {
       document.addEventListener('mouseover', (e) => {
         const target = e.target.closest && e.target.closest('[data-ds-tooltip]');
         if (!target) return;
-        
+
         // If we are already showing tooltip for this target, don't re-trigger
         if (target === currentTarget) {
           if (hideTimer) {
@@ -431,9 +537,9 @@ const DesignSystem = (() => {
           currentTarget = target;
           const text = target.getAttribute('data-ds-tooltip');
           const preferredPos = target.getAttribute('data-ds-tooltip-pos') || 'bottom';
-          
+
           tooltipEl.textContent = text;
-          
+
           // Measure tooltip
           tooltipEl.style.opacity = '0';
           tooltipEl.style.display = 'block';
@@ -461,7 +567,7 @@ const DesignSystem = (() => {
           }
 
           left = rect.left + (rect.width / 2) - (tw / 2);
-          
+
           // horizontal bounds
           if (left < 8) left = 8;
           if (left + tw > window.innerWidth - 8) left = window.innerWidth - tw - 8;
