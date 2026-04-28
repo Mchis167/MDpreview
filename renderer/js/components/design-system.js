@@ -287,7 +287,7 @@ const DesignSystem = (() => {
         control.appendChild(item);
       });
 
-      return {
+      const instance = {
         el: control,
         indicator,
         updateActive: (id) => {
@@ -309,6 +309,12 @@ const DesignSystem = (() => {
           }
         }
       };
+
+      if (activeId) {
+        setTimeout(() => instance.updateActive(activeId), 0);
+      }
+
+      return instance;
     },
 
     showConfirm: ({ title, message, onConfirm, onCancel }) => {

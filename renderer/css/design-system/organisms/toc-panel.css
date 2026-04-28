@@ -11,7 +11,7 @@
   top: calc(var(--_toc-top) + var(--_toc-btn-h) + var(--_toc-panel-offset));
   right: var(--_toc-right);
   width: var(--ds-toc-width);
-  max-height: 60vh;
+  max-height: 85vh;
   background: var(--ds-bg-floating-glass);
   backdrop-filter: blur(var(--ds-blur-xl)) saturate(180%);
   -webkit-backdrop-filter: blur(var(--ds-blur-xl)) saturate(180%);
@@ -38,18 +38,29 @@
 
 /* ── TOC Header ── */
 .toc-header {
-  padding: var(--ds-space-md) var(--ds-space-sm) var(--ds-space-md) var(--ds-space-lg);
+  padding: var(--ds-space-sm) var(--ds-space-sm) var(--ds-space-sm) var(--ds-space-sm);
   display: flex;
   align-items: center;
-  justify-content: space-between;
   border-bottom: 1px solid var(--ds-border-subtle);
+  gap: var(--ds-space-md);
 }
 
 .toc-header h3 {
-  font-size: var(--ds-font-lg);
+  font-size: var(--ds-font-md);
   font-weight: 700;
   color: var(--ds-text-primary);
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toc-header .ds-spacer {
+  flex: 1;
+}
+
+.toc-header .ds-segmented-control {
+  transform: scale(0.9);
 }
 
 
@@ -59,9 +70,10 @@
   overflow-y: auto;
   overflow-x: hidden;
   flex: 1;
-  scrollbar-width: none; /* Hide standard scrollbar */
+  min-height: 0; /* CRITICAL: Prevents flex child from expanding to fit content */
+  scrollbar-width: none;
+  /* Hide standard scrollbar */
   scroll-snap-type: y proximity;
-  scroll-padding-top: var(--ds-space-md);
   scroll-behavior: smooth;
 }
 
@@ -77,25 +89,26 @@
   display: none;
 }
 
+.toc-body.is-map {
+  overflow: hidden;
+  padding: 0;
+}
+
 .toc-body.is-scrollable {
   /* Smart Mask Fading */
   --_fade-top: 0;
   --_fade-bottom: 24px;
 
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    black var(--_fade-top),
-    black calc(100% - var(--_fade-bottom)),
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    black var(--_fade-top),
-    black calc(100% - var(--_fade-bottom)),
-    transparent 100%
-  );
+  -webkit-mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black var(--_fade-top),
+      black calc(100% - var(--_fade-bottom)),
+      transparent 100%);
+  mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black var(--_fade-top),
+      black calc(100% - var(--_fade-bottom)),
+      transparent 100%);
 }
 
 /* ── TOC Empty State ── */

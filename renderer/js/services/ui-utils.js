@@ -42,8 +42,44 @@ const UIUtils = (() => {
     requestAnimationFrame(checkScrollable);
   }
 
+  /**
+   * Renders a skeleton loading state
+   * @param {string} type - 'list' or 'map'
+   * @param {number} count - Number of rows (for list)
+   */
+  function renderSkeleton(type = 'list', count = 6) {
+    const frag = document.createDocumentFragment();
+    
+    if (type === 'list') {
+      const widths = ['70%', '85%', '60%', '75%', '90%', '65%', '80%', '55%'];
+      for (let i = 0; i < count; i++) {
+        const row = DesignSystem.createElement('div', 'skeleton-row');
+        const icon = DesignSystem.createElement('div', ['skeleton', 'skeleton-icon']);
+        const text = DesignSystem.createElement('div', ['skeleton', 'skeleton-text']);
+        text.style.width = widths[i % widths.length];
+
+        row.appendChild(icon);
+        row.appendChild(text);
+        frag.appendChild(row);
+      }
+    } else if (type === 'map') {
+      // For map, we show a full-height shimmer block or multiple blocks
+      const container = DesignSystem.createElement('div', 'skeleton-map');
+      for (let i = 0; i < 12; i++) {
+        const row = DesignSystem.createElement('div', ['skeleton', 'skeleton-text'], {
+          style: `width: ${Math.random() * 40 + 60}%; height: 12px; margin-bottom: 12px;`
+        });
+        container.appendChild(row);
+      }
+      frag.appendChild(container);
+    }
+    
+    return frag;
+  }
+
   return {
-    applySmartScrollMask
+    applySmartScrollMask,
+    renderSkeleton
   };
 })();
 

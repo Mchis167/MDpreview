@@ -58,7 +58,7 @@
   padding: 0 var(--ds-space-sm);
   gap: var(--ds-space-2xs);
   color: var(--ds-text-secondary);
-  font-size: var(--ds-font-md);
+  font-size: var(--ds-font-sm);
   font-weight: 400;
   cursor: pointer;
   position: relative;
@@ -304,7 +304,8 @@
 /* Color override for Draft state (Subtle White Alpha) */
 .tab-item.is-draft .tab-bar__status-dot {
   --_dot-color: var(--ds-white-a60);
-  box-shadow: none; /* Remove glow for a cleaner look */
+  box-shadow: none;
+  /* Remove glow for a cleaner look */
 }
 
 .tab-item:not(.active) .tab-bar__status-dot {

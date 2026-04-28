@@ -53,6 +53,9 @@ Ghi lại các quyết định thiết kế và kỹ thuật quan trọng trong 
 | 2026-04-28 | [20260428-viewer-persistent-dom.md](20260428-viewer-persistent-dom.md) | Kiến trúc DOM bền vững cho Viewer | accepted |
 | 2026-04-28 | [20260428-toc-scroll-sync-strategy.md](20260428-toc-scroll-sync-strategy.md) | Chiến lược đồng bộ cuộn và highlight TOC | accepted |
 | 2026-04-28 | [20260428-architecture-polish-legacy-pruning.md](20260428-architecture-polish-legacy-pruning.md) | Tổng vệ sinh kiến trúc và loại bỏ Legacy | accepted |
+| 2026-04-28 | [20260428-project-map-mirror-fidelity.md](20260428-project-map-mirror-fidelity.md) | Chiến lược Phản chiếu (Mirroring) cho Project Map | accepted |
+| 2026-04-28 | [20260428-project-map-scroll-stabilization.md](20260428-project-map-scroll-stabilization.md) | Chiến lược Ổn định Thanh cuộn cho Project Map | accepted |
+| 2026-04-28 | [20260428-project-map-zoom-interaction-strategy.md](20260428-project-map-zoom-interaction-strategy.md) | Chiến lược Zoom cục bộ và Tương tác Footer Bar cho Project Map | accepted |
 
 
 ---

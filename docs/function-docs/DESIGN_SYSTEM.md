@@ -38,7 +38,7 @@ Tạo button chuẩn (`ds-btn`) với nhiều biến thể.
 ### `createSegmentedControl(options)`
 Tạo bộ điều khiển phân đoạn (`ds-segmented-control`) với chỉ báo trượt.
 - `items`: Danh sách các item `{ id, icon, title }`.
-- `activeId`: ID item đang active.
+- `activeId`: ID item đang active (tự động kích hoạt chỉ báo khi khởi tạo).
 - `radius`: (Init: `var(--ds-radius-panel)`) Bo góc tùy chỉnh.
 - `onChange`: Callback khi chọn item mới.
 

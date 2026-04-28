@@ -6,26 +6,31 @@
 
 ## Kiến trúc
 
-TOC Component hoạt động như một Overlay trên `MarkdownViewer`. Nó bao gồm:
-- **TOC Trigger**: Nút bấm nổi để đóng/mở.
-- **TOC Panel**: Bảng hiển thị danh sách các tiêu đề (Headings).
+TOC Component hoạt động như một Overlay trên `MarkdownViewer`. Nó hỗ trợ hai chế độ hiển thị (View Modes):
+- **Outline (Default)**: Hiển thị cấu trúc tiêu đề cây (Tree View).
+- **Project Map**: Hiển thị bản đồ thu nhỏ phản chiếu trực quan tài liệu (Mini-map).
 
 ---
 
 ## State & Persistence
 
-Module này không lưu trữ state bền vững (persistence). Trạng thái hiển thị (`_isVisible`) được quản lý cục bộ trong phiên làm việc.
+- `_activeView`: Lưu trữ chế độ hiển thị hiện tại (`outline` hoặc `map`).
+- `_expandedState / _collapsedState`: Lưu trữ trạng thái đóng/mở của các nhánh tiêu đề để giữ tính nhất quán khi re-render.
 
 ---
 
 ## Các Function chính
 
 ### `init()`
-Khởi tạo module, đăng ký các event listeners (scroll, click) và thiết lập cấu trúc DOM ban đầu.
+Khởi tạo module và thiết lập trình điều khiển chuyển đổi (Segmented Control) giữa Outline và Map.
+
+### `renderBody()`
+Logic trung tâm để dựng nội dung bên trong bảng:
+- **Outline Mode**: Xây dựng cây tiêu đề từ `_tree`.
+- **Map Mode**: Gán class `.is-map` cho `.toc-body` để tối ưu không gian và gọi `ProjectMap.render()`.
 
 ### `update(headings)`
-Cập nhật danh sách các tiêu đề từ nội dung Markdown hiện tại.
-- **Lưu ý**: Tự động loại bỏ thẻ `H1` để giữ cho mục lục gọn gàng. Nếu không tìm thấy Heading nào, module sẽ hiển thị **Empty State** với icon `list-tree`.
+Cập nhật danh sách các tiêu đề và đồng bộ hóa nội dung Project Map nếu đang ở chế độ Map.
 
 ### `reset()`
 Xóa toàn bộ state tạm thời, đưa mục lục về trạng thái **Skeleton Loading**. Được gọi khi người dùng chuyển sang một file mới.
@@ -33,6 +38,7 @@ Xóa toàn bộ state tạm thời, đưa mục lục về trạng thái **Skele
 ### `show()`
 Hiển thị bảng mục lục với hiệu ứng **Full Slide-in** từ biên phải.
 - Kích hoạt trạng thái `.is-active` cho nút bấm.
+- Đảm bảo thanh chỉ báo của **Segmented Control** được đồng bộ đúng vị trí (`updateActive`).
 - Thêm class `.has-toc` cho viewer để dịch chuyển nội dung văn bản.
 
 ### `hide()`
@@ -40,9 +46,8 @@ Hiển thị bảng mục lục với hiệu ứng **Full Slide-in** từ biên 
 
 ### `updateActiveHeading(container)`
 Logic trung tâm để đồng bộ trạng thái cuộn:
-- **Threshold**: Sử dụng hằng số `SCROLL_OFFSET = 240px` làm ngưỡng nhận diện active.
-- **Sync**: Khi người dùng click vào một mục trong TOC, trang web sẽ cuộn sao cho heading đó dừng lại ở vị trí `230px` (ngay trên ngưỡng active 10px) để đảm bảo highlight ngay lập tức.
-- **Auto-expansion**: Tự động mở rộng (expand) các nhánh cha nếu tiêu đề đang active nằm trong nhóm con.
+- **Outline Sync**: Đánh dấu tiêu đề hiện tại (`is-active`), tự động mở rộng nhánh cha và cuộn danh sách mục lục. Ngưỡng nhận diện active là `SCROLL_OFFSET = 240px`.
+- **Project Map Sync**: Gọi `ProjectMap.syncScroll()` để cập nhật vị trí vùng highlight trên bản đồ tương ứng với vị trí cuộn của viewer.
 
 ---
 

@@ -168,7 +168,7 @@ router.get('/render', (req, res) => {
     const content    = fs.readFileSync(fullPath, 'utf8');
     const html       = renderWithLineNumbers(content);
     const totalLines = content.split('\n').length;
-    res.json({ html, file, totalLines });
+    res.json({ html, file, totalLines, raw: content });
   } catch (err) {
     if (err.message.includes('Security Error')) {
       return res.status(403).json({ error: err.message });

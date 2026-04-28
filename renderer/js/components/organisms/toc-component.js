@@ -1,7 +1,10 @@
+/* global DesignSystem, UIUtils */
 /**
  * TOCComponent — Table of Contents (Organism)
  * Purpose: Scans headings in the document and renders a navigable tree view.
  * Dependencies: DesignSystem, ScrollModule
+ * 
+ * @global DesignSystem, UIUtils
  */
 const TOCComponent = (() => {
   'use strict';
@@ -16,6 +19,10 @@ const TOCComponent = (() => {
   let _tree = [];
   let _hideTimeout = null;
   let _isScanning = false;
+  let _activeView = 'outline'; // 'outline' or 'map'
+  let _viewSwitcher = null;
+  let _lastUpdateId = 0;
+  let _mapEl = null;
   const SCROLL_OFFSET = 240; // PX from top to trigger section change and scroll destination
 
   const SELECTORS = {
@@ -215,7 +222,35 @@ const TOCComponent = (() => {
   function _createPanel() {
     const panel = DesignSystem.createElement('div', SELECTORS.panel, { id: SELECTORS.panel });
     const header = DesignSystem.createElement('div', 'toc-header');
-    header.innerHTML = `<h3>Table of Contents</h3>`;
+    
+    // View Switcher
+    _viewSwitcher = DesignSystem.createSegmentedControl({
+      items: [
+        { id: 'outline', icon: 'list-tree', title: 'Outline' },
+        { id: 'map', icon: 'map', title: 'Project Map' }
+      ],
+      activeId: _activeView,
+      onChange: (id) => {
+        // Destroy observer when leaving map view
+        if (_activeView === 'map' && id !== 'map' && window.ProjectMap) {
+          window.ProjectMap.destroy();
+        }
+        _activeView = id;
+        _viewSwitcher.updateActive(id);
+        const title = header.querySelector('h3');
+        if (title) title.textContent = id === 'outline' ? 'Table of Contents' : 'Project Map';
+        TOCComponent.renderBody();
+      }
+    });
+    header.appendChild(_viewSwitcher.el);
+
+    const title = DesignSystem.createElement('h3', '', { 
+      text: _activeView === 'outline' ? 'Table of Contents' : 'Project Map' 
+    });
+    header.appendChild(title);
+
+    const spacer = DesignSystem.createElement('div', 'ds-spacer');
+    header.appendChild(spacer);
 
     const closeBtn = new IconActionButton({
       iconName: 'x',
@@ -239,21 +274,7 @@ const TOCComponent = (() => {
   }
 
   function _renderSkeleton() {
-    const frag = document.createDocumentFragment();
-    // Render 6 skeleton rows with varying widths
-    const widths = ['70%', '85%', '60%', '75%', '90%', '65%'];
-
-    widths.forEach(width => {
-      const row = DesignSystem.createElement('div', 'skeleton-row');
-      const icon = DesignSystem.createElement('div', ['skeleton', 'skeleton-icon']);
-      const text = DesignSystem.createElement('div', ['skeleton', 'skeleton-text']);
-      text.style.width = width;
-
-      row.appendChild(icon);
-      row.appendChild(text);
-      frag.appendChild(row);
-    });
-    return frag;
+    return UIUtils.renderSkeleton('list', 6);
   }
 
   // ============================================
@@ -265,8 +286,12 @@ const TOCComponent = (() => {
     },
 
     update: function (container, options = {}) {
+      const updateId = ++_lastUpdateId;
+      _isScanning = options.isSkeleton || false;
       const { mode = 'read' } = options;
       _currentMode = mode;
+
+      if (updateId !== _lastUpdateId) return;
 
       _tree = _scanHeadings(container);
 
@@ -286,11 +311,26 @@ const TOCComponent = (() => {
       }
     },
 
+    updateMap: function() {
+      if (!_isVisible || _activeView !== 'map' || !_mapEl) return;
+      const mount = document.getElementById('md-viewer-mount');
+      const viewport = mount ? mount.querySelector('.md-viewer-viewport') : null;
+      if (viewport && window.ProjectMap) {
+        window.ProjectMap.update(_mapEl, viewport);
+      }
+    },
+
     reset: function () {
+      _lastUpdateId++; // Invalidate pending updates
       _tree = [];
       _isScanning = true;
       _expandedState.clear();
       _collapsedState.clear();
+      
+      if (_activeView === 'map' && _mapEl && window.ProjectMap) {
+        window.ProjectMap.reset(_mapEl);
+      }
+      
       this.renderBody();
     },
 
@@ -316,7 +356,26 @@ const TOCComponent = (() => {
         }
       });
 
+      if (_activeView === 'map') {
+        body.classList.add('is-map');
+        const mount = document.getElementById('md-viewer-mount');
+        const viewport = mount ? mount.querySelector('.md-viewer-viewport') : null;
+        // Only mirror content if scanning is finished.
+        // Project Map mirrors the entire document, so we don't care about _tree.length (headings).
+        if (viewport && window.ProjectMap && !_isScanning) {
+          if (_mapEl && body.contains(_mapEl)) {
+            window.ProjectMap.update(_mapEl, viewport);
+          } else {
+            body.innerHTML = '';
+            _mapEl = window.ProjectMap.render(body, viewport);
+          }
+        }
+        return;
+      }
+
+      body.classList.remove('is-map');
       body.innerHTML = '';
+      _mapEl = null;
 
       if (_tree.length === 0) {
         if (_isScanning) {
@@ -362,6 +421,7 @@ const TOCComponent = (() => {
       // Small timeout to ensure transition triggers after DOM mount
       setTimeout(() => {
         panel.classList.add('show');
+        if (_viewSwitcher) _viewSwitcher.updateActive(_activeView);
         const btn = document.getElementById(SELECTORS.btn);
         if (btn) btn.classList.add('is-active');
         anchor.classList.add('has-toc');
@@ -377,6 +437,10 @@ const TOCComponent = (() => {
       if (panel) panel.classList.remove('show');
       if (btn) btn.classList.remove('is-active');
       if (mount) mount.classList.remove('has-toc');
+
+      // Disconnect live observer to free resources
+      if (window.ProjectMap) window.ProjectMap.destroy();
+      _mapEl = null;
 
       if (_hideTimeout) clearTimeout(_hideTimeout);
 
@@ -422,6 +486,11 @@ const TOCComponent = (() => {
         if (activeLine !== null) {
           _highlightItem(activeLine);
         }
+      }
+
+      // Sync Project Map Viewport
+      if (_activeView === 'map' && _mapEl && window.ProjectMap) {
+        window.ProjectMap.syncScroll(_mapEl);
       }
     }
   };

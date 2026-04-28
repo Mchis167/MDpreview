@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.13.0] — 2026-04-29 00:50
+
+### 🎉 Added
+- **Project Map (Mini-map)**: Triển khai bản đồ thu nhỏ tài liệu với chiến lược **True Optical Mirror** (SSR-based) đạt độ chính xác 1:1, hỗ trợ đầy đủ các thành phần phức tạp như Mermaid và CodeBlocks.
+- **Instant Zoom Optimization**: Triển khai cơ chế phóng đại bản đồ tức thì (0ms latency) bằng CSS Transform, loại bỏ hoàn toàn việc gọi API render lại khi thay đổi tỉ lệ.
+- **Dedicated Zoom Footer**: Bổ sung thanh điều khiển Zoom cố định ở đáy bản đồ với hiển thị phần trăm trực quan.
+- **Interaction Polishing**: Hỗ trợ hai chế độ cuộn: **Smooth Scroll** cho thao tác click điều hướng và **Snappy Scroll** cho thao tác kéo (dragging) vùng highlight.
+- **Auto-scrolling & Viewport Centering**: Cơ chế tự động cuộn bản đồ thông minh giúp vùng highlight luôn được giữ ở trung tâm vùng nhìn thấy của thanh bên khi người dùng cuộn tài liệu chính.
+- **Project Map Diagnostic Logger**: Hệ thống giám sát và cảnh báo tàng hình (Diagnostic System) giúp phát hiện các lỗi giãn nở layout và mất dấu vùng highlight trong thời gian thực.
+- **Architecture Documentation**: Bổ sung các ADRs mới về chiến lược phản chiếu hình ảnh (`mirror-fidelity`), ổn định thanh cuộn (`scroll-stabilization`) và tương tác Zoom (`zoom-interaction-strategy`).
+
+### 🔧 Changed
+- **Architecture Refactor**: Tái cấu trúc DOM của Project Map thành mô hình Flexbox (Body cuộn + Footer cố định) để tối ưu hóa trải nghiệm người dùng và độ ổn định của UI.
+- **Standardized UI Components**: Chuyển đổi toàn bộ nút điều khiển sang sử dụng Design System atoms (`.ds-btn`) và Icon Registry tập trung.
+- **TOC View Switching**: Tích hợp Project Map vào `TOCComponent`, hỗ trợ chuyển đổi linh hoạt giữa chế độ Outline và Map thông qua Segmented Control.
+- **Unified Layout Constraints**: Áp dụng class `.is-map` lên `TOC Body` để tối ưu hóa không gian hiển thị (padding: 0) và kiểm soát tràn viền cho bản đồ.
+
+### 🐞 Fixed
+- **JS Height Enforcement Regression**: Khôi phục và nâng cấp lớp bảo vệ ép chiều cao dựa trên `parentElement.clientHeight`, đảm bảo bản đồ luôn hoạt động ổn định trên các tài liệu cực dài và chống giãn nở layout ngoài ý muốn.
+- **High-Fidelity Clipping**: Khắc phục triệt để lỗi mất nội dung (clipping) khi tài liệu quá dài bằng kiến trúc **Track & Rail**.
+- **Zoom Limits**: Tự động vô hiệu hóa các nút điều khiển khi đạt giới hạn tỉ lệ (20% - 100%).
+- **TOC Panel Layout Expansion**: Khắc phục triệt để lỗi Flexbox tự động giãn nở chiều cao ngoài ý muốn bằng kỹ thuật **JS Height Enforcement**, đảm bảo Project Map luôn có thanh cuộn độc lập và hoạt động ổn định.
+- **Viewport Indicator Sync**: Sửa lỗi lệch tọa độ vùng highlight trên các tài liệu có dung lượng lớn và cấu trúc phức tạp.
+
 ## [1.12.0] — 2026-04-28 14:40
 
 ### 🎉 Added
