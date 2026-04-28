@@ -1,9 +1,9 @@
 /* global AppState, SidebarLeft, MarkdownViewer, RightSidebar, 
    SettingsService, SearchPalette, ShortcutsComponent, ShortcutService,
    TreeModule, WorkspaceModule, CollectModule, 
-   SidebarModule, DraftModule, EditorModule, 
+   DraftModule, EditorModule, 
    EditToolbarComponent,
-   TabsModule, TabPreview, io, initMermaid, initZoom, initToolbarBtns, ScrollModule, RecentlyViewedModule, ChangeActionViewBar, CommentsModule */
+   TabsModule, TabPreview, io, initMermaid, initZoom, ScrollModule, RecentlyViewedModule, ChangeActionViewBar, CommentsModule */
 /* ============================================================
    app.js — Core state, file loading, socket connection, boot
    Other responsibilities live in dedicated modules:
@@ -492,7 +492,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   initSocket();
   initMermaid();          // mermaid.js
   initZoom();             // zoom.js
-  initToolbarBtns();      // toolbar.js
 
   // ── Shortcut Management ──
   if (typeof ShortcutService !== 'undefined' && typeof ShortcutsComponent !== 'undefined') {
@@ -529,10 +528,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         else document.getElementById('sidebar-toggle-btn')?.click();
       },
       'focus-search': () => window.SearchPalette?.show(),
-      'scroll-top': () => document.getElementById('md-viewer-mount')?.scrollTo({ top: 0, behavior: 'smooth' }),
+      'scroll-top': () => {
+        const v = window.MarkdownViewer?.getInstance();
+        const scrollEl = v ? v.getActiveScrollElement() : document.getElementById('md-viewer-mount');
+        if (scrollEl) scrollEl.scrollTo({ top: 0, behavior: 'smooth' });
+      },
       'scroll-bottom': () => {
-        const v = document.getElementById('md-viewer-mount');
-        if (v) v.scrollTo({ top: v.scrollHeight, behavior: 'smooth' });
+        const v = window.MarkdownViewer?.getInstance();
+        const scrollEl = v ? v.getActiveScrollElement() : document.getElementById('md-viewer-mount');
+        if (scrollEl) scrollEl.scrollTo({ top: scrollEl.scrollHeight, behavior: 'smooth' });
       },
       'toggle-fullscreen': () => {
         if (!document.fullscreenElement) document.documentElement.requestFullscreen();
@@ -616,7 +620,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     ShortcutService.registerGroups(groups);
   }
 
-  SidebarModule.init();      // sidebar.js
   if (typeof SearchPalette !== 'undefined') SearchPalette.init();
 
   // 3. Functional Modules
@@ -633,6 +636,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   TabsModule.init();         // tabs.js
 
   if (typeof CollectModule !== 'undefined') CollectModule.init(); // collect.js
+  if (typeof window.TOCComponent !== 'undefined') window.TOCComponent.init(); // organisms/toc-component.js
   if (typeof CommentsModule !== 'undefined') CommentsModule.init(); // comments.js
 
   setTimeout(() => {

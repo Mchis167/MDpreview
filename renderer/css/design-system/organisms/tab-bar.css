@@ -56,7 +56,7 @@
   display: flex;
   align-items: center;
   padding: 0 var(--ds-space-sm);
-  gap: var(--ds-space-xs);
+  gap: var(--ds-space-2xs);
   color: var(--ds-text-secondary);
   font-size: var(--ds-font-md);
   font-weight: 400;
@@ -100,7 +100,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding: 0 var(--ds-space-xs);
+  padding: 0 var(--ds-space-2xs);
   mask-image: none;
   -webkit-mask-image: none;
   transition: mask-image var(--ds-transition-fast), -webkit-mask-image var(--ds-transition-fast);
@@ -140,7 +140,7 @@
   transform: none;
   display: flex;
   opacity: 1;
-  margin-left: var(--ds-space-xs);
+  margin-left: var(--ds-space-2xs);
 }
 
 .tab-bar__close:hover {
@@ -222,7 +222,9 @@
 }
 
 .ds-header-action svg,
-.ds-header-action svg * {
+.ds-header-action svg *,
+.tab-bar__add-btn svg,
+.tab-bar__add-btn svg * {
   pointer-events: none !important;
   width: var(--ds-space-md);
   height: var(--ds-space-md);
@@ -285,17 +287,27 @@
   -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
 }
 
-/* Dirty Indicator */
-.tab-bar__dirty-dot {
+/* Status Indicator (Dirty/Draft) */
+.tab-bar__status-dot {
+  --_dot-color: var(--ds-status-warning);
+
   width: 6px;
   height: 6px;
-  background: var(--ds-status-warning);
+  margin-left: var(--ds-space-2xs);
+  background: var(--_dot-color);
   border-radius: var(--ds-radius-pill);
   flex-shrink: 0;
-  box-shadow: 0 0 4px var(--ds-status-warning);
+  box-shadow: 0 0 4px var(--_dot-color);
+  transition: all var(--ds-transition-fast);
 }
 
-.tab-item:not(.active) .tab-bar__dirty-dot {
+/* Color override for Draft state (Subtle White Alpha) */
+.tab-item.is-draft .tab-bar__status-dot {
+  --_dot-color: var(--ds-white-a60);
+  box-shadow: none; /* Remove glow for a cleaner look */
+}
+
+.tab-item:not(.active) .tab-bar__status-dot {
   opacity: 0.8;
   box-shadow: none;
 }

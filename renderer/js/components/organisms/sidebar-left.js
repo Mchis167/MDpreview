@@ -51,6 +51,10 @@ class SidebarLeftComponent {
     // 1. Create Wrapper
     const wrap = document.createElement('div');
     wrap.id = 'sidebar-left-wrap';
+    const isCollapsed = localStorage.getItem('mdpreview_sidebar_left_collapsed') === 'true';
+    if (isCollapsed) {
+      wrap.classList.add('sidebar-collapsed');
+    }
     wrap.style.width = `${this.state.width}px`;
 
     // 2. Create Aside

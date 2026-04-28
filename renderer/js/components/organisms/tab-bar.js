@@ -69,14 +69,12 @@ class TabBarComponent {
     // ── 1. Left Section: Sidebar Toggle ──────────────────
     const toggleWrapper = document.createElement('div');
     toggleWrapper.className = 'tab-bar__sidebar-toggle-wrapper';
-    toggleWrapper.innerHTML = `
-      <div class="ds-header-action" title="Toggle Sidebar" id="sidebar-toggle-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="m9 6-6 6 6 6"/><path d="M3 12h12"/><path d="M21 19V5"/>
-        </svg>
-      </div>
-    `;
-    toggleWrapper.querySelector('#sidebar-toggle-btn').onclick = () => this.options.onToggleSidebar();
+    
+    const isCollapsed = localStorage.getItem('mdpreview_sidebar_left_collapsed') === 'true';
+    const initialIcon = isCollapsed ? 'sidebar-expand' : 'sidebar-collapse';
+    const sidebarToggle = DesignSystem.createHeaderAction(initialIcon, 'Toggle Sidebar (Mod+B)', () => this.options.onToggleSidebar(), 'sidebar-toggle-btn');
+    toggleWrapper.appendChild(sidebarToggle);
+    
     this.mount.appendChild(toggleWrapper);
 
     this.mount.appendChild(this._createDivider());
@@ -100,9 +98,9 @@ class TabBarComponent {
     const draftCount = this.state.openFiles.filter(p => p && p.startsWith('__DRAFT_')).length;
     const isLimitReached = draftCount >= 20;
 
-    addTabWrapper.className = `tab-bar__add-btn-container ${isLimitReached ? 'is-disabled' : ''}`;
+    addTabWrapper.className = `tab-bar__add-btn-container ds-tooltip-trigger ds-tooltip-container ${isLimitReached ? 'is-disabled' : ''}`;
     addTabWrapper.innerHTML = `
-      <div class="tab-bar__add-btn" title="${isLimitReached ? '' : 'New Draft'}">
+      <div class="tab-bar__add-btn">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
         </svg>
@@ -110,8 +108,9 @@ class TabBarComponent {
     `;
 
     if (isLimitReached) {
-      const tooltip = DesignSystem.createTooltip('Draft limit reached (max 20)');
-      addTabWrapper.appendChild(tooltip);
+      addTabWrapper.setAttribute('data-ds-tooltip', 'Draft limit reached (max 20)');
+    } else {
+      addTabWrapper.setAttribute('data-ds-tooltip', 'New Draft');
     }
 
     addTabWrapper.onclick = () => {
@@ -168,11 +167,10 @@ class TabBarComponent {
     const isDirty = this.state.dirtyFiles.includes(path);
 
     const item = document.createElement('div');
-    item.className = `tab-item ${isActive ? 'active' : ''} ${isSelected ? 'selected' : ''} ${isPinned ? 'is-pinned' : ''} ${isDirty ? 'is-dirty' : ''}`;
+    item.className = `tab-item ${isActive ? 'active' : ''} ${isSelected ? 'selected' : ''} ${isPinned ? 'is-pinned' : ''} ${isDirty ? 'is-dirty' : ''} ${isDraft ? 'is-draft' : ''}`;
     item.setAttribute('data-path', path);
 
-    const dot = isDraft ? '<span class="tab-bar__draft-dot"></span>' : '';
-    const dirtyDot = (isDirty && !isDraft) ? '<span class="tab-bar__dirty-dot"></span>' : '';
+    const statusDot = (isDirty || isDraft) ? '<span class="tab-bar__status-dot"></span>' : '';
     const pinIconHtml = isPinned ? `<div class="tab-bar__pin-icon">${DesignSystem.getIcon('pin')}</div>` : '';
 
     let displayLabel = fileName;
@@ -181,8 +179,7 @@ class TabBarComponent {
     }
 
     item.innerHTML = `
-      ${dot}
-      ${dirtyDot}
+      ${statusDot}
       ${pinIconHtml}
       <span class="tab-bar__name">${displayLabel}</span>
       <div class="tab-bar__close" title="Close tab">

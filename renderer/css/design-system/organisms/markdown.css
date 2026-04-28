@@ -5,13 +5,31 @@
 /* ── Viewer Container ──────────────────────────────────── */
 #md-viewer-mount {
   flex: 1;
-  overflow-y: auto;
-  /* Removed top/bottom padding (0) */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   position: relative;
   min-height: 0;
   user-select: text;
+}
 
-  /* Premium Scroll Mask */
+.md-preview-container,
+.md-editor-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+.md-viewer-viewport {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+  width: 100%;
+  transition: padding var(--ds-transition-slow);
+
+  /* Premium Scroll Mask moved here */
   --mask-top: 40px;
   --mask-bottom: 80px;
   --mask-bottom-stop: 96%;
@@ -20,9 +38,12 @@
       black var(--mask-top),
       black calc(var(--mask-bottom-stop) - var(--mask-bottom)),
       transparent var(--mask-bottom-stop));
-
   mask-image: var(--_scroll-mask);
   -webkit-mask-image: var(--_scroll-mask);
+}
+
+#md-viewer-mount.has-toc .md-viewer-viewport {
+  padding-right: var(--ds-toc-offset);
 }
 
 .md-content-inner {
@@ -906,7 +927,6 @@
 .floating-scroll-top:hover {
   background: var(--ds-layer-surface-hover);
   color: var(--ds-accent);
-  border-color: var(--ds-accent-a40);
   transform: translateY(-2px) scale(1.05);
 }
 

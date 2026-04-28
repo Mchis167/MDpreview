@@ -1,0 +1,244 @@
+#md-viewer-mount {
+  --_toc-right: var(--ds-space-lg);
+  --_toc-top: var(--ds-space-lg);
+  --_toc-btn-h: var(--ds-space-2xl);
+  --_toc-panel-offset: var(--ds-space-sm);
+}
+
+
+.ds-toc-panel {
+  position: absolute;
+  top: calc(var(--_toc-top) + var(--_toc-btn-h) + var(--_toc-panel-offset));
+  right: var(--_toc-right);
+  width: var(--ds-toc-width);
+  max-height: 60vh;
+  background: var(--ds-bg-floating-glass);
+  backdrop-filter: blur(var(--ds-blur-xl)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--ds-blur-xl)) saturate(180%);
+  border: 1px solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-surface);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: var(--ds-z-index-popover);
+  opacity: 0;
+  transform: translateX(calc(100% + var(--ds-space-4xl))) translateZ(0);
+  pointer-events: none;
+  transition:
+    opacity var(--ds-transition-main),
+    transform var(--ds-transition-slow);
+  will-change: transform, opacity;
+}
+
+.ds-toc-panel.show {
+  opacity: 1;
+  transform: translateX(0) translateZ(0);
+  pointer-events: auto;
+}
+
+/* ── TOC Header ── */
+.toc-header {
+  padding: var(--ds-space-md) var(--ds-space-sm) var(--ds-space-md) var(--ds-space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--ds-border-subtle);
+}
+
+.toc-header h3 {
+  font-size: var(--ds-font-lg);
+  font-weight: 700;
+  color: var(--ds-text-primary);
+  margin: 0;
+}
+
+
+/* ── TOC Body ── */
+.toc-body {
+  padding: var(--ds-space-md) var(--ds-space-sm);
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  scrollbar-width: none; /* Hide standard scrollbar */
+  scroll-snap-type: y proximity;
+  scroll-padding-top: var(--ds-space-md);
+  scroll-behavior: smooth;
+}
+
+.toc-body::before {
+  content: "";
+  display: block;
+  height: 1px;
+  margin-top: -1px;
+  scroll-snap-align: start;
+}
+
+.toc-body::-webkit-scrollbar {
+  display: none;
+}
+
+.toc-body.is-scrollable {
+  /* Smart Mask Fading */
+  --_fade-top: 0;
+  --_fade-bottom: 24px;
+
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black var(--_fade-top),
+    black calc(100% - var(--_fade-bottom)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black var(--_fade-top),
+    black calc(100% - var(--_fade-bottom)),
+    transparent 100%
+  );
+}
+
+/* ── TOC Empty State ── */
+.toc-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ds-space-2xl) var(--ds-space-lg);
+  text-align: center;
+  color: var(--ds-text-tertiary);
+  gap: var(--ds-space-sm);
+}
+
+.toc-empty-state .empty-icon {
+  width: var(--ds-space-2xl);
+  height: var(--ds-space-2xl);
+  opacity: 0.4;
+  color: var(--ds-text-tertiary);
+}
+
+.toc-empty-state p {
+  font-size: var(--ds-font-md);
+  font-weight: 600;
+  color: var(--ds-text-secondary);
+  margin: 0;
+}
+
+.toc-empty-state span {
+  font-size: var(--ds-font-xs);
+  line-height: 1.5;
+  max-width: 200px;
+}
+
+/* ── TOC Items ── */
+.ds-toc-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.item-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ds-space-xs) var(--ds-space-xs) var(--ds-space-xs) var(--ds-space-md);
+  border-radius: var(--ds-radius-widget);
+  cursor: pointer;
+  transition: all var(--ds-transition-fast);
+  gap: var(--ds-space-sm);
+}
+
+.item-content:hover {
+  background: var(--ds-layer-subtle-hover);
+}
+
+.item-label {
+  flex: 1;
+  font-size: var(--ds-font-md);
+  color: var(--ds-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--ds-transition-fast);
+}
+
+.item-content:hover .item-label {
+  color: var(--ds-text-primary);
+}
+
+.ds-toc-item.is-active>.item-content .item-label {
+  color: var(--ds-text-accent);
+  font-weight: 700;
+}
+
+.ds-toc-item.is-active>.item-content {
+  background: var(--ds-layer-subtle-active-hover);
+}
+
+.item-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ds-space-lg);
+  height: var(--ds-space-lg);
+  color: var(--ds-text-tertiary);
+  transition: transform var(--ds-transition-fast);
+}
+
+.item-toggle svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ── Levels & Indentation ── */
+.ds-toc-item.level-2 {
+  padding-left: 0;
+}
+
+.ds-toc-item.level-2:not(:first-child) {
+  border-top: 1px solid var(--ds-border-subtle);
+  margin-top: var(--ds-space-sm);
+  padding-top: var(--ds-space-sm);
+}
+
+.ds-toc-item.level-3 {
+  padding-left: var(--ds-space-md);
+}
+
+.ds-toc-item.level-4 {
+  padding-left: var(--ds-space-xl);
+}
+
+.ds-toc-item.level-5 {
+  padding-left: calc(var(--ds-space-xl) + var(--ds-space-md));
+}
+
+.ds-toc-item.level-6 {
+  padding-left: var(--ds-space-4xl);
+}
+
+/* ── Expansion Logic ── */
+.item-children {
+  display: none;
+  overflow: hidden;
+}
+
+.ds-toc-item.is-expanded>.item-children {
+  display: block;
+}
+
+/* ── Floating TOC Button ── */
+.floating-toc-btn {
+  position: absolute;
+  top: var(--_toc-top);
+  right: var(--_toc-right);
+  z-index: var(--ds-z-index-popover);
+  transition: all var(--ds-transition-normal) var(--ds-ease-spring);
+  box-shadow: var(--ds-shadow-lg);
+  pointer-events: auto;
+}
+
+.floating-toc-btn.is-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}

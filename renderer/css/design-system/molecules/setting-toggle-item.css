@@ -7,7 +7,7 @@
   padding: var(--ds-space-md) var(--ds-space-lg);
   gap: var(--ds-space-md);
   cursor: pointer;
-  border-radius: calc(var(--ds-radius-panel) - var(--ds-space-xs));
+  border-radius: calc(var(--ds-radius-panel) - var(--ds-space-2xs));
   transition: background var(--ds-transition-fast), transform var(--ds-transition-fast);
   min-height: 48px;
   user-select: none;

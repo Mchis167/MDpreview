@@ -17,11 +17,11 @@
 }
 
 .ctx-item {
-  padding: var(--ds-space-xs) var(--ds-space-md);
+  padding: var(--ds-space-2xs) var(--ds-space-md);
   font-size: var(--ds-font-sm);
   font-weight: 500;
   color: var(--ds-text-secondary);
-  border-radius: calc(var(--ds-radius-panel) - var(--ds-space-xs));
+  border-radius: calc(var(--ds-radius-panel) - var(--ds-space-2xs));
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -93,7 +93,7 @@
 .ctx-shortcut {
   margin-left: var(--ds-space-xl);
   display: flex;
-  gap: var(--ds-space-xs);
+  gap: var(--ds-space-2xs);
   opacity: 0.9;
 }
 
@@ -106,5 +106,5 @@
 .ctx-divider {
   height: 1px;
   background: var(--ds-border-strong);
-  margin: var(--ds-space-xs);
+  margin: var(--ds-space-2xs);
 }

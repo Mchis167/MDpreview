@@ -111,13 +111,13 @@ const TabsModule = (function () {
   }
 
   function updateSidebarToggleIcon(isCollapsed) {
-    const iconOpen = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6-6 6 6 6"/><path d="M3 12h12"/><path d="M21 19V5"/></svg>`;
-    const iconClosed = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5v14"/><path d="M21 12H9"/><path d="m15 18 6-6-6-6"/></svg>`;
-    
     const btn = document.getElementById('sidebar-toggle-btn');
     if (btn) {
-      btn.innerHTML = isCollapsed ? iconClosed : iconOpen;
+      const iconName = isCollapsed ? 'sidebar-expand' : 'sidebar-collapse';
+      btn.innerHTML = DesignSystem.getIcon(iconName);
       btn.title = isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar';
+      // Sync premium tooltip
+      DesignSystem.applyTooltip(btn, btn.title, 'bottom');
     }
   }
 

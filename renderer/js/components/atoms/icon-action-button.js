@@ -27,7 +27,10 @@ class IconActionButton {
         if (this.className) classes.push(this.className);
         
         btn.className = classes.join(' ');
-        if (this.title) btn.setAttribute('data-title', this.title);
+        
+        if (this.title) {
+            DesignSystem.applyTooltip(btn, this.title, 'bottom');
+        }
 
         // Get icon from DesignSystem
         const iconHtml = DesignSystem.getIcon(this.iconName);

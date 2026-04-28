@@ -20,7 +20,7 @@
   height: var(--_height);
   padding: 0 var(--_pad-x);
   border-radius: var(--_radius);
-  gap: var(--ds-space-xs);
+  gap: var(--ds-space-2xs);
   background: var(--_bg);
   color: var(--_color);
   font-family: var(--ds-font-family-text);
@@ -43,7 +43,7 @@
 
 /* ── Spacing logic (margin on label instead of gap) ───── */
 .ds-btn-text {
-  margin: 0 var(--ds-space-xs);
+  margin: 0 var(--ds-space-2xs);
 }
 
 .ds-btn-text:only-child {
@@ -102,3 +102,10 @@
   justify-content: center;
 }
 
+
+.ds-btn.is-active {
+  --_bg: var(--ds-layer-subtle-active);
+  --_color: var(--ds-text-primary);
+  --_bg-hover: var(--ds-layer-subtle-active-hover);
+  border: 1px solid var(--ds-white-a10);
+}

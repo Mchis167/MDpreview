@@ -18,7 +18,6 @@
 /* ── Molecules ──────────────────────────────────────────── */
 @import 'design-system/molecules/workspace-switcher.css';
 @import 'design-system/molecules/segmented-control.css';
-@import 'design-system/molecules/mode-switcher.css';
 @import 'design-system/molecules/sidebar-section-header.css';
 @import 'design-system/molecules/context-menu.css';
 @import 'design-system/molecules/popover-shield.css';
@@ -38,6 +37,7 @@
 @import 'design-system/organisms/change-action-view-bar.css';
 @import 'design-system/organisms/edit-toolbar.css';
 @import 'design-system/organisms/workspace-panel.css';
+@import 'design-system/organisms/toc-panel.css';
 @import 'design-system/organisms/settings-panel.css';
 @import 'design-system/organisms/modals-misc.css';
 @import 'design-system/organisms/editor.css';

@@ -53,7 +53,7 @@ body {
   height: 100%;
   width: 100%;
   padding: var(--ds-space-xl);
-  gap: var(--ds-space-xs);
+  gap: var(--ds-space-2xs);
   transition: padding var(--ds-transition-main);
 }
 
@@ -94,8 +94,6 @@ main {
   display: flex;
   flex-direction: column;
   background: var(--ds-surface-main);
-  backdrop-filter: blur(var(--ds-blur-xs));
-  -webkit-backdrop-filter: blur(var(--ds-blur-xs));
   border: 1px solid var(--ds-border-default);
   border-radius: var(--ds-radius-surface);
   overflow: hidden;

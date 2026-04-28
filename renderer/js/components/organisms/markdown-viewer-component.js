@@ -1,7 +1,4 @@
-/* ══════════════════════════════════════════════════
-   MarkdownViewerComponent.js — The Shell
-   Atomic Design System (Organism)
-   ════════════════════════════════════════════════════ */
+/* global AppState, TOCComponent, EditToolbarComponent, EditorModule, MarkdownHelperComponent, MarkdownLogicService, ScrollModule, DesignSystem */
 
 class MarkdownViewerComponent {
   constructor(options = {}) {
@@ -12,8 +9,12 @@ class MarkdownViewerComponent {
       content: '',
       html: ''
     };
-    this.activeComponent = null;
+    this.previewComp = null;
+    this.editorComp = null;
+    this.viewport = null;
     this._scrollTopBtn = null;
+    this._tocBtn = null;
+    this._tocUpdateTimeout = null;
     this.init();
   }
 
@@ -31,82 +32,141 @@ class MarkdownViewerComponent {
     const modeChanged = newState.mode !== undefined && newState.mode !== this.state.mode;
     
     // 1. Save scroll position before switching file OR mode
-    // This prevents the "scroll jump" when moving between Read and Comment/Collect modes
-    if ((fileChanged || modeChanged) && this.state.file && window.ScrollModule) {
-      window.ScrollModule.save(this.state.file);
+    if ((fileChanged || modeChanged) && this.state.file && ScrollModule) {
+      ScrollModule.save(this.state.file);
     }
     
-    // 2. Update state
+    const oldMode = this.state.mode;
     this.state = { ...this.state, ...newState };
 
-    if (modeChanged || fileChanged) {
+    if (fileChanged) {
       this.render();
-    } else if (this.activeComponent && this.activeComponent.update) {
-      this.activeComponent.update(this.state);
+    } else if (modeChanged) {
+      this._handleModeSwitch(oldMode, newState.mode);
+      // Ensure hidden components are updated with latest state even on mode switch
+      if (this.previewComp) this.previewComp.update(this.state);
+      if (this.editorComp) this.editorComp.update(this.state);
+    } else if (this.state.mode === 'edit' && this.editorComp) {
+      this.editorComp.update(this.state);
+    } else if (this.previewComp) {
+      this.previewComp.update(this.state);
     }
+
+    // Update TOC with debounce
+    this._updateTOC();
   }
 
   render() {
     if (!this.mount) return;
     
-    // Set rendering flag to prevent ScrollModule from saving noise during DOM changes
     window._isMDViewerRendering = true;
     
     try {
-      // Clean up previous component if needed
-      if (this.activeComponent && this.activeComponent.destroy) {
-        this.activeComponent.destroy();
-      }
-
+      if (this.previewComp && this.previewComp.destroy) this.previewComp.destroy();
+      if (this.editorComp && this.editorComp.destroy) this.editorComp.destroy();
+      
       this.mount.innerHTML = '';
+      this._tocBtn = null;
+      this._scrollTopBtn = null;
       
-      // Update Secondary Toolbar visibility
-      if (window.EditToolbarComponent) {
-        const toolbar = window.EditToolbarComponent.getInstance();
-        if (this.state.mode === 'edit') {
-          toolbar.show({
-            onAction: (action) => {
-              if (window.EditorModule) window.EditorModule.applyAction(action);
-            },
-            onSave: () => this.activeComponent && this.activeComponent._save && this.activeComponent._save(),
-            onCancel: () => this.activeComponent && this.activeComponent._handleCancel && this.activeComponent._handleCancel(),
-            onHelp: () => window.MarkdownHelperComponent && window.MarkdownHelperComponent.open()
-          });
-        } else {
-          toolbar.hide();
-        }
-      }
+      // Reset TOC internal state to clear old content and show skeleton
+      if (TOCComponent) TOCComponent.reset();
       
-      switch(this.state.mode) {
-        case 'read':
-        case 'comment':
-        case 'collect':
-          this.activeComponent = new MarkdownPreview({ 
-            mount: this.mount, 
-            html: this.state.html,
-            file: this.state.file
-          });
-          break;
-        case 'edit':
-          this.activeComponent = new MarkdownEditor({ 
-            mount: this.mount, 
-            content: this.state.content,
-            file: this.state.file
-          });
-          break;
-        default:
-          this.activeComponent = new MarkdownEmptyState({ mount: this.mount });
+      if (this.state.mode === 'empty') {
+        new MarkdownEmptyState({ mount: this.mount });
+        return;
       }
 
-      // Add Floating Scroll Top Button if not in empty state
-      if (this.state.mode !== 'empty') {
-        this._renderFloatingScrollTop();
-      }
+      this.viewport = DesignSystem.createElement('div', 'md-viewer-viewport');
+      this.mount.appendChild(this.viewport);
+
+      // Render both but they control their own initial visibility
+      this.previewComp = new MarkdownPreview({ 
+        mount: this.viewport, 
+        html: this.state.html,
+        file: this.state.file
+      });
+
+      this.editorComp = new MarkdownEditor({ 
+        mount: this.viewport, 
+        content: this.state.content,
+        file: this.state.file
+      });
+
+      this._handleModeSwitch(null, this.state.mode);
+
+    } catch (_err) {
+      // Error handled during individual component renders
     } finally {
-      // Small delay to ensure browser processed the DOM changes before unlocking
       setTimeout(() => {
         window._isMDViewerRendering = false;
       }, 300);
+    }
+  }
+
+  _handleModeSwitch(oldMode, newMode) {
+    if (!this.mount || !this.viewport) return;
+
+    this.mount.setAttribute('data-mode', newMode);
+
+    const previewEl = this.viewport.querySelector('#md-content');
+    const editorEl = this.viewport.querySelector('#edit-viewer');
+
+    if (newMode === 'edit') {
+      if (previewEl) previewEl.style.display = 'none';
+      if (editorEl) editorEl.style.display = 'flex';
+      if (this.editorComp) this.editorComp.activate();
+    } else {
+      if (previewEl) previewEl.style.display = 'flex';
+      if (editorEl) editorEl.style.display = 'none';
+      if (this.editorComp) this.editorComp.deactivate();
+    }
+
+    if (EditToolbarComponent) {
+      const toolbar = EditToolbarComponent.getInstance();
+      if (newMode === 'edit') {
+        toolbar.show({
+          onAction: (action) => EditorModule && EditorModule.applyAction(action),
+          onSave: () => this.editorComp && this.editorComp._save(),
+          onCancel: () => this.editorComp && this.editorComp._handleCancel(),
+          onHelp: () => MarkdownHelperComponent && MarkdownHelperComponent.open()
+        });
+      } else {
+        toolbar.hide();
+      }
+    }
+
+    if (oldMode === 'comment' && window.CommentsModule) window.CommentsModule.removeCommentMode();
+    if (oldMode === 'collect' && window.CollectModule) window.CollectModule.removeCollectMode();
+
+    if (newMode === 'comment' && window.CommentsModule) window.CommentsModule.applyCommentMode();
+    if (newMode === 'collect' && window.CollectModule) window.CollectModule.applyCollectMode();
+
+    this._updateFloatingButtons();
+    this._refreshScrollTopListener();
+  }
+
+  _updateFloatingButtons() {
+    const mode = this.state.mode;
+    if (!this._scrollTopBtn) this._renderFloatingScrollTop();
+    
+    if (mode === 'read' || mode === 'comment' || mode === 'collect') {
+      if (!this._tocBtn) this._renderFloatingTOC();
+      this._tocBtn.style.display = 'flex';
+      
+      if (TOCComponent && TOCComponent.isVisible()) {
+        TOCComponent.show(this.mount);
+      }
+      
+      this.viewport.onscroll = () => {
+        if (TOCComponent) TOCComponent.updateActiveHeading(this.viewport);
+      };
+    } else {
+      if (this._tocBtn) this._tocBtn.style.display = 'none';
+      if (TOCComponent) {
+        TOCComponent.hide();
+        this.mount.classList.remove('has-toc');
+      }
     }
   }
 
@@ -121,23 +181,88 @@ class MarkdownViewerComponent {
     });
 
     this._scrollTopBtn.onclick = () => {
-      const scrollEl = this.mount.querySelector('#edit-textarea') || this.mount.querySelector('.md-content') || this.mount;
-      scrollEl.scrollTo({ top: 0, behavior: 'smooth' });
+      const scrollEl = this.getActiveScrollElement();
+      if (scrollEl) scrollEl.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    this.mount.appendChild(this._scrollTopBtn);
+    this.mount.prepend(this._scrollTopBtn);
+    this._refreshScrollTopListener();
+  }
 
-    // Listen for scroll on the active container
-    const scrollEl = this.mount.querySelector('#edit-textarea') || this.mount.querySelector('.md-content') || this.mount;
-    if (scrollEl) {
-      scrollEl.onscroll = () => {
-        if (scrollEl.scrollTop > 300) {
-          this._scrollTopBtn.classList.add('is-visible');
-        } else {
-          this._scrollTopBtn.classList.remove('is-visible');
-        }
-      };
+  /**
+   * Refreshes the scroll listener on the currently active container
+   */
+  _refreshScrollTopListener() {
+    if (!this._scrollTopBtn) return;
+
+    const scrollEl = this.getActiveScrollElement();
+    if (!scrollEl) return;
+
+    // Remove old listener if exists (via replacement of node or tracking)
+    if (this._currentScrollEl === scrollEl) return;
+    
+    this._currentScrollEl = scrollEl;
+    scrollEl.addEventListener('scroll', () => {
+      if (scrollEl.scrollTop > 300) {
+        this._scrollTopBtn.classList.add('is-visible');
+      } else {
+        this._scrollTopBtn.classList.remove('is-visible');
+      }
+    });
+  }
+
+  /**
+   * Returns the currently active scrollable element
+   */
+  getActiveScrollElement() {
+    if (this.state.mode === 'edit') {
+      return this.mount.querySelector('#edit-textarea');
     }
+    return this.viewport;
+  }
+
+  /**
+   * Create and manage the floating TOC button
+   */
+  _renderFloatingTOC() {
+    this._tocBtn = DesignSystem.createButton({
+      variant: 'subtitle',
+      offLabel: true,
+      leadingIcon: 'list',
+      title: 'Table of Contents',
+      className: 'floating-toc-btn'
+    });
+    this._tocBtn.id = 'floating-toc-btn';
+
+    this._tocBtn.onclick = (e) => {
+      e.stopPropagation();
+      if (TOCComponent) TOCComponent.toggle(this.mount);
+    };
+
+    this.mount.prepend(this._tocBtn);
+    
+    // Immediate initial sync
+    this._updateTOC();
+  }
+
+  _updateTOC() {
+    if (this._tocUpdateTimeout) clearTimeout(this._tocUpdateTimeout);
+    
+    // Only update TOC in non-edit modes
+    if (this.state.mode === 'edit') return;
+
+    this._tocUpdateTimeout = setTimeout(() => {
+      if (TOCComponent && this.viewport) {
+        const isSkeleton = !!(this.state.html && this.state.html.includes('skeleton-text'));
+        const input = this.viewport.querySelector('.md-render-body') || this.viewport;
+          
+        TOCComponent.update(input, { 
+          mode: this.state.mode, 
+          isSkeleton: isSkeleton 
+        });
+      }
+      this._tocUpdateTimeout = null;
+    }, 800);
   }
 }
 
@@ -181,9 +306,9 @@ class MarkdownPreview {
     this.mount.appendChild(container);
 
     // Post-render integration (Small delay to ensure DOM is ready for calculations)
-    if (window.ScrollModule) {
-      window.ScrollModule.setContainer(this.mount, this.file);
-      window.ScrollModule.restore(this.file);
+    if (ScrollModule) {
+      ScrollModule.setContainer(this.mount, this.file);
+      ScrollModule.restore(this.file);
     }
     
     // Mermaid and CodeBlocks still benefit from a frame delay for layout
@@ -208,9 +333,13 @@ class MarkdownPreview {
       if (window.CodeBlockModule) window.CodeBlockModule.process(inner);
 
       // Ensure scroll is maintained if content size changed
-      if (window.ScrollModule) {
-        window.ScrollModule.restore(this.file);
+      if (ScrollModule) {
+        ScrollModule.restore(this.file);
       }
+
+      // Sync TOC on live update
+      const viewer = MarkdownViewer.getInstance();
+      if (viewer && viewer._updateTOC) viewer._updateTOC();
     }
   }
 }
@@ -235,23 +364,34 @@ class MarkdownEditor {
     
     container.appendChild(textarea);
     this.mount.appendChild(container);
+  }
 
-    // Initialize Editor Logic
-    if (window.EditorModule) {
-      window.EditorModule.bindToElement(textarea);
+  activate() {
+    const textarea = this.mount.querySelector('#edit-textarea');
+    if (textarea) {
+      // Initialize Editor Logic
+      if (EditorModule) {
+        EditorModule.bindToElement(textarea);
+      }
+
+      // Tell ScrollModule to watch the textarea
+      if (ScrollModule) {
+        ScrollModule.setContainer(textarea, this.file);
+        ScrollModule.restore(this.file);
+      }
+
+      // Restore cursor if context exists in AppState
+      const ctx = window.AppState && window.AppState.lastSyncContext;
+      if (ctx && (ctx.line || ctx.scrollPct) && MarkdownLogicService) {
+        MarkdownLogicService.syncCursor(textarea, ctx);
+        window.AppState.lastSyncContext = null;
+      }
     }
+  }
 
-    // NEW: Tell ScrollModule to watch the textarea instead of the mount point in Edit mode
-    if (window.ScrollModule) {
-      window.ScrollModule.setContainer(textarea, this.file);
-      window.ScrollModule.restore(this.file);
-    }
-
-    // Restore cursor if context exists in AppState
-    const ctx = window.AppState && window.AppState.lastSyncContext;
-    if (ctx && (ctx.line || ctx.scrollPct) && window.MarkdownLogicService) {
-      window.MarkdownLogicService.syncCursor(textarea, ctx);
-      window.AppState.lastSyncContext = null;
+  deactivate() {
+    if (EditorModule) {
+      EditorModule.unbind();
     }
   }
 
@@ -265,15 +405,15 @@ class MarkdownEditor {
   }
 
   async _save() {
-    if (window.EditorModule) {
-      const success = await window.EditorModule.save();
+    if (EditorModule) {
+      const success = await EditorModule.save();
       if (success) this._switchTo('read');
     }
   }
 
   _handleCancel() {
-    if (window.EditorModule) {
-      window.EditorModule.revert();
+    if (EditorModule) {
+      EditorModule.revert();
     }
     this._switchTo('read');
   }
@@ -283,8 +423,8 @@ class MarkdownEditor {
     const textarea = this.mount.querySelector('#edit-textarea');
     if (textarea && textarea.value !== content) {
       // Syncing original content will update textarea.value AND preserve selection
-      if (window.EditorModule) {
-        window.EditorModule.setOriginalContent(content);
+      if (EditorModule) {
+        EditorModule.setOriginalContent(content);
       } else {
         textarea.value = content;
       }
@@ -292,7 +432,7 @@ class MarkdownEditor {
   }
 
   destroy() {
-    if (window.EditorModule) window.EditorModule.unbind();
+    if (EditorModule) EditorModule.unbind();
   }
 }
 

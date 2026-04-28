@@ -7,13 +7,21 @@
 ## Kiến trúc
 
 ```
-MarkdownViewerComponent (container)
+MarkdownViewerComponent (mount point: #md-viewer-mount)
 ├── MarkdownEmptyState     — khi chưa mở file nào
 ├── MarkdownPreview        — read mode
 ├── MarkdownEditor         — edit mode
 ├── CommentsView           — comment mode (delegate sang CommentsModule)
 └── CollectView            — collect mode (delegate sang CollectModule)
 ```
+
+---
+
+## Kiến trúc Layered Viewport
+
+Kể từ phiên bản 2026-04-28, `MarkdownViewer` chuyển sang kiến trúc phân lớp để hỗ trợ các Overlay (như TOC):
+- **Scroll Container (`.md-viewer-viewport`)**: Là lớp duy nhất có thuộc tính `overflow-y: auto`. Tất cả nội dung Markdown (Preview/Editor) đều nằm trong lớp này.
+- **Fixed Overlays**: Các thành phần như TOC Panel và Scroll-to-Top được mount trực tiếp vào `#md-viewer-mount` với vị trí `absolute`, giúp chúng không bị cuộn theo nội dung văn bản.
 
 ---
 
@@ -34,8 +42,8 @@ MarkdownViewer.setState({
 Logic bên trong:
 1. So sánh `newState` với state cũ để detect thay đổi
 2. Nếu chỉ thay đổi content (không đổi mode/file) → gọi `update()` để patch DOM thay vì render lại toàn bộ
-3. Nếu đổi mode hoặc file → destroy component cũ → render component mới
-4. Lưu scroll position trước khi destroy (qua ScrollModule)
+3. Nếu đổi mode → Toggle hiển thị (`display: none/flex`) giữa Preview và Editor container (Persistent DOM). Không destroy component để bảo toàn scroll position và TOC state.
+4. Nếu đổi file → Gọi `reset()` trên các component liên quan và render lại nội dung mới.
 
 ### `render()`
 Tạo sub-component phù hợp dựa trên `state.mode` và mount vào DOM.
@@ -73,8 +81,11 @@ Render editor layout:
 
 Gọi `EditorModule.bindToElement(textarea)` sau khi mount. `EditToolbarComponent` được kích hoạt thông qua `MarkdownViewer._setupToolbar()`.
 
+### `activate()` / `deactivate()`
+Dùng để kích hoạt hoặc tạm dừng logic Editor khi container được hiển thị/ẩn (Persistent DOM). `activate()` thực hiện bind phím tắt và khôi phục focus.
+
 ### `destroy()`
-Gọi `EditorModule.unbind()` để dọn dẹp event listeners trước khi component bị remove.
+Dọn dẹp triệt để event listeners khi file bị đóng hoàn toàn.
 
 ---
 
@@ -91,13 +102,13 @@ AppState.currentMode = newMode
         ↓
 MarkdownViewer.setState({ mode: newMode })
         ↓
-ScrollModule.savePosition()  ← lưu scroll trước khi switch
+SyncService.syncPosition(oldMode, newMode)  ← Đồng bộ scroll/cursor thông minh
         ↓
-Destroy old sub-component
+ScrollModule.savePosition()  ← lưu scroll dự phòng
         ↓
-Render new sub-component
+Render new sub-component (if file changed) or Toggle Visibility
         ↓
-ScrollModule.restorePosition()  ← khôi phục scroll
+ScrollModule.restorePosition()  ← khôi phục scroll (nếu cần)
 ```
 
 ---

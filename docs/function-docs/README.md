@@ -11,7 +11,9 @@ Tài liệu các module và function quan trọng của MDpreview.
 | File | Mô tả |
 |---|---|
 | [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) | Centralized UI factory (Buttons, Segmented Control, Radius logic) |
+| [DESIGN_SYSTEM_ICONS.md](DESIGN_SYSTEM_ICONS.md) | Registry toàn bộ icon SVG của dự án (Modular Icons) |
 | [CORE_APP.md](CORE_APP.md) | Global state (AppState), loadFile, boot sequence, theme, socket |
+| [SYNC_SERVICE.md](SYNC_SERVICE.md) | Service đồng bộ hóa vị trí (scroll/cursor) giữa các chế độ xem |
 | [TABS.md](TABS.md) | Tab management, multi-select, batch close |
 | [EDITOR.md](EDITOR.md) | Textarea editor, undo/redo, dirty tracking, save |
 | [WORKSPACE.md](WORKSPACE.md) | Workspace CRUD, switching, Electron API integration |
@@ -34,6 +36,7 @@ Tài liệu các module và function quan trọng của MDpreview.
 | [TAB_BAR_COMPONENT.md](TAB_BAR_COMPONENT.md) | Organism quản lý thanh Tab (drag & drop, context menu) |
 | [TAB_PREVIEW.md](TAB_PREVIEW.md) | Hover Preview với Render Window strategy và Glassmorphism |
 | [EDIT_TOOLBAR.md](EDIT_TOOLBAR.md) | Thanh công cụ soạn thảo dàn trải với phân cấp Header H1-H6 |
+| [TOC_COMPONENT.md](TOC_COMPONENT.md) | Quản lý mục lục nổi (Floating TOC) và đồng bộ cuộn |
 
 ---
 

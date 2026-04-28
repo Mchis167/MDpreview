@@ -65,7 +65,7 @@
   width: 100%;
   background: var(--ds-border-subtle);
   flex-shrink: 0;
-  margin: var(--ds-space-xs) 0;
+  margin: var(--ds-space-2xs) 0;
 }
 
 /* ── Views Structure ── */
@@ -144,10 +144,10 @@
 
 /* ── Footer: Status Badge ── */
 .sidebar-footer {
-  padding: var(--ds-space-xs) var(--ds-space-sm) var(--ds-space-sm) var(--ds-space-sm);
+  padding: var(--ds-space-2xs) var(--ds-space-sm) var(--ds-space-sm) var(--ds-space-sm);
   flex-shrink: 0;
   display: flex;
-  gap: var(--ds-space-xs);
+  gap: var(--ds-space-2xs);
   align-items: center;
 }
 

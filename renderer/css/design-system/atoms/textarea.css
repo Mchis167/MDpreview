@@ -42,7 +42,7 @@
 }
 
 .textarea-container {
-  margin: 0 var(--ds-space-xs);
+  margin: 0 var(--ds-space-2xs);
   padding: 10px 14px;
   background: var(--ds-layer-control-default);
   border: 1px solid var(--ds-border-default);
@@ -158,11 +158,11 @@
 
 .expanded-textarea-body {
   flex: 1;
-  margin: 0 var(--ds-space-xs) var(--ds-space-xs) var(--ds-space-xs);
+  margin: 0 var(--ds-space-2xs) var(--ds-space-2xs) var(--ds-space-2xs);
   padding: var(--ds-space-xl);
   background: var(--ds-layer-control-default);
   border: 1px solid var(--ds-border-default);
-  border-radius: max(0px, var(--ds-radius-shell) - var(--ds-space-xs));
+  border-radius: max(0px, var(--ds-radius-shell) - var(--ds-space-2xs));
   display: flex;
   overflow: clip;
 }

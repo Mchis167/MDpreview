@@ -49,6 +49,10 @@ Ghi lại các quyết định thiết kế và kỹ thuật quan trọng trong 
 | 2026-04-28 | [20260428-edit-toolbar-layout-evolution.md](20260428-edit-toolbar-layout-evolution.md) | Tiến hóa Layout và chuẩn hóa Icon Scaling cho Edit Toolbar | accepted |
 | 2026-04-28 | [20260428-optimized-file-loading.md](20260428-optimized-file-loading.md) | Tối ưu hóa logic tải file và ổn định UI | accepted |
 | 2026-04-28 | [20260428-centralized-shortcut-strategy.md](20260428-centralized-shortcut-strategy.md) | Chiến lược Phím tắt Tập trung và Đánh chặn Toàn cục | accepted |
+| 2026-04-28 | [20260428-toc-semantic-tokens.md](20260428-toc-semantic-tokens.md) | Token hóa Semantic cho chuyển động và bố cục TOC | accepted |
+| 2026-04-28 | [20260428-viewer-persistent-dom.md](20260428-viewer-persistent-dom.md) | Kiến trúc DOM bền vững cho Viewer | accepted |
+| 2026-04-28 | [20260428-toc-scroll-sync-strategy.md](20260428-toc-scroll-sync-strategy.md) | Chiến lược đồng bộ cuộn và highlight TOC | accepted |
+| 2026-04-28 | [20260428-architecture-polish-legacy-pruning.md](20260428-architecture-polish-legacy-pruning.md) | Tổng vệ sinh kiến trúc và loại bỏ Legacy | accepted |
 
 
 ---

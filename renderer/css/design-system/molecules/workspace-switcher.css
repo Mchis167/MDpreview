@@ -4,7 +4,7 @@
    ══════════════════════════════════════════════════ */
 
 .ds-workspace-switcher-mount {
-  padding: var(--ds-space-xs);
+  padding: var(--ds-space-2xs);
   flex-shrink: 0;
 }
 
@@ -18,7 +18,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--ds-space-xs) var(--ds-space-md) var(--ds-space-xs) var(--ds-space-xl);
+  padding: var(--ds-space-2xs) var(--ds-space-md) var(--ds-space-2xs) var(--ds-space-xl);
   background: var(--ds-layer-surface-default);
   border: none;
   cursor: pointer;

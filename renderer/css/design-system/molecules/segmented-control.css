@@ -4,13 +4,13 @@
 
 .ds-segmented-control {
   --_radius: var(--ds-segmented-radius, var(--ds-radius-panel));
-  --_padding: var(--ds-segmented-padding, var(--ds-space-2xs));
+  --_padding: var(--ds-segmented-padding, var(--ds-space-3xs));
 
   display: flex;
   background: var(--ds-glass-hover);
   padding: var(--_padding);
   border-radius: var(--_radius);
-  gap: var(--ds-space-2xs);
+  gap: var(--ds-space-3xs);
   position: relative;
 }
 

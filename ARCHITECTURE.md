@@ -51,7 +51,7 @@ Define atomic building blocks—no abstractions.
 --ds-primitive-orange-rgb: 255, 191, 72;
 
 /* Spacing */
---ds-space-xs: 4px;
+--ds-space-2xs: 4px;
 --ds-space-sm: 8px;
 --ds-space-md: 12px;
 --ds-space-lg: 16px;
@@ -63,7 +63,8 @@ Define atomic building blocks—no abstractions.
 --ds-radius-md: 8px;
 --ds-radius-lg: 12px;
 --ds-radius-xl: 16px;
---ds-radius-xxl: 24px;
+--ds-radius-2xl: 24px;
+--ds-radius-3xl: 32px;
 --ds-radius-full: 999px;
 ```
 
@@ -135,7 +136,7 @@ These tokens describe **intent**, not implementation. Change one token, update e
 --ds-status-danger-bg: rgba(244, 67, 54, 0.15);
 
 /* Semantic Radius (Concentric Design) */
---ds-radius-shell: var(--ds-radius-xxl);    /* 24px — containers */
+--ds-radius-shell: var(--ds-radius-2xl);    /* 24px — containers */
 --ds-radius-panel: var(--ds-radius-lg);     /* 12px — inner panels */
 --ds-radius-widget: var(--ds-radius-md);    /* 8px  — buttons, inputs */
 --ds-radius-chip: var(--ds-radius-xs);      /* 4px  — small tags */
@@ -310,7 +311,8 @@ window.IconActionButton = IconActionButton;
 - **ScrollContainer**: Reusable scroll view with mask-fading and automatic safe zone for sidebar lists.
 - **SettingToggleItem**: Specialized row with label and switch toggle for settings menus.
 
-**Organisms:** `tab-bar.js`, `sidebar-left.js`, `markdown-viewer-component.js`, etc.
+**Organisms:** `tab-bar.js`, `sidebar-left.js`, `markdown-viewer-component.js`, `toc-component.js`, etc.
+- **TOCComponent**: Manages the Table of Contents tree view and floating toggle.
 
 #### 3. Services (`renderer/js/services/`)
 - `file-service.js` — File I/O wrapper
@@ -455,6 +457,7 @@ app.js (Core)
 │   │   └── TreeItem (molecule)
 │   └── SearchComponent (molecule)
 ├── MarkdownViewer (organism)
+│   ├── TOCComponent (organism)
 │   ├── MarkdownLogicService
 │   └── CodeBlockModule (util)
 ├── RightSidebar (organism)

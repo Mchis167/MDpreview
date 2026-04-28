@@ -15,7 +15,6 @@
   <!-- ── Libraries ───────────────────────────────────── -->
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js" defer></script>
   <script src="/socket.io/socket.io.js" defer></script>
-  <script src="https://unpkg.com/lucide@latest" defer></script>
 
   <!-- ── Application Styles ─────────────────────────── -->
   <link rel="stylesheet" href="css/styles.css">
@@ -65,6 +64,7 @@
   <!-- ── 2. Design System Components ── -->
   <!-- Foundations -->
   <script src="js/components/design-system.js" defer></script>
+  <script src="js/components/design-system-icons.js" defer></script>
 
   <!-- Atoms (Base Elements) -->
   <script src="js/components/atoms/icon-action-button.js" defer></script>
@@ -97,6 +97,7 @@
   <script src="js/components/organisms/settings-component.js" defer></script>
   <script src="js/components/organisms/markdown-helper-component.js" defer></script>
   <script src="js/components/organisms/shortcuts-component.js" defer></script>
+  <script src="js/components/organisms/toc-component.js" defer></script>
   <script src="js/components/organisms/explorer-settings-component.js" defer></script>
   <script src="js/components/organisms/search-palette.js" defer></script>
 
@@ -106,10 +107,10 @@
   <script src="js/services/file-service.js" defer></script>
   <script src="js/services/markdown-logic-service.js" defer></script>
   <script src="js/services/tree-drag-manager.js" defer></script>
-  <script src="js/services/sidebar-controller.js" defer></script>
   <script src="js/services/recently-viewed-service.js" defer></script>
   <script src="js/services/search-service.js" defer></script>
   <script src="js/services/shortcut-service.js" defer></script>
+  <script src="js/services/sync-service.js" defer></script>
 
   <!-- ── 4. Utilities ── -->
   <script src="js/utils/zoom.js" defer></script>
@@ -122,8 +123,6 @@
   <script src="js/modules/workspace.js" defer></script>
   <script src="js/modules/comments.js" defer></script>
   <script src="js/modules/collect.js" defer></script>
-  <script src="js/modules/toolbar.js" defer></script>
-  <script src="js/modules/sidebar.js" defer></script>
   <script src="js/modules/draft.js" defer></script>
   <script src="js/modules/editor.js" defer></script>
   <script src="js/modules/tabs.js" defer></script>

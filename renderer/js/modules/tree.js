@@ -1,5 +1,5 @@
 /* global AppState, SettingsService, DesignSystem, FileService, TreeDragManager, 
-   TreeViewComponent, SidebarSectionHeader, SidebarModule, RecentlyViewedModule, showToast, ScrollContainer */
+   TreeViewComponent, SidebarSectionHeader, SearchPalette, RecentlyViewedModule, showToast, ScrollContainer */
 /* ============================================================
    tree.js — Sidebar File Tree logic with Sorting and DND
    ============================================================ */
@@ -63,7 +63,7 @@ const TreeModule = (() => {
       title: 'Search files',
       iconName: 'search',
       onClick: () => {
-        if (typeof SidebarModule !== 'undefined') SidebarModule.activateSearch();
+        if (typeof SearchPalette !== 'undefined') SearchPalette.show();
       }
     });
 

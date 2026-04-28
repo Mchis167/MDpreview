@@ -104,19 +104,20 @@ Thứ tự khởi động nghiêm ngặt — **không thay đổi thứ tự**:
 ```
 1. AppState.loadPersistentState()   — Load state từ server
 2. SettingsService.applyTheme()      — Cập nhật CSS variables từ SettingsService
-3. SidebarLeft.init()                — Khởi tạo sidebar trái
-4. ChangeActionViewBar.init()        — Khởi tạo sync bar
-5. RightSidebar.init()               — Khởi tạo sidebar phải
-6. initSocket()                      — Kết nối socket
-7. Mermaid.init()                    — Khởi tạo renderer diagram
-8. DraftModule.init()                — Load drafts
-9. MarkdownViewer.init()            — Khởi tạo viewer
-10. ScrollModule.init()              — Khởi tạo scroll sync
-11. TabPreview.init()                — Khởi tạo hover preview (molecules/tab-preview.js)
-12. TabsModule.init()                — Khởi tạo tabs
-13. setTimeout(0): Tree + Workspace  — Defer để DOM ổn định
+3. SearchPalette.init()              — Khởi tạo registry tìm kiếm (SearchPalette.js)
+4. SidebarLeft.init()                — Khởi tạo sidebar trái
+5. ChangeActionViewBar.init()        — Khởi tạo sync bar
+6. RightSidebar.init()               — Khởi tạo sidebar phải
+7. initSocket()                      — Kết nối socket
+8. Mermaid.init()                    — Khởi tạo renderer diagram
+9. DraftModule.init()                — Load drafts
+10. MarkdownViewer.init()            — Khởi tạo viewer
+11. ScrollModule.init()              — Khởi tạo scroll sync
+12. TabPreview.init()                — Khởi tạo hover preview (molecules/tab-preview.js)
+13. TabsModule.init()                — Khởi tạo tabs
+14. setTimeout(0): Tree + Workspace  — Defer để DOM ổn định
 ```
 
 ---
 
-*Document — 2026-04-28*
+*Document — 2026-04-28 (Refactored: Removed SidebarModule, updated Search trigger)*

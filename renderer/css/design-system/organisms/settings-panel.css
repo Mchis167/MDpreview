@@ -11,7 +11,6 @@
 .color-selector {
   display: flex;
   gap: var(--ds-space-sm);
-  padding-right: var(--ds-space-md);
 }
 
 .color-item {
@@ -92,7 +91,7 @@
   font-size: var(--ds-font-base);
   font-weight: 600;
   cursor: pointer;
-  padding: var(--ds-space-xs) 26px var(--ds-space-xs) var(--ds-space-sm);
+  padding: var(--ds-space-2xs) 26px var(--ds-space-2xs) var(--ds-space-sm);
   border-radius: var(--ds-radius-widget);
   transition: all var(--ds-transition-fast);
   text-align: right;

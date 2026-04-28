@@ -49,16 +49,32 @@ Tạo lớp chắn bảo vệ (shield) cho các menu nổi, hỗ trợ click-out
 
 ---
 
+## Tooltip System (Smart Singleton)
+
+Design System cung cấp cơ chế tooltip thông minh, tự động xử lý vị trí và chống clipping.
+
+### `applyTooltip(element, text, position)`
+Gắn tooltip cho một phần tử bất kỳ. Thay vì tạo DOM con, hàm này sử dụng hệ thống attribute giúp tránh lỗi bị cắt bởi `overflow: hidden`.
+- `element`: HTMLElement mục tiêu.
+- `text`: Nội dung tooltip.
+- `position`: `top` | `bottom` (mặc định là `bottom`).
+
+### `initSmartTooltips()`
+Khởi tạo trình quản lý tooltip toàn cục (Singleton). Tự động tính toán tọa độ, lật hướng (flip) khi chạm biên Viewport và chống nhấp nháy (flicker) khi di chuyển chuột qua các icon con.
+
+---
+
 ## Icon Registry
 
 Design System quản lý một bộ thư viện icon tập trung (SVG strings) thông qua `DesignSystem.ICONS`.
 
-### `getIcon(name)`
-Trả về chuỗi SVG của icon tương ứng.
+### `registerIcons(icons)`
+Nạp thêm bộ icon vào registry nội bộ. Hàm này cho phép các module mở rộng (như `design-system-icons.js`) đăng ký icon của mình mà không cần sửa code core của DesignSystem.
 
-**Các icon mới bổ sung:**
-- `heading-1` đến `heading-6`: Icon tiêu đề chuẩn Lucide (stroke 2.5).
-- `save`, `help-circle`, `terminal`, `code`, `table`.
+### `getIcon(name)`
+Trả về chuỗi SVG của icon tương ứng từ registry đã đăng ký.
+
+> Xem thêm: [DESIGN_SYSTEM_ICONS.md](DESIGN_SYSTEM_ICONS.md)
 
 ---
 

@@ -1,58 +1,67 @@
 /* ============================================================
    design-system/atoms/tooltip.css
-   Uses --_ local variables for position variants.
+   Smart Singleton Tooltip — Controlled via JS
    ============================================================ */
 
-.ds-tooltip-container { position: relative; }
-
 .ds-tooltip {
-  /* ── Local Variables ── */
-  --_bg:      var(--ds-bg-surface);
-  --_color:   var(--ds-text-primary);
-  --_radius:  var(--ds-radius-panel);
-  --_shadow:  var(--ds-shadow-md);
-  --_offset:  10px;
-
-  position: absolute;
-  background: var(--_bg);
-  color: var(--_color);
+  --_offset: 8px;
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+  background: var(--ds-bg-elevated);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--ds-border-strong);
-  border-radius: var(--_radius);
-  padding: var(--ds-space-sm) var(--ds-space-md);
-  font-size: var(--ds-font-sm);
+  border-radius: var(--ds-radius-md);
+  padding: 6px 12px;
+  color: var(--ds-text-primary);
+  font-size: 11px;
   font-weight: 500;
   white-space: nowrap;
-  pointer-events: none;
+  box-shadow: var(--ds-shadow-lg);
   opacity: 0;
-  box-shadow: var(--_shadow);
-  transition: all var(--ds-transition-fast);
-  z-index: 2000;
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+  left: 0;
+  top: 0;
 }
 
-/* ── Position: Bottom (default) ─────────────────────────── */
-.ds-tooltip-bottom {
-  top: 110%;
-  left: 50%;
-  transform: translateX(-50%) translateY(var(--_offset));
-}
-
-.ds-tooltip-bottom::before {
-  content: '';
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 5px solid transparent;
-  border-bottom-color: var(--ds-border-strong);
-}
-
-/* ── Hover triggers ─────────────────────────────────────── */
-.ds-tooltip-trigger:hover .ds-tooltip,
-.is-disabled:hover .ds-tooltip {
+.ds-tooltip.is-visible {
   opacity: 1;
 }
 
-.ds-tooltip-trigger:hover .ds-tooltip-bottom,
-.is-disabled:hover .ds-tooltip-bottom {
-  transform: translateX(-50%) translateY(0);
+/* ── Position variants for JS calculation ──────────────── */
+.ds-tooltip.pos-bottom {
+  transform: translateY(var(--_offset));
+}
+.ds-tooltip.pos-bottom.is-visible {
+  transform: translateY(0);
+}
+
+.ds-tooltip.pos-top {
+  transform: translateY(calc(-1 * var(--_offset)));
+}
+.ds-tooltip.pos-top.is-visible {
+  transform: translateY(0);
+}
+
+/* ── Arrow ─────────────────────────────────────────────── */
+.ds-tooltip::before {
+  content: '';
+  position: absolute;
+  border: 5px solid transparent;
+}
+
+.ds-tooltip.pos-bottom::before {
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-bottom-color: var(--ds-border-strong);
+}
+
+.ds-tooltip.pos-top::before {
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-top-color: var(--ds-border-strong);
 }

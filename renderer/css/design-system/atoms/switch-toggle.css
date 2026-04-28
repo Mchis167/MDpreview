@@ -5,10 +5,10 @@
 
 .switch-toggle {
   /* ── Local Variables ── */
-  --_bg: var(--ds-black-a40);
-  --_bg-hover: var(--ds-layer-subtle-selected);
+  --_bg: var(--ds-white-a10);
+  --_bg-hover: var(--ds-white-a15);
   --_border: var(--ds-border-default);
-  --_indicator-bg: var(--ds-layer-subtle-hover);
+  --_indicator-bg: var(--ds-white-a40);
   --_indicator-x: 0;
   --_indicator-size: 24px;
 
@@ -16,7 +16,7 @@
   align-items: center;
   width: 52px;
   height: 32px;
-  padding: var(--ds-space-xs);
+  padding: var(--ds-space-2xs);
   background: var(--_bg);
   border: 1px solid var(--_border);
   border-radius: var(--ds-radius-pill);

@@ -128,7 +128,7 @@
 
 .tree-item:hover .item-delete-btn {
   width: 22px;
-  padding: var(--ds-space-xs);
+  padding: var(--ds-space-2xs);
   opacity: 0.4;
   margin-left: auto;
   visibility: visible;
@@ -176,7 +176,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--ds-space-xs);
+  gap: var(--ds-space-2xs);
   box-shadow: var(--ds-shadow-md);
   border: 1px solid var(--ds-border-default);
   transform: translate(-50%, -50%);

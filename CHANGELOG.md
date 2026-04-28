@@ -2,6 +2,60 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.12.0] — 2026-04-28 14:40
+
+### 🎉 Added
+- **Modular Icon System**: Tách rời bộ icon SVG ra khỏi core logic của Design System sang module độc lập `design-system-icons.js`. Bổ sung API `DesignSystem.registerIcons(icons)` để hỗ trợ đăng ký icon động.
+- **SyncService**: Triển khai service chuyên biệt quản lý việc đồng bộ hóa vị trí cuộn và con trỏ (Sync Scroll/Cursor) giữa các chế độ Read và Edit.
+- **Smart Singleton Tooltip System**: 
+    - Triển khai kiến trúc **Singleton Tooltip** (một phần tử duy nhất gắn vào `body`) giúp loại bỏ hoàn toàn vấn đề tooltip bị cắt (clipping) bởi các container cha có `overflow: hidden`.
+    - **Smart Positioning Logic**: Tự động tính toán tọa độ và lật hướng (flip) tooltip giữa `top` và `bottom` để đảm bảo luôn hiển thị trọn vẹn trong Viewport.
+    - **Flicker-free Interaction**: Sử dụng cơ chế theo dõi `currentTarget` và lọc `relatedTarget` giúp tooltip hiển thị ổn định 100%, không bị ẩn hiện khi di chuyển chuột qua các phần tử con (icon) bên trong nút bấm.
+- **Design System Tooltip API**: 
+    - Bổ sung `DesignSystem.initSmartTooltips()` để quản lý tập trung toàn bộ tooltip qua sự kiện delegation.
+    - Cập nhật `DesignSystem.applyTooltip()` sử dụng hệ thống attribute `data-ds-tooltip` tinh gọn.
+- **TOC Skeleton Loading**: Thay thế trạng thái "No headings found" bằng hiệu ứng skeleton shimmering (6 dòng với độ dài ngẫu nhiên) mang lại trải nghiệm chuyên nghiệp hơn.
+- **Floating TOC Refinements**:
+    - Triển khai hiệu ứng **Full Slide-in** từ biên phải màn hình với gia tốc nảy (spring physics) mượt mà.
+    - **Content Offset Logic**: Tự động dịch chuyển nội dung văn bản (`padding-right`) khi TOC mở để tránh chồng đè.
+    - **TOC Semantic Tokens**: Bổ sung bộ token Tier 3 chuyên biệt (`--ds-toc-width`, `--ds-toc-offset`, `--ds-transition-slow`) giúp quản lý tập trung.
+    - **Active Button State**: Nút kích hoạt TOC hiện có trạng thái `.is-active` tinh tế với viền mỏng và nền trắng mờ 5%.
+
+### 🔧 Changed
+- **Architecture Polish**: Thực hiện đợt nâng cấp kiến trúc tổng thể, loại bỏ các thành phần trung gian và module di sản.
+- **SearchPalette Integration**: Cập nhật `app.js` và `tree.js` để gọi trực tiếp `SearchPalette` thay vì đi qua `SidebarModule`.
+- **Organism Decoupling**: Giải phóng `ChangeActionViewBar` khỏi logic nghiệp vụ đồng bộ, chuyển sang sử dụng `SyncService`.
+- **Premium Tooltip Integration**: Nâng cấp toàn bộ các thành phần Design System (`IconActionButton`, `createButton`, `createHeaderAction`, `createSegmentedControl`) sang hệ thống tooltip thông minh mới.
+- **Smart Orientation**: Tự động cấu hình hướng `top` cho các thanh công cụ ở đáy màn hình (`ChangeActionViewBar`) và hướng `bottom` cho thanh công cụ phía trên.
+- **Tooltip CSS Refactor**: Chuyển đổi sang `position: fixed` và tối ưu hóa hiệu ứng Glassmorphism với `backdrop-filter: blur(12px)`.
+- **Global Spacing Refactor**: Tái cấu trúc toàn bộ hệ thống Spacing sang chuẩn T-shirt scale đồng nhất (từ `3xs` đến `4xl`). 
+    - Bổ sung các nấc quan trọng: `6px` (`--ds-space-xs`) và `28px` (`--ds-space-2xl`).
+    - Tự động cập nhật toàn bộ tham chiếu trong 40+ module CSS/JS và tài liệu kiến trúc.
+- **TOC Layout Evolution**:
+    - **Trailing Chevron**: Di chuyển nút đóng/mở (toggle) từ đầu dòng sang cuối dòng, giúp nhãn nội dung được căn lề trái thẳng hàng.
+    - **H2 Section Dividers**: Bổ sung đường kẻ phân cách tinh tế (`border-top`) giữa các mục cấp 2 để phân chia khối nội dung rõ ràng hơn.
+- **TOC Component Standardization**:
+    - Chuyển đổi nút đóng TOC sang atom `IconActionButton` để đồng bộ UI với hệ thống.
+    - Refactor hệ thống thụt lề (Indentation): Bắt đầu từ `level-2` ở mức 0 và tăng tiến theo bước `12px` (`var(--ds-space-md)`).
+    - **Positioning Sync**: Đồng bộ vị trí TOC Panel với Button thông qua hệ thống biến CSS nội bộ (`--_toc-top`, `--_toc-right`), đảm bảo logic layout tập trung tại một nơi.
+- **Semantic Token Migration**: Hoàn tất việc chuyển đổi 100% các giá trị hardcoded trong `toc-panel.css` sang Tier 3 Semantic Tokens.
+- **Layered Viewport Architecture**: Tái cấu trúc `MarkdownViewer` với một scrolling viewport chuyên biệt, cho phép các Overlay (như TOC) hoạt động ổn định ở vị trí `absolute` mà không bị ảnh hưởng bởi quá trình cuộn trang.
+- **TOC Header Filtering**: Tự động loại bỏ thẻ `H1` khỏi danh sách mục lục để tập trung vào các mục chính của tài liệu.
+- **Explicit Toggle Interaction**: Chuyển đổi sang cơ chế đóng/mở chủ động, không còn tự đóng khi click ra ngoài để tối ưu việc đối chiếu nội dung.
+- **Transition Synchronization**: Đồng bộ hoàn toàn thời gian chuyển động (0.5s) và hàm số `cubic-bezier` giữa mục lục và nội dung văn bản.
+
+### 🗑 Removed
+- **Lucide Dependency**: Gỡ bỏ Lucide CDN khỏi dự án, thay thế hoàn toàn bằng hệ thống SVG registry nội bộ để tăng tốc độ tải và tính ổn định.
+- **Legacy Components**: Xóa bỏ các module và file di sản không còn sử dụng: `toolbar.js`, `sidebar.js`, `sidebar-controller.js`.
+- **Legacy CSS**: Loại bỏ `mode-switcher.css` và các selector mồ côi liên quan đến hệ thống sidebar cũ.
+
+### 🐞 Fixed
+- **White Screen on Mode Switch**: Sửa lỗi màn hình trắng khi chuyển đổi Mode sau khi chuyển Tab bằng cách đảm bảo các component con (Preview/Editor) luôn được cập nhật nội dung ngay cả khi đang bị ẩn.
+- **Missing Tooltips**: Khôi phục các tooltip bị mất trên `TabBar` (nút New Draft, Sidebar Toggle) và `EditToolbar`.
+- **Clipping Issues**: Giải quyết triệt để lỗi tooltip bị biến mất khi nằm trong các vùng nội dung bị giới hạn (Sidebar, Toolbar).
+- **Double Sticky Conflict**: Giải quyết triệt để lỗi vỡ layout do xung đột nhiều thành phần `sticky` trong container viewer.
+- **Token Typo**: Sửa lỗi tham chiếu token `--ds-white-a08` trong hệ thống màu.
+
 ## [1.11.0] — 2026-04-28 07:00
 
 ### 🎉 Added
@@ -13,7 +67,7 @@ All notable changes to this project will be documented in this file.
 - **Design System Icons**: Bổ sung bộ icon Lucide chuẩn cho `heading-1` đến `heading-6` vào `DesignSystem.ICONS`.
 - **Edit Toolbar Granularity**: Chia nhỏ công cụ Header thành 6 mức độ chọn trực tiếp (H1-H6) trong một nhóm riêng biệt.
 - **Design System Spacer**: Triển khai `.ds-edit-toolbar-spacer` (Molecule) hỗ trợ tạo khoảng trống linh hoạt để đẩy các nhóm hành động về phía bên phải.
-- **Extended Tokens**: Bổ sung các token mới: `--ds-space-2xs` (2px), `--ds-shadow-xl` (đổ bóng lớn cho popover), và hệ thống `Z-Index` định danh.
+- **Extended Tokens**: Bổ sung các token mới: `--ds-space-3xs` (2px), `--ds-shadow-xl` (đổ bóng lớn cho popover), và hệ thống `Z-Index` định danh.
 - **Design System Component**: Bổ sung `DesignSystem.createSegmentedControl` hỗ trợ khởi tạo nhanh Molecule với bộ chỉ báo trượt (sliding indicator) và logic đồng bộ mode.
 - **Silent Loading Mode**: Cơ chế `silent` loading cho phép cập nhật nội dung file (sau khi save hoặc qua socket) mà không gây nhấp nháy Skeleton, mang lại trải nghiệm mượt mà.
 

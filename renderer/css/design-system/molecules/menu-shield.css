@@ -2,19 +2,19 @@
 
 .ds-menu-shield {
   position: fixed;
-  z-index: 2000;
+  z-index: var(--ds-z-index-popover);
   min-width: 200px;
   max-width: 320px;
-  background: var(--ds-surface-overlay);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: var(--ds-bg-floating-glass);
+  backdrop-filter: blur(var(--ds-blur-lg)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--ds-blur-lg)) saturate(180%);
   border: 1px solid var(--ds-border-subtle);
   border-radius: var(--ds-radius-panel);
   box-shadow: var(--ds-shadow-lift);
-  padding: var(--ds-space-xs);
+  padding: var(--ds-space-2xs);
   display: flex;
   flex-direction: column;
-  animation: dsMenuFadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: dsMenuFadeIn var(--ds-transition-main);
   overflow: hidden;
   pointer-events: auto;
 }
@@ -35,7 +35,7 @@
 .ds-menu-shield-header {
   padding: var(--ds-space-sm) var(--ds-space-md) var(--ds-space-md) var(--ds-space-md);
   border-bottom: 1px solid var(--ds-border-subtle);
-  margin-bottom: var(--ds-space-xs);
+  margin-bottom: var(--ds-space-2xs);
 }
 
 .ds-menu-shield-title {

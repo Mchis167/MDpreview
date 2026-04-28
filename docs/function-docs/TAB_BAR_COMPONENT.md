@@ -104,7 +104,8 @@ Each tab contains:
 - Tab Bar sử dụng **Singleton Pattern** qua `window.TabBar`.
 - Thuộc tính `data-path` là bắt buộc cho tính năng Hover Preview hoạt động.
 - Không được can thiệp trực tiếp vào DOM của Tab Bar từ bên ngoài, luôn sử dụng `TabsModule` để điều khiển qua `setState`.
+- **Tooltips**: Sử dụng hệ thống Premium Smart Tooltip (`applyTooltip`) để hiển thị thông tin trạng thái nút bấm và giới hạn bản nháp.
 
 ---
 
-*Document — 2026-04-27*
+*Document — 2026-04-28*
