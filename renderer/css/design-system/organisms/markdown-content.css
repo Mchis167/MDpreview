@@ -1,0 +1,155 @@
+/* ============================================================
+   markdown-content.css — Markdown typography and core styles
+   ============================================================ */
+
+.md-render-body {
+  max-width: 800px;
+  margin: 0 auto;
+  color: var(--ds-text-secondary);
+  line-height: 1.8;
+  font-size: calc(15px * (var(--preview-zoom, 100) / 100));
+}
+
+.md-render-body h1 {
+  font-size: calc(32px * (var(--preview-zoom, 100) / 100));
+  font-weight: 700;
+  color: var(--ds-text-inverse);
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--ds-white-a20);
+  letter-spacing: -0.05em;
+}
+
+.md-render-body h2 {
+  font-size: calc(24px * (var(--preview-zoom, 100) / 100));
+  font-weight: 700;
+  color: var(--ds-text-inverse);
+  margin-top: 3rem;
+  margin-bottom: 1.25rem;
+  position: relative;
+  padding-left: 20px;
+  line-height: 1.4;
+}
+
+.md-render-body h2::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.6em;
+  width: 8px;
+  height: 8px;
+  background: var(--ds-accent);
+  border-radius: 2px;
+}
+
+.md-render-body h3 {
+  font-size: calc(18px * (var(--preview-zoom, 100) / 100));
+  font-weight: 600;
+  color: var(--ds-accent);
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.md-render-body h4 {
+  font-size: calc(16px * (var(--preview-zoom, 100) / 100));
+  font-weight: 600;
+  color: var(--ds-text-inverse);
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.md-render-body h5 {
+  font-size: calc(14px * (var(--preview-zoom, 100) / 100));
+  font-weight: 600;
+  color: var(--ds-text-primary);
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.md-render-body h6 {
+  font-size: calc(12px * (var(--preview-zoom, 100) / 100));
+  font-weight: 600;
+  color: var(--ds-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.md-render-body p {
+  margin-bottom: 1.25rem;
+}
+
+.md-render-body a {
+  color: var(--ds-accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.md-render-body a:hover {
+  text-decoration: underline;
+}
+
+.md-render-body blockquote {
+  border-left: 2px solid var(--ds-accent);
+  padding: 16px 24px;
+  margin: 2rem 0;
+  background: var(--ds-white-a02);
+  border-radius: 0 12px 12px 0;
+  color: var(--ds-text-secondary);
+  line-height: 1.7;
+}
+
+.md-render-body blockquote p {
+  margin-bottom: 0;
+}
+
+.md-render-body ul,
+.md-render-body ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.md-render-body li {
+  margin-bottom: 0.5rem;
+}
+
+.md-render-body hr {
+  border: none;
+  border-bottom: 1px solid var(--ds-border-default);
+  margin: 2rem 0;
+}
+
+.md-render-body img {
+  max-width: 100%;
+  border-radius: var(--ds-radius-panel);
+  margin: 1rem 0;
+}
+
+.md-render-body code {
+  font-family: var(--ds-font-family-code);
+  font-size: 0.85em;
+  background: rgba(var(--ds-accent-rgb), 0.1);
+  padding: 0.15em 0.6em;
+  border-radius: var(--ds-radius-sm);
+  color: var(--ds-accent);
+  border: 1px solid rgba(var(--ds-accent-rgb), 0.25);
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: middle;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  margin: 2px 0;
+  line-height: 1.5;
+  transition: all 0.2s;
+}
+
+.md-render-body h1 code,
+.md-render-body h2 code,
+.md-render-body h3 code,
+.md-render-body h4 code {
+  font-size: 0.8em;
+  vertical-align: middle;
+  border-width: 2px;
+  background: rgba(var(--ds-accent-rgb), 0.15);
+}

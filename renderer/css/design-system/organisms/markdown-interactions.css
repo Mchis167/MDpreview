@@ -1,0 +1,187 @@
+/* ============================================================
+   markdown-interactions.css — Interaction modes and floating UI
+   ============================================================ */
+
+/* ── Interaction Highlights ────────────────────────────── */
+.highlight-temp {
+  background: rgba(168, 85, 247, 0.12) !important;
+}
+
+.pulse-highlight {
+  animation: pulse-bg 2s cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+@keyframes ds-fade-in-subtle {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ds-sync-fade-in {
+  animation: ds-fade-in-subtle 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes pulse-bg {
+
+  0%,
+  100% {
+    background: transparent;
+  }
+
+  50% {
+    background: rgba(var(--ds-accent-rgb), 0.2);
+    box-shadow: 0 0 15px rgba(var(--ds-accent-rgb), 0.1);
+  }
+}
+
+/* ── Line Comment Targets (comment mode) ───────────────── */
+.md-line {
+  position: relative;
+  padding: 2px 0;
+  border-radius: var(--ds-radius-chip);
+}
+
+.md-line.has-comment {
+  border-left: 2px solid transparent;
+  padding-left: 12px;
+  margin-left: -12px;
+  transition: border-color 0.2s;
+}
+
+#md-viewer-mount[data-active-mode="comment"] .md-line.has-comment {
+  border-left-color: var(--ds-accent);
+}
+
+.comment-range {
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  border-radius: 2px;
+  color: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+#md-viewer-mount[data-active-mode="comment"] .comment-range {
+  background: rgba(var(--ds-accent-rgb), 0.12);
+  border-bottom-color: rgba(var(--ds-accent-rgb), 0.4);
+}
+
+#md-viewer-mount[data-active-mode="comment"] .comment-range:hover {
+  background: var(--ds-layer-subtle-active-hover);
+  border-bottom-color: var(--ds-accent);
+}
+
+.idea-range {
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  border-radius: 2px;
+  color: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+#md-viewer-mount[data-active-mode="collect"] .idea-range {
+  background: rgba(var(--ds-accent-rgb), 0.15);
+  border-bottom: 2px solid rgba(var(--ds-accent-rgb), 0.3);
+}
+
+#md-viewer-mount[data-active-mode="collect"] .idea-range:hover {
+  background: var(--ds-layer-subtle-active-hover);
+  border-bottom-color: var(--ds-accent);
+}
+
+.pulse-highlight-collect {
+  animation: pulseCollect 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes pulseCollect {
+  0% {
+    background: rgba(var(--ds-accent-rgb), 0.4);
+  }
+
+  100% {
+    background: transparent;
+  }
+}
+
+/* Floating Triggers (Comment & Collect) */
+.comment-trigger,
+.collect-trigger {
+  --_color: var(--ds-text-primary);
+  --_color-hover: var(--ds-text-primary) !important;
+  color: var(--ds-text-primary) !important;
+  position: fixed;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1000;
+  background: var(--ds-white-a10) !important;
+  backdrop-filter: blur(var(--ds-blur-md)) !important;
+  -webkit-backdrop-filter: blur(var(--ds-blur-md)) !important;
+  border: 1px solid var(--ds-white-a20) !important;
+  box-shadow: 0 8px 32px var(--ds-black-a30) !important;
+}
+
+.comment-trigger.show,
+.collect-trigger.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.comment-item-snippet .highlight-selection {
+  background: rgba(var(--ds-accent-rgb), 0.2);
+  color: var(--ds-accent);
+  padding: 0 4px;
+  border-radius: var(--ds-radius-chip);
+  font-weight: 700;
+}
+
+/* ── Scroll to Top ─────────────────────────────────────── */
+.floating-scroll-top {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-layer-surface);
+  border: 1px solid var(--ds-border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-text-primary);
+  cursor: pointer;
+  z-index: 100;
+  opacity: 0;
+  transform: translateY(20px) scale(0.8);
+  pointer-events: none;
+  transition: all var(--ds-transition-normal) var(--ds-ease-spring);
+  box-shadow: var(--ds-shadow-lg);
+}
+
+.floating-scroll-top.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.floating-scroll-top:hover {
+  background: var(--ds-layer-surface-hover);
+  color: var(--ds-accent);
+  transform: translateY(-2px) scale(1.05);
+}
+
+.floating-scroll-top:active {
+  transform: translateY(0) scale(0.95);
+}
+
+.floating-scroll-top svg {
+  width: 20px;
+  height: 20px;
+}

@@ -1,0 +1,153 @@
+/* ============================================================
+   markdown-viewer.css — Markdown viewer shell and core layout
+   ============================================================ */
+
+/* ── Viewer Container ──────────────────────────────────── */
+#md-viewer-mount {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  min-height: 0;
+  user-select: text;
+  isolation: isolate; /* Create a clean stacking context for floating UI */
+}
+
+.md-preview-container,
+.md-editor-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+.md-viewer-viewport {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+  width: 100%;
+  transition: padding var(--ds-transition-slow);
+
+  /* Premium Scroll Mask moved here */
+  --mask-top: 40px;
+  --mask-bottom: 80px;
+  --mask-bottom-stop: 96%;
+  --_scroll-mask: linear-gradient(to bottom,
+      transparent 0%,
+      black var(--mask-top),
+      black calc(var(--mask-bottom-stop) - var(--mask-bottom)),
+      transparent var(--mask-bottom-stop));
+  mask-image: var(--_scroll-mask);
+  -webkit-mask-image: var(--_scroll-mask);
+}
+
+#md-viewer-mount.has-toc .md-viewer-viewport {
+  padding-right: var(--ds-toc-offset);
+}
+
+/* Disable scroll mask in edit mode to prevent UI clipping/fading */
+#md-viewer-mount[data-mode="edit"] .md-viewer-viewport {
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+
+.md-content-inner {
+  padding: 120px 0;
+  transition: opacity var(--ds-transition-main);
+}
+
+/* ── Content Skeleton ──────────────────────────────────── */
+.md-content-inner.is-loading {
+  pointer-events: none;
+}
+
+.md-content-inner.is-loading::before {
+  content: '';
+  display: block;
+  height: 40px;
+  width: 60%;
+  margin-bottom: 40px;
+  background: linear-gradient(90deg, var(--ds-white-a03) 25%, var(--ds-white-a08) 50%, var(--ds-white-a03) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 2s infinite linear;
+  border-radius: var(--ds-radius-widget);
+}
+
+.md-content-inner.is-loading::after {
+  content: '';
+  display: block;
+  height: 300px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--ds-white-a03) 25%, var(--ds-white-a08) 50%, var(--ds-white-a03) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 2s infinite linear;
+  border-radius: var(--ds-radius-panel);
+  mask-image: linear-gradient(to bottom,
+      black 0%,
+      black 10%, transparent 12%,
+      transparent 15%, black 17%,
+      black 25%, transparent 27%,
+      transparent 30%, black 32%,
+      black 100%);
+  -webkit-mask-image: linear-gradient(to bottom,
+      black 0%,
+      black 10%, transparent 12%,
+      transparent 15%, black 17%,
+      black 25%, transparent 27%,
+      transparent 30%, black 32%,
+      black 100%);
+}
+
+/* ── Empty State ───────────────────────────────────────── */
+#empty-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 33px;
+}
+
+.illus-wrap {
+  width: 240px;
+  height: 240px;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.center-illus {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0.5;
+  filter: drop-shadow(0 20px 40px var(--ds-black-a50));
+}
+
+.empty-state-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+#empty-state h2 {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--ds-text-secondary);
+  letter-spacing: -0.75px;
+  line-height: 36px;
+}
+
+#empty-state p {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ds-text-secondary);
+  line-height: 26px;
+}

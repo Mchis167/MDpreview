@@ -45,23 +45,3 @@
   transform: translateY(0);
 }
 
-/* ── Arrow ─────────────────────────────────────────────── */
-.ds-tooltip::before {
-  content: '';
-  position: absolute;
-  border: 5px solid transparent;
-}
-
-.ds-tooltip.pos-bottom::before {
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border-bottom-color: var(--ds-border-strong);
-}
-
-.ds-tooltip.pos-top::before {
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border-top-color: var(--ds-border-strong);
-}

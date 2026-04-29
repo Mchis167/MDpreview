@@ -543,6 +543,54 @@ document.addEventListener('DOMContentLoaded', async () => {
         else document.exitFullscreen();
       },
       'save-file': () => window.EditorModule?.save(),
+      'copy-markdown': () => {
+        const v = window.MarkdownViewer?.getInstance();
+        if (v) v.copyMarkdown();
+      },
+      'copy-as-file': () => {
+        const v = window.MarkdownViewer?.getInstance();
+        if (v) v.copyAsFile();
+      },
+      'copy-gdocs': () => {
+        const v = window.MarkdownViewer?.getInstance();
+        if (v) v.copyForGDocs();
+      },
+      'toggle-toc': () => {
+        const v = window.MarkdownViewer?.getInstance();
+        if (v) v.toggleTOC();
+      },
+      'toggle-map': () => {
+        const v = window.MarkdownViewer?.getInstance();
+        if (v) v.toggleProjectMap();
+      },
+      'import-markdown': async () => {
+        if (!window.EditorModule || !window.electronAPI) return;
+        const paths = await window.electronAPI.openFiles({
+          properties: ['openFile'],
+          filters: [{ name: 'Markdown', extensions: ['md', 'markdown', 'txt'] }]
+        });
+        if (paths && paths.length > 0) {
+          const res = await window.electronAPI.readFile(paths[0]);
+          if (res.success) {
+            window.EditorModule.insertContent(res.content, 'replace');
+            if (window.showToast) window.showToast('Content imported');
+          }
+        }
+      },
+      'append-markdown': async () => {
+        if (!window.EditorModule || !window.electronAPI) return;
+        const paths = await window.electronAPI.openFiles({
+          properties: ['openFile'],
+          filters: [{ name: 'Markdown', extensions: ['md', 'markdown', 'txt'] }]
+        });
+        if (paths && paths.length > 0) {
+          const res = await window.electronAPI.readFile(paths[0]);
+          if (res.success) {
+            window.EditorModule.insertContent(res.content, 'append');
+            if (window.showToast) window.showToast('Content appended');
+          }
+        }
+      },
       'undo': () => document.execCommand('undo'),
       'redo': () => document.execCommand('redo'),
       'markdown-helper': () => window.MarkdownHelperComponent?.open(),

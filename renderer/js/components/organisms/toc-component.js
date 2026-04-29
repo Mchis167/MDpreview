@@ -455,6 +455,28 @@ const TOCComponent = (() => {
     },
 
     isVisible: () => _isVisible,
+    getActiveView: () => _activeView,
+
+    switchView: function(viewId) {
+      if (!_viewSwitcher) return;
+      if (viewId === _activeView) return;
+      
+      // Destroy observer when leaving map view
+      if (_activeView === 'map' && viewId !== 'map' && window.ProjectMap) {
+        window.ProjectMap.destroy();
+      }
+      
+      _activeView = viewId;
+      _viewSwitcher.updateActive(viewId);
+      
+      const panel = document.getElementById(SELECTORS.panel);
+      if (panel) {
+        const title = panel.querySelector('.toc-header h3');
+        if (title) title.textContent = viewId === 'outline' ? 'Table of Contents' : 'Project Map';
+      }
+      
+      this.renderBody();
+    },
 
     updateActiveHeading: function (container) {
       if (!_isVisible) return;

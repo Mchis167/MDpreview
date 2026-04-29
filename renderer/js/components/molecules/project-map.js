@@ -332,9 +332,13 @@ const ProjectMap = (() => {
               _resizeObserver.observe(innerEl);
             }
 
-            // 2. Post-process for Mermaid/CodeBlocks
-            if (html && window.processMermaid) window.processMermaid(innerEl);
-            if (html && window.CodeBlockModule) window.CodeBlockModule.process(innerEl);
+            // ── 4. Post-process (Delayed to ensure mirror is in DOM) ──
+            requestAnimationFrame(() => {
+              if (innerEl.isConnected) {
+                if (html && window.processMermaid) window.processMermaid(innerEl);
+                if (html && window.CodeBlockModule) window.CodeBlockModule.process(innerEl);
+              }
+            });
             
             // 3. Initial layout pass
             requestAnimationFrame(() => _applyZoom(mapEl));

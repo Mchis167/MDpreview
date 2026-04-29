@@ -250,7 +250,7 @@
   display: flex;
   align-items: center;
   gap: var(--ds-space-sm);
-  z-index: var(--ds-z-index-popover);
+  z-index: 9999; /* Ensure it's above everything including toolbars and masks */
   pointer-events: none;
 }
 

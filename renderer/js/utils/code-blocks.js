@@ -14,6 +14,9 @@ const CodeBlockModule = {
     const codeBlocks = container.querySelectorAll('pre code');
     
     codeBlocks.forEach(codeEl => {
+      // ── Defensive: Skip Mermaid blocks (they are handled by mermaid.js) ──
+      if (codeEl.classList.contains('language-mermaid') || codeEl.classList.contains('mermaid')) return;
+
       const preEl = codeEl.parentElement;
       if (!preEl || preEl.tagName !== 'PRE') return;
       if (preEl.classList.contains('code-block-processed')) return;

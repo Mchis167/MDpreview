@@ -49,15 +49,34 @@ Logic bên trong:
 Tạo sub-component phù hợp dựa trên `state.mode` và mount vào DOM.
 
 ### `_renderFloatingActions()`
-Tạo nhóm các nút hành động nổi (Floating Action Group). Bao gồm:
-- **Smart Copy (Combo Button)**: Nút "Copy" tích hợp nhiều tùy chọn (Markdown, GDoc, File, Path).
-- **TOC Toggle**: Nút mở mục lục.
-- **Project Map Toggle**: Nút mở bản đồ tài liệu.
+Tạo nhóm các nút hành động nổi (Floating Action Group). Được mount vào `#md-viewer-mount` dưới dạng overlay với `z-index: 9999`.
 
-Nhóm này được mount vào `#md-viewer-mount` dưới dạng overlay.
+Hệ thống tự động thay đổi các nút hiển thị dựa trên `state.mode`:
+
+| Mode | Nút hành động |
+|---|---|
+| **Read** | `Share` (Smart Copy), `TOC`, `Project Map` |
+| **Edit** | `Import` (Thay thế), `Append` (Nối thêm) |
+
+**Cơ chế Singleton**: `_floatingGroup` được duy trì như một biến instance bền vững. Khi chuyển mode, ứng dụng chỉ ẩn/hiện (`display: none/flex`) các nhóm nút tương ứng thay vì tạo lại DOM, giúp tránh các lỗi mất tham chiếu (Ghosting).
 
 ### `_renderFloatingScrollTop()`
 Tạo nút "↑ Scroll to top" floating. Hiển thị khi scroll > 300px, ẩn khi gần top.
+
+---
+
+## Context Menu & Selection Actions
+
+`MarkdownViewer` quản lý menu chuột phải thông qua `_handleContextMenu(e)`, tích hợp các hành động dựa trên vùng chọn (selection).
+
+| Hành động | Điều kiện | Mô tả |
+|---|---|---|
+| **Edit Selection** | Có bôi đen | Chuyển sang Edit mode và highlight đúng đoạn văn đã chọn. |
+| **Add Comment** | Có bôi đen | Chuyển sang Comment mode và mở form add tại vị trí đó. |
+| **Add to Collect** | Có bôi đen | Lưu đoạn văn vào danh sách Idea (Collect mode). |
+| **Copy as...** | Luôn hiển thị | Các tùy chọn Smart Copy nâng cao. |
+
+**Cơ chế Selection Persistence**: Khi click vào menu item, trình duyệt có thể làm mất vùng chọn. Để khắc phục, ứng dụng thực hiện chụp (capture) metadata của vùng chọn ngay khi menu vừa mở và lưu vào `AppState.forceSyncContext` nếu người dùng chọn "Edit Selection".
 
 ---
 
@@ -170,4 +189,4 @@ Mỗi component tự nullify `activeInstance` qua `onClose` callback khi bị đ
 
 ---
 
-*Document — 2026-04-29*
+*Document — 2026-04-29 (Updated Shortcuts and Context Menu)*

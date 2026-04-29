@@ -15,6 +15,8 @@ class MarkdownViewerComponent {
     this._scrollTopBtn = null;
     this._tocBtn = null;
     this._comboBtn = null;
+    this._editImportBtn = null;
+    this._editAppendBtn = null;
     this._floatingGroup = null;
     this._tocUpdateTimeout = null;
     this.init();
@@ -70,6 +72,8 @@ class MarkdownViewerComponent {
       this.mount.innerHTML = '';
       this._tocBtn = null;
       this._comboBtn = null;
+      this._editImportBtn = null;
+      this._editAppendBtn = null;
       this._floatingGroup = null;
       this._scrollTopBtn = null;
       
@@ -83,6 +87,9 @@ class MarkdownViewerComponent {
 
       this.viewport = DesignSystem.createElement('div', 'md-viewer-viewport');
       this.mount.appendChild(this.viewport);
+
+      // Add context menu listener
+      this.viewport.oncontextmenu = (e) => this._handleContextMenu(e);
 
       // Render both but they control their own initial visibility
       this.previewComp = new MarkdownPreview({ 
@@ -154,17 +161,27 @@ class MarkdownViewerComponent {
     const mode = this.state.mode;
     if (!this._scrollTopBtn) this._renderFloatingScrollTop();
     
-    if (mode === 'read' || mode === 'comment' || mode === 'collect') {
-      if (!this._floatingGroup) this._renderFloatingActions();
-      
-      if (this._floatingGroup && !this.mount.contains(this._floatingGroup)) {
-        this.mount.appendChild(this._floatingGroup);
-      }
+    // Ensure group exists
+    if (!this._floatingGroup) {
+      this._floatingGroup = DesignSystem.createElement('div', 'floating-action-group');
+      this._floatingGroup.id = 'floating-action-group';
+      this.mount.appendChild(this._floatingGroup);
+    }
 
-      if (this._floatingGroup) {
-        this._floatingGroup.style.display = 'flex';
-      }
-      
+    const isReadGroup = ['read', 'comment', 'collect'].includes(mode);
+    const isEditGroup = mode === 'edit';
+
+    // Toggle visibility
+    if (isReadGroup && !this._tocBtn) this._renderReadFloatingActions();
+    if (this._tocBtn) this._tocBtn.style.display = isReadGroup ? 'flex' : 'none';
+    if (this._comboBtn) this._comboBtn.style.display = isReadGroup ? 'flex' : 'none';
+    
+    if (isEditGroup && !this._editImportBtn) this._renderEditFloatingActions();
+    
+    if (this._editImportBtn) this._editImportBtn.style.display = isEditGroup ? 'flex' : 'none';
+    if (this._editAppendBtn) this._editAppendBtn.style.display = isEditGroup ? 'flex' : 'none';
+
+    if (isReadGroup) {
       if (TOCComponent && TOCComponent.isVisible()) {
         TOCComponent.show(this.mount);
       }
@@ -173,8 +190,6 @@ class MarkdownViewerComponent {
         if (TOCComponent) TOCComponent.updateActiveHeading(this.viewport);
       };
     } else {
-      if (this._floatingGroup) this._floatingGroup.style.display = 'none';
-      
       if (TOCComponent) {
         TOCComponent.hide();
         this.mount.classList.remove('has-toc');
@@ -236,9 +251,8 @@ class MarkdownViewerComponent {
   /**
    * Create and manage the floating action group (TOC + Combo)
    */
-  _renderFloatingActions() {
-    this._floatingGroup = DesignSystem.createElement('div', 'floating-action-group');
-    this._floatingGroup.id = 'floating-action-group'; 
+  _renderReadFloatingActions() {
+    if (!this._floatingGroup) return;
 
     // 1. TOC Button
     this._tocBtn = DesignSystem.createButton({
@@ -274,87 +288,12 @@ class MarkdownViewerComponent {
           { 
             label: 'Copy as File', 
             icon: 'file-plus', 
-            onClick: async () => {
-              if (!window.electronAPI) return;
-
-              try {
-                let res;
-                if (this.state.file) {
-                  // Case 1: Physical file on disk
-                  res = await window.electronAPI.copyFileToClipboard(this.state.file);
-                } else if (this.state.content) {
-                  // Case 2: Draft/Generated content -> Copy as temp file
-                  const fileName = (window.AppState && window.AppState.activeTabName) 
-                    ? `${window.AppState.activeTabName}.md` 
-                    : 'Untitled.md';
-                  
-                  // Convert string to Uint8Array for the buffer
-                  const buffer = new TextEncoder().encode(this.state.content);
-                  res = await window.electronAPI.copyFileFromBuffer(buffer, fileName);
-                }
-
-                if (res && res.success) {
-                  if (window.showToast) window.showToast('File copied to clipboard');
-                } else if (res) {
-                  throw new Error(res.error);
-                }
-              } catch (err) {
-                console.error('[DEBUG] Copy as File failed:', err);
-                if (window.showToast) window.showToast(`Copy failed: ${err.message}`, 'error');
-              }
-            }
+            onClick: () => this._handleCopyAsFile()
           },
           { 
             label: 'Copy for Google Docs', 
             icon: 'file-text', 
-            onClick: async () => {
-              if (this.state.html) {
-                if (window.showToast) {
-                  window.showToast('Preparing smart copy...', 'info', { id: 'gdoc-copy', sticky: true, progress: 0 });
-                }
-                
-                try {
-                   const previewInner = this.viewport.querySelector('.md-content-inner');
-                   const sourceHtml = previewInner ? previewInner.innerHTML : this.state.html;
-
-                   const result = await window.GDocUtil.transform(sourceHtml, this.mount);
-                   const transformedHtml = result.html;
-                   
-                   const html = `<div style="font-family: sans-serif; color: #24292e;">${transformedHtml}</div>`;
-                   
-                   if (window.electronAPI && typeof window.electronAPI.writeClipboardAdvanced === 'function') {
-                     const res = await window.electronAPI.writeClipboardAdvanced({
-                       html: html,
-                       text: this.state.content || ''
-                     });
-                     if (res.success) {
-                       if (window.showToast) {
-                         const msg = result.totalCount > 0 
-                           ? `Smart copy ready! (${result.successCount}/${result.totalCount} charts)`
-                           : 'Smart copy for GDocs ready!';
-                         const type = result.failCount > 0 ? 'warn' : 'success';
-                         window.showToast(msg, type, { id: 'gdoc-copy' });
-                       }
-                     } else {
-                       throw new Error(res.error);
-                     }
-                   } else {
-                     const blob = new Blob([html], { type: 'text/html' });
-                     const textBlob = new Blob([this.state.content || ''], { type: 'text/plain' });
-                     const item = new window.ClipboardItem({
-                       'text/html': blob,
-                       'text/plain': textBlob
-                     });
-                     await navigator.clipboard.write([item]);
-                     if (window.showToast) window.showToast('Smart copy for GDocs ready!', 'success', { id: 'gdoc-copy' });
-                   }
-                } catch (err) {
-                  console.error('[DEBUG] GDoc Smart copy failed:', err);
-                  navigator.clipboard.writeText(this.state.content);
-                  if (window.showToast) window.showToast('Markdown copied (Smart Copy failed)', 'error', { id: 'gdoc-copy' });
-                }
-              }
-            }
+            onClick: () => this._handleGDocCopy()
           },
           { divider: true },
           { 
@@ -401,11 +340,312 @@ class MarkdownViewerComponent {
 
     this._floatingGroup.appendChild(this._tocBtn);
     this._floatingGroup.appendChild(this._comboBtn);
-
-    this.mount.appendChild(this._floatingGroup);
     
     // Immediate initial sync
     this._updateTOC();
+  }
+
+
+
+  // ── Context Menu & Actions ───────────────────────────────
+
+  _handleContextMenu(e) {
+    if (this.state.mode === 'edit') return;
+
+    const items = [];
+    const selection = window.getSelection();
+    const selectedText = selection.toString().trim();
+    const hasSelection = selectedText.length > 0;
+
+    // IMPORTANT: Capture selection data NOW while it still exists.
+    // Clicking on context menu items often clears the selection.
+    let capturedData = null;
+    if (hasSelection) {
+      capturedData = window.SyncService ? window.SyncService.captureReadViewSyncData() : null;
+    }
+
+    // 1. Selection Actions
+    if (hasSelection && capturedData) {
+
+      items.push({
+        label: 'Add Comment',
+        icon: 'message-circle-plus',
+        onClick: () => {
+
+          if (window.CommentsModule) {
+
+            this._switchToMode('comment');
+            // Wait for DOM to switch and module to activate
+            setTimeout(() => {
+
+              window.CommentsModule.externalTrigger(capturedData);
+            }, 150);
+          }
+        }
+      });
+      items.push({
+        label: 'Add to Collect',
+        icon: 'bookmark',
+        onClick: () => {
+
+          if (window.CollectModule) {
+
+            this._switchToMode('collect');
+            window.CollectModule.addIdea(
+              capturedData.selectedText, 
+              capturedData.lineStart, 
+              capturedData.lineEnd, 
+              capturedData.selectedText
+            );
+          }
+        }
+      });
+      items.push({
+        label: 'Edit Selection',
+        icon: 'pen-line',
+        onClick: () => {
+          this._switchToMode('edit', capturedData);
+        }
+      });
+      items.push({ divider: true });
+    } else if (hasSelection) {
+      items.push({
+        label: 'Edit Selection',
+        icon: 'pen-line',
+        onClick: () => {
+          this._switchToMode('edit', capturedData);
+        }
+      });
+      items.push({ divider: true });
+    }
+
+    // 2. Advanced Copy
+    items.push({
+      label: 'Copy as Markdown',
+      icon: 'copy',
+      onClick: () => {
+        if (this.state.content) {
+          navigator.clipboard.writeText(this.state.content);
+          if (window.showToast) window.showToast('Markdown copied');
+        }
+      }
+    });
+
+    items.push({
+      label: 'Copy for Google Docs',
+      icon: 'file-text',
+      onClick: () => this._handleGDocCopy()
+    });
+
+    items.push({
+      label: 'Copy as File',
+      icon: 'file-plus',
+      onClick: () => this._handleCopyAsFile()
+    });
+
+    // 3. Mode Specific
+    if (this.state.mode === 'comment') {
+      items.push({ divider: true });
+      items.push({
+        label: 'Copy Comments Report',
+        icon: 'clipboard-list',
+        onClick: () => window.CommentsModule && window.CommentsModule.copyAll()
+      });
+      items.push({
+        label: 'Clear All Comments',
+        icon: 'trash',
+        danger: true,
+        onClick: () => window.CommentsModule && window.CommentsModule.clear()
+      });
+    }
+
+    if (this.state.mode === 'collect') {
+      items.push({ divider: true });
+      items.push({
+        label: 'Copy All Ideas',
+        icon: 'clipboard-list',
+        onClick: () => window.CollectModule && window.CollectModule.copyAll()
+      });
+      items.push({
+        label: 'Clear All Ideas',
+        icon: 'trash',
+        danger: true,
+        onClick: () => window.CollectModule && window.CollectModule.clearAll()
+      });
+    }
+
+    DesignSystem.createContextMenu(e, items);
+  }
+
+  _switchToMode(mode, context = null) {
+    if (context && window.AppState) {
+      AppState.forceSyncContext = context;
+    }
+    const btn = document.querySelector(`.ds-segment-item[data-id="${mode}"]`);
+    if (btn) {
+      btn.click();
+    } else if (window.AppState && window.AppState.onModeChange) {
+      window.AppState.onModeChange(mode);
+    }
+  }
+
+  async _handleCopyAsFile() {
+    if (!window.electronAPI) return;
+
+    try {
+      let res;
+      if (this.state.file) {
+        // Case 1: Physical file on disk
+        res = await window.electronAPI.copyFileToClipboard(this.state.file);
+      } else if (this.state.content) {
+        // Case 2: Draft/Generated content -> Copy as temp file
+        const fileName = (window.AppState && window.AppState.activeTabName) 
+          ? `${window.AppState.activeTabName}.md` 
+          : 'Untitled.md';
+        
+        // Convert string to Uint8Array for the buffer
+        const buffer = new TextEncoder().encode(this.state.content);
+        res = await window.electronAPI.copyFileFromBuffer(buffer, fileName);
+      }
+
+      if (res && res.success) {
+        if (window.showToast) window.showToast('File copied to clipboard');
+      } else if (res) {
+        throw new Error(res.error);
+      }
+    } catch (err) {
+      console.error('[DEBUG] Copy as File failed:', err);
+      if (window.showToast) window.showToast(`Copy failed: ${err.message}`, 'error');
+    }
+  }
+
+  async _handleGDocCopy() {
+    if (!this.state.html) return;
+
+    if (window.showToast) {
+      window.showToast('Preparing smart copy...', 'info', { id: 'gdoc-copy', sticky: true, progress: 0 });
+    }
+    
+    try {
+       const previewInner = this.viewport.querySelector('.md-content-inner');
+       const sourceHtml = previewInner ? previewInner.innerHTML : this.state.html;
+
+       const result = await window.GDocUtil.transform(sourceHtml, this.mount);
+       const transformedHtml = result.html;
+       
+       const html = `<div style="font-family: sans-serif; color: #24292e;">${transformedHtml}</div>`;
+       
+       if (window.electronAPI && typeof window.electronAPI.writeClipboardAdvanced === 'function') {
+         const res = await window.electronAPI.writeClipboardAdvanced({
+           html: html,
+           text: this.state.content || ''
+         });
+         if (res.success) {
+           if (window.showToast) {
+             const msg = result.totalCount > 0 
+               ? `Smart copy ready! (${result.successCount}/${result.totalCount} charts)`
+               : 'Smart copy for GDocs ready!';
+             const type = result.failCount > 0 ? 'warn' : 'success';
+             window.showToast(msg, type, { id: 'gdoc-copy' });
+           }
+         } else {
+           throw new Error(res.error);
+         }
+       } else {
+         // Fallback to simple clipboard
+         await navigator.clipboard.write([
+            new ClipboardItem({
+              "text/html": new Blob([html], { type: "text/html" }),
+              "text/plain": new Blob([this.state.content || ''], { type: "text/plain" })
+            })
+         ]);
+         if (window.showToast) window.showToast('Smart copy ready! (Browser)', 'success', { id: 'gdoc-copy' });
+       }
+    } catch (err) {
+       console.error('[DEBUG] GDoc copy failed:', err);
+       if (window.showToast) window.showToast('Failed to prepare smart copy', 'error', { id: 'gdoc-copy' });
+    }
+  }
+
+  _renderEditFloatingActions() {
+    if (!this._floatingGroup) return;
+
+    // 1. Import (Replace) Button
+    this._editImportBtn = DesignSystem.createButton({
+      variant: 'subtitle',
+      offLabel: true,
+      leadingIcon: 'file-text',
+      title: 'Import (Replace all)',
+      className: 'floating-import-btn'
+    });
+
+    this._editImportBtn.onclick = async (e) => {
+      e.stopPropagation();
+      const paths = await window.FileService.openFiles({ 
+        properties: ['openFile'],
+        filters: [{ name: 'Markdown', extensions: ['md'] }]
+      });
+
+      if (paths && paths[0]) {
+        try {
+          const res = await window.electronAPI.readFile(paths[0]);
+          if (!res.success) throw new Error(res.error || 'Failed to read file');
+          
+          if (res.content !== undefined) {
+            const isDirty = EditorModule.isDirty();
+            if (isDirty) {
+              DesignSystem.showConfirm({
+                title: 'Overwrite Content?',
+                message: 'Your current changes will be replaced. Continue?',
+                onConfirm: () => {
+                  EditorModule.insertContent(res.content, 'replace');
+                  if (window.showToast) window.showToast('Content imported');
+                }
+              });
+            } else {
+              EditorModule.insertContent(res.content, 'replace');
+              if (window.showToast) window.showToast('Content imported');
+            }
+          }
+        } catch (err) {
+          if (window.showToast) window.showToast(`Import failed: ${err.message}`, 'error');
+        }
+      }
+    };
+
+    // 2. Append Button
+    this._editAppendBtn = DesignSystem.createButton({
+      variant: 'subtitle',
+      offLabel: true,
+      leadingIcon: 'file-plus',
+      title: 'Import (Append to end)',
+      className: 'floating-append-btn'
+    });
+
+    this._editAppendBtn.onclick = async (e) => {
+      e.stopPropagation();
+      const paths = await window.FileService.openFiles({ 
+        properties: ['openFile'],
+        filters: [{ name: 'Markdown', extensions: ['md'] }]
+      });
+
+      if (paths && paths[0]) {
+        try {
+          const res = await window.electronAPI.readFile(paths[0]);
+          if (!res.success) throw new Error(res.error || 'Failed to read file');
+          
+          if (res.content !== undefined) {
+            EditorModule.insertContent(res.content, 'append');
+            if (window.showToast) window.showToast('Content appended to end');
+          }
+        } catch (err) {
+          if (window.showToast) window.showToast(`Append failed: ${err.message}`, 'error');
+        }
+      }
+    };
+
+    this._floatingGroup.appendChild(this._editImportBtn);
+    this._floatingGroup.appendChild(this._editAppendBtn);
   }
 
   _updateTOC() {
@@ -426,6 +666,42 @@ class MarkdownViewerComponent {
       }
       this._tocUpdateTimeout = null;
     }, 800);
+  }
+
+  // ── Public API for Shortcuts ─────────────────────────────
+
+  copyMarkdown() {
+    if (this.state.content) {
+      navigator.clipboard.writeText(this.state.content);
+      if (window.showToast) window.showToast('Full Markdown copied');
+    }
+  }
+
+  copyAsFile() {
+    this._handleCopyAsFile();
+  }
+
+  copyForGDocs() {
+    this._handleGDocCopy();
+  }
+
+  toggleTOC() {
+    if (TOCComponent) TOCComponent.toggle(this.mount);
+  }
+
+  toggleProjectMap() {
+    if (TOCComponent) {
+      if (!TOCComponent.isVisible()) {
+        TOCComponent.show(this.mount);
+        TOCComponent.switchView('map');
+      } else {
+        if (TOCComponent.getActiveView() === 'map') {
+          TOCComponent.hide();
+        } else {
+          TOCComponent.switchView('map');
+        }
+      }
+    }
   }
 }
 

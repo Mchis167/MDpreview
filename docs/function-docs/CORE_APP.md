@@ -15,6 +15,7 @@
 | `currentMode` | `string` | Mode hiện tại: `read`, `edit`, `comment`, `collect` |
 | `commentMode` | `string` | Sub-mode cho comment: `view`, `add` |
 | `settings` | `object` | Theme, font, zoom, các tùy chọn explorer |
+| `forceSyncContext` | `object \| null` | Dữ liệu vị trí ép buộc dùng cho SyncService (dùng khi Edit Selection) |
 
 ### `AppState.loadPersistentState()`
 Fetch state từ server (`GET /api/state`) và đồng bộ vào localStorage. Được gọi khi app khởi động.
@@ -97,6 +98,8 @@ Các phím tắt toàn cục được quản lý tập trung qua `ShortcutServic
 | **Mod+W** | `close-active-tab` | `TabsModule.closeSelected()` |
 | **Mod+A** | `select-all-tabs` | `TabsModule.selectAll()` |
 | **1 / 2 / 3 / 4** | `mode-X` | `AppState.onModeChange(mode)` |
+| **Mod+Alt+I** | `import-markdown` | Mở dialog chọn file để ghi đè nội dung hiện tại |
+| **Mod+Alt+A** | `append-markdown` | Mở dialog chọn file để nối thêm vào cuối nội dung |
 
 > **Cơ chế:** Phím tắt được đánh chặn sớm ở **Capture Phase**. Khi người dùng đang gõ văn bản, chỉ các phím kết hợp với `Mod` hoặc `Alt` mới được thực thi để tránh xung đột với việc nhập liệu. Xem [`SHORTCUT_SERVICE.md`](SHORTCUT_SERVICE.md).
 

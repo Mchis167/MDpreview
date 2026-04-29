@@ -4,6 +4,15 @@ const os = require('os');
 const clipboardEx = require('electron-clipboard-ex');
 
 function register(ipcMain) {
+  ipcMain.handle('read-file', async (event, filePath) => {
+    try {
+      if (!fs.existsSync(filePath)) throw new Error('File not found');
+      return { success: true, content: fs.readFileSync(filePath, 'utf8') };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
   ipcMain.handle('delete-file', async (event, filePath) => {
     try {
       if (!fs.existsSync(filePath)) throw new Error('File does not exist');

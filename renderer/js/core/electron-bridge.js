@@ -8,6 +8,8 @@
 
   // console.log('%c[Bridge] Electron not detected. Polyfilling window.electronAPI via Express APIs...', 'color: #ffbf48; font-weight: bold;');
 
+  const FILE_CACHE = new Map();
+
   window.electronAPI = {
     // Folder picker (In browser, we'll just prompt for a string or return null)
     openFolder: () => {
@@ -118,6 +120,24 @@
     },
     
     // File System
+    readFile: async (filePath) => {
+      // Check frontend cache first (for web version picked files)
+      if (FILE_CACHE.has(filePath)) {
+        const file = FILE_CACHE.get(filePath);
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve({ success: true, content: reader.result });
+          reader.onerror = () => resolve({ success: false, error: 'Failed to read file' });
+          reader.readAsText(file);
+        });
+      }
+
+      // Fallback to server API (only works for workspace files)
+      const res = await fetch(`/api/file/raw?path=${encodeURIComponent(filePath)}`);
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      const content = await res.text();
+      return { success: true, content };
+    },
     deleteFile: async (filePath) => {
       const res = await fetch(`/api/file-ops?path=${encodeURIComponent(filePath)}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
@@ -229,6 +249,87 @@
 
     getAbsolutePath: async (filePath) => filePath,
     
+    openFiles: async (options = {}) => {
+      return new Promise((resolve) => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.multiple = options.properties && options.properties.includes('multiSelections');
+        
+        input.onchange = (e) => {
+          const files = Array.from(e.target.files);
+          const paths = files.map(f => {
+            // Store the actual file object in cache using its name as key
+            FILE_CACHE.set(f.name, f);
+            return f.name;
+          });
+          resolve(paths);
+        };
+        
+        input.oncancel = () => resolve([]);
+        input.click();
+      });
+    },
+
+    copyFileFromBuffer: async (buffer, filename) => {
+      try {
+        const blob = new Blob([buffer], { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        return { success: true };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    },
+
+    rasterizeSVG: async (svg, w, h) => {
+      // Browser-side SVG to PNG fallback
+      return new Promise((resolve, reject) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        canvas.width = w * 2;
+        canvas.height = h * 2;
+        
+        const encodedData = window.btoa(unescape(encodeURIComponent(svg)));
+        const dataUrl = `data:image/svg+xml;base64,${encodedData}`;
+        
+        img.onload = () => {
+          ctx.fillStyle = '#1e1e1e';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/png'));
+        };
+        img.onerror = (e) => reject(new Error('SVG render failed: ' + e));
+        img.src = dataUrl;
+      });
+    },
+
+    writeClipboardAdvanced: async (data) => {
+      try {
+        if (data.html) {
+          const blob = new Blob([data.html], { type: 'text/html' });
+          const textBlob = new Blob([data.text || ''], { type: 'text/plain' });
+          const item = new window.ClipboardItem({
+            'text/html': blob,
+            'text/plain': textBlob
+          });
+          await navigator.clipboard.write([item]);
+        } else {
+          await navigator.clipboard.writeText(data.text || '');
+        }
+        return { success: true };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    },
+
     isElectron: false,
     
     // Custom

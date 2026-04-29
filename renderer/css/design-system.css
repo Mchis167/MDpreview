@@ -43,5 +43,8 @@
 @import 'design-system/organisms/settings-panel.css';
 @import 'design-system/organisms/modals-misc.css';
 @import 'design-system/organisms/editor.css';
-@import 'design-system/organisms/markdown.css';
+@import 'design-system/organisms/markdown-viewer.css';
+@import 'design-system/organisms/markdown-content.css';
+@import 'design-system/organisms/markdown-blocks.css';
+@import 'design-system/organisms/markdown-interactions.css';
 @import 'design-system/organisms/search-palette.css';

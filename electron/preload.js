@@ -22,6 +22,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   clearComments:  (wsId, file)             => ipcRenderer.invoke('clear-comments', wsId, file),
   
   // File System
+  readFile:      (filePath)          => ipcRenderer.invoke('read-file', filePath),
   deleteFile:    (filePath)          => ipcRenderer.invoke('delete-file', filePath),
   duplicateFile: (filePath)          => ipcRenderer.invoke('duplicate-file', filePath),
   renameFile:    (oldPath, newPath) => ipcRenderer.invoke('rename-file', oldPath, newPath),

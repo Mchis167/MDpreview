@@ -34,6 +34,15 @@ Di chuyển tới snapshot sau (nếu đã undo trước đó). Snapshot mới s
 
 ---
 
+## Content Injection
+
+### `insertContent(text, mode)`
+Chèn nội dung văn bản vào editor. Tự động chụp snapshot để hỗ trợ Undo/Redo.
+- **`mode === 'replace'`**: Thay thế toàn bộ nội dung hiện tại bằng `text`.
+- **`mode === 'append'`**: Thêm `text` vào cuối tài liệu.
+
+---
+
 ## Save & Dirty Tracking
 
 ### `save()`
@@ -86,4 +95,4 @@ Focus vào textarea và đồng bộ con trỏ với read view — dùng khi chu
 
 ---
 
-*Document — 2026-04-27*
+*Document — 2026-04-29*

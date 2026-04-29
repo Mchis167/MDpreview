@@ -58,4 +58,4 @@ Một hàm bridge (cầu nối) để gọi thực thi hành động qua `Shortc
 
 ---
 
-*Document — 2026-04-28*
+*Document — 2026-04-29 (Updated Editor shortcuts)*

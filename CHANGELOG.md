@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.16.0] — 2026-04-29 11:20
+
+### 🎉 Added
+- **Editor Floating Actions**: Triển khai nhóm nút hành động nổi (**Import** và **Append**) trong chế độ Editor, cho phép người dùng nhanh chóng chèn nội dung từ file Markdown bên ngoài.
+- **Xcode-Inspired Syntax Highlighting**: 
+    - Thay thế palette màu cũ bằng hệ màu Xcode Exact Palette chuyên nghiệp, mang lại độ tương phản cao và thẩm mỹ cao cấp cho Code Blocks.
+    - **Premium Code Block Features**: Bổ sung thanh cuộn (scrollbar) siêu mỏng, padding chuẩn và nút Copy tích hợp Design System.
+- **Native File Reading IPC & Web Cache**: 
+    - Bổ sung trình xử lý `read-file` trong nhân Electron và cơ chế `FILE_CACHE` trong `electron-bridge.js` cho bản Web. 
+    - Cho phép đọc bất kỳ file nào người dùng chọn mà không bị giới hạn bởi Workspace (bypassing Express security).
+- **"Edit Selection" Action**: 
+    - Bổ sung hành động chỉnh sửa nhanh đoạn văn bản đang chọn vào Menu chuột phải.
+    - Triển khai cơ chế **Selection Persistence & Forced Sync**: Tự động chụp lại vị trí vùng chọn và ép xung trình soạn thảo highlight đúng dải ký tự đó khi chuyển mode.
+- **Toast Progress System**: Nâng cấp hệ thống thông báo hỗ trợ **Progress Bar** (thanh tiến trình) và trạng thái `sticky`, giúp theo dõi các tác vụ dài như Rasterization hoặc File Copy.
+- **Undo/Redo Support for Injections**: Nâng cấp `EditorModule.insertContent()` để tự động chụp snapshot lịch sử, đảm bảo các thao tác Import/Append có thể Undo/Redo hoàn hảo.
+- **Markdown Editor Shortcuts**: Bổ sung phím tắt **Import Markdown** (`Mod + Alt + I`) và **Append Markdown** (`Mod + Alt + A`).
+
+### 🔧 Changed
+- **Premium UI Layering**: 
+    - Áp dụng `isolation: isolate` cho container chính của viewer để tạo stacking context độc lập.
+    - Nâng cấp `z-index: 9999` cho nhóm nút nổi, đảm bảo luôn hiển thị trên mọi lớp UI khác.
+- **Flat Design Tooltips**: Loại bỏ phần "miếng tam giác" (anchor/arrow) của Tooltip theo yêu cầu tối giản hóa giao diện, tạo cảm giác phẳng và hiện đại hơn.
+- **Persistent Floating Group**: Tái cấu trúc `MarkdownViewerComponent` để quản lý nhóm nút nổi như một singleton bền vững.
+- **Icon Registry Expansion**: Đăng ký các icon mới `panel-left` (Sidebar) và `file-stack` (Copy as File).
+- **Shortcut Icon Standardization**: Cập nhật và đồng bộ hóa icon phím tắt trên toàn bộ hệ thống (Guide, Search Palette, TOC Panel).
+
+### 🐞 Fixed
+- **Internal Server Error (500)**: Khắc phục triệt để lỗi server từ chối đọc file nằm ngoài Workspace.
+- **DOM Reference Ghosting**: Sửa lỗi mất tham chiếu container khiến các nút hành động không hiển thị sau khi chuyển mode.
+- **Bridge Syntax Error**: Sửa lỗi cú pháp và trùng lặp code trong `electron-bridge.js` gây crash bản Web.
+
 ## [1.15.0] — 2026-04-29 07:10
 
 ### 🎉 Added

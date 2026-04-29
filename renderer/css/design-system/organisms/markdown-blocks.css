@@ -1,0 +1,360 @@
+/* ============================================================
+   markdown-blocks.css — Complex blocks (Code, Tables, Charts)
+   ============================================================ */
+
+/* ── Premium Block System (Shared) ─────────────────────── */
+/* Unified style for Code Blocks, Tables, and Charts */
+.premium-block-container,
+.premium-code-block,
+.md-table-wrapper,
+.mermaid {
+  background: var(--ds-white-a05) !important;
+  /* Slightly more opaque for visibility */
+  backdrop-filter: blur(40px) !important;
+  /* Stable blur value */
+  -webkit-backdrop-filter: blur(40px) !important;
+  border: 1px solid var(--ds-white-a08) !important;
+  border-radius: var(--ds-radius-panel) !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+  margin: 1.5rem 0 !important;
+  overflow: hidden !important;
+  transition: none !important;
+  /* Force hardware acceleration */
+  isolation: isolate;
+  /* Create new stacking context */
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* No hover state for these blocks per user request */
+.premium-block-container:hover,
+.premium-code-block:hover,
+.md-table-wrapper:hover,
+.mermaid:hover {
+  border-color: var(--ds-white-a08) !important;
+  /* Same as static */
+  transform: none !important;
+  box-shadow: 0 10px 40px var(--ds-black-a20) !important;
+}
+
+/* ── Premium Code Block ────────────────────────────────── */
+/* Specific compact margins when inside details */
+.md-render-body details .premium-code-block {
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.md-render-body details>.premium-code-block:first-child,
+.md-render-body details>.md-block:first-child .premium-code-block {
+  margin-top: 0.5rem !important;
+}
+
+/* Ensure pre inside premium block is seamless */
+.premium-code-block pre {
+  margin: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  overflow-x: auto !important;
+  max-width: 100%;
+}
+
+/* Premium Scrollbar for Code Blocks */
+.premium-code-block pre::-webkit-scrollbar {
+  height: 6px;
+}
+
+.premium-code-block pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.premium-code-block pre::-webkit-scrollbar-thumb {
+  background: var(--ds-white-a10);
+  border-radius: var(--ds-radius-widget);
+}
+
+.premium-code-block pre::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--ds-accent-rgb), 0.4);
+}
+
+.code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 8px 8px 16px;
+  background: var(--ds-black-a30);
+  border-bottom: 1px solid var(--ds-white-a10);
+  user-select: none;
+}
+
+.code-block-lang {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--ds-text-secondary);
+  /* Increased visibility */
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: var(--ds-font-family-code);
+}
+
+.code-block-copy {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--ds-layer-surface-default);
+  border: 1px solid var(--ds-white-a10);
+  color: var(--ds-text-secondary);
+  padding: 4px 10px;
+  border-radius: var(--ds-radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.code-block-copy:hover {
+  background: var(--ds-layer-surface-hover);
+  color: var(--ds-text-inverse);
+}
+
+.code-block-copy.copied {
+  background: rgba(var(--ds-accent-rgb), 0.15);
+  color: var(--ds-accent);
+}
+
+.code-block-copy .hidden {
+  display: none;
+}
+
+.md-render-body pre {
+  margin: 2rem 0;
+  padding: 20px;
+  background: #1f1f24;
+  border: 1px solid var(--ds-white-a10);
+  border-radius: var(--ds-radius-panel);
+  overflow-x: auto;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  line-height: 0;
+  /* Fix for pre spacing */
+}
+
+.md-render-body pre code {
+  display: block;
+  background: none;
+  padding: 0;
+  color: #fff;
+  font-size: calc(13.5px * (var(--code-zoom, 100) / 100));
+  line-height: 1.6;
+  border: none;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  font-family: var(--ds-font-family-code);
+}
+
+/* ── Syntax Highlighting (Xcode Exact Palette) ─────────── */
+.hljs-comment,
+.hljs-quote,
+.hljs-doctag {
+  color: #a1c659;
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-section,
+.hljs-link {
+  color: #d0a8ff;
+}
+
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-attribute,
+.hljs-meta .hljs-string {
+  color: #ff8170;
+}
+
+.hljs-built_in,
+.hljs-class .hljs-title,
+.hljs-title.class_,
+.hljs-title,
+.hljs-name,
+.hljs-type,
+.hljs-selector-class,
+.hljs-selector-attr,
+.hljs-selector-pseudo {
+  color: #6bdfff;
+}
+
+.hljs-number,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-attr {
+  color: #d0a8ff;
+}
+
+.hljs-symbol,
+.hljs-bullet,
+.hljs-meta {
+  color: #ffa14f;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+.hljs-link {
+  text-decoration: underline;
+}
+
+.hljs-deletion {
+  color: #ff8170;
+}
+
+/* ── Premium Tables ───────────────────────────────────── */
+.md-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin: 3rem 0;
+  border-radius: var(--ds-radius-panel);
+  border: 1px solid var(--ds-white-a10);
+  background: #0d1117;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.md-render-body table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.95em;
+  min-width: 600px;
+}
+
+.md-render-body th {
+  background: var(--ds-white-a04);
+  color: var(--ds-accent);
+  padding: 16px 24px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  border-bottom: 1px solid var(--ds-white-a08);
+  white-space: nowrap;
+  font-family: var(--ds-font-family-code);
+}
+
+.md-render-body td {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--ds-white-a05);
+  border-right: 1px solid var(--ds-white-a02);
+  color: var(--ds-text-secondary);
+  line-height: 1.6;
+}
+
+.md-render-body td:last-child {
+  border-right: none;
+}
+
+.md-render-body tr:last-child td {
+  border-bottom: none;
+}
+
+/* Scrollbar for table wrapper */
+.md-table-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.md-table-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.md-table-wrapper::-webkit-scrollbar-thumb {
+  background: var(--ds-white-a10);
+  border-radius: var(--ds-radius-widget);
+}
+
+.md-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--ds-accent-rgb), 0.4);
+}
+
+/* ── Mermaid Diagrams ──────────────────────────────────── */
+.mermaid {
+  background: var(--ds-black-a40);
+  border: 1px solid var(--ds-border-default);
+  border-radius: var(--ds-radius-panel);
+  padding: 32px;
+  margin: 1.5rem 0;
+  cursor: zoom-in;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.mermaid:hover {
+  border-color: rgba(var(--ds-accent-rgb), 0.4);
+  box-shadow: 0 0 20px rgba(var(--ds-accent-rgb), 0.08);
+}
+
+/* ── Mermaid Diagram Overrides (Fix Text Readability) ───── */
+.mermaid svg {
+  color: var(--ds-text-inverse) !important;
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.mermaid .node rect,
+.mermaid .node circle,
+.mermaid .node polygon,
+.mermaid .node path,
+.mermaid .node ellipse,
+.mermaid .classGroup rect {
+  fill: var(--ds-white-a05) !important;
+  stroke: var(--ds-white-a40) !important;
+  stroke-width: 1px !important;
+}
+
+/* Force all text elements to white */
+.mermaid .label,
+.mermaid .label text,
+.mermaid text,
+.mermaid tspan,
+.mermaid .classTitle,
+.mermaid .classTitle text,
+.mermaid .method text,
+.mermaid .attribute text,
+.mermaid .note text {
+  fill: var(--ds-primitive-white) !important;
+  color: var(--ds-text-inverse) !important;
+  font-family: var(--ds-font-family-text) !important;
+  font-weight: 500 !important;
+}
+
+.mermaid .edgePath .path,
+.mermaid .relation,
+.mermaid .relationLine {
+  stroke: var(--ds-white-a40) !important;
+}
+
+.mermaid .marker,
+.mermaid .arrowheadPath {
+  fill: var(--ds-white-a40) !important;
+  stroke: var(--ds-white-a40) !important;
+}
+
+/* Class Diagram Specifics */
+.mermaid .classGroup line {
+  stroke: var(--ds-white-a30) !important;
+}
+
+.mermaid .classTitle text {
+  font-weight: 700 !important;
+}

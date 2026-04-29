@@ -26,11 +26,28 @@ class ShortcutsComponent {
           { id: 'mode-edit', label: 'Switch to Edit mode', keys: ['2'], icon: 'pen-line', tags: ['write', 'editor', 'sửa'] },
           { id: 'mode-comment', label: 'Switch to Comment mode', keys: ['3'], icon: 'message-circle', tags: ['feedback', 'review', 'chú thích', 'góp ý'] },
           { id: 'mode-collect', label: 'Switch to Collect mode', keys: ['4'], icon: 'bookmark', tags: ['save', 'bookmark', 'favorite', 'thu thập'] },
-          { id: 'toggle-sidebar', label: 'Toggle Sidebar', keys: ['Mod', 'B'], icon: 'sidebar', tags: ['menu', 'folders', 'explorer', 'ẩn hiện'] },
+          { id: 'toggle-sidebar', label: 'Toggle Sidebar', keys: ['Mod', 'B'], icon: 'panel-left', tags: ['navigation', 'panel', 'thanh bên'] },
           { id: 'focus-search', label: 'Focus Search', keys: ['Mod', 'P'], icon: 'search', tags: ['find', 'palette', 'tìm kiếm'] },
           { id: 'scroll-top', label: 'Scroll to Top', keys: ['Mod', '↑'], icon: 'arrow-up', tags: ['up', 'start', 'lên đầu'] },
           { id: 'scroll-bottom', label: 'Scroll to Bottom', keys: ['Mod', '↓'], icon: 'arrow-down', tags: ['down', 'end', 'xuống cuối'] },
-          { id: 'toggle-fullscreen', label: 'Toggle Fullscreen', keys: isMac ? ['Mod', 'Shift', 'F'] : ['F11'], icon: 'maximize', tags: ['window', 'expand', 'toàn màn hình'] }
+          { id: 'toggle-fullscreen', label: 'Toggle Fullscreen', keys: isMac ? ['Mod', 'Shift', 'F'] : ['F11'], icon: 'maximize', tags: ['window', 'expand', 'toàn màn hình'] },
+          { id: 'toggle-toc', label: 'Toggle Table of Contents', keys: ['Mod', 'Alt', 'T'], icon: 'list-tree', tags: ['outline', 'navigation', 'mục lục'] },
+          { id: 'toggle-map', label: 'Toggle Project Map', keys: ['Mod', 'Alt', 'M'], icon: 'map', tags: ['mini-map', 'overview', 'bản đồ'] }
+        ]
+      },
+      {
+        title: 'Smart Copy',
+        items: [
+          { id: 'copy-markdown', label: 'Copy Markdown (Entire File)', keys: ['Mod', 'Shift', 'C'], icon: 'copy', tags: ['markdown', 'raw', 'sao chép'] },
+          { id: 'copy-as-file', label: 'Copy as File', keys: ['Mod', 'Alt', 'C'], icon: 'file-stack', tags: ['export', 'clip', 'sao chép file'] },
+          { id: 'copy-gdocs', label: 'Copy for Google Docs', keys: ['Mod', 'Alt', 'G'], icon: 'file-text', tags: ['gdoc', 'rich text', 'sao chép gdoc'] }
+        ]
+      },
+      {
+        title: 'Editor Actions',
+        items: [
+          { id: 'import-markdown', label: 'Import Markdown', keys: ['Mod', 'Alt', 'I'], icon: 'folder-input', tags: ['import', 'load', 'nhập file'] },
+          { id: 'append-markdown', label: 'Append Markdown', keys: ['Mod', 'Alt', 'A'], icon: 'plus', tags: ['append', 'add', 'thêm file'] }
         ]
       },
       {

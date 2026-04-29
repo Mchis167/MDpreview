@@ -132,9 +132,16 @@ class ChangeActionViewBarComponent {
 
     // ── Sync Logic (Capture while still visible) ──────────
     const prevMode = AppState.currentMode;
-    const syncData = (prevMode === 'edit')
-      ? this.captureEditorSyncData()
-      : (prevMode === 'read' || prevMode === 'comment' || prevMode === 'collect' ? this.captureReadViewSyncData() : null);
+    let syncData = AppState.forceSyncContext || null;
+    
+    // Clear forced context after use
+    if (AppState.forceSyncContext) delete AppState.forceSyncContext;
+
+    if (!syncData) {
+      syncData = (prevMode === 'edit')
+        ? this.captureEditorSyncData()
+        : (prevMode === 'read' || prevMode === 'comment' || prevMode === 'collect' ? this.captureReadViewSyncData() : null);
+    }
 
     // ── Dirty Check ───────────────────────────────────────
     if (prevMode === 'edit' && targetMode !== 'edit' && typeof EditorModule !== 'undefined' && EditorModule.isDirty()) {

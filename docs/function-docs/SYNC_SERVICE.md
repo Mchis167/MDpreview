@@ -40,6 +40,8 @@ Service này hoạt động như một Bridge giữa:
 
 Sử dụng `window._suppressScrollSync` (token) để tạm dừng các listener cuộn tự động trong quá trình thực hiện đồng bộ, tránh hiện tượng "vòng lặp cuộn" (scroll loops).
 
+Service này cũng hỗ trợ **Forced Sync Context** thông qua `AppState.forceSyncContext`. Nếu thuộc tính này tồn tại, `ChangeActionViewBar` sẽ bỏ qua việc tự chụp vị trí mà dùng trực tiếp dữ liệu này để đồng bộ, giúp bảo toàn vùng chọn khi bôi đen và Edit.
+
 ---
 
 ## Lưu ý quan trọng
@@ -49,4 +51,4 @@ Sử dụng `window._suppressScrollSync` (token) để tạm dừng các listene
 
 ---
 
-*Document — 2026-04-28*
+*Document — 2026-04-29 (Updated Forced Sync mechanism)*

@@ -13,6 +13,7 @@ Tài liệu các module và function quan trọng của MDpreview.
 | [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) | Centralized UI factory (Buttons, Segmented Control, Radius logic) |
 | [DESIGN_SYSTEM_ICONS.md](DESIGN_SYSTEM_ICONS.md) | Registry toàn bộ icon SVG của dự án (Modular Icons) |
 | [CORE_APP.md](CORE_APP.md) | Global state (AppState), loadFile, boot sequence, theme, socket |
+| [ELECTRON_BRIDGE.md](ELECTRON_BRIDGE.md) | Unified API bridge between Electron and Browser (File System, Clipboard, Rasterization) |
 | [SYNC_SERVICE.md](SYNC_SERVICE.md) | Service đồng bộ hóa vị trí (scroll/cursor) giữa các chế độ xem |
 | [TABS.md](TABS.md) | Tab management, multi-select, batch close |
 | [EDITOR.md](EDITOR.md) | Textarea editor, undo/redo, dirty tracking, save |

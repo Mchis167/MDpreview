@@ -699,6 +699,54 @@ const CommentsModule = (() => {
   }
 
 
-  return { init, loadForFile, applyCommentMode, removeCommentMode, clearUI, clear, getCommentCount: () => comments.length };
+  function externalTrigger(data) {
+
+    if (!data) return;
+    formTarget = data;
+    const targetLine = document.querySelector(`.md-line[data-line="${data.lineStart}"]`);
+
+    _showForm(targetLine || document.body);
+  }
+
+  function captureSelectionData() {
+    const selection = window.getSelection();
+
+    if (selection.isCollapsed) {
+
+      return null;
+    }
+    const range = selection.getRangeAt(0);
+    const selectedText = selection.toString().trim();
+    const allLines = Array.from(document.querySelectorAll('.md-line'));
+
+    
+    const selectedLines = allLines.filter(el => selection.containsNode(el, true));
+
+    
+    if (selectedLines.length === 0) {
+
+      return null;
+    }
+    
+    const lineStart = parseInt(selectedLines[0].dataset.line, 10);
+    const lineEnd   = parseInt(selectedLines[selectedLines.length - 1].dataset.line, 10);
+    const context = _getSelectionContext(range);
+    
+    const data = { 
+      lineStart, 
+      lineEnd, 
+      startLineContent: _getLineText(selectedLines[0]), 
+      endLineContent: _getLineText(selectedLines[selectedLines.length - 1]),
+      selectedText,
+      context,
+      headingPath: _getHeadingPath(lineStart)
+    };
+    
+
+    return data;
+  }
+
+
+  return { init, loadForFile, applyCommentMode, removeCommentMode, clearUI, clear, getCommentCount: () => comments.length, externalTrigger, captureSelectionData };
 })();
 window.CommentsModule = CommentsModule;

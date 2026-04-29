@@ -192,6 +192,29 @@ const EditorModule = (() => {
     }
   }
 
+  function insertContent(text, mode = 'insert') {
+    if (!_textarea) return;
+
+    _snapshot();
+
+    if (mode === 'replace') {
+      _textarea.value = text;
+    } else if (mode === 'append') {
+      const current = _textarea.value;
+      _textarea.value = current + (current && !current.endsWith('\n') ? '\n\n' : (current ? '\n' : '')) + text;
+    } else {
+      const start = _textarea.selectionStart;
+      const end = _textarea.selectionEnd;
+      _textarea.setRangeText(text, start, end, 'select');
+    }
+
+    _snapshot();
+    _textarea.focus();
+
+    // Trigger input event to update dirty state
+    _textarea.dispatchEvent(new Event('input'));
+  }
+
   return { 
       bindToElement, unbind, save, isDirty, setOriginalContent, undo, redo, 
       applyAction,
@@ -206,6 +229,7 @@ const EditorModule = (() => {
       },
       focusWithContext,
       getOriginalContent: () => _originalContent,
+      insertContent,
       revert
   };
 })();
