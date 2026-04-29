@@ -652,11 +652,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 /**
  * Global Toast Notification
  */
-function showToast(message, type = 'success') {
-  let container = document.getElementById('toast-container');
+function showToast(message, type = 'success', options = {}) {
+  const toastId = options.id || 'default-toast';
+  let container = document.getElementById(`toast-${toastId}`);
+  
   if (!container) {
     container = document.createElement('div');
-    container.id = 'toast-container';
+    container.id = `toast-${toastId}`;
     container.className = 'toast-container';
     container.innerHTML = `
       <div class="toast-content">
@@ -665,21 +667,33 @@ function showToast(message, type = 'success') {
         <div class="toast-close">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </div>
+        <div class="toast-progress-container">
+          <div class="toast-progress-bar"></div>
+        </div>
       </div>
     `;
     document.body.appendChild(container);
 
     container.querySelector('.toast-close').onclick = () => {
       container.classList.remove('show');
+      setTimeout(() => container.remove(), 400);
     };
   }
 
   const content = container.querySelector('.toast-content');
   const icon = container.querySelector('.toast-icon');
   const messageEl = container.querySelector('.toast-message');
+  const progressBar = container.querySelector('.toast-progress-bar');
 
   // Set Type
   content.className = `toast-content ${type}`;
+  if (options.progress !== undefined) {
+    content.classList.add('has-progress');
+    progressBar.style.width = `${options.progress}%`;
+  } else {
+    content.classList.remove('has-progress');
+  }
+
   messageEl.textContent = message;
 
   // Set Icon
@@ -691,10 +705,13 @@ function showToast(message, type = 'success') {
 
   container.classList.add('show');
 
-  // Auto hide
+  // Auto hide (unless sticky)
   if (container._timer) clearTimeout(container._timer);
-  container._timer = setTimeout(() => {
-    container.classList.remove('show');
-  }, 4000);
+  if (!options.sticky) {
+    container._timer = setTimeout(() => {
+      container.classList.remove('show');
+      setTimeout(() => container.remove(), 400);
+    }, options.duration || 4000);
+  }
 }
 window.showToast = showToast;

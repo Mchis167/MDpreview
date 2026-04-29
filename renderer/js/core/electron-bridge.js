@@ -182,6 +182,55 @@
       return { success: false, error: 'Not supported in browser' };
     },
     
+    copyFileToClipboard: async (filePath) => {
+      try {
+        // Browser fallback: Since we can't truly copy a file to OS clipboard, we trigger a download
+        const res = await fetch(`/api/file/raw?path=${encodeURIComponent(filePath)}`);
+        if (!res.ok) throw new Error('Failed to fetch file content');
+        const content = await res.text();
+        
+        const blob = new Blob([content], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filePath.split('/').pop() || 'document.md';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        if (typeof showToast === 'function') showToast('File download triggered (Copy-as-file not supported in browser)', 'info');
+        return { success: true };
+      } catch (error) {
+        console.error('Browser copy error:', error);
+        return { success: false, error: error.message };
+      }
+    },
+    
+    startFileDrag: async (filePath, event) => {
+      try {
+        // Browser fallback: Use the DownloadURL trick for dragging to desktop
+        const res = await fetch(`/api/file/raw?path=${encodeURIComponent(filePath)}`);
+        if (!res.ok) return;
+        const content = await res.text();
+        
+        const fileName = filePath.split('/').pop() || 'document.md';
+        const blob = new Blob([content], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        
+        // This is a legacy but effective trick for web browsers to drag-and-download
+        if (event && event.dataTransfer) {
+          event.dataTransfer.setData('DownloadURL', `text/markdown:${fileName}:${url}`);
+        }
+      } catch (error) {
+        console.error('Browser drag error:', error);
+      }
+    },
+
+    getAbsolutePath: async (filePath) => filePath,
+    
+    isElectron: false,
+    
     // Custom
     rebuildApp: () => {
       if (typeof showToast === 'function') showToast('Rebuild is only available in the desktop app.', 'error');

@@ -49,10 +49,36 @@ Logic bên trong:
 Tạo sub-component phù hợp dựa trên `state.mode` và mount vào DOM.
 
 ### `_renderFloatingActions()`
-Tạo nhóm các nút hành động nổi (Floating Action Group). Bao gồm nút Share (Combo Button) và các nút điều khiển chế độ xem (TOC, Project Map). Nhóm này được mount vào `#md-viewer-mount` dưới dạng overlay.
+Tạo nhóm các nút hành động nổi (Floating Action Group). Bao gồm:
+- **Smart Copy (Combo Button)**: Nút "Copy" tích hợp nhiều tùy chọn (Markdown, GDoc, File, Path).
+- **TOC Toggle**: Nút mở mục lục.
+- **Project Map Toggle**: Nút mở bản đồ tài liệu.
+
+Nhóm này được mount vào `#md-viewer-mount` dưới dạng overlay.
 
 ### `_renderFloatingScrollTop()`
 Tạo nút "↑ Scroll to top" floating. Hiển thị khi scroll > 300px, ẩn khi gần top.
+
+---
+
+## Smart Copy System
+
+Hệ thống copy nâng cao hỗ trợ xuất nội dung sang các ứng dụng khác:
+
+### 📋 Các tùy chọn Copy
+- **Copy Markdown (Main Action)**: Copy nội dung thô (raw content) vào clipboard.
+- **Copy for Google Docs**: Chuyển đổi HTML sang định dạng Rich Text có kèm style nhúng (inline) và biểu đồ rasterized chất lượng cao (2x scale). Hỗ trợ hiển thị Progress Bar trong quá trình xử lý.
+- **Copy as File**: Sao chép trực tiếp file vật lý vào clipboard (chỉ Electron).
+- **Copy File Path**: Sao chép đường dẫn tuyệt đối của file.
+
+### 🔄 Quy trình Copy for Google Docs
+1. Trích xuất HTML từ DOM (`.md-content-inner`) để lấy nội dung đã xử lý.
+2. Hiển thị **Progress Toast** với định danh `gdoc-copy` để thông báo trạng thái cho người dùng.
+3. Gọi `GDocUtil.transform(html, mountNode)` để:
+   - Inline CSS cho Table, Code, Quote.
+   - Rasterize SVGs (Mermaid) thành ảnh PNG (Retina scale 2.0) một cách tuần tự.
+4. Ghi vào Clipboard dưới 2 định dạng: `text/html` (rich text) và `text/plain` (markdown fallback).
+5. Sử dụng `window.electronAPI.writeClipboardAdvanced` trên Desktop để vượt qua giới hạn của Browser API.
 
 ---
 

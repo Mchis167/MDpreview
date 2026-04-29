@@ -1,5 +1,7 @@
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
+const clipboardEx = require('electron-clipboard-ex');
 
 function register(ipcMain) {
   ipcMain.handle('delete-file', async (event, filePath) => {
@@ -113,6 +115,118 @@ function register(ipcMain) {
       shell.showItemInFolder(filePath);
       return { success: true };
     } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('copy-file-to-clipboard', async (event, filePath) => {
+    console.log('[MAIN DEBUG] Received copy-file-to-clipboard request for:', filePath);
+    try {
+      const { getWatchDir } = require('../main');
+      const fullPath = path.isAbsolute(filePath) ? filePath : path.resolve(getWatchDir() || '', filePath);
+      console.log('[MAIN DEBUG] Resolved absolute path:', fullPath);
+      
+      if (!fs.existsSync(fullPath)) {
+        console.error('[MAIN DEBUG] File does not exist:', fullPath);
+        return { success: false, error: 'File does not exist' };
+      }
+
+      // Use clipboard-ex for robust OS-level file copy
+      clipboardEx.writeFilePaths([fullPath]);
+      
+      console.log('[MAIN DEBUG] Successfully wrote to clipboard via clipboard-ex');
+      return { success: true };
+    } catch (error) {
+      console.error('[MAIN DEBUG] Copy error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('copy-file-from-buffer', async (event, { buffer, filename }) => {
+    console.log('[MAIN DEBUG] Received copy-file-from-buffer request for:', filename);
+    try {
+      const tempDir = os.tmpdir();
+      const tempPath = path.join(tempDir, filename);
+
+      // Convert array buffer to Buffer if needed
+      const data = Buffer.from(buffer);
+      fs.writeFileSync(tempPath, data);
+      
+      // Use clipboard-ex to copy the temp file
+      clipboardEx.writeFilePaths([tempPath]);
+
+      // Cleanup temp file after 60s
+      setTimeout(() => {
+        try {
+          if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+        } catch (_e) { /* ignore cleanup errors */ }
+      }, 60_000);
+
+      console.log('[MAIN DEBUG] Successfully copied buffer to clipboard via temp file:', tempPath);
+      return { success: true };
+    } catch (error) {
+      console.error('[MAIN DEBUG] Copy from buffer error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.on('start-file-drag', async (event, filePath) => {
+    try {
+      const { app } = require('electron');
+      if (!fs.existsSync(filePath)) return;
+      
+      const icon = await app.getFileIcon(filePath);
+      event.sender.startDrag({
+        file: filePath,
+        icon: icon
+      });
+    } catch (error) {
+      console.error('Drag error:', error);
+    }
+  });
+
+  ipcMain.handle('get-absolute-path', async (event, filePath) => {
+    try {
+      if (path.isAbsolute(filePath)) return filePath;
+      const { getWatchDir } = require('../main');
+      const watchDir = getWatchDir();
+      return watchDir ? path.resolve(watchDir, filePath) : path.resolve(filePath);
+    } catch (_error) {
+      return filePath;
+    }
+  });
+
+  ipcMain.handle('write-clipboard-advanced', async (event, { html, text }) => {
+    console.log('[MAIN DEBUG] Received write-clipboard-advanced request. HTML Length:', html?.length, 'Text Length:', text?.length);
+    try {
+      const { clipboard } = require('electron');
+      clipboard.write({
+        html: html,
+        text: text
+      });
+      console.log('[MAIN DEBUG] Successfully wrote HTML and Text to native clipboard');
+      return { success: true };
+    } catch (error) {
+      console.error('[MAIN DEBUG] Advanced clipboard write error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('rasterize-svg', async (event, svgString, width, height) => {
+    console.log('[MAIN DEBUG] Received rasterize-svg request. SVG Length:', svgString.length, 'Size:', width, 'x', height);
+    try {
+      const { nativeImage } = require('electron');
+      const buffer = Buffer.from(svgString);
+      const image = nativeImage.createFromBuffer(buffer, {
+        width: Math.round(width),
+        height: Math.round(height),
+        scaleFactor: 2.0
+      });
+      const dataUrl = image.toDataURL();
+      console.log('[MAIN DEBUG] Rasterization successful. DataURL length:', dataUrl.length);
+      return { success: true, dataUrl };
+    } catch (error) {
+      console.error('[MAIN DEBUG] Rasterize error:', error);
       return { success: false, error: error.message };
     }
   });

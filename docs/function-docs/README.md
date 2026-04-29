@@ -38,6 +38,7 @@ Tài liệu các module và function quan trọng của MDpreview.
 | [TAB_PREVIEW.md](TAB_PREVIEW.md) | Hover Preview với Render Window strategy và Glassmorphism |
 | [EDIT_TOOLBAR.md](EDIT_TOOLBAR.md) | Thanh công cụ soạn thảo dàn trải với phân cấp Header H1-H6 |
 | [TOC_COMPONENT.md](TOC_COMPONENT.md) | Quản lý mục lục nổi (Floating TOC) và đồng bộ cuộn |
+| [GDOC_UTIL.md](GDOC_UTIL.md) | Chuyển đổi HTML sang định dạng Google Docs (Styling & Rasterization) |
 
 ---
 

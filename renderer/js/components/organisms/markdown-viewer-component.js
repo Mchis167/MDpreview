@@ -255,28 +255,149 @@ class MarkdownViewerComponent {
       if (TOCComponent) TOCComponent.toggle(this.mount);
     };
 
-    // 2. Combo Button
+    // 2. Combo Button (Smart Copy & Drag)
     this._comboBtn = DesignSystem.createComboButton({
-      label: 'Share',
+      label: 'Copy',
       variant: 'subtitle',
-      leadingIcon: 'share-2',
+      leadingIcon: 'copy',
       className: 'floating-combo-btn',
-      tooltip: 'Share Document',
+      tooltip: 'Copy Markdown',
       mainAction: () => {
-        console.warn('Share clicked');
+        if (this.state.content) {
+          navigator.clipboard.writeText(this.state.content);
+          if (window.showToast) window.showToast('Markdown copied to clipboard');
+        }
       },
-      toggleTooltip: 'More Actions',
+      toggleTooltip: 'Advanced Copy',
       toggleAction: () => {
         DesignSystem.createMenu(this._comboBtn, [
-          { label: 'Copy Link', icon: 'link', onClick: () => console.warn('Copy Link') },
-          { label: 'Export PDF', icon: 'file-text', onClick: () => console.warn('Export PDF') },
+          { 
+            label: 'Copy as File', 
+            icon: 'file-plus', 
+            onClick: async () => {
+              if (!window.electronAPI) return;
+
+              try {
+                let res;
+                if (this.state.file) {
+                  // Case 1: Physical file on disk
+                  res = await window.electronAPI.copyFileToClipboard(this.state.file);
+                } else if (this.state.content) {
+                  // Case 2: Draft/Generated content -> Copy as temp file
+                  const fileName = (window.AppState && window.AppState.activeTabName) 
+                    ? `${window.AppState.activeTabName}.md` 
+                    : 'Untitled.md';
+                  
+                  // Convert string to Uint8Array for the buffer
+                  const buffer = new TextEncoder().encode(this.state.content);
+                  res = await window.electronAPI.copyFileFromBuffer(buffer, fileName);
+                }
+
+                if (res && res.success) {
+                  if (window.showToast) window.showToast('File copied to clipboard');
+                } else if (res) {
+                  throw new Error(res.error);
+                }
+              } catch (err) {
+                console.error('[DEBUG] Copy as File failed:', err);
+                if (window.showToast) window.showToast(`Copy failed: ${err.message}`, 'error');
+              }
+            }
+          },
+          { 
+            label: 'Copy for Google Docs', 
+            icon: 'file-text', 
+            onClick: async () => {
+              if (this.state.html) {
+                if (window.showToast) {
+                  window.showToast('Preparing smart copy...', 'info', { id: 'gdoc-copy', sticky: true, progress: 0 });
+                }
+                
+                try {
+                   const previewInner = this.viewport.querySelector('.md-content-inner');
+                   const sourceHtml = previewInner ? previewInner.innerHTML : this.state.html;
+
+                   const result = await window.GDocUtil.transform(sourceHtml, this.mount);
+                   const transformedHtml = result.html;
+                   
+                   const html = `<div style="font-family: sans-serif; color: #24292e;">${transformedHtml}</div>`;
+                   
+                   if (window.electronAPI && typeof window.electronAPI.writeClipboardAdvanced === 'function') {
+                     const res = await window.electronAPI.writeClipboardAdvanced({
+                       html: html,
+                       text: this.state.content || ''
+                     });
+                     if (res.success) {
+                       if (window.showToast) {
+                         const msg = result.totalCount > 0 
+                           ? `Smart copy ready! (${result.successCount}/${result.totalCount} charts)`
+                           : 'Smart copy for GDocs ready!';
+                         const type = result.failCount > 0 ? 'warn' : 'success';
+                         window.showToast(msg, type, { id: 'gdoc-copy' });
+                       }
+                     } else {
+                       throw new Error(res.error);
+                     }
+                   } else {
+                     const blob = new Blob([html], { type: 'text/html' });
+                     const textBlob = new Blob([this.state.content || ''], { type: 'text/plain' });
+                     const item = new window.ClipboardItem({
+                       'text/html': blob,
+                       'text/plain': textBlob
+                     });
+                     await navigator.clipboard.write([item]);
+                     if (window.showToast) window.showToast('Smart copy for GDocs ready!', 'success', { id: 'gdoc-copy' });
+                   }
+                } catch (err) {
+                  console.error('[DEBUG] GDoc Smart copy failed:', err);
+                  navigator.clipboard.writeText(this.state.content);
+                  if (window.showToast) window.showToast('Markdown copied (Smart Copy failed)', 'error', { id: 'gdoc-copy' });
+                }
+              }
+            }
+          },
           { divider: true },
-          { label: 'Settings', icon: 'settings', onClick: () => {
-            if (window.AppState) window.AppState.onModeChange('settings');
-          }}
+          { 
+            label: 'Copy File Path', 
+            icon: 'link', 
+            onClick: () => {
+              if (this.state.file) {
+                navigator.clipboard.writeText(this.state.file);
+                if (window.showToast) window.showToast('File path copied');
+              }
+            }
+          }
         ], { align: 'right' });
       }
     });
+
+    // ── Drag to Export ──
+    const leadingIcon = this._comboBtn.querySelector('.ds-btn-icon-leading');
+    if (leadingIcon) {
+      leadingIcon.setAttribute('draggable', 'true');
+      leadingIcon.style.cursor = 'grab';
+      leadingIcon.title = 'Drag to export file';
+      leadingIcon.ondragstart = (e) => {
+        if (window.electronAPI && this.state.file) {
+          const isElectron = !!window.electronAPI.isElectron;
+          const hasDragFunc = typeof window.electronAPI.startFileDrag === 'function';
+
+          if (isElectron) {
+            // Electron native drag logic
+            if (!hasDragFunc) {
+              e.preventDefault();
+              if (window.showToast) window.showToast('Please restart the app to enable Drag & Drop', 'error');
+              return;
+            }
+            e.preventDefault();
+            window.electronAPI.startFileDrag(this.state.file);
+          } else if (hasDragFunc) {
+            // Browser fallback: Use the DownloadURL trick (don't preventDefault)
+            window.electronAPI.startFileDrag(this.state.file, e);
+          }
+        }
+      };
+    }
 
     this._floatingGroup.appendChild(this._tocBtn);
     this._floatingGroup.appendChild(this._comboBtn);

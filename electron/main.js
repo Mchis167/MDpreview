@@ -139,3 +139,7 @@ app.on('will-quit', () => {
   if (serverModule && typeof serverModule.stop === 'function') serverModule.stop();
   process.exit(0);
 });
+
+module.exports = {
+  getWatchDir: () => (serverModule && typeof serverModule.getWatchDir === 'function') ? serverModule.getWatchDir() : null
+};

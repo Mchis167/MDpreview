@@ -71,9 +71,14 @@ Kết nối Socket.IO tới server để nhận real-time events:
 
 ---
 
-## `showToast(message, type)`
+## `showToast(message, type, options = {})`
 
-Hiển thị toast notification tự ẩn sau 4 giây. `type` có thể là `success`, `error`, `info`.
+Hiển thị toast notification (mặc định tự ẩn sau 4 giây).
+- `type`: `success`, `error`, `warn`, `info`.
+- `options`:
+    - `id`: Định danh để cập nhật nội dung toast đang hiển thị thay vì tạo mới.
+    - `sticky`: Nếu `true`, toast sẽ không tự động ẩn.
+    - `progress`: Giá trị từ 0-1 để hiển thị thanh tiến trình (progress bar).
 
 ---
 
@@ -120,4 +125,4 @@ Thứ tự khởi động nghiêm ngặt — **không thay đổi thứ tự**:
 
 ---
 
-*Document — 2026-04-28 (Refactored: Removed SidebarModule, updated Search trigger)*
+*Document — 2026-04-29 (Updated showToast features)*

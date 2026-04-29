@@ -31,6 +31,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   createFolder:  (folderPath)        => ipcRenderer.invoke('create-folder', folderPath),
   revealInFinder: (filePath)          => ipcRenderer.invoke('reveal-in-finder', filePath),
   
+  // Clipboard & Drag
+  copyFileToClipboard: (filePath) => ipcRenderer.invoke('copy-file-to-clipboard', filePath),
+  copyFileFromBuffer: (buffer, filename) => ipcRenderer.invoke('copy-file-from-buffer', { buffer, filename }),
+  startFileDrag: (filePath)       => ipcRenderer.send('start-file-drag', filePath),
+  getAbsolutePath: (filePath)     => ipcRenderer.invoke('get-absolute-path', filePath),
+  rasterizeSVG: (svg, w, h)       => ipcRenderer.invoke('rasterize-svg', svg, w, h),
+  writeClipboardAdvanced: (data)  => ipcRenderer.invoke('write-clipboard-advanced', data),
+  isElectron: true,
+  
   // Custom
   rebuildApp: () => ipcRenderer.send('rebuild-app')
 });

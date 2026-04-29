@@ -51,7 +51,7 @@
 .ds-combo-btn-main {
   display: flex;
   align-items: center;
-  padding: 0 var(--ds-space-sm);
+  padding: 0 var(--ds-space-sm) 0 var(--ds-space-md);
   gap: var(--ds-space-2xs);
   color: inherit;
   border-right: 1px solid var(--_divider);

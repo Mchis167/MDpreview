@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.15.0] — 2026-04-29 07:10
+
+### 🎉 Added
+- **Google Docs Integration (Smart Copy)**: 
+    - Triển khai hệ thống sao chép thông minh chuyên biệt cho Google Docs, bảo toàn định dạng Rich Text, bảng biểu và blockquote.
+    - **Inlining CSS Engine**: Tự động nhúng trực tiếp phong cách vào HTML để giữ đúng layout khi paste vào trình soạn thảo văn bản.
+- **Retina-ready SVG Rasterization**: 
+    - Cơ chế render biểu đồ Mermaid chất lượng cao trực tiếp tại Renderer-side bằng Canvas (2.0 scale).
+    - Tự động thêm khung nền tối (`#1e1e1e`) cho biểu đồ khi xuất, đảm bảo các nét vẽ sáng màu luôn hiển thị rõ nét trên nền văn bản trắng.
+- **Progressive UI Feedback**: Nâng cấp hệ thống Toast hỗ trợ **Progress Bar** và trạng thái `sticky`, hiển thị tiến trình xử lý biểu đồ theo thời gian thực (ví dụ: "Processing 3/10 charts...").
+- **Copy as File (Native Electron)**: Tính năng sao chép trực tiếp file vật lý vào clipboard (hỗ trợ macOS `filenames`, `file-url`) để dán vào Slack, ChatGPT hoặc Finder.
+- **Advanced Clipboard IPC**: Triển khai các handler `write-clipboard-advanced`, `copy-file-to-clipboard` và `rasterize-svg` để tận dụng tối đa sức mạnh hệ điều hành.
+- **GDoc Copy Diagnostic Logging**: Hệ thống log chuyên sâu (`[✓] Success` / `[✗] Failed`) ghi lại chi tiết hiệu năng và kết quả render của từng biểu đồ trong Console.
+
+### 🔧 Changed
+- **Advanced Copy Menu UI**: Nâng cấp nút "Share" thành **Combo Button** với menu tùy chọn linh hoạt: Copy Markdown, Copy for GDocs, Copy as File, và Copy Absolute Path.
+- **Sequential Chart Processing**: Tái cấu trúc luồng xử lý từ song song sang tuần tự (Sequential) để đảm bảo độ ổn định tối đa cho Clipboard và tránh treo ứng dụng khi xử lý tài liệu cực lớn.
+- **High-Fidelity Style Inlining**: Mở rộng danh sách thuộc tính CSS nội suy (`text-anchor`, `dominant-baseline`, `letter-spacing`, v.v.) giúp biểu đồ giữ đúng định dạng văn bản gốc.
+- **GDoc Copy Optimization**: Tinh chỉnh tỷ lệ scale (2.0x) để cân bằng giữa độ sắc nét Retina và kích thước bộ nhớ clipboard.
+
+### 🗑 Removed
+- **Unreliable Native Rasterization**: Gỡ bỏ cơ chế render SVG qua IPC của Electron do không tương thích tốt với cấu trúc CSS phức tạp của Mermaid.
+- **"Copy Charts as Files" Feature**: Gỡ bỏ tính năng copy ảnh rời để tập trung hoàn toàn vào quy trình "Copy for Google Docs" đồng bộ.
+
+### 🐞 Fixed
+- **Mermaid Box Text Clipping**: Khắc phục triệt để lỗi mất chữ trong biểu đồ bằng cách ép font `Arial` và thuộc tính `white-space: pre` cho các thẻ văn bản SVG.
+- **"Tainted Canvas" Security Error**: Giải quyết lỗi bảo mật trình duyệt khi xuất ảnh bằng kỹ thuật Unicode-safe Base64 encoding.
+- **ViewBox & Scaling Alignment**: Sửa lỗi biểu đồ bị cắt hoặc sai tỷ lệ bằng cách bảo toàn thuộc tính `viewBox` gốc trong quá trình rasterization.
+- **Chart Stuck Protection**: Thêm cơ chế Timeout 5s và bộ xử lý lỗi cho từng biểu đồ, ngăn chặn việc tiến trình copy bị treo vô hạn.
+- **Parallel GDoc Transformation**: Nâng cấp `GDocUtil` hỗ trợ xử lý song song (`Promise.all`) các biểu đồ, giúp tăng tốc độ xử lý cho các tài liệu lớn (>70k ký tự).
+
+### 🐞 Fixed
+- **Tainted Canvas & Security Errors**: Khắc phục lỗi bảo mật khi render biểu đồ Mermaid bằng kỹ thuật Base64 kết hợp Native Image API.
+- **SVG Blurriness**: Giải quyết triệt để vấn đề biểu đồ bị mờ khi paste vào văn bản bằng cơ chế render 4x và tối ưu hóa `viewBox` XML.
+- **Clipboard Format Conflicts**: Sửa lỗi không paste được file trên MacOS bằng cách bổ sung đa định dạng URL/Text/Filenames.
+
 ## [1.14.0] — 2026-04-29 03:40
 
 ### 🎉 Added
