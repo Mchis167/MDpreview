@@ -1,11 +1,10 @@
-/* eslint-disable no-undef */
 /* ============================================================
    mermaid.js — Mermaid diagram init and rendering
    processMermaid() is called from app.js after file load.
    setupMermaidClicks() wires diagrams to openZoom() from zoom.js.
    ============================================================ */
 
-const { getMermaidConfig } = require('../services/mermaid-config.js');
+import { getMermaidConfig } from '../services/mermaid-config.js';
 
 (() => {
 'use strict';
