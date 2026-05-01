@@ -4,14 +4,12 @@
    setupMermaidClicks() wires diagrams to openZoom() from zoom.js.
    ============================================================ */
 
-import { getMermaidConfig } from '../services/mermaid-config.js';
-
 (() => {
 'use strict';
 
 function initMermaid() {
   if (typeof mermaid === 'undefined') return;
-  mermaid.initialize(getMermaidConfig('server'));
+  mermaid.initialize(window.mermaidConfig.getMermaidConfig('server'));
 }
 
 async function processMermaid(container) {
