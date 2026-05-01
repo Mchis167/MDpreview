@@ -14,7 +14,20 @@ function initMermaid() {
 
 async function processMermaid(container) {
   if (typeof mermaid === 'undefined') return;
+
+  // Collect nodes to render:
+  // 1. Existing .mermaid divs that haven't been rendered yet (no SVG children)
+  // 2. Legacy pre > code.language-mermaid elements (for backwards compatibility)
   const nodes = [];
+
+  // First: Check for existing mermaid divs that need rendering
+  container.querySelectorAll('.mermaid').forEach(div => {
+    if (!div.querySelector('svg')) {
+      nodes.push(div);
+    }
+  });
+
+  // Second: Handle legacy pre > code.language-mermaid (if any)
   container.querySelectorAll('pre > code.language-mermaid').forEach(el => {
     const content = el.textContent.trim();
     if (!content) return; // Skip empty blocks
@@ -22,7 +35,7 @@ async function processMermaid(container) {
     const wrapper = document.createElement('div');
     wrapper.className = 'mermaid';
     wrapper.textContent = content;
-    
+
     // ── Defensive: Force stable width if inside Project Map ──
     // Mermaid's layout engine crashes if it detects the tiny scaled dimensions of the mini-map.
     if (container.closest('.ds-project-map__mirror') || container.classList.contains('ds-project-map__mirror')) {
@@ -42,12 +55,12 @@ async function processMermaid(container) {
       // ── Defensive: Only process nodes that are actually in the document and have dimensions ──
       const activeNodes = nodes.filter(node => {
         if (!document.body.contains(node)) return false;
-        
+
         // Use offsetWidth/Height to ensure the element is actually laid out and visible
         // If it's 0, Mermaid's layout engine (D3) will often produce NaN/undefined
         const style = window.getComputedStyle(node);
         const isVisible = style.display !== 'none' && style.visibility !== 'hidden' && node.offsetWidth > 0;
-        
+
         return isVisible;
       });
 

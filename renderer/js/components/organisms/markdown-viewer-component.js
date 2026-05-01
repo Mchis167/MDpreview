@@ -855,14 +855,15 @@ class MarkdownPreview {
     }
     
     // Mermaid and CodeBlocks still benefit from a frame delay for layout
-    requestAnimationFrame(() => {
+    (async () => {
+      await new Promise(resolve => requestAnimationFrame(resolve));
       try {
-        if (window.processMermaid) window.processMermaid(inner);
+        if (window.processMermaid) await window.processMermaid(inner);
       } catch (_e) { /* Mermaid error - gracefully skip */ }
       try {
         if (window.CodeBlockModule) window.CodeBlockModule.process(inner);
       } catch (_e) { /* CodeBlock error - gracefully skip */ }
-    });
+    })();
   }
 
   update({ html }) {
@@ -872,7 +873,9 @@ class MarkdownPreview {
       inner.innerHTML = html;
       
       // Re-process for live updates (e.g. Drafts)
-      if (window.processMermaid) window.processMermaid(inner);
+      if (window.processMermaid) {
+        window.processMermaid(inner).catch(_e => { /* Mermaid error - gracefully skip */ });
+      }
       if (window.CodeBlockModule) window.CodeBlockModule.process(inner);
 
       // Ensure scroll is maintained if content size changed
