@@ -13,8 +13,10 @@
 
 ### For Developers
 1. **[SETUP.md](SETUP.md)** — Installation and development environment setup
-2. **[scripts-guide.md](scripts-guide.md)** — Available build and deployment scripts
-3. **[RENDERING_ARCHITECTURE.md](RENDERING_ARCHITECTURE.md)** — How rendering works
+2. **[FEATURE_DOCS_GUIDE.md](FEATURE_DOCS_GUIDE.md)** — How to find and understand features
+3. **[function-docs/README.md](function-docs/README.md)** — Documentation of all 37+ features
+4. **[scripts-guide.md](scripts-guide.md)** — Available build and deployment scripts
+5. **[RENDERING_ARCHITECTURE.md](RENDERING_ARCHITECTURE.md)** — How rendering works
 
 ### For DevOps / Deployment
 1. **[scripts-guide.md](scripts-guide.md)** — DeployWorker, PreviewUI, QuickRebuild commands
@@ -225,28 +227,34 @@ MDpreview/
 **Product Manager / Non-Technical**
 1. [README.md](../README.md) — Features and capabilities
 2. [user_guide.md](user_guide.md) — How to use
+3. [function-docs/README.md](function-docs/README.md) — All features at a glance
 
 **Frontend Developer**
 1. [SETUP.md](SETUP.md) — Setup environment
-2. [RENDERING_ARCHITECTURE.md](RENDERING_ARCHITECTURE.md) — Rendering system
-3. [css-pipeline.md](css-pipeline.md) — Styling system
-4. [scripts-guide.md](scripts-guide.md) — Build scripts
+2. [FEATURE_DOCS_GUIDE.md](FEATURE_DOCS_GUIDE.md) — How to find features
+3. [function-docs/](function-docs/) — Feature documentation (37+ modules)
+4. [RENDERING_ARCHITECTURE.md](RENDERING_ARCHITECTURE.md) — Rendering system
+5. [css-pipeline.md](css-pipeline.md) — Styling system
 
 **Backend/Full-Stack Developer**
 1. [SETUP.md](SETUP.md) — Environment setup
-2. [RENDERING_ARCHITECTURE.md](RENDERING_ARCHITECTURE.md) — Rendering pipeline
-3. [SECURITY.md](SECURITY.md) — Security considerations
-4. [phase-1-1-completion.md](phase-1-1-completion.md) — Architecture decisions
+2. [FEATURE_DOCS_GUIDE.md](FEATURE_DOCS_GUIDE.md) — How to find features
+3. [function-docs/](function-docs/) — Feature documentation
+4. [RENDERING_ARCHITECTURE.md](RENDERING_ARCHITECTURE.md) — Rendering pipeline
+5. [SECURITY.md](SECURITY.md) — Security considerations
+6. [phase-1-1-completion.md](phase-1-1-completion.md) — Architecture decisions
 
 **DevOps / Deployment**
 1. [scripts-guide.md](scripts-guide.md) — Deployment procedures
 2. [RENDERING_ARCHITECTURE.md](RENDERING_ARCHITECTURE.md#worker-renderer) — Worker setup
 3. [SECURITY.md](SECURITY.md#production-deployment) — Production security
+4. [function-docs/PUBLISH_WORKER.md](function-docs/PUBLISH_WORKER.md) — Worker architecture
 
 **QA / Test Engineer**
-1. [manual-testing-phase-1-1.md](manual-testing-phase-1-1.md) — Test procedures
-2. [SETUP.md](SETUP.md#testing) — Running tests
-3. [phase-1-1-completion.md](phase-1-1-completion.md#testing--verification) — Test results
+1. [FEATURE_DOCS_GUIDE.md](FEATURE_DOCS_GUIDE.md) — How to find features
+2. [function-docs/README.md](function-docs/README.md) — All features
+3. [manual-testing-phase-1-1.md](manual-testing-phase-1-1.md) — Test procedures
+4. [SETUP.md](SETUP.md#testing) — Running tests
 
 ---
 
