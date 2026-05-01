@@ -1,6 +1,179 @@
 # Module: DOCS
 
 
+<file path="GraphPreview/Antigravity_Chart_Guide.md">
+```md
+# 📗 Hướng dẫn: Tạo Biểu đồ Premium trong Antigravity
+
+Chào bạn! Bản hướng dẫn này giúp bạn nắm vững cách sử dụng mã Markdown kết hợp với Mermaid để tôi (Antigravity) có thể giúp bạn tạo ra các bản "Preview Canvas" đẳng cấp.
+
+---
+
+## 🚀 1. Công thức cơ bản
+Để tôi có thể vẽ được biểu đồ, bạn chỉ cần đưa đoạn mã vào khối code như sau trong file `.md` của bạn:
+
+```text
+# Tên biểu đồ của bạn
+```mermaid
+[Mã nguồn Mermaid ở đây]
+\``` (Nhớ đóng block bằng 3 dấu nháy)
+```
+
+---
+
+## 🎨 2. Các mẫu biểu đồ "đẹp" nhất
+
+### A. Biểu đồ luồng (Flowchart - `graph TD`)
+Dùng để vẽ kiến trúc app hoặc luồng logic code.
+- **Tip**: Dùng `subgraph` để nhóm các module lại.
+- **Tip**: Sử dụng các hình dáng nút khác nhau: `[Nút vuông]`, `(Nút tròn)`, `([Nút elip])`, `[[Nút sub-process]]`.
+
+```mermaid
+graph TD
+    A(["Start"]) --> B[["Process"]]
+    B --> C{"Condition"}
+    C -- "Yes" --> D["Success"]
+    C -- "No" --> E["Retry"]
+    
+    style A fill:#4CAF50,color:#fff
+    style D fill:#2196F3,color:#fff
+    style E fill:#F44336,color:#fff
+```
+
+### B. Biểu đồ tuần tự (Sequence Diagram - `sequenceDiagram`)
+Mô tả cách các Class/Service tương tác qua lại.
+```mermaid
+sequenceDiagram
+    participant UI as SwiftUI View
+    participant Store as ChatSessionStore
+    participant API as OpenAI API
+    
+    UI->>Store: Send Message
+    Store->>API: POST /chat/completions
+    API-->>Store: Return Response
+    Store-->>UI: Update @Published List
+```
+
+### C. Biểu đồ Gantt (Tiến độ - `gantt`)
+Rất tốt để theo dõi Roadmap dự án.
+```mermaid
+gantt
+    title Kế hoạch Development 2026
+    section Thiết kế
+    UI Design           :done,    des1, 2026-03-01, 7d
+    Architecture        :active,  des2, 2026-03-08, 10d
+```
+
+---
+
+## ✨ 3. Mẹo làm đẹp (Styling Level "Premium")
+
+Để biểu đồ không bị "phẳng" và nhạt nhòa, bạn có thể thêm các dòng lệnh **Style** ở cuối khối Mermaid:
+
+- `style ID fill:#hex,stroke:#hex,stroke-width:2px,rx:10,ry:10`
+  - `fill`: Màu nền (dùng mã màu HSL hoặc HEX).
+  - `stroke`: Màu viền.
+  - `rx`, `ry`: Độ bo góc cho nút.
+- `linkStyle default stroke:#888,stroke-width:1px` : Làm các đường nối thanh mảnh và sang trọng hơn.
+
+---
+
+## 🛠️ 4. Quy trình làm việc đề xuất
+
+1.  **Draft**: Sử dụng [Mermaid Live Editor](https://mermaid.live/) để kéo thả hoặc gõ mã thử nghiệm.
+2.  **Paste**: Copy mã từ Live Editor vào file `.md` của dự án bạn.
+3.  **Command**: Gọi tôi bằng câu lệnh: **"Hãy render file MD này thành Artifact bản đẹp"**.
+
+---
+
+## 🛑 5. Những nguyên tắc vàng (Anti-Error)
+Để tránh các lỗi render phổ biến ("Lexical error" hoặc "Syntax error"), hãy luôn tuân thủ 3 nguyên tắc sau:
+
+### ✅ Luôn dùng Dấu ngoặc kép `"` cho nhãn (Labels)
+Nếu nhãn của bạn chứa **Emoji**, **ký tự đặc biệt** (như `[`, `]`, `(`, `)`, `:`, `-`) hoặc **khoảng trắng**, hãy luôn bọc nó trong `""`.
+- ❌ Sai: `User([👤 User])`
+- ✅ Đúng: `User(["👤 User"])`
+
+### ✅ Dùng `<br/>` thay cho `\n` để xuống dòng
+Ký tự `\n` thường gây lỗi trong một số môi trường render. Hãy dùng thẻ HTML `<br/>`.
+- ❌ Sai: `DT[[ChatDebugTool\n⚠️ Chỉ là Debug View]]`
+- ✅ Đúng: `DT[["ChatDebugTool<br/>⚠️ Chỉ là Debug View"]]`
+
+### ✅ Bọc ID của các Participant (Sequence Diagram)
+Trong biểu đồ tuần tự, hãy dùng dấu nháy kép cho tên Participant nếu có ký tự đặc biệt.
+- ❌ Sai: `participant V as View (onAppear)`
+- ✅ Đúng: `participant V as "View (onAppear)"`
+
+---
+*Lưu ý: Bạn không cần lo lắng về việc cài đặt thư viện. Tôi đã tích hợp sẵn trình biên dịch Mermaid tối ưu nhất cho các bản Artifact của bạn.*
+
+```
+</file>
+
+<file path="GraphPreview/Example_Audit_With_Charts.md">
+```md
+# 📊 Example: AIChat Audit (Với Biểu Đồ Mermaid)
+
+> [!NOTE]
+> **Đây là file ví dụ để bạn tham khảo cách viết mã Mermaid kết hợp Markdown.**
+
+---
+
+## 🗺️ Visual Architecture Flow
+Sơ đồ Mermaid vẽ kiến trúc:
+
+```mermaid
+graph TD
+    User(["👤 User Message"]) --> CV[["ChatView<br/>Production UI"]]
+    CV --> CS["AIChatService.shared"]
+    CS --> CSS["ChatSessionStore"]
+    CSS --> CP["ChatSessionPersistence"]
+    
+    subgraph "AI Processing"
+        CS --> CPB["ChatPromptBuilder"]
+        CPB --> LLM[("OpenAI/Claude API<br/>gpt-4.1-nano")]
+    end
+    
+    subgraph "Storage"
+        CP --> JSON[("JSON Files<br/>Atomic Writes")]
+    end
+    
+    style CV fill:#1565C0,color:#fff
+    style LLM fill:#6A1B9A,color:#fff
+    style JSON fill:#2E7D32,color:#fff
+```
+
+---
+
+## 📈 Dự Án Tiến Độ (Project Roadmap)
+Ví dụ về biểu đồ Gantt:
+
+```mermaid
+gantt
+    title AIChat Implementation Roadmap
+    dateFormat  YYYY-MM-DD
+    section Hoàn Thành
+    "Bước 1 - Models & Store"           :done,    des1, 2026-03-24, 2026-03-25
+    "Bước 2 - Service Refactor"         :done,    des2, 2026-03-25, 2026-03-26
+    "Bước 5 - Relationship Store Integ"  :done,    des5, 2026-03-27, 2026-03-28
+    section Đang Xử Lý
+    "Bước 3 - Prompt Optimization"      :active,  des3, 2026-03-28, 1d
+    section Chưa Bắt Đầu
+    "Bước 4 - Production ChatView"      :         des4, 2026-03-29, 3d
+```
+
+---
+
+## 🏔️ Tình Trạng Tổng Quan
+
+Proposal đề ra 5 bước. Hiện tại **4/5 bước đã hoàn thành**, bước còn lại (ChatView) chưa tồn tại.
+
+---
+*File này được tạo tự động để làm mẫu cho bộ hướng dẫn tạo Chart.*
+
+```
+</file>
+
 <file path="docs/decisions/20260426-adaptive-sidebar-scrolling.md">
 ```md
 # Adaptive Sidebar Scrolling Architecture
@@ -2336,7 +2509,7 @@ const modal = BaseFormModal.open({
 | `currentWorkspace` | `object \| null` | Workspace đang active |
 | `currentMode` | `string` | Mode hiện tại: `read`, `edit`, `comment`, `collect` |
 | `commentMode` | `string` | Sub-mode cho comment: `view`, `add` |
-| `settings` | `object` | Theme, font, zoom, các tùy chọn explorer |
+| `settings` | `object` | Theme, font, zoom, explorer options, **Publishing (Worker URL, Secret, Data)** |
 | `forceSyncContext` | `object \| null` | Dữ liệu vị trí ép buộc dùng cho SyncService (dùng khi Edit Selection) |
 
 ### `AppState.loadPersistentState()`
@@ -2450,7 +2623,7 @@ Thứ tự khởi động nghiêm ngặt — **không thay đổi thứ tự**:
 
 ---
 
-*Document — 2026-04-29 (Updated showToast features)*
+*Document — 2026-04-30 (Added Publishing state)*
 
 ```
 </file>
@@ -2497,6 +2670,7 @@ Tạo button chuẩn (`ds-btn`) với nhiều biến thể.
 **Helpers**:
 - `btn.setLoading(isLoading)`: Hiển thị/ẩn spinner loading và vô hiệu hóa nút.
 - `btn.setIcon(iconName)`: Cập nhật icon leading mà không cần render lại toàn bộ.
+- `btn.setLabel(newLabel)`: Cập nhật văn bản hiển thị của nút một cách nhanh chóng.
 
 ### `createSegmentedControl(options)`
 Tạo bộ điều khiển phân đoạn (`ds-segmented-control`) với chỉ báo trượt.
@@ -2527,26 +2701,42 @@ Tạo menu thả xuống (dropdown) hoặc menu ngữ cảnh được "neo" vào
 **Smart Behavior**: Nếu `anchor` là một `ds-combo-btn`, hàm này sẽ tự động quản lý class `.is-open` và xử lý logic toggle (đóng menu khi nhấn lại vào nút).
 
 ### `createInput(options)`
-Tạo ô nhập liệu chuẩn (`ds-input`) hỗ trợ các trạng thái hover/focus/error.
+Tạo ô nhập liệu chuẩn (`ds-input`) sử dụng **InputComponent** (Atom), hỗ trợ đầy đủ các trạng thái hover/focus/error và tích hợp sẵn chỉ báo trạng thái.
 - `label`: Nhãn hiển thị phía trên input (tự động bọc trong `.ds-form-field`).
+- `description`: Hướng dẫn chi tiết, hiển thị dưới dạng **interactive tooltip** khi di chuột vào nhãn (label).
 - `type`: `text` | `password` | `number`... (mặc định: `text`).
 - `placeholder`: Văn bản gợi ý.
 - `value`: Giá trị mặc định.
+- `variant`: `default` | `error` | `success` | `warning` (điều khiển màu viền).
+- `status`: `{ text, variant, icon }` — Cấu hình thông báo trạng thái bên dưới.
 - `onInput` / `onChange`: Các callback sự kiện.
 
-**Smart Component**: Nếu có `label`, hàm trả về một container (`.ds-form-field`) nhưng vẫn proxy thuộc tính `.value` và phương thức `.focus()` từ input gốc.
+**Public API** (trên container trả về):
+- `.value`: Getter/Setter cho giá trị input.
+- `.focus()`: Focus vào input.
+- `.setStatus(data)`: Cập nhật thông báo trạng thái (`text`, `variant`, `icon`, `isLoading`).
+- `.setLoading(isLoading, text)`: Chuyển đổi trạng thái chờ xử lý.
+- `.setVariant(variant)`: Thay đổi màu sắc đường viền input.
 
 ### `createInputGroup(options)`
-Tạo nhóm nhập liệu có đính kèm nút hành động ở phía bên phải.
-- `label`: Nhãn hiển thị (tương tự `createInput`).
-- `inputOptions`: Các tùy chọn cho input bên trong.
-- `action`: `{ icon, onClick, title }` — Cấu hình nút hành động.
+Tạo nhóm nhập liệu (`ds-input-group`) có đính kèm nút hành động ở phía bên phải. Kế thừa toàn bộ API của `createInput`.
+- `action`: `{ icon, onClick, title }` — Cấu hình nút hành động (sử dụng `Button` atom).
 
 ### `createInlineMessage(options)`
-Tạo thông báo nội khối (`ds-inline-message`) cho các ghi chú hoặc trạng thái.
+Tạo thông báo nội khối (`ds-inline-message`) cho các thông tin quan trọng hoặc cảnh báo mức độ cao.
 - `text`: Nội dung thông báo.
 - `variant`: `info` | `success` | `warning` | `error`.
 - `icon`: Tên icon từ registry (mặc định theo variant).
+
+### `createStatusBadge(options)`
+Tạo chỉ báo trạng thái (Status Badge) siêu tối giản (Dot + Label) cho các thông tin trạng thái phụ trợ.
+- `text`: Nội dung văn bản.
+- `variant`: `info` | `success` | `warning` | `error` / `danger`.
+- `className`: Class CSS bổ sung.
+
+**Public API**:
+- `.setText(newText)`: Cập nhật văn bản.
+- `.setVariant(newVariant)`: Cập nhật màu sắc dot.
 
 ### `createPopoverShield(onClose)`
 Tạo lớp chắn bảo vệ (shield) cho các menu nổi, hỗ trợ click-outside và Escape để đóng.
@@ -2608,7 +2798,7 @@ DesignSystem.createSegmentedControl({
 
 ---
 
-*Document — 2026-04-30*
+*Document — 2026-05-01*
 
 ```
 </file>
@@ -3148,7 +3338,13 @@ Hệ thống copy nâng cao hỗ trợ xuất nội dung sang các ứng dụng 
 - **Copy for Google Docs**: Chuyển đổi HTML sang định dạng Rich Text có kèm style nhúng (inline) và biểu đồ rasterized chất lượng cao (2x scale). Hỗ trợ hiển thị Progress Bar trong quá trình xử lý.
 - **Copy as File**: Sao chép trực tiếp file vật lý vào clipboard (chỉ Electron).
 - **Copy Absolute Path**: Sao chép đường dẫn tuyệt đối của file.
-- **Publish to Handoff**: Mở `PublishConfigComponent` để cấu hình Slug/Password trước khi xuất bản tài liệu lên web.
+- **Publish to Worker**: Mở `PublishConfigComponent` để cấu hình Slug/Password trước khi xuất bản tài liệu lên Cloudflare Worker.
+
+### 🌐 Hệ thống Publish Button (Floating Action)
+Nút **Publish** trong chế độ Read có hành vi thông minh dựa trên trạng thái của tài liệu:
+- **Chưa xuất bản**: Hiển thị dưới dạng **Button đơn** tiêu chuẩn (`variant: subtitle`).
+- **Đã xuất bản**: Chuyển sang dạng **ComboButton** (`variant: subtitle`). Nút chính là "Re-publish", nút phụ mở ra menu quản lý bài viết (Xem link, Copy link, Unpublish).
+- **Phản hồi tức thì**: Sử dụng cơ chế `await` trong logic Unpublish để đảm bảo UI quay về trạng thái ban đầu ngay khi dữ liệu được xóa thành công.
 
 ### 🔄 Quy trình Copy for Google Docs
 1. Trích xuất HTML từ DOM (`.md-content-inner`) để lấy nội dung đã xử lý.
@@ -3249,7 +3445,7 @@ Mỗi component tự nullify `activeInstance` qua `onClose` callback khi bị đ
 
 ---
 
-*Document — 2026-04-30 (Updated Publish Configuration and Input Groups)*
+*Document — 2026-05-01 (Improved Publish Workflow & Interactive UI)*
 
 ```
 </file>
@@ -3453,6 +3649,79 @@ Cập nhật nội dung bản đồ khi tài liệu thay đổi.
 ```
 </file>
 
+<file path="docs/function-docs/PUBLISH_COMPONENTS.md">
+```md
+# Publish Components (`renderer/js/components/organisms/`)
+
+> Bộ 3 thành phần UI quản lý trải nghiệm xuất bản và cấu hình Edge Worker.
+
+---
+
+## Kiến trúc
+
+```
+SettingsComponent (Trigger)
+    ↓
+PublishSettingsFormComponent   — [Cấu hình hạ tầng: URL, Secret]
+    ↓
+PublishConfigComponent         — [Cấu hình bài viết: Slug, Password, Unpublish]
+    ↓
+PublishManagerComponent        — [Quản lý tổng thể: List, Rename, Delete All]
+```
+
+---
+
+## PublishConfigComponent
+
+Popover điều khiển việc xuất bản một file cụ thể. Tích hợp trực tiếp vào thanh toolbar của Markdown Viewer.
+
+### `init()` & `_checkSlug(slug)`
+- **Smart Slug**: Tự động chuẩn hóa slug khi gõ.
+- **Live Validation**: Debounced 500ms để kiểm tra tính khả dụng của slug trên Worker.
+- **Overwrite Warning**: Tự động chuyển đổi nút sang "Overwrite & Publish" nếu phát hiện slug bị trùng.
+
+### `Stale Check (Logic khởi tạo)`
+Khi mở bảng, nếu App ghi nhận file đã đăng, nó sẽ tự đối chiếu với server. Nếu slug không còn tồn tại trên Cloudflare, App sẽ tự động xóa trạng thái cục bộ (**Self-Healing**).
+
+---
+
+## PublishManagerComponent
+
+Modal quản lý tập trung toàn bộ tài liệu đã xuất bản trên Cloudflare KV.
+
+### `_loadAndRender()`
+1. Gọi `PublishService.listAllPublished()` để lấy danh sách từ Edge.
+2. Hiển thị danh sách Slugs kèm các nút hành động nhanh.
+
+### Các hành động:
+- **Rename (Edit)**: Prompt nhập tên mới và thực hiện `renameSlug`.
+- **Delete (Trash)**: Xác nhận và xóa vĩnh viễn nội dung khỏi KV.
+
+---
+
+## PublishSettingsFormComponent
+
+Form cấu hình hạ tầng cho người dùng (Endpoint URL và Admin Secret).
+
+- **Persistence**: Lưu trữ trực tiếp vào `localStorage` thông qua `SettingsService`.
+- **Validation**: Yêu cầu đầy đủ URL và Secret để kích hoạt engine xuất bản tự lưu trữ.
+
+---
+
+## Cơ chế Đồng bộ trạng thái (State Sync)
+
+Hệ thống sử dụng các callback và cơ chế `await` để đảm bảo UI luôn nhất quán:
+1. **Callback `onPublished`**: Khi xuất bản hoặc gỡ bài từ `PublishConfigComponent`, nó sẽ kích hoạt callback để `MarkdownViewerComponent` vẽ lại các nút hành động nổi.
+2. **Await Unpublish**: Các thao tác gỡ bài đều được `await` để đảm bảo dữ liệu đã được xóa sạch trong `AppState` trước khi UI thực hiện re-render.
+3. **Global Refresh**: Mọi thay đổi về Slug (Rename/Delete) trong `PublishManagerComponent` đều kích hoạt sự kiện cập nhật để các bảng cấu hình đang mở có thể đối chiếu lại dữ liệu ngay lập tức.
+
+---
+
+*Document — 2026-04-30*
+
+```
+</file>
+
 <file path="docs/function-docs/PUBLISH_HANDOFF.md">
 ```md
 # Publish to Handoff Feature
@@ -3541,6 +3810,170 @@ IPC Handler (Main)      Direct Fetch API
 ```
 </file>
 
+<file path="docs/function-docs/PUBLISH_SERVICE.md">
+```md
+# Publish Service (`renderer/js/services/publish-service.js`)
+
+> Service trung tâm quản lý logic xuất bản tài liệu lên Cloudflare Workers và Handoff.host.
+
+---
+
+## Mục đích
+
+Giải quyết bài toán đưa tài liệu Markdown từ môi trường local lên Web công khai. Service hỗ trợ hai luồng chính:
+1. **Cloudflare Worker (Ưu tiên)**: Xuất bản tự lưu trữ (Self-hosted) với khả năng tùy chỉnh Slug, bảo mật bằng mật khẩu và quản lý vòng đời bài viết.
+2. **Legacy Handoff**: Xuất bản lên hạ tầng Handoff.host thông qua API Token.
+
+---
+
+## Key Functions
+
+### `publish(options = {})`
+Hàm thực thi xuất bản chính. Tự động nhận diện engine (Worker vs Legacy) dựa trên cấu hình trong `AppState.settings`.
+
+**Logic luồng Worker:**
+1. Đọc nội dung document (hỗ trợ cả Draft qua `DraftModule`).
+2. Gửi payload tới Server Proxy (`POST /api/worker-publish`) kèm theo `Admin Secret`.
+3. Nhận phản hồi và lưu thông tin trạng thái bài đăng vào `AppState.settings.publishData`.
+
+### `checkSlugAvailability(slug)`
+Kiểm tra xem một Slug đã tồn tại trên Worker KV hay chưa.
+- **Return**: `Promise<boolean>` (true nếu Slug có sẵn/hợp lệ).
+- **Flow**: Gọi trực tiếp tới endpoint `/check-slug` của Worker.
+
+### `renameSlug(oldSlug, newSlug)`
+Thay đổi URL của một tài liệu đã xuất bản.
+1. Gọi `/rename` trên Worker để di chuyển dữ liệu KV.
+2. Cập nhật lại toàn bộ `publishData` cục bộ để ánh xạ sang Slug mới.
+
+### `unpublish(filePath)`
+Gỡ bỏ tài liệu khỏi Web.
+1. Gửi lệnh `DELETE` tới Worker để xóa dữ liệu trên KV.
+2. Xóa trạng thái xuất bản cục bộ của file đó.
+
+### `listAllPublished()`
+Lấy danh sách tất cả các Slugs đang active trên Worker của người dùng.
+
+### `copyAsHtml(fileName, html)`
+Tạo và sao chép vào clipboard một bản HTML độc lập (**Standalone Bundle**).
+- **Fidelity**: Tự động nhúng toàn bộ Design System Tokens và CSS của App vào file HTML.
+- **Independence**: File xuất ra có khả năng hoạt động offline 100% với đầy đủ style cho Code Blocks, Tables và Mermaid.
+
+---
+
+## Tiêu chuẩn Visual Parity (Độ trung thực hiển thị)
+
+Dự án cam kết độ trung thực 100% giữa Editor và bản xuất bản (Live/Offline):
+1. **DOM Hierarchy**: Phải tuân thủ nghiêm ngặt cấu trúc `#md-content > .md-content > .md-content-inner`.
+2. **Atomic Blocks**: Mọi đoạn văn bản phải nằm trong `.md-block > .md-line`.
+3. **Premium Blocks**: Các thành phần đặc biệt (Code, Table, Mermaid) sử dụng hệ thống Glassmorphism (`backdrop-filter`, `transparent background`).
+4. **Mermaid Visibility**: Ép chuẩn hiển thị văn bản màu trắng và nét vẽ mờ (white alpha) để tương thích với theme tối của web.
+
+---
+
+## Cấu trúc Dữ liệu (Publish Info)
+
+Trạng thái xuất bản của mỗi file được lưu trong `AppState.settings.publishData` theo cấu trúc:
+```js
+{
+  "/path/to/file.md": {
+    "slug": "my-document",
+    "url": "https://worker.dev/my-document",
+    "updatedAt": "2026-05-01T...",
+    "type": "worker" // hoặc "legacy"
+  }
+}
+```
+
+---
+
+## Debugging
+
+- **Log Tag**: `[PublishService]`
+- **Server Trace**: Kiểm tra log tại server Node.js cho các yêu cầu proxy `/api/worker-publish`.
+
+---
+
+*Document — 2026-05-01*
+
+```
+</file>
+
+<file path="docs/function-docs/PUBLISH_WORKER.md">
+```md
+# Publishing Worker (`cf-publish-worker/`)
+
+> Công cụ xuất bản tài liệu Markdown lên Edge (Cloudflare Workers) với hiệu ứng thị giác Premium.
+
+---
+
+## Kiến trúc Runtime
+
+Worker hoạt động dựa trên 3 thành phần chính:
+1. **Asset Router (`index.js`)**: 
+    - Ưu tiên phục vụ các tài nguyên tĩnh từ thư mục `./public` (ví dụ: `publish.css`).
+    - Các yêu cầu không phải asset sẽ được chuyển hướng sang trình xử lý `serve.js` để lấy nội dung Markdown từ KV.
+2. **Renderer (`renderer.js`)**: 
+    - Sử dụng `marked` kết hợp với `highlight.js` và `mermaid`.
+    - **Fidelity Lock**: Tái tạo chính xác cấu trúc DOM nguyên tử (`.md-block > .md-line`) để đảm bảo style tương thích 100% với App.
+3. **Shell Generator (`shell.js`)**: 
+    - Tạo khung HTML hoàn chỉnh bao gồm các thẻ Meta, Font (Inter, Roboto Mono) và các thư viện cần thiết (Mermaid).
+
+---
+
+## Asset Serving Logic
+
+Mọi tài nguyên tĩnh trong `/public` đều được ánh xạ thông qua binding `ASSETS`:
+
+```javascript
+// index.js priority logic
+const asset = await env.ASSETS.fetch(request);
+if (asset.status !== 404) return asset;
+
+// Fallback to document serving
+return handleServe(request, env);
+```
+
+---
+
+## Visual Parity Standards
+
+Để đạt được hiệu ứng Premium, Worker phải tuân thủ:
+
+### 1. CSS Design Tokens
+File `public/publish.css` chứa bản sao chính xác các tokens từ App:
+- `--ds-bg-main`: `#131313`
+- `--ds-accent`: `#ffbf48`
+- Hệ thống màu `white-alpha` cho viền và nền mờ.
+
+### 2. Glassmorphism Blocks
+Mọi block đặc biệt phải có:
+```css
+background: transparent !important;
+backdrop-filter: blur(40px);
+border: 1px solid var(--ds-white-a08);
+```
+
+### 3. Mermaid Optimization
+Worker tự động override các style mặc định của Mermaid để đảm bảo chữ luôn trắng và các đường nối mờ ảo, đồng bộ với dark theme.
+
+---
+
+## Deployment
+
+Sử dụng Wrangler để triển khai:
+```bash
+cd cf-publish-worker
+npm run deploy
+```
+
+---
+
+*Document — 2026-05-01*
+
+```
+</file>
+
 <file path="docs/function-docs/README.md">
 ```md
 # Function Documentation Index
@@ -3578,7 +4011,9 @@ Tài liệu các module và function quan trọng của MDpreview.
 | [SIDEBAR_LEFT.md](SIDEBAR_LEFT.md) | Organism quản lý khung giao diện thanh bên trái (Explorer, Search, Footer) |
 | [SCROLL_CONTAINER.md](SCROLL_CONTAINER.md) | Molecule quản lý vùng cuộn thông minh với mask-fade và dynamic safe zone |
 | [PROJECT_MAP.md](PROJECT_MAP.md) | Bản đồ thu nhỏ phản chiếu tài liệu (Mini-map) |
-| [PUBLISH_HANDOFF.md](PUBLISH_HANDOFF.md) | Quy trình xuất bản tài liệu với Slug và Mật khẩu tùy chỉnh. |
+| [PUBLISH_SERVICE.md](PUBLISH_SERVICE.md) | Centralized service for Worker & Handoff publishing (Lifecycle, Rename, Delete). |
+| [PUBLISH_COMPONENTS.md](PUBLISH_COMPONENTS.md) | UI components for publish config, global management and settings. |
+| [PUBLISH_WORKER.md](PUBLISH_WORKER.md) | Cloudflare Worker architecture, asset serving and fidelity standards. |
 | [RECENTLY_VIEWED.md](RECENTLY_VIEWED.md) | Quản lý lịch sử tập tin vừa mở và hiển thị indicator ẩn |
 | [SEARCH_PALETTE.md](SEARCH_PALETTE.md) | Tìm kiếm nhanh toàn cục (Quick Open) với Debounce, Smart Path và Recent Files |
 | [SEARCH_SERVICE.md](SEARCH_SERVICE.md) | Bộ não fuzzy search và scoring engine hỗ trợ tìm kiếm file/folder |
@@ -3624,7 +4059,7 @@ if (EditorModule.isDirty()) {
 
 ---
 
-*Last Updated — 2026-04-30*
+*Last Updated — 2026-05-01*
 
 ```
 </file>
@@ -5607,5 +6042,644 @@ Khi dùng `electron-builder` hoặc `electron-forge`, cần khai báo để nati
 - [ ] Với file generated (buffer): xác nhận temp file được cleanup sau 60s
 - [ ] Test case file path có space hoặc ký tự Unicode (tiếng Việt) — `electron-clipboard-ex` xử lý được nhưng nên verify
 - [ ] Build thử trên cả Windows và macOS nếu app cross-platform
+```
+</file>
+
+<file path="docs/function-idea-docs/cf-publish-implementation-plan.md">
+```md
+# Implementation Plan: Self-Hosted Publish Engine (Cloudflare Workers + KV)
+
+**Project:** MDpreview — Thay thế Handoff bằng publish engine tự quản lý  
+**Date:** 2026-04-30  
+**Status:** Draft  
+**Scope:** Backend Worker, Storage, Frontend integration, Migration
+
+---
+
+## 1. Tổng quan kiến trúc
+
+Giải pháp thay thế Handoff.host bằng một stack tự kiểm soát hoàn toàn, tận dụng lại engine render đã có sẵn của MDpreview.
+
+```
+MDpreview App (Electron / Web)
+         │
+         │  POST /publish  { slug, content (md), password?, assets[] }
+         ▼
+Cloudflare Worker (Edge)
+         │
+         ├─ Validate slug + password
+         ├─ Run renderWithLineNumbers (marked + hljs) — reuse logic từ server/routes/render.js
+         ├─ Inject vào HTML shell (CSS, Mermaid, fonts)
+         │
+         ├─ KV Store ──► { "pub:{slug}:html"   → rendered HTML }
+         │                { "pub:{slug}:meta"   → { password_hash, createdAt, updatedAt, filePath } }
+         │                { "pub:{slug}:assets" → { "img/foo.png": base64 } }
+         │
+         └─ Response: { url: "https://pub.yourdomain.com/{slug}" }
+```
+
+**Domain layout đề xuất:**
+- Worker API: `https://api-pub.yourdomain.com` (hoặc dùng route trên Workers.dev)
+- Published pages: `https://pub.yourdomain.com/{slug}`
+- Có thể dùng cùng một Worker xử lý cả upload lẫn serve.
+
+---
+
+## 2. Cấu trúc thư mục dự án Worker
+
+```
+cf-publish-worker/
+├── src/
+│   ├── index.js              ← Entry point, router chính
+│   ├── renderer.js           ← Port từ server/routes/render.js (marked + hljs)
+│   ├── shell.js              ← HTML shell template
+│   ├── handlers/
+│   │   ├── publish.js        ← POST /publish
+│   │   ├── serve.js          ← GET /{slug}
+│   │   ├── delete.js         ← DELETE /publish/{slug}
+│   │   └── auth.js           ← Password check helper
+│   └── utils/
+│       ├── hash.js           ← bcrypt-lite / SHA-256 password hash
+│       └── slug.js           ← Validate slug format
+├── wrangler.toml
+└── package.json
+```
+
+---
+
+## 3. Chi tiết từng Phase
+
+### Phase 1 — Cloudflare Worker Core
+
+**Mục tiêu:** Worker hoạt động độc lập, nhận upload và serve trang.
+
+#### 3.1 Thiết lập `wrangler.toml`
+
+```toml
+name = "mdpreview-publish"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+[[kv_namespaces]]
+binding = "PUB_STORE"
+id = "<KV_NAMESPACE_ID>"
+
+[vars]
+ADMIN_SECRET = ""   # Đặt qua wrangler secret put ADMIN_SECRET
+```
+
+#### 3.2 Router chính (`src/index.js`)
+
+```javascript
+import { handlePublish }  from './handlers/publish.js';
+import { handleServe }    from './handlers/serve.js';
+import { handleDelete }   from './handlers/delete.js';
+
+export default {
+  async fetch(request, env) {
+    const url  = new URL(request.url);
+    const path = url.pathname;
+
+    // CORS preflight
+    if (request.method === 'OPTIONS') return corsHeaders();
+
+    // API Routes
+    if (request.method === 'POST' && path === '/publish')
+      return handlePublish(request, env);
+
+    if (request.method === 'DELETE' && path.startsWith('/publish/'))
+      return handleDelete(request, env, path.split('/')[2]);
+
+    // Serve published page
+    if (request.method === 'GET' && path !== '/')
+      return handleServe(request, env, path.slice(1));
+
+    return new Response('MDpreview Publish Worker', { status: 200 });
+  }
+};
+```
+
+#### 3.3 Renderer (`src/renderer.js`)
+
+Port trực tiếp logic từ `server/routes/render.js` vào Worker runtime. Lưu ý: Worker edge runtime hỗ trợ đầy đủ `marked` và `highlight.js` — cả hai đều là pure JS, không cần Node.js API.
+
+```javascript
+import { marked }   from 'marked';
+import hljs         from 'highlight.js';
+
+marked.setOptions({
+  highlight(code, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try { return hljs.highlight(code, { language: lang }).value; }
+      catch (_) {}
+    }
+    return hljs.highlightAuto(code).value;
+  },
+  langPrefix: 'hljs language-'
+});
+
+// Giữ nguyên hàm renderWithLineNumbers từ server/routes/render.js
+export function render(content) {
+  return marked.parse(content); // simplified — hoặc port đầy đủ renderWithLineNumbers nếu cần line sync
+}
+```
+
+> **Quyết định:** Phase 1 dùng `marked.parse()` đơn giản. Việc port toàn bộ `renderWithLineNumbers` (kèm `data-line-start`) là optional — chỉ cần thiết nếu muốn publish page hỗ trợ scroll-sync trong tương lai.
+
+#### 3.4 HTML Shell (`src/shell.js`)
+
+Shell phải tái hiện đúng CSS của MDpreview để bản publish trông giống hệt viewer.
+
+```javascript
+export function buildShell({ slug, html, title = 'Document' }) {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${escapeHtml(title)}</title>
+  <!-- Fonts — giữ nguyên như createStandaloneBundle hiện tại -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- MDpreview Design System CSS — host trên Cloudflare R2 hoặc CDN riêng -->
+  <link rel="stylesheet" href="https://assets.yourdomain.com/publish/v1/publish.css">
+  <!-- Mermaid — cần client-side vì Worker không có DOM -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({ startOnLoad: true, theme: 'neutral' });</script>
+</head>
+<body class="md-publish-body">
+  <div class="md-publish-container">
+    <div class="md-content">${html}</div>
+  </div>
+  <script>
+    // Syntax highlight fallback nếu hljs chưa chạy server-side
+    document.querySelectorAll('pre code').forEach(el => {
+      if (window.hljs) hljs.highlightElement(el);
+    });
+  </script>
+</body>
+</html>`;
+}
+```
+
+**`publish.css`** — File này được build từ CSS hiện tại của MDpreview (extract `markdown.css` + `tokens.css` + `hljs theme`), bundle thành 1 file tĩnh, upload lên Cloudflare R2 hoặc bất kỳ CDN nào. Đây là file **versioned** (`v1/publish.css`, `v2/publish.css`...) để kiểm soát breaking change.
+
+#### 3.5 Handler Upload (`src/handlers/publish.js`)
+
+```javascript
+import { render }    from '../renderer.js';
+import { buildShell } from '../shell.js';
+import { hashPassword, checkAdminSecret } from './auth.js';
+import { isValidSlug } from '../utils/slug.js';
+
+export async function handlePublish(request, env) {
+  // 1. Authenticate — dùng ADMIN_SECRET header từ app
+  if (!checkAdminSecret(request, env))
+    return json({ error: 'Unauthorized' }, 401);
+
+  const body = await request.json();
+  const { slug, content, password, title, filePath } = body;
+
+  // 2. Validate slug
+  if (!isValidSlug(slug))
+    return json({ error: 'Invalid slug. Only a-z, 0-9, hyphens allowed.' }, 400);
+
+  // 3. Render markdown → HTML
+  const renderedHtml = render(content);
+  const fullHtml     = buildShell({ slug, html: renderedHtml, title });
+
+  // 4. Hash password nếu có
+  const passwordHash = password ? await hashPassword(password) : null;
+
+  // 5. Lưu vào KV
+  const meta = {
+    slug,
+    title,
+    filePath,
+    passwordHash,
+    createdAt: (await env.PUB_STORE.get(`pub:${slug}:meta`))
+                 ? JSON.parse(await env.PUB_STORE.get(`pub:${slug}:meta`)).createdAt
+                 : new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  await Promise.all([
+    env.PUB_STORE.put(`pub:${slug}:html`, fullHtml),
+    env.PUB_STORE.put(`pub:${slug}:meta`, JSON.stringify(meta)),
+  ]);
+
+  const publicUrl = `https://pub.yourdomain.com/${slug}`;
+  return json({ success: true, url: publicUrl, updatedAt: meta.updatedAt });
+}
+```
+
+#### 3.6 Handler Serve (`src/handlers/serve.js`)
+
+```javascript
+export async function handleServe(request, env, slug) {
+  const metaRaw = await env.PUB_STORE.get(`pub:${slug}:meta`);
+  if (!metaRaw) return new Response('Not Found', { status: 404 });
+
+  const meta = JSON.parse(metaRaw);
+
+  // Password-protected page
+  if (meta.passwordHash) {
+    const provided = getPasswordFromRequest(request); // query param hoặc cookie
+    if (!provided) return servePasswordPrompt(slug);
+    const ok = await verifyPassword(provided, meta.passwordHash);
+    if (!ok) return servePasswordPrompt(slug, true); // show error
+  }
+
+  const html = await env.PUB_STORE.get(`pub:${slug}:html`);
+  return new Response(html, {
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'public, max-age=60', // cache 60s ở edge
+    }
+  });
+}
+```
+
+> **Password UX:** Trang password prompt là một HTML nhỏ inline trong Worker (không cần request KV) — form POST slug + password dưới dạng query param, Worker verify rồi set cookie session tạm.
+
+---
+
+### Phase 2 — Asset Handling (Ảnh local)
+
+Đây là điểm cải tiến lớn nhất so với Handoff hiện tại — web version hiện tại không upload được ảnh do giới hạn browser.
+
+#### Chiến lược:
+- Ảnh nhỏ (< 512KB sau base64): Lưu thẳng vào KV cùng slug, inline vào HTML dưới dạng `data:image/...;base64,...`
+- Ảnh lớn (> 512KB): Upload riêng lên **Cloudflare R2**, lưu URL vào meta, thay thế src trong HTML shell.
+
+#### Flow upload ảnh:
+
+```
+MDpreview gatherAssets(html)
+    │
+    ├─ Nhỏ (< 512KB) → base64 → gộp vào payload JSON field "assets"
+    │                             Worker inline thẳng vào <img src="data:...">
+    │
+    └─ Lớn (> 512KB) → Worker nhận binary qua FormData
+                        → PUT vào R2: r2.put(`assets/${slug}/${filename}`, blob)
+                        → URL: https://assets.yourdomain.com/assets/{slug}/{filename}
+```
+
+#### Thay đổi trong `publish.js`:
+
+```javascript
+// Sau khi render HTML, replace img src từ relative path → hosted URL
+function rewriteAssetUrls(html, assets, slug) {
+  return html.replace(/src="([^"]+)"/g, (match, src) => {
+    if (src.startsWith('http') || src.startsWith('data:')) return match;
+    // Tìm trong assets map
+    const asset = assets[src];
+    if (asset?.type === 'inline') return `src="${asset.dataUrl}"`;
+    if (asset?.type === 'r2') return `src="https://assets.yourdomain.com/assets/${slug}/${asset.filename}"`;
+    return match;
+  });
+}
+```
+
+---
+
+### Phase 3 — Thay đổi phía MDpreview App
+
+Đây là phần thay đổi **ít nhất** trong codebase hiện tại, theo nguyên tắc thay đổi một chỗ.
+
+#### 3.1 Thêm config trong SettingsService
+
+```javascript
+// Thêm vào SettingsService — các key mới
+PUBLISH_WORKER_URL:  'publishWorkerUrl',   // https://api-pub.yourdomain.com
+PUBLISH_ADMIN_SECRET: 'publishAdminSecret', // Thay thế handoffToken
+```
+
+Giao diện Settings: Thêm một section "Publish Settings" mới, thay thế section "Handoff Token" hiện tại. Các field:
+- Worker URL (text input)
+- Admin Secret (password input, masked)
+
+#### 3.2 Refactor `publish-service.js`
+
+Thay vì `createStandaloneBundle` (bundle CSS inline vào HTML), service mới chỉ cần gửi raw markdown:
+
+```javascript
+// publish-service.js — NEW flow
+async publish(slug, password) {
+  const content = await this._getRawMarkdown();  // lấy AppState.currentFile raw content
+  const assets  = await this.gatherAssets();     // giữ nguyên logic hiện tại
+  const title   = this._inferTitle(content);
+
+  const payload = {
+    slug,
+    content,      // raw markdown — Worker tự render
+    password,
+    title,
+    filePath: AppState.currentFile,
+    assets,       // { "relative/path.png": { type: "inline", dataUrl: "..." } }
+  };
+
+  const workerUrl = SettingsService.get(SettingsService.PUBLISH_WORKER_URL);
+  const secret    = SettingsService.get(SettingsService.PUBLISH_ADMIN_SECRET);
+
+  const response = await fetch(`${workerUrl}/publish`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Admin-Secret': secret,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return response.json(); // { success, url, updatedAt }
+}
+```
+
+> **Lưu ý:** `gatherAssets()` và logic resolve ảnh local vẫn giữ nguyên. Chỉ thay đổi **destination** — từ FormData upload lên Handoff → JSON payload gửi lên Worker.
+
+#### 3.3 Cập nhật `electron-bridge.js`
+
+Route `publishToHandoff` → `publishToWorker`. Trên Desktop (Electron), không cần proxy qua server nữa vì Worker đã xử lý CORS. Có thể gọi thẳng từ renderer.
+
+```javascript
+// electron-bridge.js
+window.electronAPI = {
+  // ...existing methods...
+  publishToWorker: async (payload) => {
+    // Electron: gọi thẳng Worker URL (không cần IPC proxy)
+    const workerUrl = await ipcRenderer.invoke('get-setting', 'publishWorkerUrl');
+    const secret    = await ipcRenderer.invoke('get-setting', 'publishAdminSecret');
+    const res = await fetch(`${workerUrl}/publish`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': secret },
+      body: JSON.stringify(payload),
+    });
+    return res.json();
+  }
+};
+```
+
+**Web version:** Gọi qua server proxy `/api/worker-publish` (tương tự `/api/handoff/publish` hiện tại) để giữ secret phía server, không expose cho client.
+
+#### 3.4 Cập nhật `server/routes/handoff.js` → `worker-publish.js`
+
+```javascript
+// server/routes/worker-publish.js
+router.post('/worker-publish', async (req, res) => {
+  const { payload, workerUrl } = req.body;
+  const secret = process.env.PUBLISH_ADMIN_SECRET || req.body.secret;
+
+  const response = await fetch(`${workerUrl}/publish`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': secret },
+    body: JSON.stringify(payload),
+  });
+  const result = await response.json();
+  res.json(result);
+});
+```
+
+#### 3.5 Cập nhật `PublishConfigComponent`
+
+UI thay đổi tối thiểu — giữ nguyên form Slug + Password. Chỉ cần:
+- Thay label "Publish to Handoff" → "Publish"
+- Xóa dependency vào `handoffToken` — dùng `publishAdminSecret` thay thế
+- Thêm link "Manage published pages" → mở một modal danh sách (xem Phase 4)
+
+---
+
+### Phase 4 — Publish Manager (Quản lý trang đã publish)
+
+Tính năng mới không có trong Handoff: xem, cập nhật, xóa các trang đã publish.
+
+#### Worker endpoint bổ sung:
+
+```
+GET  /manage               → List tất cả slugs (yêu cầu Admin Secret)
+GET  /manage/{slug}        → Metadata của một trang
+DELETE /publish/{slug}     → Xóa trang
+```
+
+#### KV List pattern:
+
+```javascript
+// Lưu index riêng để list nhanh
+await env.PUB_STORE.put('index:slugs', JSON.stringify([...existingSlugs, slug]));
+```
+
+> **Lưu ý KV limit:** Cloudflare KV `list()` có limit 1000 keys per call — đủ dùng cho hầu hết use case. Nếu vượt quá, dùng cursor pagination.
+
+#### UI trong MDpreview:
+
+Thêm tab "Published" trong `PublishConfigComponent` hoặc một panel riêng trong Settings, hiển thị danh sách:
+
+```
+Slug             | Last Updated       | URL                    | Actions
+-----------------|--------------------|------------------------|------------------
+my-document      | 2026-04-30 06:00   | pub.domain.com/my-doc  | [Open] [Update] [Delete]
+project-notes    | 2026-04-29 14:22   | pub.domain.com/proj... | [Open] [Update] [Delete]
+```
+
+**"Update"** = Publish lại file hiện tại lên slug đã chọn (không cần nhập lại slug).
+
+---
+
+### Phase 5 — `publish.css` Build Pipeline
+
+CSS bundle cho published pages phải độc lập với app và versioned.
+
+#### Các file cần extract từ MDpreview renderer:
+
+| File nguồn | Nội dung cần giữ |
+|---|---|
+| `renderer/css/tokens.css` | Tất cả (Design System tokens) |
+| `renderer/css/markdown.css` | Tất cả (MD content styles) |
+| `renderer/css/hljs-theme.css` | Syntax highlight theme |
+| `renderer/css/fonts.css` | Font declarations (hoặc dùng Google Fonts CDN) |
+
+#### Build command (thêm vào `package.json`):
+
+```json
+"scripts": {
+  "build:publish-css": "cat renderer/css/tokens.css renderer/css/markdown.css renderer/css/hljs-theme.css > cf-publish-worker/public/publish.css && echo Build complete"
+}
+```
+
+Mỗi khi CSS thay đổi có ảnh hưởng đến published page, chạy lệnh này và upload `publish.css` lên R2/CDN, bump version trong `shell.js`.
+
+---
+
+## 4. Checklist triển khai
+
+### Cloudflare Setup
+
+- [ ] Tạo KV Namespace `MDpreview-PUB-STORE` trên Cloudflare Dashboard
+- [ ] `wrangler secret put ADMIN_SECRET` — đặt secret mạnh
+- [ ] Deploy Worker: `wrangler deploy`
+- [ ] (Optional) Tạo R2 bucket `mdpreview-assets` cho ảnh lớn
+- [ ] Bind custom domain `pub.yourdomain.com` → Worker route
+
+### Worker (`cf-publish-worker/`)
+
+- [ ] `src/renderer.js` — port `renderWithLineNumbers` từ `server/routes/render.js`
+- [ ] `src/shell.js` — HTML shell với CSS + Mermaid CDN
+- [ ] `src/handlers/publish.js` — nhận JSON, render, lưu KV
+- [ ] `src/handlers/serve.js` — serve page, xử lý password
+- [ ] `src/handlers/delete.js` — xóa slug khỏi KV
+- [ ] `src/utils/hash.js` — SHA-256 password hash (Web Crypto API — available trong Worker)
+- [ ] `src/utils/slug.js` — validate `/^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$/`
+- [ ] Test với Wrangler local dev: `wrangler dev`
+
+### MDpreview App
+
+- [ ] `renderer/css/` — build `publish.css`, upload lên CDN, update URL trong `shell.js`
+- [ ] `SettingsService` — thêm `publishWorkerUrl`, `publishAdminSecret`
+- [ ] `publish-service.js` — refactor để gửi raw markdown thay vì bundle HTML
+- [ ] `electron-bridge.js` — thêm `publishToWorker`, giữ `publishToHandoff` với deprecation notice
+- [ ] `server/routes/` — thêm `worker-publish.js` route cho web proxy
+- [ ] `server/index.js` — mount route mới
+- [ ] `PublishConfigComponent` — cập nhật UI, xóa Handoff token dependency
+- [ ] `HandoffTokenForm` — đổi thành `PublishSettingsForm` (Worker URL + Admin Secret)
+- [ ] Cập nhật `docsfunction-docsPUBLISHHANDOFF.md` thành `PUBLISH.md`
+
+---
+
+## 5. Migration từ Handoff
+
+Không cần breaking change. Chiến lược:
+
+1. **Song song:** Giữ nguyên Handoff flow trong `electron-bridge.js`. Thêm Worker flow mới. `PublishConfigComponent` detect xem user đang dùng loại nào dựa trên settings (`handoffToken` vs `publishAdminSecret`).
+2. **Deprecation notice:** Nếu detect `handoffToken` còn tồn tại, hiển thị banner "Upgrade to self-hosted publish" trong Settings.
+3. **Remove:** Sau khi confirm ổn định, xóa `handoff.js` route và `HandoffTokenForm`.
+
+---
+
+## 6. So sánh trước/sau
+
+| Tiêu chí | Handoff (hiện tại) | Worker + KV (mới) |
+|---|---|---|
+| Kiểm soát infrastructure | ❌ Bên thứ 3 | ✅ Hoàn toàn tự quản lý |
+| Upload ảnh local (web) | ❌ Bị block bởi browser | ✅ Qua server proxy → Worker |
+| Render fidelity | ⚠️ Bundle CSS inline (drift theo thời gian) | ✅ Versioned `publish.css` từ source |
+| Mermaid diagrams | ⚠️ Pre-rendered trong bundle | ✅ Mermaid CDN client-side (đúng hơn) |
+| Versioning / history | ❌ Không | ✅ `updatedAt` trong meta, có thể mở rộng |
+| Quản lý published pages | ❌ Không | ✅ List / Update / Delete qua Manager UI |
+| Password protection | ✅ Có (qua Handoff) | ✅ Tự implement, kiểm soát hoàn toàn |
+| Chi phí | Phụ thuộc Handoff pricing | ✅ CF KV Free: 100K reads/day, 1K writes/day |
+| Latency | Server Handoff | ✅ Cloudflare Edge (< 50ms toàn cầu) |
+| Offline fallback | ❌ | ⚠️ Cần internet để serve (có thể cache PWA sau) |
+
+---
+
+## 7. Rủi ro và cách xử lý
+
+| Rủi ro | Mức độ | Xử lý |
+|---|---|---|
+| KV size limit 25MB/value | Thấp (MD files nhỏ) | Nếu HTML > 1MB → split assets sang R2 |
+| Mermaid không render SSR | Trung bình | Chấp nhận client-side render qua CDN, đủ cho publish |
+| Worker cold start latency | Thấp | Cloudflare Workers không có cold start thực sự |
+| `marked` version drift giữa app và Worker | Trung bình | Pin cùng version trong `package.json` của cả hai, dùng shared renderer package nếu cần |
+| KV eventually consistent | Thấp | Sau publish, show URL ngay — page sẵn sàng trong < 1s |
+| Admin Secret bị lộ (web client) | Trung bình | Web version luôn proxy qua server, **không bao giờ** expose secret ra browser |
+
+---
+
+*Document — 2026-04-30*
+
+```
+</file>
+
+<file path="docs/user_guide.md">
+```md
+Tôi đã tạo một hướng dẫn chi tiết (User Guide) để bạn có thể thực hiện việc deploy và cấu hình hệ thống Publish mới một cách chuẩn xác nhất.
+
+> [!IMPORTANT]
+> Tài liệu hướng dẫn chi tiết: [CF Publish Engine Deployment Guide](file:///Users/mchisdo/MDpreview/docs/user_guide.md)
+
+### 📌 Các điểm chính trong hướng dẫn:
+1.  **Quy trình Wrangler**: Từng câu lệnh từ `install` -> `login` -> `kv` -> `secret` -> `deploy`.
+2.  **Cấu hình MDpreview**: Cách kết nối App với Worker vừa tạo.
+3.  **Xác minh**: Các bước kiểm tra để đảm bảo hệ thống hoạt động hoàn hảo.
+
+---
+
+### 📄 Nội dung Hướng dẫn (Artifact)
+
+```markdown
+---
+title: Hướng dẫn Triển khai Self-Hosted Publish Engine
+created: 2026-04-30
+status: completed
+---
+
+# Hướng dẫn Triển khai Cloudflare Worker Publish
+
+Tài liệu này hướng dẫn chi tiết các bước để deploy hệ thống xuất bản (Publish Engine) của riêng bạn lên Cloudflare và tích hợp nó vào MDpreview.
+
+## 🎯 Mục tiêu
+- Tự chủ hoàn toàn hạ tầng lưu trữ tài liệu.
+- Tối ưu hiệu năng hiển thị và bảo mật.
+- Hỗ trợ render Mermaid và Highlight.js tại Edge.
+
+## 📋 Bước 1: Triển khai Worker
+
+Mở Terminal và thực hiện các lệnh sau:
+
+### 1.1 Di chuyển vào thư mục Worker
+```bash
+cd /Users/mchisdo/MDpreview/cf-publish-worker
+npm install
+```
+
+### 1.2 Đăng nhập Cloudflare
+```bash
+npx wrangler login
+```
+
+### 1.3 Khởi tạo bộ nhớ lưu trữ (KV Namespace)
+```bash
+npx wrangler kv:namespace create PUB_STORE
+```
+> [!NOTE]
+> Sau khi chạy lệnh này, bạn sẽ nhận được một đoạn mã `id = "..."`. Hãy copy ID này và dán vào file `wrangler.toml` trong thư mục `cf-publish-worker`.
+
+### 1.4 Thiết lập mật khẩu quản trị (Admin Secret)
+Lệnh này tạo mật khẩu để App của bạn có quyền ghi dữ liệu lên Worker:
+```bash
+npx wrangler secret put ADMIN_SECRET
+```
+*Nhập mật khẩu bạn tự chọn và hãy ghi nhớ nó.*
+
+### 1.5 Deploy lên Cloudflare
+```bash
+npm run deploy
+```
+Sau khi hoàn tất, bạn sẽ nhận được URL của Worker (ví dụ: `https://mdpreview-publish.username.workers.dev`).
+
+## 📋 Bước 2: Cấu hình trên MDpreview
+
+1. Mở ứng dụng **MDpreview**.
+2. Truy cập **Settings** -> nhấn nút **Config Publish**.
+3. Điền thông tin:
+   - **Worker URL**: Nhập URL nhận được ở bước 1.5 (ví dụ: `https://mdpreview-publish.username.workers.dev/publish`).
+   - **Admin Secret**: Nhập mật khẩu bạn đã đặt ở bước 1.4.
+4. Nhấn **Save Configuration**.
+
+## 📋 Bước 3: Kiểm tra & Xác minh
+
+1. Chọn một tài liệu Markdown bất kỳ trong App.
+2. Nhấn biểu tượng **Cloud** (Publish) trên thanh công cụ.
+3. Xác nhận dòng chữ *"Self-hosted Worker active"* hiển thị trong form.
+4. Nhấn **Publish Now**.
+5. App sẽ trả về một link (URL). Hãy mở link này trên trình duyệt để tận hưởng kết quả.
+
+## ⚠️ Lưu ý quan trọng
+- **Bảo mật**: Tuyệt đối không chia sẻ `Admin Secret` cho người khác.
+- **KV ID**: Nếu bạn xóa KV trên Dashboard Cloudflare, bạn phải tạo lại và cập nhật ID mới vào `wrangler.toml`.
+- **CSS**: Nếu bạn muốn thay đổi giao diện trang publish, hãy chỉnh sửa file `public/publish.css` trong thư mục Worker và chạy lại `npm run deploy`.
+
+---
+**Last updated:** 2026-04-30
+```
 ```
 </file>

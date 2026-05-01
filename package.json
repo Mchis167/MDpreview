@@ -6,8 +6,9 @@
   "scripts": {
     "start": "electron .",
     "serve": "node server/index.js",
-    "build": "electron-builder --mac",
+    "build": "npm run build:publish-css && electron-builder --mac",
     "build:dir": "electron-builder --mac --dir",
+    "build:publish-css": "node scripts/build-publish-css.js",
     "dev": "electron .",
     "test": "vitest run",
     "lint:css": "stylelint \"renderer/css/**/*.css\"",

@@ -422,6 +422,45 @@ module.exports = { register };
 ```
 </file>
 
+<file path="electron/ipc/worker-publish.js">
+```js
+/**
+ * Worker Publish IPC Handler
+ * Purpose: Handle direct publishing to Cloudflare Worker from the main process
+ */
+function register(ipcMain) {
+  ipcMain.handle('publish-to-worker', async (event, { payload, workerUrl, secret }) => {
+    try {
+      const response = await fetch(`${workerUrl}/publish`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Secret': secret
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      const result = await response.json();
+      if (!response.ok) {
+        return { 
+          success: false, 
+          error: result.error || `Publish failed with status ${response.status}` 
+        };
+      }
+      
+      return { success: true, ...result };
+    } catch (error) {
+      console.error('[WORKER PUBLISH IPC] Error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+}
+
+module.exports = { register };
+
+```
+</file>
+
 <file path="electron/ipc/workspace.js">
 ```js
 const { app } = require('electron');
@@ -629,6 +668,7 @@ ipcMain.on('rebuild-app', () => {
 
 // Register domain IPC handlers
 require('./ipc/handoff').register(ipcMain);
+require('./ipc/worker-publish').register(ipcMain);
 require('./ipc/workspace').register(ipcMain);
 require('./ipc/comments').register(ipcMain);
 require('./ipc/files').register(ipcMain);
@@ -695,6 +735,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   rasterizeSVG: (svg, w, h)       => ipcRenderer.invoke('rasterize-svg', svg, w, h),
   writeClipboardAdvanced: (data)  => ipcRenderer.invoke('write-clipboard-advanced', data),
   publishToHandoff: (options)     => ipcRenderer.invoke('publish-to-handoff', options),
+  publishToWorker: (options)      => ipcRenderer.invoke('publish-to-worker', options),
   isElectron: true,
   
   // Custom

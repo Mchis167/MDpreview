@@ -1,0 +1,273 @@
+/* ============================================================
+   publish-styles.css — Publish-page specific styles.
+   SOURCE FILE — hand-crafted, do not auto-generate.
+
+   This file is combined with tokens.css by:
+     npm run build:publish-css
+   Output: cf-publish-worker/public/publish.css
+   ============================================================ */
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--ds-bg-main);
+    color: var(--ds-text-secondary);
+    font-family: var(--ds-font-family-text);
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+}
+
+.md-publish-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 60px 24px;
+}
+
+/* ── Markdown Content Typography ── */
+.md-render-body {
+    font-size: 15px;
+}
+
+.md-render-body h1,
+.md-render-body h2,
+.md-render-body h3,
+.md-render-body h4,
+.md-render-body h5,
+.md-render-body h6 {
+    color: var(--ds-text-inverse);
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 1.25rem;
+    margin-top: 2.5rem;
+}
+
+.md-render-body h1 {
+    font-size: 32px;
+    margin-top: 0;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--ds-white-a20);
+    letter-spacing: -0.05em;
+}
+
+.md-render-body h2 {
+    font-size: 24px;
+    position: relative;
+    padding-left: 20px;
+}
+
+.md-render-body h2::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.6em;
+    width: 8px;
+    height: 8px;
+    background: var(--ds-accent);
+    border-radius: 2px;
+}
+
+.md-render-body h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ds-accent);
+}
+
+.md-render-body p { margin-bottom: 1.25rem; }
+
+.md-render-body a {
+    color: var(--ds-accent);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.md-render-body a:hover { text-decoration: underline; }
+
+.md-render-body hr {
+    border: none;
+    border-bottom: 1px solid var(--ds-border-strong);
+    margin: 3rem 0;
+}
+
+.md-render-body blockquote {
+    border-left: 2px solid var(--ds-accent);
+    padding: 16px 24px;
+    margin: 2rem 0;
+    background: var(--ds-white-a02);
+    border-radius: 0 var(--ds-radius-panel) var(--ds-radius-panel) 0;
+    color: var(--ds-text-secondary);
+}
+
+.md-render-body ul, .md-render-body ol { padding-left: 1.5rem; margin-bottom: 1.25rem; }
+.md-render-body li { margin-bottom: 0.5rem; }
+
+/* ── Premium Block System ── */
+.premium-code-block,
+.md-table-wrapper,
+.mermaid {
+    background: transparent !important;
+    backdrop-filter: blur(40px) !important;
+    -webkit-backdrop-filter: blur(40px) !important;
+    border: 1px solid var(--ds-border-strong) !important;
+    border-radius: var(--ds-radius-panel) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+    margin: 2rem 0 !important;
+    overflow: hidden !important;
+    isolation: isolate;
+}
+
+/* ── Premium Code Blocks ── */
+.code-block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--ds-black-a30);
+    border-bottom: 1px solid var(--ds-white-a10);
+}
+
+.code-block-lang {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--ds-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-family: var(--ds-font-family-code);
+}
+
+.code-block-copy {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--ds-layer-surface-default);
+    border: 1px solid var(--ds-white-a10);
+    color: var(--ds-text-secondary);
+    padding: 4px 10px;
+    border-radius: var(--ds-radius-sm);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--ds-transition-smooth);
+}
+
+.code-block-copy:hover {
+    background: var(--ds-layer-surface-hover);
+    color: var(--ds-text-inverse);
+}
+
+.code-block-copy.copied {
+    background: rgba(var(--ds-accent-rgb), 0.15);
+    color: var(--ds-accent);
+}
+
+.code-block-copy .hidden { display: none; }
+
+.md-render-body pre {
+    margin: 0;
+    padding: 20px;
+    background: transparent;
+    overflow-x: auto;
+}
+
+/* Premium Scrollbar */
+.md-render-body pre::-webkit-scrollbar,
+.md-table-wrapper::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+}
+
+.md-render-body pre::-webkit-scrollbar-thumb,
+.md-table-wrapper::-webkit-scrollbar-thumb {
+    background: var(--ds-white-a10);
+    border-radius: 10px;
+}
+
+.md-render-body pre::-webkit-scrollbar-thumb:hover,
+.md-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--ds-white-a20);
+}
+
+.md-render-body pre code {
+    display: block;
+    font-family: var(--ds-font-family-code);
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #fff;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+
+/* ── Premium Tables ── */
+.md-table-wrapper { background: transparent !important; }
+
+.md-render-body table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.95em;
+    min-width: 600px;
+}
+
+.md-render-body th {
+    background: var(--ds-white-a04);
+    color: var(--ds-accent);
+    padding: 16px 24px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border-bottom: 1px solid var(--ds-border-strong);
+    font-family: var(--ds-font-family-code);
+}
+
+.md-render-body td {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--ds-border-default);
+    border-right: 1px solid var(--ds-border-subtle);
+    color: var(--ds-text-secondary);
+    line-height: 1.6;
+}
+
+.md-render-body td:last-child { border-right: none; }
+.md-render-body tr:last-child td { border-bottom: none; }
+
+/* ── Atomic Blocks (Shared with App) ── */
+.md-block { margin-bottom: 0.5rem; }
+.md-line { width: 100%; }
+
+/* ── Mermaid Diagrams ── */
+.mermaid {
+    background: transparent !important;
+    padding: 32px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid svg {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* Force Mermaid text visibility and standardize strokes */
+.mermaid text, .mermaid span, .mermaid .label {
+    fill: #fff !important;
+    color: #fff !important;
+}
+
+.mermaid path, .mermaid rect, .mermaid circle, .mermaid polygon {
+    stroke: var(--ds-white-a20) !important;
+}
+
+/* ── Syntax Highlighting (Xcode Exact Palette) ── */
+.hljs-comment, .hljs-quote { color: #a1c659; font-style: italic; }
+.hljs-keyword, .hljs-selector-tag, .hljs-literal { color: #d0a8ff; }
+.hljs-string, .hljs-regexp, .hljs-attribute { color: #ff8170; }
+.hljs-built_in, .hljs-title, .hljs-name, .hljs-type { color: #6bdfff; }
+.hljs-number, .hljs-variable, .hljs-attr { color: #d0a8ff; }
+.hljs-symbol, .hljs-bullet, .hljs-meta { color: #ffa14f; }
+.hljs-strong { font-weight: bold; }
+.hljs-emphasis { font-style: italic; }

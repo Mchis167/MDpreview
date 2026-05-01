@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.18.0] — 2026-05-01 18:05
+
+### 🎉 Added
+- **Visual Parity Optimization (Worker & Site)**:
+    - **Premium Theme Refinement**: Cập nhật màu nền `bg-main` sang `#131313` (xám đen sâu) mang lại cảm giác cao cấp và dịu mắt hơn cho bản publish.
+    - **Unified Premium Blocks**: Chuẩn hóa Code Blocks, Tables và Mermaid diagrams với hiệu ứng **backdrop-blur (40px)** và viền siêu mỏng, tạo hiệu ứng kính mờ (glassmorphism) đồng bộ 100% với Editor.
+    - **High-Fidelity Mermaid**: Ép màu chữ trắng và chuẩn hóa các nét vẽ sang hệ white alpha, đảm bảo biểu đồ luôn rõ nét trên nền tối của Worker.
+- **Standardized Divider (hr)**: Triển khai style cho thẻ `hr` bám sát Design System của App (viền trắng mờ + khoảng cách 3rem), giúp phân tách nội dung tinh tế hơn.
+- **Bundle for AI Script**: Triển khai script `bundle-for-ai.js` hỗ trợ đóng gói mã nguồn theo độ ưu tiên, giúp các AI Agent nắm bắt bối cảnh dự án nhanh chóng và chính xác.
+
+### 🔧 Changed
+- **PublishService Synchronization**:
+    - Cập nhật template **Standalone Bundle** (Copy as HTML) để tích hợp đầy đủ Design System Tokens và cấu trúc DOM mới, đảm bảo bản xuất bản offline luôn có đầy đủ style.
+- **Typography & Spacing Standardization**: Đồng bộ hóa toàn bộ lề (margins), font chữ (Inter/Roboto Mono) và kích thước chữ giữa bản live và trình soạn thảo.
+
+### 🐞 Fixed
+- **Cloudflare Worker Critical Fixes**: 
+    - Khắc phục lỗi Worker chặn file `publish.css` (404), đảm bảo giao diện bản live luôn được tải đúng.
+    - **Structural DOM Parity**: Tái cấu trúc phân cấp HTML (`#md-content > .md-content > .md-content-inner`) trong Worker Renderer để khớp chính xác với hệ thống CSS của App.
+
 ## [1.17.0] — 2026-05-01 07:30
 
 ### 🎉 Added

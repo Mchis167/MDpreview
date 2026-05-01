@@ -42,29 +42,18 @@
 
 .ds-btn.is-loading {
   pointer-events: none;
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
-.ds-btn.is-loading .ds-btn-text,
-.ds-btn.is-loading .ds-btn-icon-leading,
-.ds-btn.is-loading .ds-btn-icon-trailing {
-  visibility: hidden;
-}
+/* We no longer hide children as JS now swaps/appends the loader icon */
 
-.ds-btn.is-loading::after {
-  content: "";
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  top: calc(50% - 8px);
-  left: calc(50% - 8px);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  border-top-color: currentColor;
-  animation: ds-spin 0.6s linear infinite;
+.ds-icon-spin {
+  animation: ds-spin 1s linear infinite;
+  display: block;
 }
 
 @keyframes ds-spin {
+  from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
@@ -253,13 +242,22 @@
 
 .ds-form-field-label {
     font-family: var(--ds-font-family-code);
-    font-size: var(--ds-font-sm);
+    font-size: var(--ds-font-xs);
     font-weight: 700;
     color: var(--ds-text-disabled);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     display: block;
     margin: 0 0 var(--ds-space-sm) var(--ds-space-lg);
+    transition: color var(--ds-transition-fast);
+}
+
+.ds-form-field-label.has-tooltip {
+    cursor: help;
+}
+
+.ds-form-field-label.has-tooltip:hover {
+    color: var(--ds-accent-blue);
 }
 
 /* ── Standard Input ── */
@@ -272,7 +270,7 @@
     border-radius: var(--ds-radius-panel);
     padding: 0 var(--ds-space-lg);
     color: var(--ds-text-primary);
-    font-size: var(--ds-font-lg);
+    font-size: var(--ds-font-md);
     font-family: inherit;
     outline: none;
     transition: all var(--ds-transition-fast);
@@ -301,7 +299,7 @@
 }
 
 .ds-input.ds-input--error:focus {
-    box-shadow: 0 0 0 4px var(--ds-red-a08);
+    box-shadow: 0 0 0 var(--ds-space-2xs) var(--ds-red-a08);
 }
 
 .ds-input:disabled {
@@ -349,6 +347,87 @@
     color: var(--ds-text-primary);
     background: var(--ds-white-a05);
 }
+
+/* ── Status Indicator ── */
+.ds-form-field-status {
+    display: none;
+    align-items: center;
+    gap: var(--ds-space-xs);
+    font-size: var(--ds-font-xs);
+    line-height: 1.4;
+    padding-left: var(--ds-space-lg);
+    color: var(--ds-text-tertiary);
+    transition: all var(--ds-transition-main);
+    opacity: 0;
+    transform: translateY(-4px);
+    pointer-events: none;
+}
+
+.ds-form-field-status.show {
+    display: flex;
+    margin-top: var(--ds-space-xs);
+    min-height: var(--ds-space-lg);
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.ds-form-field-status--success {
+    color: var(--ds-status-success);
+}
+
+.ds-form-field-status--warning {
+    color: var(--ds-status-warning);
+}
+
+.ds-form-field-status--error {
+    color: var(--ds-status-danger);
+}
+
+.ds-form-field-status--info {
+    color: var(--ds-text-tertiary);
+}
+
+/* Loading state for status */
+.ds-form-field-status.is-loading {
+    color: var(--ds-text-tertiary);
+    font-style: italic;
+}
+
+/* Status Indicator Layout with Icon */
+
+.ds-form-field-status-icon svg {
+    width: var(--ds-font-base);
+    height: var(--ds-font-base);
+    display: block;
+}
+
+/* Specific icon adjustments if needed */
+.ds-form-field-status--success .ds-form-field-status-icon {
+    color: var(--ds-status-success);
+}
+
+.ds-form-field-status--error .ds-form-field-status-icon {
+    color: var(--ds-status-danger);
+}
+
+.ds-form-field-status--warning .ds-form-field-status-icon {
+    color: var(--ds-status-warning);
+}
+
+/* ── URL / Link Variant (Reusable) ── */
+.ds-input--link .ds-input {
+    color: var(--ds-accent-blue);
+    font-family: var(--ds-font-family-code);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.ds-input--link .ds-input:hover {
+    text-decoration: underline;
+}
+
 ```
 </file>
 
@@ -401,6 +480,47 @@
   width: 12px;
   height: 12px;
 }
+```
+</file>
+
+<file path="renderer/css/design-system/atoms/status-badge.css">
+```css
+/* ── Design System: Status Badge (Atom) ── */
+
+.ds-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-sm);
+    padding: var(--ds-space-3xs) 0;
+    line-height: 1.4;
+}
+
+.ds-status-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--ds-radius-pill);
+    background: var(--_dot-color, var(--ds-text-tertiary));
+    box-shadow: 0 0 4px var(--_dot-color);
+    flex-shrink: 0;
+}
+
+.ds-status-badge-label {
+    font-size: var(--ds-font-sm);
+    color: var(--ds-text-secondary);
+    font-family: var(--ds-font-family-text);
+}
+
+/* Variants */
+.ds-status-badge--success { --_dot-color: var(--ds-status-success); }
+.ds-status-badge--warning { --_dot-color: var(--ds-status-warning); }
+.ds-status-badge--error   { --_dot-color: var(--ds-status-danger); }
+.ds-status-badge--danger  { --_dot-color: var(--ds-status-danger); }
+.ds-status-badge--info    { --_dot-color: var(--ds-status-info); }
+
+/* Sizes (Optional, defaults to small) */
+.ds-status-badge--md .ds-status-badge-label { font-size: var(--ds-font-md); }
+.ds-status-badge--md .ds-status-badge-dot { width: 8px; height: 8px; }
+
 ```
 </file>
 
@@ -935,7 +1055,8 @@
 }
 
 /* ── Open/Active State ──────────────────────────────── */
-.ds-combo-btn.is-open {
+.ds-combo-btn.is-open,
+.ds-combo-btn.is-active {
   background: var(--_bg-hover) !important;
   color: var(--_color-hover, var(--_color));
   border: 1px solid var(--ds-border-selected-subtle);
@@ -943,11 +1064,13 @@
   transform: translateY(0);
 }
 
-.ds-combo-btn.is-open .ds-combo-btn-toggle svg {
+.ds-combo-btn.is-open .ds-combo-btn-toggle svg,
+.ds-combo-btn.is-active .ds-combo-btn-toggle svg {
   transform: rotate(180deg);
 }
 
-.ds-combo-btn.is-open .ds-combo-btn-toggle {
+.ds-combo-btn.is-open .ds-combo-btn-toggle,
+.ds-combo-btn.is-active .ds-combo-btn-toggle {
   background: var(--ds-white-a05);
 }
 ```
@@ -3560,42 +3683,18 @@
   background: var(--ds-accent-red);
 }
 
-/* ── Publish Success Modal ── */
-.publish-success-modal .ds-popover-card {
-  width: 480px;
-}
 
-.ds-publish-success-content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-md);
-}
+```
+</file>
 
-.ds-publish-link-container {
-  display: flex;
-  background: var(--ds-surface-secondary);
-  border: 1px solid var(--ds-border-strong);
-  border-radius: var(--ds-radius-input);
-  padding: 4px;
-  margin-top: var(--ds-space-sm);
-}
+<file path="renderer/css/design-system/organisms/publish-config.css">
+```css
+/* ============================================================
+   publish-config.css — Organism
+   Purpose: Styles for Publish Success Modal and Config Popover
+   ============================================================ */
 
-.ds-publish-link-container .ds-input {
-  border: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  padding: var(--ds-space-sm) var(--ds-space-md);
-  flex: 1;
-  font-family: var(--ds-font-code);
-  font-size: var(--ds-font-sm);
-  color: var(--ds-accent-blue);
-  cursor: pointer;
-}
-
-.ds-publish-link-container .ds-input:focus {
-  outline: none;
-}
-
+/* ── Floating Publish Button State ── */
 .floating-publish-btn.is-published {
   border-color: var(--ds-blue-a30);
 }
@@ -3606,14 +3705,15 @@
 
 /* ── Publish Configuration Popover ── */
 .ds-publish-config-shield.ds-menu-shield {
-  min-width: 340px;
-  max-width: 400px;
+  --_panel-px: var(--ds-space-lg);
+  width: 360px;
+  max-width: 360px;
   padding: var(--ds-space-md);
 }
 
 .ds-publish-config-shield .ds-menu-shield-header {
   border-bottom: none;
-  padding: var(--ds-space-sm) var(--ds-space-lg) var(--ds-space-lg) var(--ds-space-lg);
+  padding: var(--ds-space-sm) var(--_panel-px) var(--ds-space-xs) var(--_panel-px);
 }
 
 .ds-publish-config-shield .ds-menu-shield-title {
@@ -3632,7 +3732,6 @@
   width: 100%;
 }
 
-
 .ds-publish-actions {
   display: flex;
   justify-content: space-between;
@@ -3645,7 +3744,6 @@
   gap: var(--ds-space-sm);
 }
 
-
 .ds-publish-status-info {
   margin-bottom: var(--ds-space-xs);
 }
@@ -3656,6 +3754,14 @@
 
 .ds-publish-config-shield .ds-menu-shield-content {
   padding: 0;
+}
+
+
+/* Status Badge spacing in Publish Panel */
+.ds-publish-status-badge,
+.ds-publish-engine-badge {
+  padding-left: var(--_panel-px);
+  padding-right: var(--_panel-px);
 }
 ```
 </file>
@@ -6148,6 +6254,7 @@ body.is-searching .edit-toolbar-container {
 @import 'design-system/atoms/switch-toggle.css';
 @import 'design-system/atoms/textarea.css';
 @import 'design-system/atoms/kbd.css';
+@import 'design-system/atoms/status-badge.css';
 
 /* ── Molecules ──────────────────────────────────────────── */
 @import 'design-system/molecules/workspace-switcher.css';
@@ -6177,6 +6284,7 @@ body.is-searching .edit-toolbar-container {
 @import 'design-system/organisms/toc-panel.css';
 @import 'design-system/organisms/settings-panel.css';
 @import 'design-system/organisms/modals-misc.css';
+@import 'design-system/organisms/publish-config.css';
 @import 'design-system/organisms/editor.css';
 @import 'design-system/organisms/markdown-viewer.css';
 @import 'design-system/organisms/markdown-content.css';
@@ -6384,9 +6492,16 @@ main {
   <script src="js/components/design-system-icons.js" defer></script>
 
   <!-- Atoms (Base Elements) -->
+  <script src="js/components/atoms/button.js" defer></script>
+  <script src="js/components/atoms/modal.js" defer></script>
+  <script src="js/components/atoms/inline-message.js" defer></script>
+  <script src="js/components/atoms/segmented-control.js" defer></script>
+  <script src="js/components/atoms/select.js" defer></script>
   <script src="js/components/atoms/icon-action-button.js" defer></script>
   <script src="js/components/atoms/textarea.js" defer></script>
   <script src="js/components/atoms/switch-toggle.js" defer></script>
+  <script src="js/components/atoms/input-component.js" defer></script>
+  <script src="js/components/atoms/status-badge.js" defer></script>
 
   <!-- Molecules (Compound Elements) -->
   <script src="js/components/molecules/workspace-switcher.js" defer></script>
@@ -6417,7 +6532,8 @@ main {
   <script src="js/components/organisms/shortcuts-component.js" defer></script>
   <script src="js/components/organisms/toc-component.js" defer></script>
   <script src="js/components/organisms/base-form-modal.js" defer></script>
-  <script src="js/components/organisms/handoff-token-form-component.js" defer></script>
+  <script src="js/components/organisms/publish-settings-form-component.js" defer></script>
+  <script src="js/components/organisms/publish-manager-component.js" defer></script>
   <script src="js/components/organisms/publish-config-component.js" defer></script>
   <script src="js/components/organisms/explorer-settings-component.js" defer></script>
   <script src="js/components/organisms/search-palette.js" defer></script>
@@ -6456,6 +6572,216 @@ main {
 </body>
 
 </html>
+```
+</file>
+
+<file path="renderer/js/components/atoms/button.js">
+```js
+/* global DesignSystem */
+/**
+ * ButtonComponent (Atom)
+ * Purpose: Provides standardized button and combo-button elements.
+ */
+const ButtonComponent = (() => {
+  'use strict';
+
+  /**
+   * Create a standardized button
+   */
+  function create(options = {}) {
+    const {
+      label,
+      variant = 'primary',
+      onClick,
+      disabled = false,
+      className = '',
+      leadingIcon = null,
+      trailingIcon = null,
+      offLabel = false,
+      title = null,
+      radius = 'var(--ds-radius-widget)'
+    } = options;
+
+    // Enforce single icon for off-label buttons
+    let activeLeadingIcon = leadingIcon;
+    let activeTrailingIcon = trailingIcon;
+    if (offLabel && activeLeadingIcon && activeTrailingIcon) {
+      activeTrailingIcon = null;
+    }
+
+    const btn = DesignSystem.createElement('button', [
+      `ds-btn`,
+      `ds-btn-${variant}`,
+      offLabel ? 'ds-btn-off-label' : '',
+      className
+    ]);
+
+    if (options.id) btn.id = options.id;
+
+    btn.style.setProperty('--_radius', radius);
+
+    if (activeLeadingIcon) {
+      const iconHtml = DesignSystem.getIcon(activeLeadingIcon) || activeLeadingIcon;
+      const span = DesignSystem.createElement('span', 'ds-btn-icon-leading', { html: iconHtml });
+      btn.appendChild(span);
+    }
+
+    if (label && !offLabel) {
+      const textSpan = DesignSystem.createElement('span', 'ds-btn-text', { text: label });
+      btn.appendChild(textSpan);
+    }
+
+    if (activeTrailingIcon) {
+      const iconHtml = DesignSystem.getIcon(activeTrailingIcon) || activeTrailingIcon;
+      const span = DesignSystem.createElement('span', 'ds-btn-icon-trailing', { html: iconHtml });
+      btn.appendChild(span);
+    }
+
+    if (disabled) btn.disabled = true;
+    if (onClick) btn.onclick = onClick;
+
+    if (title || (offLabel && label)) {
+      DesignSystem.applyTooltip(btn, title || label, options.tooltipPos || 'bottom');
+    }
+
+    // Add loading state helper
+    btn.setLoading = (isLoading) => {
+      if (isLoading) {
+        btn.classList.add('is-loading');
+        btn.disabled = true;
+
+        // Handle icon swapping/appending
+        const iconLeading = btn.querySelector('.ds-btn-icon-leading');
+        if (iconLeading) {
+          // Save original icon HTML to restore later
+          iconLeading.dataset.originalIcon = iconLeading.innerHTML;
+          iconLeading.innerHTML = DesignSystem.getIcon('loader') || '';
+        } else {
+          // Create a temporary leading icon for the loader
+          const loaderSpan = DesignSystem.createElement('span', ['ds-btn-icon-leading', 'ds-btn-loader-temp'], {
+            html: DesignSystem.getIcon('loader') || ''
+          });
+          btn.prepend(loaderSpan);
+        }
+      } else {
+        btn.classList.remove('is-loading');
+        btn.disabled = disabled;
+
+        // Restore original state
+        const loaderTemp = btn.querySelector('.ds-btn-loader-temp');
+        if (loaderTemp) {
+          loaderTemp.remove();
+        } else {
+          const iconLeading = btn.querySelector('.ds-btn-icon-leading');
+          if (iconLeading && iconLeading.dataset.originalIcon) {
+            iconLeading.innerHTML = iconLeading.dataset.originalIcon;
+            delete iconLeading.dataset.originalIcon;
+          }
+        }
+      }
+    };
+
+    // Add icon update helper
+    btn.setIcon = (iconName) => {
+      const span = btn.querySelector('.ds-btn-icon-leading');
+      if (span) {
+        span.innerHTML = DesignSystem.getIcon(iconName) || '';
+      }
+    };
+
+    // Add label update helper
+    btn.setLabel = (newLabel) => {
+      const span = btn.querySelector('.ds-btn-text');
+      if (span) {
+        span.textContent = newLabel;
+      }
+    };
+
+    return btn;
+  }
+
+  /**
+   * Create a combo button (Main + Toggle)
+   */
+  function createCombo(options = {}) {
+    const {
+      label,
+      variant = 'subtitle',
+      leadingIcon = null,
+      mainAction,
+      toggleAction,
+      disabled = false,
+      className = '',
+      tooltip = null,
+      radius = 'var(--ds-radius-widget)'
+    } = options;
+
+    const container = DesignSystem.createElement('div', [
+      'ds-combo-btn',
+      `ds-combo-btn-${variant}`,
+      className
+    ]);
+
+    if (options.id) container.id = options.id;
+
+    container.style.setProperty('--_radius', radius);
+    if (disabled) {
+      container.classList.add('is-disabled');
+      container.setAttribute('disabled', 'true'); 
+    }
+
+    // Main Part
+    const main = DesignSystem.createElement('div', 'ds-combo-btn-main');
+    if (leadingIcon) {
+      const iconHtml = DesignSystem.getIcon(leadingIcon) || leadingIcon;
+      main.appendChild(DesignSystem.createElement('span', 'ds-btn-icon-leading', { html: iconHtml }));
+    }
+    if (label) {
+      main.appendChild(DesignSystem.createElement('span', 'ds-btn-text', { text: label }));
+    }
+    
+    if (!disabled && mainAction) {
+      main.onclick = (e) => {
+        e.stopPropagation();
+        mainAction(e);
+      };
+    }
+
+    // Toggle Part
+    const toggle = DesignSystem.createElement('div', 'ds-combo-btn-toggle', {
+      html: DesignSystem.getIcon('chevron-down') || '▼'
+    });
+    
+    if (options.toggleTooltip) {
+      DesignSystem.applyTooltip(toggle, options.toggleTooltip, 'bottom');
+    }
+    
+    if (!disabled && toggleAction) {
+      toggle.onclick = (e) => {
+        e.stopPropagation();
+        if (container.classList.contains('is-open')) {
+          if (typeof window.MenuShield !== 'undefined') window.MenuShield.close();
+          return;
+        }
+        toggleAction(e);
+      };
+    }
+
+    container.appendChild(main);
+    container.appendChild(toggle);
+
+    if (tooltip) {
+      DesignSystem.applyTooltip(container, tooltip, 'bottom');
+    }
+
+    return container;
+  }
+
+  return { create, createCombo };
+})();
+
+window.ButtonComponent = ButtonComponent;
+
 ```
 </file>
 
@@ -6518,6 +6844,613 @@ class IconActionButton {
 }
 
 window.IconActionButton = IconActionButton;
+
+```
+</file>
+
+<file path="renderer/js/components/atoms/inline-message.js">
+```js
+/* global DesignSystem */
+/**
+ * InlineMessageComponent (Atom)
+ * Purpose: Provides standardized inline callouts/messages.
+ */
+const InlineMessageComponent = (() => {
+  'use strict';
+
+  /**
+   * Create an inline message (callout)
+   */
+  function create(options = {}) {
+    const {
+      text = '',
+      variant = 'info', // 'info', 'success', 'warning', 'error'
+      icon = 'info',
+      className = ''
+    } = options;
+
+    const container = DesignSystem.createElement('div', [
+      `ds-inline-message`, 
+      `ds-inline-message--${variant}`, 
+      className
+    ]);
+    
+    const iconHtml = DesignSystem.getIcon(icon) || DesignSystem.getIcon('info') || '';
+    if (iconHtml) {
+      const iconWrapper = DesignSystem.createElement('div', 'ds-inline-message-icon', { html: iconHtml });
+      container.appendChild(iconWrapper);
+    }
+
+    const textEl = DesignSystem.createElement('div', 'ds-inline-message-text', { text });
+    container.appendChild(textEl);
+
+    return container;
+  }
+
+  return { create };
+})();
+
+window.InlineMessageComponent = InlineMessageComponent;
+
+```
+</file>
+
+<file path="renderer/js/components/atoms/input-component.js">
+```js
+/* global DesignSystem */
+/**
+ * InputComponent
+ * Purpose: A robust, reusable input atom with support for labels, actions, and status indicators.
+ * Follows the Design System's Atomic design principles.
+ */
+const InputComponent = (() => {
+  'use strict';
+
+  /**
+   * Create a standardized input component
+   * @param {Object} options
+   * @returns {HTMLElement} The enhanced container element
+   */
+  function create(options = {}) {
+    const {
+      type = 'text',
+      placeholder = '',
+      value = '',
+      className = '',
+      id = '',
+      label = null,
+      variant = 'default', // 'default', 'error', 'success', 'warning'
+      status = null, // { text, variant }
+      action = null, // { icon, onClick, title }
+      onInput = null,
+      onChange = null,
+      disabled = false,
+      readOnly = false,
+      description = null
+    } = options;
+
+    // 1. Create Container (Form Field)
+    const container = DesignSystem.createElement('div', ['ds-form-field', className]);
+    if (id) container.id = id;
+
+    // 2. Label & Tooltip Description
+    if (label) {
+      const labelEl = DesignSystem.createElement('label', 'ds-form-field-label', { text: label });
+      if (description) {
+        DesignSystem.applyTooltip(labelEl, description, 'top');
+        labelEl.classList.add('has-tooltip');
+      }
+      container.appendChild(labelEl);
+    }
+
+    // 3. Input Wrapper (Group if action exists)
+    const wrapperClass = action ? 'ds-input-group' : 'ds-input-wrapper';
+    const wrapper = DesignSystem.createElement('div', [wrapperClass]);
+    if (variant && variant !== 'default') {
+      wrapper.classList.add(`ds-input--${variant}`);
+    }
+    container.appendChild(wrapper);
+
+    // 4. Actual Input
+    const input = DesignSystem.createElement('input', 'ds-input');
+    input.type = type;
+    input.placeholder = placeholder;
+    input.value = value;
+    if (disabled) input.disabled = true;
+    if (readOnly) input.readOnly = true;
+    if (className) input.classList.add(className);
+    wrapper.appendChild(input);
+
+    // 5. Action Button
+    let actionBtn = null;
+    if (action) {
+      actionBtn = DesignSystem.createButton({
+        variant: 'ghost',
+        leadingIcon: action.icon,
+        onClick: action.onClick,
+        title: action.title,
+        offLabel: true,
+        className: 'ds-input-group-action'
+      });
+      wrapper.appendChild(actionBtn);
+    }
+
+    // 6. Status Indicator
+    const statusEl = DesignSystem.createElement('div', 'ds-form-field-status');
+    container.appendChild(statusEl);
+
+    // ── Instance API (Attached to container) ─────────────────────
+    
+    /**
+     * Update the status message and variant
+     * @param {Object} data - { text, variant, isLoading }
+     */
+    container.setStatus = (data) => {
+      if (!data || (!data.text && !data.icon)) {
+        statusEl.innerHTML = '';
+        statusEl.className = 'ds-form-field-status';
+        statusEl.classList.remove('show');
+        return;
+      }
+
+      statusEl.className = 'ds-form-field-status show';
+      
+      let html = '';
+      if (data.icon) {
+        const iconHtml = DesignSystem.getIcon(data.icon);
+        html += `<span class="ds-form-field-status-icon">${iconHtml}</span>`;
+      }
+      if (data.text) {
+        html += `<span class="ds-form-field-status-text">${data.text}</span>`;
+      }
+      
+      statusEl.innerHTML = html;
+      
+      if (data.variant) {
+        statusEl.classList.add(`ds-form-field-status--${data.variant}`);
+      }
+      
+      if (data.isLoading) {
+        statusEl.classList.add('is-loading');
+      }
+    };
+
+    /**
+     * Update the input variant (border/bg)
+     * @param {string} newVariant - 'default', 'error', 'success', 'warning'
+     */
+    container.setVariant = (newVariant) => {
+      // Clean old variants
+      ['error', 'success', 'warning'].forEach(v => {
+        wrapper.classList.remove(`ds-input--${v}`);
+      });
+      
+      if (newVariant && newVariant !== 'default') {
+        wrapper.classList.add(`ds-input--${newVariant}`);
+      }
+    };
+
+    /**
+     * Set loading state for the status indicator
+     * @param {boolean} isLoading
+     * @param {string} loadingText
+     */
+    container.setLoading = (isLoading, loadingText = 'Processing...') => {
+      if (isLoading) {
+        container.setStatus({ text: loadingText, variant: 'info', isLoading: true });
+      } else {
+        container.setStatus(null);
+      }
+    };
+
+    // Proxy standard properties
+    Object.defineProperty(container, 'value', {
+      get: () => input.value,
+      set: (v) => { input.value = v; },
+      configurable: true
+    });
+
+    container.focus = () => input.focus();
+    container.input = input;
+    if (actionBtn) container.actionBtn = actionBtn;
+
+    // Events
+    if (onInput) input.addEventListener('input', (e) => onInput(e, input.value));
+    if (onChange) input.addEventListener('change', (e) => onChange(e, input.value));
+
+    // Initial status
+    if (status) container.setStatus(status);
+
+    return container;
+  }
+
+  return { create };
+})();
+
+window.InputComponent = InputComponent;
+
+```
+</file>
+
+<file path="renderer/js/components/atoms/modal.js">
+```js
+/* global DesignSystem */
+/**
+ * ModalComponent (Atom)
+ * Purpose: Provides standardized popover shields, confirmation dialogs, and prompts.
+ */
+const ModalComponent = (() => {
+  'use strict';
+
+  /**
+   * Create a Popover Shield
+   */
+  function create(options = {}) {
+    const {
+      title = 'Modal',
+      content = '',
+      footer = null,
+      className = '',
+      width = null,
+      hasBackdrop = true,
+      showHeader = true,
+      position = null,
+      alignment = 'center', // 'center', 'bottom-left', or 'custom'
+      container = document.body,
+      onClose = null
+    } = options;
+
+    const shieldClass = hasBackdrop ? 'ds-popover-shield' : 'ds-popover-floating';
+    const shield = DesignSystem.createElement('div', [shieldClass, `ds-popover-${alignment}`]);
+    const isBody = container === document.body;
+    shield.style.position = isBody ? 'fixed' : 'absolute';
+
+    const card = DesignSystem.createElement('div', ['ds-popover-card', className]);
+    if (width) card.style.width = width;
+    if (position) {
+      if (position.top) card.style.top = position.top;
+      if (position.right) card.style.right = position.right;
+      if (position.bottom) card.style.bottom = position.bottom;
+      if (position.left) card.style.left = position.left;
+      card.style.position = 'fixed';
+      card.style.margin = '0';
+    }
+
+    const header = DesignSystem.createElement('div', 'ds-popover-header');
+    const titleEl = DesignSystem.createElement('h2', 'ds-popover-title', { text: title });
+    const closeBtn = DesignSystem.createElement('button', 'ds-popover-close', { 
+      html: DesignSystem.getIcon('x') || '✕' 
+    });
+
+    const body = DesignSystem.createElement('div', 'ds-popover-body');
+    if (content instanceof HTMLElement) {
+      body.appendChild(content);
+    } else if (typeof content === 'string') {
+      body.innerHTML = content;
+    }
+
+    if (showHeader) {
+      header.appendChild(titleEl);
+      header.appendChild(closeBtn);
+      card.appendChild(header);
+    }
+    card.appendChild(body);
+
+    if (footer) {
+      const footerEl = DesignSystem.createElement('div', 'ds-popover-footer');
+      if (footer instanceof HTMLElement) {
+        footerEl.appendChild(footer);
+      } else {
+        footerEl.innerHTML = footer;
+      }
+      card.appendChild(footerEl);
+    }
+
+    shield.appendChild(card);
+
+    const closeAction = () => {
+      shield.classList.remove('show');
+      setTimeout(() => {
+        shield.remove();
+        if (onClose) onClose();
+      }, 250);
+    };
+
+    closeBtn.onclick = closeAction;
+    shield.onclick = (e) => {
+      if (hasBackdrop && e.target === shield) closeAction();
+    };
+
+    container.appendChild(shield);
+    setTimeout(() => shield.classList.add('show'), 10);
+
+    if (!hasBackdrop) {
+      const clickAway = (e) => {
+        if (e.target.closest('.ds-popover-card')) return;
+        if (!card.contains(e.target)) {
+          closeAction();
+          document.removeEventListener('click', clickAway, true);
+        }
+      };
+      setTimeout(() => document.addEventListener('click', clickAway, true), 100);
+    }
+
+    const popoverInstance = { shield, card, body, close: closeAction };
+    shield.__popover = popoverInstance;
+    return popoverInstance;
+  }
+
+  /**
+   * Show a confirmation dialog
+   */
+  function confirm({ title, message, onConfirm, onCancel }) {
+    const content = DesignSystem.createElement('div', 'ds-confirm-content');
+    content.innerHTML = `<p class="ds-confirm-message">${message}</p>`;
+
+    const footer = DesignSystem.createElement('div', 'ds-confirm-footer');
+    const cancelBtn = DesignSystem.createButton({ label: 'Cancel', variant: 'ghost' });
+    const confirmBtn = DesignSystem.createButton({ label: 'Confirm', variant: 'primary' });
+
+    footer.appendChild(cancelBtn);
+    footer.appendChild(confirmBtn);
+
+    const popover = create({
+      title,
+      content,
+      footer,
+      width: '400px',
+      className: 'ds-modal-confirm'
+    });
+
+    confirmBtn.onclick = async () => {
+      try {
+        if (onConfirm) await onConfirm();
+      } finally {
+        popover.close();
+      }
+    };
+    cancelBtn.onclick = () => {
+      if (onCancel) onCancel();
+      popover.close();
+    };
+  }
+
+  /**
+   * Show a prompt dialog
+   */
+  function prompt(options) {
+    const { title, message, placeholder, defaultValue = '', onConfirm, onCancel } = options;
+    const content = DesignSystem.createElement('div', 'ds-prompt-content');
+    const label = DesignSystem.createElement('label', 'ds-field-label', { text: message });
+    const input = DesignSystem.createInput({ 
+      type: 'text', 
+      placeholder: placeholder, 
+      value: defaultValue 
+    });
+
+    content.appendChild(label);
+    content.appendChild(input);
+
+    const footer = DesignSystem.createElement('div', 'ds-confirm-footer');
+    const cancelBtn = DesignSystem.createButton({ label: 'Cancel', variant: 'ghost' });
+    const confirmBtn = DesignSystem.createButton({ label: 'Continue', variant: 'primary' });
+
+    footer.appendChild(cancelBtn);
+    footer.appendChild(confirmBtn);
+
+    const popover = create({
+      title,
+      content,
+      footer,
+      width: '440px',
+      className: 'ds-modal-prompt'
+    });
+
+    setTimeout(() => input.focus(), 150);
+
+    confirmBtn.onclick = async () => {
+      const val = input.value.trim();
+      if (!val) {
+        input.classList.add('ds-input-error');
+        input.focus();
+        return;
+      }
+      if (onConfirm) await onConfirm(val);
+      popover.close();
+    };
+
+    input.oninput = () => input.classList.remove('ds-input-error');
+    input.onkeydown = (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); confirmBtn.click(); }
+      if (e.key === 'Escape') { e.preventDefault(); cancelBtn.click(); }
+    };
+
+    cancelBtn.onclick = () => {
+      if (onCancel) onCancel();
+      popover.close();
+    };
+  }
+
+  return { create, confirm, prompt };
+})();
+
+window.ModalComponent = ModalComponent;
+
+```
+</file>
+
+<file path="renderer/js/components/atoms/segmented-control.js">
+```js
+/* global DesignSystem */
+/**
+ * SegmentedControlComponent (Atom)
+ * Purpose: Provides a standardized segmented control with a sliding indicator.
+ */
+const SegmentedControlComponent = (() => {
+  'use strict';
+
+  /**
+   * Create a segmented control
+   */
+  function create(options = {}) {
+    const {
+      items = [],
+      activeId = null,
+      onChange = null,
+      radius = 'var(--ds-radius-panel)',
+      className = ''
+    } = options;
+
+    const control = DesignSystem.createElement('div', ['ds-segmented-control', className]);
+    control.style.setProperty('--_radius', radius);
+
+    const indicator = DesignSystem.createElement('div', 'ds-segment-indicator');
+    control.appendChild(indicator);
+
+    items.forEach(itemData => {
+      const item = DesignSystem.createElement('div', 'ds-segment-item', {
+        'data-id': itemData.id,
+        'html': DesignSystem.getIcon(itemData.icon)
+      });
+
+      if (itemData.title) {
+        DesignSystem.applyTooltip(item, itemData.title, options.tooltipPos || 'bottom');
+      }
+
+      if (itemData.id === activeId) item.classList.add('active');
+
+      item.addEventListener('mousedown', (e) => e.preventDefault());
+      item.addEventListener('click', () => {
+        if (onChange) onChange(itemData.id);
+      });
+
+      control.appendChild(item);
+    });
+
+    const instance = {
+      el: control,
+      indicator,
+      updateActive: (id) => {
+        const allItems = control.querySelectorAll('.ds-segment-item');
+        let activeItem = null;
+        allItems.forEach(item => {
+          const isActive = item.getAttribute('data-id') === id;
+          item.classList.toggle('active', isActive);
+          if (isActive) activeItem = item;
+        });
+
+        if (indicator && activeItem) {
+          requestAnimationFrame(() => {
+            indicator.style.width = `${activeItem.offsetWidth}px`;
+            indicator.style.height = `${activeItem.offsetHeight}px`;
+            indicator.style.left = `${activeItem.offsetLeft}px`;
+            indicator.style.top = `${activeItem.offsetTop}px`;
+          });
+        }
+      }
+    };
+
+    if (activeId) {
+      setTimeout(() => instance.updateActive(activeId), 0);
+    }
+
+    return instance;
+  }
+
+  return { create };
+})();
+
+window.SegmentedControlComponent = SegmentedControlComponent;
+
+```
+</file>
+
+<file path="renderer/js/components/atoms/select.js">
+```js
+/* global DesignSystem */
+/**
+ * SelectComponent (Atom)
+ * Purpose: Provides a standardized styled select element.
+ */
+const SelectComponent = (() => {
+  'use strict';
+
+  /**
+   * Create a standardized select element
+   */
+  function create(options = [], currentVal, onChange) {
+    const select = DesignSystem.createElement('select', 'ds-select');
+    options.forEach(opt => {
+      const value = typeof opt === 'string' ? opt : opt.value;
+      const label = typeof opt === 'string' ? opt : opt.label;
+      const el = DesignSystem.createElement('option', '', { value, text: label });
+      if (value === currentVal) el.selected = true;
+      select.appendChild(el);
+    });
+    if (onChange) select.onchange = (e) => onChange(e.target.value);
+    return select;
+  }
+
+  return { create };
+})();
+
+window.SelectComponent = SelectComponent;
+
+```
+</file>
+
+<file path="renderer/js/components/atoms/status-badge.js">
+```js
+/**
+ * StatusBadge Component (Atom)
+ * Purpose: A subtle status indicator consisting of a dot and a label.
+ */
+const StatusBadge = (() => {
+  'use strict';
+
+  /**
+   * Create a StatusBadge element
+   * @param {Object} options - { text, variant, className }
+   * @returns {HTMLElement}
+   */
+  function create(options = {}) {
+    const {
+      text = '',
+      variant = 'info',
+      className = ''
+    } = options;
+
+    const container = document.createElement('div');
+    container.className = `ds-status-badge ds-status-badge--${variant} ${className}`;
+
+    const dot = document.createElement('span');
+    dot.className = 'ds-status-badge-dot';
+
+    const label = document.createElement('span');
+    label.className = 'ds-status-badge-label';
+    label.textContent = text;
+
+    container.appendChild(dot);
+    container.appendChild(label);
+
+    // Dynamic API
+    container.setText = (newText) => {
+      label.textContent = newText;
+    };
+
+    container.setVariant = (newVariant) => {
+      container.className = `ds-status-badge ds-status-badge--${newVariant} ${className}`;
+    };
+
+    return container;
+  }
+
+  return {
+    create
+  };
+})();
+
+window.StatusBadge = StatusBadge;
 
 ```
 </file>
@@ -6824,7 +7757,10 @@ window.TextAreaModule = TextAreaModule;
     'panel-left': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>`,
     'file-stack': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1"/><path d="M16 16a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1"/><path d="M21 6a2 2 0 0 0-.586-1.414l-2-2A2 2 0 0 0 17 2h-3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1z"/></svg>`,
     'globe': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
-    'check-circle': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
+    'check-circle': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+    'circle-x': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>`,
+    'circle-check': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>`,
+    'loader': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ds-icon-spin"><path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/></svg>`
   };
 
   DesignSystem.registerIcons(ICONS);
@@ -6837,6 +7773,7 @@ window.TextAreaModule = TextAreaModule;
 
 <file path="renderer/js/components/design-system.js">
 ```js
+/* global InputComponent, ContextMenuComponent, StatusBadge, ButtonComponent, ModalComponent, InlineMessageComponent, SegmentedControlComponent, SelectComponent */
 /* ============================================================
    design-system.js — Core Design System Module
    ============================================================ */
@@ -6874,110 +7811,18 @@ const DesignSystem = (() => {
     return el;
   }
 
-  /**
-   * Private: Create a Popover Shield
-   */
-  function createPopoverShield(options = {}) {
-    const {
-      title = 'Modal',
-      content = '',
-      footer = null,
-      className = '',
-      width = null,
-      hasBackdrop = true,
-      showHeader = true,
-      position = null,
-      alignment = 'center', // 'center', 'bottom-left', or 'custom'
-      container = document.body,
-      onClose = null
-    } = options;
-
-    const shieldClass = hasBackdrop ? 'ds-popover-shield' : 'ds-popover-floating';
-    const shield = createElement('div', [shieldClass, `ds-popover-${alignment}`]);
-    const isBody = container === document.body;
-    shield.style.position = isBody ? 'fixed' : 'absolute';
-
-    const card = createElement('div', ['ds-popover-card', className]);
-    if (width) card.style.width = width;
-    if (position) {
-      if (position.top) card.style.top = position.top;
-      if (position.right) card.style.right = position.right;
-      if (position.bottom) card.style.bottom = position.bottom;
-      if (position.left) card.style.left = position.left;
-      card.style.position = 'fixed';
-      card.style.margin = '0';
-    }
-
-    const header = createElement('div', 'ds-popover-header');
-    const titleEl = createElement('h2', 'ds-popover-title', { text: title });
-    const closeBtn = createElement('button', 'ds-popover-close', { html: ICONS['x'] || '✕' });
-
-    const body = createElement('div', 'ds-popover-body');
-    if (content instanceof HTMLElement) {
-      body.appendChild(content);
-    } else if (typeof content === 'string') {
-      body.innerHTML = content;
-    }
-
-    if (showHeader) {
-      header.appendChild(titleEl);
-      header.appendChild(closeBtn);
-      card.appendChild(header);
-    }
-    card.appendChild(body);
-
-    if (footer) {
-      const footerEl = createElement('div', 'ds-popover-footer');
-      if (footer instanceof HTMLElement) {
-        footerEl.appendChild(footer);
-      } else {
-        footerEl.innerHTML = footer;
-      }
-      card.appendChild(footerEl);
-    }
-
-    shield.appendChild(card);
-
-    const closeAction = () => {
-      shield.classList.remove('show');
-      setTimeout(() => {
-        shield.remove();
-        if (onClose) onClose();
-      }, 250);
-    };
-
-    closeBtn.onclick = closeAction;
-    shield.onclick = (e) => {
-      if (hasBackdrop && e.target === shield) closeAction();
-    };
-
-    container.appendChild(shield);
-    setTimeout(() => shield.classList.add('show'), 10);
-
-    if (!hasBackdrop) {
-      const clickAway = (e) => {
-        // If clicking on ANY popover card, don't close this one
-        if (e.target.closest('.ds-popover-card')) return;
-        
-        if (!card.contains(e.target)) {
-          closeAction();
-          document.removeEventListener('click', clickAway, true);
-        }
-      };
-      setTimeout(() => document.addEventListener('click', clickAway, true), 100);
-    }
-
-    const popoverInstance = { shield, card, body, close: closeAction };
-    shield.__popover = popoverInstance;
-    return popoverInstance;
-  }
 
   /**
    * Public API
    */
   return {
     createElement,
-    createPopoverShield,
+    createPopoverShield: (options) => {
+      if (typeof ModalComponent !== 'undefined') {
+        return ModalComponent.create(options);
+      }
+      return null;
+    },
 
     /**
      * Registers a set of icons into the DesignSystem registry
@@ -7057,273 +7902,59 @@ const DesignSystem = (() => {
     },
 
     createSelect: (options = [], currentVal, onChange) => {
-      const select = createElement('select', 'ds-select');
-      options.forEach(opt => {
-        const value = typeof opt === 'string' ? opt : opt.value;
-        const label = typeof opt === 'string' ? opt : opt.label;
-        const el = createElement('option', '', { value, text: label });
-        if (value === currentVal) el.selected = true;
-        select.appendChild(el);
-      });
-      if (onChange) select.onchange = (e) => onChange(e.target.value);
-      return select;
+      if (typeof SelectComponent !== 'undefined') {
+        return SelectComponent.create(options, currentVal, onChange);
+      }
+      return null;
     },
 
     createComboButton: (options = {}) => {
-      const {
-        label,
-        variant = 'subtitle',
-        leadingIcon = null,
-        mainAction,
-        toggleAction,
-        disabled = false,
-        className = '',
-        tooltip = null,
-        radius = 'var(--ds-radius-widget)'
-      } = options;
-
-      const container = createElement('div', [
-        'ds-combo-btn',
-        `ds-combo-btn-${variant}`,
-        className
-      ]);
-
-      if (options.id) container.id = options.id;
-
-      container.style.setProperty('--_radius', radius);
-      if (disabled) {
-        container.classList.add('is-disabled');
-        // Actually button atoms use :disabled, but since this is a div, we use a class or attribute
-        container.setAttribute('disabled', 'true'); 
+      if (typeof ButtonComponent !== 'undefined') {
+        return ButtonComponent.createCombo(options);
       }
-
-      // Main Part
-      const main = createElement('div', 'ds-combo-btn-main');
-      if (leadingIcon) {
-        const iconHtml = ICONS[leadingIcon] || leadingIcon;
-        main.appendChild(createElement('span', 'ds-btn-icon-leading', { html: iconHtml }));
-      }
-      if (label) {
-        main.appendChild(createElement('span', 'ds-btn-text', { text: label }));
-      }
-      
-      if (!disabled && mainAction) {
-        main.onclick = (e) => {
-          e.stopPropagation();
-          mainAction(e);
-        };
-      }
-
-      // Toggle Part
-      const toggle = createElement('div', 'ds-combo-btn-toggle', {
-        html: ICONS['chevron-down'] || '▼'
-      });
-      
-      if (options.toggleTooltip) {
-        DesignSystem.applyTooltip(toggle, options.toggleTooltip, 'bottom');
-      }
-      
-      if (!disabled && toggleAction) {
-        toggle.onclick = (e) => {
-          e.stopPropagation();
-          // Toggle logic: If already open, close it
-          if (container.classList.contains('is-open')) {
-            if (typeof window.MenuShield !== 'undefined') window.MenuShield.close();
-            return;
-          }
-          toggleAction(e);
-        };
-      }
-
-      container.appendChild(main);
-      container.appendChild(toggle);
-
-      if (tooltip) {
-        DesignSystem.applyTooltip(container, tooltip, 'bottom');
-      }
-
-      return container;
+      return null;
     },
 
     createButton: (options = {}) => {
-      const {
-        label,
-        variant = 'primary',
-        onClick,
-        disabled = false,
-        className = '',
-        leadingIcon = null,
-        trailingIcon = null,
-        offLabel = false,
-        title = null,
-        radius = 'var(--ds-radius-widget)' // Initial value
-      } = options;
-
-      // Enforce single icon for off-label buttons
-      let activeLeadingIcon = leadingIcon;
-      let activeTrailingIcon = trailingIcon;
-      if (offLabel && activeLeadingIcon && activeTrailingIcon) {
-        activeTrailingIcon = null;
+      if (typeof ButtonComponent !== 'undefined') {
+        return ButtonComponent.create(options);
       }
-
-      const btn = createElement('button', [
-        `ds-btn`,
-        `ds-btn-${variant}`,
-        offLabel ? 'ds-btn-off-label' : '',
-        className
-      ]);
-
-      if (options.id) btn.id = options.id;
-
-      btn.style.setProperty('--_radius', radius);
-
-      if (activeLeadingIcon) {
-        const iconHtml = ICONS[activeLeadingIcon] || activeLeadingIcon;
-        const span = createElement('span', 'ds-btn-icon-leading', { html: iconHtml });
-        btn.appendChild(span);
-      }
-
-      if (label && !offLabel) {
-        const textSpan = createElement('span', 'ds-btn-text', { text: label });
-        btn.appendChild(textSpan);
-      }
-
-      if (activeTrailingIcon) {
-        const iconHtml = ICONS[activeTrailingIcon] || activeTrailingIcon;
-        const span = createElement('span', 'ds-btn-icon-trailing', { html: iconHtml });
-        btn.appendChild(span);
-      }
-
-      if (disabled) btn.disabled = true;
-      if (onClick) btn.onclick = onClick;
-
-      if (title || (offLabel && label)) {
-        DesignSystem.applyTooltip(btn, title || label, options.tooltipPos || 'bottom');
-      }
-
-      // Add loading state helper
-      btn.setLoading = (isLoading) => {
-        if (isLoading) {
-          btn.classList.add('is-loading');
-          btn.disabled = true;
-        } else {
-          btn.classList.remove('is-loading');
-          btn.disabled = disabled;
-        }
-      };
-
-      // Add icon update helper
-      btn.setIcon = (iconName) => {
-        const span = btn.querySelector('.ds-btn-icon-leading');
-        if (span) {
-          span.innerHTML = DesignSystem.getIcon(iconName) || '';
-        }
-      };
-
-      return btn;
+      return null;
     },
 
     /**
      * Creates a standardized input element
      */
+    /**
+     * Creates a standardized input element using InputComponent
+     */
     createInput: (options = {}) => {
-      const {
-        type = 'text',
-        placeholder = '',
-        value = '',
-        className = '',
-        id = '',
-        onInput = null,
-        onChange = null,
-        label = null
-      } = options;
-
-      const input = createElement('input', [`ds-input`, className]);
+      if (typeof InputComponent !== 'undefined') {
+        return InputComponent.create(options);
+      }
       
-      if (id) input.id = id;
+      // Fallback if InputComponent is not yet loaded (unlikely)
+      const { type = 'text', placeholder = '', value = '', className = '' } = options;
+      const input = createElement('input', [`ds-input`, className]);
       input.type = type;
       input.placeholder = placeholder;
       input.value = value;
-
-      if (onInput) input.addEventListener('input', onInput);
-      if (onChange) input.addEventListener('change', onChange);
-
-      if (label) {
-        const container = createElement('div', 'ds-form-field');
-        const labelEl = createElement('label', 'ds-form-field-label', { text: label });
-        container.appendChild(labelEl);
-        container.appendChild(input);
-
-        // Proxy properties so container behaves like input for most use cases
-        Object.defineProperty(container, 'value', {
-          get: () => input.value,
-          set: (v) => { input.value = v; },
-          configurable: true
-        });
-        container.focus = () => input.focus();
-        container.input = input; // Expose underlying input
-
-        return container;
-      }
-
       return input;
     },
 
     /**
-     * Creates an input with an attached action button
+     * Creates an input with an attached action button using InputComponent
      */
     createInputGroup: (options = {}) => {
-      const {
-        inputOptions = {},
-        action = null, // { icon, onClick, title }
-        className = '',
-        label = null
-      } = options;
+      if (typeof InputComponent !== 'undefined') {
+        const { inputOptions = {}, ...rest } = options;
+        return InputComponent.create({ ...inputOptions, ...rest });
+      }
 
-      const group = createElement('div', ['ds-input-group', className]);
-      const input = DesignSystem.createInput(inputOptions);
+      // Fallback
+      const group = createElement('div', ['ds-input-group']);
+      const input = createElement('input', 'ds-input');
       group.appendChild(input);
-
-      if (action) {
-        const btn = DesignSystem.createButton({
-          variant: 'ghost',
-          leadingIcon: action.icon,
-          onClick: action.onClick,
-          title: action.title,
-          offLabel: true,
-          className: 'ds-input-group-action'
-        });
-        group.appendChild(btn);
-      }
-
-      // Proxy value property
-      Object.defineProperty(group, 'value', {
-        get: () => input.value,
-        set: (v) => { input.value = v; },
-        configurable: true
-      });
-      group.focus = () => input.focus();
-      group.input = input;
-
-      if (label) {
-        const container = createElement('div', 'ds-form-field');
-        const labelEl = createElement('label', 'ds-form-field-label', { text: label });
-        container.appendChild(labelEl);
-        container.appendChild(group);
-
-        // Proxy again for the field wrapper
-        Object.defineProperty(container, 'value', {
-          get: () => group.value,
-          set: (v) => { group.value = v; },
-          configurable: true
-        });
-        container.focus = () => group.focus();
-        container.group = group;
-        container.input = input;
-
-        return container;
-      }
-
       return group;
     },
 
@@ -7331,179 +7962,46 @@ const DesignSystem = (() => {
      * Creates an inline message (callout)
      */
     createInlineMessage: (options = {}) => {
-      const {
-        text = '',
-        variant = 'info', // 'info', 'success', 'warning', 'error'
-        icon = 'info',
-        className = ''
-      } = options;
-
-      const container = createElement('div', [`ds-inline-message`, `ds-inline-message--${variant}`, className]);
-      
-      const iconHtml = ICONS[icon] || ICONS['info'] || '';
-      if (iconHtml) {
-        const iconWrapper = createElement('div', 'ds-inline-message-icon', { html: iconHtml });
-        container.appendChild(iconWrapper);
+      if (typeof InlineMessageComponent !== 'undefined') {
+        return InlineMessageComponent.create(options);
       }
+      return null;
+    },
 
-      const textEl = createElement('div', 'ds-inline-message-text', { text });
-      container.appendChild(textEl);
-
-      return container;
+    /**
+     * Creates a subtle status indicator (Dot + Label)
+     */
+    createStatusBadge: (options = {}) => {
+      if (typeof StatusBadge !== 'undefined') {
+        return StatusBadge.create(options);
+      }
+      return createElement('div', 'ds-status-badge-fallback', { text: options.text });
     },
 
     createSegmentedControl: (options = {}) => {
-      const {
-        items = [],
-        activeId = null,
-        onChange = null,
-        radius = 'var(--ds-radius-panel)', // Initial value
-        className = ''
-      } = options;
-
-      const control = createElement('div', ['ds-segmented-control', className]);
-      control.style.setProperty('--_radius', radius);
-
-      const indicator = createElement('div', 'ds-segment-indicator');
-      control.appendChild(indicator);
-
-      items.forEach(itemData => {
-        const item = createElement('div', 'ds-segment-item', {
-          'data-id': itemData.id,
-          'html': DesignSystem.getIcon(itemData.icon)
-        });
-
-        if (itemData.title) {
-          DesignSystem.applyTooltip(item, itemData.title, options.tooltipPos || 'bottom');
-        }
-
-        if (itemData.id === activeId) item.classList.add('active');
-
-        item.addEventListener('mousedown', (e) => e.preventDefault());
-        item.addEventListener('click', () => {
-          if (onChange) onChange(itemData.id);
-        });
-
-        control.appendChild(item);
-      });
-
-      const instance = {
-        el: control,
-        indicator,
-        updateActive: (id) => {
-          const allItems = control.querySelectorAll('.ds-segment-item');
-          let activeItem = null;
-          allItems.forEach(item => {
-            const isActive = item.getAttribute('data-id') === id;
-            item.classList.toggle('active', isActive);
-            if (isActive) activeItem = item;
-          });
-
-          if (indicator && activeItem) {
-            requestAnimationFrame(() => {
-              indicator.style.width = `${activeItem.offsetWidth}px`;
-              indicator.style.height = `${activeItem.offsetHeight}px`;
-              indicator.style.left = `${activeItem.offsetLeft}px`;
-              indicator.style.top = `${activeItem.offsetTop}px`;
-            });
-          }
-        }
-      };
-
-      if (activeId) {
-        setTimeout(() => instance.updateActive(activeId), 0);
+      if (typeof SegmentedControlComponent !== 'undefined') {
+        return SegmentedControlComponent.create(options);
       }
-
-      return instance;
+      return null;
     },
 
-    showConfirm: ({ title, message, onConfirm, onCancel }) => {
-      const content = createElement('div', 'ds-confirm-content');
-      content.innerHTML = `<p class="ds-confirm-message">${message}</p>`;
-
-      const footer = createElement('div', 'ds-confirm-footer');
-      const cancelBtn = createElement('button', 'ds-btn ds-btn-ghost', { text: 'Cancel' });
-      const confirmBtn = createElement('button', 'ds-btn ds-btn-primary', { text: 'Confirm' });
-
-      footer.appendChild(cancelBtn);
-      footer.appendChild(confirmBtn);
-
-      const popover = createPopoverShield({
-        title,
-        content,
-        footer,
-        width: '400px',
-        className: 'ds-modal-confirm'
-      });
-
-      confirmBtn.onclick = async () => {
-        try {
-          if (onConfirm) await onConfirm();
-        } finally {
-          popover.close();
-        }
-      };
-      cancelBtn.onclick = () => {
-        if (onCancel) onCancel();
-        popover.close();
-      };
+    showConfirm: (options) => {
+      if (typeof ModalComponent !== 'undefined') {
+        return ModalComponent.confirm(options);
+      }
     },
 
     showPrompt: (options) => {
-      const { title, message, placeholder, defaultValue = '', onConfirm, onCancel } = options;
-      const content = createElement('div', 'ds-prompt-content');
-      const label = createElement('label', 'ds-field-label', { text: message });
-      const input = DesignSystem.createInput({ 
-        type: 'text', 
-        placeholder: placeholder, 
-        value: defaultValue 
-      });
-
-      content.appendChild(label);
-      content.appendChild(input);
-
-      const footer = createElement('div', 'ds-confirm-footer');
-      const cancelBtn = createElement('button', 'ds-btn ds-btn-ghost', { text: 'Cancel' });
-      const confirmBtn = createElement('button', 'ds-btn ds-btn-primary', { text: 'Continue' });
-
-      footer.appendChild(cancelBtn);
-      footer.appendChild(confirmBtn);
-
-      const popover = createPopoverShield({
-        title,
-        content,
-        footer,
-        width: '440px',
-        className: 'ds-modal-prompt'
-      });
-
-      setTimeout(() => input.focus(), 150);
-
-      confirmBtn.onclick = async () => {
-        const val = input.value.trim();
-        if (!val) {
-          input.classList.add('ds-input-error');
-          input.focus();
-          return;
-        }
-        if (onConfirm) await onConfirm(val);
-        popover.close();
-      };
-
-      input.oninput = () => input.classList.remove('ds-input-error');
-      input.onkeydown = (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); confirmBtn.click(); }
-        if (e.key === 'Escape') { e.preventDefault(); cancelBtn.click(); }
-      };
-
-      cancelBtn.onclick = () => {
-        if (onCancel) onCancel();
-        popover.close();
-      };
+      if (typeof ModalComponent !== 'undefined') {
+        return ModalComponent.prompt(options);
+      }
     },
 
     showCustomModal: (options) => {
-      return createPopoverShield(options);
+      if (typeof ModalComponent !== 'undefined') {
+        return ModalComponent.create(options);
+      }
+      return null;
     },
 
     initSmartTooltips: function () {
@@ -7578,7 +8076,7 @@ const DesignSystem = (() => {
           tooltipEl.style.top = `${top}px`;
           tooltipEl.className = `ds-tooltip pos-${finalPos} is-visible`;
           showTimer = null;
-        }, 500); // 500ms delay
+        }, 150); // Reduced delay to 150ms for snappier feel
       }, true);
 
       document.addEventListener('mouseout', (e) => {
@@ -7773,6 +8271,9 @@ const MenuShield = (() => {
     const _handleOutsideClick = (e) => {
       // Don't close if clicking inside the shield
       if (shield.contains(e.target)) return;
+
+      // Don't close if clicking on another active modal shield (e.g. Confirm Modal)
+      if (e.target.closest('.ds-popover-shield')) return;
 
       // Don't close if clicking inside the anchor (let the toggle logic handle it)
       if (options.anchor && (options.anchor === e.target || options.anchor.contains(e.target))) {
@@ -10956,12 +11457,11 @@ class MarkdownViewerComponent {
     }
 
     if (!info) {
-      // Standard Publish Button
+      // Regular Button when not published
       this._publishBtn = DesignSystem.createButton({
         label: 'Publish',
         variant: 'subtitle',
         leadingIcon: 'globe',
-        className: 'floating-publish-btn',
         id: 'floating-publish-btn',
         tooltip: 'Publish to Web',
         onClick: (e) => {
@@ -10972,9 +11472,8 @@ class MarkdownViewerComponent {
       // Published Combo Button (Re-publish / Unpublish)
       this._publishBtn = DesignSystem.createComboButton({
         label: 'Re-publish',
-        variant: 'subtitle',
+        variant: 'subtitle', // Light variant even when published
         leadingIcon: 'globe',
-        className: 'floating-publish-btn is-published',
         id: 'floating-publish-btn',
         tooltip: `Last published: ${new Date(info.updatedAt).toLocaleDateString()}`,
         mainAction: (e) => {
@@ -11004,9 +11503,9 @@ class MarkdownViewerComponent {
               onClick: () => {
                 DesignSystem.showConfirm({
                   title: 'Clear Publish State?',
-                  message: 'This only removes the state from MDpreview. The page on Handoff.host will remain active unless deleted manually on the host.',
-                  onConfirm: () => {
-                    window.PublishService.unpublish(file);
+                  message: 'This only removes the state from MDpreview. The page on the Worker will remain active unless deleted manually.',
+                  onConfirm: async () => {
+                    await window.PublishService.unpublish(file);
                     this._updatePublishButtonState();
                   }
                 });
@@ -11034,72 +11533,12 @@ class MarkdownViewerComponent {
         event,
         anchor,
         file: this.state.file,
-        onPublished: (url) => {
+        onPublished: (_url) => {
           this._updatePublishButtonState();
-          this._showPublishSuccessModal(url);
         }
       });
     }
   }
-
-  /**
-   * Shows a premium success modal with the publish link
-   */
-  _showPublishSuccessModal(url) {
-    if (!window.DesignSystem) return;
-
-    const modal = DesignSystem.showCustomModal({
-      title: 'Successfully Published',
-      icon: 'check-circle',
-      className: 'publish-success-modal',
-      body: `
-        <div class="ds-publish-success-content">
-          <p class="ds-text-subtle">Your document is now live on the web. You can share this link with anyone.</p>
-          <div class="ds-publish-link-container">
-            <input type="text" class="ds-input" value="${url}" readonly id="publish-url-input">
-          </div>
-          <div class="ds-inline-message ds-inline-message--info" style="margin-top: 12px;">
-            <div class="ds-inline-message-icon">${DesignSystem.getIcon('info')}</div>
-            <div class="ds-inline-message-content">Note: Local images are not included in the web version.</div>
-          </div>
-        </div>
-      `,
-      footer: `
-        <button class="ds-btn ds-btn--subtitle" id="close-modal-btn">Close</button>
-        <button class="ds-btn ds-btn--primary" id="copy-url-btn">
-          <span class="ds-btn-icon-leading">${DesignSystem.getIcon('copy')}</span>
-          <span class="ds-btn-label">Copy Link</span>
-        </button>
-      `
-    });
-
-    // Event Listeners
-    const copyBtn = modal.querySelector('#copy-url-btn');
-    const input = modal.querySelector('#publish-url-input');
-    const closeBtn = modal.querySelector('#close-modal-btn');
-
-    if (copyBtn) {
-      copyBtn.onclick = () => {
-        navigator.clipboard.writeText(url);
-        if (window.showToast) window.showToast('Link copied to clipboard', 'success');
-        copyBtn.querySelector('.ds-btn-label').textContent = 'Copied!';
-        setTimeout(() => {
-          if (copyBtn.querySelector('.ds-btn-label')) {
-            copyBtn.querySelector('.ds-btn-label').textContent = 'Copy Link';
-          }
-        }, 2000);
-      };
-    }
-
-    if (input) {
-      input.onclick = () => input.select();
-    }
-
-    if (closeBtn) {
-      closeBtn.onclick = () => modal.close();
-    }
-  }
-
 
 
   // ── Context Menu & Actions ───────────────────────────────
@@ -11679,28 +12118,74 @@ const PublishConfigComponent = (() => {
       if (!this.container) return;
       this.container.innerHTML = '';
 
-      const info = this.state.info;
+      const { info, isLoading } = this.state;
       const fileName = this.file.split('/').pop().replace(/\.[^/.]+$/, "");
       const defaultSlug = info ? info.slug : fileName.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 50);
 
-      // 0. Published Status Info
+
+      // 0. Header / Status Section
       if (info) {
-        const statusMsg = DesignSystem.createInlineMessage({
-          text: `Last published: ${new Date(info.updatedAt).toLocaleString()}`,
+        const workerUrl = window.AppState.settings.publishWorkerUrl || '';
+        const baseUrl = workerUrl.replace(/\/publish\/?$/, '');
+        const fullUrl = `${baseUrl}/${info.slug}`;
+
+        const statusBadge = DesignSystem.createStatusBadge({
+          text: `Live on the web since ${new Date(info.updatedAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}`,
           variant: 'success',
-          icon: 'check-circle',
-          className: 'ds-publish-status-info'
+          className: 'ds-publish-status-badge'
         });
-        this.container.appendChild(statusMsg);
+        this.container.appendChild(statusBadge);
+
+        // Display Full URL
+        const urlGroup = DesignSystem.createInput({
+          label: 'Public Address',
+          description: 'Share this link with your audience.',
+          value: fullUrl,
+          readOnly: true,
+          className: 'ds-input--link',
+          action: {
+            icon: 'copy',
+            title: 'Copy Link',
+            onClick: (e) => {
+              navigator.clipboard.writeText(fullUrl);
+              if (window.showToast) window.showToast('Link copied');
+              const btn = e.currentTarget;
+              if (btn && typeof btn.setIcon === 'function') {
+                btn.setIcon('check');
+                setTimeout(() => btn.setIcon('copy'), 2000);
+              }
+            }
+          }
+        });
+        
+        const urlInputEl = urlGroup.querySelector('input');
+        if (urlInputEl) {
+          urlInputEl.style.cursor = 'pointer';
+          urlInputEl.onclick = () => window.open(fullUrl, '_blank');
+          urlInputEl.title = 'Click to open link';
+        }
+        this.container.appendChild(urlGroup);
+      } else {
+        const isWorker = !!(window.AppState.settings.publishWorkerUrl && window.AppState.settings.publishAdminSecret);
+        
+
+        const engineBadge = DesignSystem.createStatusBadge({
+          text: isWorker ? 'Ready to publish via Edge Worker' : 'Ready to publish via Handoff',
+          variant: isWorker ? 'info' : 'warning',
+          className: 'ds-publish-engine-badge'
+        });
+        this.container.appendChild(engineBadge);
       }
 
       // 1. Slug (Link) Field
       const slugField = DesignSystem.createInputGroup({
-        label: 'Slug (URL Link)',
+        label: 'Customize Link',
+        description: 'Choose a simple, readable name for your URL.',
         inputOptions: {
-          placeholder: 'your-custom-slug',
+          placeholder: 'my-awesome-document',
           value: defaultSlug,
-          className: 'ds-publish-input'
+          className: 'ds-publish-input',
+          disabled: isLoading
         },
         action: {
           icon: 'copy',
@@ -11708,14 +12193,11 @@ const PublishConfigComponent = (() => {
           onClick: (e) => {
             const val = slugField.value;
             navigator.clipboard.writeText(val);
-            
-            // Visual feedback on button
             const btn = e.currentTarget;
             if (btn && typeof btn.setIcon === 'function') {
               btn.setIcon('check');
               setTimeout(() => btn.setIcon('copy'), 2000);
             }
-
             if (window.showToast) window.showToast('Slug copied');
           }
         }
@@ -11723,32 +12205,67 @@ const PublishConfigComponent = (() => {
       this.slugInput = slugField;
       this.container.appendChild(slugField);
 
+      // Listen for changes
+      const input = slugField.querySelector('input');
+      this.slugInputEl = input;
+      if (input) {
+        input.addEventListener('input', () => {
+          if (this.state.isLoading) return;
+          const raw = input.value;
+          const clean = raw.toLowerCase().replace(/[^a-z0-9_-]/g, '-').substring(0, 100);
+          
+          if (raw !== clean) input.value = clean;
+          this._checkSlug(clean);
+        });
+      }
+
+      // Initial Check - SKIP IF LOADING
+      if (!isLoading) {
+        setTimeout(async () => {
+          if (this.state.isLoading) return;
+          if (info && info.slug) {
+            const isStillThere = await window.PublishService.checkSlugAvailability(info.slug);
+            if (isStillThere) {
+              await window.PublishService.unpublish(this.file);
+              this.setState({ info: null });
+              return;
+            }
+          }
+          this._checkSlug(defaultSlug);
+        }, 100);
+      }
+
       // 2. Password Field
       const passField = DesignSystem.createInput({
-        label: 'Password (Optional)',
+        label: 'Protect with Password',
+        description: 'Restrict access to only those with the password.',
         type: 'password',
-        placeholder: 'Leave blank for public',
-        className: 'ds-publish-input'
+        placeholder: 'Leave blank to keep public',
+        className: 'ds-publish-input',
+        disabled: isLoading
       });
       this.passInput = passField;
       this.container.appendChild(passField);
 
       // 3. Actions
       const actions = DesignSystem.createElement('div', 'ds-publish-actions');
-      
-      // Left side actions (Unpublish)
       const leftActions = DesignSystem.createElement('div', 'ds-publish-actions-left');
+      leftActions.style.display = 'flex';
+      leftActions.style.gap = '8px';
+
       if (info) {
         const unpublishBtn = DesignSystem.createButton({
-          label: 'Unpublish',
+          label: 'Remove from Web',
           variant: 'danger-ghost',
+          disabled: isLoading,
           onClick: () => {
             DesignSystem.showConfirm({
-              title: 'Clear Publish State?',
-              message: 'This only removes the state from MDpreview. The page on Handoff.host will remain active.',
-              onConfirm: () => {
-                window.PublishService.unpublish(this.file);
-                this.setState({ info: null });
+              title: 'Remove Document?',
+              message: 'This will take the document offline. The link will no longer work.',
+              onConfirm: async () => {
+                this.setState({ isLoading: true });
+                await window.PublishService.unpublish(this.file);
+                this.setState({ info: null, isLoading: false });
                 if (this.onPublished) this.onPublished(null);
               }
             });
@@ -11756,27 +12273,37 @@ const PublishConfigComponent = (() => {
         });
         leftActions.appendChild(unpublishBtn);
       }
+
       actions.appendChild(leftActions);
 
-      // Right side actions
       const rightActions = DesignSystem.createElement('div', 'ds-publish-actions-right');
       const cancelBtn = DesignSystem.createButton({
         label: 'Cancel',
         variant: 'ghost',
+        disabled: isLoading,
         onClick: () => window.MenuShield.close()
       });
       const publishBtn = DesignSystem.createButton({
-        label: info ? 'Update' : 'Publish',
+        label: info ? 'Update Link' : 'Go Live',
         variant: 'primary',
+        disabled: isLoading,
         onClick: async () => {
           const slug = this.slugInput.value.trim();
           const password = this.passInput.value.trim();
+          
+          const startTime = Date.now();
           
           publishBtn.setLoading(true);
           this.setState({ isLoading: true });
 
           try {
             const url = await window.PublishService.publish({ slug, password });
+            
+            const elapsed = Date.now() - startTime;
+            if (elapsed < 1000) {
+              await new Promise(resolve => setTimeout(resolve, 1000 - elapsed));
+            }
+
             if (url) {
               const newInfo = window.PublishService.getPublishInfo(this.file);
               this.setState({ info: newInfo, isLoading: false });
@@ -11784,24 +12311,92 @@ const PublishConfigComponent = (() => {
               if (this.onPublished) {
                 this.onPublished(url);
               }
-              // Close on success
-              window.MenuShield.close();
             } else {
               this.setState({ isLoading: false });
-              publishBtn.setLoading(false);
             }
-          } catch (_e) {
+          } catch (err) {
+            console.error('[PublishConfig] ERROR Publish:', err);
             this.setState({ isLoading: false });
-            publishBtn.setLoading(false);
           }
         }
       });
+      
+      if (isLoading) {
+        publishBtn.setLoading(true);
+      }
 
       rightActions.appendChild(cancelBtn);
+      this.publishBtn = publishBtn;
       rightActions.appendChild(publishBtn);
       actions.appendChild(rightActions);
       
       this.container.appendChild(actions);
+    }
+
+    _checkSlug(slug) {
+      if (this.state.isLoading) return;
+      if (this._checkTimer) clearTimeout(this._checkTimer);
+
+      if (!slug || slug.length < 1) {
+        if (this.slugInput) this.slugInput.setStatus(null);
+        if (this.publishBtn) this.publishBtn.disabled = true;
+        return;
+      }
+      
+      // Debounce everything to prevent flicker and redundant calls
+      this._checkTimer = setTimeout(async () => {
+        if (this.state.isLoading) return;
+        
+        // Source of truth: current input value
+        const currentVal = this.slugInputEl ? this.slugInputEl.value : slug;
+        if (currentVal !== slug) return;
+
+        if (this.slugInput) {
+          this.slugInput.setStatus({ text: 'Checking availability...', variant: 'info', isLoading: true });
+        }
+
+        try {
+          const isAvailable = await window.PublishService.checkSlugAvailability(slug);
+          
+          // Re-verify after async call to handle rapid typing
+          const finalVal = this.slugInputEl ? this.slugInputEl.value : slug;
+          if (finalVal !== slug) return;
+
+          if (!this.slugInput) return;
+
+          const info = this.state.info;
+          if (isAvailable) {
+            this.slugInput.setStatus({ text: 'Slug is available', variant: 'success', icon: 'circle-check' });
+            this.slugInput.setVariant('default');
+            if (this.publishBtn) {
+              this.publishBtn.disabled = false;
+              this.publishBtn.setLabel(info ? 'Update Link' : 'Go Live');
+            }
+          } else {
+            // If it's already published to THIS slug, it's fine (it's an update)
+            if (info && info.slug === slug) {
+              this.slugInput.setStatus({ text: 'Current slug (update mode)', variant: 'success', icon: 'circle-check' });
+              this.slugInput.setVariant('default');
+              if (this.publishBtn) {
+                this.publishBtn.disabled = false;
+                this.publishBtn.setLabel('Update Link');
+              }
+            } else {
+              this.slugInput.setStatus({ text: 'Taken. Clicking Go Live will OVERWRITE.', variant: 'warning', icon: 'circle-x' });
+              this.slugInput.setVariant('warning');
+              if (this.publishBtn) {
+                this.publishBtn.disabled = false;
+                this.publishBtn.setLabel(info ? 'Update Link' : 'Go Live');
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Slug check failed:', e);
+          if (this.slugInput) {
+            this.slugInput.setStatus({ text: 'Could not verify slug', variant: 'warning' });
+          }
+        }
+      }, 500);
     }
 
     setState(newState) {
@@ -11838,11 +12433,7 @@ const PublishConfigComponent = (() => {
         }
       });
 
-      // Auto focus
-      setTimeout(() => {
-        const input = content.querySelector('.ds-publish-input');
-        if (input) input.focus();
-      }, 150);
+
     }
   }
 
@@ -11850,6 +12441,298 @@ const PublishConfigComponent = (() => {
 })();
 
 window.PublishConfigComponent = PublishConfigComponent;
+
+```
+</file>
+
+<file path="renderer/js/components/organisms/publish-manager-component.js">
+```js
+/* global DesignSystem, BaseFormModal, PublishService */
+/**
+ * PublishManagerComponent
+ * Purpose: List and delete all published slugs directly from the Worker KV.
+ * Atomic Design System (Organism)
+ */
+
+class PublishManagerComponent {
+  constructor(options = {}) {
+    this.onChanged = options.onChanged || (() => {});
+    this.slugs = [];
+    this.isLoading = true;
+  }
+
+  render() {
+    this.bodyContent = DesignSystem.createElement('div', 'ds-publish-manager');
+    this.bodyContent.style.minHeight = '300px';
+    this._loadAndRender();
+    
+    const closeBtn = DesignSystem.createButton({
+      variant: 'primary',
+      label: 'Close',
+      onClick: () => this.closeAction()
+    });
+
+    const form = BaseFormModal.create({
+      iconHtml: `
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" 
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2H2v10" /><path d="M12 22H2V12" /><path d="M22 22H12V12" /><path d="M22 2h-10v10" />
+        </svg>
+      `,
+      title: 'Global Publish Manager',
+      subtitle: 'View and manage all active slugs on your Cloudflare Worker.',
+      bodyContent: this.bodyContent,
+      actions: [closeBtn]
+    });
+
+    return form;
+  }
+
+  async _loadAndRender() {
+    this.bodyContent.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--ds-text-dim);">Loading published slugs...</div>';
+    
+    this.slugs = await PublishService.listAllPublished();
+    this.isLoading = false;
+    this._renderList();
+  }
+
+  _renderList() {
+    this.bodyContent.innerHTML = '';
+    
+    if (this.slugs.length === 0) {
+      this.bodyContent.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--ds-text-dim);">No published documents found on worker.</div>';
+      return;
+    }
+
+    const list = DesignSystem.createElement('div', 'ds-publish-manager-list');
+    list.style.display = 'flex';
+    list.style.flexDirection = 'column';
+    list.style.gap = '8px';
+
+    this.slugs.forEach(slug => {
+      const row = DesignSystem.createElement('div', 'ds-publish-manager-item');
+      row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--ds-white-a05); border-radius: var(--ds-radius-widget); border: 1px solid var(--ds-white-a10);';
+
+      const info = DesignSystem.createElement('div');
+      info.innerHTML = `
+        <div style="font-weight: 600; color: var(--ds-text-primary); font-size: 13px;">${slug}</div>
+        <div style="font-size: 11px; color: var(--ds-text-dim); margin-top: 2px;">Active on Edge</div>
+      `;
+
+      const actions = DesignSystem.createElement('div');
+      actions.style.display = 'flex';
+      actions.style.gap = '8px';
+
+      const renameBtn = DesignSystem.createButton({
+        variant: 'ghost',
+        leadingIcon: 'edit',
+        title: 'Rename Slug',
+        onClick: (e) => {
+          if (e) e.stopPropagation();
+          const newSlug = prompt('Enter new slug:', slug);
+          if (newSlug && newSlug !== slug) {
+            DesignSystem.showConfirm({
+              title: 'Rename Slug?',
+              message: `Change "/${slug}" to "/${newSlug.toLowerCase()}"? This will update the URL.`,
+              onConfirm: async () => {
+                const success = await PublishService.renameSlug(slug, newSlug.toLowerCase().replace(/[^a-z0-9_-]/g, '-'));
+                if (success) {
+                  this._loadAndRender();
+                  this.onChanged();
+                } else {
+                  if (window.showToast) window.showToast('Rename failed. Slug might be taken.', 'error');
+                }
+              }
+            });
+          }
+        }
+      });
+
+      const deleteBtn = DesignSystem.createButton({
+        variant: 'danger-ghost',
+        leadingIcon: 'trash-2',
+        title: 'Delete Slug',
+        onClick: (e) => {
+          if (e) e.stopPropagation();
+          DesignSystem.showConfirm({
+            title: 'Delete Slug?',
+            message: `Are you sure you want to permanently delete "/${slug}" from the worker? This cannot be undone.`,
+            onConfirm: async () => {
+              const success = await PublishService.deleteSlug(slug);
+              if (success) {
+                this.slugs = this.slugs.filter(s => s !== slug);
+                this._renderList();
+                this.onChanged();
+              }
+            }
+          });
+        }
+      });
+
+      actions.appendChild(renameBtn);
+      actions.appendChild(deleteBtn);
+      row.appendChild(info);
+      row.appendChild(actions);
+      list.appendChild(row);
+    });
+
+    this.bodyContent.appendChild(list);
+  }
+
+  static open(options = {}) {
+    const component = new PublishManagerComponent(options);
+    const content = component.render();
+
+    const popover = DesignSystem.createPopoverShield({
+      content: content,
+      width: '480px',
+      showHeader: false
+    });
+
+    component.closeAction = () => popover.close();
+    return popover;
+  }
+}
+
+window.PublishManagerComponent = PublishManagerComponent;
+
+```
+</file>
+
+<file path="renderer/js/components/organisms/publish-settings-form-component.js">
+```js
+/* global DesignSystem, BaseFormModal */
+/**
+ * PublishSettingsFormComponent
+ * Purpose: Configure Cloudflare Worker and Handoff API settings
+ * Atomic Design System (Organism)
+ */
+
+class PublishSettingsFormComponent {
+  constructor(options = {}) {
+    this.onConfirm = options.onConfirm || (() => { });
+    this.onCancel = options.onCancel || (() => { });
+    
+    const s = window.AppState.settings;
+    this.initialWorkerUrl = s.publishWorkerUrl || '';
+    this.initialAdminSecret = s.publishAdminSecret || '';
+    this.initialHandoffToken = s.handoffToken || '';
+  }
+
+  render() {
+    const bodyContent = DesignSystem.createElement('div', 'ds-publish-settings-form');
+    bodyContent.style.display = 'flex';
+    bodyContent.style.flexDirection = 'column';
+    bodyContent.style.gap = 'var(--ds-space-md)';
+
+    // --- Section 1: Worker (Primary) ---
+    const workerSection = DesignSystem.createElement('div', 'ds-form-section');
+    workerSection.innerHTML = '<h3 style="margin: 0 0 12px 0; font-size: 14px; color: var(--ds-accent);">Self-Hosted Worker (Recommended)</h3>';
+    
+    const urlLabel = DesignSystem.createElement('label', 'ds-form-field-label', { text: 'WORKER URL' });
+    this.urlInput = DesignSystem.createInput({
+      placeholder: 'https://your-worker.yourdomain.workers.dev',
+      value: this.initialWorkerUrl
+    });
+
+    const secretLabel = DesignSystem.createElement('label', 'ds-form-field-label', { text: 'ADMIN SECRET' });
+    this.secretInput = DesignSystem.createInput({
+      type: 'password',
+      placeholder: 'Enter your worker admin secret...',
+      value: this.initialAdminSecret
+    });
+
+    workerSection.appendChild(urlLabel);
+    workerSection.appendChild(this.urlInput);
+    workerSection.appendChild(secretLabel);
+    workerSection.appendChild(this.secretInput);
+
+    // Divider
+    const divider = DesignSystem.createElement('div', 'ds-form-divider');
+    divider.style.margin = '8px 0';
+
+    // --- Section 2: Handoff (Legacy) ---
+    const handoffSection = DesignSystem.createElement('div', 'ds-form-section');
+    handoffSection.innerHTML = '<h3 style="margin: 0 0 12px 0; font-size: 14px; color: var(--ds-text-dim);">Legacy: Handoff.host</h3>';
+    
+    const tokenLabel = DesignSystem.createElement('label', 'ds-form-field-label', { text: 'HANDOFF API TOKEN' });
+    this.tokenInput = DesignSystem.createInput({
+      type: 'password',
+      placeholder: 'Enter your Handoff Bearer token...',
+      value: this.initialHandoffToken
+    });
+
+    handoffSection.appendChild(tokenLabel);
+    handoffSection.appendChild(this.tokenInput);
+
+    bodyContent.appendChild(workerSection);
+    bodyContent.appendChild(divider);
+    bodyContent.appendChild(handoffSection);
+
+    // Actions
+    const cancelBtn = DesignSystem.createButton({
+      variant: 'ghost',
+      label: 'Cancel',
+      onClick: () => {
+        this.closeAction();
+        this.onCancel();
+      }
+    });
+
+    this.confirmBtn = DesignSystem.createButton({
+      variant: 'primary',
+      label: 'Save Configuration',
+      onClick: () => {
+        const workerUrl = this.urlInput.value.trim();
+        const adminSecret = this.secretInput.value.trim();
+        const handoffToken = this.tokenInput.value.trim();
+        
+        window.SettingsService.update('publishWorkerUrl', workerUrl);
+        window.SettingsService.update('publishAdminSecret', adminSecret);
+        window.SettingsService.update('handoffToken', handoffToken);
+        
+        if (window.showToast) window.showToast('Publish settings updated');
+        
+        this.onConfirm();
+        this.closeAction();
+      }
+    });
+
+    const form = BaseFormModal.create({
+      iconHtml: `
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
+        </svg>
+      `,
+      title: 'Publish Configuration',
+      subtitle: 'Configure your self-hosted Cloudflare Worker or use legacy Handoff.host.',
+      bodyContent: bodyContent,
+      actions: [cancelBtn, this.confirmBtn]
+    });
+
+    setTimeout(() => this.urlInput.focus(), 100);
+
+    return form;
+  }
+
+  static open(options = {}) {
+    const component = new PublishSettingsFormComponent(options);
+    const content = component.render();
+
+    const popover = DesignSystem.createPopoverShield({
+      content: content,
+      width: '520px',
+      showHeader: false,
+      className: 'aws-popover-shield'
+    });
+
+    component.closeAction = () => popover.close();
+    return popover;
+  }
+}
+
+window.PublishSettingsFormComponent = PublishSettingsFormComponent;
 
 ```
 </file>
@@ -12565,7 +13448,7 @@ window.SearchPalette = SearchPalette;
 
 <file path="renderer/js/components/organisms/settings-component.js">
 ```js
-/* global DesignSystem, SettingRow, SettingsService, AppState, SwitchToggleModule, showToast, HandoffTokenFormComponent */
+/* global DesignSystem, SettingRow, SettingsService, AppState, SwitchToggleModule, showToast, PublishSettingsFormComponent, PublishManagerComponent */
 /* ══════════════════════════════════════════════════
    SettingsComponent.js — Settings View Organism
    Atomic Design System (Organism)
@@ -12641,8 +13524,12 @@ class SettingsComponent {
     // 4. Integrations Group
     container.appendChild(this._createGroup('Integrations', [
       SettingRow.create({
-        label: 'Handoff API Token',
+        label: 'Publish Configuration',
         control: this._createTokenConfigButton()
+      }),
+      SettingRow.create({
+        label: 'Publish Management',
+        control: this._createManagementButton()
       })
     ]));
 
@@ -12650,24 +13537,38 @@ class SettingsComponent {
   }
 
   _createTokenConfigButton() {
-    const hasToken = !!AppState.settings.handoffToken;
     const btn = DesignSystem.createButton({
       variant: 'subtitle',
-      label: hasToken ? 'Update Config' : 'Config API',
+      label: 'Config Publish',
       leadingIcon: 'settings-2',
       onClick: () => {
-        if (typeof HandoffTokenFormComponent !== 'undefined') {
-          HandoffTokenFormComponent.open({
-            onConfirm: (token) => {
-              if (typeof SettingsService !== 'undefined') {
-                SettingsService.update('handoffToken', token);
-                if (typeof showToast === 'function') showToast('Handoff token updated');
-                // Re-render settings to update button label
-                SettingsComponent.hide();
-                setTimeout(() => SettingsComponent.open(), 50);
-              }
+        if (typeof PublishSettingsFormComponent !== 'undefined') {
+          PublishSettingsFormComponent.open({
+            onConfirm: () => {
+              // Re-render settings to update button label
+              SettingsComponent.hide();
+              setTimeout(() => SettingsComponent.open(), 50);
             }
           });
+        }
+      }
+    });
+    
+    btn.style.height = '28px';
+    btn.style.padding = '0 12px';
+    btn.style.fontSize = '11px';
+
+    return btn;
+  }
+
+  _createManagementButton() {
+    const btn = DesignSystem.createButton({
+      variant: 'subtitle',
+      label: 'Manage Slugs',
+      leadingIcon: 'layers',
+      onClick: () => {
+        if (typeof PublishManagerComponent !== 'undefined') {
+          PublishManagerComponent.open();
         }
       }
     });
@@ -14853,7 +15754,13 @@ window.AppState = {
     rightSidebarWidth: parseInt(localStorage.getItem('mdpreview_sidebar_right_width') || '300', 10),
     rightSidebarOpen: localStorage.getItem('md-right-sidebar-open') === 'true',
     rightSidebarTab: localStorage.getItem('md-right-sidebar-tab') || 'comments',
-    handoffToken: localStorage.getItem('md-handoff-token') || ''
+    handoffToken: localStorage.getItem('md-handoff-token') || '',
+    publishWorkerUrl: localStorage.getItem('md-publish-worker-url') || '',
+    publishAdminSecret: localStorage.getItem('md-publish-admin-secret') || '',
+    publishData: (() => {
+      try { return JSON.parse(localStorage.getItem('md-publish-data') || '{}'); }
+      catch (_e) { return {}; }
+    })()
   },
 
   /**
@@ -15908,6 +16815,29 @@ window.showToast = showToast;
         }
         return { success: true };
       } catch (error) {
+        return { success: false, error: error.message };
+      }
+    },
+
+    publishToWorker: async (data) => {
+      try {
+        const { payload, workerUrl, secret } = data;
+        
+        // If web version, we proxy through our own server to keep secret safe
+        const response = await fetch('/api/worker-publish', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ payload, workerUrl, secret })
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.error || `Server responded with ${response.status}`);
+        }
+
+        return await response.json();
+      } catch (error) {
+        console.error('[Bridge] Worker Publish error:', error);
         return { success: false, error: error.message };
       }
     },
@@ -20461,7 +21391,7 @@ const PublishService = (() => {
    * Scans HTML for local image references and resolves them to absolute paths
    */
   async function _gatherAssets(html) {
-    const assets = new Set();
+    const assets = {};
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = html;
     
@@ -20471,15 +21401,21 @@ const PublishService = (() => {
       if (src && !src.startsWith('http') && !src.startsWith('data:')) {
         // Resolve path via electronAPI (which handles relative to watch dir)
         const absolutePath = await window.electronAPI.getAbsolutePath(src);
-        if (absolutePath) assets.add(absolutePath);
+        if (absolutePath) {
+          assets[src] = {
+            path: absolutePath,
+            type: 'inline'
+          };
+        }
       }
     }
     
-    return Array.from(assets);
+    return assets;
   }
 
   /**
    * Bundles all active design system CSS into a single style block
+   * @deprecated Used for Handoff.host legacy bundling
    */
   function _bundleStyles() {
     let bundledCss = '';
@@ -20506,50 +21442,122 @@ const PublishService = (() => {
    */
   function _createStandaloneBundle(html, title) {
     const styles = _bundleStyles();
-    
+    const fileName = title || 'MDpreview Document';
+
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title || 'MDpreview Document'}</title>
+    <title>${fileName}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --ds-font-main: 'Inter', system-ui, -apple-system, sans-serif;
-            --ds-font-code: 'Roboto Mono', monospace;
+            --ds-bg-main: #131313;
+            --ds-accent: #ffbf48;
+            --ds-accent-rgb: 255, 191, 72;
+            --ds-text-primary: rgba(255, 255, 255, 0.90);
+            --ds-text-secondary: rgba(255, 255, 255, 0.60);
+            --ds-text-inverse: #ffffff;
+            --ds-white-a02: rgba(255, 255, 255, 0.02);
+            --ds-white-a04: rgba(255, 255, 255, 0.04);
+            --ds-white-a05: rgba(255, 255, 255, 0.05);
+            --ds-white-a08: rgba(255, 255, 255, 0.08);
+            --ds-white-a10: rgba(255, 255, 255, 0.10);
+            --ds-white-a20: rgba(255, 255, 255, 0.20);
+            --ds-black-a30: rgba(0, 0, 0, 0.30);
+            --ds-border-default: rgba(255, 255, 255, 0.10);
+            --ds-radius-panel: 12px;
+            --ds-radius-sm: 6px;
+            --ds-transition-smooth: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
+
         body {
             margin: 0;
             padding: 0;
-            background: #000;
-            color: #fff;
-            font-family: var(--ds-font-main);
+            background: var(--ds-bg-main);
+            color: var(--ds-text-secondary);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.8;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
-        ${styles}
-        
-        /* Standalone overrides */
-        .md-viewer-viewport {
-            height: auto !important;
-            padding: 40px 20px !important;
-            max-width: 900px;
+
+        .md-publish-container {
+            max-width: 800px;
             margin: 0 auto;
-            background: transparent !important;
+            padding: 60px 24px;
         }
-        .md-content-inner {
-            padding: 0 !important;
+
+        .md-render-body { font-size: 15px; }
+
+        ${styles}
+
+        /* ── Parity Overrides ── */
+        .md-viewer-viewport { background: transparent !important; height: auto !important; }
+        .md-content-inner { padding: 0 !important; }
+        .md-block { margin-bottom: 0.5rem; }
+        .md-line { width: 100%; }
+
+        .md-render-body hr {
+            border: none;
+            border-bottom: 1px solid var(--ds-border-default);
+            margin: 3rem 0;
+        }
+
+        .premium-code-block, .md-table-wrapper, .mermaid {
+            background: transparent !important;
+            backdrop-filter: blur(40px) !important;
+            -webkit-backdrop-filter: blur(40px) !important;
+            border: 1px solid var(--ds-white-a08) !important;
+            border-radius: var(--ds-radius-panel) !important;
+            margin: 2rem 0 !important;
+            overflow: hidden !important;
+        }
+
+        .md-table-wrapper { background: transparent !important; }
+
+        .mermaid path, .mermaid rect, .mermaid circle, .mermaid polygon {
+            stroke: var(--ds-white-a20) !important;
+        }
+
+        .mermaid text, .mermaid span, .mermaid .label {
+            fill: #fff !important;
+            color: #fff !important;
+        }
+
+        .code-block-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            background: var(--ds-black-a30);
+            border-bottom: 1px solid var(--ds-white-a10);
+        }
+
+        .code-block-lang {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--ds-text-secondary);
+            font-family: 'Roboto Mono', monospace;
         }
     </style>
 </head>
 <body class="ds-theme-dark">
-    <div class="md-viewer-viewport">
-        <div id="md-content" class="md-content-inner">
-            ${html}
+    <div class="md-publish-container">
+        <div id="md-content" class="md-content md-render-body">
+            <div class="md-content-inner">
+                ${html}
+            </div>
         </div>
     </div>
+    <footer style="text-align: center; padding: 60px; color: #666; font-size: 12px; font-family: sans-serif;">
+        Generated with <a href="https://github.com/Mchis167/MDpreview" style="color: #888; text-decoration: none;">MDpreview</a>
+    </footer>
 </body>
 </html>`;
   }
@@ -20567,6 +21575,27 @@ const PublishService = (() => {
     },
 
     /**
+     * Check if a slug is already taken on the worker
+     * @param {string} slug 
+     * @returns {Promise<boolean>} true if available
+     */
+    async checkSlugAvailability(slug) {
+      const workerUrl = window.AppState.settings.publishWorkerUrl;
+      if (!workerUrl) return true;
+
+      try {
+        // Clean the base URL (remove /publish if present)
+        const baseUrl = workerUrl.replace(/\/publish\/?$/, '');
+        const res = await fetch(`${baseUrl}/check-slug?slug=${encodeURIComponent(slug)}`);
+        if (!res.ok) return true;
+        const data = await res.json();
+        return !data.exists;
+      } catch (_e) {
+        return true; 
+      }
+    },
+
+    /**
      * Saves publication info for a specific file
      */
     savePublishInfo: function(filePath, info) {
@@ -20580,28 +21609,142 @@ const PublishService = (() => {
     },
 
     /**
-     * Removes publication info for a specific file
+     * List all slugs currently on the worker
      */
-    unpublish: function(filePath) {
-      if (!filePath) return;
-      const data = window.AppState.settings.publishData || {};
-      delete data[filePath];
-      window.SettingsService.update('publishData', data);
-      if (window.showToast) window.showToast('Publication state cleared locally', 'info');
+    async listAllPublished() {
+      const workerUrl = window.AppState.settings.publishWorkerUrl;
+      const adminSecret = window.AppState.settings.publishAdminSecret;
+      if (!workerUrl || !adminSecret) return [];
+
+      try {
+        const baseUrl = workerUrl.replace(/\/publish\/?$/, '');
+        const res = await fetch(`${baseUrl}/list`, {
+          headers: { 'X-Admin-Secret': adminSecret }
+        });
+        if (!res.ok) return [];
+        const data = await res.json();
+        return data.slugs || [];
+      } catch (_e) {
+        return [];
+      }
     },
 
     /**
-     * Publishes the current document to Handoff.host
+     * Rename a slug on the worker and update local state
+     */
+    async renameSlug(oldSlug, newSlug) {
+      const workerUrl = window.AppState.settings.publishWorkerUrl;
+      const adminSecret = window.AppState.settings.publishAdminSecret;
+      if (!workerUrl || !adminSecret || !oldSlug || !newSlug) return false;
+
+      try {
+        const baseUrl = workerUrl.replace(/\/publish\/?$/, '');
+        const res = await fetch(`${baseUrl}/rename`, {
+          method: 'POST',
+          headers: { 
+            'X-Admin-Secret': adminSecret,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ oldSlug, newSlug })
+        });
+        
+        if (res.ok) {
+          // Update local state if any file is linked to this slug
+          const data = window.AppState.settings.publishData || {};
+          let changed = false;
+          Object.keys(data).forEach(filePath => {
+            if (data[filePath].slug === oldSlug) {
+              data[filePath].slug = newSlug;
+              changed = true;
+            }
+          });
+          if (changed) {
+            window.SettingsService.update('publishData', data);
+          }
+          return true;
+        }
+        return false;
+      } catch (_e) {
+        return false;
+      }
+    },
+
+    /**
+     * Force delete a slug from the worker (without local state management)
+     */
+    async deleteSlug(slug) {
+      const workerUrl = window.AppState.settings.publishWorkerUrl;
+      const adminSecret = window.AppState.settings.publishAdminSecret;
+      if (!workerUrl || !adminSecret || !slug) return false;
+
+      try {
+        const baseUrl = workerUrl.replace(/\/publish\/?$/, '');
+        const res = await fetch(`${baseUrl}/publish/${slug}`, {
+          method: 'DELETE',
+          headers: { 'X-Admin-Secret': adminSecret }
+        });
+        return res.ok;
+      } catch (_e) {
+        return false;
+      }
+    },
+
+    /**
+     * Removes publication info for a specific file and deletes from Worker if applicable
+     */
+    unpublish: async function(filePath) {
+      if (!filePath) return;
+      
+      const info = this.getPublishInfo(filePath);
+      const workerUrl = window.AppState.settings.publishWorkerUrl;
+      const adminSecret = window.AppState.settings.publishAdminSecret;
+
+      if (info && info.slug && workerUrl && adminSecret) {
+        try {
+          // Clean the base URL (remove /publish if present)
+          const baseUrl = workerUrl.replace(/\/publish\/?$/, '');
+          const res = await fetch(`${baseUrl}/publish/${info.slug}`, {
+            method: 'DELETE',
+            headers: {
+              'X-Admin-Secret': adminSecret
+            }
+          });
+          
+          if (!res.ok) {
+            const err = await res.json();
+            console.warn('Worker unpublish failed:', err.error);
+          }
+        } catch (e) {
+          console.error('Failed to call worker unpublish:', e);
+        }
+      }
+
+      const data = window.AppState.settings.publishData || {};
+      delete data[filePath];
+      window.SettingsService.update('publishData', data);
+      
+      if (window.showToast) window.showToast('Document unpublished and removed from edge', 'info');
+    },
+
+    /**
+     * Publishes the current document
+     * Supports both Legacy Handoff and New Worker Flow
      * @param {Object} options - { slug, password }
      */
     publish: async function(options = {}) {
       const { currentFile, settings } = window.AppState;
       if (!currentFile) return null;
       
-      const token = settings.handoffToken;
-      if (!token) {
+      const workerUrl = settings.publishWorkerUrl;
+      const adminSecret = settings.publishAdminSecret;
+      const handoffToken = settings.handoffToken;
+
+      // Determine mode: Worker has priority if configured
+      const useWorker = !!(workerUrl && adminSecret);
+      
+      if (!useWorker && !handoffToken) {
         if (window.showToast) {
-          window.showToast('Please set Handoff API Token in Settings first', 'error');
+          window.showToast('Please configure Publish settings first', 'error');
         }
         return null;
       }
@@ -20609,54 +21752,98 @@ const PublishService = (() => {
       // Get content from viewer
       const viewer = window.MarkdownViewer.getInstance();
       if (!viewer) return null;
-      const { html } = viewer.state;
       
       const fileName = currentFile.split('/').pop().replace(/\.[^/.]+$/, "");
       const slug = options.slug || fileName.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 50);
       const password = options.password || '';
 
       if (window.showToast) {
-        window.showToast('Preparing bundle...', 'info', { sticky: true, id: 'publish' });
+        window.showToast(useWorker ? 'Publishing to Worker...' : 'Preparing Handoff bundle...', 'info', { sticky: true, id: 'publish' });
       }
 
       try {
-        // 1. Gather Assets
-        const assets = await _gatherAssets(html);
-        
-        // 2. Create HTML Bundle
-        const bundle = _createStandaloneBundle(html, fileName);
-        
-        if (window.showToast) {
-          window.showToast('Uploading to Handoff...', 'info', { sticky: true, id: 'publish', progress: 50 });
-        }
+        if (useWorker) {
+          // --- NEW WORKER FLOW ---
+          // 1. Get current content
+          let content = '';
+          if (currentFile.startsWith('__DRAFT_')) {
+            if (typeof window.DraftModule !== 'undefined') {
+              content = window.DraftModule.getDraftContent(currentFile);
+            }
+          } else {
+            const res = await window.electronAPI.readFile(currentFile);
+            if (res.success) {
+              content = res.content;
+            } else {
+              if (window.showToast) window.showToast('Failed to read file content', 'error');
+              return null;
+            }
+          }
 
-        // 3. Call IPC to perform upload
-        const result = await window.electronAPI.publishToHandoff({
-          html: bundle,
-          slug,
-          assets,
-          token,
-          password,
-          note: `Published from MDpreview v${window.AppState.version || '1.0.0'}`
-        });
-
-        if (result.success) {
-          const fullUrl = `https://handoff.host${result.url}`;
-          
-          // Save to state
-          this.savePublishInfo(currentFile, {
-            url: fullUrl,
-            slug: slug,
-            version: result.version
-          });
-
-          if (window.showToast) {
-            window.showToast('Published successfully!', 'success', { id: 'publish' });
+          if (!content) {
+            if (window.showToast) window.showToast('Document is empty', 'error');
+            return null;
           }
           
-          return fullUrl;
+          const payload = {
+            slug,
+            content: content,
+            password,
+            title: fileName,
+            filePath: currentFile,
+            assets: await _gatherAssets(viewer.state.html)
+          };
+
+          const result = await window.electronAPI.publishToWorker({
+            payload,
+            workerUrl,
+            secret: adminSecret
+          });
+
+          if (result.success) {
+            const baseUrl = workerUrl.replace(/\/$/, '').replace('/publish', '');
+            const fullUrl = `${baseUrl}/${result.slug}`;
+            
+            this.savePublishInfo(currentFile, {
+              url: fullUrl,
+              slug: result.slug,
+              type: 'worker'
+            });
+
+            if (window.showToast) window.showToast('Published to Worker successfully!', 'success', { id: 'publish' });
+            return fullUrl;
+          } else {
+            throw new Error(result.error);
+          }
         } else {
-          throw new Error(result.error);
+          // --- LEGACY HANDOFF FLOW ---
+          const { html } = viewer.state;
+          const assets = await _gatherAssets(html);
+          const assetPaths = Object.values(assets).map(a => a.path);
+          const bundle = _createStandaloneBundle(html, fileName);
+          
+          const result = await window.electronAPI.publishToHandoff({
+            html: bundle,
+            slug,
+            assets: assetPaths,
+            token: handoffToken,
+            password,
+            note: `Published from MDpreview v${window.AppState.version || '1.0.0'}`
+          });
+
+          if (result.success) {
+            const fullUrl = `https://handoff.host${result.url}`;
+            this.savePublishInfo(currentFile, {
+              url: fullUrl,
+              slug: slug,
+              version: result.version,
+              type: 'handoff'
+            });
+            if (window.showToast) window.showToast('Published to Handoff successfully!', 'success', { id: 'publish' });
+            return fullUrl;
+          } else {
+            throw new Error(result.error);
+          }
         }
       } catch (error) {
         if (window.showToast) {
@@ -21091,6 +22278,8 @@ const SettingsService = (() => {
     
     // API / Third Party
     handoffToken: { storageKey: 'md-handoff-token', type: 'none' },
+    publishWorkerUrl: { storageKey: 'md-publish-worker-url', type: 'none' },
+    publishAdminSecret: { storageKey: 'md-publish-admin-secret', type: 'none' },
     publishData: { storageKey: 'md-publish-data', type: 'none' }
   };
 

@@ -40,6 +40,21 @@ Gỡ bỏ tài liệu khỏi Web.
 ### `listAllPublished()`
 Lấy danh sách tất cả các Slugs đang active trên Worker của người dùng.
 
+### `copyAsHtml(fileName, html)`
+Tạo và sao chép vào clipboard một bản HTML độc lập (**Standalone Bundle**).
+- **Fidelity**: Tự động nhúng toàn bộ Design System Tokens và CSS của App vào file HTML.
+- **Independence**: File xuất ra có khả năng hoạt động offline 100% với đầy đủ style cho Code Blocks, Tables và Mermaid.
+
+---
+
+## Tiêu chuẩn Visual Parity (Độ trung thực hiển thị)
+
+Dự án cam kết độ trung thực 100% giữa Editor và bản xuất bản (Live/Offline):
+1. **DOM Hierarchy**: Phải tuân thủ nghiêm ngặt cấu trúc `#md-content > .md-content > .md-content-inner`.
+2. **Atomic Blocks**: Mọi đoạn văn bản phải nằm trong `.md-block > .md-line`.
+3. **Premium Blocks**: Các thành phần đặc biệt (Code, Table, Mermaid) sử dụng hệ thống Glassmorphism (`backdrop-filter`, `transparent background`).
+4. **Mermaid Visibility**: Ép chuẩn hiển thị văn bản màu trắng và nét vẽ mờ (white alpha) để tương thích với theme tối của web.
+
 ---
 
 ## Cấu trúc Dữ liệu (Publish Info)
@@ -50,7 +65,7 @@ Trạng thái xuất bản của mỗi file được lưu trong `AppState.settin
   "/path/to/file.md": {
     "slug": "my-document",
     "url": "https://worker.dev/my-document",
-    "updatedAt": "2026-04-30T...",
+    "updatedAt": "2026-05-01T...",
     "type": "worker" // hoặc "legacy"
   }
 }
@@ -65,4 +80,4 @@ Trạng thái xuất bản của mỗi file được lưu trong `AppState.settin
 
 ---
 
-*Document — 2026-04-30*
+*Document — 2026-05-01*

@@ -12,16 +12,18 @@ const CONFIG = {
         'electron': '03',
         'server': '04',
         'renderer': '05',
-        'scripts': '06',
-        'tests': '07',
-        'misc': '08'
+        'worker': '06',
+        'scripts': '07',
+        'tests': '08',
+        'misc': '09'
     },
     MODULES: {
         'core': ['package.json', 'ARCHITECTURE.md', 'CHANGELOG.md', 'tailwind.config.js', 'eslint.config.mjs'],
-        'docs': ['docs'],
+        'docs': ['docs', 'GraphPreview'],
         'renderer': ['renderer'],
         'electron': ['electron'],
         'server': ['server'],
+        'worker': ['cf-publish-worker'],
         'scripts': ['scripts'],
         'tests': ['tests']
     },

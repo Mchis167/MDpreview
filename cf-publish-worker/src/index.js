@@ -96,7 +96,15 @@ export default {
         return res;
       }
 
-      // Serve
+      // Try to serve static assets from the ASSETS binding (e.g., /publish.css)
+      if (request.method === 'GET') {
+        const assetResponse = await env.ASSETS.fetch(request.clone());
+        if (assetResponse.status !== 404) {
+          return assetResponse;
+        }
+      }
+
+      // Serve Published Documents (Slugs)
       if (request.method === 'GET' && path !== '/') {
         const slug = path.slice(1);
         return handleServe(request, env, slug);

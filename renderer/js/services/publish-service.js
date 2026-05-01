@@ -65,50 +65,122 @@ const PublishService = (() => {
    */
   function _createStandaloneBundle(html, title) {
     const styles = _bundleStyles();
-    
+    const fileName = title || 'MDpreview Document';
+
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title || 'MDpreview Document'}</title>
+    <title>${fileName}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --ds-font-main: 'Inter', system-ui, -apple-system, sans-serif;
-            --ds-font-code: 'Roboto Mono', monospace;
+            --ds-bg-main: #131313;
+            --ds-accent: #ffbf48;
+            --ds-accent-rgb: 255, 191, 72;
+            --ds-text-primary: rgba(255, 255, 255, 0.90);
+            --ds-text-secondary: rgba(255, 255, 255, 0.60);
+            --ds-text-inverse: #ffffff;
+            --ds-white-a02: rgba(255, 255, 255, 0.02);
+            --ds-white-a04: rgba(255, 255, 255, 0.04);
+            --ds-white-a05: rgba(255, 255, 255, 0.05);
+            --ds-white-a08: rgba(255, 255, 255, 0.08);
+            --ds-white-a10: rgba(255, 255, 255, 0.10);
+            --ds-white-a20: rgba(255, 255, 255, 0.20);
+            --ds-black-a30: rgba(0, 0, 0, 0.30);
+            --ds-border-default: rgba(255, 255, 255, 0.10);
+            --ds-radius-panel: 12px;
+            --ds-radius-sm: 6px;
+            --ds-transition-smooth: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
+
         body {
             margin: 0;
             padding: 0;
-            background: #000;
-            color: #fff;
-            font-family: var(--ds-font-main);
+            background: var(--ds-bg-main);
+            color: var(--ds-text-secondary);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.8;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
-        ${styles}
-        
-        /* Standalone overrides */
-        .md-viewer-viewport {
-            height: auto !important;
-            padding: 40px 20px !important;
-            max-width: 900px;
+
+        .md-publish-container {
+            max-width: 800px;
             margin: 0 auto;
-            background: transparent !important;
+            padding: 60px 24px;
         }
-        .md-content-inner {
-            padding: 0 !important;
+
+        .md-render-body { font-size: 15px; }
+
+        ${styles}
+
+        /* ── Parity Overrides ── */
+        .md-viewer-viewport { background: transparent !important; height: auto !important; }
+        .md-content-inner { padding: 0 !important; }
+        .md-block { margin-bottom: 0.5rem; }
+        .md-line { width: 100%; }
+
+        .md-render-body hr {
+            border: none;
+            border-bottom: 1px solid var(--ds-border-default);
+            margin: 3rem 0;
+        }
+
+        .premium-code-block, .md-table-wrapper, .mermaid {
+            background: transparent !important;
+            backdrop-filter: blur(40px) !important;
+            -webkit-backdrop-filter: blur(40px) !important;
+            border: 1px solid var(--ds-white-a08) !important;
+            border-radius: var(--ds-radius-panel) !important;
+            margin: 2rem 0 !important;
+            overflow: hidden !important;
+        }
+
+        .md-table-wrapper { background: transparent !important; }
+
+        .mermaid path, .mermaid rect, .mermaid circle, .mermaid polygon {
+            stroke: var(--ds-white-a20) !important;
+        }
+
+        .mermaid text, .mermaid span, .mermaid .label {
+            fill: #fff !important;
+            color: #fff !important;
+        }
+
+        .code-block-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            background: var(--ds-black-a30);
+            border-bottom: 1px solid var(--ds-white-a10);
+        }
+
+        .code-block-lang {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--ds-text-secondary);
+            font-family: 'Roboto Mono', monospace;
         }
     </style>
 </head>
 <body class="ds-theme-dark">
-    <div class="md-viewer-viewport">
-        <div id="md-content" class="md-content-inner">
-            ${html}
+    <div class="md-publish-container">
+        <div id="md-content" class="md-content md-render-body">
+            <div class="md-content-inner">
+                ${html}
+            </div>
         </div>
     </div>
+    <footer style="text-align: center; padding: 60px; color: #666; font-size: 12px; font-family: sans-serif;">
+        Generated with <a href="https://github.com/Mchis167/MDpreview" style="color: #888; text-decoration: none;">MDpreview</a>
+    </footer>
 </body>
 </html>`;
   }

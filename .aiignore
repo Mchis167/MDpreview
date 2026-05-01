@@ -47,6 +47,7 @@ data/
 storage/
 temp/
 tmp/
+scratch/
 
 # Loại trừ các file cấu hình lồng nhau của Electron/Mac
 *.app/
