@@ -1,6 +1,8 @@
 /**
  * HTML Shell for published documents
  */
+import { getMermaidConfig } from '../../renderer/js/services/mermaid-config.js';
+
 export function buildShell({ slug, html, title = 'Document', assetsUrl = '/publish.css' }) {
   const escapedTitle = title.replace(/[&<>"']/g, m => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -18,13 +20,10 @@ export function buildShell({ slug, html, title = 'Document', assetsUrl = '/publi
   <link rel="stylesheet" href="${assetsUrl}">
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <script>
+    const mermaidConfig = ${JSON.stringify(getMermaidConfig('worker'))};
     document.addEventListener('DOMContentLoaded', () => {
       // 1. Initialize Mermaid
-      mermaid.initialize({ 
-        startOnLoad: true, 
-        theme: 'dark',
-        securityLevel: 'loose'
-      });
+      mermaid.initialize(mermaidConfig);
 
       // 2. Setup Code Copy Logic
       window.copyCode = (btn) => {
