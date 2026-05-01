@@ -1,84 +1,328 @@
-# Function Documentation Index
+# Feature Documentation
 
-Tài liệu các module và function quan trọng của MDpreview.
-
-> Xem thêm: `docs/Bug hanofff/markdown_sync_handoff.md` — scroll sync architecture
-
----
-
-## Modules
-
-| File | Mô tả |
-|---|---|
-| [BASE_FORM_MODAL.md](BASE_FORM_MODAL.md) | Khung mẫu modal form chuẩn (Header, Body, Footer). |
-| [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) | Centralized UI factory (Buttons, Segmented Control, Radius logic) |
-| [DESIGN_SYSTEM_ICONS.md](DESIGN_SYSTEM_ICONS.md) | Registry toàn bộ icon SVG của dự án (Modular Icons) |
-| [CORE_APP.md](CORE_APP.md) | Global state (AppState), loadFile, boot sequence, theme, socket |
-| [ELECTRON_BRIDGE.md](ELECTRON_BRIDGE.md) | Unified API bridge between Electron and Browser (File System, Clipboard, Rasterization) |
-| [SYNC_SERVICE.md](SYNC_SERVICE.md) | Service đồng bộ hóa vị trí (scroll/cursor) giữa các chế độ xem |
-| [TABS.md](TABS.md) | Tab management, multi-select, batch close |
-| [EDITOR.md](EDITOR.md) | Textarea editor, undo/redo, dirty tracking, save |
-| [WORKSPACE.md](WORKSPACE.md) | Workspace CRUD, switching, Electron API integration |
-| [TREE.md](TREE.md) | File tree render, sort, search, drag-and-drop, file operations |
-| [SHORTCUT_SERVICE.md](SHORTCUT_SERVICE.md) | Hệ thống quản lý phím tắt tập trung (Service) |
-| [SHORTCUTS_COMPONENT.md](SHORTCUTS_COMPONENT.md) | Registry định nghĩa toàn bộ phím tắt và hành động |
-| [MARKDOWN_VIEWER.md](MARKDOWN_VIEWER.md) | Mode switching (read/edit/comment/collect), sub-component lifecycle |
-| [MENU_SHIELD.md](MENU_SHIELD.md) | Unified floating menu shell — positioning, glassmorphism, singleton |
-| [WORKSPACE_SWITCHER.md](WORKSPACE_SWITCHER.md) | Workspace name display molecule trong Sidebar header |
-| [EXPLORER_SETTINGS.md](EXPLORER_SETTINGS.md) | Explorer preferences floating menu (show hidden, flat view...) |
-| [SETTINGS_SERVICE.md](SETTINGS_SERVICE.md) | Quản lý cài đặt tập trung |
-| [SHORTCUTS.md](SHORTCUTS.md) | Quản lý và thực thi phím tắt toàn cục |
-| [TREE_DRAG_MANAGER.md](TREE_DRAG_MANAGER.md) | Engine kéo thả Sidebar (Alphabet & VIP) |
-| [SETTINGS_COMPONENT.md](SETTINGS_COMPONENT.md) | Bảng giao diện cài đặt toàn cục dạng Floating Popover |
-| [SIDEBAR_LEFT.md](SIDEBAR_LEFT.md) | Organism quản lý khung giao diện thanh bên trái (Explorer, Search, Footer) |
-| [SCROLL_CONTAINER.md](SCROLL_CONTAINER.md) | Molecule quản lý vùng cuộn thông minh với mask-fade và dynamic safe zone |
-| [PROJECT_MAP.md](PROJECT_MAP.md) | Bản đồ thu nhỏ phản chiếu tài liệu (Mini-map) |
-| [PUBLISH_SERVICE.md](PUBLISH_SERVICE.md) | Centralized service for Worker & Handoff publishing (Lifecycle, Rename, Delete). |
-| [PUBLISH_COMPONENTS.md](PUBLISH_COMPONENTS.md) | UI components for publish config, global management and settings. |
-| [PUBLISH_WORKER.md](PUBLISH_WORKER.md) | Cloudflare Worker architecture, asset serving and fidelity standards. |
-| [RECENTLY_VIEWED.md](RECENTLY_VIEWED.md) | Quản lý lịch sử tập tin vừa mở và hiển thị indicator ẩn |
-| [SEARCH_PALETTE.md](SEARCH_PALETTE.md) | Tìm kiếm nhanh toàn cục (Quick Open) với Debounce, Smart Path và Recent Files |
-| [SEARCH_SERVICE.md](SEARCH_SERVICE.md) | Bộ não fuzzy search và scoring engine hỗ trợ tìm kiếm file/folder |
-| [TAB_BAR_COMPONENT.md](TAB_BAR_COMPONENT.md) | Organism quản lý thanh Tab (drag & drop, context menu) |
-| [TAB_PREVIEW.md](TAB_PREVIEW.md) | Hover Preview với Render Window strategy và Glassmorphism |
-| [EDIT_TOOLBAR.md](EDIT_TOOLBAR.md) | Thanh công cụ soạn thảo dàn trải với phân cấp Header H1-H6 |
-| [TOC_COMPONENT.md](TOC_COMPONENT.md) | Quản lý mục lục nổi (Floating TOC) và đồng bộ cuộn |
-| [GDOC_UTIL.md](GDOC_UTIL.md) | Chuyển đổi HTML sang định dạng Google Docs (Styling & Rasterization) |
+**Last Updated:** May 1, 2026 (Phase 1.1)  
+**Total Features:** 37+ modules documented  
+**Status:** Organized by category
 
 ---
 
-## Luồng dữ liệu chính
+## 📚 Quick Navigation
+
+| Category | Purpose | Files |
+|----------|---------|-------|
+| [**Core**](#core--application-foundation) | App state, boot, lifecycle | 2 files |
+| [**Editor & Rendering**](#editor--rendering) | Markdown editing and display | 2 files |
+| [**Components**](#components--ui-elements) | UI components and design system | 10 files |
+| [**Publishing**](#publishing--cloudflare-workers) | Publishing to Workers | 3 files |
+| [**Services**](#services--data-business-logic) | Data, search, settings services | 6 files |
+| [**File Management**](#file-management--workspace) | Files, tabs, workspace | 5 files |
+| [**Utilities**](#utilities--helpers) | Helper modules and bridges | 3 files |
+| [**Advanced Features**](#advanced-features) | Shortcuts, TOC, preview | 6 files |
+
+---
+
+## 🔧 Core — Application Foundation
+
+**Core modules for app initialization and state management**
+
+| Module | Purpose | Type |
+|--------|---------|------|
+| [**CORE_APP.md**](CORE_APP.md) | Global AppState, boot sequence, theme, socket.io | Singleton Service |
+| [**ELECTRON_BRIDGE.md**](ELECTRON_BRIDGE.md) | Unified Electron ↔ Browser API bridge (File System, Clipboard, Rasterization) | API Layer |
+
+**Key Concepts:**
+- AppState is the single source of truth
+- Boot sequence initializes all modules
+- Electron bridge handles platform-specific operations
+
+---
+
+## ✏️ Editor & Rendering
+
+**Markdown editing and display in all modes**
+
+| Module | Purpose | Type |
+|--------|---------|------|
+| [**EDITOR.md**](EDITOR.md) | Textarea editor, undo/redo, dirty tracking, autosave | Component |
+| [**MARKDOWN_VIEWER.md**](MARKDOWN_VIEWER.md) | Mode switching (read/edit/comment/collect), sub-component lifecycle | Organism |
+
+**Key Concepts:**
+- Editor handles text manipulation with undo/redo
+- MarkdownViewer manages mode switching and rendering
+- Dirty flag prevents data loss
+
+---
+
+## 🎨 Components — UI Elements
+
+**Reusable UI components and design system**
+
+| Module | Purpose | Type |
+|--------|---------|------|
+| [**DESIGN_SYSTEM.md**](DESIGN_SYSTEM.md) | Centralized UI factory (Buttons, Segmented, Radius, Colors) | Factory |
+| [**DESIGN_SYSTEM_ICONS.md**](DESIGN_SYSTEM_ICONS.md) | Registry of all SVG icons (Modular Icons) | Registry |
+| [**BASE_FORM_MODAL.md**](BASE_FORM_MODAL.md) | Standard modal form template (Header, Body, Footer) | Template |
+| [**MENU_SHIELD.md**](MENU_SHIELD.md) | Floating menu shell (positioning, glassmorphism, singleton) | Organism |
+| [**SETTINGS_COMPONENT.md**](SETTINGS_COMPONENT.md) | Global settings interface (Floating Popover) | Organism |
+| [**EXPLORER_SETTINGS.md**](EXPLORER_SETTINGS.md) | Explorer preferences menu (show hidden, flat view) | Component |
+| [**SIDEBAR_LEFT.md**](SIDEBAR_LEFT.md) | Left sidebar frame (Explorer, Search, Footer) | Organism |
+| [**SCROLL_CONTAINER.md**](SCROLL_CONTAINER.md) | Smart scroll area with mask-fade and safe zone | Component |
+| [**PROJECT_MAP.md**](PROJECT_MAP.md) | Mini-map displaying document outline | Component |
+| [**EDIT_TOOLBAR.md**](EDIT_TOOLBAR.md) | Editor toolbar (Heading levels, formatting) | Component |
+
+**Key Concepts:**
+- Design System is the single source of UI patterns
+- All components extend base templates
+- Glassmorphism and backdrop-blur for premium feel
+
+---
+
+## 📤 Publishing — Cloudflare Workers
+
+**Publishing markdown to distributed edge network**
+
+| Module | Purpose | Type |
+|--------|---------|------|
+| [**PUBLISH_SERVICE.md**](PUBLISH_SERVICE.md) | Centralized publish service (lifecycle, rename, delete) | Service |
+| [**PUBLISH_COMPONENTS.md**](PUBLISH_COMPONENTS.md) | Publish UI (config, management, settings) | Components |
+| [**PUBLISH_WORKER.md**](PUBLISH_WORKER.md) | Cloudflare Worker architecture, asset serving | Edge Worker |
+
+**Key Concepts:**
+- Publish service handles all publishing operations
+- Worker serves published pages globally
+- One-click publishing workflow
+
+---
+
+## 📦 Services — Data & Business Logic
+
+**Centralized services for data management and operations**
+
+| Module | Purpose | Type |
+|--------|---------|------|
+| [**SETTINGS_SERVICE.md**](SETTINGS_SERVICE.md) | Centralized settings management | Service |
+| [**SEARCH_SERVICE.md**](SEARCH_SERVICE.md) | Fuzzy search and scoring engine | Service |
+| [**SHORTCUT_SERVICE.md**](SHORTCUT_SERVICE.md) | Keyboard shortcut registry and execution | Service |
+| [**PUBLISH_SERVICE.md**](PUBLISH_SERVICE.md) | Publishing operations (lifecycle, sync) | Service |
+| [**GDOC_UTIL.md**](GDOC_UTIL.md) | HTML to Google Docs conversion (styling, rasterization) | Utility |
+| [**SYNC_SERVICE.md**](SYNC_SERVICE.md) | Position sync (scroll, cursor) between views | Service |
+
+**Key Concepts:**
+- Each service manages a domain
+- Services expose clean APIs to components
+- Centralization prevents data inconsistency
+
+---
+
+## 🗂️ File Management — Workspace
+
+**File tree, tabs, workspace operations**
+
+| Module | Purpose | Type |
+|--------|---------|------|
+| [**WORKSPACE.md**](WORKSPACE.md) | Workspace CRUD, switching, Electron integration | Module |
+| [**TREE.md**](TREE.md) | File tree render, sort, search, drag-drop | Component |
+| [**TABS.md**](TABS.md) | Tab management, multi-select, batch close | Module |
+| [**TREE_DRAG_MANAGER.md**](TREE_DRAG_MANAGER.md) | Drag-drop engine for Sidebar (Alphabet & VIP) | Engine |
+| [**WORKSPACE_SWITCHER.md**](WORKSPACE_SWITCHER.md) | Workspace name display in Sidebar header | Molecule |
+
+**Key Concepts:**
+- Tree is the file browser
+- Tabs manage open files
+- Workspace is the root directory context
+- Dirty check prevents data loss on workspace switch
+
+---
+
+## 🛠️ Utilities — Helpers
+
+**Helper modules and bridge layers**
+
+| Module | Purpose | Type |
+|--------|---------|------|
+| [**ELECTRON_BRIDGE.md**](ELECTRON_BRIDGE.md) | Electron API bridge (file system, clipboard) | API Layer |
+| [**GDOC_UTIL.md**](GDOC_UTIL.md) | HTML to Google Docs conversion | Utility |
+| [**RECENTLY_VIEWED.md**](RECENTLY_VIEWED.md) | File history and recent files indicator | Utility |
+
+**Key Concepts:**
+- Utilities provide cross-cutting functionality
+- Bridges abstract platform differences
+- Utilities are stateless or cache-only
+
+---
+
+## ⚡ Advanced Features
+
+**Specialized features and advanced interactions**
+
+| Module | Purpose | Type |
+|--------|---------|------|
+| [**SHORTCUTS.md**](SHORTCUTS.md) | Global keyboard shortcut management | System |
+| [**SHORTCUTS_COMPONENT.md**](SHORTCUTS_COMPONENT.md) | Shortcut registry and definitions | Registry |
+| [**SEARCH_PALETTE.md**](SEARCH_PALETTE.md) | Global quick search (Quick Open) | Component |
+| [**TAB_BAR_COMPONENT.md**](TAB_BAR_COMPONENT.md) | Tab bar organism (drag, context menu) | Organism |
+| [**TAB_PREVIEW.md**](TAB_PREVIEW.md) | Hover preview with Render Window | Component |
+| [**TOC_COMPONENT.md**](TOC_COMPONENT.md) | Floating table of contents and scroll sync | Component |
+
+**Key Concepts:**
+- Shortcuts are global system-wide
+- Search Palette provides quick navigation
+- Tab Preview shows file preview on hover
+- TOC auto-syncs with scroll position
+
+---
+
+## 🔄 Data Flow
 
 ```
-User action
+User Action (Click, Shortcut, Drag)
     ↓
-keyboard shortcut / click
+Component Handler
     ↓
-Module function (Tabs, Tree, Workspace...)
+Service Operation (Settings, Search, Publish, etc.)
     ↓
-AppState update
-    ↓
-loadFile() hoặc onModeChange()
+AppState Update
     ↓
 MarkdownViewer.setState()
     ↓
-Sub-component render
+Re-render Views (Editor, Preview, Tree, etc.)
 ```
 
 ---
 
-## Dirty Check Pattern
+## 🛡️ Critical Patterns
 
-Trước bất kỳ thao tác nào có thể mất dữ liệu (đổi file, đổi workspace), hệ thống luôn check:
+### Dirty Check Pattern
 
-```js
+Before any operation that could lose data:
+
+```javascript
 if (EditorModule.isDirty()) {
-  // hiện dialog → user chọn Save / Discard / Cancel
+  // Show save/discard/cancel dialog
+  // Only proceed if user confirms
 }
 ```
 
-Áp dụng tại: `loadFile()`, `WorkspaceModule.switchTo()`, `TabsModule.remove()`, `AppState.onModeChange()`.
+**Applied in:** `loadFile()`, `switchWorkspace()`, `removeTab()`, `onModeChange()`
+
+### Service Pattern
+
+Each domain gets a centralized service:
+
+```javascript
+// ✅ Centralized
+SettingsService.get(key)
+SettingsService.set(key, value)
+
+SearchService.search(query)
+ShortcutService.execute(shortcutId)
+```
+
+### AppState Pattern
+
+Single source of truth for app state:
+
+```javascript
+AppState.currentFile      // Current file path
+AppState.currentMode      // read/edit/comment/collect
+AppState.isDirty          // Unsaved changes
+AppState.theme            // light/dark
+```
 
 ---
 
-*Last Updated — 2026-05-01*
+## 📊 Module Statistics
+
+| Category | Count | Purpose |
+|----------|-------|---------|
+| Core | 2 | App initialization and state |
+| Editor & Rendering | 2 | Content editing and display |
+| Components | 10 | UI elements |
+| Publishing | 3 | Worker and publish ops |
+| Services | 6 | Business logic and data |
+| File Management | 5 | Files, tabs, workspace |
+| Utilities | 3 | Helper modules |
+| Advanced Features | 6 | Specialized interactions |
+| **Total** | **37+** | **All features documented** |
+
+---
+
+## 🎯 Where to Look
+
+### "How do I understand...?"
+
+**The editor system?**
+→ EDITOR.md + MARKDOWN_VIEWER.md
+
+**How publishing works?**
+→ PUBLISH_SERVICE.md + PUBLISH_WORKER.md
+
+**The file tree and workspace?**
+→ WORKSPACE.md + TREE.md + TABS.md
+
+**The design system and UI?**
+→ DESIGN_SYSTEM.md + DESIGN_SYSTEM_ICONS.md + (Component docs)
+
+**Keyboard shortcuts?**
+→ SHORTCUTS.md + SHORTCUT_SERVICE.md + SHORTCUTS_COMPONENT.md
+
+**Search and quick navigation?**
+→ SEARCH_SERVICE.md + SEARCH_PALETTE.md
+
+**Settings and preferences?**
+→ SETTINGS_SERVICE.md + SETTINGS_COMPONENT.md + EXPLORER_SETTINGS.md
+
+**File history and previews?**
+→ RECENTLY_VIEWED.md + TAB_PREVIEW.md + PROJECT_MAP.md
+
+---
+
+## 🔍 Search by Concept
+
+| Concept | Files |
+|---------|-------|
+| **State Management** | CORE_APP.md, SETTINGS_SERVICE.md |
+| **UI Components** | DESIGN_SYSTEM.md, All component docs |
+| **Data Services** | *_SERVICE.md files |
+| **File Operations** | WORKSPACE.md, TREE.md, TABS.md |
+| **Publishing** | PUBLISH_*.md |
+| **Rendering** | EDITOR.md, MARKDOWN_VIEWER.md |
+| **User Input** | SHORTCUTS.md, SEARCH_PALETTE.md, EDIT_TOOLBAR.md |
+| **Preferences** | SETTINGS_COMPONENT.md, EXPLORER_SETTINGS.md |
+
+---
+
+## 📖 Related Documentation
+
+- **[README.md](../../README.md)** — Project overview
+- **[RENDERING_ARCHITECTURE.md](../RENDERING_ARCHITECTURE.md)** — Markdown rendering system
+- **[SECURITY.md](../SECURITY.md)** — Security and XSS protection
+- **[SETUP.md](../SETUP.md)** — Development setup
+
+---
+
+## 🚀 Contributing
+
+When adding new features:
+
+1. **Document the module** with:
+   - Purpose (1 sentence)
+   - Type (Component, Service, Utility, etc.)
+   - Key exports/APIs
+   - Integration points
+   - Examples
+
+2. **Update this README** with the new module
+
+3. **Follow naming conventions**:
+   - Components: PascalCase (e.g., `EDITOR.md`)
+   - Services: camelCase with `_SERVICE` (e.g., `SETTINGS_SERVICE.md`)
+   - Utilities: camelCase (e.g., `GDOC_UTIL.md`)
+
+4. **Include diagrams** if complex interactions
+
+---
+
+**Last Updated:** May 1, 2026 (Phase 1.1)  
+**Status:** Organized and complete  
+**Next:** Add Phase 1.1 features to docs as needed
