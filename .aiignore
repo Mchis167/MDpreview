@@ -1,0 +1,56 @@
+# --- AI BUNDLE IGNORE LIST ---
+# Loại bỏ các file và thư mục không cần thiết để tiết kiệm tokens 
+# và giúp AI tập trung vào logic cốt lõi của codebase.
+
+# Hệ thống & Dependencies
+node_modules/
+dist/
+build/
+out/
+.git/
+.github/
+.DS_Store
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Thư mục chứa kết quả đóng gói AI
+ai-bundles/
+
+# Tài liệu cũ & Backup
+.legacy_backup/
+*.bak
+*.swp
+*.tmp
+
+# Logs & Environment
+*.log
+.env*
+
+# IDE & Tooling Settings
+.vscode/
+.idea/
+.gemini/
+.agents/
+.agents/workflows/
+.agents/rules/
+
+# Media & Assets (Thường là binary, script đã lọc nhưng ignore ở đây để nhanh hơn)
+assets/
+static/assets/
+public/assets/
+images/
+media/
+
+# Dữ liệu người dùng (Comments, Bookmarks, State)
+data/
+storage/
+temp/
+tmp/
+
+# Loại trừ các file cấu hình lồng nhau của Electron/Mac
+*.app/
+*.dmg
+*.exe
+*.zip
+*.tar.gz

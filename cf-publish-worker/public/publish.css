@@ -1,0 +1,102 @@
+/**
+ * publish.css
+ * Clean, minimalist styles for published MDpreview documents.
+ */
+
+:root {
+    --ds-bg-main: #000000;
+    --ds-text-main: #e0e0e0;
+    --ds-text-dim: #a0a0a0;
+    --ds-accent: #007aff;
+    --ds-font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --ds-font-code: 'Roboto Mono', 'Fira Code', monospace;
+    --ds-radius: 8px;
+    --ds-border: rgba(255, 255, 255, 0.1);
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--ds-bg-main);
+    color: var(--ds-text-main);
+    font-family: var(--ds-font-main);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+.md-publish-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 60px 24px;
+}
+
+/* Markdown Content */
+.md-content { font-size: 16px; }
+.md-content h1, .md-content h2, .md-content h3 { color: #fff; margin-top: 1.5em; margin-bottom: 0.8em; }
+.md-content h1 { font-size: 2.2em; border-bottom: 1px solid var(--ds-border); padding-bottom: 0.3em; }
+.md-content p { margin: 1em 0; }
+.md-content a { color: var(--ds-accent); text-decoration: none; }
+.md-content a:hover { text-decoration: underline; }
+
+.md-content blockquote {
+    margin: 1.5em 0;
+    padding: 0.5em 1.5em;
+    border-left: 4px solid var(--ds-accent);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--ds-text-dim);
+    font-style: italic;
+    border-radius: 0 var(--ds-radius) var(--ds-radius) 0;
+}
+
+.md-content pre {
+    background: #0d0d0d;
+    padding: 16px;
+    border-radius: var(--ds-radius);
+    overflow-x: auto;
+    border: 1px solid var(--ds-border);
+}
+
+.md-content code {
+    font-family: var(--ds-font-code);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.md-content pre code {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+}
+
+.md-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--ds-radius);
+    margin: 1em 0;
+}
+
+.md-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5em 0;
+}
+
+.md-content th, .md-content td {
+    padding: 12px;
+    border: 1px solid var(--ds-border);
+    text-align: left;
+}
+
+.md-content th { background: rgba(255, 255, 255, 0.05); color: #fff; }
+
+/* HLJS Theme (Minimalist Dark) */
+.hljs-comment { color: #6a737d; }
+.hljs-keyword, .hljs-selector-tag { color: #ff7b72; }
+.hljs-string, .hljs-attr { color: #a5d6ff; }
+.hljs-number, .hljs-literal { color: #d2a8ff; }
+.hljs-title, .hljs-section { color: #79c0ff; font-weight: bold; }
+.hljs-variable, .hljs-template-variable { color: #ffa657; }

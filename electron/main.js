@@ -125,6 +125,8 @@ ipcMain.on('rebuild-app', () => {
 });
 
 // Register domain IPC handlers
+require('./ipc/handoff').register(ipcMain);
+require('./ipc/worker-publish').register(ipcMain);
 require('./ipc/workspace').register(ipcMain);
 require('./ipc/comments').register(ipcMain);
 require('./ipc/files').register(ipcMain);

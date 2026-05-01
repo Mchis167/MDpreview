@@ -101,7 +101,7 @@
 
 .ds-popover-body {
   padding: 0 0 var(--ds-space-sm) 0;
-  max-height: 75vh;
+  max-height: 80vh;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: none;

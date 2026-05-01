@@ -14,7 +14,7 @@
 | `currentWorkspace` | `object \| null` | Workspace đang active |
 | `currentMode` | `string` | Mode hiện tại: `read`, `edit`, `comment`, `collect` |
 | `commentMode` | `string` | Sub-mode cho comment: `view`, `add` |
-| `settings` | `object` | Theme, font, zoom, các tùy chọn explorer |
+| `settings` | `object` | Theme, font, zoom, explorer options, **Publishing (Worker URL, Secret, Data)** |
 | `forceSyncContext` | `object \| null` | Dữ liệu vị trí ép buộc dùng cho SyncService (dùng khi Edit Selection) |
 
 ### `AppState.loadPersistentState()`
@@ -128,4 +128,4 @@ Thứ tự khởi động nghiêm ngặt — **không thay đổi thứ tự**:
 
 ---
 
-*Document — 2026-04-29 (Updated showToast features)*
+*Document — 2026-04-30 (Added Publishing state)*

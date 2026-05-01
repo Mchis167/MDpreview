@@ -88,7 +88,14 @@ Hệ thống copy nâng cao hỗ trợ xuất nội dung sang các ứng dụng 
 - **Copy Markdown (Main Action)**: Copy nội dung thô (raw content) vào clipboard.
 - **Copy for Google Docs**: Chuyển đổi HTML sang định dạng Rich Text có kèm style nhúng (inline) và biểu đồ rasterized chất lượng cao (2x scale). Hỗ trợ hiển thị Progress Bar trong quá trình xử lý.
 - **Copy as File**: Sao chép trực tiếp file vật lý vào clipboard (chỉ Electron).
-- **Copy File Path**: Sao chép đường dẫn tuyệt đối của file.
+- **Copy Absolute Path**: Sao chép đường dẫn tuyệt đối của file.
+- **Publish to Worker**: Mở `PublishConfigComponent` để cấu hình Slug/Password trước khi xuất bản tài liệu lên Cloudflare Worker.
+
+### 🌐 Hệ thống Publish Button (Floating Action)
+Nút **Publish** trong chế độ Read có hành vi thông minh dựa trên trạng thái của tài liệu:
+- **Chưa xuất bản**: Hiển thị dưới dạng **Button đơn** tiêu chuẩn (`variant: subtitle`).
+- **Đã xuất bản**: Chuyển sang dạng **ComboButton** (`variant: subtitle`). Nút chính là "Re-publish", nút phụ mở ra menu quản lý bài viết (Xem link, Copy link, Unpublish).
+- **Phản hồi tức thì**: Sử dụng cơ chế `await` trong logic Unpublish để đảm bảo UI quay về trạng thái ban đầu ngay khi dữ liệu được xóa thành công.
 
 ### 🔄 Quy trình Copy for Google Docs
 1. Trích xuất HTML từ DOM (`.md-content-inner`) để lấy nội dung đã xử lý.
@@ -189,4 +196,4 @@ Mỗi component tự nullify `activeInstance` qua `onClose` callback khi bị đ
 
 ---
 
-*Document — 2026-04-29 (Updated Shortcuts and Context Menu)*
+*Document — 2026-05-01 (Improved Publish Workflow & Interactive UI)*

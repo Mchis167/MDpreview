@@ -1,3 +1,4 @@
+/* global InputComponent, ContextMenuComponent, StatusBadge, ButtonComponent, ModalComponent, InlineMessageComponent, SegmentedControlComponent, SelectComponent */
 /* ============================================================
    design-system.js — Core Design System Module
    ============================================================ */
@@ -35,107 +36,18 @@ const DesignSystem = (() => {
     return el;
   }
 
-  /**
-   * Private: Create a Popover Shield
-   */
-  function createPopoverShield(options = {}) {
-    const {
-      title = 'Modal',
-      content = '',
-      footer = null,
-      className = '',
-      width = null,
-      hasBackdrop = true,
-      showHeader = true,
-      position = null,
-      alignment = 'center', // 'center', 'bottom-left', or 'custom'
-      container = document.body,
-      onClose = null
-    } = options;
-
-    const shieldClass = hasBackdrop ? 'ds-popover-shield' : 'ds-popover-floating';
-    const shield = createElement('div', [shieldClass, `ds-popover-${alignment}`]);
-    const isBody = container === document.body;
-    shield.style.position = isBody ? 'fixed' : 'absolute';
-
-    const card = createElement('div', ['ds-popover-card', className]);
-    if (width) card.style.width = width;
-    if (position) {
-      if (position.top) card.style.top = position.top;
-      if (position.right) card.style.right = position.right;
-      if (position.bottom) card.style.bottom = position.bottom;
-      if (position.left) card.style.left = position.left;
-      card.style.position = 'fixed';
-      card.style.margin = '0';
-    }
-
-    const header = createElement('div', 'ds-popover-header');
-    const titleEl = createElement('h2', 'ds-popover-title', { text: title });
-    const closeBtn = createElement('button', 'ds-popover-close', { html: ICONS['x'] || '✕' });
-
-    const body = createElement('div', 'ds-popover-body');
-    if (content instanceof HTMLElement) {
-      body.appendChild(content);
-    } else if (typeof content === 'string') {
-      body.innerHTML = content;
-    }
-
-    if (showHeader) {
-      header.appendChild(titleEl);
-      header.appendChild(closeBtn);
-      card.appendChild(header);
-    }
-    card.appendChild(body);
-
-    if (footer) {
-      const footerEl = createElement('div', 'ds-popover-footer');
-      if (footer instanceof HTMLElement) {
-        footerEl.appendChild(footer);
-      } else {
-        footerEl.innerHTML = footer;
-      }
-      card.appendChild(footerEl);
-    }
-
-    shield.appendChild(card);
-
-    const closeAction = () => {
-      shield.classList.remove('show');
-      setTimeout(() => {
-        shield.remove();
-        if (onClose) onClose();
-      }, 250);
-    };
-
-    closeBtn.onclick = closeAction;
-    shield.onclick = (e) => {
-      if (hasBackdrop && e.target === shield) closeAction();
-    };
-
-    container.appendChild(shield);
-    setTimeout(() => shield.classList.add('show'), 10);
-
-    if (!hasBackdrop) {
-      const clickAway = (e) => {
-        if (!card.contains(e.target)) {
-          closeAction();
-          document.removeEventListener('click', clickAway, true);
-        }
-      };
-      setTimeout(() => document.addEventListener('click', clickAway, true), 100);
-    }
-
-    const popoverInstance = { shield, card, body, close: closeAction };
-    shield.__popover = popoverInstance;
-    return popoverInstance;
-  }
 
   /**
    * Public API
    */
   return {
     createElement,
-    createPopoverShield,
+    createPopoverShield: (options) => {
+      if (typeof ModalComponent !== 'undefined') {
+        return ModalComponent.create(options);
+      }
+      return null;
+    },
 
     /**
      * Registers a set of icons into the DesignSystem registry
@@ -215,293 +127,106 @@ const DesignSystem = (() => {
     },
 
     createSelect: (options = [], currentVal, onChange) => {
-      const select = createElement('select', 'ds-select');
-      options.forEach(opt => {
-        const value = typeof opt === 'string' ? opt : opt.value;
-        const label = typeof opt === 'string' ? opt : opt.label;
-        const el = createElement('option', '', { value, text: label });
-        if (value === currentVal) el.selected = true;
-        select.appendChild(el);
-      });
-      if (onChange) select.onchange = (e) => onChange(e.target.value);
-      return select;
+      if (typeof SelectComponent !== 'undefined') {
+        return SelectComponent.create(options, currentVal, onChange);
+      }
+      return null;
     },
 
     createComboButton: (options = {}) => {
-      const {
-        label,
-        variant = 'subtitle',
-        leadingIcon = null,
-        mainAction,
-        toggleAction,
-        disabled = false,
-        className = '',
-        tooltip = null,
-        radius = 'var(--ds-radius-widget)'
-      } = options;
-
-      const container = createElement('div', [
-        'ds-combo-btn',
-        `ds-combo-btn-${variant}`,
-        className
-      ]);
-
-      container.style.setProperty('--_radius', radius);
-      if (disabled) {
-        container.classList.add('is-disabled');
-        // Actually button atoms use :disabled, but since this is a div, we use a class or attribute
-        container.setAttribute('disabled', 'true'); 
+      if (typeof ButtonComponent !== 'undefined') {
+        return ButtonComponent.createCombo(options);
       }
-
-      // Main Part
-      const main = createElement('div', 'ds-combo-btn-main');
-      if (leadingIcon) {
-        const iconHtml = ICONS[leadingIcon] || leadingIcon;
-        main.appendChild(createElement('span', 'ds-btn-icon-leading', { html: iconHtml }));
-      }
-      if (label) {
-        main.appendChild(createElement('span', 'ds-btn-text', { text: label }));
-      }
-      
-      if (!disabled && mainAction) {
-        main.onclick = (e) => {
-          e.stopPropagation();
-          mainAction(e);
-        };
-      }
-
-      // Toggle Part
-      const toggle = createElement('div', 'ds-combo-btn-toggle', {
-        html: ICONS['chevron-down'] || '▼'
-      });
-      
-      if (options.toggleTooltip) {
-        DesignSystem.applyTooltip(toggle, options.toggleTooltip, 'bottom');
-      }
-      
-      if (!disabled && toggleAction) {
-        toggle.onclick = (e) => {
-          e.stopPropagation();
-          // Toggle logic: If already open, close it
-          if (container.classList.contains('is-open')) {
-            if (typeof window.MenuShield !== 'undefined') window.MenuShield.close();
-            return;
-          }
-          toggleAction(e);
-        };
-      }
-
-      container.appendChild(main);
-      container.appendChild(toggle);
-
-      if (tooltip) {
-        DesignSystem.applyTooltip(container, tooltip, 'bottom');
-      }
-
-      return container;
+      return null;
     },
 
     createButton: (options = {}) => {
-      const {
-        label,
-        variant = 'primary',
-        onClick,
-        disabled = false,
-        className = '',
-        leadingIcon = null,
-        trailingIcon = null,
-        offLabel = false,
-        title = null,
-        radius = 'var(--ds-radius-widget)' // Initial value
-      } = options;
+      if (typeof ButtonComponent !== 'undefined') {
+        return ButtonComponent.create(options);
+      }
+      return null;
+    },
 
-      // Enforce single icon for off-label buttons
-      let activeLeadingIcon = leadingIcon;
-      let activeTrailingIcon = trailingIcon;
-      if (offLabel && activeLeadingIcon && activeTrailingIcon) {
-        activeTrailingIcon = null;
+    /**
+     * Creates a standardized input element
+     */
+    /**
+     * Creates a standardized input element using InputComponent
+     */
+    createInput: (options = {}) => {
+      if (typeof InputComponent !== 'undefined') {
+        return InputComponent.create(options);
+      }
+      
+      // Fallback if InputComponent is not yet loaded (unlikely)
+      const { type = 'text', placeholder = '', value = '', className = '' } = options;
+      const input = createElement('input', [`ds-input`, className]);
+      input.type = type;
+      input.placeholder = placeholder;
+      input.value = value;
+      return input;
+    },
+
+    /**
+     * Creates an input with an attached action button using InputComponent
+     */
+    createInputGroup: (options = {}) => {
+      if (typeof InputComponent !== 'undefined') {
+        const { inputOptions = {}, ...rest } = options;
+        return InputComponent.create({ ...inputOptions, ...rest });
       }
 
-      const btn = createElement('button', [
-        `ds-btn`,
-        `ds-btn-${variant}`,
-        offLabel ? 'ds-btn-off-label' : '',
-        className
-      ]);
+      // Fallback
+      const group = createElement('div', ['ds-input-group']);
+      const input = createElement('input', 'ds-input');
+      group.appendChild(input);
+      return group;
+    },
 
-      btn.style.setProperty('--_radius', radius);
-
-      if (activeLeadingIcon) {
-        const iconHtml = ICONS[activeLeadingIcon] || activeLeadingIcon;
-        const span = createElement('span', 'ds-btn-icon-leading', { html: iconHtml });
-        btn.appendChild(span);
+    /**
+     * Creates an inline message (callout)
+     */
+    createInlineMessage: (options = {}) => {
+      if (typeof InlineMessageComponent !== 'undefined') {
+        return InlineMessageComponent.create(options);
       }
+      return null;
+    },
 
-      if (label && !offLabel) {
-        const textSpan = createElement('span', 'ds-btn-text', { text: label });
-        btn.appendChild(textSpan);
+    /**
+     * Creates a subtle status indicator (Dot + Label)
+     */
+    createStatusBadge: (options = {}) => {
+      if (typeof StatusBadge !== 'undefined') {
+        return StatusBadge.create(options);
       }
-
-      if (activeTrailingIcon) {
-        const iconHtml = ICONS[activeTrailingIcon] || activeTrailingIcon;
-        const span = createElement('span', 'ds-btn-icon-trailing', { html: iconHtml });
-        btn.appendChild(span);
-      }
-
-      if (disabled) btn.disabled = true;
-      if (onClick) btn.onclick = onClick;
-
-      if (title || (offLabel && label)) {
-        DesignSystem.applyTooltip(btn, title || label, options.tooltipPos || 'bottom');
-      }
-
-      return btn;
+      return createElement('div', 'ds-status-badge-fallback', { text: options.text });
     },
 
     createSegmentedControl: (options = {}) => {
-      const {
-        items = [],
-        activeId = null,
-        onChange = null,
-        radius = 'var(--ds-radius-panel)', // Initial value
-        className = ''
-      } = options;
-
-      const control = createElement('div', ['ds-segmented-control', className]);
-      control.style.setProperty('--_radius', radius);
-
-      const indicator = createElement('div', 'ds-segment-indicator');
-      control.appendChild(indicator);
-
-      items.forEach(itemData => {
-        const item = createElement('div', 'ds-segment-item', {
-          'data-id': itemData.id,
-          'html': DesignSystem.getIcon(itemData.icon)
-        });
-
-        if (itemData.title) {
-          DesignSystem.applyTooltip(item, itemData.title, options.tooltipPos || 'bottom');
-        }
-
-        if (itemData.id === activeId) item.classList.add('active');
-
-        item.addEventListener('mousedown', (e) => e.preventDefault());
-        item.addEventListener('click', () => {
-          if (onChange) onChange(itemData.id);
-        });
-
-        control.appendChild(item);
-      });
-
-      const instance = {
-        el: control,
-        indicator,
-        updateActive: (id) => {
-          const allItems = control.querySelectorAll('.ds-segment-item');
-          let activeItem = null;
-          allItems.forEach(item => {
-            const isActive = item.getAttribute('data-id') === id;
-            item.classList.toggle('active', isActive);
-            if (isActive) activeItem = item;
-          });
-
-          if (indicator && activeItem) {
-            requestAnimationFrame(() => {
-              indicator.style.width = `${activeItem.offsetWidth}px`;
-              indicator.style.height = `${activeItem.offsetHeight}px`;
-              indicator.style.left = `${activeItem.offsetLeft}px`;
-              indicator.style.top = `${activeItem.offsetTop}px`;
-            });
-          }
-        }
-      };
-
-      if (activeId) {
-        setTimeout(() => instance.updateActive(activeId), 0);
+      if (typeof SegmentedControlComponent !== 'undefined') {
+        return SegmentedControlComponent.create(options);
       }
-
-      return instance;
+      return null;
     },
 
-    showConfirm: ({ title, message, onConfirm, onCancel }) => {
-      const content = createElement('div', 'ds-confirm-content');
-      content.innerHTML = `<p class="ds-confirm-message">${message}</p>`;
-
-      const footer = createElement('div', 'ds-confirm-footer');
-      const cancelBtn = createElement('button', 'ds-btn ds-btn-ghost', { text: 'Cancel' });
-      const confirmBtn = createElement('button', 'ds-btn ds-btn-primary', { text: 'Confirm' });
-
-      footer.appendChild(cancelBtn);
-      footer.appendChild(confirmBtn);
-
-      const popover = createPopoverShield({
-        title,
-        content,
-        footer,
-        width: '400px',
-        className: 'ds-modal-confirm'
-      });
-
-      confirmBtn.onclick = async () => {
-        try {
-          if (onConfirm) await onConfirm();
-        } finally {
-          popover.close();
-        }
-      };
-      cancelBtn.onclick = () => {
-        if (onCancel) onCancel();
-        popover.close();
-      };
+    showConfirm: (options) => {
+      if (typeof ModalComponent !== 'undefined') {
+        return ModalComponent.confirm(options);
+      }
     },
 
     showPrompt: (options) => {
-      const { title, message, placeholder, defaultValue = '', onConfirm, onCancel } = options;
-      const content = createElement('div', 'ds-prompt-content');
-      const label = createElement('label', 'ds-field-label', { text: message });
-      const input = createElement('input', 'ds-input', { type: 'text', placeholder: placeholder, value: defaultValue });
+      if (typeof ModalComponent !== 'undefined') {
+        return ModalComponent.prompt(options);
+      }
+    },
 
-      content.appendChild(label);
-      content.appendChild(input);
-
-      const footer = createElement('div', 'ds-confirm-footer');
-      const cancelBtn = createElement('button', 'ds-btn ds-btn-ghost', { text: 'Cancel' });
-      const confirmBtn = createElement('button', 'ds-btn ds-btn-primary', { text: 'Continue' });
-
-      footer.appendChild(cancelBtn);
-      footer.appendChild(confirmBtn);
-
-      const popover = createPopoverShield({
-        title,
-        content,
-        footer,
-        width: '440px',
-        className: 'ds-modal-prompt'
-      });
-
-      setTimeout(() => input.focus(), 150);
-
-      confirmBtn.onclick = async () => {
-        const val = input.value.trim();
-        if (!val) {
-          input.classList.add('ds-input-error');
-          input.focus();
-          return;
-        }
-        if (onConfirm) await onConfirm(val);
-        popover.close();
-      };
-
-      input.oninput = () => input.classList.remove('ds-input-error');
-      input.onkeydown = (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); confirmBtn.click(); }
-        if (e.key === 'Escape') { e.preventDefault(); cancelBtn.click(); }
-      };
-
-      cancelBtn.onclick = () => {
-        if (onCancel) onCancel();
-        popover.close();
-      };
+    showCustomModal: (options) => {
+      if (typeof ModalComponent !== 'undefined') {
+        return ModalComponent.create(options);
+      }
+      return null;
     },
 
     initSmartTooltips: function () {
@@ -576,7 +301,7 @@ const DesignSystem = (() => {
           tooltipEl.style.top = `${top}px`;
           tooltipEl.className = `ds-tooltip pos-${finalPos} is-visible`;
           showTimer = null;
-        }, 500); // 500ms delay
+        }, 150); // Reduced delay to 150ms for snappier feel
       }, true);
 
       document.addEventListener('mouseout', (e) => {

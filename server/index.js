@@ -80,6 +80,8 @@ app.use('/api', require('./routes/render'));
 app.use('/api', require('./routes/workspaces'));
 app.use('/api', require('./routes/comments'));
 app.use('/api', require('./routes/file-ops'));
+app.use('/api', require('./routes/handoff'));
+app.use('/api', require('./routes/worker-publish'));
 
 // --- File watcher ---
 function startWatcher(dir) {

@@ -38,7 +38,8 @@ Hệ thống áp dụng các quy tắc sau để đảm bảo trải nghiệm ng
 1. **Capture Phase**: Lắng nghe sự kiện sớm nhất có thể để chặn các phím tắt mặc định của trình duyệt hoặc các xử lý riêng của ô nhập liệu.
 2. **Input Detection**: Tự động nhận diện khi người dùng đang focus vào `input`, `textarea` hoặc `contenteditable`.
 3. **Whitelist (`allowedInInput`)**: Chỉ các phím tắt quan trọng (Save, Undo, Redo, Navigation với phím Mod) mới được phép kích hoạt khi đang gõ văn bản.
-4. **Numeric Override**: Phím số `1, 2, 3, 4` khi nhấn đơn lẻ sẽ ưu tiên nhập liệu, nhưng khi nhấn kèm `Mod` hoặc `Alt` sẽ kích hoạt chuyển Mode ngay cả khi đang gõ.
+4. **Standard Editing Keys Bubbling**: Khi đang focus vào input, các phím tắt soạn thảo cơ bản (`Mod + A, C, V, X, Z, Y`) sẽ không bị chặn bởi các shortcut hệ thống (ví dụ: "Select All Tabs") để đảm bảo hành vi chọn văn bản mặc định của trình duyệt hoạt động bình thường.
+5. **Numeric Override**: Phím số `1, 2, 3, 4` khi nhấn đơn lẻ sẽ ưu tiên nhập liệu, nhưng khi nhấn kèm `Mod` hoặc `Alt` sẽ kích hoạt chuyển Mode ngay cả khi đang gõ.
 
 ---
 
@@ -65,4 +66,4 @@ Mỗi shortcut item trong registry có cấu trúc:
 
 ---
 
-*Document — 2026-04-28*
+*Document — 2026-04-30*

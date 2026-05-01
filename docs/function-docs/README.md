@@ -10,6 +10,7 @@ Tài liệu các module và function quan trọng của MDpreview.
 
 | File | Mô tả |
 |---|---|
+| [BASE_FORM_MODAL.md](BASE_FORM_MODAL.md) | Khung mẫu modal form chuẩn (Header, Body, Footer). |
 | [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) | Centralized UI factory (Buttons, Segmented Control, Radius logic) |
 | [DESIGN_SYSTEM_ICONS.md](DESIGN_SYSTEM_ICONS.md) | Registry toàn bộ icon SVG của dự án (Modular Icons) |
 | [CORE_APP.md](CORE_APP.md) | Global state (AppState), loadFile, boot sequence, theme, socket |
@@ -32,6 +33,8 @@ Tài liệu các module và function quan trọng của MDpreview.
 | [SIDEBAR_LEFT.md](SIDEBAR_LEFT.md) | Organism quản lý khung giao diện thanh bên trái (Explorer, Search, Footer) |
 | [SCROLL_CONTAINER.md](SCROLL_CONTAINER.md) | Molecule quản lý vùng cuộn thông minh với mask-fade và dynamic safe zone |
 | [PROJECT_MAP.md](PROJECT_MAP.md) | Bản đồ thu nhỏ phản chiếu tài liệu (Mini-map) |
+| [PUBLISH_SERVICE.md](PUBLISH_SERVICE.md) | Centralized service for Worker & Handoff publishing (Lifecycle, Rename, Delete). |
+| [PUBLISH_COMPONENTS.md](PUBLISH_COMPONENTS.md) | UI components for publish config, global management and settings. |
 | [RECENTLY_VIEWED.md](RECENTLY_VIEWED.md) | Quản lý lịch sử tập tin vừa mở và hiển thị indicator ẩn |
 | [SEARCH_PALETTE.md](SEARCH_PALETTE.md) | Tìm kiếm nhanh toàn cục (Quick Open) với Debounce, Smart Path và Recent Files |
 | [SEARCH_SERVICE.md](SEARCH_SERVICE.md) | Bộ não fuzzy search và scoring engine hỗ trợ tìm kiếm file/folder |
@@ -74,3 +77,7 @@ if (EditorModule.isDirty()) {
 ```
 
 Áp dụng tại: `loadFile()`, `WorkspaceModule.switchTo()`, `TabsModule.remove()`, `AppState.onModeChange()`.
+
+---
+
+*Last Updated — 2026-04-30*

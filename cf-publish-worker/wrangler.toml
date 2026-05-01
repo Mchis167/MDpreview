@@ -1,0 +1,14 @@
+name = "mdpreview-publish"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+# [vars]
+# ADMIN_SECRET = "your-secret-here" # Set via wrangler secret put ADMIN_SECRET
+
+[[kv_namespaces]]
+binding = "PUB_STORE"
+id = "7a0bbe734fa64dd7b292163a4c290abe"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"

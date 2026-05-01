@@ -1,4 +1,4 @@
-/* global DesignSystem, SettingRow, SettingsService, AppState, SwitchToggleModule, showToast */
+/* global DesignSystem, SettingRow, SettingsService, AppState, SwitchToggleModule, showToast, PublishSettingsFormComponent, PublishManagerComponent */
 /* ══════════════════════════════════════════════════
    SettingsComponent.js — Settings View Organism
    Atomic Design System (Organism)
@@ -70,8 +70,64 @@ class SettingsComponent {
 
     // Sync initial visibility
     this._updateGridVisibility(container, AppState.settings.bgEnabled);
+    
+    // 4. Integrations Group
+    container.appendChild(this._createGroup('Integrations', [
+      SettingRow.create({
+        label: 'Publish Configuration',
+        control: this._createTokenConfigButton()
+      }),
+      SettingRow.create({
+        label: 'Publish Management',
+        control: this._createManagementButton()
+      })
+    ]));
 
     return container;
+  }
+
+  _createTokenConfigButton() {
+    const btn = DesignSystem.createButton({
+      variant: 'subtitle',
+      label: 'Config Publish',
+      leadingIcon: 'settings-2',
+      onClick: () => {
+        if (typeof PublishSettingsFormComponent !== 'undefined') {
+          PublishSettingsFormComponent.open({
+            onConfirm: () => {
+              // Re-render settings to update button label
+              SettingsComponent.hide();
+              setTimeout(() => SettingsComponent.open(), 50);
+            }
+          });
+        }
+      }
+    });
+    
+    btn.style.height = '28px';
+    btn.style.padding = '0 12px';
+    btn.style.fontSize = '11px';
+
+    return btn;
+  }
+
+  _createManagementButton() {
+    const btn = DesignSystem.createButton({
+      variant: 'subtitle',
+      label: 'Manage Slugs',
+      leadingIcon: 'layers',
+      onClick: () => {
+        if (typeof PublishManagerComponent !== 'undefined') {
+          PublishManagerComponent.open();
+        }
+      }
+    });
+    
+    btn.style.height = '28px';
+    btn.style.padding = '0 12px';
+    btn.style.fontSize = '11px';
+
+    return btn;
   }
 
   // ── Helper Methods ──────────────────────────────────────

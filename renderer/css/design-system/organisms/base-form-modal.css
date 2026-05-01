@@ -1,0 +1,78 @@
+/* ── Design System: Base Form Modal (Organism) ── */
+
+.ds-form-modal {
+    --_modal-px: var(--ds-space-xl);
+    display: block;
+    padding: 0;
+    text-align: center;
+}
+
+/* ── Groups ─────────────────────────────────────────────── */
+
+.ds-form-header {
+    padding: 56px var(--_modal-px) var(--ds-space-xl) var(--_modal-px);
+    margin-bottom: 0;
+}
+
+.ds-form-body {
+    padding: var(--ds-space-xl) var(--_modal-px);
+    text-align: left;
+}
+
+.ds-form-footer {
+    padding: var(--ds-space-xl);
+    margin-top: 0;
+}
+
+/* ── Components ─────────────────────────────────────────── */
+
+.ds-form-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    background: var(--ds-layer-surface-default);
+    border: 1px solid var(--ds-border-xstrong);
+    border-radius: var(--ds-radius-xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--ds-space-xl);
+    color: var(--ds-accent);
+}
+
+.ds-form-title {
+    font-size: var(--ds-space-xl);
+    font-weight: 800;
+    color: var(--ds-text-primary);
+    margin-bottom: var(--ds-space-sm);
+    letter-spacing: -0.02em;
+    text-align: center;
+}
+
+.ds-form-subtitle {
+    color: var(--ds-text-tertiary);
+    font-size: var(--ds-font-lg);
+    margin-bottom: 0;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.ds-form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 0;
+}
+
+
+.ds-form-actions {
+    display: flex;
+    justify-content: right;
+    gap: var(--ds-space-md);
+}
+
+/* Helper for divider within modal */
+.ds-form-divider {
+    height: 1px;
+    background: var(--ds-border-default);
+    width: 100%;
+}

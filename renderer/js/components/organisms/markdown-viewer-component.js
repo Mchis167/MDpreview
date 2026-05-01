@@ -17,6 +17,7 @@ class MarkdownViewerComponent {
     this._comboBtn = null;
     this._editImportBtn = null;
     this._editAppendBtn = null;
+    this._publishBtn = null;
     this._floatingGroup = null;
     this._tocUpdateTimeout = null;
     this.init();
@@ -74,6 +75,7 @@ class MarkdownViewerComponent {
       this._comboBtn = null;
       this._editImportBtn = null;
       this._editAppendBtn = null;
+      this._publishBtn = null;
       this._floatingGroup = null;
       this._scrollTopBtn = null;
       
@@ -175,6 +177,9 @@ class MarkdownViewerComponent {
     if (isReadGroup && !this._tocBtn) this._renderReadFloatingActions();
     if (this._tocBtn) this._tocBtn.style.display = isReadGroup ? 'flex' : 'none';
     if (this._comboBtn) this._comboBtn.style.display = isReadGroup ? 'flex' : 'none';
+    if (this._publishBtn) this._publishBtn.style.display = isReadGroup ? 'flex' : 'none';
+    
+    if (isReadGroup) this._updatePublishButtonState();
     
     if (isEditGroup && !this._editImportBtn) this._renderEditFloatingActions();
     
@@ -341,10 +346,109 @@ class MarkdownViewerComponent {
     this._floatingGroup.appendChild(this._tocBtn);
     this._floatingGroup.appendChild(this._comboBtn);
     
+    // 3. Publish Button State
+    this._updatePublishButtonState();
+    
     // Immediate initial sync
     this._updateTOC();
   }
 
+  /**
+   * Refreshes the publish button based on the file's current publication state
+   */
+  _updatePublishButtonState() {
+    if (!this._floatingGroup) return;
+    const file = this.state.file;
+    const info = window.PublishService ? window.PublishService.getPublishInfo(file) : null;
+    
+    // Remove old button if it exists in DOM
+    if (this._publishBtn && this._publishBtn.parentElement) {
+      this._publishBtn.remove();
+    }
+
+    if (!info) {
+      // Regular Button when not published
+      this._publishBtn = DesignSystem.createButton({
+        label: 'Publish',
+        variant: 'subtitle',
+        leadingIcon: 'globe',
+        id: 'floating-publish-btn',
+        tooltip: 'Publish to Web',
+        onClick: (e) => {
+          this._togglePublishConfig({ event: e, anchor: this._publishBtn });
+        }
+      });
+    } else {
+      // Published Combo Button (Re-publish / Unpublish)
+      this._publishBtn = DesignSystem.createComboButton({
+        label: 'Re-publish',
+        variant: 'subtitle', // Light variant even when published
+        leadingIcon: 'globe',
+        id: 'floating-publish-btn',
+        tooltip: `Last published: ${new Date(info.updatedAt).toLocaleDateString()}`,
+        mainAction: (e) => {
+          this._togglePublishConfig({ event: e, anchor: this._publishBtn });
+        },
+        toggleTooltip: 'Publication Options',
+        toggleAction: () => {
+          DesignSystem.createMenu(this._publishBtn, [
+            { 
+              label: 'View Live Page', 
+              icon: 'external-link', 
+              onClick: () => window.open(info.url, '_blank')
+            },
+            { 
+              label: 'Copy Public Link', 
+              icon: 'link', 
+              onClick: () => {
+                navigator.clipboard.writeText(info.url);
+                if (window.showToast) window.showToast('Public link copied');
+              }
+            },
+            { divider: true },
+            { 
+              label: 'Unpublish (Local state)', 
+              icon: 'trash-2', 
+              danger: true,
+              onClick: () => {
+                DesignSystem.showConfirm({
+                  title: 'Clear Publish State?',
+                  message: 'This only removes the state from MDpreview. The page on the Worker will remain active unless deleted manually.',
+                  onConfirm: async () => {
+                    await window.PublishService.unpublish(file);
+                    this._updatePublishButtonState();
+                  }
+                });
+              }
+            }
+          ], { align: 'right' });
+        }
+      });
+    }
+
+    if (this._floatingGroup) {
+      this._floatingGroup.appendChild(this._publishBtn);
+      // Ensure visibility
+      this._publishBtn.style.display = 'flex';
+    }
+  }
+
+  /**
+   * Toggles the Publish Configuration popover (no backdrop)
+   */
+  _togglePublishConfig(options = {}) {
+    const { event, anchor } = options;
+    if (window.PublishConfigComponent) {
+      window.PublishConfigComponent.toggle({
+        event,
+        anchor,
+        file: this.state.file,
+        onPublished: (_url) => {
+          this._updatePublishButtonState();
+        }
+      });
+    }
+  }
 
 
   // ── Context Menu & Actions ───────────────────────────────

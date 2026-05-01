@@ -42,7 +42,14 @@ window.AppState = {
     sidebarWidth: parseInt(localStorage.getItem('mdpreview_sidebar_left_width') || '260', 10),
     rightSidebarWidth: parseInt(localStorage.getItem('mdpreview_sidebar_right_width') || '300', 10),
     rightSidebarOpen: localStorage.getItem('md-right-sidebar-open') === 'true',
-    rightSidebarTab: localStorage.getItem('md-right-sidebar-tab') || 'comments'
+    rightSidebarTab: localStorage.getItem('md-right-sidebar-tab') || 'comments',
+    handoffToken: localStorage.getItem('md-handoff-token') || '',
+    publishWorkerUrl: localStorage.getItem('md-publish-worker-url') || '',
+    publishAdminSecret: localStorage.getItem('md-publish-admin-secret') || '',
+    publishData: (() => {
+      try { return JSON.parse(localStorage.getItem('md-publish-data') || '{}'); }
+      catch (_e) { return {}; }
+    })()
   },
 
   /**

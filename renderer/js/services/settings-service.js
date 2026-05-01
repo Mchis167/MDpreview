@@ -31,7 +31,13 @@ const SettingsService = (() => {
     // Other Persistent States
     sortMethod: { storageKey: 'mdpreview_sort_method', type: 'explorer' },
     rightSidebarOpen: { storageKey: 'md-right-sidebar-open', type: 'none' },
-    rightSidebarTab: { storageKey: 'md-right-sidebar-tab', type: 'none' }
+    rightSidebarTab: { storageKey: 'md-right-sidebar-tab', type: 'none' },
+    
+    // API / Third Party
+    handoffToken: { storageKey: 'md-handoff-token', type: 'none' },
+    publishWorkerUrl: { storageKey: 'md-publish-worker-url', type: 'none' },
+    publishAdminSecret: { storageKey: 'md-publish-admin-secret', type: 'none' },
+    publishData: { storageKey: 'md-publish-data', type: 'none' }
   };
 
   /**

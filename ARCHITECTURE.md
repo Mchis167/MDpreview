@@ -288,7 +288,7 @@ Key enforced rules:
 
 #### 2. Components (`renderer/js/components/`)
 
-**Atoms:** `icon-action-button.js`, `switch-toggle.js`, `textarea.js`
+**Atoms:** `icon-action-button.js`, `switch-toggle.js`, `textarea.js`, `input-component.js`, `status-badge.js`
 ```javascript
 const IconActionButton = (() => {
   'use strict';
@@ -306,7 +306,7 @@ const IconActionButton = (() => {
 window.IconActionButton = IconActionButton;
 ```
 
-**Molecules:** `context-menu.js`, `search-component.js`, `sidebar-section-header.js`, `setting-toggle-item.js`
+**Molecules:** `context-menu.js`, `search-component.js`, `sidebar-section-header.js`, `setting-toggle-item.js`, `inline-message.js`
 - **ContextMenu**: Floating context menu with support for icons, labels, and shortcuts.
 - **ScrollContainer**: Reusable scroll view with mask-fading and automatic safe zone for sidebar lists.
 - **ProjectMap**: High-fidelity mini-map preview for document navigation.
@@ -321,6 +321,7 @@ window.IconActionButton = IconActionButton;
 - `tree-drag-manager.js` — D&D state machine
 - `sidebar-controller.js` — Sidebar DOM controller
 - `recently-viewed-service.js` — Recently viewed files list
+- `publish-service.js` — Document publishing. Supports legacy Handoff.host and modern self-hosted Cloudflare Workers (edge rendering).
 
 #### 4. Modules (`renderer/js/modules/`)
 Business logic that orchestrates components + services.

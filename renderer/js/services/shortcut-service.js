@@ -98,6 +98,17 @@ const ShortcutService = (() => {
     }
 
     if (matchedItem) {
+      // 3. Special handling for text editing keys in inputs
+      // If we are in an input and the key is a standard editing key (a, c, v, x, z, y),
+      // and the shortcut is NOT specifically marked to allowInInput,
+      // we should skip preventing default to let the browser handle it.
+      if (inInput) {
+        const editingKeys = ['a', 'c', 'v', 'x', 'z', 'y'];
+        if (editingKeys.includes(key) && mod && !matchedItem.allowInInput) {
+          return; // Bubble to browser
+        }
+      }
+
       e.preventDefault();
       
       try {

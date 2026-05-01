@@ -12,7 +12,8 @@
     "test": "vitest run",
     "lint:css": "stylelint \"renderer/css/**/*.css\"",
     "lint:js": "eslint \"renderer/js/**/*.js\" \"electron/**/*.js\" \"server/**/*.js\"",
-    "lint": "npm run lint:css && npm run lint:js"
+    "lint": "npm run lint:css && npm run lint:js",
+    "bundle:ai": "node scripts/bundle-for-ai.js"
   },
   "dependencies": {
     "chokidar": "^3.6.0",

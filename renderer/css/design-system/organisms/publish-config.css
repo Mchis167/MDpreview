@@ -1,0 +1,74 @@
+/* ============================================================
+   publish-config.css — Organism
+   Purpose: Styles for Publish Success Modal and Config Popover
+   ============================================================ */
+
+/* ── Floating Publish Button State ── */
+.floating-publish-btn.is-published {
+  border-color: var(--ds-blue-a30);
+}
+
+.floating-publish-btn.is-published .ds-btn-icon-leading {
+  color: var(--ds-accent-blue);
+}
+
+/* ── Publish Configuration Popover ── */
+.ds-publish-config-shield.ds-menu-shield {
+  --_panel-px: var(--ds-space-lg);
+  width: 360px;
+  max-width: 360px;
+  padding: var(--ds-space-md);
+}
+
+.ds-publish-config-shield .ds-menu-shield-header {
+  border-bottom: none;
+  padding: var(--ds-space-sm) var(--_panel-px) var(--ds-space-xs) var(--_panel-px);
+}
+
+.ds-publish-config-shield .ds-menu-shield-title {
+  font-size: var(--ds-font-lg);
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--ds-text-primary);
+  font-family: var(--ds-font-family-text);
+}
+
+.ds-publish-config-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-lg);
+  width: 100%;
+}
+
+.ds-publish-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--ds-space-sm);
+}
+
+.ds-publish-actions-right {
+  display: flex;
+  gap: var(--ds-space-sm);
+}
+
+.ds-publish-status-info {
+  margin-bottom: var(--ds-space-xs);
+}
+
+.ds-publish-input {
+  width: 100%;
+}
+
+.ds-publish-config-shield .ds-menu-shield-content {
+  padding: 0;
+}
+
+
+/* Status Badge spacing in Publish Panel */
+.ds-publish-status-badge,
+.ds-publish-engine-badge {
+  padding-left: var(--_panel-px);
+  padding-right: var(--_panel-px);
+}

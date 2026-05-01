@@ -1,0 +1,55 @@
+/* ── Design System: Inline Message (Molecule) ── */
+
+.ds-inline-message {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ds-space-md);
+    padding: var(--ds-space-md) var(--ds-space-lg);
+    border-radius: var(--ds-radius-panel);
+    font-size: var(--ds-font-sm);
+    line-height: 1.5;
+    margin: var(--ds-space-md) 0;
+    border: 1px solid transparent;
+}
+
+.ds-inline-message-icon {
+    width: 14px;
+    height: 14px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ds-inline-message-text {
+    flex: 1;
+}
+
+/* Variants */
+.ds-inline-message--info {
+    background: var(--ds-white-a02);
+    border-color: var(--ds-border-default);
+    color: var(--ds-text-secondary);
+}
+.ds-inline-message--info .ds-inline-message-icon {
+    color: var(--ds-accent-blue);
+}
+
+.ds-inline-message--success {
+    background: var(--ds-status-success-bg);
+    border-color: rgba(var(--ds-primitive-green-rgb), 0.1);
+    color: var(--ds-status-success);
+}
+
+.ds-inline-message--warning {
+    background: var(--ds-status-warning-bg);
+    border-color: rgba(var(--ds-accent-rgb), 0.1);
+    color: var(--ds-status-warning);
+}
+
+.ds-inline-message--error {
+    background: var(--ds-status-danger-bg);
+    border-color: rgba(var(--ds-primitive-red-rgb), 0.1);
+    color: var(--ds-status-danger);
+}

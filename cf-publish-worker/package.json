@@ -1,0 +1,17 @@
+{
+  "name": "mdpreview-publish-worker",
+  "version": "1.0.0",
+  "description": "Self-hosted publish engine for MDpreview",
+  "main": "src/index.js",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^4.86.0"
+  },
+  "dependencies": {
+    "highlight.js": "^11.8.0",
+    "marked": "^4.3.0"
+  }
+}

@@ -2,6 +2,115 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.17.0] — 2026-05-01 07:30
+
+### 🎉 Added
+- **StatusBadge Atom**: Triển khai thành phần chỉ báo trạng thái mới (Dot + Label) siêu tối giản, hỗ trợ đa dạng variant (`success`, `warning`, `error`, `info`), thay thế cho hệ thống InlineMessage cồng kềnh.
+- **Unified Input Component (JS Factory)**: 
+    - Triển khai `InputComponent` hoàn chỉnh với Label, Action Button và hệ thống Status Indicator tích hợp.
+    - Hỗ trợ API động (`setStatus`, `setVariant`, `setLoading`) giúp điều khiển trạng thái input minh bạch từ script.
+    - **Interactive Tooltips**: Tích hợp tooltip tương tác ngay trên nhãn input để cung cấp thông tin hướng dẫn mà không chiếm dụng không gian layout.
+    - **Link Variant**: Bổ sung `.ds-input--link` chuyên biệt để hiển thị URL với font chữ code và cơ chế tự động truncate chuyên nghiệp.
+- **Publish Configuration V2**: Tái cấu trúc toàn bộ giao diện cấu hình Publish dựa trên hệ thống Atom mới, tối ưu hóa không gian hiển thị và độ tinh tế của UI.
+- **Standardized Icons**: Đăng ký các icon mới `circle-x` và `circle-check` phục vụ phản hồi trực quan cho quá trình xác thực (validation).
+
+### 🔧 Changed
+- **Publish Workflow Refinement**: 
+    - Chuyển đổi ngôn ngữ sang hệ thuật ngữ chuyên nghiệp hơn (**Go Live**, **Public Address**, **Customize Link**).
+    - Đồng bộ hóa nhãn nút bấm (**Update Link**) xuyên suốt quá trình kiểm tra Slug.
+    - Nâng cấp luồng Unpublish: Đảm bảo bảng cấu hình luôn mở và chuyển về trạng thái chờ thay vì đóng sập popover.
+- **Tooltip System Optimization**: Giảm độ trễ hiển thị tooltip từ **500ms** xuống còn **150ms**, mang lại cảm giác phản hồi tức thì (snappy).
+- **Premium UI Polish**: 
+    - Cố định chiều rộng Panel cấu hình để tránh hiện tượng nhảy layout khi chuyển đổi trạng thái.
+    - Đồng bộ hóa khoảng cách lề Panel thông qua hằng số nội bộ `--_panel-px`.
+    - Nâng cấp định dạng ngày giờ "Live since" sang format Medium Date + Short Time thân thiện.
+- **MenuShield Enhancement**: Cập nhật cơ chế đóng menu thông minh, không tự động đóng khi người dùng tương tác với các Modal con.
+- **Slug Validation UX**: Chuyển đổi cơ chế hiển thị lỗi/thành công khi kiểm tra Slug sang hệ thống Status Indicator tích hợp trong Input, đi kèm icon và text chuyên nghiệp.
+- **Input Visibility Optimization**: Cập nhật CSS để tự động ẩn (`display: none`) vùng status khi không có nội dung, tránh tạo khoảng trống thừa trong các form.
+- **Design System Factory Expansion**: Mở rộng `DesignSystem.js` với các phương thức `createInput`, `createInputGroup` và `createStatusBadge` làm proxy cho các Atom components.
+
+### 🗑 Removed
+- **Legacy UI Elements**: 
+    - Xóa bỏ hoàn toàn hệ thống **Legacy Success Modal** và mã nguồn liên quan.
+    - Loại bỏ nút "View all active links" và các subtitle trợ giúp dư thừa để tối giản hóa chân trang (footer).
+    - Loại bỏ 100% debug loggers và `console.warn` trong luồng xử lý Publish.
+
+### 🐞 Fixed
+- **Modal Atom (Label Sync)**: Khắc phục lỗi mất nhãn trên các nút bấm trong `confirm` và `prompt` modal do sai lệch tên thuộc tính.
+- **Input Alignment**: Sửa lỗi lệch lề của nhãn khi chuyển đổi giữa chế độ có và không có wrapper.
+- **Input Padding Jumps**: Khắc phục lỗi rung lắc giao diện khi hiển thị thông báo trạng thái bên dưới ô nhập liệu.
+- **Linting Compliance**: Đạt trạng thái **Zero Errors / Zero Warnings** sau đợt refactor lớn về hệ thống input và publish UI.
+
+## [Not Commited] — 2026-04-30 07:50
+
+### 🎉 Added
+- **Self-Hosted Publishing Engine**: Hoàn thiện tích hợp hệ thống xuất bản tự lưu trữ (Self-Hosted) dựa trên **Cloudflare Workers & KV**, cho phép kiểm soát 100% dữ liệu và bảo mật document.
+- **Global Publish Manager (Organism)**: 
+    - Triển khai giao diện quản lý tập trung toàn bộ các tài liệu đã đăng trên Edge.
+    - Hỗ trợ liệt kê, tìm kiếm và quản lý vòng đời Slug trực tiếp từ Cloudflare KV.
+- **Smart Slug Lifecycle Management**: 
+    - **Availability Check**: Tự động kiểm tra tính khả dụng của Slug trong thời gian thực khi cấu hình.
+    - **Slug Renaming**: Cho phép đổi tên (move) Slug đã đăng mà không mất dữ liệu, tự động đồng bộ hóa trạng thái cục bộ.
+    - **Force Overwrite**: Hỗ trợ ghi đè nội dung lên Slug cũ với cảnh báo trực quan, giúp người dùng linh hoạt tái sử dụng link.
+- **Stale State Cleanup**: Tự động đối chiếu trạng thái cục bộ với Server khi mở bảng cấu hình; tự động gỡ bỏ trạng thái "Đã đăng" nếu dữ liệu thực tế không còn trên Cloudflare.
+- **Full URL Preview**: Hiển thị đường dẫn công khai đầy đủ (Full Link) ngay trong UI cấu hình, hỗ trợ truy cập nhanh và sao chép.
+- **Publish Management Shortcut**: Tích hợp lối tắt **"Manage Slugs"** trực tiếp vào menu **Settings** chính (nhóm Integrations).
+- **Draft Publishing Support**: Cho phép xuất bản các bản nháp (**Drafts**) trực tiếp từ bộ nhớ ứng dụng mà không cần lưu thành file vật lý.
+
+### 🔧 Changed
+- **Publish UI Refactor**: 
+    - Tái cấu trúc nút **Publish** nổi (Floating) để sử dụng hoàn toàn chuẩn **Design System** (`Button` & `ComboButton`).
+    - Loại bỏ 100% các class CSS tùy biến (`floating-publish-btn`, `is-published`) và chuyển sang dùng hệ thống Token mặc định.
+    - Cải tiến trải nghiệm: Trạng thái chưa đăng dùng nút đơn, trạng thái đã đăng dùng **ComboButton (Subtitle variant)** mang lại giao diện tinh tế hơn.
+- **PublishService Infrastructure**: 
+    - Tái cấu trúc toàn bộ logic xuất bản hỗ trợ cơ chế bất đồng bộ (async).
+    - Triển khai hệ thống API proxy phía Server (`/api/worker-publish`) để bảo vệ **Admin Secret** không bị lộ dưới trình duyệt.
+- **Cloudflare Worker Core**: Nâng cấp mã nguồn Worker hỗ trợ các endpoint quản trị: `/list`, `/rename`, `/check-slug`.
+- **PublishConfigComponent Enhancements**: Tích hợp các chỉ báo trạng thái (Success/Warning/Error), thanh trạng thái "Checking...", và quản lý nút hành động theo ngữ cảnh khả dụng của Slug.
+
+### 🐞 Fixed
+- **Publish State Desync**: Khắc phục lỗi nút Publish không tự động quay lại trạng thái ban đầu sau khi Unpublish do thiếu `await` trong tiến trình bất đồng bộ.
+- **Success Modal Logic**: Sửa lỗi modal "Thành công" tự động hiện ra khi người dùng gỡ bài (Unpublish) từ bảng cấu hình.
+- **Settings Persistence Bug**: Sửa lỗi `SettingsService` không lưu được các phím cấu hình mới (`publishWorkerUrl`, `publishAdminSecret`) vào `AppState`.
+- **Unpublish Desync**: Khắc phục tình trạng nhấn Unpublish chỉ xóa trạng thái cục bộ nhưng vẫn để lại nội dung trên Cloudflare; hiện đã đồng bộ xóa sạch dữ liệu trên KV.
+- **Draft 404/500 Error**: Sửa lỗi Server không thể đọc nội dung của các file có đường dẫn ảo (`__DRAFT_...`) khi thực hiện xuất bản.
+- **Slug Validation Regex**: Nới lỏng quy tắc kiểm tra Slug, hỗ trợ dấu gạch dưới (`_`), độ dài ngắn và tự động chuẩn hóa chữ thường.
+- **Action Buttons Visibility**: Sửa lỗi mất icon và nút bấm trong Publish Manager do sai tên thuộc tính Design System (`icon` vs `leadingIcon`).
+
+## [Not Commited] — 2026-04-30 05:25
+
+### 🎉 Added
+- **Publish Configuration Workflow**: Tách riêng tính năng Publish thành một quy trình cấu hình chuyên sâu (**PublishConfigComponent**), hỗ trợ tùy chỉnh **Slug (URL Link)** và **Mật khẩu** bảo mật tài liệu.
+- **Advanced Input Group Atom**: Triển khai `DesignSystem.createInputGroup()` cho phép tích hợp các nút hành động (như **Copy Slug**) trực tiếp vào trong trường nhập liệu.
+- **Enhanced Button Atom**: Bổ sung helper `setLoading()` và `setIcon()` cho phép cập nhật trạng thái và icon động cho nút bấm mà không cần render lại.
+- **BaseFormModal Component (Organism)**: Triển khai component template tái sử dụng cho toàn bộ các form modal trong ứng dụng. Hỗ trợ phân nhóm ngữ nghĩa (Header, Body, Footer) và tích hợp sẵn hệ thống đường kẻ phân cách (Dividers).
+- **Standardized Input Atom**: 
+    - Triển khai `renderer/css/design-system/atoms/input.css` với các trạng thái hover, focus (accent glow) và error chuẩn.
+    - Bổ sung helper `DesignSystem.createInput()` giúp khởi tạo nhanh các ô nhập liệu đồng nhất.
+- **Web-based Publishing (Handoff.host)**: Triển khai cơ chế `publishToHandoff` trong `electron-bridge.js` sử dụng Fetch API, cho phép xuất bản tài liệu ngay trên môi trường trình duyệt (kèm thông báo toast về giới hạn tài nguyên cục bộ).
+- **InlineMessage Molecule**: 
+    - Thành phần hiển thị thông báo/hướng dẫn nội khối chuyên nghiệp với 4 biến thể: `info`, `success`, `warning`, `error`.
+    - Tích hợp sẵn icon trạng thái và background bám sát Design System.
+
+### 🔧 Changed
+- **State-aware Publishing UI**: 
+    - Tích hợp **Loading state** trên nút bấm trong quá trình gửi dữ liệu lên host.
+    - Hiển thị thông báo trạng thái xuất bản cuối cùng kèm theo nút **Unpublish** để quản lý trạng thái cục bộ.
+- **Integrated Label Management**: Tự động hóa việc khởi tạo nhãn (**Label**) cho Input/InputGroup thông qua tùy chọn `label`, đồng bộ hóa thẩm mỹ với hệ thống modal gốc.
+- **Smart Popover Positioning**: Nâng cấp `MenuShield` ưu tiên định vị theo phần tử neo (**Anchor**), đảm bảo menu luôn hiển thị ngay dưới nút bấm và không đè lên UI kích hoạt.
+- **Standardized Button Variants**: Chuẩn hóa các biến thể màu sắc `danger` và `danger-ghost` vào hệ thống core CSS (`button.css`).
+- **Handoff API Configuration UI**: Tái cấu trúc hoàn toàn `HandoffTokenFormComponent.js` để sử dụng bộ ba `BaseFormModal`, `Input` và `InlineMessage`, loại bỏ 100% mã render DOM thủ công.
+- **Modal Architectural Refinement**:
+    - Triển khai cơ chế **Local Variable Padding** (`--_modal-px`) giúp quản lý khoảng cách ngang đồng nhất.
+    - Cấu trúc lại DOM để các đường kẻ ngang (`.ds-form-divider`) tự động tràn 100% chiều ngang modal mà không cần dùng margin âm.
+- **Design System Helper Expansion**: Cập nhật `DesignSystem.js` với các phương thức khởi tạo linh hoạt và refactor `showPrompt` để sử dụng chuẩn `createInput` mới.
+- **Popover Interaction Logic**: Tinh chỉnh logic click-away trong `DesignSystem.js` để xử lý chính xác các tương tác trên modal con, ngăn chặn việc đóng popover cha ngoài ý muốn.
+
+### 🐞 Fixed
+- **Shortcut Collision Fix**: Sửa lỗi phím tắt `Mod + A` (Chọn tất cả tab) chặn hành vi bôi đen văn bản trong các ô nhập liệu.
+- **Handoff Proxy Password Support**: Cập nhật route proxy server hỗ trợ truyền tham số mật khẩu khi upload tài liệu.
+- **Form Action Alignment**: Cập nhật các nút hành động trong modal sử dụng `fit-content` (thay vì fill-width) và căn lề phải (`justify-content: right`) theo đúng quy chuẩn UX chuyên nghiệp.
+
 ## [1.16.0] — 2026-04-29 11:20
 
 ### 🎉 Added

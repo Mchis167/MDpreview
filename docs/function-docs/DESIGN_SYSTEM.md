@@ -30,10 +30,15 @@ Utility tạo element nhanh với class và nội dung.
 
 ### `createButton(options)`
 Tạo button chuẩn (`ds-btn`) với nhiều biến thể.
-- `variant`: `primary` | `ghost` | `subtle-light` | `subtle-dark` | `subtitle`.
+- `variant`: `primary` | `ghost` | `subtle-light` | `subtle-dark` | `subtitle` | `danger` | `danger-ghost`.
 - `label`: Nội dung text.
 - `radius`: (Init: `var(--ds-radius-widget)`) Bo góc tùy chỉnh.
 - `offLabel`: `true` để chỉ hiển thị icon.
+
+**Helpers**:
+- `btn.setLoading(isLoading)`: Hiển thị/ẩn spinner loading và vô hiệu hóa nút.
+- `btn.setIcon(iconName)`: Cập nhật icon leading mà không cần render lại toàn bộ.
+- `btn.setLabel(newLabel)`: Cập nhật văn bản hiển thị của nút một cách nhanh chóng.
 
 ### `createSegmentedControl(options)`
 Tạo bộ điều khiển phân đoạn (`ds-segmented-control`) với chỉ báo trượt.
@@ -62,6 +67,44 @@ Tạo menu thả xuống (dropdown) hoặc menu ngữ cảnh được "neo" vào
 - `options`: `{ align: 'left'|'right', onClose, ... }`.
 
 **Smart Behavior**: Nếu `anchor` là một `ds-combo-btn`, hàm này sẽ tự động quản lý class `.is-open` và xử lý logic toggle (đóng menu khi nhấn lại vào nút).
+
+### `createInput(options)`
+Tạo ô nhập liệu chuẩn (`ds-input`) sử dụng **InputComponent** (Atom), hỗ trợ đầy đủ các trạng thái hover/focus/error và tích hợp sẵn chỉ báo trạng thái.
+- `label`: Nhãn hiển thị phía trên input (tự động bọc trong `.ds-form-field`).
+- `description`: Hướng dẫn chi tiết, hiển thị dưới dạng **interactive tooltip** khi di chuột vào nhãn (label).
+- `type`: `text` | `password` | `number`... (mặc định: `text`).
+- `placeholder`: Văn bản gợi ý.
+- `value`: Giá trị mặc định.
+- `variant`: `default` | `error` | `success` | `warning` (điều khiển màu viền).
+- `status`: `{ text, variant, icon }` — Cấu hình thông báo trạng thái bên dưới.
+- `onInput` / `onChange`: Các callback sự kiện.
+
+**Public API** (trên container trả về):
+- `.value`: Getter/Setter cho giá trị input.
+- `.focus()`: Focus vào input.
+- `.setStatus(data)`: Cập nhật thông báo trạng thái (`text`, `variant`, `icon`, `isLoading`).
+- `.setLoading(isLoading, text)`: Chuyển đổi trạng thái chờ xử lý.
+- `.setVariant(variant)`: Thay đổi màu sắc đường viền input.
+
+### `createInputGroup(options)`
+Tạo nhóm nhập liệu (`ds-input-group`) có đính kèm nút hành động ở phía bên phải. Kế thừa toàn bộ API của `createInput`.
+- `action`: `{ icon, onClick, title }` — Cấu hình nút hành động (sử dụng `Button` atom).
+
+### `createInlineMessage(options)`
+Tạo thông báo nội khối (`ds-inline-message`) cho các thông tin quan trọng hoặc cảnh báo mức độ cao.
+- `text`: Nội dung thông báo.
+- `variant`: `info` | `success` | `warning` | `error`.
+- `icon`: Tên icon từ registry (mặc định theo variant).
+
+### `createStatusBadge(options)`
+Tạo chỉ báo trạng thái (Status Badge) siêu tối giản (Dot + Label) cho các thông tin trạng thái phụ trợ.
+- `text`: Nội dung văn bản.
+- `variant`: `info` | `success` | `warning` | `error` / `danger`.
+- `className`: Class CSS bổ sung.
+
+**Public API**:
+- `.setText(newText)`: Cập nhật văn bản.
+- `.setVariant(newVariant)`: Cập nhật màu sắc dot.
 
 ### `createPopoverShield(onClose)`
 Tạo lớp chắn bảo vệ (shield) cho các menu nổi, hỗ trợ click-outside và Escape để đóng.
@@ -123,4 +166,4 @@ DesignSystem.createSegmentedControl({
 
 ---
 
-*Document — 2026-04-29*
+*Document — 2026-05-01*

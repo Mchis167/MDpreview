@@ -330,6 +330,55 @@
       }
     },
 
+    publishToWorker: async (data) => {
+      try {
+        const { payload, workerUrl, secret } = data;
+        
+        // If web version, we proxy through our own server to keep secret safe
+        const response = await fetch('/api/worker-publish', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ payload, workerUrl, secret })
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.error || `Server responded with ${response.status}`);
+        }
+
+        return await response.json();
+      } catch (error) {
+        console.error('[Bridge] Worker Publish error:', error);
+        return { success: false, error: error.message };
+      }
+    },
+
+    publishToHandoff: async (data) => {
+      try {
+        const response = await fetch('/api/handoff/publish', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.error || `Server responded with ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (typeof showToast === 'function') {
+          showToast('Published via Proxy (Note: Local images are not supported in web mode)', 'info');
+        }
+        
+        return { success: true, url: result.url };
+      } catch (error) {
+        console.error('[Bridge] Publish error:', error);
+        return { success: false, error: error.message };
+      }
+    },
+    
     isElectron: false,
     
     // Custom

@@ -39,6 +39,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getAbsolutePath: (filePath)     => ipcRenderer.invoke('get-absolute-path', filePath),
   rasterizeSVG: (svg, w, h)       => ipcRenderer.invoke('rasterize-svg', svg, w, h),
   writeClipboardAdvanced: (data)  => ipcRenderer.invoke('write-clipboard-advanced', data),
+  publishToHandoff: (options)     => ipcRenderer.invoke('publish-to-handoff', options),
+  publishToWorker: (options)      => ipcRenderer.invoke('publish-to-worker', options),
   isElectron: true,
   
   // Custom

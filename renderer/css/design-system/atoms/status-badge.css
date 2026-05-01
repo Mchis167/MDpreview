@@ -1,0 +1,35 @@
+/* ── Design System: Status Badge (Atom) ── */
+
+.ds-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-sm);
+    padding: var(--ds-space-3xs) 0;
+    line-height: 1.4;
+}
+
+.ds-status-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--ds-radius-pill);
+    background: var(--_dot-color, var(--ds-text-tertiary));
+    box-shadow: 0 0 4px var(--_dot-color);
+    flex-shrink: 0;
+}
+
+.ds-status-badge-label {
+    font-size: var(--ds-font-sm);
+    color: var(--ds-text-secondary);
+    font-family: var(--ds-font-family-text);
+}
+
+/* Variants */
+.ds-status-badge--success { --_dot-color: var(--ds-status-success); }
+.ds-status-badge--warning { --_dot-color: var(--ds-status-warning); }
+.ds-status-badge--error   { --_dot-color: var(--ds-status-danger); }
+.ds-status-badge--danger  { --_dot-color: var(--ds-status-danger); }
+.ds-status-badge--info    { --_dot-color: var(--ds-status-info); }
+
+/* Sizes (Optional, defaults to small) */
+.ds-status-badge--md .ds-status-badge-label { font-size: var(--ds-font-md); }
+.ds-status-badge--md .ds-status-badge-dot { width: 8px; height: 8px; }

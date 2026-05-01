@@ -52,6 +52,7 @@ Ghi dữ liệu đa định dạng (HTML + Text) vào clipboard. Sử dụng `na
 | `openFolder()` | Mở hộp thoại chọn thư mục. |
 | `getAbsolutePath(path)` | Chuyển đổi đường dẫn tương đối sang tuyệt đối. |
 | `revealInFinder(path)` | Mở thư mục chứa file trong File Explorer (chỉ Desktop). |
+| `publishToHandoff(data)` | Xuất bản tài liệu lên Handoff.host (Sử dụng IPC trên Desktop, Fetch trên Web). |
 | `startFileDrag(path)` | Kích hoạt hiệu ứng kéo thả file ra ngoài ứng dụng. |
 | `rebuildApp()` | Yêu cầu đóng gói và khởi động lại ứng dụng (chỉ Desktop). |
 

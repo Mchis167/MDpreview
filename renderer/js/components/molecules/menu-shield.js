@@ -50,6 +50,9 @@ const MenuShield = (() => {
       // Don't close if clicking inside the shield
       if (shield.contains(e.target)) return;
 
+      // Don't close if clicking on another active modal shield (e.g. Confirm Modal)
+      if (e.target.closest('.ds-popover-shield')) return;
+
       // Don't close if clicking inside the anchor (let the toggle logic handle it)
       if (options.anchor && (options.anchor === e.target || options.anchor.contains(e.target))) {
         return;
@@ -110,9 +113,6 @@ const MenuShield = (() => {
     if (position) {
       x = position.x;
       y = position.y;
-    } else if (event) {
-      x = event.clientX;
-      y = event.clientY;
     } else if (anchor) {
       const anchorRect = anchor.getBoundingClientRect();
 
@@ -139,6 +139,9 @@ const MenuShield = (() => {
       } else {
         y = anchorRect.bottom + margin;
       }
+    } else if (event) {
+      x = event.clientX;
+      y = event.clientY;
     }
 
     // Safety bounds for X

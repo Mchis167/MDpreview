@@ -27,6 +27,12 @@ body {
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
   user-select: none;
+  -webkit-user-select: none;
+}
+
+input, textarea, [contenteditable="true"] {
+  user-select: text !important;
+  -webkit-user-select: text !important;
 }
 
 /* ── Scrollbar ─────────────────────────────────────────────── */

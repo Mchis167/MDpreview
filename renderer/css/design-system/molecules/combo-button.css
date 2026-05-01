@@ -127,7 +127,8 @@
 }
 
 /* ── Open/Active State ──────────────────────────────── */
-.ds-combo-btn.is-open {
+.ds-combo-btn.is-open,
+.ds-combo-btn.is-active {
   background: var(--_bg-hover) !important;
   color: var(--_color-hover, var(--_color));
   border: 1px solid var(--ds-border-selected-subtle);
@@ -135,10 +136,12 @@
   transform: translateY(0);
 }
 
-.ds-combo-btn.is-open .ds-combo-btn-toggle svg {
+.ds-combo-btn.is-open .ds-combo-btn-toggle svg,
+.ds-combo-btn.is-active .ds-combo-btn-toggle svg {
   transform: rotate(180deg);
 }
 
-.ds-combo-btn.is-open .ds-combo-btn-toggle {
+.ds-combo-btn.is-open .ds-combo-btn-toggle,
+.ds-combo-btn.is-active .ds-combo-btn-toggle {
   background: var(--ds-white-a05);
 }
