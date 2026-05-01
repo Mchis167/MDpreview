@@ -2,9 +2,116 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] — 2026-05-01 19:00 — Phase 1.1: Render Logic Consolidation & XSS Security Fix
+
+### 🎉 Added
+
+- **Render Logic Consolidation (Phase 1.1 — Refactor)**:
+    - **Shared Rendering Module**: Created `renderer/js/services/md-renderer-core.js` containing 4 critical functions used by both server and worker:
+        - `highlightCodeBlock()` — Code syntax highlighting with language detection
+        - `sanitizeHtml()` — XSS protection (removes `<script>`, `<iframe>`, event handlers)
+        - `wrapInTableWrapper()` — Table accessibility wrapper
+        - `renderMermaidBlock()` — Mermaid diagram rendering
+    - **Module Compatibility**: CommonJS format supports both Node.js (server) and Cloudflare Workers (via Wrangler bundler)
+    - **100% Code Reuse**: Server and worker now use identical rendering primitives
+
+- **Security: XSS Protection in Worker** (Critical Fix):
+    - **Before**: Worker rendering was missing XSS sanitization entirely
+    - **After**: Worker now applies identical `sanitizeHtml()` to server
+    - **Protection Against**:
+        - `<script>` tag injection
+        - `<iframe>` tag injection
+        - Inline event handlers (`onclick`, `onerror`, `onload`, etc.)
+    - **Test Coverage**: All XSS vectors now verified by unit tests
+
+- **Mermaid Diagram Support in Server** (Bug Fix):
+    - Added missing `renderMermaidBlock()` call for mermaid code blocks
+    - Both server and worker now handle `\`\`\`mermaid` blocks identically
+
+- **Comprehensive Test Suite**:
+    - **21 Unit Tests**: Complete coverage of all 4 shared functions
+    - **Integration Tests**: Server + worker rendering verification
+    - **XSS Attack Vectors**: Tests for script injection, iframe injection, event handlers
+    - **Vitest Configuration**: Added `vitest.config.js` for proper test setup
+
+- **Documentation**:
+    - **[README.md](README.md)**: Comprehensive project overview
+    - **[SECURITY.md](docs/SECURITY.md)**: Security policy and XSS protection details
+    - **[RENDERING_ARCHITECTURE.md](docs/RENDERING_ARCHITECTURE.md)**: Detailed rendering system documentation
+    - **[Manual Testing Guide](docs/manual-testing-phase-1-1.md)**: 12 test cases with step-by-step instructions
+    - **[Phase 1.1 Completion Report](docs/phase-1-1-completion.md)**: Technical completion details
+
+- **Test Infrastructure**:
+    - `scripts/test-phase-1-1.sh` — Integration test runner covering unit tests, server rendering, worker build, and sanitization verification
+
+### 🔧 Changed
+
+- **Server Renderer** (`server/routes/render.js`):
+    - Removed inline `_sanitize()` function (moved to shared module)
+    - Now imports `sanitizeHtml()` and `renderMermaidBlock()` from shared core
+    - Cleaner, more maintainable code with centralized sanitization
+
+- **Worker Renderer** (`cf-publish-worker/src/renderer.js`):
+    - Now imports all 4 functions from `md-renderer-core.js`
+    - Uses `highlightCodeBlock()` instead of manual hljs calls
+    - Uses `wrapInTableWrapper()` instead of inline HTML
+    - Uses `renderMermaidBlock()` instead of inline HTML
+    - **CRITICAL**: Added `sanitizeHtml()` call before final return (was missing)
+
+### 🐞 Fixed
+
+- **Critical Security Gap**: Worker was missing XSS sanitization entirely. Now protected identically to server.
+- **Mermaid Rendering in Server**: Added missing mermaid diagram support to server renderer.
+- **Code Quality**: Eliminated rendering logic duplication across server and worker.
+
+### ✅ Testing Results
+
+- **Unit Tests**: 21/21 passing ✅
+- **Integration Tests**: All passing ✅
+- **Linting**: 0 errors, 0 warnings ✅
+- **XSS Protection Verification**:
+  - Server script injection protection ✅
+  - Server iframe protection ✅
+  - Server event handler protection ✅
+  - Worker script injection protection ✅
+  - Worker iframe protection ✅
+  - Worker event handler protection ✅
+
+### 📚 Documentation
+
+- Added `README.md` with full project overview
+- Added `docs/SECURITY.md` with detailed security policies
+- Added `docs/RENDERING_ARCHITECTURE.md` with technical architecture
+- Added `docs/manual-testing-phase-1-1.md` with 12 test cases
+- All test scripts include copy-paste curl commands for easy testing
+
+### 🔐 Security Impact
+
+**Before v1.1.0:**
+| Attack Vector | Server | Worker |
+|---|---|---|
+| `<script>` injection | ✅ Protected | ❌ Vulnerable |
+| `<iframe>` injection | ✅ Protected | ❌ Vulnerable |
+| Event handlers | ✅ Protected | ❌ Vulnerable |
+
+**After v1.1.0:**
+| Attack Vector | Server | Worker |
+|---|---|---|
+| `<script>` injection | ✅ Protected | ✅ Protected |
+| `<iframe>` injection | ✅ Protected | ✅ Protected |
+| Event handlers | ✅ Protected | ✅ Protected |
+
+---
+
 ## [1.18.0] — 2026-05-01 18:05
 
 ### 🎉 Added
+- **CSS Build Pipeline (Phase 1.2 — Refactor)**:
+    - **Automated CSS Generation**: New `npm run build:publish-css` script generates `cf-publish-worker/public/publish.css` from `renderer/css/design-system/tokens.css` + `cf-publish-worker/src/publish-styles.css`. Eliminates manual sync drift.
+    - **Source Files**: Created `cf-publish-worker/src/publish-styles.css` as the authoritative source for publish-specific styles (layout, components unique to published pages). Replaced hand-edited approach.
+    - **Build Script**: `scripts/build-publish-css.js` combines full token system with publish-specific styles, adds compatibility aliases, and regenerates output with AUTO-GENERATED header.
+    - **Workflow Automation**: `npm run build` now automatically runs `build:publish-css` before `electron-builder`, ensuring published CSS is always in sync with design tokens.
+
 - **Visual Parity Optimization (Worker & Site)**:
     - **Premium Theme Refinement**: Cập nhật màu nền `bg-main` sang `#131313` (xám đen sâu) mang lại cảm giác cao cấp và dịu mắt hơn cho bản publish.
     - **Unified Premium Blocks**: Chuẩn hóa Code Blocks, Tables và Mermaid diagrams với hiệu ứng **backdrop-blur (40px)** và viền siêu mỏng, tạo hiệu ứng kính mờ (glassmorphism) đồng bộ 100% với Editor.
