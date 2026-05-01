@@ -55,6 +55,8 @@ Dự án cam kết độ trung thực 100% giữa Editor và bản xuất bản 
 3. **Premium Blocks**: Các thành phần đặc biệt (Code, Table, Mermaid) sử dụng hệ thống Glassmorphism (`backdrop-filter`, `transparent background`).
 4. **Mermaid Visibility**: Ép chuẩn hiển thị văn bản màu trắng và nét vẽ mờ (white alpha) để tương thích với theme tối của web.
 
+**CSS Consistency (Phase 1.2)**: Worker CSS được **auto-generated** từ App tokens thông qua `npm run build:publish-css`. Xem [`docs/css-pipeline.md`](../../css-pipeline.md) để biết chi tiết.
+
 ---
 
 ## Cấu trúc Dữ liệu (Publish Info)

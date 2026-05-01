@@ -60,12 +60,14 @@ Vui lòng đọc các file theo thứ tự số thứ tự (00 -> 08) để hi�
 │   │   │   ├── publish.js
 │   │   │   └── serve.js
 │   │   ├── index.js
+│   │   ├── publish-styles.css
 │   │   ├── renderer.js
 │   │   ├── shell.js
 │   │   └── utils
 │   │       └── slug.js
 │   └── wrangler.toml
 ├── docs
+│   ├── css-pipeline.md
 │   ├── decisions
 │   │   ├── 20260426-adaptive-sidebar-scrolling.md
 │   │   ├── 20260426-centralized-settings-architecture.md
@@ -147,6 +149,7 @@ Vui lòng đọc các file theo thứ tự số thứ tự (00 -> 08) để hi�
 │   ├── function-idea-docs
 │   │   ├── ElectronClipboardCopyAsFile.md
 │   │   └── cf-publish-implementation-plan.md
+│   ├── phase-1-2-completion.md
 │   └── user_guide.md
 ├── electron
 │   ├── ipc
@@ -294,6 +297,7 @@ Vui lòng đọc các file theo thứ tự số thứ tự (00 -> 08) để hi�
 ├── scripts
 │   ├── PreviewUI.command
 │   ├── QuickRebuild.command
+│   ├── build-publish-css.js
 │   ├── bundle-for-ai.js
 │   └── rebuild.sh
 ├── server

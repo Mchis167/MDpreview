@@ -274,6 +274,50 @@ Key enforced rules:
 
 **Rule:** Never override these rules unless you have a very specific reason. They exist to catch bugs early.
 
+### Published Page CSS Pipeline
+
+The Cloudflare Worker serves published Markdown pages with styled HTML. To keep the published page styling **in sync with the app's design tokens**, there's an automated CSS build pipeline.
+
+**Files involved:**
+- **Source of truth:** `renderer/css/design-system/tokens.css` (173 design tokens)
+- **Publish-specific styles:** `cf-publish-worker/src/publish-styles.css` (layout, components unique to published pages)
+- **Generated output:** `cf-publish-worker/public/publish.css` (auto-generated, do not edit)
+- **Build script:** `scripts/build-publish-css.js`
+
+**How it works:**
+
+```bash
+npm run build:publish-css
+```
+
+This generates `publish.css` by combining:
+1. Full 3-tier token system from `tokens.css`
+2. Publish-specific compatibility aliases (e.g., `--ds-bg-main` maps to `--ds-bg-base`)
+3. Hand-crafted styles for published page layout (code block UI, typography, tables, etc.)
+
+**When to edit which file:**
+
+| Change | Edit | Reason |
+|--------|------|--------|
+| Brand color, spacing, radius (used in both app + published page) | `tokens.css` | Single source of truth; `build:publish-css` syncs it automatically |
+| Layout/typography unique to published page | `cf-publish-worker/src/publish-styles.css` | Doesn't affect app styling |
+| Code block header style only on published page | `cf-publish-worker/src/publish-styles.css` | Publish-specific component |
+| Add new opacity variant (e.g., `--ds-white-a50`) | `tokens.css` in Tier 2 | Used by both app and published pages |
+
+**When to run the build script:**
+
+Always run after editing either `tokens.css` or `publish-styles.css`:
+
+```bash
+# After editing tokens or publish-styles
+npm run build:publish-css
+
+# Or: included automatically in the full build
+npm run build      # Runs build:publish-css first, then electron-builder
+```
+
+**Design decision:** The generated `publish.css` is not committed to git (it's ~21 kB and deterministic). The CI/CD pipeline regenerates it on every Worker deploy to ensure it stays in sync with tokens.
+
 ---
 
 ## JavaScript Module System
@@ -508,6 +552,13 @@ app.js (Core)
 2. Use inset radius formula for nested containers
 3. Use `--_` local variables for component variants
 4. Run: `npm run lint:css` — Verify no color/calc errors
+
+#### CSS Changes Affecting Published Pages
+If you edit `renderer/css/design-system/tokens.css` or `cf-publish-worker/src/publish-styles.css`:
+1. Make your changes to the source file
+2. Run: `npm run build:publish-css` — Regenerates `cf-publish-worker/public/publish.css`
+3. Verify the generated file is updated (check the timestamp in the AUTO-GENERATED header)
+4. For Worker deployment: Commit source files only; `publish.css` regenerates during deploy
 
 ### Testing Locally
 

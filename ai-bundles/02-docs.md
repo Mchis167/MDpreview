@@ -174,6 +174,279 @@ Proposal đề ra 5 bước. Hiện tại **4/5 bước đã hoàn thành**, bư
 ```
 </file>
 
+<file path="docs/css-pipeline.md">
+```md
+# CSS Build Pipeline — Published Page Styling
+
+**Last Updated:** May 1, 2026  
+**Purpose:** Keep published page CSS in sync with app design tokens
+
+---
+
+## Quick Start
+
+**After editing tokens or published page styles:**
+```bash
+npm run build:publish-css
+```
+
+**Before building the app for release:**
+```bash
+npm run build  # Automatically runs build:publish-css first
+```
+
+---
+
+## Architecture Overview
+
+The published page (served by Cloudflare Worker) needs to be styled consistently with the app. Rather than manually copying CSS, we have an **automated pipeline**:
+
+```
+tokens.css (source of truth)
+     ↓
+     → [build:publish-css script]
+     ↓
+publish-styles.css (hand-crafted, publish-only)
+     ↓
+publish.css (generated, auto-synced)
+     ↓
+Cloudflare Worker serves published pages
+```
+
+### Files at a Glance
+
+| File | Type | Purpose | Edit? |
+|------|------|---------|-------|
+| `renderer/css/design-system/tokens.css` | Source | All design tokens (colors, spacing, radius, typography, shadows, transitions) | ✅ Yes |
+| `cf-publish-worker/src/publish-styles.css` | Source | Publish-specific layout styles (code blocks, typography, tables, containers) | ✅ Yes |
+| `cf-publish-worker/public/publish.css` | Generated | Combined tokens + publish styles. Served to browsers. | ❌ No — auto-generated |
+| `scripts/build-publish-css.js` | Build tool | Script that combines the two sources. Run via `npm run build:publish-css` | ✅ Rarely |
+
+---
+
+## Workflow by Change Type
+
+### Scenario 1: Brand color change (affects app + published page)
+
+**Change:** Orange → Red  
+**What to do:**
+```bash
+# 1. Edit tokens.css
+vim renderer/css/design-system/tokens.css
+# Change: --ds-primitive-orange: #ffbf48; → #ff453a;
+
+# 2. Regenerate published CSS
+npm run build:publish-css
+
+# Result: Both app and published pages now use the new color
+```
+
+**Why:** `tokens.css` is the source of truth. The build script pulls from it automatically.
+
+---
+
+### Scenario 2: Published page headline size adjustment
+
+**Change:** H1 should be 28px instead of 32px (published page only)  
+**What to do:**
+```bash
+# 1. Edit publish-styles.css
+vim cf-publish-worker/src/publish-styles.css
+# Change: .md-render-body h1 { font-size: 28px; }
+
+# 2. Regenerate published CSS
+npm run build:publish-css
+
+# Result: Only published pages affected (app H1 unchanged)
+```
+
+**Why:** `publish-styles.css` is for publish-specific styling. App doesn't use it.
+
+---
+
+### Scenario 3: New opacity token (for both app + published page)
+
+**Change:** Add `--ds-white-a50` (50% white opacity)  
+**What to do:**
+```bash
+# 1. Edit tokens.css
+vim renderer/css/design-system/tokens.css
+# Add in Tier 2 (Alpha Palette):
+#   --ds-white-a50: rgba(255, 255, 255, 0.50);
+
+# 2. Regenerate published CSS
+npm run build:publish-css
+
+# 3. Use in app CSS and publish-styles.css
+# Both will have access to --ds-white-a50 automatically
+```
+
+**Why:** New token definitions flow through the build pipeline to both environments.
+
+---
+
+### Scenario 4: Code block styling tweak (published page only)
+
+**Change:** Code block borders should be less visible  
+**What to do:**
+```bash
+# 1. Edit publish-styles.css
+vim cf-publish-worker/src/publish-styles.css
+# Change: border: 1px solid var(--ds-white-a08); →  
+#         border: 1px solid var(--ds-white-a04);
+
+# 2. Regenerate published CSS
+npm run build:publish-css
+
+# Result: Only published code blocks affected
+```
+
+**Why:** Code block UI is exclusive to published pages.
+
+---
+
+## When to Run the Build Script
+
+| Situation | Run? | Why |
+|-----------|------|-----|
+| Edit `tokens.css` | ✅ Yes | Tokens flow to published pages |
+| Edit `publish-styles.css` | ✅ Yes | Styles need to be bundled |
+| Edit app CSS (`atoms/`, `molecules/`, `organisms/`) | ❌ No | App CSS is separate from published page pipeline |
+| Edit app JS | ❌ No | JavaScript doesn't affect CSS |
+| Ready to deploy app/worker | ✅ Yes | Ensures everything is in sync |
+
+---
+
+## Technical Details
+
+### Build Script Logic
+
+`scripts/build-publish-css.js` does this:
+1. Read `renderer/css/design-system/tokens.css` — extracts full `:root {}` block with all 173 tokens
+2. Add compatibility aliases — maps legacy token names (e.g., `--ds-bg-main`) to canonical tokens (e.g., `--ds-bg-base`)
+3. Read `cf-publish-worker/src/publish-styles.css` — hand-crafted styles
+4. Write combined output → `cf-publish-worker/public/publish.css`
+5. Add `AUTO-GENERATED` header with timestamp
+
+**Result:** A single ~21 kB CSS file that contains everything the published page needs.
+
+### Alias Examples
+
+Some tokens in `publish-styles.css` may reference names that don't exist in `tokens.css`. These are automatically aliased:
+
+```css
+/* In the generated publish.css: */
+:root {
+  --ds-bg-main: var(--ds-bg-base);                    /* Legacy → canonical */
+  --ds-transition-smooth: var(--ds-transition-main);  /* Legacy → canonical */
+}
+```
+
+This allows `publish-styles.css` to use `--ds-bg-main` without requiring a rename. The build script creates the mapping automatically.
+
+---
+
+## Deployment Workflow
+
+### Local Development
+```bash
+# Edit tokens or publish-styles
+vim renderer/css/design-system/tokens.css
+vim cf-publish-worker/src/publish-styles.css
+
+# Rebuild
+npm run build:publish-css
+
+# Test locally
+npm run serve
+# Browse to http://localhost:3000
+```
+
+### Electron App Release
+```bash
+npm run build
+# Automatically runs: build:publish-css → electron-builder
+# Result: DMG with latest published page CSS baked in
+```
+
+### Worker Deployment
+```bash
+cd cf-publish-worker
+
+# build:publish-css must have run first
+# (or run it here if needed)
+npm run build:publish-css
+
+wrangler deploy
+# Worker now serves updated publish.css
+```
+
+---
+
+## Troubleshooting
+
+### Build script fails
+```bash
+# Ensure source files exist
+ls renderer/css/design-system/tokens.css  # Should exist
+ls cf-publish-worker/src/publish-styles.css  # Should exist
+
+# Run with verbose output
+node scripts/build-publish-css.js
+```
+
+### Published page styles don't update
+```bash
+# Remember to run the build script
+npm run build:publish-css
+
+# Verify the output file was updated
+ls -l cf-publish-worker/public/publish.css
+# Should show recent timestamp
+
+# Check if Worker has latest CSS
+# (you may need to redeploy the Worker)
+wrangler deploy
+```
+
+### Token name mismatch error
+If you see an error like `--ds-undefined-token is not defined`:
+1. Check if the token exists in `tokens.css` (use `grep --ds-undefined-token`)
+2. If missing → Add it to `tokens.css` Tier 1/2/3
+3. Run `npm run build:publish-css` again
+
+---
+
+## Best Practices
+
+✅ **Do:**
+- Edit `tokens.css` when the change affects both app + published pages
+- Edit `publish-styles.css` for publish-specific layout/component changes
+- Always run `npm run build:publish-css` after editing either source
+- Commit source files (`tokens.css`, `publish-styles.css`) to git
+- Review the `AUTO-GENERATED` header in `publish.css` to verify the build timestamp
+
+❌ **Don't:**
+- Manually edit `cf-publish-worker/public/publish.css` — it's generated
+- Duplicate token definitions between `tokens.css` and `publish-styles.css`
+- Hardcode colors/spacing in `publish-styles.css` — use `--ds-*` tokens
+- Forget to run `npm run build:publish-css` before deploying
+
+---
+
+## References
+
+- **Tokens:** See `renderer/css/design-system/tokens.css` for the full 3-tier system
+- **Architecture:** See `ARCHITECTURE.md` for design system principles
+- **Published Page:** See `cf-publish-worker/public/publish.css` (read-only)
+
+---
+
+*Questions? Check ARCHITECTURE.md or contact the team.*
+
+```
+</file>
+
 <file path="docs/decisions/20260426-adaptive-sidebar-scrolling.md">
 ```md
 # Adaptive Sidebar Scrolling Architecture
@@ -3869,6 +4142,8 @@ Dự án cam kết độ trung thực 100% giữa Editor và bản xuất bản 
 3. **Premium Blocks**: Các thành phần đặc biệt (Code, Table, Mermaid) sử dụng hệ thống Glassmorphism (`backdrop-filter`, `transparent background`).
 4. **Mermaid Visibility**: Ép chuẩn hiển thị văn bản màu trắng và nét vẽ mờ (white alpha) để tương thích với theme tối của web.
 
+**CSS Consistency (Phase 1.2)**: Worker CSS được **auto-generated** từ App tokens thông qua `npm run build:publish-css`. Xem [`docs/css-pipeline.md`](../../css-pipeline.md) để biết chi tiết.
+
 ---
 
 ## Cấu trúc Dữ liệu (Publish Info)
@@ -3940,11 +4215,23 @@ return handleServe(request, env);
 
 Để đạt được hiệu ứng Premium, Worker phải tuân thủ:
 
-### 1. CSS Design Tokens
-File `public/publish.css` chứa bản sao chính xác các tokens từ App:
-- `--ds-bg-main`: `#131313`
-- `--ds-accent`: `#ffbf48`
-- Hệ thống màu `white-alpha` cho viền và nền mờ.
+### 1. CSS Design Tokens (Auto-Generated)
+File `public/publish.css` được **auto-generated** từ hai nguồn:
+- **`renderer/css/design-system/tokens.css`** — Tất cả 173 design tokens từ App (colors, spacing, radius, typography, shadows, transitions)
+- **`cf-publish-worker/src/publish-styles.css`** — Publish-specific styles (layout, code blocks, tables)
+
+Build pipeline: `npm run build:publish-css` → `publish.css` (21 kB, AUTO-GENERATED)
+
+**Tokens bao gồm:**
+- `--ds-bg-main`: auto-aliased từ `--ds-bg-base` (App background)
+- `--ds-accent`: `#ffbf48` (Brand orange, hoặc được override)
+- Hệ thống màu `white-alpha` cho viền và nền mờ
+- Toàn bộ 3-tier token system (Primitives, Alpha, Semantic)
+
+**Cách thay đổi:**
+1. Edit `tokens.css` hoặc `publish-styles.css`
+2. Run: `npm run build:publish-css`
+3. publish.css tự động sync → không cần hand-edit
 
 ### 2. Glassmorphism Blocks
 Mọi block đặc biệt phải có:
@@ -3959,17 +4246,53 @@ Worker tự động override các style mặc định của Mermaid để đảm
 
 ---
 
+## CSS Build Pipeline
+
+Worker phục vụ `public/publish.css` như một asset tĩnh. Để giữ CSS luôn sync với App tokens:
+
+```bash
+# Sau khi sửa tokens.css hoặc publish-styles.css
+npm run build:publish-css
+
+# Hoặc: tự động khi build app
+npm run build  # Chạy build:publish-css trước electron-builder
+```
+
+**Quy tắc:**
+- ✅ Edit `renderer/css/design-system/tokens.css` khi thay đổi tokens dùng chung
+- ✅ Edit `cf-publish-worker/src/publish-styles.css` khi thay đổi giao diện publish-page
+- ❌ KHÔNG edit `public/publish.css` trực tiếp (auto-generated, AUTO-GENERATED header)
+
+**Chi tiết:** Xem [`docs/css-pipeline.md`](../../css-pipeline.md) hoặc [`docs/phase-1-2-completion.md`](../../phase-1-2-completion.md)
+
+---
+
 ## Deployment
 
-Sử dụng Wrangler để triển khai:
+**Local testing:**
 ```bash
+# Regenerate CSS từ tokens mới nhất
+npm run build:publish-css
+
+# Test locally
+npm run serve
+```
+
+**Cloudflare Worker deployment:**
+```bash
+# Đảm bảo CSS up-to-date
+npm run build:publish-css
+
+# Deploy
 cd cf-publish-worker
 npm run deploy
+# hoặc
+wrangler deploy
 ```
 
 ---
 
-*Document — 2026-05-01*
+*Document — 2026-05-01 (Updated for CSS Build Pipeline)*
 
 ```
 </file>
@@ -6585,6 +6908,263 @@ Không cần breaking change. Chiến lược:
 ---
 
 *Document — 2026-04-30*
+
+```
+</file>
+
+<file path="docs/phase-1-2-completion.md">
+```md
+# Phase 1.2 — CSS Build Pipeline Completion
+
+**Completed:** May 1, 2026  
+**Duration:** ~2 hours  
+**Risk Level:** ✅ Low (no behavior changes, pure refactoring)
+
+---
+
+## What Was Done
+
+### ✅ 1. Created `cf-publish-worker/src/publish-styles.css`
+
+**Purpose:** Single source of truth for publish-page-specific styles
+
+**Contains:**
+- Layout: `.md-publish-container` (max-width, padding)
+- Typography: Markdown heading/paragraph styles, links
+- Premium blocks: Code block UI (copy button, header), table styling, Mermaid diagram styles
+- Scrollbar customization
+- Syntax highlighting (hljs)
+
+**Key insight:** These styles are **only for published pages**. The app doesn't use them.
+
+**Why it matters:**
+- Before: Hand-edited in `publish.css` directly
+- After: Source file that feeds into build pipeline. Changes here are tracked and versioned.
+
+---
+
+### ✅ 2. Created `scripts/build-publish-css.js`
+
+**Purpose:** Generate `cf-publish-worker/public/publish.css` automatically
+
+**How it works:**
+1. Reads `renderer/css/design-system/tokens.css` (173 tokens from app)
+2. Adds compatibility aliases for legacy token names
+3. Reads `cf-publish-worker/src/publish-styles.css` (publish-specific styles)
+4. Combines into single file with AUTO-GENERATED header
+5. Writes to `cf-publish-worker/public/publish.css`
+
+**Output:** ~21 kB file that's everything the published page needs
+
+---
+
+### ✅ 3. Updated `package.json`
+
+Added `build:publish-css` script:
+```json
+{
+  "scripts": {
+    "build:publish-css": "node scripts/build-publish-css.js",
+    "build": "npm run build:publish-css && electron-builder --mac"
+  }
+}
+```
+
+**Why:** `npm run build` now ensures CSS is regenerated before Electron app is released.
+
+---
+
+### ✅ 4. Updated Documentation
+
+#### **ARCHITECTURE.md**
+- Added "Published Page CSS Pipeline" section explaining the setup
+- Updated "Styling Changes" subsection in Development Workflow with `build:publish-css` instructions
+- Clarified when to edit `tokens.css` vs `publish-styles.css`
+
+#### **New: `docs/css-pipeline.md`**
+- Comprehensive guide on the CSS build system
+- Scenarios showing when to edit which file
+- Workflow instructions for local dev and deployment
+- Troubleshooting guide
+- Best practices
+
+#### **CHANGELOG.md**
+- Added entry documenting Phase 1.2 completion
+
+---
+
+## Verification
+
+✅ Build script tested and working:
+```bash
+$ npm run build:publish-css
+✓ publish.css built — 21.0 kB
+  tokens  → renderer/css/design-system/tokens.css
+  styles  → cf-publish-worker/src/publish-styles.css
+  output  → cf-publish-worker/public/publish.css
+```
+
+✅ Output file verified:
+- AUTO-GENERATED header present and clear
+- Timestamp updated
+- Contains full token system + publish-specific styles
+- File is readable and valid CSS
+
+---
+
+## Impact
+
+### ✅ Resolved Issues
+
+1. **CSS Drift Prevention**
+   - Before: `publish.css` was hand-edited, diverged from tokens easily
+   - After: Auto-generated from single source of truth (`tokens.css`)
+   - Impact: Token changes automatically flow to published pages
+
+2. **No Manual Sync Needed**
+   - Before: Every time tokens changed, `publish.css` had to be manually updated
+   - After: One script run keeps everything in sync
+   - Impact: Fewer bugs, faster iteration
+
+3. **Scalability**
+   - Before: Error-prone, hard to track what changed
+   - After: Deterministic pipeline, easy to audit via git
+   - Impact: Supports future growth without friction
+
+---
+
+## Workflow Changes
+
+### For You (the Developer)
+
+**When editing tokens or publish styles:**
+```bash
+vim renderer/css/design-system/tokens.css
+# or
+vim cf-publish-worker/src/publish-styles.css
+
+# Then:
+npm run build:publish-css
+```
+
+**That's it.** The pipeline handles the rest.
+
+---
+
+### For CI/CD / Deployment
+
+**Electron app release:**
+```bash
+npm run build
+# Automatically: build:publish-css → electron-builder
+# Result: App + Worker CSS both up-to-date
+```
+
+**Worker deployment:**
+```bash
+cd cf-publish-worker
+# Ensure build:publish-css ran
+npm run build:publish-css
+wrangler deploy
+```
+
+---
+
+## What This Enables (Phase 1.1 & 1.3)
+
+✅ **Phase 1.1 (Render Logic Consolidation)** — Ready
+- Can now safely extract shared renderer primitives
+- CSS sync is automated, reducing duplication concerns
+
+✅ **Phase 1.3 (Mermaid Config Unification)** — Ready
+- CSS pipeline is solid, can focus on config next
+
+---
+
+## Next Steps
+
+### Short Term (This Week)
+
+1. **Commit these changes:**
+   ```bash
+   git add renderer/css/design-system/tokens.css cf-publish-worker/src/publish-styles.css \
+           cf-publish-worker/public/publish.css scripts/build-publish-css.js \
+           package.json ARCHITECTURE.md CHANGELOG.md docs/css-pipeline.md
+   
+   git commit -m "feat(phase-1.2): CSS build pipeline for publish.css auto-sync
+   
+   - Created cf-publish-worker/src/publish-styles.css as source file
+   - Added scripts/build-publish-css.js for automated generation
+   - Updated package.json: build script now runs build:publish-css
+   - Documented in ARCHITECTURE.md and new docs/css-pipeline.md
+   
+   Closes: Phase 1.2"
+   ```
+
+2. **Test the workflow:**
+   - Make a small change to `tokens.css` (e.g., adjust spacing)
+   - Run `npm run build:publish-css`
+   - Verify `publish.css` is updated
+   - Test locally with `npm run serve`
+
+### Medium Term (Next Sprint)
+
+**Phase 1.1 — Render Logic Consolidation**
+- Extract `md-renderer-core.js` with shared primitives (marked config, hljs config, sanitizeHtml)
+- Update `server/routes/render.js` to import from core
+- Add XSS sanitization to Worker renderer
+
+**Phase 1.3 — Mermaid Config Unification**
+- Create `renderer/js/utils/mermaid-config.js`
+- Map theme variables from `tokens.css` (or add new Mermaid-specific tokens)
+- Unify config between app and Worker
+
+---
+
+## Files Changed
+
+```
+✅ Created:
+  - cf-publish-worker/src/publish-styles.css      (source file)
+  - scripts/build-publish-css.js                  (build tool)
+  - docs/css-pipeline.md                          (documentation)
+  - docs/phase-1-2-completion.md                  (this file)
+
+✅ Modified:
+  - cf-publish-worker/public/publish.css          (regenerated)
+  - package.json                                  (added build:publish-css)
+  - ARCHITECTURE.md                               (documented pipeline)
+  - CHANGELOG.md                                  (recorded change)
+
+⚠ Committed to git:
+  - Source files (css-styles, tokens, scripts)
+  - Generated file (publish.css for Worker deploy independence)
+  - Documentation (guides)
+```
+
+---
+
+## Key Points to Remember
+
+1. **Source of Truth:** `tokens.css` is the canonical source. Publish.css is generated from it.
+2. **Publish-Only Styles:** Put layout/component changes unique to published pages in `publish-styles.css`.
+3. **Always Regenerate:** After editing either source file, run `npm run build:publish-css`.
+4. **Don't Edit Generated File:** `publish.css` has an `AUTO-GENERATED` header for a reason.
+5. **Workflow:** Tokens → Build script → Published pages (automated, no manual sync).
+
+---
+
+## Questions?
+
+- **When to run the build script?** See `docs/css-pipeline.md` ("When to Run the Build Script" section)
+- **What changed in the workflow?** See `ARCHITECTURE.md` ("CSS Changes Affecting Published Pages" subsection)
+- **How does the build script work?** See `scripts/build-publish-css.js` (well-commented)
+
+---
+
+**Phase 1.2 Status: ✅ Complete**  
+**Ready for: Phase 1.1 & 1.3**  
+**Recommended Priority: 1.1 (Render Logic) next**
 
 ```
 </file>

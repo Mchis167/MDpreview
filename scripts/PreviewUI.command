@@ -5,6 +5,10 @@ cd "$(dirname "$0")/.."
 
 echo "🚀 Starting MDpreview Server..."
 
+# Sync publish CSS from tokens (Phase 1.2)
+echo "🎨 Syncing publish CSS..."
+npm run build:publish-css
+
 # Kill any process running on port 3737 to avoid conflicts
 lsof -ti:3737 | xargs kill -9 2>/dev/null
 

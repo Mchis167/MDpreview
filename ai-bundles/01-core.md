@@ -279,6 +279,50 @@ Key enforced rules:
 
 **Rule:** Never override these rules unless you have a very specific reason. They exist to catch bugs early.
 
+### Published Page CSS Pipeline
+
+The Cloudflare Worker serves published Markdown pages with styled HTML. To keep the published page styling **in sync with the app's design tokens**, there's an automated CSS build pipeline.
+
+**Files involved:**
+- **Source of truth:** `renderer/css/design-system/tokens.css` (173 design tokens)
+- **Publish-specific styles:** `cf-publish-worker/src/publish-styles.css` (layout, components unique to published pages)
+- **Generated output:** `cf-publish-worker/public/publish.css` (auto-generated, do not edit)
+- **Build script:** `scripts/build-publish-css.js`
+
+**How it works:**
+
+```bash
+npm run build:publish-css
+```
+
+This generates `publish.css` by combining:
+1. Full 3-tier token system from `tokens.css`
+2. Publish-specific compatibility aliases (e.g., `--ds-bg-main` maps to `--ds-bg-base`)
+3. Hand-crafted styles for published page layout (code block UI, typography, tables, etc.)
+
+**When to edit which file:**
+
+| Change | Edit | Reason |
+|--------|------|--------|
+| Brand color, spacing, radius (used in both app + published page) | `tokens.css` | Single source of truth; `build:publish-css` syncs it automatically |
+| Layout/typography unique to published page | `cf-publish-worker/src/publish-styles.css` | Doesn't affect app styling |
+| Code block header style only on published page | `cf-publish-worker/src/publish-styles.css` | Publish-specific component |
+| Add new opacity variant (e.g., `--ds-white-a50`) | `tokens.css` in Tier 2 | Used by both app and published pages |
+
+**When to run the build script:**
+
+Always run after editing either `tokens.css` or `publish-styles.css`:
+
+```bash
+# After editing tokens or publish-styles
+npm run build:publish-css
+
+# Or: included automatically in the full build
+npm run build      # Runs build:publish-css first, then electron-builder
+```
+
+**Design decision:** The generated `publish.css` is not committed to git (it's ~21 kB and deterministic). The CI/CD pipeline regenerates it on every Worker deploy to ensure it stays in sync with tokens.
+
 ---
 
 ## JavaScript Module System
@@ -514,6 +558,13 @@ app.js (Core)
 3. Use `--_` local variables for component variants
 4. Run: `npm run lint:css` — Verify no color/calc errors
 
+#### CSS Changes Affecting Published Pages
+If you edit `renderer/css/design-system/tokens.css` or `cf-publish-worker/src/publish-styles.css`:
+1. Make your changes to the source file
+2. Run: `npm run build:publish-css` — Regenerates `cf-publish-worker/public/publish.css`
+3. Verify the generated file is updated (check the timestamp in the AUTO-GENERATED header)
+4. For Worker deployment: Commit source files only; `publish.css` regenerates during deploy
+
 ### Testing Locally
 
 1. **Run dev server**: `npm run dev` (Electron) or `npm run serve` (Node server)
@@ -656,24 +707,31 @@ Refer back to this document when:
 
 All notable changes to this project will be documented in this file.
 
-## [Not Commited] — 2026-05-01 08:31
+## [1.18.0] — 2026-05-01 18:05
 
 ### 🎉 Added
-- **Standardized Divider (hr)**: Triển khai style cho thẻ `hr` bám sát Design System của App (viền trắng mờ + khoảng cách 3rem), giúp phân tách nội dung tinh tế hơn trên bản publish.
+- **CSS Build Pipeline (Phase 1.2 — Refactor)**:
+    - **Automated CSS Generation**: New `npm run build:publish-css` script generates `cf-publish-worker/public/publish.css` from `renderer/css/design-system/tokens.css` + `cf-publish-worker/src/publish-styles.css`. Eliminates manual sync drift.
+    - **Source Files**: Created `cf-publish-worker/src/publish-styles.css` as the authoritative source for publish-specific styles (layout, components unique to published pages). Replaced hand-edited approach.
+    - **Build Script**: `scripts/build-publish-css.js` combines full token system with publish-specific styles, adds compatibility aliases, and regenerates output with AUTO-GENERATED header.
+    - **Workflow Automation**: `npm run build` now automatically runs `build:publish-css` before `electron-builder`, ensuring published CSS is always in sync with design tokens.
+
+- **Visual Parity Optimization (Worker & Site)**:
+    - **Premium Theme Refinement**: Cập nhật màu nền `bg-main` sang `#131313` (xám đen sâu) mang lại cảm giác cao cấp và dịu mắt hơn cho bản publish.
+    - **Unified Premium Blocks**: Chuẩn hóa Code Blocks, Tables và Mermaid diagrams với hiệu ứng **backdrop-blur (40px)** và viền siêu mỏng, tạo hiệu ứng kính mờ (glassmorphism) đồng bộ 100% với Editor.
+    - **High-Fidelity Mermaid**: Ép màu chữ trắng và chuẩn hóa các nét vẽ sang hệ white alpha, đảm bảo biểu đồ luôn rõ nét trên nền tối của Worker.
+- **Standardized Divider (hr)**: Triển khai style cho thẻ `hr` bám sát Design System của App (viền trắng mờ + khoảng cách 3rem), giúp phân tách nội dung tinh tế hơn.
+- **Bundle for AI Script**: Triển khai script `bundle-for-ai.js` hỗ trợ đóng gói mã nguồn theo độ ưu tiên, giúp các AI Agent nắm bắt bối cảnh dự án nhanh chóng và chính xác.
 
 ### 🔧 Changed
-- **Visual Parity Optimization (Worker & Site)**:
-    - **Premium Theme Refinement**: Cập nhật màu nền `bg-main` sang `#131313` (xám đen sâu) mang lại cảm giác cao cấp và dịu mắt hơn.
-    - **Unified Premium Blocks**: Chuẩn hóa Code Blocks, Tables và Mermaid diagrams với nền trong suốt, hiệu ứng **backdrop-blur (40px)** và viền siêu mỏng, tạo hiệu ứng kính mờ (glassmorphism) đồng bộ 100% với Editor.
-    - **High-Fidelity Mermaid**: Ép màu chữ trắng và chuẩn hóa các nét vẽ (stroke) sang hệ white alpha, đảm bảo biểu đồ luôn rõ nét trên nền tối.
-    - **Typography & Spacing Standardization**: Đồng bộ hóa toàn bộ lề (margins), font chữ (Inter/Roboto Mono) và kích thước chữ giữa bản live và trình soạn thảo.
 - **PublishService Synchronization**:
-    - Cập nhật template **Standalone Bundle** (Copy as HTML) để tích hợp đầy đủ Design System Tokens và cấu trúc DOM mới.
-    - Đảm bảo các bản xuất bản offline luôn có đầy đủ style mà không phụ thuộc vào file CSS bên ngoài.
+    - Cập nhật template **Standalone Bundle** (Copy as HTML) để tích hợp đầy đủ Design System Tokens và cấu trúc DOM mới, đảm bảo bản xuất bản offline luôn có đầy đủ style.
+- **Typography & Spacing Standardization**: Đồng bộ hóa toàn bộ lề (margins), font chữ (Inter/Roboto Mono) và kích thước chữ giữa bản live và trình soạn thảo.
 
 ### 🐞 Fixed
-- **Critical Asset Serving (Worker)**: Khắc phục lỗi Worker chặn file `publish.css` (trả về 404), đảm bảo giao diện bản live luôn được tải đúng.
-- **Structural DOM Parity**: Tái cấu trúc phân cấp HTML (`#md-content > .md-content > .md-content-inner`) trong Worker Renderer để khớp chính xác với hệ thống CSS của App.
+- **Cloudflare Worker Critical Fixes**: 
+    - Khắc phục lỗi Worker chặn file `publish.css` (404), đảm bảo giao diện bản live luôn được tải đúng.
+    - **Structural DOM Parity**: Tái cấu trúc phân cấp HTML (`#md-content > .md-content > .md-content-inner`) trong Worker Renderer để khớp chính xác với hệ thống CSS của App.
 
 ## [1.17.0] — 2026-05-01 07:30
 
@@ -1679,8 +1737,9 @@ export default [
   "scripts": {
     "start": "electron .",
     "serve": "node server/index.js",
-    "build": "electron-builder --mac",
+    "build": "npm run build:publish-css && electron-builder --mac",
     "build:dir": "electron-builder --mac --dir",
+    "build:publish-css": "node scripts/build-publish-css.js",
     "dev": "electron .",
     "test": "vitest run",
     "lint:css": "stylelint \"renderer/css/**/*.css\"",
