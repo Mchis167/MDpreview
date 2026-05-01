@@ -3,7 +3,7 @@
  *   renderer/css/design-system/tokens.css
  *   cf-publish-worker/src/publish-styles.css
  * Regenerate: npm run build:publish-css
- * Generated:  2026-05-01T23:55:21.825Z
+ * Generated:  2026-05-01T23:58:23.090Z
  */
 
 /* ============================================================
@@ -376,6 +376,34 @@ body {
     font-size: 18px;
     font-weight: 600;
     color: var(--ds-accent);
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+}
+
+.md-render-body h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ds-text-inverse);
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.md-render-body h5 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ds-text-primary);
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.md-render-body h6 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ds-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 .md-render-body p { margin-bottom: 1.25rem; }
@@ -387,6 +415,40 @@ body {
 }
 
 .md-render-body a:hover { text-decoration: underline; }
+
+.md-render-body code {
+    font-family: var(--ds-font-family-code);
+    font-size: 0.85em;
+    background: rgba(var(--ds-accent-rgb), 0.1);
+    padding: 0.15em 0.6em;
+    border-radius: var(--ds-radius-sm);
+    color: var(--ds-accent);
+    border: 1px solid rgba(var(--ds-accent-rgb), 0.25);
+    display: inline-block;
+    max-width: 100%;
+    vertical-align: middle;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    margin: 2px 0;
+    line-height: 1.5;
+    transition: all 0.2s;
+}
+
+.md-render-body h1 code,
+.md-render-body h2 code,
+.md-render-body h3 code,
+.md-render-body h4 code {
+    font-size: 0.8em;
+    vertical-align: middle;
+    border-width: 2px;
+    background: rgba(var(--ds-accent-rgb), 0.15);
+}
+
+.md-render-body img {
+    max-width: 100%;
+    border-radius: var(--ds-radius-panel);
+    margin: 1rem 0;
+}
 
 .md-render-body hr {
     border: none;
@@ -401,6 +463,11 @@ body {
     background: var(--ds-white-a02);
     border-radius: 0 var(--ds-radius-panel) var(--ds-radius-panel) 0;
     color: var(--ds-text-secondary);
+    line-height: 1.7;
+}
+
+.md-render-body blockquote p {
+    margin-bottom: 0;
 }
 
 .md-render-body ul, .md-render-body ol { padding-left: 1.5rem; margin-bottom: 1.25rem; }
