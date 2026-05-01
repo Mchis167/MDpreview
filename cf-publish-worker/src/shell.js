@@ -1,12 +1,17 @@
 /**
  * HTML Shell for published documents
  */
-import { getMermaidConfig } from '../../renderer/js/services/mermaid-config.js';
 
 export function buildShell({ slug, html, title = 'Document', assetsUrl = '/publish.css' }) {
   const escapedTitle = title.replace(/[&<>"']/g, m => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[m]));
+
+  const mermaidConfig = {
+    theme: 'dark',
+    startOnLoad: true,
+    securityLevel: 'loose'
+  };
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -20,12 +25,36 @@ export function buildShell({ slug, html, title = 'Document', assetsUrl = '/publi
   <link rel="stylesheet" href="${assetsUrl}">
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <script>
-    const mermaidConfig = ${JSON.stringify(getMermaidConfig('worker'))};
-    document.addEventListener('DOMContentLoaded', () => {
+    const mermaidConfig = ${JSON.stringify(mermaidConfig)};
+    document.addEventListener('DOMContentLoaded', async () => {
       // 1. Initialize Mermaid
       mermaid.initialize(mermaidConfig);
 
-      // 2. Setup Code Copy Logic
+      // 2. Render Mermaid diagrams and hide loading indicator
+      try {
+        const container = document.getElementById('md-content');
+        const nodes = [];
+
+        container.querySelectorAll('.mermaid').forEach(div => {
+          if (!div.querySelector('svg')) {
+            nodes.push(div);
+          }
+        });
+
+        if (nodes.length > 0) {
+          await new Promise(resolve => requestAnimationFrame(resolve));
+          await mermaid.run({ nodes });
+        }
+      } catch (err) {
+        console.warn('Mermaid render error:', err);
+      } finally {
+        const loadingEl = document.getElementById('md-publish-loading');
+        if (loadingEl) {
+          loadingEl.classList.add('hidden');
+        }
+      }
+
+      // 3. Setup Code Copy Logic
       window.copyCode = (btn) => {
         const codeEl = btn.closest('.premium-code-block').querySelector('code');
         if (!codeEl) return;
@@ -35,12 +64,12 @@ export function buildShell({ slug, html, title = 'Document', assetsUrl = '/publi
           const iconCopy = btn.querySelector('.icon-copy');
           const iconCheck = btn.querySelector('.icon-check');
           const textSpan = btn.querySelector('span');
-          
+
           btn.classList.add('copied');
           iconCopy.classList.add('hidden');
           iconCheck.classList.remove('hidden');
           textSpan.innerText = 'Copied!';
-          
+
           setTimeout(() => {
             btn.classList.remove('copied');
             iconCopy.classList.remove('hidden');
@@ -53,6 +82,12 @@ export function buildShell({ slug, html, title = 'Document', assetsUrl = '/publi
   </script>
 </head>
 <body class="md-publish-body">
+  <div id="md-publish-loading" class="md-publish-loading">
+    <div class="md-publish-loading-content">
+      <div class="md-publish-spinner"></div>
+      <div class="md-publish-loading-text">Loading <strong>document</strong>...</div>
+    </div>
+  </div>
   <div class="md-publish-container">
     <div id="md-content" class="md-content md-render-body">
       <div class="md-content-inner">
