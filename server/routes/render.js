@@ -4,6 +4,7 @@ const fs          = require('fs');
 const path        = require('path');
 const hljs        = require('highlight.js');
 const { marked }  = require('marked');
+const { sanitizeHtml, renderMermaidBlock } = require('../../renderer/js/services/md-renderer-core.js');
 
 // Configure marked with highlight.js
 marked.setOptions({
@@ -87,7 +88,9 @@ function renderWithLineNumbers(content) {
 
     // Default processing for other tokens
     let tokenHtml = '';
-    if (token.type === 'code' && token.lang !== 'mermaid') {
+    if (token.type === 'code' && token.lang === 'mermaid') {
+      tokenHtml = renderMermaidBlock(token.text);
+    } else if (token.type === 'code') {
       const lang = token.lang || '';
       let highlighted = '';
       try {
@@ -132,18 +135,7 @@ function renderWithLineNumbers(content) {
     i++;
   }
 
-  return _sanitize(html);
-}
-
-/**
- * Basic XSS Sanitization
- * Strips script and iframe tags
- */
-function _sanitize(html) {
-  return html
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-    .replace(/on\w+="[^"]*"/gi, ''); // Remove inline event handlers
+  return sanitizeHtml(html);
 }
 
 // Helper to resolve absolute path safely within watchDir

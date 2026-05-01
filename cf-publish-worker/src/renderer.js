@@ -1,5 +1,6 @@
 import { marked } from 'marked';
 import hljs from 'highlight.js';
+import { highlightCodeBlock, sanitizeHtml, wrapInTableWrapper, renderMermaidBlock } from '../../renderer/js/services/md-renderer-core.js';
 
 /**
  * High-fidelity renderer port from MDpreview server.
@@ -18,15 +19,7 @@ export function render(content) {
     if (token.type === 'code' && token.lang !== 'mermaid') {
       const lang = token.lang || 'text';
       const language = lang.toUpperCase();
-      let highlighted = token.text;
-      
-      try {
-        if (lang && hljs.getLanguage(lang)) {
-          highlighted = hljs.highlight(token.text, { language: lang }).value;
-        } else {
-          highlighted = hljs.highlightAuto(token.text).value;
-        }
-      } catch (_) { highlighted = token.text; }
+      const highlighted = highlightCodeBlock(token.text, lang);
 
       tokenHtml = `
         <div class="premium-code-block">
@@ -44,11 +37,11 @@ export function render(content) {
     // ── 2. Handle Tables ──
     else if (token.type === 'table') {
       const tableHtml = marked.parser([token]);
-      tokenHtml = `<div class="md-table-wrapper">${tableHtml}</div>`;
+      tokenHtml = wrapInTableWrapper(tableHtml);
     } 
     // ── 3. Handle Mermaid ──
     else if (token.type === 'code' && token.lang === 'mermaid') {
-      tokenHtml = `<div class="mermaid">${token.text}</div>`;
+      tokenHtml = renderMermaidBlock(token.text);
     }
     // ── 4. Standard Blocks ──
     else {
@@ -59,5 +52,6 @@ export function render(content) {
     html += `<div class="md-block"><div class="md-line">${tokenHtml}</div></div>\n`;
   });
 
-  return html;
+  // Sanitize output to prevent XSS (CRITICAL SECURITY FIX)
+  return sanitizeHtml(html);
 }
