@@ -91,10 +91,9 @@
 
 /* High-fidelity rendering optimization */
 .ds-project-map__mirror .md-render-body {
-  width: 800px !important;
-  /* Match CONFIG.baseWidth in JS */
-  max-width: 800px !important;
-  min-width: 800px !important;
+  width: var(--ds-content-width) !important;
+  max-width: var(--ds-content-width) !important;
+  min-width: var(--ds-content-width) !important;
   margin: 0 !important;
   background: transparent !important;
 }

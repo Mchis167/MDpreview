@@ -282,4 +282,7 @@
    /* ── Layout & Sizing ────────────────────────────── */
    --ds-toc-width: 280px;
    --ds-toc-offset: 240px;
+   --ds-content-padding-x: 80px;
+   --ds-content-padding-y: 80px;
+   --ds-content-width: 800px;
 }

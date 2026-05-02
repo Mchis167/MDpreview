@@ -54,8 +54,10 @@
 }
 
 .md-content-inner {
-  padding: 120px 0;
+  padding: var(--ds-content-padding-y) var(--ds-content-padding-x);
   transition: opacity var(--ds-transition-main);
+  max-width: calc(var(--ds-content-width) + (var(--ds-content-padding-x) * 2));
+  margin: 0 auto;
 }
 
 /* ── Content Skeleton ──────────────────────────────────── */

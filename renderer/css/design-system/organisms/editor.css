@@ -15,10 +15,12 @@
   color: var(--ds-text-primary);
   font-family: var(--ds-font-family-code);
   font-size: var(--ds-font-base);
-  padding: 80px 160px;
+  padding: var(--ds-content-padding-y) var(--ds-content-padding-x);
   resize: none;
   outline: none;
   line-height: 1.6;
+  max-width: calc(var(--ds-content-width) + (var(--ds-content-padding-x) * 2));
+  margin: 0 auto;
 }
 
 
