@@ -175,10 +175,10 @@ body {
 .premium-code-block,
 .md-table-wrapper,
 .mermaid {
-    background: transparent !important;
+    background: rgba(255, 255, 255, 0.02) !important;
     backdrop-filter: blur(40px) !important;
     -webkit-backdrop-filter: blur(40px) !important;
-    border: 1px solid var(--ds-border-strong) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius: var(--ds-radius-panel) !important;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
     margin: 2rem 0 !important;
@@ -191,17 +191,18 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 16px;
-    background: var(--ds-black-a30);
-    border-bottom: 1px solid var(--ds-white-a10);
+    padding: 8px 8px 8px 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    user-select: none;
 }
 
 .code-block-lang {
     font-size: 10px;
     font-weight: 800;
-    color: var(--ds-text-secondary);
+    color: rgba(255, 255, 255, 0.6);
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     font-family: var(--ds-font-family-code);
 }
 
@@ -209,20 +210,20 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
-    background: var(--ds-layer-surface-default);
-    border: 1px solid var(--ds-white-a10);
-    color: var(--ds-text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.6);
     padding: 4px 10px;
     border-radius: var(--ds-radius-sm);
     font-size: 11px;
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--ds-transition-smooth);
+    transition: all 0.2s;
 }
 
 .code-block-copy:hover {
-    background: var(--ds-layer-surface-hover);
-    color: var(--ds-text-inverse);
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .code-block-copy.copied {
@@ -268,8 +269,6 @@ body {
 }
 
 /* ── Premium Tables ── */
-.md-table-wrapper { background: transparent !important; }
-
 .md-render-body table {
     width: 100%;
     border-collapse: separate;
@@ -309,7 +308,6 @@ body {
 
 /* ── Mermaid Diagrams ── */
 .mermaid {
-    background: transparent !important;
     padding: 32px !important;
     display: flex;
     align-items: center;
