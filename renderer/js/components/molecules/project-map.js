@@ -34,6 +34,8 @@ const ProjectMap = (() => {
   let _lastRequestId = 0;
   let _abortController = null;
   let _resizeObserver = null;
+  let _mainContentWidthObserver = null;
+  let _mapElement = null;
 
   // ============================================
   // Private Functions
@@ -100,10 +102,19 @@ const ProjectMap = (() => {
     const mirror = mapEl.querySelector(SELECTORS.mirror);
     const track = mapEl.querySelector(SELECTORS.track);
     const innerEl = mirror?.querySelector(SELECTORS.content);
-    
+
     if (mirror && track && innerEl) {
       const body = mapEl.querySelector('.ds-project-map__body') || mapEl;
-      const internalWidth = CONFIG.baseWidth;
+
+      // Get actual content width from main viewer, fallback to baseWidth if not available
+      let internalWidth = CONFIG.baseWidth;
+      if (_mainViewer) {
+        const mainContent = _mainViewer.querySelector(SELECTORS.content);
+        if (mainContent) {
+          internalWidth = mainContent.offsetWidth || CONFIG.baseWidth;
+        }
+      }
+
       const panelWidth = Math.max(120, body.clientWidth || 280);
       
       const baseScale = Math.max(0.05, (panelWidth - 24) / internalWidth);
@@ -324,12 +335,24 @@ const ProjectMap = (() => {
           if (innerEl) {
             // 1. Attach ResizeObserver for high-fidelity height sync
             if (_resizeObserver) _resizeObserver.disconnect();
-            
+
             if (window.ResizeObserver) {
               _resizeObserver = new ResizeObserver(() => {
                 requestAnimationFrame(() => _applyZoom(mapEl));
               });
               _resizeObserver.observe(innerEl);
+            }
+
+            // Observe width changes on main content to sync project map scale
+            if (_mainViewer && window.ResizeObserver) {
+              const mainContent = _mainViewer.querySelector(SELECTORS.content);
+              if (mainContent) {
+                if (_mainContentWidthObserver) _mainContentWidthObserver.disconnect();
+                _mainContentWidthObserver = new ResizeObserver(() => {
+                  requestAnimationFrame(() => _applyZoom(mapEl));
+                });
+                _mainContentWidthObserver.observe(mainContent);
+              }
             }
 
             // ── 4. Post-process (Delayed to ensure mirror is in DOM) ──
@@ -356,6 +379,7 @@ const ProjectMap = (() => {
       if (_updateTimer) clearTimeout(_updateTimer);
       if (_abortController) _abortController.abort();
       if (_resizeObserver) _resizeObserver.disconnect();
+      if (_mainContentWidthObserver) _mainContentWidthObserver.disconnect();
       _currentContent = '';
     },
 
@@ -364,6 +388,10 @@ const ProjectMap = (() => {
       if (_resizeObserver) {
         _resizeObserver.disconnect();
         _resizeObserver = null;
+      }
+      if (_mainContentWidthObserver) {
+        _mainContentWidthObserver.disconnect();
+        _mainContentWidthObserver = null;
       }
       if (_abortController) {
         _abortController.abort();
