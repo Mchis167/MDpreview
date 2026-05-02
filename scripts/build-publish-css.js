@@ -3,7 +3,8 @@
  * build-publish-css.js
  * Generates cf-publish-worker/public/publish.css from:
  *   1. renderer/css/design-system/tokens.css  — full 3-tier token system
- *   2. cf-publish-worker/src/publish-styles.css — publish-page styles
+ *   2. renderer/css/shared/markdown-render.css — shared markdown styles
+ *   3. cf-publish-worker/src/publish-styles.css — publish-page specific styles
  *
  * Usage: node scripts/build-publish-css.js
  *        npm run build:publish-css
@@ -16,9 +17,10 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
 
-const TOKENS_SRC  = path.join(ROOT, 'renderer/css/design-system/tokens.css');
-const STYLES_SRC  = path.join(ROOT, 'cf-publish-worker/src/publish-styles.css');
-const OUTPUT      = path.join(ROOT, 'cf-publish-worker/public/publish.css');
+const TOKENS_SRC    = path.join(ROOT, 'renderer/css/design-system/tokens.css');
+const SHARED_SRC    = path.join(ROOT, 'renderer/css/shared/markdown-render.css');
+const STYLES_SRC    = path.join(ROOT, 'cf-publish-worker/src/publish-styles.css');
+const OUTPUT        = path.join(ROOT, 'cf-publish-worker/public/publish.css');
 
 // Aliases that let publish-styles.css keep its current token names
 // without requiring a rename in the source file.
@@ -34,7 +36,7 @@ const PUBLISH_COMPAT_ALIASES = `
 `;
 
 function build() {
-  for (const [label, file] of [['tokens', TOKENS_SRC], ['styles', STYLES_SRC]]) {
+  for (const [label, file] of [['tokens', TOKENS_SRC], ['shared', SHARED_SRC], ['styles', STYLES_SRC]]) {
     if (!fs.existsSync(file)) {
       console.error(`✗ Missing ${label} source: ${file}`);
       process.exit(1);
@@ -42,12 +44,14 @@ function build() {
   }
 
   const tokens = fs.readFileSync(TOKENS_SRC, 'utf8');
+  const shared = fs.readFileSync(SHARED_SRC, 'utf8');
   const styles = fs.readFileSync(STYLES_SRC, 'utf8');
 
   const banner = [
     '/* AUTO-GENERATED — DO NOT EDIT MANUALLY',
     ' * Sources:',
     ' *   renderer/css/design-system/tokens.css',
+    ' *   renderer/css/shared/markdown-render.css',
     ' *   cf-publish-worker/src/publish-styles.css',
     ' * Regenerate: npm run build:publish-css',
     ` * Generated:  ${new Date().toISOString()}`,
@@ -55,13 +59,14 @@ function build() {
     '',
   ].join('\n');
 
-  const output = [banner, tokens, PUBLISH_COMPAT_ALIASES, styles].join('\n');
+  const output = [banner, tokens, PUBLISH_COMPAT_ALIASES, shared, styles].join('\n');
 
   fs.writeFileSync(OUTPUT, output, 'utf8');
 
   const kb = (Buffer.byteLength(output, 'utf8') / 1024).toFixed(1);
   console.log(`✓ publish.css built — ${kb} kB`);
   console.log(`  tokens  → ${TOKENS_SRC.replace(ROOT + '/', '')}`);
+  console.log(`  shared  → ${SHARED_SRC.replace(ROOT + '/', '')}`);
   console.log(`  styles  → ${STYLES_SRC.replace(ROOT + '/', '')}`);
   console.log(`  output  → ${OUTPUT.replace(ROOT + '/', '')}`);
 }

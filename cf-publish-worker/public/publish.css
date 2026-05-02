@@ -1,9 +1,10 @@
 /* AUTO-GENERATED — DO NOT EDIT MANUALLY
  * Sources:
  *   renderer/css/design-system/tokens.css
+ *   renderer/css/shared/markdown-render.css
  *   cf-publish-worker/src/publish-styles.css
  * Regenerate: npm run build:publish-css
- * Generated:  2026-05-02T00:15:34.822Z
+ * Generated:  2026-05-02T00:21:07.709Z
  */
 
 /* ============================================================
@@ -302,39 +303,18 @@
 }
 
 /* ============================================================
-   publish-styles.css — Publish-page specific styles.
-   SOURCE FILE — hand-crafted, do not auto-generate.
-
-   This file is combined with tokens.css by:
-     npm run build:publish-css
-   Output: cf-publish-worker/public/publish.css
+   markdown-render.css — Shared markdown rendering styles
+   Used by both: MDpreview app & publish-worker
    ============================================================ */
 
-* { box-sizing: border-box; }
-
-body {
-    margin: 0;
-    padding: 0;
-    background-color: var(--ds-bg-main);
-    color: var(--ds-text-secondary);
-    font-family: var(--ds-font-family-text);
-    line-height: 1.8;
-    -webkit-font-smoothing: antialiased;
-}
-
-.md-publish-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 60px 24px;
-}
-
-/* ── Markdown Content Typography ── */
+/* ── Base Markdown Body ── */
 .md-render-body {
     font-size: 15px;
     color: var(--ds-text-secondary);
     line-height: 1.8;
 }
 
+/* ── Headings ── */
 .md-render-body h1 {
     font-size: 32px;
     font-weight: 700;
@@ -407,7 +387,10 @@ body {
     line-height: 1.4;
 }
 
-.md-render-body p { margin-bottom: 1.25rem; }
+/* ── Inline Elements ── */
+.md-render-body p {
+    margin-bottom: 1.25rem;
+}
 
 .md-render-body a {
     color: var(--ds-accent);
@@ -415,7 +398,9 @@ body {
     font-weight: 600;
 }
 
-.md-render-body a:hover { text-decoration: underline; }
+.md-render-body a:hover {
+    text-decoration: underline;
+}
 
 .md-render-body code {
     font-family: var(--ds-font-family-code);
@@ -439,6 +424,7 @@ body {
     margin: 2rem 0;
 }
 
+/* ── Block Elements ── */
 .md-render-body blockquote {
     border-left: 2px solid var(--ds-accent);
     padding: 16px 24px;
@@ -453,13 +439,18 @@ body {
     margin-bottom: 0;
 }
 
-.md-render-body ul, .md-render-body ol { padding-left: 1.5rem; margin-bottom: 1.25rem; }
-.md-render-body li { margin-bottom: 0.5rem; }
+.md-render-body ul,
+.md-render-body ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1.25rem;
+}
 
-/* ── Premium Block System ── */
-.premium-code-block,
-.md-table-wrapper,
-.mermaid {
+.md-render-body li {
+    margin-bottom: 0.5rem;
+}
+
+/* ── Code Blocks ── */
+.premium-code-block {
     background: rgba(255, 255, 255, 0.02) !important;
     backdrop-filter: blur(40px) !important;
     -webkit-backdrop-filter: blur(40px) !important;
@@ -471,7 +462,6 @@ body {
     isolation: isolate;
 }
 
-/* ── Premium Code Blocks ── */
 .code-block-header {
     display: flex;
     align-items: center;
@@ -516,7 +506,9 @@ body {
     color: var(--ds-accent);
 }
 
-.code-block-copy .hidden { display: none; }
+.code-block-copy .hidden {
+    display: none;
+}
 
 .md-render-body pre {
     margin: 0;
@@ -525,21 +517,16 @@ body {
     overflow-x: auto;
 }
 
-/* Premium Scrollbar */
-.md-render-body pre::-webkit-scrollbar,
-.md-table-wrapper::-webkit-scrollbar {
+.md-render-body pre::-webkit-scrollbar {
     height: 6px;
-    width: 6px;
 }
 
-.md-render-body pre::-webkit-scrollbar-thumb,
-.md-table-wrapper::-webkit-scrollbar-thumb {
+.md-render-body pre::-webkit-scrollbar-thumb {
     background: var(--ds-white-a10);
     border-radius: 10px;
 }
 
-.md-render-body pre::-webkit-scrollbar-thumb:hover,
-.md-table-wrapper::-webkit-scrollbar-thumb:hover {
+.md-render-body pre::-webkit-scrollbar-thumb:hover {
     background: var(--ds-white-a20);
 }
 
@@ -553,7 +540,21 @@ body {
     overflow-wrap: break-word;
 }
 
-/* ── Premium Tables ── */
+/* ── Tables ── */
+.md-table-wrapper {
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: blur(40px) !important;
+    -webkit-backdrop-filter: blur(40px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: var(--ds-radius-panel) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+    margin: 2rem 0 !important;
+    overflow: hidden !important;
+    width: 100%;
+    overflow-x: auto;
+    isolation: isolate;
+}
+
 .md-render-body table {
     width: 100%;
     border-collapse: separate;
@@ -584,19 +585,42 @@ body {
     line-height: 1.6;
 }
 
-.md-render-body td:last-child { border-right: none; }
-.md-render-body tr:last-child td { border-bottom: none; }
+.md-render-body td:last-child {
+    border-right: none;
+}
 
-/* ── Atomic Blocks (Published layout workaround) ── */
-.md-block { margin: 0; }
-.md-line { width: 100%; }
+.md-render-body tr:last-child td {
+    border-bottom: none;
+}
+
+.md-table-wrapper::-webkit-scrollbar {
+    height: 6px;
+}
+
+.md-table-wrapper::-webkit-scrollbar-thumb {
+    background: var(--ds-white-a10);
+    border-radius: 10px;
+}
+
+.md-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--ds-white-a20);
+}
 
 /* ── Mermaid Diagrams ── */
 .mermaid {
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: blur(40px) !important;
+    -webkit-backdrop-filter: blur(40px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: var(--ds-radius-panel) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+    margin: 2rem 0 !important;
+    overflow: hidden !important;
     padding: 32px !important;
     display: flex;
     align-items: center;
     justify-content: center;
+    isolation: isolate;
 }
 
 .mermaid svg {
@@ -657,7 +681,7 @@ body {
     font-weight: 700 !important;
 }
 
-/* ── Syntax Highlighting (Xcode Exact Palette) ── */
+/* ── Syntax Highlighting (Xcode Palette) ── */
 .hljs-comment, .hljs-quote { color: #a1c659; font-style: italic; }
 .hljs-keyword, .hljs-selector-tag, .hljs-literal { color: #d0a8ff; }
 .hljs-string, .hljs-regexp, .hljs-attribute { color: #ff8170; }
@@ -667,55 +691,82 @@ body {
 .hljs-strong { font-weight: bold; }
 .hljs-emphasis { font-style: italic; }
 
+/* ── Atomic Block Wrappers ── */
+.md-block { margin: 0; }
+.md-line { width: 100%; }
+
+/* ============================================================
+   publish-styles.css — Publish-page specific styles
+   Imports shared markdown styles from app
+   ============================================================ */
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--ds-bg-main);
+    color: var(--ds-text-secondary);
+    font-family: var(--ds-font-family-text);
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+}
+
+.md-publish-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 60px 24px;
+}
+
 /* ── Loading Indicator ── */
 .md-publish-loading {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #151515 0%, #1a1a1a 100%);
-  opacity: 1;
-  transition: opacity 0.4s ease-out;
-  z-index: 9999;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #151515 0%, #1a1a1a 100%);
+    opacity: 1;
+    transition: opacity 0.4s ease-out;
+    z-index: 9999;
 }
 
 .md-publish-loading.hidden {
-  opacity: 0;
-  pointer-events: none;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .md-publish-loading-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
 }
 
 .md-publish-spinner {
-  width: 48px;
-  height: 48px;
-  border: 3px solid var(--ds-white-a10);
-  border-top-color: var(--ds-accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--ds-white-a10);
+    border-top-color: var(--ds-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+    to { transform: rotate(360deg); }
 }
 
 .md-publish-loading-text {
-  font-size: 14px;
-  color: var(--ds-text-secondary);
-  text-align: center;
-  max-width: 280px;
+    font-size: 14px;
+    color: var(--ds-text-secondary);
+    text-align: center;
+    max-width: 280px;
 }
 
 .md-publish-loading-text strong {
-  color: var(--ds-accent);
-  font-weight: 600;
+    color: var(--ds-accent);
+    font-weight: 600;
 }

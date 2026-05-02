@@ -6,6 +6,9 @@
 /* ── Tokens ─────────────────────────────────────────────── */
 @import 'design-system/tokens.css';
 
+/* ── Shared Modules ────────────────────────────────────────── */
+@import 'shared/markdown-render.css';
+
 /* ── Atoms ──────────────────────────────────────────────── */
 @import 'design-system/atoms/utilities.css';
 @import 'design-system/atoms/button.css';

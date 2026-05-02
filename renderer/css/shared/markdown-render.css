@@ -1,0 +1,392 @@
+/* ============================================================
+   markdown-render.css — Shared markdown rendering styles
+   Used by both: MDpreview app & publish-worker
+   ============================================================ */
+
+/* ── Base Markdown Body ── */
+.md-render-body {
+    font-size: 15px;
+    color: var(--ds-text-secondary);
+    line-height: 1.8;
+}
+
+/* ── Headings ── */
+.md-render-body h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--ds-text-inverse);
+    margin-top: 0;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--ds-white-a20);
+    letter-spacing: -0.05em;
+    line-height: 1.4;
+}
+
+.md-render-body h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ds-text-inverse);
+    margin-top: 2rem;
+    margin-bottom: 1.25rem;
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.4;
+}
+
+.md-render-body h2::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.6em;
+    width: 8px;
+    height: 8px;
+    background: var(--ds-accent);
+    border-radius: 2px;
+}
+
+.md-render-body h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ds-accent);
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+}
+
+.md-render-body h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ds-text-inverse);
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.md-render-body h5 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ds-text-primary);
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.md-render-body h6 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ds-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+/* ── Inline Elements ── */
+.md-render-body p {
+    margin-bottom: 1.25rem;
+}
+
+.md-render-body a {
+    color: var(--ds-accent);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.md-render-body a:hover {
+    text-decoration: underline;
+}
+
+.md-render-body code {
+    font-family: var(--ds-font-family-code);
+    font-size: 0.85em;
+    color: var(--ds-accent);
+    display: inline;
+    vertical-align: baseline;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+
+.md-render-body img {
+    max-width: 100%;
+    border-radius: var(--ds-radius-panel);
+    margin: 1rem 0;
+}
+
+.md-render-body hr {
+    border: none;
+    border-bottom: 1px solid var(--ds-border-default);
+    margin: 2rem 0;
+}
+
+/* ── Block Elements ── */
+.md-render-body blockquote {
+    border-left: 2px solid var(--ds-accent);
+    padding: 16px 24px;
+    margin: 2rem 0;
+    background: var(--ds-white-a02);
+    border-radius: 0 var(--ds-radius-panel) var(--ds-radius-panel) 0;
+    color: var(--ds-text-secondary);
+    line-height: 1.7;
+}
+
+.md-render-body blockquote p {
+    margin-bottom: 0;
+}
+
+.md-render-body ul,
+.md-render-body ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.md-render-body li {
+    margin-bottom: 0.5rem;
+}
+
+/* ── Code Blocks ── */
+.premium-code-block {
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: blur(40px) !important;
+    -webkit-backdrop-filter: blur(40px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: var(--ds-radius-panel) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+    margin: 2rem 0 !important;
+    overflow: hidden !important;
+    isolation: isolate;
+}
+
+.code-block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 8px 8px 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    user-select: none;
+}
+
+.code-block-lang {
+    font-size: 10px;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-family: var(--ds-font-family-code);
+}
+
+.code-block-copy {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.6);
+    padding: 4px 10px;
+    border-radius: var(--ds-radius-sm);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.code-block-copy:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.code-block-copy.copied {
+    background: rgba(var(--ds-accent-rgb), 0.15);
+    color: var(--ds-accent);
+}
+
+.code-block-copy .hidden {
+    display: none;
+}
+
+.md-render-body pre {
+    margin: 0;
+    padding: 20px;
+    background: transparent;
+    overflow-x: auto;
+}
+
+.md-render-body pre::-webkit-scrollbar {
+    height: 6px;
+}
+
+.md-render-body pre::-webkit-scrollbar-thumb {
+    background: var(--ds-white-a10);
+    border-radius: 10px;
+}
+
+.md-render-body pre::-webkit-scrollbar-thumb:hover {
+    background: var(--ds-white-a20);
+}
+
+.md-render-body pre code {
+    display: block;
+    font-family: var(--ds-font-family-code);
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #fff;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+
+/* ── Tables ── */
+.md-table-wrapper {
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: blur(40px) !important;
+    -webkit-backdrop-filter: blur(40px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: var(--ds-radius-panel) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+    margin: 2rem 0 !important;
+    overflow: hidden !important;
+    width: 100%;
+    overflow-x: auto;
+    isolation: isolate;
+}
+
+.md-render-body table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.95em;
+    min-width: 600px;
+}
+
+.md-render-body th {
+    background: var(--ds-white-a04);
+    color: var(--ds-accent);
+    padding: 16px 24px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border-bottom: 1px solid var(--ds-white-a08);
+    white-space: nowrap;
+    font-family: var(--ds-font-family-code);
+}
+
+.md-render-body td {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--ds-white-a05);
+    border-right: 1px solid var(--ds-white-a02);
+    color: var(--ds-text-secondary);
+    line-height: 1.6;
+}
+
+.md-render-body td:last-child {
+    border-right: none;
+}
+
+.md-render-body tr:last-child td {
+    border-bottom: none;
+}
+
+.md-table-wrapper::-webkit-scrollbar {
+    height: 6px;
+}
+
+.md-table-wrapper::-webkit-scrollbar-thumb {
+    background: var(--ds-white-a10);
+    border-radius: 10px;
+}
+
+.md-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--ds-white-a20);
+}
+
+/* ── Mermaid Diagrams ── */
+.mermaid {
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: blur(40px) !important;
+    -webkit-backdrop-filter: blur(40px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: var(--ds-radius-panel) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+    margin: 2rem 0 !important;
+    overflow: hidden !important;
+    padding: 32px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    isolation: isolate;
+}
+
+.mermaid svg {
+    color: var(--ds-text-inverse) !important;
+    display: block;
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* Node shapes styling */
+.mermaid .node rect,
+.mermaid .node circle,
+.mermaid .node polygon,
+.mermaid .node path,
+.mermaid .node ellipse,
+.mermaid .classGroup rect {
+    fill: var(--ds-white-a05) !important;
+    stroke: var(--ds-white-a40) !important;
+    stroke-width: 1px !important;
+}
+
+/* Force all text elements to white */
+.mermaid .label,
+.mermaid .label text,
+.mermaid text,
+.mermaid tspan,
+.mermaid .classTitle,
+.mermaid .classTitle text,
+.mermaid .method text,
+.mermaid .attribute text,
+.mermaid .note text {
+    fill: var(--ds-primitive-white) !important;
+    color: var(--ds-text-inverse) !important;
+    font-family: var(--ds-font-family-text) !important;
+    font-weight: 500 !important;
+}
+
+/* Edge and connection styling */
+.mermaid .edgePath .path,
+.mermaid .relation,
+.mermaid .relationLine {
+    stroke: var(--ds-white-a40) !important;
+}
+
+/* Arrow and marker styling */
+.mermaid .marker,
+.mermaid .arrowheadPath {
+    fill: var(--ds-white-a40) !important;
+    stroke: var(--ds-white-a40) !important;
+}
+
+/* Class diagram specifics */
+.mermaid .classGroup line {
+    stroke: var(--ds-white-a30) !important;
+}
+
+.mermaid .classTitle text {
+    font-weight: 700 !important;
+}
+
+/* ── Syntax Highlighting (Xcode Palette) ── */
+.hljs-comment, .hljs-quote { color: #a1c659; font-style: italic; }
+.hljs-keyword, .hljs-selector-tag, .hljs-literal { color: #d0a8ff; }
+.hljs-string, .hljs-regexp, .hljs-attribute { color: #ff8170; }
+.hljs-built_in, .hljs-title, .hljs-name, .hljs-type { color: #6bdfff; }
+.hljs-number, .hljs-variable, .hljs-attr { color: #d0a8ff; }
+.hljs-symbol, .hljs-bullet, .hljs-meta { color: #ffa14f; }
+.hljs-strong { font-weight: bold; }
+.hljs-emphasis { font-style: italic; }
+
+/* ── Atomic Block Wrappers ── */
+.md-block { margin: 0; }
+.md-line { width: 100%; }
