@@ -3,7 +3,7 @@
  *   renderer/css/design-system/tokens.css
  *   cf-publish-worker/src/publish-styles.css
  * Regenerate: npm run build:publish-css
- * Generated:  2026-05-02T00:10:21.862Z
+ * Generated:  2026-05-02T00:15:34.822Z
  */
 
 /* ============================================================
@@ -600,18 +600,61 @@ body {
 }
 
 .mermaid svg {
+    color: var(--ds-text-inverse) !important;
+    display: block;
     max-width: 100% !important;
     height: auto !important;
 }
 
-/* Force Mermaid text visibility and standardize strokes */
-.mermaid text, .mermaid span, .mermaid .label {
-    fill: #fff !important;
-    color: #fff !important;
+/* Node shapes styling */
+.mermaid .node rect,
+.mermaid .node circle,
+.mermaid .node polygon,
+.mermaid .node path,
+.mermaid .node ellipse,
+.mermaid .classGroup rect {
+    fill: var(--ds-white-a05) !important;
+    stroke: var(--ds-white-a40) !important;
+    stroke-width: 1px !important;
 }
 
-.mermaid path, .mermaid rect, .mermaid circle, .mermaid polygon {
-    stroke: var(--ds-white-a20) !important;
+/* Force all text elements to white */
+.mermaid .label,
+.mermaid .label text,
+.mermaid text,
+.mermaid tspan,
+.mermaid .classTitle,
+.mermaid .classTitle text,
+.mermaid .method text,
+.mermaid .attribute text,
+.mermaid .note text {
+    fill: var(--ds-primitive-white) !important;
+    color: var(--ds-text-inverse) !important;
+    font-family: var(--ds-font-family-text) !important;
+    font-weight: 500 !important;
+}
+
+/* Edge and connection styling */
+.mermaid .edgePath .path,
+.mermaid .relation,
+.mermaid .relationLine {
+    stroke: var(--ds-white-a40) !important;
+}
+
+/* Arrow and marker styling */
+.mermaid .marker,
+.mermaid .arrowheadPath {
+    fill: var(--ds-white-a40) !important;
+    stroke: var(--ds-white-a40) !important;
+}
+
+/* Class diagram specifics */
+.mermaid .classGroup line {
+    stroke: var(--ds-white-a30) !important;
+}
+
+.mermaid .classTitle text {
+    font-weight: 700 !important;
 }
 
 /* ── Syntax Highlighting (Xcode Exact Palette) ── */
