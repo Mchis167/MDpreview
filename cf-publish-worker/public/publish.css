@@ -3,7 +3,7 @@
  *   renderer/css/design-system/tokens.css
  *   cf-publish-worker/src/publish-styles.css
  * Regenerate: npm run build:publish-css
- * Generated:  2026-05-02T00:07:01.668Z
+ * Generated:  2026-05-02T00:10:21.862Z
  */
 
 /* ============================================================
@@ -420,29 +420,11 @@ body {
 .md-render-body code {
     font-family: var(--ds-font-family-code);
     font-size: 0.85em;
-    background: rgba(var(--ds-accent-rgb), 0.1);
-    padding: 0.15em 0.6em;
-    border-radius: var(--ds-radius-sm);
     color: var(--ds-accent);
-    border: 1px solid rgba(var(--ds-accent-rgb), 0.25);
-    display: inline-block;
-    max-width: 100%;
-    vertical-align: middle;
+    display: inline;
+    vertical-align: baseline;
     white-space: pre-wrap;
     overflow-wrap: break-word;
-    margin: 2px 0;
-    line-height: 1.5;
-    transition: all 0.2s;
-}
-
-.md-render-body h1 code,
-.md-render-body h2 code,
-.md-render-body h3 code,
-.md-render-body h4 code {
-    font-size: 0.8em;
-    vertical-align: middle;
-    border-width: 2px;
-    background: rgba(var(--ds-accent-rgb), 0.15);
 }
 
 .md-render-body img {
