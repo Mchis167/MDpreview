@@ -1,8 +1,10 @@
 # Feature Documentation
 
-**Last Updated:** May 1, 2026 (Phase 1.1)  
+**Last Updated:** May 2, 2026 (Phase 1.1)  
 **Total Features:** 37+ modules documented  
 **Status:** Organized by category
+
+> **Recent Update (May 2):** Added comprehensive `PROJECT_MAP.md` documentation with layout padding sync and viewport indicator technical details. See [Components](#-components--ui-elements) section.
 
 ---
 
@@ -295,9 +297,10 @@ AppState.theme            // light/dark
 ## 📖 Related Documentation
 
 - **[README.md](../../README.md)** — Project overview
-- **[RENDERING_ARCHITECTURE.md](../RENDERING_ARCHITECTURE.md)** — Markdown rendering system
-- **[SECURITY.md](../SECURITY.md)** — Security and XSS protection
-- **[SETUP.md](../SETUP.md)** — Development setup
+- **[Architecture](../guides/development/architecture.md)** — Markdown rendering system
+- **[Security Policy](../security/policy.md)** — Security and XSS protection
+- **[Setup Guide](../guides/getting-started/setup.md)** — Development setup
+- **[Design Tokens](../guides/development/design-tokens.md)** — CSS system and layout tokens
 
 ---
 

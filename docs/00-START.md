@@ -1,7 +1,9 @@
 # MDPreview Documentation
 
-**Last Updated:** May 1, 2026 (Phase 1.1)  
+**Last Updated:** May 2, 2026 (Phase 1.1 + Layout Sync)  
 **Status:** Fully organized by topic and role
+
+> **Recent Update (May 2):** Added comprehensive documentation for content padding/width synchronization across main viewer, editor, and project map. See [Design System](guides/development/design-tokens.md#scenario-4-content-padding--width-adjustment-affects-all-views) section.
 
 ---
 
@@ -140,8 +142,11 @@ docs/
 ### "I want to test the application"
 → [Manual Tests](testing/manual-tests.md)
 
-### "I want to update the design system"
+### "I want to update the design system or content padding"
 → [Design Tokens](guides/development/design-tokens.md)
+
+### "I want to understand the project map (minimap)"
+→ [Project Map Component](features/components/PROJECT_MAP.md)
 
 ### "I have a security concern"
 → [Security Policy](security/policy.md)

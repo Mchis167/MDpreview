@@ -2,6 +2,8 @@
 
 **For developers building and understanding MDpreview**
 
+**Last Updated:** May 2, 2026
+
 ---
 
 ## Key Guides
@@ -9,7 +11,7 @@
 | Guide | Purpose | Read Time |
 |-------|---------|-----------|
 | [Architecture](architecture.md) | How rendering works, shared core module, server vs worker | 20 min |
-| [Design Tokens](design-tokens.md) | CSS system, design tokens, token pipeline | 15 min |
+| [Design Tokens](design-tokens.md) | CSS system, design tokens, token pipeline, layout synchronization | 15 min |
 
 ---
 
@@ -17,6 +19,7 @@
 
 1. **Architecture** — The complete rendering system design
 2. **Design Tokens** — How to update and build the CSS system
+3. **Layout Synchronization** — How padding/width tokens sync across views (added May 2, 2026)
 
 ---
 
@@ -30,6 +33,15 @@
 
 **"How do I update the design system?"**
 → [Design Tokens - Updating Tokens](design-tokens.md#updating-tokens)
+
+**"How do I change content padding or width?"**
+→ [Design Tokens - Scenario 4](design-tokens.md#scenario-4-content-padding--width-adjustment-affects-all-views)
+
+**"How does the project map (minimap) work?"**
+→ [Project Map Component](../../features/components/PROJECT_MAP.md)
+
+**"Why is the viewport indicator misaligned?"**
+→ [ADR: Content Padding Synchronization](../../decisions/20260502-content-padding-width-synchronization.md)
 
 **"How does XSS protection work?"**
 → [Architecture - XSS Protection](architecture.md#xss-protection-pipeline)

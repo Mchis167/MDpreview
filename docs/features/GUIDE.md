@@ -2,43 +2,47 @@
 
 **How to find and understand features in MDpreview**
 
+**Last Updated:** May 2, 2026
+
 ---
 
 ## 🎯 Quick Links by Role
 
 ### 👨‍💻 Developer (Understanding the Codebase)
 
-1. **Start here:** [function-docs/README.md](function-docs/README.md) — Overview of all 37+ features
+1. **Start here:** [README.md](README.md) — Overview of all 37+ features
 2. **Find the module:** Use the category table to locate your feature
 3. **Understand it:** Read the module's documentation file
 4. **Related modules:** Check the integration points
 
 **Example: Understanding the Editor**
 ```
-1. Read: function-docs/README.md (under "Editor & Rendering")
-2. Read: function-docs/EDITOR.md (how editor works)
-3. Read: function-docs/MARKDOWN_VIEWER.md (display modes)
+1. Read: README.md (under "Editor & Rendering")
+2. Read: EDITOR.md (how editor works)
+3. Read: MARKDOWN_VIEWER.md (display modes)
 4. Understand: Data flow from EDITOR → AppState → MARKDOWN_VIEWER
 ```
 
 ### 🎨 UI/Component Developer
 
-1. **Start:** [function-docs/README.md](function-docs/README.md) → Components section
-2. **Design System:** Read [DESIGN_SYSTEM.md](function-docs/DESIGN_SYSTEM.md)
-3. **Icons:** Check [DESIGN_SYSTEM_ICONS.md](function-docs/DESIGN_SYSTEM_ICONS.md)
-4. **Specific Component:** Find the module in Components list
+1. **Start:** [README.md](README.md) → Components section
+2. **Design System:** Read [DESIGN_SYSTEM.md](components/DESIGN_SYSTEM.md)
+3. **Icons:** Check [DESIGN_SYSTEM_ICONS.md](components/DESIGN_SYSTEM_ICONS.md)
+4. **Layout & Padding:** Read [Design Tokens Guide](../guides/development/design-tokens.md)
+5. **Project Map (Minimap):** See [PROJECT_MAP.md](components/PROJECT_MAP.md)
+6. **Specific Component:** Find the module in Components list
 
 ### 🚀 Feature Implementer
 
-1. **Understand related domains:** Find all related modules using the cross-reference table
+1. **Understand related domains:** Find all related modules using the cross-reference table in [README.md](README.md)
 2. **Read data flow:** See how data flows in and out
 3. **Check patterns:** Look for similar implementations
 4. **Understand AppState:** How does it affect app state?
 
 ### 🧪 QA/Tester
 
-1. **Feature List:** All features documented in [function-docs/](function-docs/)
-2. **Feature Name:** Search for it in [function-docs/README.md](function-docs/README.md)
+1. **Feature List:** All features documented in [README.md](README.md)
+2. **Feature Name:** Search for it in [README.md](README.md)
 3. **How it Works:** Read the module documentation
 4. **Integration:** Understand what it depends on
 
@@ -48,7 +52,7 @@
 
 ### "I want to understand how [Feature] works"
 
-**Step 1:** Find the feature in [function-docs/README.md](function-docs/README.md)
+**Step 1:** Find the feature in [README.md](README.md)
 
 **Step 2:** Read the module documentation (e.g., `EDITOR.md`)
 
@@ -78,21 +82,26 @@
 
 ### "What features do we have?"
 
-→ Look at [function-docs/README.md](function-docs/README.md) categories
+→ Look at [README.md](README.md) categories
 
 ---
 
 ## 📋 Documentation Structure
 
 ```
-function-docs/
-├── README.md                    ← START HERE
-├── CORE_APP.md                  ← App state and lifecycle
-├── EDITOR.md                    ← Editor module
-├── MARKDOWN_VIEWER.md           ← Display and modes
-├── DESIGN_SYSTEM.md             ← UI factory
-├── DESIGN_SYSTEM_ICONS.md       ← Icon registry
-├── BASE_FORM_MODAL.md           ← Modal template
+features/
+├── README.md                    ← START HERE (37+ modules)
+├── GUIDE.md                     ← This file
+├── components/
+│   ├── DESIGN_SYSTEM.md         ← UI factory
+│   ├── DESIGN_SYSTEM_ICONS.md   ← Icon registry
+│   ├── PROJECT_MAP.md           ← Minimap component (NEW)
+│   └── [9 other components]
+├── [other categories...]
+    ├── CORE_APP.md              ← App state and lifecycle
+    ├── EDITOR.md                ← Editor module
+    ├── MARKDOWN_VIEWER.md       ← Display and modes
+    ├── BASE_FORM_MODAL.md       ← Modal template
 ├── PUBLISH_SERVICE.md           ← Publishing logic
 ├── PUBLISH_COMPONENTS.md        ← Publish UI
 ├── PUBLISH_WORKER.md            ← Cloudflare Worker
