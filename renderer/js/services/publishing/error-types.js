@@ -337,6 +337,9 @@ const PublishingErrorTypes = (() => {
   };
 })();
 
+// Export to window for browser context
+window.PublishingErrorTypes = PublishingErrorTypes;
+
 // Export for use in modules
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = PublishingErrorTypes;

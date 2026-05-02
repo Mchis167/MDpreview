@@ -123,6 +123,15 @@
   <script src="js/services/search-service.js" defer></script>
   <script src="js/services/shortcut-service.js" defer></script>
   <script src="js/services/sync-service.js" defer></script>
+
+  <!-- ── 3.1 Publishing Service Dependencies (load in order) ── -->
+  <script src="js/services/design-token-provider.js" defer></script>
+  <script src="js/services/publishing/error-types.js" defer></script>
+  <script src="js/services/publishing/retry-strategy.js" defer></script>
+  <script src="js/services/publishing/publish-utils.js" defer></script>
+  <script src="js/services/publishing/worker-publish-adapter.js" defer></script>
+  <script src="js/services/publishing/legacy-handoff-adapter.js" defer></script>
+  <script src="js/services/publishing/publish-orchestrator.js" defer></script>
   <script src="js/services/publish-service.js" defer></script>
 
   <!-- ── 4. Utilities ── -->

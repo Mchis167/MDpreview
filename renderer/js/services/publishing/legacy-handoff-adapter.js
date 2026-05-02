@@ -143,6 +143,10 @@ const LegacyHandoffAdapter = (() => {
   };
 })();
 
+// Export to window for browser context
+window.LegacyHandoffAdapter = LegacyHandoffAdapter;
+
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = LegacyHandoffAdapter;
 }

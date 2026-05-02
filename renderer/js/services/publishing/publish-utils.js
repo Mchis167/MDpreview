@@ -343,6 +343,10 @@ const PublishUtils = (() => {
 })();
 
 // Export for use in modules
+// Export to window for browser context
+window.PublishUtils = PublishUtils;
+
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = PublishUtils;
 }

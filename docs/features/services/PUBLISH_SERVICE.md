@@ -12,6 +12,30 @@ Giải quyết bài toán đưa tài liệu Markdown từ môi trường local l
 
 ---
 
+## Architecture (v1.2.0+)
+
+**Phase 2.1 Refactor** giới thiệu kiến trúc modular hóa với các thành phần sau:
+
+```
+PublishService (Public API)
+  ├─ PublishOrchestrator (Strategy selection)
+  │  ├─ WorkerPublishAdapter (Cloudflare Workers strategy)
+  │  └─ LegacyHandoffAdapter (Legacy Handoff strategy)
+  ├─ DesignTokenProvider (Auto-generated CSS from tokens)
+  ├─ PublishUtils (Slug validation, asset gathering, HTML escaping)
+  ├─ RetryStrategy (Exponential backoff with jitter)
+  └─ PublishingErrorTypes (Structured error handling)
+```
+
+**Benefits**:
+- ✅ Decoupled strategy pattern (easy to add new adapters)
+- ✅ Design tokens auto-generated (no hardcoded CSS)
+- ✅ Comprehensive asset bundling (images, fonts, SVGs)
+- ✅ Robust retry logic with exponential backoff
+- ✅ Structured error types for better debugging
+
+---
+
 ## Key Functions
 
 ### `publish(options = {})`
@@ -75,11 +99,54 @@ Trạng thái xuất bản của mỗi file được lưu trong `AppState.settin
 
 ---
 
-## Debugging
+## Security Considerations
 
-- **Log Tag**: `[PublishService]`
-- **Server Trace**: Kiểm tra log tại server Node.js cho các yêu cầu proxy `/api/worker-publish`.
+### Password Protection
+- Passwords are transmitted in request body (not URL parameters) to prevent exposure via referrer headers or browser history
+- Server-side: Use salted hashing (PBKDF2/bcrypt) for storage — SHA-256 without salt is vulnerable to rainbow table attacks
+- Client-side: Passwords are never logged to console or stored in localStorage
+
+### Input Validation
+- Slug format validated client-side before sending (`^[a-z0-9\-]{3,50}$`)
+- Server-side validation ensures defense-in-depth
+- Asset size limits enforced: 5MB per asset, 20MB total
+
+### Mermaid Security
+- Published documents use `securityLevel: 'antiscript'` to block inline scripts while allowing HTML formatting
+- Prevents XSS attacks through diagram definitions
+
+### Recommended Deployment Settings
+- Enable HSTS headers on worker domain (enforce HTTPS)
+- Implement per-user rate limiting (10 publishes/hour)
+- Monitor and log all publish attempts
+- See [`docs/decisions/20260502-publish-security-hardening.md`](../decisions/20260502-publish-security-hardening.md) for detailed security hardening strategy
 
 ---
 
-*Document — 2026-05-01*
+## Error Handling
+
+The service uses structured error types for better debugging:
+- `ValidationError` — Invalid input (slug format, missing config)
+- `AuthenticationError` — Missing/invalid credentials
+- `NetworkError` — Transient network failures (retryable)
+- `TimeoutError` — Request timeout (retryable)
+- `WorkerError` — Server-side worker errors
+- `SlugConflictError` — Slug already exists
+
+All errors are logged with timestamp and context. Retry logic uses exponential backoff for transient failures.
+
+---
+
+## Debugging
+
+- **Log Tag**: `[PublishService]`, `[PublishOrchestrator]`, `[WorkerPublishAdapter]`, `[RetryStrategy]`
+- **Server Trace**: Kiểm tra log tại server Node.js cho các yêu cầu proxy `/api/worker-publish`
+- **Console Inspection**: 
+  ```javascript
+  const tokens = PublishService.getDesignTokens();
+  console.log(tokens); // View all design tokens
+  ```
+
+---
+
+*Document — 2026-05-02 (v1.2.0 Architecture)*

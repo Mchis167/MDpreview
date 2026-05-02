@@ -290,6 +290,10 @@ const RetryStrategy = (() => {
 })();
 
 // Export for use in modules
+// Export to window for browser context
+window.RetryStrategy = RetryStrategy;
+
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = RetryStrategy;
 }

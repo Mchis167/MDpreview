@@ -238,6 +238,10 @@ const PublishOrchestrator = (() => {
 })();
 
 // Export for use in modules
+// Export to window for browser context
+window.PublishOrchestrator = PublishOrchestrator;
+
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = PublishOrchestrator;
 }

@@ -358,6 +358,9 @@ const DesignTokenProvider = (() => {
   };
 })();
 
+// Export to window for browser context
+window.DesignTokenProvider = DesignTokenProvider;
+
 // Export for use in modules
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = DesignTokenProvider;

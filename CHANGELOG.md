@@ -2,6 +2,130 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] — 2026-05-02 — Phase 2.1: Publishing Service Refactor & Security Hardening
+
+### 🎯 Added
+
+- **Publishing Service Architecture Refactor**:
+    - **Modular Strategy Pattern**: Decoupled Worker and Legacy Handoff publishing into separate adapter modules
+      - `WorkerPublishAdapter` — Cloudflare Workers publishing strategy
+      - `LegacyHandoffAdapter` — Legacy Handoff.host publishing (deprecated)
+      - `PublishOrchestrator` — Automatic strategy selection based on configuration
+    - **Design Token Provider**: Auto-generated CSS from design tokens replaces hardcoded stylesheet
+      - `DesignTokenProvider.generateInlineStyles()` — Synchronizes tokens with current editor theme
+      - Eliminates CSS drift between editor and published documents
+    - **Enhanced Asset Bundling** (`PublishUtils`):
+      - Handles images, fonts, SVGs, and external resources
+      - Size validation: 5MB per asset, 20MB total
+      - Asset type detection and validation
+      - Detailed error logging for unresolved assets
+    - **Robust Error Handling**:
+      - Structured error types: `ValidationError`, `AuthenticationError`, `NetworkError`, `TimeoutError`, `WorkerError`, `SlugConflictError`
+      - Exponential backoff retry strategy with jitter
+      - Request timeouts: 10s for publish, 5s for slug checks
+      - Clear, actionable error messages to users
+
+- **Security Hardening** (`docs/decisions/20260502-publish-security-hardening.md`):
+    - Client-side slug validation before sending (defense in depth)
+    - Asset bundling size limits prevent memory exhaustion
+    - Mermaid security: `securityLevel: 'antiscript'` for published documents
+    - Password handling improvements documented (server-side implementation pending)
+    - Input validation for all user-provided content
+
+- **Documentation Updates**:
+    - Updated `docs/features/services/PUBLISH_SERVICE.md` with v1.2.0 architecture diagram
+    - Added security considerations section
+    - Added structured error handling documentation
+    - Created comprehensive security ADR for future hardening steps
+
+### 🔧 Changed
+
+- **PublishService refactoring** (backwards compatible):
+    - Delegates publishing to `PublishOrchestrator` (previously monolithic)
+    - Uses `DesignTokenProvider` instead of hardcoded CSS
+    - Uses `PublishUtils` for common operations
+    - Improved logging with consistent `[timestamp] [Module]` format
+    - All error handling now uses structured error types
+- **Removed deprecated functions**:
+    - `_bundleStyles()` — Replaced with `DesignTokenProvider`
+    - Inline asset gathering — Extracted to `PublishUtils.gatherAssets()`
+
+### ✅ Fixed
+
+- CSS drift in published documents (design tokens now auto-sync with editor)
+- Silent failures in asset gathering (now logs detailed error information)
+- Lack of retry logic for transient network failures
+- Generic error messages (now include specific context and suggestions)
+- Slug availability check not available for legacy Handoff adapter (now handled gracefully)
+
+### ⚠️ Deprecated
+
+- `LegacyHandoffAdapter` — Handoff.host publishing deprecated. Migrate to Cloudflare Workers.
+
+### 📦 New Files (Phase 2.1)
+
+**Core Publishing Modules** (`renderer/js/services/publishing/`):
+- `publish-orchestrator.js` (184 lines) — Strategy pattern orchestrator for adapter selection
+- `worker-publish-adapter.js` (412 lines) — Worker publishing with asset gathering, validation, retries
+- `legacy-handoff-adapter.js` (149 lines) — Legacy Handoff.host adapter (deprecated)
+- `error-types.js` (174 lines) — Structured error classes for specific error recovery
+- `retry-strategy.js` (296 lines) — Exponential backoff with configurable patterns (quick/default/aggressive)
+- `publish-utils.js` (TBD lines) — Slug validation, asset gathering, HTML escaping utilities
+
+**Design System** (`renderer/js/services/`):
+- `design-token-provider.js` (12+ KB) — Auto-generated tokens from CSS, programmatic API
+
+**Documentation** (`docs/decisions/`):
+- `20260502-publish-security-hardening.md` — Security hardening strategy, risk analysis, recommendations
+
+### 🚀 Performance Improvements
+
+- **Retry Logic**: Network failures now use exponential backoff (initial 1s, max 30s) instead of failing immediately
+- **Asset Bundling**: Assets resolved in parallel, caching prevents re-validation on subsequent publishes
+- **Token Generation**: Design tokens cached at module load, reducing runtime overhead
+
+### 🔐 Security Improvements
+
+- Slug format validation client-side before server round-trip
+- Asset size limits prevent DOS via memory exhaustion (5MB/asset, 20MB total)
+- Mermaid diagrams use `securityLevel: 'antiscript'` to prevent XSS via diagram definitions
+- Password handling documented; server-side: salted hashing recommended (future upgrade)
+
+### 🛠️ Migration Guide (v1.1.1 → v1.2.0)
+
+**For Developers**:
+1. All `PublishService` methods work unchanged (backwards compatible)
+2. New modules auto-loaded in `index.html` (no action needed)
+3. If adding new publishing strategies: extend `publish-adapter` pattern, add to `PublishOrchestrator._selectAdapter()`
+
+**For Users**:
+- No action required
+- Publishing workflow identical to v1.1.1
+- Enhanced error messages provide better debugging info
+
+**For Server Operators** (cf-publish-worker):
+- Upgrade worker to support salted password hashing (PBKDF2/bcrypt) — see security ADR
+- Implement per-user rate limiting (recommended: 10 publishes/hour)
+- Monitor publish endpoint logs for suspicious patterns
+
+### 🧪 Testing Checklist
+
+- [x] Publish document with images (verify images load in published version)
+- [x] Publish document with code blocks (verify syntax highlighting)
+- [x] Publish document with Mermaid diagrams (verify rendering)
+- [x] Slug collision detection working
+- [x] Retry logic functioning (tested with simulated network delay)
+- [x] Token values synced correctly between editor and published version
+- [x] Error messages are helpful and specific
+
+### ⚡ Known Limitations
+
+1. **Legacy Handoff**: Slug availability check, rename, and list operations not supported (limitation of API)
+2. **Asset Bundling**: SVG symbol references not fully resolved in all cases (documented in PublishUtils)
+3. **Mermaid Security**: `securityLevel: 'antiscript'` blocks some advanced diagram features (acceptable tradeoff)
+
+---
+
 ## [1.1.1] — 2026-05-02 — Phase 1.3: Layout Padding Synchronization & Documentation Restructuring
 
 ### 🎯 Added

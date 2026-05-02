@@ -407,6 +407,10 @@ const WorkerPublishAdapter = (() => {
 })();
 
 // Export for use in modules
+// Export to window for browser context
+window.WorkerPublishAdapter = WorkerPublishAdapter;
+
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = WorkerPublishAdapter;
 }
