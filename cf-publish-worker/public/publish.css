@@ -3,7 +3,7 @@
  *   renderer/css/design-system/tokens.css
  *   cf-publish-worker/src/publish-styles.css
  * Regenerate: npm run build:publish-css
- * Generated:  2026-05-01T23:58:23.090Z
+ * Generated:  2026-05-02T00:03:37.100Z
  */
 
 /* ============================================================
@@ -331,34 +331,31 @@ body {
 /* ── Markdown Content Typography ── */
 .md-render-body {
     font-size: 15px;
-}
-
-.md-render-body h1,
-.md-render-body h2,
-.md-render-body h3,
-.md-render-body h4,
-.md-render-body h5,
-.md-render-body h6 {
-    color: var(--ds-text-inverse);
-    font-weight: 700;
-    line-height: 1.4;
-    margin-bottom: 1.25rem;
-    margin-top: 2.5rem;
+    color: var(--ds-text-secondary);
+    line-height: 1.8;
 }
 
 .md-render-body h1 {
     font-size: 32px;
+    font-weight: 700;
+    color: var(--ds-text-inverse);
     margin-top: 0;
     margin-bottom: 2rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid var(--ds-white-a20);
     letter-spacing: -0.05em;
+    line-height: 1.4;
 }
 
 .md-render-body h2 {
     font-size: 24px;
-    position: relative;
+    font-weight: 700;
+    color: var(--ds-text-inverse);
+    margin-top: 2rem;
+    margin-bottom: 1.25rem;
     padding-left: 20px;
+    position: relative;
+    line-height: 1.4;
 }
 
 .md-render-body h2::before {
@@ -378,6 +375,7 @@ body {
     color: var(--ds-accent);
     margin-top: 2rem;
     margin-bottom: 0.75rem;
+    line-height: 1.4;
 }
 
 .md-render-body h4 {
@@ -386,6 +384,7 @@ body {
     color: var(--ds-text-inverse);
     margin-top: 1.5rem;
     margin-bottom: 0.5rem;
+    line-height: 1.4;
 }
 
 .md-render-body h5 {
@@ -394,6 +393,7 @@ body {
     color: var(--ds-text-primary);
     margin-top: 1.25rem;
     margin-bottom: 0.5rem;
+    line-height: 1.4;
 }
 
 .md-render-body h6 {
@@ -404,6 +404,7 @@ body {
     letter-spacing: 0.1em;
     margin-top: 1rem;
     margin-bottom: 0.5rem;
+    line-height: 1.4;
 }
 
 .md-render-body p { margin-bottom: 1.25rem; }
@@ -452,8 +453,8 @@ body {
 
 .md-render-body hr {
     border: none;
-    border-bottom: 1px solid var(--ds-border-strong);
-    margin: 3rem 0;
+    border-bottom: 1px solid var(--ds-border-default);
+    margin: 2rem 0;
 }
 
 .md-render-body blockquote {
@@ -589,14 +590,15 @@ body {
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    border-bottom: 1px solid var(--ds-border-strong);
+    border-bottom: 1px solid var(--ds-white-a08);
+    white-space: nowrap;
     font-family: var(--ds-font-family-code);
 }
 
 .md-render-body td {
     padding: 16px 24px;
-    border-bottom: 1px solid var(--ds-border-default);
-    border-right: 1px solid var(--ds-border-subtle);
+    border-bottom: 1px solid var(--ds-white-a05);
+    border-right: 1px solid var(--ds-white-a02);
     color: var(--ds-text-secondary);
     line-height: 1.6;
 }
@@ -604,8 +606,8 @@ body {
 .md-render-body td:last-child { border-right: none; }
 .md-render-body tr:last-child td { border-bottom: none; }
 
-/* ── Atomic Blocks (Shared with App) ── */
-.md-block { margin-bottom: 0.5rem; }
+/* ── Atomic Blocks (Published layout workaround) ── */
+.md-block { margin: 0; }
 .md-line { width: 100%; }
 
 /* ── Mermaid Diagrams ── */
