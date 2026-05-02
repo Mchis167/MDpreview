@@ -43,4 +43,5 @@ Chúng tôi quyết định sử dụng chiến lược "Optical Mirror". Thay v
 - Có độ trễ nhỏ khi cập nhật (do debounce và server render).
 
 **Constraint tương lai:**
-- Mọi thay đổi về chiều rộng chuẩn của Viewer (`max-width: 800px`) phải được cập nhật đồng thời vào `ProjectMap.CONFIG.baseWidth`.
+- ~~Mọi thay đổi về chiều rộng chuẩn của Viewer (`max-width: 800px`) phải được cập nhật đồng thời vào `ProjectMap.CONFIG.baseWidth`.~~ (UPDATED 2026-05-02)
+- **NEW:** Width/padding sync được handle tự động qua CSS tokens + ResizeObserver. Xem [20260502-content-padding-width-synchronization.md](20260502-content-padding-width-synchronization.md)

@@ -1,66 +1,163 @@
-# Project Map (`renderer/js/components/molecules/project-map.js`)
+# Project Map (Mini-map / Minimap Navigator)
 
-> Thành phần bản đồ thu nhỏ (Mini-map) cung cấp cái nhìn tổng quan 1:1 và điều hướng nhanh cho tài liệu Markdown.
-
----
-
-Project Map sử dụng chiến lược **True Optical Mirror** với cấu trúc phân lớp:
-- **Body (.ds-project-map__body)**: Vùng cuộn chính, được ép chiều cao bằng JS để chống giãn nở layout.
-- **Track (.ds-project-map__track)**: Lớp nền quản lý tổng chiều cao vật lý của bản đồ (tương đương `viewer.scrollHeight * _scale`).
-- **Mirror (.ds-project-map__mirror)**: Chứa nội dung HTML unscaled, dùng `transform: scale()` để thu nhỏ.
-- **Interaction Layer (.ds-project-map__overlay)**: Lớp phủ bắt sự kiện click/drag.
-- **Footer (.ds-project-map__footer)**: Thanh điều khiển Zoom cố định ở dưới cùng.
+**Module:** `renderer/js/components/molecules/project-map.js`  
+**Type:** Molecule (composite component)  
+**Purpose:** Real-time mini-map preview of current document with scroll sync and zoom controls  
+**Status:** Fully implemented (v1.1.0+)
 
 ---
 
-## State & Cấu hình
+## User-Facing Features
 
-| Thuộc tính | Loại | Mô tả |
-|---|---|---|
-| `_scale` | `number` | Tỉ lệ thu nhỏ cuối cùng (Base Scale * Zoom Factor). |
-| `_zoomFactor` | `number` | Hệ số phóng đại người dùng chọn (0.2 - 1.0). |
-| `_currentContent` | `string` | Hash nội dung hiện tại để tránh render lại. |
+### 1. Mini-map Preview
+- Shows scaled-down 1:1 view of entire document
+- Updates in real-time as you scroll or edit
+- Hover to see viewport indicator (highlighted region in document)
 
----
+### 2. Viewport Indicator
+- Thin highlighted bar showing current view area
+- Position = `scrollTop * scale` (mathematically accurate)
+- Auto-scrolls mini-map to keep indicator centered
 
-## Các thành phần chính
+### 3. Zoom Controls
+- Zoom Out button (`−`) — decrease from 100% to 20%
+- Zoom Label — displays current zoom percentage
+- Zoom In button (`+`) — increase from 100% to 100%
+- Buttons auto-disable at min/max limits
 
-### `render(container, viewportEl)`
-Khởi tạo bản đồ vào một container.
-- **Input**: `container`, `viewportEl` (viewer chính).
-- **Mới**: Tạo cấu trúc Flexbox (Body + Footer) và các nút Zoom.
-
-### `_applyZoom(mapEl)`
-Cập nhật tỉ lệ và chiều cao container cục bộ mà không cần render lại HTML.
-- **Instant Response**: Phản hồi tức thì khi người dùng nhấn `+` hoặc `-`.
-- **Logic**: Tính toán lại `_scale` và cập nhật biến CSS `--_scale`.
-
-### `update(mapEl, viewportEl)`
-Cập nhật nội dung bản đồ khi tài liệu thay đổi.
-- Tính toán `scrollHeight` của nội dung unscaled.
-- Cập nhật chiều cao `track` (scaled) và `mirror` (unscaled).
-
-### `syncScroll(mapEl)`
-Đồng bộ vị trí của vùng highlight (Viewport Indicator) theo Viewer chính.
-- **Auto-centering**: Tự động cuộn bản đồ để giữ vùng highlight ở trung tâm panel.
+### 4. Click to Navigate
+- Click on mini-map to jump to that position in document
+- Smooth scroll animation
+- Drag to scroll document continuously
 
 ---
 
-## Tương tác người dùng
+## How It Works Technically
 
-- **Click (Single Click)**: Cuộn mượt (`smooth`) Viewer chính đến vị trí tương ứng.
-- **Drag (Kéo chuột)**: Cuộn tức thời (`auto`) theo tay người dùng để duyệt nhanh.
-- **Zoom Controls**: Tăng/giảm tỉ lệ bản đồ qua nút `+` và `-`. Nút tự động vô hiệu hóa (disabled) khi đạt giới hạn (100% hoặc 20%).
+### Architecture: SSR + Scaled Transform
+
+The Project Map uses a **Server-Side Rendering (SSR) mirror strategy**:
+
+```
+Main Content (800px wide)
+      ↓
+    [Fetch /api/render-raw]
+      ↓
+Mirror Container (800px wide)
+      ↓
+   [Apply scale transform]
+      ↓
+Mini-map Panel (e.g. 150px wide @ 0.15 scale)
+```
+
+**Why SSR?**
+- 100% fidelity — uses same render engine as main viewer
+- Supports Mermaid diagrams, syntax highlighting, complex layouts
+- No CSS breakage or missing styles
+- Single source of truth for content rendering
+
+### Content Width Synchronization
+
+**CRITICAL:** Mirror width must match main viewer width exactly.
+
+**How it works:**
+1. JavaScript measures main viewer's `.md-content-inner` width (includes 80px padding on each side)
+2. Sets CSS variable `--_mirror-width` on mirror element
+3. Mirror CSS constrains mirror body width to `--_mirror-width`
+4. Content renders identically to main viewer (same width, padding, layout)
+5. Scale applied: `scale = (panelWidth - 24) / internalWidth`
+6. ResizeObserver detects main content width changes → auto-recalculate
+
+**Synchronization tokens (tokens.css):**
+```css
+--ds-content-padding-x: 80px;   /* Horizontal padding */
+--ds-content-padding-y: 80px;   /* Vertical padding */
+--ds-content-width: 800px;      /* Max content width */
+```
+
+Both main viewer and mirror use these tokens, ensuring padding is always in sync.
+
+### Viewport Indicator Calculation
+
+The viewport indicator bar position is calculated as:
+
+```javascript
+const clientHeight = _mainViewer.clientHeight;      // Visible area height
+const scrollTop = _mainViewer.scrollTop;            // Current scroll position
+
+const vHeight = clientHeight * _scale;              // Indicator height
+const vTop = scrollTop * _scale;                    // Indicator position
+
+viewport.style.height = `${vHeight}px`;
+viewport.style.top = `${vTop}px`;
+```
+
+This creates a **mathematically accurate minimap** where:
+- Indicator bar height ∝ visible viewport in main viewer
+- Indicator bar position ∝ scroll position
+- Scrolling in map = scrolling main viewer
 
 ---
 
-## Lưu ý quan trọng
+## Component API
 
-- **JS Height Enforcement**: Bắt buộc ép chiều cao `mapEl` và `body` dựa trên `parentElement.clientHeight` để đảm bảo khả năng cuộn trên thanh bên.
-- **Fixed Width (800px)**: Ép chiều rộng nội dung unscaled trong mirror là **800px** và giữ nguyên `padding` để đảm bảo tính đồng bộ layout và tọa độ cuộn 1:1 với viewer chính.
-- **Design System Consistency**: Sử dụng `.ds-btn.ds-btn-off-label` cho các nút điều khiển để đồng bộ UI.
-- **Performance**: Việc render lại nội dung được debounce 600ms. Các thao tác Zoom được xử lý cục bộ tại trình duyệt (0ms latency).
+### Public Methods
+
+#### `ProjectMap.render(mount, viewerEl)`
+Initialize the component.
+
+**Parameters:**
+- `mount` — DOM element to insert project map into
+- `viewerEl` — The main viewer element (scrollable area)
+
+**Returns:** Root DOM element of project map
+
+#### `ProjectMap.update(mapEl, viewerEl)`
+Refetch and re-render content (e.g., when document changes).
+
+**Parameters:**
+- `mapEl` — Project map root element
+- `viewerEl` — Main viewer element
+
+#### `ProjectMap.syncScroll(mapEl)`
+Update viewport indicator position based on current scroll.
+
+**Parameters:**
+- `mapEl` — Project map root element
+
+#### `ProjectMap.destroy()`
+Clean up resources (timers, observers, abort signals).
+
+#### `ProjectMap.reset(mapEl)`
+Clear mirror content and show skeleton (loading state).
+
+**Parameters:**
+- `mapEl` — Project map root element
 
 ---
 
-*Document — Updated 2026-04-28 (Session: Zoom & Footer Refactor)*
+## CSS Structure
+
+### Class Hierarchy
+
+```
+.ds-project-map                    Root container
+├── .ds-project-map__body         Scrollable area
+│   └── .ds-project-map__track    Total content height
+│       └── .ds-project-map__mirror     Scaled mirror (absolute positioned)
+│           └── .md-render-body         Server-rendered HTML
+│               └── .md-content-inner   Actual content (with padding)
+│       └── .ds-project-map__viewport   Indicator bar (position: absolute)
+│       └── .ds-project-map__overlay    Interaction layer (click/drag)
+└── .ds-project-map__footer       Zoom controls bar
+    ├── .ds-project-map__btn-out  Zoom out button
+    ├── .ds-project-map__zoom-label  Zoom percentage label
+    └── .ds-project-map__btn-in   Zoom in button
+```
+
+---
+
+## Related Architecture Decisions
+
+- **[20260428-project-map-mirror-fidelity.md](../../decisions/20260428-project-map-mirror-fidelity.md)** — SSR mirror strategy
+- **[20260502-content-padding-width-synchronization.md](../../decisions/20260502-content-padding-width-synchronization.md)** — Padding/width token sync

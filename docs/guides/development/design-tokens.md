@@ -1,7 +1,9 @@
-# CSS Build Pipeline — Published Page Styling
+# Design Tokens & CSS Build Pipeline
 
-**Last Updated:** May 1, 2026  
-**Purpose:** Keep published page CSS in sync with app design tokens
+**Last Updated:** May 2, 2026  
+**Purpose:** Centralized design tokens and publish page CSS synchronization
+
+> **Note (May 2, 2026):** Added layout tokens (`--ds-content-padding-x`, `--ds-content-padding-y`, `--ds-content-width`) for content alignment sync across main viewer, editor, and project map. See [Scenario 4](#scenario-4-content-padding--width-adjustment-affects-all-views) for usage.
 
 ---
 
@@ -107,7 +109,51 @@ npm run build:publish-css
 
 ---
 
-### Scenario 4: Code block styling tweak (published page only)
+### Scenario 4: Content padding & width adjustment (affects all views)
+
+**Change:** Increase horizontal padding from 80px to 100px  
+**What to do:**
+```bash
+# 1. Edit tokens.css
+vim renderer/css/design-system/tokens.css
+# Change in Tier 3 (Semantic):
+#   --ds-content-padding-x: 100px;  (was 80px)
+#   --ds-content-width: 800px;      (unchanged, determines text width)
+
+# 2. Update all views using these tokens
+# They will automatically sync:
+# - Main viewer (.md-content-inner)
+# - Editor (#edit-textarea)
+# - Project map mirror (.ds-project-map__mirror .md-content-inner)
+
+# 3. Rebuild app to ensure CSS is fresh
+npm run build
+
+# Result: All views have consistent 100px padding, viewport indicator stays accurate
+```
+
+**Why:** Layout tokens ensure padding consistency across main viewer, editor, and project map mirror. This is critical for accurate viewport indicator positioning in the project map minimap.
+
+**Layout tokens breakdown:**
+```css
+/* Tier 3: Semantic - Layout System */
+--ds-content-padding-x: 80px;   /* Horizontal padding on content */
+--ds-content-padding-y: 80px;   /* Vertical padding on content */
+--ds-content-width: 800px;      /* Max width of readable text (without padding) */
+
+/* Usage in views: */
+.md-content-inner {
+  padding: var(--ds-content-padding-y) var(--ds-content-padding-x);
+  max-width: calc(var(--ds-content-width) + (var(--ds-content-padding-x) * 2));
+  margin: 0 auto;
+}
+```
+
+⚠️ **Critical constraint:** Mirror padding MUST match main viewer padding. If they diverge, viewport indicator position will be inaccurate.
+
+---
+
+### Scenario 5: Code block styling tweak (published page only)
 
 **Change:** Code block borders should be less visible  
 **What to do:**
