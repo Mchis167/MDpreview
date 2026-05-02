@@ -2,6 +2,91 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1] — 2026-05-02 — Phase 1.3: Layout Padding Synchronization & Documentation Restructuring
+
+### 🎯 Added
+
+- **Layout Padding Synchronization (Critical Fix)**:
+    - **Root Cause**: Project Map mirror had hardcoded padding (`padding: 120px 0`) while main viewer used CSS tokens (`padding: 80px 80px`)
+    - **Impact**: Viewport indicator position misaligned because mirror's text area width (internalWidth) differed from main viewer
+    - **Solution**: Changed mirror padding to use same design tokens as main viewer: `var(--ds-content-padding-y) var(--ds-content-padding-x)`
+    - **Result**: Both viewer and mirror now have identical internal width, making viewport indicator mathematically accurate
+
+- **Architecture Decision Record (ADR)**: `docs/decisions/20260502-content-padding-width-synchronization.md`
+    - Documents root cause: 160px padding mismatch between viewer and mirror
+    - Details solution: Centralized CSS tokens for all layout-critical padding
+    - Explains math: baseScale = (panelWidth - 24) / internalWidth, vTop = scrollTop * scale
+    - Future constraint: Mirror padding MUST match main viewer padding to preserve accuracy
+
+- **Project Map Feature Documentation**: `docs/features/components/PROJECT_MAP.md`
+    - Comprehensive module documentation with architecture explanation
+    - Public API with all exported functions and state shape
+    - CSS structure breakdown with token explanations
+    - Viewport indicator calculation deep-dive with formulas
+    - Common issues and debugging section
+    - Testing checklist for mirror fidelity
+
+- **Documentation Restructuring** (Major):
+    - Transitioned docs from flat `docs/function-docs/` to organized structure:
+      - `docs/features/` — Feature & module documentation
+      - `docs/guides/development/` — Architecture & design guides
+      - `docs/decisions/` — Architecture Decision Records (ADRs)
+    - Updated 11+ documentation files with new paths and cross-references
+    - Fixed broken links across entire docs hierarchy
+
+- **Updated Design Tokens Guide**: `docs/guides/development/design-tokens.md`
+    - Added Scenario 4: "Content padding & width adjustment"
+    - Documents how to change layout tokens globally
+    - Added critical constraint: mirror padding sync requirement
+    - Updated with May 2, 2026 date
+
+- **Agent Workflow Updates** (4 files):
+    - `.agents/workflows/00.startup.md` — Updated doc references, added design tokens guide
+    - `.agents/workflows/07.token-management.md` — Added layout token guidance and ADR workflow
+    - `.agents/workflows/15.update-docs.md` — Revised file→doc mapping table with new structure
+    - `.agents/workflows/16.new-doc.md` — Updated documentation creation guidance for new folder structure
+
+### 🔧 Changed
+
+- **CSS**: `renderer/css/design-system/molecules/project-map.css`
+    - Changed: `padding: 120px 0 !important;` (hardcoded)
+    - To: `padding: var(--ds-content-padding-y) var(--ds-content-padding-x) !important;` (token-based)
+
+- **Documentation Structure**:
+    - `docs/features/README.md` — Fixed broken links, added design tokens reference
+    - `docs/features/GUIDE.md` — Updated folder structure, fixed path references
+    - `docs/guides/development/README.md` — Added padding/width Q&A, updated references
+    - `docs/00-START.md` — Added recent update note, project map quick link
+    - `docs/decisions/20260428-project-map-mirror-fidelity.md` — Marked constraint as superseded
+
+### 🐞 Fixed
+
+- **Viewport Indicator Misalignment**: Project Map viewport indicator was offset due to padding mismatch. Now synchronized via CSS tokens.
+- **Documentation Navigation**: Fixed broken paths across docs from old `function-docs/` structure to new `features/` structure.
+- **Agent Workflow Guidance**: Updated all workflow files to direct developers to correct documentation locations.
+
+### 📊 Testing
+
+- Manual testing of viewport indicator positioning confirms math accuracy with synchronized padding
+- All documentation links verified across new folder structure
+- Workflow references validated against new documentation locations
+
+### 📚 Documentation
+
+- **New Files**: 2 files (ADR + project map feature doc)
+- **Updated Files**: 12 files (docs + workflows)
+- **Total Documented Features**: 37+ modules maintained
+- **Status**: Documentation structure reorganized for better navigation and consistency
+
+### 🎓 Knowledge Artifacts
+
+- **ADR 20260502**: Why padding sync is critical for viewport indicator accuracy
+- **PROJECT_MAP.md**: Complete project map module reference with calculations
+- **Design Tokens Guide**: Scenario 4 explains global layout token changes
+- **Agent Workflows**: Updated guidance for future feature documentation
+
+---
+
 ## [1.1.0] — 2026-05-01 19:00 — Phase 1.1: Render Logic Consolidation & XSS Security Fix
 
 ### 🎉 Added
