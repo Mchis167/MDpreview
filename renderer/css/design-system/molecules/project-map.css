@@ -105,5 +105,5 @@
 
 /* Maintain padding parity with main viewer to ensure scroll sync accuracy */
 .ds-project-map__mirror .md-content-inner {
-  padding: 120px 0 !important;
+  padding: var(--ds-content-padding-y) var(--ds-content-padding-x) !important;
 }
