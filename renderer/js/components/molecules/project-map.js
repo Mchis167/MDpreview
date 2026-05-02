@@ -115,6 +115,9 @@ const ProjectMap = (() => {
         }
       }
 
+      // Sync mirror width to match actual main content width
+      mirror.style.setProperty('--_mirror-width', `${internalWidth}px`);
+
       const panelWidth = Math.max(120, body.clientWidth || 280);
       
       const baseScale = Math.max(0.05, (panelWidth - 24) / internalWidth);

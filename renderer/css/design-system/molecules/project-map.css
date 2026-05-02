@@ -91,11 +91,16 @@
 
 /* High-fidelity rendering optimization */
 .ds-project-map__mirror .md-render-body {
-  width: var(--ds-content-width) !important;
-  max-width: var(--ds-content-width) !important;
-  min-width: var(--ds-content-width) !important;
+  width: var(--_mirror-width, var(--ds-content-width)) !important;
+  max-width: var(--_mirror-width, var(--ds-content-width)) !important;
+  min-width: var(--_mirror-width, var(--ds-content-width)) !important;
   margin: 0 !important;
   background: transparent !important;
+}
+
+.ds-project-map__mirror .md-content-inner {
+  max-width: var(--_mirror-width, var(--ds-content-width)) !important;
+  margin: 0 !important;
 }
 
 /* Maintain padding parity with main viewer to ensure scroll sync accuracy */
