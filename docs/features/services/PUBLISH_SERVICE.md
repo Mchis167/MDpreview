@@ -77,9 +77,22 @@ Dự án cam kết độ trung thực 100% giữa Editor và bản xuất bản 
 1. **DOM Hierarchy**: Phải tuân thủ nghiêm ngặt cấu trúc `#md-content > .md-content > .md-content-inner`.
 2. **Atomic Blocks**: Mọi đoạn văn bản phải nằm trong `.md-block > .md-line`.
 3. **Premium Blocks**: Các thành phần đặc biệt (Code, Table, Mermaid) sử dụng hệ thống Glassmorphism (`backdrop-filter`, `transparent background`).
-4. **Mermaid Visibility**: Ép chuẩn hiển thị văn bản màu trắng và nét vẽ mờ (white alpha) để tương thích với theme tối của web.
+4. **Mermaid Zoom**: Tích hợp thanh điều khiển Zoom và khả năng tương tác mượt mà trên bản Publish, đồng bộ 1:1 với Project Map trong app.
 
-**CSS Consistency (Phase 1.2)**: Worker CSS được **auto-generated** từ App tokens thông qua `npm run build:publish-css`. Xem [`docs/css-pipeline.md`](../../css-pipeline.md) để biết chi tiết.
+**CSS & Asset Pipeline (Phase 2.3)**: Toàn bộ CSS và JS của Worker được **auto-generated** và đồng bộ thông qua `npm run build:publish-assets`.
+- **CSS**: Bundle từ Design Tokens + shared components (Tab Bar, Zoom Modal).
+- **JS**: Đồng bộ hóa `zoom.js` và `code-blocks.js` để đảm bảo tính năng tương tác đồng nhất.
+
+---
+
+## Architecture (Phase 2.3 Updates)
+
+### Dynamic Shell Injection
+Dự án đã chuyển đổi từ mô hình "Full Bake" (lưu cả file HTML vào KV) sang mô hình **Dynamic Shell Injection**:
+1. **Publishing**: `WorkerPublishAdapter` giờ đây chỉ gửi phần Body đã render của Markdown tới Worker.
+2. **Storage**: KV chỉ lưu trữ nội dung Body, giúp tiết kiệm không gian và tách biệt dữ liệu khỏi giao diện.
+3. **Serving**: Tại thời điểm Runtime, Worker sẽ lấy Body và nhúng nó vào một **Shell HTML** (template) mới nhất.
+4. **Benefit**: Cho phép cập nhật giao diện, sửa lỗi CSS/JS hoặc thêm tính năng (như Zoom) cho **tất cả** tài liệu đã xuất bản ngay lập tức mà không cần re-publish.
 
 ---
 
@@ -149,4 +162,4 @@ All errors are logged with timestamp and context. Retry logic uses exponential b
 
 ---
 
-*Document — 2026-05-02 (v1.2.0 Architecture)*
+*Document — 2026-05-02 (v1.2.1 Architecture Updates)*

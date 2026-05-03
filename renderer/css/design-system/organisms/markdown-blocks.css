@@ -3,26 +3,6 @@
    Base markdown styles imported from shared/markdown-render.css
    ============================================================ */
 
-/* ── Premium Block Container (App Enhancement) ─────────── */
-.premium-block-container {
-  background: var(--ds-white-a05) !important;
-  backdrop-filter: blur(40px) !important;
-  -webkit-backdrop-filter: blur(40px) !important;
-  border: 1px solid var(--ds-white-a08) !important;
-  border-radius: var(--ds-radius-panel) !important;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
-  margin: 1.5rem 0 !important;
-  overflow: hidden !important;
-  isolation: isolate;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.premium-block-container:hover {
-  border-color: var(--ds-white-a08) !important;
-  transform: none !important;
-  box-shadow: 0 10px 40px var(--ds-black-a20) !important;
-}
 
 /* ── Code Block App-Specific Overrides ───────────────── */
 /* Compact margins when inside details */
@@ -36,31 +16,18 @@
   margin-top: 0.5rem !important;
 }
 
-/* Pre styling specific to app preview */
+/* App-specific: Box shadow and Code zoom support for preview */
 .md-render-body pre {
-  margin: 2rem 0;
-  padding: 20px;
-  background: #1f1f24 !important;
-  border: 1px solid var(--ds-white-a10);
-  border-radius: var(--ds-radius-panel);
-  overflow-x: auto;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-  line-height: 0;
 }
 
-/* Code zoom support for preview */
 .md-render-body pre code {
   font-size: calc(13.5px * (var(--code-zoom, 100) / 100));
 }
 
 /* ── Mermaid App-Specific Enhancements ────────────────── */
-/* Interactive hover state for mermaid diagrams */
+/* Interactive hover state for mermaid diagrams in preview */
 .mermaid {
   cursor: zoom-in;
   transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.mermaid:hover {
-  border-color: rgba(var(--ds-accent-rgb), 0.4) !important;
-  box-shadow: 0 0 20px rgba(var(--ds-accent-rgb), 0.08) !important;
 }

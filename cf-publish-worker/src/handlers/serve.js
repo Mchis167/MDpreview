@@ -1,3 +1,5 @@
+import { buildShell } from '../shell.js';
+
 export async function handleServe(request, env, slug) {
   const metaRaw = await env.PUB_STORE.get(`pub:${slug}:meta`);
   if (!metaRaw) {
@@ -27,8 +29,26 @@ export async function handleServe(request, env, slug) {
     }
   }
 
-  const html = await env.PUB_STORE.get(`pub:${slug}:html`);
-  return new Response(html, {
+  const content = await env.PUB_STORE.get(`pub:${slug}:html`);
+  if (!content) {
+    return new Response('Not Found', { status: 404 });
+  }
+
+  let finalHtml = content;
+
+  // Detection logic: If it doesn't look like a full HTML document, wrap it.
+  const trimmed = content.trim().toLowerCase();
+  const isFullHtml = trimmed.startsWith('<!doctype') || trimmed.startsWith('<html');
+
+  if (!isFullHtml) {
+    finalHtml = buildShell({
+      slug,
+      html: content,
+      title: meta.title || 'Document'
+    });
+  }
+
+  return new Response(finalHtml, {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       'Cache-Control': 'public, max-age=60'

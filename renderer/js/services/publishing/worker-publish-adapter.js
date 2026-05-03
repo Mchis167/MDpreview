@@ -358,14 +358,25 @@ const WorkerPublishAdapter = (() => {
       })
     });
 
+    const isJson = response.headers.get('content-type')?.includes('application/json');
+    let result = null;
+    
+    try {
+      if (isJson) result = await response.json();
+    } catch (_err) {
+      // Fallback if JSON parsing fails
+    }
+
     if (!response.ok) {
-      const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
+      const errorMsg = result?.error || `HTTP ${response.status}: ${response.statusText}`;
+      const error = new Error(errorMsg);
       error.status = response.status;
-      error.response = response;
+      error.code = result?.code;
+      error.details = result;
       throw error;
     }
 
-    return await response.json();
+    return result;
   }
 
   /**
@@ -378,10 +389,10 @@ const WorkerPublishAdapter = (() => {
 
     switch (level) {
       case 'debug':
-        console.debug(prefix, message);
+        console.debug(prefix, message); // eslint-disable-line no-console
         break;
       case 'info':
-        console.log(prefix, message);
+        console.log(prefix, message); // eslint-disable-line no-console
         break;
       case 'warn':
         console.warn(prefix, message);

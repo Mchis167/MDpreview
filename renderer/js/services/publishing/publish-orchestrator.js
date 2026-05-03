@@ -110,7 +110,7 @@ const PublishOrchestrator = (() => {
    * Rename a published slug
    */
   async function renameSlug(oldSlug, newSlug, settings = window.AppState?.settings) {
-    const { adapter, type, config } = _selectAdapter(settings);
+    const { adapter, type: _type, config } = _selectAdapter(settings);
 
     // Legacy adapter doesn't support rename
     if (adapter === LegacyHandoffAdapter) {
@@ -132,7 +132,7 @@ const PublishOrchestrator = (() => {
    * Unpublish a document
    */
   async function unpublish(slug, filePath, settings = window.AppState?.settings) {
-    const { adapter, type, config } = _selectAdapter(settings);
+    const { adapter, type: _type, config } = _selectAdapter(settings);
 
     _log('info', `Unpublishing: ${slug} (${filePath})`);
 
@@ -147,7 +147,7 @@ const PublishOrchestrator = (() => {
    * List all published documents
    */
   async function listPublished(settings = window.AppState?.settings) {
-    const { adapter, type, config } = _selectAdapter(settings);
+    const { adapter, type: _type, config } = _selectAdapter(settings);
 
     // Legacy adapter doesn't support list
     if (adapter === LegacyHandoffAdapter) {
@@ -204,7 +204,7 @@ const PublishOrchestrator = (() => {
     const timestamp = new Date().toISOString().substring(11, 19);
     const prefix = `[${timestamp}] ${LOG_TAG}`;
     const method = { debug: 'debug', info: 'log', warn: 'warn', error: 'error' }[level];
-    console[method](prefix, message);
+    console[method](prefix, message); // eslint-disable-line no-console
   }
 
   // ============================================

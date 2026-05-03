@@ -238,12 +238,14 @@ const PublishingErrorTypes = (() => {
         return new SlugConflictError(response.slug || 'unknown');
       }
 
+      const errorMessage = response.error || response.message || (status >= 500 ? 'Server error' : (statusText || defaultMessage));
+
       if (status >= 500) {
-        return new WorkerError('Server error', `HTTP_${status}`);
+        return new WorkerError(errorMessage, `HTTP_${status}`);
       }
 
       if (status >= 400) {
-        return new NetworkError(statusText || defaultMessage, status);
+        return new NetworkError(errorMessage, status);
       }
 
       if (status >= 300) {

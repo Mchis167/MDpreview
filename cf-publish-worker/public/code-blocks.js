@@ -1,0 +1,92 @@
+/* ============================================================
+   code-blocks.js — Syntax highlighting enhancements, copy button, badges
+   ============================================================ */
+
+(() => {
+'use strict';
+
+const CodeBlockModule = {
+  /**
+   * Process all code blocks in a container to add UI enhancements
+   */
+  process(container) {
+    if (!container) return;
+    const codeBlocks = container.querySelectorAll('pre code');
+    
+    codeBlocks.forEach(codeEl => {
+      // ── Defensive: Skip Mermaid blocks (they are handled by mermaid.js) ──
+      if (codeEl.classList.contains('language-mermaid') || codeEl.classList.contains('mermaid')) return;
+
+      const preEl = codeEl.parentElement;
+      if (!preEl || preEl.tagName !== 'PRE') return;
+      if (preEl.classList.contains('code-block-processed')) return;
+      
+      // 1. Identify language
+      let lang = 'TEXT';
+      const langMatch = codeEl.className.match(/language-([^\s]+)/);
+      if (langMatch) {
+        lang = langMatch[1].toUpperCase();
+      }
+      
+      // 2. Create Wrapper
+      const wrapper = document.createElement('div');
+      wrapper.className = 'premium-code-block';
+      
+      // 3. Create Header
+      const header = document.createElement('div');
+      header.className = 'code-block-header';
+      header.innerHTML = `
+        <span class="code-block-lang">${lang}</span>
+        <button class="code-block-copy" title="Copy code">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="icon-check hidden"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Copy</span>
+        </button>
+      `;
+      
+      // 4. Setup Copy Logic
+      const copyBtn = header.querySelector('.code-block-copy');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const text = codeEl.innerText;
+          navigator.clipboard.writeText(text).then(() => {
+            this.showCopiedState(copyBtn);
+          });
+        });
+      }
+      
+      // 5. Rearrange DOM: Replace pre with wrapper containing header + pre
+      preEl.classList.add('code-block-processed');
+      preEl.replaceWith(wrapper);
+      wrapper.appendChild(header);
+      wrapper.appendChild(preEl);
+    });
+  },
+
+  /**
+   * Handle the "Copied!" feedback state
+   */
+  showCopiedState(btn) {
+    const iconCopy = btn.querySelector('.icon-copy');
+    const iconCheck = btn.querySelector('.icon-check');
+    const textSpan = btn.querySelector('span');
+    
+    btn.classList.add('copied');
+    iconCopy.classList.add('hidden');
+    iconCheck.classList.remove('hidden');
+    textSpan.innerText = 'Copied!';
+    
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      iconCopy.classList.remove('hidden');
+      iconCheck.classList.add('hidden');
+      textSpan.innerText = 'Copy';
+    }, 2000);
+  }
+};
+
+window.CodeBlockModule = CodeBlockModule;
+
+})();

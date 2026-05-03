@@ -292,7 +292,7 @@ The Cloudflare Worker serves published Markdown pages with styled HTML. To keep 
 **How it works:**
 
 ```bash
-npm run build:publish-css
+npm run build:publish-assets
 ```
 
 This generates `publish.css` by combining:
@@ -315,7 +315,7 @@ Always run after editing either `tokens.css` or `publish-styles.css`:
 
 ```bash
 # After editing tokens or publish-styles
-npm run build:publish-css
+npm run build:publish-assets
 
 # Or: included automatically in the full build
 npm run build      # Runs build:publish-css first, then electron-builder
@@ -706,6 +706,354 @@ Refer back to this document when:
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+## [Not Commited] — 2026-05-02 11:35
+
+### 🎯 Added
+- **Mermaid Dynamic Zoom (Publish Site)**: Enabled high-fidelity interactive zoom for Mermaid charts on published documents, matching local editor performance.
+- **Dynamic Shell Injection Architecture**: Refactored the publishing pipeline to decouple Markdown content from the HTML shell. This enables instant, global updates to UI, CSS, and JS features across all published documents without requiring manual re-publishing.
+- **Asset Pipeline Integration**: Expanded the build process to synchronize `zoom.js` and `code-blocks.js` automatically to the Edge worker's public assets.
+
+### 🔧 Changed
+- **Initialization Logic Refactor**: Updated `cf-publish-worker/src/shell.js` with a robust asynchronous loader that ensures Mermaid initialization and Zoom wiring execute only after the DOM is fully hydrated.
+- **Build Script Evolution**: Modernized `scripts/build-publish-assets.js` to manage both CSS bundling and JS utility synchronization in a single, automated workflow.
+
+### ✅ Fixed
+- **Button Visual Fidelity**: Resolved an issue where zoom controls appeared as solid white circles on the published site by implementing a comprehensive CSS reset for `<button>` elements in `zoom-modal.css`.
+- **Color Consistency**: Replaced hardcoded RGBA values in the zoom control bar with semantic design tokens (`--ds-black-a80`, `--ds-shadow-lg`) to achieve 1:1 visual parity with the main application.
+- **Click Binding**: Fixed a race condition in the worker where Mermaid diagrams were sometimes not correctly wired for zoom interactions.
+
+### 🧪 Improved
+- **Integration Testing**: Added `tests/__tests__/publish-integration.test.js` to verify asset synchronization integrity and shell component presence.
+
+## [Not Commited] — 2026-05-02 09:58
+
+### 🎯 Added
+- **Shared Component Integration**:
+    - **CodeBlockModule**: Integrated `renderer/js/utils/code-blocks.js` into the published page shell. This enables full interactive features (copy buttons, language badges, "Copied!" feedback) using the exact same logic as the main application.
+    - **Asset Delivery**: Automated the copying of `code-blocks.js` to the Worker's `public/` directory during the build process.
+
+### 🔧 Changed
+- **Edge Publishing Architecture Standardization**:
+    - Refactored `cf-publish-worker/src/shell.js` and `publish-styles.css` to use the **Atomic Design System** (`ds-` prefixes and semantic tokens).
+    - Adopted the `.tab-bar-container` layout pattern for the published document header, ensuring 1:1 visual parity with the app's top bar.
+    - **CSS Pipeline Upgrade**: Refactored `scripts/build-publish-css.js` to bundle `renderer/css/design-system/organisms/tab-bar.css`, ensuring shared component styles are available on the Edge.
+- **Streamlined Worker Logic**:
+    - Removed redundant server-side `upgradeHtml` logic from `renderer.js` and `handlePublish`. The client-side now handles all visual enhancements for code blocks via the shared module.
+
+### ✅ Fixed
+- **Layout Parity & Stability**: Resolved issues where the published page header collapsed or drifted visually from the main app by using canonical shared CSS.
+- **Code Block Consistency**: Eliminated manual HTML wrapping in the Worker in favor of the app's standard processing, ensuring identical rendering for all syntax-highlighted blocks.
+
+## [1.2.0] — 2026-05-02 — Phase 2.1: Publishing Service Refactor & Security Hardening
+
+### 🎯 Added
+
+- **Publishing Service Architecture Refactor**:
+    - **Modular Strategy Pattern**: Decoupled Worker and Legacy Handoff publishing into separate adapter modules
+      - `WorkerPublishAdapter` — Cloudflare Workers publishing strategy
+      - `LegacyHandoffAdapter` — Legacy Handoff.host publishing (deprecated)
+      - `PublishOrchestrator` — Automatic strategy selection based on configuration
+    - **Design Token Provider**: Auto-generated CSS from design tokens replaces hardcoded stylesheet
+      - `DesignTokenProvider.generateInlineStyles()` — Synchronizes tokens with current editor theme
+      - Eliminates CSS drift between editor and published documents
+    - **Enhanced Asset Bundling** (`PublishUtils`):
+      - Handles images, fonts, SVGs, and external resources
+      - Size validation: 5MB per asset, 20MB total
+      - Asset type detection and validation
+      - Detailed error logging for unresolved assets
+    - **Robust Error Handling**:
+      - Structured error types: `ValidationError`, `AuthenticationError`, `NetworkError`, `TimeoutError`, `WorkerError`, `SlugConflictError`
+      - Exponential backoff retry strategy with jitter
+      - Request timeouts: 10s for publish, 5s for slug checks
+      - Clear, actionable error messages to users
+
+- **Security Hardening** (`docs/decisions/20260502-publish-security-hardening.md`):
+    - Client-side slug validation before sending (defense in depth)
+    - Asset bundling size limits prevent memory exhaustion
+    - Mermaid security: `securityLevel: 'antiscript'` for published documents
+    - Password handling improvements documented (server-side implementation pending)
+    - Input validation for all user-provided content
+
+- **Documentation Updates**:
+    - Updated `docs/features/services/PUBLISH_SERVICE.md` with v1.2.0 architecture diagram
+    - Added security considerations section
+    - Added structured error handling documentation
+    - Created comprehensive security ADR for future hardening steps
+
+### 🔧 Changed
+
+- **PublishService refactoring** (backwards compatible):
+    - Delegates publishing to `PublishOrchestrator` (previously monolithic)
+    - Uses `DesignTokenProvider` instead of hardcoded CSS
+    - Uses `PublishUtils` for common operations
+    - Improved logging with consistent `[timestamp] [Module]` format
+    - All error handling now uses structured error types
+- **Removed deprecated functions**:
+    - `_bundleStyles()` — Replaced with `DesignTokenProvider`
+    - Inline asset gathering — Extracted to `PublishUtils.gatherAssets()`
+
+### ✅ Fixed
+
+- CSS drift in published documents (design tokens now auto-sync with editor)
+- Silent failures in asset gathering (now logs detailed error information)
+- Lack of retry logic for transient network failures
+- Generic error messages (now include specific context and suggestions)
+- Slug availability check not available for legacy Handoff adapter (now handled gracefully)
+
+### ⚠️ Deprecated
+
+- `LegacyHandoffAdapter` — Handoff.host publishing deprecated. Migrate to Cloudflare Workers.
+
+### 📦 New Files (Phase 2.1)
+
+**Core Publishing Modules** (`renderer/js/services/publishing/`):
+- `publish-orchestrator.js` (184 lines) — Strategy pattern orchestrator for adapter selection
+- `worker-publish-adapter.js` (412 lines) — Worker publishing with asset gathering, validation, retries
+- `legacy-handoff-adapter.js` (149 lines) — Legacy Handoff.host adapter (deprecated)
+- `error-types.js` (174 lines) — Structured error classes for specific error recovery
+- `retry-strategy.js` (296 lines) — Exponential backoff with configurable patterns (quick/default/aggressive)
+- `publish-utils.js` (TBD lines) — Slug validation, asset gathering, HTML escaping utilities
+
+**Design System** (`renderer/js/services/`):
+- `design-token-provider.js` (12+ KB) — Auto-generated tokens from CSS, programmatic API
+
+**Documentation** (`docs/decisions/`):
+- `20260502-publish-security-hardening.md` — Security hardening strategy, risk analysis, recommendations
+
+### 🚀 Performance Improvements
+
+- **Retry Logic**: Network failures now use exponential backoff (initial 1s, max 30s) instead of failing immediately
+- **Asset Bundling**: Assets resolved in parallel, caching prevents re-validation on subsequent publishes
+- **Token Generation**: Design tokens cached at module load, reducing runtime overhead
+
+### 🔐 Security Improvements
+
+- Slug format validation client-side before server round-trip
+- Asset size limits prevent DOS via memory exhaustion (5MB/asset, 20MB total)
+- Mermaid diagrams use `securityLevel: 'antiscript'` to prevent XSS via diagram definitions
+- Password handling documented; server-side: salted hashing recommended (future upgrade)
+
+### 🛠️ Migration Guide (v1.1.1 → v1.2.0)
+
+**For Developers**:
+1. All `PublishService` methods work unchanged (backwards compatible)
+2. New modules auto-loaded in `index.html` (no action needed)
+3. If adding new publishing strategies: extend `publish-adapter` pattern, add to `PublishOrchestrator._selectAdapter()`
+
+**For Users**:
+- No action required
+- Publishing workflow identical to v1.1.1
+- Enhanced error messages provide better debugging info
+
+**For Server Operators** (cf-publish-worker):
+- Upgrade worker to support salted password hashing (PBKDF2/bcrypt) — see security ADR
+- Implement per-user rate limiting (recommended: 10 publishes/hour)
+- Monitor publish endpoint logs for suspicious patterns
+
+### 🧪 Testing Checklist
+
+- [x] Publish document with images (verify images load in published version)
+- [x] Publish document with code blocks (verify syntax highlighting)
+- [x] Publish document with Mermaid diagrams (verify rendering)
+- [x] Slug collision detection working
+- [x] Retry logic functioning (tested with simulated network delay)
+- [x] Token values synced correctly between editor and published version
+- [x] Error messages are helpful and specific
+
+### ⚡ Known Limitations
+
+1. **Legacy Handoff**: Slug availability check, rename, and list operations not supported (limitation of API)
+2. **Asset Bundling**: SVG symbol references not fully resolved in all cases (documented in PublishUtils)
+3. **Mermaid Security**: `securityLevel: 'antiscript'` blocks some advanced diagram features (acceptable tradeoff)
+
+---
+
+## [1.1.1] — 2026-05-02 — Phase 1.3: Layout Padding Synchronization & Documentation Restructuring
+
+### 🎯 Added
+
+- **Layout Padding Synchronization (Critical Fix)**:
+    - **Root Cause**: Project Map mirror had hardcoded padding (`padding: 120px 0`) while main viewer used CSS tokens (`padding: 80px 80px`)
+    - **Impact**: Viewport indicator position misaligned because mirror's text area width (internalWidth) differed from main viewer
+    - **Solution**: Changed mirror padding to use same design tokens as main viewer: `var(--ds-content-padding-y) var(--ds-content-padding-x)`
+    - **Result**: Both viewer and mirror now have identical internal width, making viewport indicator mathematically accurate
+
+- **Architecture Decision Record (ADR)**: `docs/decisions/20260502-content-padding-width-synchronization.md`
+    - Documents root cause: 160px padding mismatch between viewer and mirror
+    - Details solution: Centralized CSS tokens for all layout-critical padding
+    - Explains math: baseScale = (panelWidth - 24) / internalWidth, vTop = scrollTop * scale
+    - Future constraint: Mirror padding MUST match main viewer padding to preserve accuracy
+
+- **Project Map Feature Documentation**: `docs/features/components/PROJECT_MAP.md`
+    - Comprehensive module documentation with architecture explanation
+    - Public API with all exported functions and state shape
+    - CSS structure breakdown with token explanations
+    - Viewport indicator calculation deep-dive with formulas
+    - Common issues and debugging section
+    - Testing checklist for mirror fidelity
+
+- **Documentation Restructuring** (Major):
+    - Transitioned docs from flat `docs/function-docs/` to organized structure:
+      - `docs/features/` — Feature & module documentation
+      - `docs/guides/development/` — Architecture & design guides
+      - `docs/decisions/` — Architecture Decision Records (ADRs)
+    - Updated 11+ documentation files with new paths and cross-references
+    - Fixed broken links across entire docs hierarchy
+
+- **Updated Design Tokens Guide**: `docs/guides/development/design-tokens.md`
+    - Added Scenario 4: "Content padding & width adjustment"
+    - Documents how to change layout tokens globally
+    - Added critical constraint: mirror padding sync requirement
+    - Updated with May 2, 2026 date
+
+- **Agent Workflow Updates** (4 files):
+    - `.agents/workflows/00.startup.md` — Updated doc references, added design tokens guide
+    - `.agents/workflows/07.token-management.md` — Added layout token guidance and ADR workflow
+    - `.agents/workflows/15.update-docs.md` — Revised file→doc mapping table with new structure
+    - `.agents/workflows/16.new-doc.md` — Updated documentation creation guidance for new folder structure
+
+### 🔧 Changed
+
+- **CSS**: `renderer/css/design-system/molecules/project-map.css`
+    - Changed: `padding: 120px 0 !important;` (hardcoded)
+    - To: `padding: var(--ds-content-padding-y) var(--ds-content-padding-x) !important;` (token-based)
+
+- **Documentation Structure**:
+    - `docs/features/README.md` — Fixed broken links, added design tokens reference
+    - `docs/features/GUIDE.md` — Updated folder structure, fixed path references
+    - `docs/guides/development/README.md` — Added padding/width Q&A, updated references
+    - `docs/00-START.md` — Added recent update note, project map quick link
+    - `docs/decisions/20260428-project-map-mirror-fidelity.md` — Marked constraint as superseded
+
+### 🐞 Fixed
+
+- **Viewport Indicator Misalignment**: Project Map viewport indicator was offset due to padding mismatch. Now synchronized via CSS tokens.
+- **Documentation Navigation**: Fixed broken paths across docs from old `function-docs/` structure to new `features/` structure.
+- **Agent Workflow Guidance**: Updated all workflow files to direct developers to correct documentation locations.
+
+### 📊 Testing
+
+- Manual testing of viewport indicator positioning confirms math accuracy with synchronized padding
+- All documentation links verified across new folder structure
+- Workflow references validated against new documentation locations
+
+### 📚 Documentation
+
+- **New Files**: 2 files (ADR + project map feature doc)
+- **Updated Files**: 12 files (docs + workflows)
+- **Total Documented Features**: 37+ modules maintained
+- **Status**: Documentation structure reorganized for better navigation and consistency
+
+### 🎓 Knowledge Artifacts
+
+- **ADR 20260502**: Why padding sync is critical for viewport indicator accuracy
+- **PROJECT_MAP.md**: Complete project map module reference with calculations
+- **Design Tokens Guide**: Scenario 4 explains global layout token changes
+- **Agent Workflows**: Updated guidance for future feature documentation
+
+---
+
+## [1.1.0] — 2026-05-01 19:00 — Phase 1.1: Render Logic Consolidation & XSS Security Fix
+
+### 🎉 Added
+
+- **Render Logic Consolidation (Phase 1.1 — Refactor)**:
+    - **Shared Rendering Module**: Created `renderer/js/services/md-renderer-core.js` containing 4 critical functions used by both server and worker:
+        - `highlightCodeBlock()` — Code syntax highlighting with language detection
+        - `sanitizeHtml()` — XSS protection (removes `<script>`, `<iframe>`, event handlers)
+        - `wrapInTableWrapper()` — Table accessibility wrapper
+        - `renderMermaidBlock()` — Mermaid diagram rendering
+    - **Module Compatibility**: CommonJS format supports both Node.js (server) and Cloudflare Workers (via Wrangler bundler)
+    - **100% Code Reuse**: Server and worker now use identical rendering primitives
+
+- **Security: XSS Protection in Worker** (Critical Fix):
+    - **Before**: Worker rendering was missing XSS sanitization entirely
+    - **After**: Worker now applies identical `sanitizeHtml()` to server
+    - **Protection Against**:
+        - `<script>` tag injection
+        - `<iframe>` tag injection
+        - Inline event handlers (`onclick`, `onerror`, `onload`, etc.)
+    - **Test Coverage**: All XSS vectors now verified by unit tests
+
+- **Mermaid Diagram Support in Server** (Bug Fix):
+    - Added missing `renderMermaidBlock()` call for mermaid code blocks
+    - Both server and worker now handle `\`\`\`mermaid` blocks identically
+
+- **Comprehensive Test Suite**:
+    - **21 Unit Tests**: Complete coverage of all 4 shared functions
+    - **Integration Tests**: Server + worker rendering verification
+    - **XSS Attack Vectors**: Tests for script injection, iframe injection, event handlers
+    - **Vitest Configuration**: Added `vitest.config.js` for proper test setup
+
+- **Documentation**:
+    - **[README.md](README.md)**: Comprehensive project overview
+    - **[SECURITY.md](docs/SECURITY.md)**: Security policy and XSS protection details
+    - **[RENDERING_ARCHITECTURE.md](docs/RENDERING_ARCHITECTURE.md)**: Detailed rendering system documentation
+    - **[Manual Testing Guide](docs/manual-testing-phase-1-1.md)**: 12 test cases with step-by-step instructions
+    - **[Phase 1.1 Completion Report](docs/phase-1-1-completion.md)**: Technical completion details
+
+- **Test Infrastructure**:
+    - `scripts/test-phase-1-1.sh` — Integration test runner covering unit tests, server rendering, worker build, and sanitization verification
+
+### 🔧 Changed
+
+- **Server Renderer** (`server/routes/render.js`):
+    - Removed inline `_sanitize()` function (moved to shared module)
+    - Now imports `sanitizeHtml()` and `renderMermaidBlock()` from shared core
+    - Cleaner, more maintainable code with centralized sanitization
+
+- **Worker Renderer** (`cf-publish-worker/src/renderer.js`):
+    - Now imports all 4 functions from `md-renderer-core.js`
+    - Uses `highlightCodeBlock()` instead of manual hljs calls
+    - Uses `wrapInTableWrapper()` instead of inline HTML
+    - Uses `renderMermaidBlock()` instead of inline HTML
+    - **CRITICAL**: Added `sanitizeHtml()` call before final return (was missing)
+
+### 🐞 Fixed
+
+- **Critical Security Gap**: Worker was missing XSS sanitization entirely. Now protected identically to server.
+- **Mermaid Rendering in Server**: Added missing mermaid diagram support to server renderer.
+- **Code Quality**: Eliminated rendering logic duplication across server and worker.
+
+### ✅ Testing Results
+
+- **Unit Tests**: 21/21 passing ✅
+- **Integration Tests**: All passing ✅
+- **Linting**: 0 errors, 0 warnings ✅
+- **XSS Protection Verification**:
+  - Server script injection protection ✅
+  - Server iframe protection ✅
+  - Server event handler protection ✅
+  - Worker script injection protection ✅
+  - Worker iframe protection ✅
+  - Worker event handler protection ✅
+
+### 📚 Documentation
+
+- Added `README.md` with full project overview
+- Added `docs/SECURITY.md` with detailed security policies
+- Added `docs/RENDERING_ARCHITECTURE.md` with technical architecture
+- Added `docs/manual-testing-phase-1-1.md` with 12 test cases
+- All test scripts include copy-paste curl commands for easy testing
+
+### 🔐 Security Impact
+
+**Before v1.1.0:**
+| Attack Vector | Server | Worker |
+|---|---|---|
+| `<script>` injection | ✅ Protected | ❌ Vulnerable |
+| `<iframe>` injection | ✅ Protected | ❌ Vulnerable |
+| Event handlers | ✅ Protected | ❌ Vulnerable |
+
+**After v1.1.0:**
+| Attack Vector | Server | Worker |
+|---|---|---|
+| `<script>` injection | ✅ Protected | ✅ Protected |
+| `<iframe>` injection | ✅ Protected | ✅ Protected |
+| Event handlers | ✅ Protected | ✅ Protected |
+
+---
 
 ## [1.18.0] — 2026-05-01 18:05
 
@@ -1737,9 +2085,9 @@ export default [
   "scripts": {
     "start": "electron .",
     "serve": "node server/index.js",
-    "build": "npm run build:publish-css && electron-builder --mac",
+    "build": "npm run build:publish-assets && electron-builder --mac",
     "build:dir": "electron-builder --mac --dir",
-    "build:publish-css": "node scripts/build-publish-css.js",
+    "build:publish-assets": "node scripts/build-publish-assets.js",
     "dev": "electron .",
     "test": "vitest run",
     "lint:css": "stylelint \"renderer/css/**/*.css\"",

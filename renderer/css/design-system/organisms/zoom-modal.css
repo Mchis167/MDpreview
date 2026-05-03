@@ -1,0 +1,124 @@
+/* ============================================================
+   zoom-modal.css — Mermaid diagram zoom modal styles
+   ============================================================ */
+
+#zoom-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(var(--ds-blur-lg));
+  display: none;
+  overflow: hidden;
+  cursor: grab;
+}
+
+#zoom-modal.show {
+  display: block;
+}
+
+#zoom-modal:active {
+  cursor: grabbing;
+}
+
+#zoom-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+#zoom-close {
+  position: absolute;
+  top: var(--ds-space-xl);
+  right: var(--ds-space-xl);
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  background: var(--ds-layer-subtle-selected);
+  border: 1px solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-pill);
+  color: var(--ds-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--ds-transition-fast), color var(--ds-transition-fast);
+  /* Reset default button styles */
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  padding: 0;
+}
+
+#zoom-close:hover {
+  background: var(--ds-layer-subtle-hover);
+  color: var(--ds-text-inverse);
+}
+
+#zoom-controls-bar {
+  position: absolute;
+  bottom: var(--ds-space-xl);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--ds-black-a80);
+  backdrop-filter: blur(var(--ds-blur-md));
+  -webkit-backdrop-filter: blur(var(--ds-blur-md));
+  border: 1px solid var(--ds-border-subtle);
+  border-radius: var(--ds-radius-pill);
+  padding: var(--ds-space-2xs) 10px;
+  z-index: 10;
+  cursor: default;
+  box-shadow: var(--ds-shadow-lg);
+}
+
+.zoom-ctrl-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ds-radius-pill);
+  color: var(--ds-text-secondary);
+  transition: background var(--ds-transition-fast), color var(--ds-transition-fast);
+  cursor: pointer;
+  /* Reset default button styles */
+  background: transparent;
+  border: none;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  padding: 0;
+}
+
+.zoom-ctrl-btn:hover {
+  background: var(--ds-layer-subtle-hover);
+  color: var(--ds-text-inverse);
+}
+
+.zoom-ctrl-btn:active {
+  background: var(--ds-layer-subtle-active);
+}
+
+#zoom-pct {
+  font-family: var(--ds-font-family-code);
+  font-size: var(--ds-font-sm);
+  font-weight: 600;
+  color: var(--ds-text-secondary);
+  min-width: 44px;
+  text-align: center;
+  padding: 0 var(--ds-space-2xs);
+  cursor: default;
+}
+
+.zoom-ctrl-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--ds-border-subtle);
+  margin: 0 var(--ds-space-2xs);
+  opacity: 0.5;
+}

@@ -131,7 +131,7 @@ const LegacyHandoffAdapter = (() => {
     const timestamp = new Date().toISOString().substring(11, 19);
     const prefix = `[${timestamp}] ${LOG_TAG}`;
     const method = { debug: 'debug', info: 'log', warn: 'warn', error: 'error' }[level];
-    console[method](prefix, message);
+    console[method](prefix, message); // eslint-disable-line no-console
   }
 
   return {

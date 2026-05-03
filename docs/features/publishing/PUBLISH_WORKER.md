@@ -4,114 +4,52 @@
 
 ---
 
-## Kiến trúc Runtime
+## Kiến trúc Runtime (Phase 2.3)
 
-Worker hoạt động dựa trên 3 thành phần chính:
+Worker hoạt động dựa trên cơ chế **Dynamic Shell Injection**, cho phép cập nhật giao diện toàn cầu mà không cần re-publish tài liệu:
+
 1. **Asset Router (`index.js`)**: 
-    - Ưu tiên phục vụ các tài nguyên tĩnh từ thư mục `./public` (ví dụ: `publish.css`).
-    - Các yêu cầu không phải asset sẽ được chuyển hướng sang trình xử lý `serve.js` để lấy nội dung Markdown từ KV.
-2. **Renderer (`renderer.js`)**: 
-    - Sử dụng `marked` kết hợp với `highlight.js` và `mermaid`.
-    - **Fidelity Lock**: Tái tạo chính xác cấu trúc DOM nguyên tử (`.md-block > .md-line`) để đảm bảo style tương thích 100% với App.
+    - Ưu tiên phục vụ các tài nguyên tĩnh từ thư mục `./public` (ví dụ: `publish.css`, `zoom.js`, `code-blocks.js`).
+2. **Serving Logic (`serve.js`)**: 
+    - **Legacy Detection**: Tự động nhận diện các tài liệu cũ đã được "Full Bake" (chứa thẻ `<html>` hoặc `<!DOCTYPE`). Nếu phát hiện, Worker sẽ trả về trực tiếp nội dung đó để đảm bảo tính tương thích ngược.
+    - **Dynamic Injection**: Đối với tài liệu mới (chỉ chứa Body), Worker sẽ nhúng nội dung vào Shell HTML mới nhất được tạo ra bởi `shell.js`.
 3. **Shell Generator (`shell.js`)**: 
-    - Tạo khung HTML hoàn chỉnh bao gồm các thẻ Meta, Font (Inter, Roboto Mono) và các thư viện cần thiết (Mermaid).
+    - Cung cấp khung HTML chuẩn, nạp các Design Tokens và JS Utilities.
+    - **Asynchronous Initialization**: Đảm bảo Mermaid và Zoom logic chỉ khởi chạy sau khi DOM đã sẵn sàng, hỗ trợ cả sơ đồ đã render sẵn (pre-rendered) và sơ đồ động.
 
 ---
 
-## Asset Serving Logic
+## Asset & CSS Pipeline
 
-Mọi tài nguyên tĩnh trong `/public` đều được ánh xạ thông qua binding `ASSETS`:
-
-```javascript
-// index.js priority logic
-const asset = await env.ASSETS.fetch(request);
-if (asset.status !== 404) return asset;
-
-// Fallback to document serving
-return handleServe(request, env);
-```
-
----
-
-## Visual Parity Standards
-
-Để đạt được hiệu ứng Premium, Worker phải tuân thủ:
-
-### 1. CSS Design Tokens (Auto-Generated)
-File `public/publish.css` được **auto-generated** từ hai nguồn:
-- **`renderer/css/design-system/tokens.css`** — Tất cả 173 design tokens từ App (colors, spacing, radius, typography, shadows, transitions)
-- **`cf-publish-worker/src/publish-styles.css`** — Publish-specific styles (layout, code blocks, tables)
-
-Build pipeline: `npm run build:publish-css` → `publish.css` (21 kB, AUTO-GENERATED)
-
-**Tokens bao gồm:**
-- `--ds-bg-main`: auto-aliased từ `--ds-bg-base` (App background)
-- `--ds-accent`: `#ffbf48` (Brand orange, hoặc được override)
-- Hệ thống màu `white-alpha` cho viền và nền mờ
-- Toàn bộ 3-tier token system (Primitives, Alpha, Semantic)
-
-**Cách thay đổi:**
-1. Edit `tokens.css` hoặc `publish-styles.css`
-2. Run: `npm run build:publish-css`
-3. publish.css tự động sync → không cần hand-edit
-
-### 2. Glassmorphism Blocks
-Mọi block đặc biệt phải có:
-```css
-background: transparent !important;
-backdrop-filter: blur(40px);
-border: 1px solid var(--ds-white-a08);
-```
-
-### 3. Mermaid Optimization
-Worker tự động override các style mặc định của Mermaid để đảm bảo chữ luôn trắng và các đường nối mờ ảo, đồng bộ với dark theme.
-
----
-
-## CSS Build Pipeline
-
-Worker phục vụ `public/publish.css` như một asset tĩnh. Để giữ CSS luôn sync với App tokens:
+Để giữ giao diện Publish luôn đồng bộ 100% với App, dự án sử dụng script build tập trung:
 
 ```bash
-# Sau khi sửa tokens.css hoặc publish-styles.css
-npm run build:publish-css
-
-# Hoặc: tự động khi build app
-npm run build  # Chạy build:publish-css trước electron-builder
+# Sau khi sửa tokens.css, component CSS hoặc JS utilities
+npm run build:publish-assets
 ```
 
-**Quy tắc:**
-- ✅ Edit `renderer/css/design-system/tokens.css` khi thay đổi tokens dùng chung
-- ✅ Edit `cf-publish-worker/src/publish-styles.css` khi thay đổi giao diện publish-page
-- ❌ KHÔNG edit `public/publish.css` trực tiếp (auto-generated, AUTO-GENERATED header)
-
-**Chi tiết:** Xem [`docs/css-pipeline.md`](../../css-pipeline.md) hoặc [`docs/phase-1-2-completion.md`](../../phase-1-2-completion.md)
+Script này thực hiện:
+1. **CSS Bundling**: Kết hợp `tokens.css` + Shared Components (`tab-bar.css`, `zoom-modal.css`) + `publish-styles.css`.
+2. **JS Syncing**: Đồng bộ hóa bản mới nhất của `zoom.js` và `code-blocks.js` vào thư mục `public/` của Worker.
 
 ---
 
-## Deployment
+## Visual Parity & Interactions
 
-**Local testing:**
-```bash
-# Regenerate CSS từ tokens mới nhất
-npm run build:publish-css
+Ngoài việc đồng bộ Style, bản Publish hiện đã hỗ trợ đầy đủ các tương tác cao cấp:
 
-# Test locally
-npm run serve
-```
+### 1. Mermaid Dynamic Zoom
+Tích hợp hệ thống Zoom tương tác đồng bộ 1:1 với Project Map của App:
+- Hiển thị thanh điều khiển (`zoom-controls-bar`) với các phím tắt và chỉ báo phần trăm.
+- Hỗ trợ Pan/Zoom mượt mà trên cả máy tính và thiết bị di động.
+- Tự động gán sự kiện click cho các sơ đồ Mermaid ngay khi trang được tải.
 
-**Cloudflare Worker deployment:**
-```bash
-# Đảm bảo CSS up-to-date
-npm run build:publish-css
-
-# Deploy
-cd cf-publish-worker
-npm run deploy
-# hoặc
-wrangler deploy
-```
+### 2. Interactive Code Blocks
+Sử dụng `CodeBlockModule` chia sẻ để cung cấp:
+- Nút Copy thông minh với phản hồi "Copied!".
+- Badge ngôn ngữ lập trình.
+- Hiệu ứng Glassmorphism và Scrollbar premium.
 
 ---
-
-*Document — 2026-05-01 (Updated for CSS Build Pipeline)*
+...
+*Document — 2026-05-02 (Updated for Dynamic Shell & Asset Pipeline)*

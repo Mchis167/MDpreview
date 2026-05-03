@@ -48,11 +48,27 @@ Vui lòng đọc các file theo thứ tự số thứ tự (00 -> 08) để hi�
 ├── GraphPreview
 │   ├── Antigravity_Chart_Guide.md
 │   └── Example_Audit_With_Charts.md
+├── README.md
 ├── bundle.command
 ├── cf-publish-worker
+│   ├── .wrangler
+│   │   └── state
+│   │       └── v3
+│   │           ├── cache
+│   │           │   └── miniflare-CacheObject
+│   │           │       ├── metadata.sqlite
+│   │           │       ├── metadata.sqlite-shm
+│   │           │       └── metadata.sqlite-wal
+│   │           └── kv
+│   │               └── miniflare-KVNamespaceObject
+│   │                   ├── metadata.sqlite
+│   │                   ├── metadata.sqlite-shm
+│   │                   └── metadata.sqlite-wal
 │   ├── package.json
 │   ├── public
-│   │   └── publish.css
+│   │   ├── code-blocks.js
+│   │   ├── publish.css
+│   │   └── zoom.js
 │   ├── src
 │   │   ├── handlers
 │   │   │   ├── auth.js
@@ -67,7 +83,7 @@ Vui lòng đọc các file theo thứ tự số thứ tự (00 -> 08) để hi�
 │   │       └── slug.js
 │   └── wrangler.toml
 ├── docs
-│   ├── css-pipeline.md
+│   ├── 00-START.md
 │   ├── decisions
 │   │   ├── 20260426-adaptive-sidebar-scrolling.md
 │   │   ├── 20260426-centralized-settings-architecture.md
@@ -108,49 +124,92 @@ Vui lòng đọc các file theo thứ tự số thứ tự (00 -> 08) để hi�
 │   │   ├── 20260429-gdoc-rasterization-strategy.md
 │   │   ├── 20260429-menu-anchoring-strategy.md
 │   │   ├── 20260429-stable-layout-border-pattern.md
+│   │   ├── 20260502-content-padding-width-synchronization.md
+│   │   ├── 20260502-publish-security-hardening.md
 │   │   └── README.md
-│   ├── function-docs
-│   │   ├── BASE_FORM_MODAL.md
-│   │   ├── CORE_APP.md
-│   │   ├── DESIGN_SYSTEM.md
-│   │   ├── DESIGN_SYSTEM_ICONS.md
-│   │   ├── EDITOR.md
-│   │   ├── EDIT_TOOLBAR.md
-│   │   ├── ELECTRON_BRIDGE.md
-│   │   ├── EXPLORER_SETTINGS.md
-│   │   ├── GDOC_UTIL.md
-│   │   ├── MARKDOWN_VIEWER.md
-│   │   ├── MENU_SHIELD.md
-│   │   ├── PROJECT_MAP.md
-│   │   ├── PUBLISH_COMPONENTS.md
-│   │   ├── PUBLISH_HANDOFF.md
-│   │   ├── PUBLISH_SERVICE.md
-│   │   ├── PUBLISH_WORKER.md
+│   ├── features
+│   │   ├── GUIDE.md
 │   │   ├── README.md
-│   │   ├── RECENTLY_VIEWED.md
-│   │   ├── SCROLL_CONTAINER.md
-│   │   ├── SEARCH_PALETTE.md
-│   │   ├── SEARCH_SERVICE.md
-│   │   ├── SETTINGS_COMPONENT.md
-│   │   ├── SETTINGS_SERVICE.md
-│   │   ├── SHORTCUTS.md
-│   │   ├── SHORTCUTS_COMPONENT.md
-│   │   ├── SHORTCUT_SERVICE.md
-│   │   ├── SIDEBAR_LEFT.md
-│   │   ├── SYNC_SERVICE.md
-│   │   ├── TABS.md
-│   │   ├── TAB_BAR_COMPONENT.md
-│   │   ├── TAB_PREVIEW.md
-│   │   ├── TOC_COMPONENT.md
-│   │   ├── TREE.md
-│   │   ├── TREE_DRAG_MANAGER.md
-│   │   ├── WORKSPACE.md
-│   │   └── WORKSPACE_SWITCHER.md
-│   ├── function-idea-docs
-│   │   ├── ElectronClipboardCopyAsFile.md
-│   │   └── cf-publish-implementation-plan.md
-│   ├── phase-1-2-completion.md
-│   └── user_guide.md
+│   │   ├── advanced
+│   │   │   ├── README.md
+│   │   │   ├── SEARCH_PALETTE.md
+│   │   │   ├── SHORTCUTS.md
+│   │   │   ├── SHORTCUTS_COMPONENT.md
+│   │   │   ├── TAB_BAR_COMPONENT.md
+│   │   │   ├── TAB_PREVIEW.md
+│   │   │   └── TOC_COMPONENT.md
+│   │   ├── components
+│   │   │   ├── BASE_FORM_MODAL.md
+│   │   │   ├── DESIGN_SYSTEM.md
+│   │   │   ├── DESIGN_SYSTEM_ICONS.md
+│   │   │   ├── EDIT_TOOLBAR.md
+│   │   │   ├── EXPLORER_SETTINGS.md
+│   │   │   ├── MENU_SHIELD.md
+│   │   │   ├── PROJECT_MAP.md
+│   │   │   ├── README.md
+│   │   │   ├── SCROLL_CONTAINER.md
+│   │   │   ├── SETTINGS_COMPONENT.md
+│   │   │   └── SIDEBAR_LEFT.md
+│   │   ├── core
+│   │   │   ├── CORE_APP.md
+│   │   │   ├── ELECTRON_BRIDGE.md
+│   │   │   └── README.md
+│   │   ├── editor
+│   │   │   ├── EDITOR.md
+│   │   │   ├── MARKDOWN_VIEWER.md
+│   │   │   └── README.md
+│   │   ├── file-management
+│   │   │   ├── README.md
+│   │   │   ├── TABS.md
+│   │   │   ├── TREE.md
+│   │   │   ├── TREE_DRAG_MANAGER.md
+│   │   │   ├── WORKSPACE.md
+│   │   │   └── WORKSPACE_SWITCHER.md
+│   │   ├── publishing
+│   │   │   ├── PUBLISH_COMPONENTS.md
+│   │   │   ├── PUBLISH_HANDOFF.md
+│   │   │   ├── PUBLISH_WORKER.md
+│   │   │   └── README.md
+│   │   ├── services
+│   │   │   ├── GDOC_UTIL.md
+│   │   │   ├── PUBLISH_SERVICE.md
+│   │   │   ├── README.md
+│   │   │   ├── SEARCH_SERVICE.md
+│   │   │   ├── SETTINGS_SERVICE.md
+│   │   │   ├── SHORTCUT_SERVICE.md
+│   │   │   └── SYNC_SERVICE.md
+│   │   └── utilities
+│   │       ├── README.md
+│   │       └── RECENTLY_VIEWED.md
+│   ├── guides
+│   │   ├── deployment
+│   │   │   ├── README.md
+│   │   │   └── scripts-reference.md
+│   │   ├── development
+│   │   │   ├── README.md
+│   │   │   ├── architecture.md
+│   │   │   └── design-tokens.md
+│   │   └── getting-started
+│   │       ├── README.md
+│   │       ├── quickstart.md
+│   │       ├── setup.md
+│   │       └── user-guide.md
+│   ├── reference
+│   │   ├── README.md
+│   │   ├── archive
+│   │   │   ├── ElectronClipboardCopyAsFile.md
+│   │   │   ├── README.md
+│   │   │   └── cf-publish-implementation-plan.md
+│   │   └── phase-reports
+│   │       ├── README.md
+│   │       ├── phase-1-1.md
+│   │       └── phase-1-2.md
+│   ├── security
+│   │   ├── README.md
+│   │   └── policy.md
+│   └── testing
+│       ├── README.md
+│       └── manual-tests.md
 ├── electron
 │   ├── ipc
 │   │   ├── comments.js
@@ -209,10 +268,13 @@ Vui lòng đọc các file theo thứ tự số thứ tự (00 -> 08) để hi�
 │   │   │   │   ├── tab-bar.css
 │   │   │   │   ├── toc-panel.css
 │   │   │   │   ├── tree-view.css
-│   │   │   │   └── workspace-panel.css
+│   │   │   │   ├── workspace-panel.css
+│   │   │   │   └── zoom-modal.css
 │   │   │   └── tokens.css
 │   │   ├── design-system.css
 │   │   ├── layout.css
+│   │   ├── shared
+│   │   │   └── markdown-render.css
 │   │   └── styles.css
 │   ├── index.html
 │   ├── js
@@ -276,9 +338,22 @@ Vui lòng đọc các file theo thứ tự số thứ tự (00 -> 08) để hi�
 │   │   │   ├── tree.js
 │   │   │   └── workspace.js
 │   │   ├── services
+│   │   │   ├── __tests__
+│   │   │   │   ├── md-renderer-core.test.js
+│   │   │   │   └── mermaid-config.test.js
+│   │   │   ├── design-token-provider.js
 │   │   │   ├── file-service.js
 │   │   │   ├── markdown-logic-service.js
+│   │   │   ├── md-renderer-core.js
+│   │   │   ├── mermaid-config.js
 │   │   │   ├── publish-service.js
+│   │   │   ├── publishing
+│   │   │   │   ├── error-types.js
+│   │   │   │   ├── legacy-handoff-adapter.js
+│   │   │   │   ├── publish-orchestrator.js
+│   │   │   │   ├── publish-utils.js
+│   │   │   │   ├── retry-strategy.js
+│   │   │   │   └── worker-publish-adapter.js
 │   │   │   ├── recently-viewed-service.js
 │   │   │   ├── search-service.js
 │   │   │   ├── settings-service.js
@@ -295,11 +370,13 @@ Vui lòng đọc các file theo thứ tự số thứ tự (00 -> 08) để hi�
 │   └── testing
 │       └── sync-unit-test.js
 ├── scripts
+│   ├── DeployWorker.command
 │   ├── PreviewUI.command
 │   ├── QuickRebuild.command
-│   ├── build-publish-css.js
+│   ├── build-publish-assets.js
 │   ├── bundle-for-ai.js
-│   └── rebuild.sh
+│   ├── rebuild.sh
+│   └── test-phase-1-1.sh
 ├── server
 │   ├── index.js
 │   ├── routes
@@ -314,16 +391,22 @@ Vui lòng đọc các file theo thứ tự số thứ tự (00 -> 08) để hi�
 │   ├── start.js
 │   └── test-server.js
 ├── tailwind.config.js
-└── tests
-    ├── TestContent
-    │   └── rolling_summary_update_analysis.md
-    ├── audit-security.js
-    ├── audit-test-suite.md
-    ├── editor-module.test.js
-    ├── markdown-logic.test.js
-    ├── markdown-viewer.test.js
-    ├── sidebar-left.test.js
-    └── sync-cursor.test.js
+├── tests
+│   ├── TestContent
+│   │   └── rolling_summary_update_analysis.md
+│   ├── __tests__
+│   │   └── publish-integration.test.js
+│   ├── audit-security.js
+│   ├── audit-test-suite.md
+│   ├── editor-module.test.js
+│   ├── markdown-logic.test.js
+│   ├── markdown-viewer.test.js
+│   ├── sidebar-left.test.js
+│   └── sync-cursor.test.js
+├── vitest.config.js
+└── workspaces
+    └── MDpreview
+        └── Test Mermaid.md
 
 ```
 

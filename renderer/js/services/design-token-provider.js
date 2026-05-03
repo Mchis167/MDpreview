@@ -334,7 +334,7 @@ const DesignTokenProvider = (() => {
         }
 
         // Check for mismatches
-        for (const [name, jsValue] of Object.entries(jsTokens)) {
+        for (const [name, _jsValue] of Object.entries(jsTokens)) {
           if (domTokens[name]) {
             result.matches++;
             // Note: Exact match may not be possible due to CSS parsing,
@@ -346,7 +346,7 @@ const DesignTokenProvider = (() => {
         }
 
         // Check for tokens in DOM that aren't in JS
-        for (const [name, domValue] of Object.entries(domTokens)) {
+        for (const [name, _domValue] of Object.entries(domTokens)) {
           if (!(name in jsTokens)) {
             result.missingInJs.push(name);
           }

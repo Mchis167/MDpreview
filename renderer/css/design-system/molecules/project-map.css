@@ -101,9 +101,5 @@
 .ds-project-map__mirror .md-content-inner {
   max-width: var(--_mirror-width, var(--ds-content-width)) !important;
   margin: 0 !important;
-}
-
-/* Maintain padding parity with main viewer to ensure scroll sync accuracy */
-.ds-project-map__mirror .md-content-inner {
   padding: var(--ds-content-padding-y) var(--ds-content-padding-x) !important;
 }

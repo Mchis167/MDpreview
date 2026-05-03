@@ -15,14 +15,77 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-.md-publish-container {
+.ds-publish-content-wrapper {
     max-width: 800px;
     margin: 0 auto;
-    padding: 60px 24px;
+    padding: 100px 24px 60px; /* Top padding for fixed header */
 }
 
-/* ── Loading Indicator ── */
-.md-publish-loading {
+/* ── Use Shared Header Pattern (TabBar) ── */
+.tab-bar-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--header-height, 40px);
+    background: var(--ds-bg-toolbar);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+}
+
+.ds-publish-header-inner {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+}
+
+.ds-logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    cursor: default;
+}
+
+.ds-logo-box {
+    width: 24px;
+    height: 24px;
+    background: var(--ds-accent);
+    color: white;
+    border-radius: var(--ds-radius-widget);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 13px;
+}
+
+.ds-logo-text {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--ds-text-inverse);
+    letter-spacing: -0.02em;
+}
+
+.ds-publish-doc-title {
+    font-size: 13px;
+    color: var(--ds-text-tertiary);
+    font-weight: 400;
+    max-width: 400px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Design System: Loading ── */
+.ds-publish-loading {
     position: fixed;
     top: 0;
     left: 0;
@@ -31,25 +94,25 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #151515 0%, #1a1a1a 100%);
+    background: var(--ds-bg-base);
     opacity: 1;
     transition: opacity 0.4s ease-out;
     z-index: 9999;
 }
 
-.md-publish-loading.hidden {
+.ds-publish-loading.hidden {
     opacity: 0;
     pointer-events: none;
 }
 
-.md-publish-loading-content {
+.ds-publish-loading-content {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 24px;
 }
 
-.md-publish-spinner {
+.ds-publish-spinner {
     width: 48px;
     height: 48px;
     border: 3px solid var(--ds-white-a10);
@@ -62,14 +125,16 @@ body {
     to { transform: rotate(360deg); }
 }
 
-.md-publish-loading-text {
+.ds-publish-loading-text {
     font-size: 14px;
     color: var(--ds-text-secondary);
     text-align: center;
     max-width: 280px;
 }
 
-.md-publish-loading-text strong {
+.ds-publish-loading-text strong {
     color: var(--ds-accent);
     font-weight: 600;
 }
+
+

@@ -10,8 +10,8 @@ echo ""
 
 # Ensure publish CSS is up-to-date
 echo "🎨 Step 1/3: Syncing publish CSS from tokens..."
-npm run build:publish-css || {
-  echo "❌ Error: CSS build failed"
+npm run build:publish-assets || {
+  echo "❌ Error: Assets build failed"
   exit 1
 }
 

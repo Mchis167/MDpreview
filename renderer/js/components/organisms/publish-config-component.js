@@ -135,14 +135,6 @@ const PublishConfigComponent = (() => {
       if (!isLoading) {
         setTimeout(async () => {
           if (this.state.isLoading) return;
-          if (info && info.slug) {
-            const isStillThere = await window.PublishService.checkSlugAvailability(info.slug);
-            if (isStillThere) {
-              await window.PublishService.unpublish(this.file);
-              this.setState({ info: null });
-              return;
-            }
-          }
           this._checkSlug(defaultSlug);
         }, 100);
       }

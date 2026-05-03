@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] — 2026-05-03 10:15
+
+### 🎉 Added
+- **Dynamic Shell Injection Architecture**: Refactored the publishing pipeline to decouple Markdown content from the HTML shell. This enables instant, global updates to UI, CSS, and JS features across all published documents without manual re-publishing.
+- **Mermaid Dynamic Zoom (Publish Site)**: Enabled high-fidelity interactive zoom for Mermaid charts on published documents, matching local editor performance.
+- **Shared Component Integration**: Integrated `CodeBlockModule` and `zoom.js` into the published page shell, enabling full interactive features (copy buttons, language badges, "Copied!" feedback) on the Edge.
+- **Standardized Divider (hr)**: Triển khai style cho thẻ `hr` bám sát Design System của App (viền trắng mờ + khoảng cách 3rem), giúp phân tách nội dung tinh tế hơn trên bản publish.
+
+### 🔧 Changed
+- **Edge Publishing Architecture Standardization**:
+    - Refactored `cf-publish-worker/src/shell.js` and `publish-styles.css` to use the **Atomic Design System** (`ds-` prefixes and semantic tokens).
+    - Adopted the `.tab-bar-container` layout pattern for the published document header, ensuring 1:1 visual parity with the app's top bar.
+- **Initialization Logic Refactor**: Updated worker shell with a robust asynchronous loader that ensures Mermaid initialization and Zoom wiring execute after DOM hydration.
+- **Build Pipeline Evolution**: Modernized `scripts/build-publish-assets.js` to manage CSS bundling and JS utility synchronization in a single, automated workflow.
+
+### 🐞 Fixed
+- **Cloudflare Worker Critical Fixes**:
+    - Khắc phục lỗi Worker chặn file `publish.css` (404) và tái cấu trúc phân cấp HTML (`#md-content`) để khớp chính xác với hệ thống CSS của App.
+    - Resolved zoom control visual bugs (white circles) via comprehensive CSS reset for buttons in `zoom-modal.css`.
+- **Color Consistency**: Replaced hardcoded values with semantic design tokens (`--ds-black-a80`, `--ds-shadow-lg`) for full visual parity.
+- **Linting Stabilization**: Resolved 90+ ESLint errors and warnings across the new publishing service; updated `eslint.config.mjs` to recognize new atomic service globals.
+
+### 🧪 Improved
+- **Integration Testing**: Added `tests/__tests__/publish-integration.test.js` to verify asset synchronization integrity and shell component presence.
+
 ## [1.2.0] — 2026-05-02 — Phase 2.1: Publishing Service Refactor & Security Hardening
 
 ### 🎯 Added

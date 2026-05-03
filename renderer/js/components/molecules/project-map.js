@@ -56,6 +56,7 @@ const ProjectMap = (() => {
       const data = await res.json();
       return data.html;
     } catch (err) {
+      if (err.name === 'AbortError') return null;
       console.error('ProjectMap Render Error:', err);
       return null;
     }

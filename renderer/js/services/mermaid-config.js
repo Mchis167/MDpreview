@@ -6,7 +6,6 @@
  * Works in both browser (global) and Node.js (CommonJS) contexts.
  */
 
-/* eslint-disable no-undef */
 (function() {
   'use strict';
 
@@ -67,4 +66,3 @@
     module.exports = exports;
   }
 })();
-/* eslint-enable no-undef */

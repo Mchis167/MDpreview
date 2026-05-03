@@ -185,7 +185,7 @@ Edit CSS design tokens in `renderer/css/design-system/tokens.css`:
 
 **Auto-sync to published pages:**
 ```bash
-npm run build:publish-css
+npm run build:publish-assets
 ./scripts/DeployWorker.command
 ```
 
@@ -232,7 +232,7 @@ bash scripts/test-phase-1-1.sh
 npm run build
 
 # Sync CSS to published pages
-npm run build:publish-css
+npm run build:publish-assets
 
 # Deploy to Cloudflare Workers
 ./scripts/DeployWorker.command
@@ -351,7 +351,7 @@ rm -rf node_modules && npm install
 ### CSS not updating
 ```bash
 # Rebuild CSS from tokens
-npm run build:publish-css
+npm run build:publish-assets
 
 # Check output was generated
 ls -lh cf-publish-worker/public/publish.css

@@ -134,7 +134,7 @@ const PublishUtils = (() => {
    * Resolve a single asset path to absolute location
    * @private
    */
-  async function _resolveAsset(path, type, result, electronAPI, maxSize, logLevel) {
+  async function _resolveAsset(path, type, result, electronAPI, _maxSize, _logLevel) {
     if (!path || result.resolved[path] || result.unresolved.some(u => u.path === path)) {
       return; // Already processed
     }
@@ -219,10 +219,10 @@ const PublishUtils = (() => {
 
     switch (level) {
       case 'debug':
-        console.debug(prefix, message);
+        console.debug(prefix, message); // eslint-disable-line no-console
         break;
       case 'info':
-        console.log(prefix, message);
+        console.log(prefix, message); // eslint-disable-line no-console
         break;
       case 'warn':
         console.warn(prefix, message);

@@ -287,7 +287,7 @@ The Cloudflare Worker serves published Markdown pages with styled HTML. To keep 
 **How it works:**
 
 ```bash
-npm run build:publish-css
+npm run build:publish-assets
 ```
 
 This generates `publish.css` by combining:
@@ -310,7 +310,7 @@ Always run after editing either `tokens.css` or `publish-styles.css`:
 
 ```bash
 # After editing tokens or publish-styles
-npm run build:publish-css
+npm run build:publish-assets
 
 # Or: included automatically in the full build
 npm run build      # Runs build:publish-css first, then electron-builder

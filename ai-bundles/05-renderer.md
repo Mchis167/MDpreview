@@ -18,6 +18,7 @@
   --_color: var(--ds-text-primary);
   --_bg-hover: var(--ds-layer-subtle-hover);
   --_transform-hover: translateY(-1px);
+  --_blur: none;
 
   display: inline-flex;
   align-items: center;
@@ -38,6 +39,8 @@
   cursor: pointer;
   transition: all var(--ds-transition-fast);
   position: relative;
+  backdrop-filter: var(--_blur);
+  -webkit-backdrop-filter: var(--_blur);
 }
 
 .ds-btn.is-loading {
@@ -112,6 +115,7 @@
   --_color: var(--ds-text-primary);
   --_bg-hover: var(--ds-layer-subtle-hover);
   --_transform-hover: none;
+  --_blur: var(--ds-blur-md);
 }
 
 .ds-btn-subtle-dark {
@@ -119,6 +123,7 @@
   --_color: var(--ds-text-primary);
   --_bg-hover: var(--ds-layer-subtle-dark-hover);
   --_transform-hover: none;
+  --_blur: var(--ds-blur-md);
 }
 
 .ds-btn-subtitle {
@@ -126,6 +131,7 @@
   --_color: var(--ds-text-secondary);
   --_bg-hover: var(--ds-layer-surface-hover);
   --_color-hover: var(--ds-text-primary);
+  --_blur: var(--ds-blur-md);
 }
 
 .ds-btn-off-label {
@@ -1605,17 +1611,17 @@
 
 /* High-fidelity rendering optimization */
 .ds-project-map__mirror .md-render-body {
-  width: 800px !important;
-  /* Match CONFIG.baseWidth in JS */
-  max-width: 800px !important;
-  min-width: 800px !important;
+  width: var(--_mirror-width, var(--ds-content-width)) !important;
+  max-width: var(--_mirror-width, var(--ds-content-width)) !important;
+  min-width: var(--_mirror-width, var(--ds-content-width)) !important;
   margin: 0 !important;
   background: transparent !important;
 }
 
-/* Maintain padding parity with main viewer to ensure scroll sync accuracy */
 .ds-project-map__mirror .md-content-inner {
-  padding: 120px 0 !important;
+  max-width: var(--_mirror-width, var(--ds-content-width)) !important;
+  margin: 0 !important;
+  padding: var(--ds-content-padding-y) var(--ds-content-padding-x) !important;
 }
 ```
 </file>
@@ -2517,10 +2523,12 @@
   color: var(--ds-text-primary);
   font-family: var(--ds-font-family-code);
   font-size: var(--ds-font-base);
-  padding: 80px 160px;
+  padding: var(--ds-content-padding-y) var(--ds-content-padding-x);
   resize: none;
   outline: none;
   line-height: 1.6;
+  max-width: calc(var(--ds-content-width) + (var(--ds-content-padding-x) * 2));
+  margin: 0 auto;
 }
 
 
@@ -2690,46 +2698,13 @@
 <file path="renderer/css/design-system/organisms/markdown-blocks.css">
 ```css
 /* ============================================================
-   markdown-blocks.css — Complex blocks (Code, Tables, Charts)
+   markdown-blocks.css — App-specific block enhancements
+   Base markdown styles imported from shared/markdown-render.css
    ============================================================ */
 
-/* ── Premium Block System (Shared) ─────────────────────── */
-/* Unified style for Code Blocks, Tables, and Charts */
-.premium-block-container,
-.premium-code-block,
-.md-table-wrapper,
-.mermaid {
-  background: var(--ds-white-a05) !important;
-  /* Slightly more opaque for visibility */
-  backdrop-filter: blur(40px) !important;
-  /* Stable blur value */
-  -webkit-backdrop-filter: blur(40px) !important;
-  border: 1px solid var(--ds-white-a08) !important;
-  border-radius: var(--ds-radius-panel) !important;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
-  margin: 1.5rem 0 !important;
-  overflow: hidden !important;
-  transition: none !important;
-  /* Force hardware acceleration */
-  isolation: isolate;
-  /* Create new stacking context */
-  max-width: 100%;
-  box-sizing: border-box;
-}
 
-/* No hover state for these blocks per user request */
-.premium-block-container:hover,
-.premium-code-block:hover,
-.md-table-wrapper:hover,
-.mermaid:hover {
-  border-color: var(--ds-white-a08) !important;
-  /* Same as static */
-  transform: none !important;
-  box-shadow: 0 10px 40px var(--ds-black-a20) !important;
-}
-
-/* ── Premium Code Block ────────────────────────────────── */
-/* Specific compact margins when inside details */
+/* ── Code Block App-Specific Overrides ───────────────── */
+/* Compact margins when inside details */
 .md-render-body details .premium-code-block {
   margin-top: 1rem !important;
   margin-bottom: 1rem !important;
@@ -2740,314 +2715,20 @@
   margin-top: 0.5rem !important;
 }
 
-/* Ensure pre inside premium block is seamless */
-.premium-code-block pre {
-  margin: 0 !important;
-  border: none !important;
-  box-shadow: none !important;
-  background: transparent !important;
-  overflow-x: auto !important;
-  max-width: 100%;
-}
-
-/* Premium Scrollbar for Code Blocks */
-.premium-code-block pre::-webkit-scrollbar {
-  height: 6px;
-}
-
-.premium-code-block pre::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.premium-code-block pre::-webkit-scrollbar-thumb {
-  background: var(--ds-white-a10);
-  border-radius: var(--ds-radius-widget);
-}
-
-.premium-code-block pre::-webkit-scrollbar-thumb:hover {
-  background: rgba(var(--ds-accent-rgb), 0.4);
-}
-
-.code-block-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 8px 8px 16px;
-  background: var(--ds-black-a30);
-  border-bottom: 1px solid var(--ds-white-a10);
-  user-select: none;
-}
-
-.code-block-lang {
-  font-size: 10px;
-  font-weight: 800;
-  color: var(--ds-text-secondary);
-  /* Increased visibility */
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-family: var(--ds-font-family-code);
-}
-
-.code-block-copy {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--ds-layer-surface-default);
-  border: 1px solid var(--ds-white-a10);
-  color: var(--ds-text-secondary);
-  padding: 4px 10px;
-  border-radius: var(--ds-radius-sm);
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.code-block-copy:hover {
-  background: var(--ds-layer-surface-hover);
-  color: var(--ds-text-inverse);
-}
-
-.code-block-copy.copied {
-  background: rgba(var(--ds-accent-rgb), 0.15);
-  color: var(--ds-accent);
-}
-
-.code-block-copy .hidden {
-  display: none;
-}
-
+/* App-specific: Box shadow and Code zoom support for preview */
 .md-render-body pre {
-  margin: 2rem 0;
-  padding: 20px;
-  background: #1f1f24;
-  border: 1px solid var(--ds-white-a10);
-  border-radius: var(--ds-radius-panel);
-  overflow-x: auto;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-  line-height: 0;
-  /* Fix for pre spacing */
 }
 
 .md-render-body pre code {
-  display: block;
-  background: none;
-  padding: 0;
-  color: #fff;
   font-size: calc(13.5px * (var(--code-zoom, 100) / 100));
-  line-height: 1.6;
-  border: none;
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
-  font-family: var(--ds-font-family-code);
 }
 
-/* ── Syntax Highlighting (Xcode Exact Palette) ─────────── */
-.hljs-comment,
-.hljs-quote,
-.hljs-doctag {
-  color: #a1c659;
-  font-style: italic;
-}
-
-.hljs-keyword,
-.hljs-selector-tag,
-.hljs-literal,
-.hljs-section,
-.hljs-link {
-  color: #d0a8ff;
-}
-
-.hljs-string,
-.hljs-regexp,
-.hljs-addition,
-.hljs-attribute,
-.hljs-meta .hljs-string {
-  color: #ff8170;
-}
-
-.hljs-built_in,
-.hljs-class .hljs-title,
-.hljs-title.class_,
-.hljs-title,
-.hljs-name,
-.hljs-type,
-.hljs-selector-class,
-.hljs-selector-attr,
-.hljs-selector-pseudo {
-  color: #6bdfff;
-}
-
-.hljs-number,
-.hljs-variable,
-.hljs-template-variable,
-.hljs-attr {
-  color: #d0a8ff;
-}
-
-.hljs-symbol,
-.hljs-bullet,
-.hljs-meta {
-  color: #ffa14f;
-}
-
-.hljs-emphasis {
-  font-style: italic;
-}
-
-.hljs-strong {
-  font-weight: bold;
-}
-
-.hljs-link {
-  text-decoration: underline;
-}
-
-.hljs-deletion {
-  color: #ff8170;
-}
-
-/* ── Premium Tables ───────────────────────────────────── */
-.md-table-wrapper {
-  width: 100%;
-  overflow-x: auto;
-  margin: 3rem 0;
-  border-radius: var(--ds-radius-panel);
-  border: 1px solid var(--ds-white-a10);
-  background: #0d1117;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-}
-
-.md-render-body table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: 0.95em;
-  min-width: 600px;
-}
-
-.md-render-body th {
-  background: var(--ds-white-a04);
-  color: var(--ds-accent);
-  padding: 16px 24px;
-  text-align: left;
-  font-weight: 700;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  border-bottom: 1px solid var(--ds-white-a08);
-  white-space: nowrap;
-  font-family: var(--ds-font-family-code);
-}
-
-.md-render-body td {
-  padding: 16px 24px;
-  border-bottom: 1px solid var(--ds-white-a05);
-  border-right: 1px solid var(--ds-white-a02);
-  color: var(--ds-text-secondary);
-  line-height: 1.6;
-}
-
-.md-render-body td:last-child {
-  border-right: none;
-}
-
-.md-render-body tr:last-child td {
-  border-bottom: none;
-}
-
-/* Scrollbar for table wrapper */
-.md-table-wrapper::-webkit-scrollbar {
-  height: 6px;
-}
-
-.md-table-wrapper::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.md-table-wrapper::-webkit-scrollbar-thumb {
-  background: var(--ds-white-a10);
-  border-radius: var(--ds-radius-widget);
-}
-
-.md-table-wrapper::-webkit-scrollbar-thumb:hover {
-  background: rgba(var(--ds-accent-rgb), 0.4);
-}
-
-/* ── Mermaid Diagrams ──────────────────────────────────── */
+/* ── Mermaid App-Specific Enhancements ────────────────── */
+/* Interactive hover state for mermaid diagrams in preview */
 .mermaid {
-  background: var(--ds-black-a40);
-  border: 1px solid var(--ds-border-default);
-  border-radius: var(--ds-radius-panel);
-  padding: 32px;
-  margin: 1.5rem 0;
   cursor: zoom-in;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.mermaid:hover {
-  border-color: rgba(var(--ds-accent-rgb), 0.4);
-  box-shadow: 0 0 20px rgba(var(--ds-accent-rgb), 0.08);
-}
-
-/* ── Mermaid Diagram Overrides (Fix Text Readability) ───── */
-.mermaid svg {
-  color: var(--ds-text-inverse) !important;
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
-
-.mermaid .node rect,
-.mermaid .node circle,
-.mermaid .node polygon,
-.mermaid .node path,
-.mermaid .node ellipse,
-.mermaid .classGroup rect {
-  fill: var(--ds-white-a05) !important;
-  stroke: var(--ds-white-a40) !important;
-  stroke-width: 1px !important;
-}
-
-/* Force all text elements to white */
-.mermaid .label,
-.mermaid .label text,
-.mermaid text,
-.mermaid tspan,
-.mermaid .classTitle,
-.mermaid .classTitle text,
-.mermaid .method text,
-.mermaid .attribute text,
-.mermaid .note text {
-  fill: var(--ds-primitive-white) !important;
-  color: var(--ds-text-inverse) !important;
-  font-family: var(--ds-font-family-text) !important;
-  font-weight: 500 !important;
-}
-
-.mermaid .edgePath .path,
-.mermaid .relation,
-.mermaid .relationLine {
-  stroke: var(--ds-white-a40) !important;
-}
-
-.mermaid .marker,
-.mermaid .arrowheadPath {
-  fill: var(--ds-white-a40) !important;
-  stroke: var(--ds-white-a40) !important;
-}
-
-/* Class Diagram Specifics */
-.mermaid .classGroup line {
-  stroke: var(--ds-white-a30) !important;
-}
-
-.mermaid .classTitle text {
-  font-weight: 700 !important;
 }
 ```
 </file>
@@ -3055,159 +2736,42 @@
 <file path="renderer/css/design-system/organisms/markdown-content.css">
 ```css
 /* ============================================================
-   markdown-content.css — Markdown typography and core styles
+   markdown-content.css — App-specific markdown enhancements
+   Base styles imported from shared/markdown-render.css
    ============================================================ */
 
+/* ── Text Zoom Support (App-only feature) ─────────────────── */
 .md-render-body {
-  max-width: 800px;
-  margin: 0 auto;
-  color: var(--ds-text-secondary);
-  line-height: 1.8;
   font-size: calc(15px * (var(--preview-zoom, 100) / 100));
 }
 
 .md-render-body h1 {
   font-size: calc(32px * (var(--preview-zoom, 100) / 100));
-  font-weight: 700;
-  color: var(--ds-text-inverse);
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--ds-white-a20);
-  letter-spacing: -0.05em;
 }
 
 .md-render-body h2 {
   font-size: calc(24px * (var(--preview-zoom, 100) / 100));
-  font-weight: 700;
-  color: var(--ds-text-inverse);
   margin-top: 3rem;
-  margin-bottom: 1.25rem;
-  position: relative;
-  padding-left: 20px;
-  line-height: 1.4;
-}
-
-.md-render-body h2::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0.6em;
-  width: 8px;
-  height: 8px;
-  background: var(--ds-accent);
-  border-radius: 2px;
 }
 
 .md-render-body h3 {
   font-size: calc(18px * (var(--preview-zoom, 100) / 100));
-  font-weight: 600;
-  color: var(--ds-accent);
-  margin-top: 2rem;
-  margin-bottom: 0.75rem;
 }
 
 .md-render-body h4 {
   font-size: calc(16px * (var(--preview-zoom, 100) / 100));
-  font-weight: 600;
-  color: var(--ds-text-inverse);
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
 }
 
 .md-render-body h5 {
   font-size: calc(14px * (var(--preview-zoom, 100) / 100));
-  font-weight: 600;
-  color: var(--ds-text-primary);
-  margin-top: 1.25rem;
-  margin-bottom: 0.5rem;
 }
 
 .md-render-body h6 {
   font-size: calc(12px * (var(--preview-zoom, 100) / 100));
-  font-weight: 600;
-  color: var(--ds-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
 }
 
-.md-render-body p {
-  margin-bottom: 1.25rem;
-}
-
-.md-render-body a {
-  color: var(--ds-accent);
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.md-render-body a:hover {
-  text-decoration: underline;
-}
-
-.md-render-body blockquote {
-  border-left: 2px solid var(--ds-accent);
-  padding: 16px 24px;
-  margin: 2rem 0;
-  background: var(--ds-white-a02);
-  border-radius: 0 12px 12px 0;
-  color: var(--ds-text-secondary);
-  line-height: 1.7;
-}
-
-.md-render-body blockquote p {
-  margin-bottom: 0;
-}
-
-.md-render-body ul,
-.md-render-body ol {
-  padding-left: 1.5rem;
-  margin-bottom: 1.25rem;
-}
-
-.md-render-body li {
-  margin-bottom: 0.5rem;
-}
-
-.md-render-body hr {
-  border: none;
-  border-bottom: 1px solid var(--ds-border-default);
-  margin: 2rem 0;
-}
-
-.md-render-body img {
-  max-width: 100%;
-  border-radius: var(--ds-radius-panel);
-  margin: 1rem 0;
-}
-
-.md-render-body code {
-  font-family: var(--ds-font-family-code);
-  font-size: 0.85em;
-  background: rgba(var(--ds-accent-rgb), 0.1);
-  padding: 0.15em 0.6em;
-  border-radius: var(--ds-radius-sm);
-  color: var(--ds-accent);
-  border: 1px solid rgba(var(--ds-accent-rgb), 0.25);
-  display: inline-block;
-  max-width: 100%;
-  vertical-align: middle;
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
-  margin: 2px 0;
-  line-height: 1.5;
-  transition: all 0.2s;
-}
-
-.md-render-body h1 code,
-.md-render-body h2 code,
-.md-render-body h3 code,
-.md-render-body h4 code {
-  font-size: 0.8em;
-  vertical-align: middle;
-  border-width: 2px;
-  background: rgba(var(--ds-accent-rgb), 0.15);
+.md-render-body pre code {
+  font-size: calc(13.5px * (var(--code-zoom, 100) / 100));
 }
 
 ```
@@ -3463,8 +3027,10 @@
 }
 
 .md-content-inner {
-  padding: 120px 0;
+  padding: var(--ds-content-padding-y) var(--ds-content-padding-x);
   transition: opacity var(--ds-transition-main);
+  max-width: calc(var(--ds-content-width) + (var(--ds-content-padding-x) * 2));
+  margin: 0 auto;
 }
 
 /* ── Content Skeleton ──────────────────────────────────── */
@@ -5838,7 +5404,16 @@ body.is-searching .edit-toolbar-container {
   font-weight: 600;
 }
 
-/* ── Zoom Modal ── */
+
+```
+</file>
+
+<file path="renderer/css/design-system/organisms/zoom-modal.css">
+```css
+/* ============================================================
+   zoom-modal.css — Mermaid diagram zoom modal styles
+   ============================================================ */
+
 #zoom-modal {
   position: fixed;
   inset: 0;
@@ -5882,6 +5457,11 @@ body.is-searching .edit-toolbar-container {
   justify-content: center;
   cursor: pointer;
   transition: background var(--ds-transition-fast), color var(--ds-transition-fast);
+  /* Reset default button styles */
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  padding: 0;
 }
 
 #zoom-close:hover {
@@ -5897,14 +5477,15 @@ body.is-searching .edit-toolbar-container {
   display: flex;
   align-items: center;
   gap: 2px;
-  background: rgba(10, 10, 15, 0.85);
+  background: var(--ds-black-a80);
   backdrop-filter: blur(var(--ds-blur-md));
   -webkit-backdrop-filter: blur(var(--ds-blur-md));
-  border: 1px solid var(--ds-border-strong);
+  border: 1px solid var(--ds-border-subtle);
   border-radius: var(--ds-radius-pill);
   padding: var(--ds-space-2xs) 10px;
   z-index: 10;
   cursor: default;
+  box-shadow: var(--ds-shadow-lg);
 }
 
 .zoom-ctrl-btn {
@@ -5917,11 +5498,22 @@ body.is-searching .edit-toolbar-container {
   color: var(--ds-text-secondary);
   transition: background var(--ds-transition-fast), color var(--ds-transition-fast);
   cursor: pointer;
+  /* Reset default button styles */
+  background: transparent;
+  border: none;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  padding: 0;
 }
 
 .zoom-ctrl-btn:hover {
   background: var(--ds-layer-subtle-hover);
   color: var(--ds-text-inverse);
+}
+
+.zoom-ctrl-btn:active {
+  background: var(--ds-layer-subtle-active);
 }
 
 #zoom-pct {
@@ -5938,8 +5530,9 @@ body.is-searching .edit-toolbar-container {
 .zoom-ctrl-divider {
   width: 1px;
   height: 18px;
-  background: var(--ds-border-strong);
+  background: var(--ds-border-subtle);
   margin: 0 var(--ds-space-2xs);
+  opacity: 0.5;
 }
 
 ```
@@ -6231,6 +5824,9 @@ body.is-searching .edit-toolbar-container {
    /* ── Layout & Sizing ────────────────────────────── */
    --ds-toc-width: 280px;
    --ds-toc-offset: 240px;
+   --ds-content-padding-x: 80px;
+   --ds-content-padding-y: 80px;
+   --ds-content-width: 800px;
 }
 ```
 </file>
@@ -6244,6 +5840,9 @@ body.is-searching .edit-toolbar-container {
 
 /* ── Tokens ─────────────────────────────────────────────── */
 @import 'design-system/tokens.css';
+
+/* ── Shared Modules ────────────────────────────────────────── */
+@import 'shared/markdown-render.css';
 
 /* ── Atoms ──────────────────────────────────────────────── */
 @import 'design-system/atoms/utilities.css';
@@ -6281,6 +5880,7 @@ body.is-searching .edit-toolbar-container {
 @import 'design-system/organisms/change-action-view-bar.css';
 @import 'design-system/organisms/edit-toolbar.css';
 @import 'design-system/organisms/workspace-panel.css';
+@import 'design-system/organisms/zoom-modal.css';
 @import 'design-system/organisms/toc-panel.css';
 @import 'design-system/organisms/settings-panel.css';
 @import 'design-system/organisms/modals-misc.css';
@@ -6404,6 +6004,404 @@ main {
   overflow: hidden;
   position: relative;
 }
+```
+</file>
+
+<file path="renderer/css/shared/markdown-render.css">
+```css
+/* ============================================================
+   markdown-render.css — Shared markdown rendering styles
+   Used by both: MDpreview app & publish-worker
+   ============================================================ */
+
+/* ── Base Markdown Body ── */
+.md-render-body {
+    font-size: 15px;
+    color: var(--ds-text-secondary);
+    line-height: 1.8;
+}
+
+/* ── Headings ── */
+.md-render-body h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--ds-text-inverse);
+    margin-top: 0;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--ds-white-a20);
+    letter-spacing: -0.05em;
+    line-height: 1.4;
+}
+
+.md-render-body h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ds-text-inverse);
+    margin-top: 2rem;
+    margin-bottom: 1.25rem;
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.4;
+}
+
+.md-render-body h2::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.6em;
+    width: 8px;
+    height: 8px;
+    background: var(--ds-accent);
+    border-radius: 2px;
+}
+
+.md-render-body h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ds-accent);
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+}
+
+.md-render-body h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ds-text-inverse);
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.md-render-body h5 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ds-text-primary);
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.md-render-body h6 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ds-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+/* ── Inline Elements ── */
+.md-render-body p {
+    margin-bottom: 1.25rem;
+}
+
+.md-render-body a {
+    color: var(--ds-accent);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.md-render-body a:hover {
+    text-decoration: underline;
+}
+
+.md-render-body code {
+    font-family: var(--ds-font-family-code);
+    font-size: 0.85em;
+    color: var(--ds-accent);
+    display: inline;
+    vertical-align: baseline;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+
+.md-render-body img {
+    max-width: 100%;
+    border-radius: var(--ds-radius-panel);
+    margin: 1rem 0;
+}
+
+.md-render-body hr {
+    border: none;
+    border-bottom: 1px solid var(--ds-border-default);
+    margin: 2rem 0;
+}
+
+/* ── Block Elements ── */
+.md-render-body blockquote {
+    border-left: 2px solid var(--ds-accent);
+    padding: 16px 24px;
+    margin: 2rem 0;
+    background: var(--ds-white-a02);
+    border-radius: 0 var(--ds-radius-panel) var(--ds-radius-panel) 0;
+    color: var(--ds-text-secondary);
+    line-height: 1.7;
+}
+
+.md-render-body blockquote p {
+    margin-bottom: 0;
+}
+
+.md-render-body ul,
+.md-render-body ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.md-render-body li {
+    margin-bottom: 0.5rem;
+}
+
+/* ── Code Blocks ── */
+.premium-code-block {
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: blur(40px) !important;
+    -webkit-backdrop-filter: blur(40px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: var(--ds-radius-panel) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+    margin: 2rem 0 !important;
+    overflow: hidden !important;
+    isolation: isolate;
+}
+
+.code-block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 8px 8px 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    user-select: none;
+}
+
+.code-block-lang {
+    font-size: 10px;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-family: var(--ds-font-family-code);
+}
+
+.code-block-copy {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.6);
+    padding: 4px 10px;
+    border-radius: var(--ds-radius-sm);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.code-block-copy:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.code-block-copy.copied {
+    background: rgba(var(--ds-accent-rgb), 0.15);
+    color: var(--ds-accent);
+}
+
+.code-block-copy .hidden {
+    display: none;
+}
+
+.md-render-body pre {
+    margin: 0;
+    padding: 20px;
+    background: transparent;
+    overflow-x: auto;
+}
+
+.md-render-body pre::-webkit-scrollbar {
+    height: 6px;
+}
+
+.md-render-body pre::-webkit-scrollbar-thumb {
+    background: var(--ds-white-a10);
+    border-radius: 10px;
+}
+
+.md-render-body pre::-webkit-scrollbar-thumb:hover {
+    background: var(--ds-white-a20);
+}
+
+.md-render-body pre code {
+    display: block;
+    font-family: var(--ds-font-family-code);
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #fff;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+
+/* ── Tables ── */
+.md-table-wrapper {
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: blur(40px) !important;
+    -webkit-backdrop-filter: blur(40px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: var(--ds-radius-panel) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+    margin: 2rem 0 !important;
+    overflow: hidden !important;
+    width: 100%;
+    overflow-x: auto;
+    isolation: isolate;
+}
+
+.md-render-body table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.95em;
+    min-width: 600px;
+}
+
+.md-render-body th {
+    background: var(--ds-white-a04);
+    color: var(--ds-accent);
+    padding: 16px 24px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border-bottom: 1px solid var(--ds-white-a08);
+    white-space: nowrap;
+    font-family: var(--ds-font-family-code);
+}
+
+.md-render-body td {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--ds-white-a05);
+    border-right: 1px solid var(--ds-white-a02);
+    color: var(--ds-text-secondary);
+    line-height: 1.6;
+}
+
+.md-render-body td:last-child {
+    border-right: none;
+}
+
+.md-render-body tr:last-child td {
+    border-bottom: none;
+}
+
+.md-table-wrapper::-webkit-scrollbar {
+    height: 6px;
+}
+
+.md-table-wrapper::-webkit-scrollbar-thumb {
+    background: var(--ds-white-a10);
+    border-radius: 10px;
+}
+
+.md-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--ds-white-a20);
+}
+
+/* ── Mermaid Diagrams ── */
+.mermaid {
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: blur(40px) !important;
+    -webkit-backdrop-filter: blur(40px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: var(--ds-radius-panel) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+    margin: 2rem 0 !important;
+    overflow: hidden !important;
+    padding: 32px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    isolation: isolate;
+}
+
+.mermaid svg {
+    color: var(--ds-text-inverse) !important;
+    display: block;
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* Node shapes styling */
+.mermaid .node rect,
+.mermaid .node circle,
+.mermaid .node polygon,
+.mermaid .node path,
+.mermaid .node ellipse,
+.mermaid .classGroup rect {
+    fill: var(--ds-white-a05) !important;
+    stroke: var(--ds-white-a40) !important;
+    stroke-width: 1px !important;
+}
+
+/* Force all text elements to white */
+.mermaid .label,
+.mermaid .label text,
+.mermaid text,
+.mermaid tspan,
+.mermaid .classTitle,
+.mermaid .classTitle text,
+.mermaid .method text,
+.mermaid .attribute text,
+.mermaid .note text {
+    fill: var(--ds-primitive-white) !important;
+    color: var(--ds-text-inverse) !important;
+    font-family: var(--ds-font-family-text) !important;
+    font-weight: 500 !important;
+}
+
+/* Edge and connection styling */
+.mermaid .edgePath .path,
+.mermaid .relation,
+.mermaid .relationLine {
+    stroke: var(--ds-white-a40) !important;
+}
+
+/* Arrow and marker styling */
+.mermaid .marker,
+.mermaid .arrowheadPath {
+    fill: var(--ds-white-a40) !important;
+    stroke: var(--ds-white-a40) !important;
+}
+
+/* Class diagram specifics */
+.mermaid .classGroup line {
+    stroke: var(--ds-white-a30) !important;
+}
+
+.mermaid .classTitle text {
+    font-weight: 700 !important;
+}
+
+/* ── Syntax Highlighting (Xcode Palette) ── */
+.hljs-comment, .hljs-quote { color: #a1c659; font-style: italic; }
+.hljs-keyword, .hljs-selector-tag, .hljs-literal { color: #d0a8ff; }
+.hljs-string, .hljs-regexp, .hljs-attribute { color: #ff8170; }
+.hljs-built_in, .hljs-title, .hljs-name, .hljs-type { color: #6bdfff; }
+.hljs-number, .hljs-variable, .hljs-attr { color: #d0a8ff; }
+.hljs-symbol, .hljs-bullet, .hljs-meta { color: #ffa14f; }
+.hljs-strong { font-weight: bold; }
+.hljs-emphasis { font-style: italic; }
+
+/* ── Atomic Block Wrappers ── */
+.md-block { margin: 0; }
+.md-line { width: 100%; }
+
 ```
 </file>
 
@@ -6548,9 +6546,19 @@ main {
   <script src="js/services/search-service.js" defer></script>
   <script src="js/services/shortcut-service.js" defer></script>
   <script src="js/services/sync-service.js" defer></script>
+
+  <!-- ── 3.1 Publishing Service Dependencies (load in order) ── -->
+  <script src="js/services/design-token-provider.js" defer></script>
+  <script src="js/services/publishing/error-types.js" defer></script>
+  <script src="js/services/publishing/retry-strategy.js" defer></script>
+  <script src="js/services/publishing/publish-utils.js" defer></script>
+  <script src="js/services/publishing/worker-publish-adapter.js" defer></script>
+  <script src="js/services/publishing/legacy-handoff-adapter.js" defer></script>
+  <script src="js/services/publishing/publish-orchestrator.js" defer></script>
   <script src="js/services/publish-service.js" defer></script>
 
   <!-- ── 4. Utilities ── -->
+  <script src="js/services/mermaid-config.js" defer></script>
   <script src="js/utils/zoom.js" defer></script>
   <script src="js/utils/mermaid.js" defer></script>
   <script src="js/utils/gdoc-util.js" defer></script>
@@ -8442,6 +8450,8 @@ const ProjectMap = (() => {
   let _lastRequestId = 0;
   let _abortController = null;
   let _resizeObserver = null;
+  let _mainContentWidthObserver = null;
+  let _mapElement = null;
 
   // ============================================
   // Private Functions
@@ -8462,6 +8472,7 @@ const ProjectMap = (() => {
       const data = await res.json();
       return data.html;
     } catch (err) {
+      if (err.name === 'AbortError') return null;
       console.error('ProjectMap Render Error:', err);
       return null;
     }
@@ -8508,10 +8519,22 @@ const ProjectMap = (() => {
     const mirror = mapEl.querySelector(SELECTORS.mirror);
     const track = mapEl.querySelector(SELECTORS.track);
     const innerEl = mirror?.querySelector(SELECTORS.content);
-    
+
     if (mirror && track && innerEl) {
       const body = mapEl.querySelector('.ds-project-map__body') || mapEl;
-      const internalWidth = CONFIG.baseWidth;
+
+      // Get actual content width from main viewer, fallback to baseWidth if not available
+      let internalWidth = CONFIG.baseWidth;
+      if (_mainViewer) {
+        const mainContent = _mainViewer.querySelector(SELECTORS.content);
+        if (mainContent) {
+          internalWidth = mainContent.offsetWidth || CONFIG.baseWidth;
+        }
+      }
+
+      // Sync mirror width to match actual main content width
+      mirror.style.setProperty('--_mirror-width', `${internalWidth}px`);
+
       const panelWidth = Math.max(120, body.clientWidth || 280);
       
       const baseScale = Math.max(0.05, (panelWidth - 24) / internalWidth);
@@ -8732,12 +8755,24 @@ const ProjectMap = (() => {
           if (innerEl) {
             // 1. Attach ResizeObserver for high-fidelity height sync
             if (_resizeObserver) _resizeObserver.disconnect();
-            
+
             if (window.ResizeObserver) {
               _resizeObserver = new ResizeObserver(() => {
                 requestAnimationFrame(() => _applyZoom(mapEl));
               });
               _resizeObserver.observe(innerEl);
+            }
+
+            // Observe width changes on main content to sync project map scale
+            if (_mainViewer && window.ResizeObserver) {
+              const mainContent = _mainViewer.querySelector(SELECTORS.content);
+              if (mainContent) {
+                if (_mainContentWidthObserver) _mainContentWidthObserver.disconnect();
+                _mainContentWidthObserver = new ResizeObserver(() => {
+                  requestAnimationFrame(() => _applyZoom(mapEl));
+                });
+                _mainContentWidthObserver.observe(mainContent);
+              }
             }
 
             // ── 4. Post-process (Delayed to ensure mirror is in DOM) ──
@@ -8764,6 +8799,7 @@ const ProjectMap = (() => {
       if (_updateTimer) clearTimeout(_updateTimer);
       if (_abortController) _abortController.abort();
       if (_resizeObserver) _resizeObserver.disconnect();
+      if (_mainContentWidthObserver) _mainContentWidthObserver.disconnect();
       _currentContent = '';
     },
 
@@ -8772,6 +8808,10 @@ const ProjectMap = (() => {
       if (_resizeObserver) {
         _resizeObserver.disconnect();
         _resizeObserver = null;
+      }
+      if (_mainContentWidthObserver) {
+        _mainContentWidthObserver.disconnect();
+        _mainContentWidthObserver = null;
       }
       if (_abortController) {
         _abortController.abort();
@@ -11945,14 +11985,15 @@ class MarkdownPreview {
     }
     
     // Mermaid and CodeBlocks still benefit from a frame delay for layout
-    requestAnimationFrame(() => {
+    (async () => {
+      await new Promise(resolve => requestAnimationFrame(resolve));
       try {
-        if (window.processMermaid) window.processMermaid(inner);
+        if (window.processMermaid) await window.processMermaid(inner);
       } catch (_e) { /* Mermaid error - gracefully skip */ }
       try {
         if (window.CodeBlockModule) window.CodeBlockModule.process(inner);
       } catch (_e) { /* CodeBlock error - gracefully skip */ }
-    });
+    })();
   }
 
   update({ html }) {
@@ -11962,7 +12003,9 @@ class MarkdownPreview {
       inner.innerHTML = html;
       
       // Re-process for live updates (e.g. Drafts)
-      if (window.processMermaid) window.processMermaid(inner);
+      if (window.processMermaid) {
+        window.processMermaid(inner).catch(_e => { /* Mermaid error - gracefully skip */ });
+      }
       if (window.CodeBlockModule) window.CodeBlockModule.process(inner);
 
       // Ensure scroll is maintained if content size changed
@@ -12223,14 +12266,6 @@ const PublishConfigComponent = (() => {
       if (!isLoading) {
         setTimeout(async () => {
           if (this.state.isLoading) return;
-          if (info && info.slug) {
-            const isStillThere = await window.PublishService.checkSlugAvailability(info.slug);
-            if (isStillThere) {
-              await window.PublishService.unpublish(this.file);
-              this.setState({ info: null });
-              return;
-            }
-          }
           this._checkSlug(defaultSlug);
         }, 100);
       }
@@ -20737,6 +20772,715 @@ window.WorkspaceModule = WorkspaceModule;
 ```
 </file>
 
+<file path="renderer/js/services/__tests__/md-renderer-core.test.js">
+```js
+/* eslint-disable no-undef */
+const {
+  highlightCodeBlock,
+  sanitizeHtml,
+  wrapInTableWrapper,
+  renderMermaidBlock
+} = require('../md-renderer-core.js');
+
+describe('md-renderer-core', () => {
+  describe('highlightCodeBlock()', () => {
+    it('should highlight JavaScript code', () => {
+      const code = 'const x = 42;';
+      const result = highlightCodeBlock(code, 'javascript');
+      expect(result).toContain('hljs');
+      expect(result).toContain('x');
+    });
+
+    it('should handle unknown language with auto-detection', () => {
+      const code = 'some code';
+      const result = highlightCodeBlock(code, 'unknownlang');
+      // highlight.js auto-detects and highlights even for unknown languages
+      expect(result).toContain('code');
+    });
+
+    it('should auto-detect language when not specified', () => {
+      const code = 'function test() { return 1; }';
+      const result = highlightCodeBlock(code, '');
+      expect(result).toBeTruthy();
+      expect(result).toContain('test');
+    });
+
+    it('should handle empty code', () => {
+      const result = highlightCodeBlock('', 'javascript');
+      expect(result).toBe('');
+    });
+  });
+
+  describe('sanitizeHtml()', () => {
+    it('should remove <script> tags', () => {
+      const html = '<p>Hello</p><script>alert(1)</script>';
+      const result = sanitizeHtml(html);
+      expect(result).not.toContain('<script>');
+      expect(result).not.toContain('alert');
+      expect(result).toContain('Hello');
+    });
+
+    it('should remove <iframe> tags', () => {
+      const html = '<p>Content</p><iframe src="evil.com"></iframe>';
+      const result = sanitizeHtml(html);
+      expect(result).not.toContain('<iframe');
+      expect(result).toContain('Content');
+    });
+
+    it('should remove inline event handlers', () => {
+      const html = '<div onclick="attack()">Click me</div>';
+      const result = sanitizeHtml(html);
+      expect(result).not.toContain('onclick');
+      expect(result).toContain('Click me');
+    });
+
+    it('should remove all on* event handlers', () => {
+      const html = '<img onerror="hack()" onload="evil()" src="x">';
+      const result = sanitizeHtml(html);
+      expect(result).not.toContain('onerror');
+      expect(result).not.toContain('onload');
+    });
+
+    it('should preserve safe HTML', () => {
+      const html = '<h1>Title</h1><p>Safe content</p>';
+      const result = sanitizeHtml(html);
+      expect(result).toContain('<h1>');
+      expect(result).toContain('Title');
+      expect(result).toContain('Safe content');
+    });
+
+    it('should handle multiple separate script tags', () => {
+      const html = '<div><script>alert(1)</script> text <script>alert(2)</script></div>';
+      const result = sanitizeHtml(html);
+      expect(result).not.toContain('<script');
+      expect(result).not.toContain('alert');
+      expect(result).toContain('text');
+    });
+
+    it('should handle empty string', () => {
+      const result = sanitizeHtml('');
+      expect(result).toBe('');
+    });
+
+    it('should be case-insensitive for tags', () => {
+      const html1 = '<SCRIPT>alert(1)</SCRIPT>';
+      const html2 = '<Script>alert(1)</Script>';
+      expect(sanitizeHtml(html1)).not.toContain('alert');
+      expect(sanitizeHtml(html2)).not.toContain('alert');
+    });
+  });
+
+  describe('wrapInTableWrapper()', () => {
+    it('should wrap HTML in md-table-wrapper div', () => {
+      const html = '<table><tr><td>Cell</td></tr></table>';
+      const result = wrapInTableWrapper(html);
+      expect(result).toContain('<div class="md-table-wrapper">');
+      expect(result).toContain('</div>');
+      expect(result).toContain('<table>');
+    });
+
+    it('should preserve table content', () => {
+      const html = '<table><tr><th>Header</th></tr></table>';
+      const result = wrapInTableWrapper(html);
+      expect(result).toContain('Header');
+    });
+
+    it('should handle empty table', () => {
+      const html = '<table></table>';
+      const result = wrapInTableWrapper(html);
+      expect(result).toContain('md-table-wrapper');
+    });
+  });
+
+  describe('renderMermaidBlock()', () => {
+    it('should wrap text in mermaid div', () => {
+      const text = 'graph LR\n  A --> B';
+      const result = renderMermaidBlock(text);
+      expect(result).toContain('<div class="mermaid">');
+      expect(result).toContain('</div>');
+      expect(result).toContain('A --> B');
+    });
+
+    it('should preserve diagram syntax', () => {
+      const text = 'flowchart TD\n  Start --> End';
+      const result = renderMermaidBlock(text);
+      expect(result).toContain('flowchart TD');
+      expect(result).toContain('Start --> End');
+    });
+
+    it('should handle empty diagram', () => {
+      const result = renderMermaidBlock('');
+      expect(result).toContain('class="mermaid"');
+    });
+
+    it('should not escape diagram content', () => {
+      const text = 'graph LR\n  A[">"]';
+      const result = renderMermaidBlock(text);
+      expect(result).toContain('A[">"]');
+    });
+  });
+
+  describe('Integration: XSS Protection', () => {
+    it('should sanitize rendered code blocks with script tags', () => {
+      const html = '<pre><code><script>alert(1)</script></code></pre>';
+      const result = sanitizeHtml(html);
+      expect(result).not.toContain('<script');
+    });
+
+    it('should handle multiple XSS vectors', () => {
+      const html = `
+        <script>alert(1)</script>
+        <iframe src="evil"></iframe>
+        <div onmouseover="hack()">text</div>
+      `;
+      const result = sanitizeHtml(html);
+      expect(result).not.toContain('<script');
+      expect(result).not.toContain('<iframe');
+      expect(result).not.toContain('onmouseover');
+      expect(result).toContain('text');
+    });
+  });
+});
+
+```
+</file>
+
+<file path="renderer/js/services/__tests__/mermaid-config.test.js">
+```js
+/* eslint-disable no-undef */
+const {
+  MERMAID_THEME_COLORS,
+  BASE_CONFIG,
+  SERVER_CONFIG,
+  WORKER_CONFIG,
+  getMermaidConfig
+} = require('../mermaid-config.js');
+
+describe('mermaid-config', () => {
+  describe('MERMAID_THEME_COLORS', () => {
+    it('should have all required color properties', () => {
+      expect(MERMAID_THEME_COLORS).toHaveProperty('primaryColor');
+      expect(MERMAID_THEME_COLORS).toHaveProperty('primaryTextColor');
+      expect(MERMAID_THEME_COLORS).toHaveProperty('primaryBorderColor');
+      expect(MERMAID_THEME_COLORS).toHaveProperty('lineColor');
+      expect(MERMAID_THEME_COLORS).toHaveProperty('secondaryColor');
+      expect(MERMAID_THEME_COLORS).toHaveProperty('tertiaryColor');
+      expect(MERMAID_THEME_COLORS).toHaveProperty('mainBkg');
+      expect(MERMAID_THEME_COLORS).toHaveProperty('nodeBorder');
+      expect(MERMAID_THEME_COLORS).toHaveProperty('clusterBkg');
+      expect(MERMAID_THEME_COLORS).toHaveProperty('titleColor');
+      expect(MERMAID_THEME_COLORS).toHaveProperty('edgeLabelBackground');
+      expect(MERMAID_THEME_COLORS).toHaveProperty('fontFamily');
+    });
+
+    it('should have valid color values', () => {
+      Object.entries(MERMAID_THEME_COLORS).forEach(([_key, value]) => {
+        expect(typeof value).toBe('string');
+        expect(value.length).toBeGreaterThan(0);
+        // Color should be hex, rgb, rgba, or a font family
+        expect(/^(#|rgba?)/.test(value) || /^[A-Za-z]/.test(value)).toBe(true);
+      });
+    });
+
+    it('should use golden and purple color scheme', () => {
+      expect(MERMAID_THEME_COLORS.primaryColor).toBe('#ffbf48'); // golden
+      expect(MERMAID_THEME_COLORS.secondaryColor).toContain('2a'); // purple
+    });
+  });
+
+  describe('BASE_CONFIG', () => {
+    it('should have theme set to dark', () => {
+      expect(BASE_CONFIG.theme).toBe('dark');
+    });
+
+    it('should be shared by all configs', () => {
+      expect(SERVER_CONFIG.theme).toBe(BASE_CONFIG.theme);
+      expect(WORKER_CONFIG.theme).toBe(BASE_CONFIG.theme);
+    });
+  });
+
+  describe('SERVER_CONFIG', () => {
+    it('should have startOnLoad set to false', () => {
+      expect(SERVER_CONFIG.startOnLoad).toBe(false);
+    });
+
+    it('should include all theme variables', () => {
+      expect(SERVER_CONFIG.themeVariables).toEqual(MERMAID_THEME_COLORS);
+    });
+
+    it('should not have securityLevel', () => {
+      expect(SERVER_CONFIG.securityLevel).toBeUndefined();
+    });
+
+    it('should inherit theme from BASE_CONFIG', () => {
+      expect(SERVER_CONFIG.theme).toBe('dark');
+    });
+  });
+
+  describe('WORKER_CONFIG', () => {
+    it('should have startOnLoad set to true', () => {
+      expect(WORKER_CONFIG.startOnLoad).toBe(true);
+    });
+
+    it('should have securityLevel set to loose', () => {
+      expect(WORKER_CONFIG.securityLevel).toBe('loose');
+    });
+
+    it('should not have themeVariables', () => {
+      expect(WORKER_CONFIG.themeVariables).toBeUndefined();
+    });
+
+    it('should inherit theme from BASE_CONFIG', () => {
+      expect(WORKER_CONFIG.theme).toBe('dark');
+    });
+  });
+
+  describe('getMermaidConfig()', () => {
+    it('should return SERVER_CONFIG for "server" environment', () => {
+      const config = getMermaidConfig('server');
+      expect(config).toEqual(SERVER_CONFIG);
+    });
+
+    it('should return WORKER_CONFIG for "worker" environment', () => {
+      const config = getMermaidConfig('worker');
+      expect(config).toEqual(WORKER_CONFIG);
+    });
+
+    it('should throw error for unknown environment', () => {
+      expect(() => {
+        getMermaidConfig('unknown');
+      }).toThrow('Unknown environment');
+    });
+
+    it('should throw error for undefined environment', () => {
+      expect(() => {
+        getMermaidConfig();
+      }).toThrow('Unknown environment');
+    });
+
+    it('should return config with startOnLoad property', () => {
+      const serverConfig = getMermaidConfig('server');
+      const workerConfig = getMermaidConfig('worker');
+
+      expect(serverConfig).toHaveProperty('startOnLoad');
+      expect(workerConfig).toHaveProperty('startOnLoad');
+      expect(serverConfig.startOnLoad).toBe(false);
+      expect(workerConfig.startOnLoad).toBe(true);
+    });
+  });
+
+  describe('Integration: Config Parity', () => {
+    it('should have consistent theme across environments', () => {
+      const serverConfig = getMermaidConfig('server');
+      const workerConfig = getMermaidConfig('worker');
+
+      expect(serverConfig.theme).toBe(workerConfig.theme);
+      expect(serverConfig.theme).toBe('dark');
+    });
+
+    it('server should include theme variables while worker uses defaults', () => {
+      const serverConfig = getMermaidConfig('server');
+      const workerConfig = getMermaidConfig('worker');
+
+      expect(serverConfig).toHaveProperty('themeVariables');
+      expect(workerConfig).not.toHaveProperty('themeVariables');
+    });
+
+    it('should be valid for mermaid.initialize()', () => {
+      const serverConfig = getMermaidConfig('server');
+      const workerConfig = getMermaidConfig('worker');
+
+      // Both should be objects
+      expect(typeof serverConfig).toBe('object');
+      expect(typeof workerConfig).toBe('object');
+
+      // Both should have theme
+      expect(serverConfig).toHaveProperty('theme');
+      expect(workerConfig).toHaveProperty('theme');
+
+      // Both should have startOnLoad
+      expect(serverConfig).toHaveProperty('startOnLoad');
+      expect(workerConfig).toHaveProperty('startOnLoad');
+    });
+  });
+});
+
+```
+</file>
+
+<file path="renderer/js/services/design-token-provider.js">
+```js
+/**
+ * DesignTokenProvider
+ * Purpose: Expose design system tokens programmatically for use in published documents
+ * Source: renderer/css/design-system/tokens.css (3-tier architecture)
+ *
+ * This module extracts design tokens at runtime and provides a JavaScript API
+ * for accessing token values. Used by PublishService for injecting tokens into
+ * standalone HTML bundles without hardcoding.
+ */
+
+const DesignTokenProvider = (() => {
+  'use strict';
+
+  // ============================================
+  // TOKEN DEFINITIONS (mirrored from tokens.css)
+  // ============================================
+
+  const TOKENS = {
+    // TIER 1 — PRIMITIVES
+    primitives: {
+      // Brand Colors
+      '--ds-primitive-orange': '#ffbf48',
+      '--ds-primitive-green': '#22c55e',
+      '--ds-primitive-red': '#ff453a',
+      '--ds-primitive-blue': '#1E90FF',
+
+      // RGB Channels
+      '--ds-primitive-orange-rgb': '255, 191, 72',
+      '--ds-primitive-green-rgb': '34, 197, 94',
+      '--ds-primitive-red-rgb': '255, 69, 58',
+      '--ds-primitive-blue-rgb': '30, 144, 255',
+
+      // Base Backgrounds
+      '--ds-primitive-base': '#151515',
+      '--ds-primitive-surface': '#1a1a1a',
+      '--ds-primitive-deep': '#111',
+      '--ds-primitive-white': '#fff',
+      '--ds-primitive-black': '#000',
+
+      // Spacing Scale
+      '--ds-space-3xs': '2px',
+      '--ds-space-2xs': '4px',
+      '--ds-space-xs': '6px',
+      '--ds-space-sm': '8px',
+      '--ds-space-md': '12px',
+      '--ds-space-lg': '16px',
+      '--ds-space-xl': '24px',
+      '--ds-space-2xl': '28px',
+      '--ds-space-3xl': '32px',
+      '--ds-space-4xl': '48px',
+
+      // Radius Scale
+      '--ds-radius-xs': '4px',
+      '--ds-radius-sm': '6px',
+      '--ds-radius-md': '8px',
+      '--ds-radius-lg': '12px',
+      '--ds-radius-xl': '16px',
+      '--ds-radius-2xl': '24px',
+      '--ds-radius-3xl': '32px',
+      '--ds-radius-full': '999px',
+
+      // Typography
+      '--ds-font-family-text': "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+      '--ds-font-family-code': "'Roboto Mono', ui-monospace, SFMono-Regular, monospace",
+      '--ds-font-xs': '11px',
+      '--ds-font-sm': '12px',
+      '--ds-font-md': '13px',
+      '--ds-font-base': '14px',
+      '--ds-font-lg': '15px',
+      '--ds-font-xl': '18px',
+
+      // Easing
+      '--ds-ease-spring': 'cubic-bezier(0.16, 1, 0.3, 1)',
+      '--ds-ease-elastic': 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+      '--ds-ease-out': 'cubic-bezier(0.4, 0, 0.2, 1)',
+
+      // Blur Scale
+      '--ds-blur-xs': '6px',
+      '--ds-blur-sm': '8px',
+      '--ds-blur-md': '12px',
+      '--ds-blur-lg': '20px',
+      '--ds-blur-xl': '32px'
+    },
+
+    // TIER 2 — ALPHA PALETTE
+    alpha: {
+      // White alpha variants
+      '--ds-white-a01': 'rgba(255, 255, 255, 0.01)',
+      '--ds-white-a02': 'rgba(255, 255, 255, 0.02)',
+      '--ds-white-a03': 'rgba(255, 255, 255, 0.03)',
+      '--ds-white-a04': 'rgba(255, 255, 255, 0.04)',
+      '--ds-white-a05': 'rgba(255, 255, 255, 0.05)',
+      '--ds-white-a08': 'rgba(255, 255, 255, 0.08)',
+      '--ds-white-a10': 'rgba(255, 255, 255, 0.10)',
+      '--ds-white-a12': 'rgba(255, 255, 255, 0.12)',
+      '--ds-white-a20': 'rgba(255, 255, 255, 0.20)',
+      '--ds-white-a30': 'rgba(255, 255, 255, 0.30)',
+      '--ds-white-a40': 'rgba(255, 255, 255, 0.40)',
+      '--ds-white-a60': 'rgba(255, 255, 255, 0.60)',
+      '--ds-white-a90': 'rgba(255, 255, 255, 0.90)',
+
+      // Black alpha variants
+      '--ds-black-a05': 'rgba(0, 0, 0, 0.05)',
+      '--ds-black-a15': 'rgba(0, 0, 0, 0.15)',
+      '--ds-black-a20': 'rgba(0, 0, 0, 0.20)',
+      '--ds-black-a30': 'rgba(0, 0, 0, 0.30)',
+      '--ds-black-a35': 'rgba(0, 0, 0, 0.35)',
+      '--ds-black-a40': 'rgba(0, 0, 0, 0.40)',
+      '--ds-black-a50': 'rgba(0, 0, 0, 0.50)',
+      '--ds-black-a80': 'rgba(0, 0, 0, 0.80)',
+      '--ds-black-a90': 'rgba(0, 0, 0, 0.90)',
+
+      // Accent alpha variants
+      '--ds-orange-a08': 'rgba(255, 191, 72, 0.08)',
+      '--ds-orange-a15': 'rgba(255, 191, 72, 0.15)',
+      '--ds-orange-a30': 'rgba(255, 191, 72, 0.30)',
+
+      '--ds-green-a15': 'rgba(34, 197, 94, 0.15)',
+      '--ds-green-a20': 'rgba(34, 197, 94, 0.20)',
+      '--ds-green-a40': 'rgba(34, 197, 94, 0.40)',
+
+      '--ds-red-a08': 'rgba(255, 69, 58, 0.08)',
+      '--ds-red-a10': 'rgba(255, 69, 58, 0.10)',
+      '--ds-red-a15': 'rgba(255, 69, 58, 0.15)',
+      '--ds-red-a30': 'rgba(255, 69, 58, 0.30)'
+    },
+
+    // TIER 3 — SEMANTIC
+    semantic: {
+      // Backgrounds
+      '--ds-bg-base': '#151515',
+      '--ds-bg-backdrop': 'rgba(0, 0, 0, 0.40)',
+      '--ds-bg-popover-glass': 'rgba(255, 255, 255, 0.01)',
+      '--ds-bg-floating-glass': 'linear-gradient(135deg, rgba(255, 255, 255, 0.01) 0%, rgba(255, 255, 255, 0.03) 100%)',
+      '--ds-bg-toolbar': 'rgba(0, 0, 0, 0.50)',
+      '--ds-bg-toolbar-inner': 'rgba(255, 255, 255, 0.03)',
+
+      // Glass effects
+      '--ds-glass-sidebar': 'linear-gradient(166deg, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.20) 100%)',
+      '--ds-glass-main': 'linear-gradient(168deg, rgba(0, 0, 0, 0.20) 0%, rgba(0, 0, 0, 0.30) 100%)',
+      '--ds-glass-hover': 'rgba(255, 255, 255, 0.05)',
+
+      // Borders
+      '--ds-border-xsubtle': 'rgba(255, 255, 255, 0.01)',
+      '--ds-border-subtle': 'rgba(255, 255, 255, 0.04)',
+      '--ds-border-default': 'rgba(255, 255, 255, 0.05)',
+      '--ds-border-strong': 'rgba(255, 255, 255, 0.08)',
+      '--ds-border-xstrong': 'rgba(255, 255, 255, 0.12)',
+      '--ds-border-selected-subtle': 'rgba(255, 255, 255, 0.10)',
+      '--ds-border-selected': 'rgba(255, 255, 255, 0.30)',
+      '--ds-border-dark-xsubtle': 'rgba(0, 0, 0, 0.05)',
+
+      // Radius semantic
+      '--ds-radius-shell': '24px',
+      '--ds-radius-surface': '16px',
+      '--ds-radius-panel': '12px',
+      '--ds-radius-widget': '8px',
+      '--ds-radius-chip': '4px',
+      '--ds-radius-pill': '999px',
+
+      // Text
+      '--ds-text-primary': 'rgba(255, 255, 255, 0.90)',
+      '--ds-text-secondary': 'rgba(255, 255, 255, 0.60)',
+      '--ds-text-tertiary': 'rgba(255, 255, 255, 0.40)',
+      '--ds-text-disabled': 'rgba(255, 255, 255, 0.20)',
+      '--ds-text-inverse': '#ffffff',
+      '--ds-text-on-accent': 'rgba(0, 0, 0, 0.90)',
+
+      // Accent
+      '--ds-accent': '#ffbf48',
+      '--ds-accent-rgb': '255, 191, 72',
+      '--ds-accent-hover': 'linear-gradient(rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.10)), #ffbf48',
+      '--ds-accent-green': '#22c55e',
+      '--ds-accent-red': '#ff453a',
+      '--ds-accent-blue': '#1E90FF',
+
+      // Status
+      '--ds-status-success': '#22c55e',
+      '--ds-status-success-bg': 'rgba(34, 197, 94, 0.15)',
+      '--ds-status-danger': '#ff453a',
+      '--ds-status-danger-bg': 'rgba(255, 69, 58, 0.10)',
+      '--ds-status-warning': '#ffbf48',
+      '--ds-status-warning-bg': 'rgba(255, 191, 72, 0.08)',
+      '--ds-status-info': '#1E90FF',
+
+      // Shadows
+      '--ds-shadow-xs': '0 1px 2px rgba(0, 0, 0, 0.20)',
+      '--ds-shadow-sm': '0 2px 8px rgba(0, 0, 0, 0.20)',
+      '--ds-shadow-md': '0 8px 24px rgba(0, 0, 0, 0.35)',
+      '--ds-shadow-lg': '0 20px 40px rgba(0, 0, 0, 0.50)',
+      '--ds-shadow-xl': '0 32px 64px rgba(0, 0, 0, 0.80)',
+      '--ds-shadow-lift': '0 20px 40px rgba(0, 0, 0, 0.30), 0 0 0 1px rgba(255, 255, 255, 0.10)',
+      '--ds-shadow-glow': '0 0 20px rgba(255, 191, 72, 0.3)',
+
+      // Blur
+      '--ds-blur-sidebar': '32px',
+      '--ds-blur-searchbox': '32px',
+
+      // Z-Index
+      '--ds-z-index-base': '1',
+      '--ds-z-index-toolbar': '100',
+      '--ds-z-index-overlay': '1000',
+      '--ds-z-index-popover': '1100',
+      '--ds-z-index-max': '9999',
+
+      // Transitions
+      '--ds-transition-fast': '0.1s cubic-bezier(0.16, 1, 0.3, 1)',
+      '--ds-transition-main': '0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+      '--ds-transition-normal': '0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+      '--ds-transition-smooth': '0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+    },
+
+    // Layout-critical tokens (for content padding)
+    layout: {
+      '--ds-content-padding-x': '80px',
+      '--ds-content-padding-y': '80px'
+    }
+  };
+
+  // ============================================
+  // PRIVATE FUNCTIONS
+  // ============================================
+
+  /**
+   * Merge all token tiers into a single flat map
+   */
+  function _getAllTokens() {
+    return {
+      ...TOKENS.primitives,
+      ...TOKENS.alpha,
+      ...TOKENS.semantic,
+      ...TOKENS.layout
+    };
+  }
+
+  /**
+   * Validate a token exists and return its value
+   */
+  function _resolveToken(tokenName) {
+    const allTokens = _getAllTokens();
+    if (!(tokenName in allTokens)) {
+      console.warn(`[DesignTokenProvider] Token not found: ${tokenName}`);
+      return null;
+    }
+    return allTokens[tokenName];
+  }
+
+  // ============================================
+  // PUBLIC API
+  // ============================================
+
+  return {
+    /**
+     * Get a single token value by name
+     * @param {string} tokenName - CSS variable name (e.g., '--ds-accent')
+     * @returns {string|null} Token value or null if not found
+     */
+    getToken(tokenName) {
+      return _resolveToken(tokenName);
+    },
+
+    /**
+     * Get all tokens of a specific tier
+     * @param {string} tier - 'primitives' | 'alpha' | 'semantic' | 'layout'
+     * @returns {object} Object with all tokens in that tier
+     */
+    getTier(tier) {
+      if (!(tier in TOKENS)) {
+        console.warn(`[DesignTokenProvider] Tier not found: ${tier}`);
+        return {};
+      }
+      return TOKENS[tier];
+    },
+
+    /**
+     * Get all tokens flattened into a single object
+     * @returns {object} All tokens with keys like '--ds-accent'
+     */
+    getAllTokens() {
+      return _getAllTokens();
+    },
+
+    /**
+     * Generate CSS variable declarations as a string
+     * @param {string} selector - CSS selector (e.g., ':root')
+     * @returns {string} CSS rules for all tokens
+     */
+    generateCSSVariables(selector = ':root') {
+      const allTokens = _getAllTokens();
+      const lines = Object.entries(allTokens).map(
+        ([name, value]) => `  ${name}: ${value};`
+      );
+      return `${selector} {\n${lines.join('\n')}\n}`;
+    },
+
+    /**
+     * Generate inline CSS (without selector) for embedding in <style> tag
+     * @returns {string} CSS variable declarations without selector
+     */
+    generateInlineStyles() {
+      const allTokens = _getAllTokens();
+      const lines = Object.entries(allTokens).map(
+        ([name, value]) => `  ${name}: ${value};`
+      );
+      return lines.join('\n');
+    },
+
+    /**
+     * Validate token consistency at runtime
+     * Checks if tokens defined in JavaScript match those in the DOM
+     * @returns {object} Validation report with matches, mismatches, missing
+     */
+    validateTokens() {
+      const jsTokens = _getAllTokens();
+      const domTokens = {};
+      const result = {
+        valid: true,
+        matches: 0,
+        mismatches: [],
+        missingInDom: [],
+        missingInJs: []
+      };
+
+      // Get tokens from DOM
+      if (typeof document !== 'undefined') {
+        const root = document.documentElement;
+        const styles = getComputedStyle(root);
+
+        for (const name of Object.keys(jsTokens)) {
+          const domValue = styles.getPropertyValue(name).trim();
+          if (domValue) {
+            domTokens[name] = domValue;
+          }
+        }
+
+        // Check for mismatches
+        for (const [name, jsValue] of Object.entries(jsTokens)) {
+          if (domTokens[name]) {
+            result.matches++;
+            // Note: Exact match may not be possible due to CSS parsing,
+            // so we just verify the token exists in DOM
+          } else {
+            result.missingInDom.push(name);
+            result.valid = false;
+          }
+        }
+
+        // Check for tokens in DOM that aren't in JS
+        for (const [name, domValue] of Object.entries(domTokens)) {
+          if (!(name in jsTokens)) {
+            result.missingInJs.push(name);
+          }
+        }
+      }
+
+      return result;
+    }
+  };
+})();
+
+// Export to window for browser context
+window.DesignTokenProvider = DesignTokenProvider;
+
+// Export for use in modules
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = DesignTokenProvider;
+}
+
+```
+</file>
+
 <file path="renderer/js/services/file-service.js">
 ```js
 /**
@@ -21373,76 +22117,189 @@ window.MarkdownLogicService = MarkdownLogicService;
 ```
 </file>
 
+<file path="renderer/js/services/md-renderer-core.js">
+```js
+/* eslint-disable no-undef */
+/**
+ * md-renderer-core.js
+ * Shared rendering primitives for server and Cloudflare Worker.
+ * Source of truth for: code highlighting, sanitization, block wrapping.
+ */
+
+// Universal highlight.js resolver
+let hljsInstance = null;
+try {
+  if (typeof hljs !== 'undefined') {
+    hljsInstance = hljs;
+  } else if (typeof require !== 'undefined') {
+    hljsInstance = require('highlight.js');
+  }
+} catch (_err) {
+  // Will be handled in functions
+}
+
+/**
+ * Highlight a code block with language support and fallback to auto-detection.
+ */
+function highlightCodeBlock(code, lang) {
+  // Fallback to plain text if hljs is missing
+  if (!hljsInstance) return code;
+
+  if (lang && hljsInstance.getLanguage(lang)) {
+    try {
+      return hljsInstance.highlight(code, { language: lang }).value;
+    } catch (_ignored) {
+      return hljsInstance.highlightAuto(code).value;
+    }
+  }
+  return hljsInstance.highlightAuto(code).value;
+}
+
+/**
+ * Sanitize HTML to prevent XSS attacks.
+ */
+function sanitizeHtml(html) {
+  if (!html) return '';
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+    .replace(/on\w+="[^"]*"/gi, '');
+}
+
+/**
+ * Wrap table HTML in accessibility and styling wrapper.
+ */
+function wrapInTableWrapper(html) {
+  return `<div class="md-table-wrapper">${html}</div>`;
+}
+
+/**
+ * Render a Mermaid diagram block.
+ */
+function renderMermaidBlock(text) {
+  return `<div class="mermaid">${text}</div>`;
+}
+
+// Export for both environments
+const exportsObj = {
+  highlightCodeBlock,
+  sanitizeHtml,
+  wrapInTableWrapper,
+  renderMermaidBlock
+};
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = exportsObj;
+}
+
+// For ESM environments (Workers)
+if (typeof exports !== 'undefined') {
+  Object.assign(exports, exportsObj);
+}
+
+```
+</file>
+
+<file path="renderer/js/services/mermaid-config.js">
+```js
+/**
+ * mermaid-config.js
+ * Centralized Mermaid diagram configuration for server and worker.
+ * Source of truth for theme variables, initialization settings.
+ *
+ * Works in both browser (global) and Node.js (CommonJS) contexts.
+ */
+
+/* eslint-disable no-undef */
+(function() {
+  'use strict';
+
+  const MERMAID_THEME_COLORS = {
+    primaryColor: '#ffbf48',
+    primaryTextColor: '#000000',
+    primaryBorderColor: '#e6a800',
+    lineColor: '#aaaaaa',
+    secondaryColor: '#2a2a3e',
+    tertiaryColor: '#1d1d2e',
+    mainBkg: '#2d2d42',
+    nodeBorder: '#5a5a7a',
+    clusterBkg: 'rgba(255,255,255,0.04)',
+    titleColor: '#ffffff',
+    edgeLabelBackground: '#1a1a2e',
+    fontFamily: 'Inter, sans-serif'
+  };
+
+  const BASE_CONFIG = {
+    theme: 'dark'
+  };
+
+  const SERVER_CONFIG = Object.assign({}, BASE_CONFIG, {
+    startOnLoad: false,
+    themeVariables: MERMAID_THEME_COLORS
+  });
+
+  const WORKER_CONFIG = Object.assign({}, BASE_CONFIG, {
+    startOnLoad: true,
+    securityLevel: 'loose'
+  });
+
+  function getMermaidConfig(environment) {
+    if (environment === 'server') {
+      return SERVER_CONFIG;
+    } else if (environment === 'worker') {
+      return WORKER_CONFIG;
+    } else {
+      throw new Error(`Unknown environment: ${environment}. Use 'server' or 'worker'.`);
+    }
+  }
+
+  const exports = {
+    MERMAID_THEME_COLORS,
+    BASE_CONFIG,
+    SERVER_CONFIG,
+    WORKER_CONFIG,
+    getMermaidConfig
+  };
+
+  // Browser global
+  if (typeof window !== 'undefined') {
+    window.mermaidConfig = exports;
+  }
+
+  // CommonJS export for tests
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = exports;
+  }
+})();
+/* eslint-enable no-undef */
+
+```
+</file>
+
 <file path="renderer/js/services/publish-service.js">
 ```js
 /**
  * PublishService
- * Purpose: Coordinate document publishing to external hosts like Handoff.host
- * Dependencies: AppState, SettingsService, electronAPI
+ * Purpose: Central API for document publishing to external services
+ * Architecture: Uses PublishOrchestrator + adapters (Worker, Legacy Handoff)
+ * Dependencies: PublishOrchestrator, DesignTokenProvider, PublishUtils
  */
 const PublishService = (() => {
   'use strict';
+
+  const LOG_TAG = '[PublishService]';
 
   // ============================================
   // Private Functions
   // ============================================
 
   /**
-   * Scans HTML for local image references and resolves them to absolute paths
-   */
-  async function _gatherAssets(html) {
-    const assets = {};
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
-    
-    const imgs = tempDiv.querySelectorAll('img');
-    for (const img of imgs) {
-      const src = img.getAttribute('src');
-      if (src && !src.startsWith('http') && !src.startsWith('data:')) {
-        // Resolve path via electronAPI (which handles relative to watch dir)
-        const absolutePath = await window.electronAPI.getAbsolutePath(src);
-        if (absolutePath) {
-          assets[src] = {
-            path: absolutePath,
-            type: 'inline'
-          };
-        }
-      }
-    }
-    
-    return assets;
-  }
-
-  /**
-   * Bundles all active design system CSS into a single style block
-   * @deprecated Used for Handoff.host legacy bundling
-   */
-  function _bundleStyles() {
-    let bundledCss = '';
-    
-    // We iterate through all stylesheets that are from our local domain
-    for (const sheet of document.styleSheets) {
-      try {
-        // Only include our own design-system or component styles
-        if (!sheet.href || sheet.href.includes('renderer/css/')) {
-          for (const rule of sheet.cssRules) {
-            bundledCss += rule.cssText + '\n';
-          }
-        }
-      } catch (_e) {
-        // Cross-origin sheets might throw security errors, ignore them
-      }
-    }
-    
-    return bundledCss;
-  }
-
-  /**
-   * Wraps the rendered content in a standalone HTML template with styles
+   * Create standalone HTML bundle with design tokens injected
+   * Replaces deprecated _bundleStyles() with token provider
    */
   function _createStandaloneBundle(html, title) {
-    const styles = _bundleStyles();
-    const fileName = title || 'MDpreview Document';
+    const fileName = PublishUtils.escapeHtml(title || 'MDpreview Document');
+    const tokenStyles = DesignTokenProvider.generateInlineStyles();
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -21455,31 +22312,15 @@ const PublishService = (() => {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --ds-bg-main: #131313;
-            --ds-accent: #ffbf48;
-            --ds-accent-rgb: 255, 191, 72;
-            --ds-text-primary: rgba(255, 255, 255, 0.90);
-            --ds-text-secondary: rgba(255, 255, 255, 0.60);
-            --ds-text-inverse: #ffffff;
-            --ds-white-a02: rgba(255, 255, 255, 0.02);
-            --ds-white-a04: rgba(255, 255, 255, 0.04);
-            --ds-white-a05: rgba(255, 255, 255, 0.05);
-            --ds-white-a08: rgba(255, 255, 255, 0.08);
-            --ds-white-a10: rgba(255, 255, 255, 0.10);
-            --ds-white-a20: rgba(255, 255, 255, 0.20);
-            --ds-black-a30: rgba(0, 0, 0, 0.30);
-            --ds-border-default: rgba(255, 255, 255, 0.10);
-            --ds-radius-panel: 12px;
-            --ds-radius-sm: 6px;
-            --ds-transition-smooth: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+${tokenStyles}
         }
 
         body {
             margin: 0;
             padding: 0;
-            background: var(--ds-bg-main);
+            background: var(--ds-bg-base);
             color: var(--ds-text-secondary);
-            font-family: 'Inter', sans-serif;
+            font-family: var(--ds-font-family-text);
             line-height: 1.8;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
@@ -21491,9 +22332,7 @@ const PublishService = (() => {
             padding: 60px 24px;
         }
 
-        .md-render-body { font-size: 15px; }
-
-        ${styles}
+        .md-render-body { font-size: var(--ds-font-lg); }
 
         /* ── Parity Overrides ── */
         .md-viewer-viewport { background: transparent !important; height: auto !important; }
@@ -21543,7 +22382,7 @@ const PublishService = (() => {
             text-transform: uppercase;
             letter-spacing: 0.12em;
             color: var(--ds-text-secondary);
-            font-family: 'Roboto Mono', monospace;
+            font-family: var(--ds-font-family-code);
         }
     </style>
 </head>
@@ -21562,301 +22401,2116 @@ const PublishService = (() => {
 </html>`;
   }
 
+  /**
+   * Log message with tag
+   */
+  function _log(level, message) {
+    const timestamp = new Date().toISOString().substring(11, 19);
+    const prefix = `[${timestamp}] ${LOG_TAG}`;
+    const method = { debug: 'debug', info: 'log', warn: 'warn', error: 'error' }[level] || 'log';
+    console[method](prefix, message);
+  }
+
   // ============================================
-  // Public API
+  // Public API (with backwards compatibility)
   // ============================================
   return {
     /**
      * Returns publication info for a specific file
      */
-    getPublishInfo: function(filePath) {
-      if (!filePath || !window.AppState.settings.publishData) return null;
+    getPublishInfo(filePath) {
+      if (!filePath || !window.AppState?.settings?.publishData) return null;
       return window.AppState.settings.publishData[filePath] || null;
     },
 
     /**
-     * Check if a slug is already taken on the worker
-     * @param {string} slug 
-     * @returns {Promise<boolean>} true if available
+     * Check if a slug is available
+     * Delegates to PublishOrchestrator with fallback
      */
     async checkSlugAvailability(slug) {
-      const workerUrl = window.AppState.settings.publishWorkerUrl;
-      if (!workerUrl) return true;
-
       try {
-        // Clean the base URL (remove /publish if present)
-        const baseUrl = workerUrl.replace(/\/publish\/?$/, '');
-        const res = await fetch(`${baseUrl}/check-slug?slug=${encodeURIComponent(slug)}`);
-        if (!res.ok) return true;
-        const data = await res.json();
-        return !data.exists;
-      } catch (_e) {
-        return true; 
+        return await PublishOrchestrator.checkSlugAvailability(slug, window.AppState?.settings);
+      } catch (error) {
+        _log('warn', `Slug check failed: ${error.message}. Assuming available.`);
+        return true;
       }
     },
 
     /**
-     * Saves publication info for a specific file
+     * Save publication info for a file
      */
-    savePublishInfo: function(filePath, info) {
+    savePublishInfo(filePath, info) {
       if (!filePath) return;
-      const data = window.AppState.settings.publishData || {};
+      const data = window.AppState.settings?.publishData || {};
       data[filePath] = {
         ...info,
         updatedAt: new Date().toISOString()
       };
-      window.SettingsService.update('publishData', data);
+      window.SettingsService?.update('publishData', data);
     },
 
     /**
-     * List all slugs currently on the worker
+     * List all published documents
      */
     async listAllPublished() {
-      const workerUrl = window.AppState.settings.publishWorkerUrl;
-      const adminSecret = window.AppState.settings.publishAdminSecret;
-      if (!workerUrl || !adminSecret) return [];
-
       try {
-        const baseUrl = workerUrl.replace(/\/publish\/?$/, '');
-        const res = await fetch(`${baseUrl}/list`, {
-          headers: { 'X-Admin-Secret': adminSecret }
-        });
-        if (!res.ok) return [];
-        const data = await res.json();
-        return data.slugs || [];
-      } catch (_e) {
+        return await PublishOrchestrator.listPublished(window.AppState?.settings);
+      } catch (error) {
+        _log('warn', `List published failed: ${error.message}`);
         return [];
       }
     },
 
     /**
-     * Rename a slug on the worker and update local state
+     * Rename a published slug and update local state
      */
     async renameSlug(oldSlug, newSlug) {
-      const workerUrl = window.AppState.settings.publishWorkerUrl;
-      const adminSecret = window.AppState.settings.publishAdminSecret;
-      if (!workerUrl || !adminSecret || !oldSlug || !newSlug) return false;
-
       try {
-        const baseUrl = workerUrl.replace(/\/publish\/?$/, '');
-        const res = await fetch(`${baseUrl}/rename`, {
-          method: 'POST',
-          headers: { 
-            'X-Admin-Secret': adminSecret,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ oldSlug, newSlug })
-        });
-        
-        if (res.ok) {
-          // Update local state if any file is linked to this slug
-          const data = window.AppState.settings.publishData || {};
-          let changed = false;
-          Object.keys(data).forEach(filePath => {
-            if (data[filePath].slug === oldSlug) {
-              data[filePath].slug = newSlug;
-              changed = true;
-            }
-          });
-          if (changed) {
-            window.SettingsService.update('publishData', data);
+        const result = await PublishOrchestrator.renameSlug(oldSlug, newSlug, window.AppState?.settings);
+
+        // Update local publish info
+        const data = window.AppState.settings?.publishData || {};
+        let changed = false;
+        Object.keys(data).forEach(filePath => {
+          if (data[filePath].slug === oldSlug) {
+            data[filePath].slug = newSlug;
+            changed = true;
           }
-          return true;
+        });
+        if (changed) {
+          window.SettingsService?.update('publishData', data);
         }
-        return false;
-      } catch (_e) {
+
+        return result;
+      } catch (error) {
+        _log('error', `Rename failed: ${error.message}`);
         return false;
       }
     },
 
     /**
-     * Force delete a slug from the worker (without local state management)
+     * Delete a published slug
      */
     async deleteSlug(slug) {
-      const workerUrl = window.AppState.settings.publishWorkerUrl;
-      const adminSecret = window.AppState.settings.publishAdminSecret;
-      if (!workerUrl || !adminSecret || !slug) return false;
-
       try {
-        const baseUrl = workerUrl.replace(/\/publish\/?$/, '');
-        const res = await fetch(`${baseUrl}/publish/${slug}`, {
-          method: 'DELETE',
-          headers: { 'X-Admin-Secret': adminSecret }
-        });
-        return res.ok;
-      } catch (_e) {
+        await PublishOrchestrator.unpublish(slug, null, window.AppState?.settings);
+        return true;
+      } catch (error) {
+        _log('error', `Delete failed: ${error.message}`);
         return false;
       }
     },
 
     /**
-     * Removes publication info for a specific file and deletes from Worker if applicable
+     * Unpublish a document (remove from service and local state)
      */
-    unpublish: async function(filePath) {
+    async unpublish(filePath) {
       if (!filePath) return;
-      
-      const info = this.getPublishInfo(filePath);
-      const workerUrl = window.AppState.settings.publishWorkerUrl;
-      const adminSecret = window.AppState.settings.publishAdminSecret;
 
-      if (info && info.slug && workerUrl && adminSecret) {
+      const info = this.getPublishInfo(filePath);
+      if (!info?.slug) {
+        _log('warn', `No publication info for: ${filePath}`);
+      } else {
         try {
-          // Clean the base URL (remove /publish if present)
-          const baseUrl = workerUrl.replace(/\/publish\/?$/, '');
-          const res = await fetch(`${baseUrl}/publish/${info.slug}`, {
-            method: 'DELETE',
-            headers: {
-              'X-Admin-Secret': adminSecret
-            }
-          });
-          
-          if (!res.ok) {
-            const err = await res.json();
-            console.warn('Worker unpublish failed:', err.error);
+          await PublishOrchestrator.unpublish(info.slug, filePath, window.AppState?.settings);
+          _log('info', `Unpublished: ${filePath}`);
+        } catch (error) {
+          _log('error', `Unpublish failed: ${error.message}`);
+          if (window.showToast) {
+            window.showToast(
+              `Error unpublishing: ${PublishingErrorTypes.formatErrorMessage(error)}`,
+              'error'
+            );
           }
-        } catch (e) {
-          console.error('Failed to call worker unpublish:', e);
         }
       }
 
-      const data = window.AppState.settings.publishData || {};
+      // Remove local publication info
+      const data = window.AppState.settings?.publishData || {};
       delete data[filePath];
-      window.SettingsService.update('publishData', data);
-      
-      if (window.showToast) window.showToast('Document unpublished and removed from edge', 'info');
+      window.SettingsService?.update('publishData', data);
+
+      if (window.showToast) {
+        window.showToast('Document unpublished', 'info');
+      }
     },
 
     /**
-     * Publishes the current document
-     * Supports both Legacy Handoff and New Worker Flow
-     * @param {Object} options - { slug, password }
+     * Publish the current document
+     * @param {Object} options - {slug, password}
      */
-    publish: async function(options = {}) {
+    async publish(options = {}) {
       const { currentFile, settings } = window.AppState;
-      if (!currentFile) return null;
-      
-      const workerUrl = settings.publishWorkerUrl;
-      const adminSecret = settings.publishAdminSecret;
-      const handoffToken = settings.handoffToken;
+      if (!currentFile) {
+        _log('error', 'No current file to publish');
+        return null;
+      }
 
-      // Determine mode: Worker has priority if configured
-      const useWorker = !!(workerUrl && adminSecret);
-      
-      if (!useWorker && !handoffToken) {
+      // Check if publishing is configured
+      if (!PublishOrchestrator.isConfigured(settings)) {
         if (window.showToast) {
-          window.showToast('Please configure Publish settings first', 'error');
+          window.showToast('Please configure Publishing settings first', 'error');
         }
         return null;
       }
 
-      // Get content from viewer
-      const viewer = window.MarkdownViewer.getInstance();
-      if (!viewer) return null;
-      
-      const fileName = currentFile.split('/').pop().replace(/\.[^/.]+$/, "");
+      // Get viewer and content
+      const viewer = window.MarkdownViewer?.getInstance();
+      if (!viewer) {
+        _log('error', 'Markdown viewer not available');
+        return null;
+      }
+
+      let content = '';
+      try {
+        if (currentFile.startsWith('__DRAFT_')) {
+          if (typeof window.DraftModule !== 'undefined') {
+            content = window.DraftModule.getDraftContent(currentFile);
+          }
+        } else {
+          const res = await window.electronAPI.readFile(currentFile);
+          if (res?.success) {
+            content = res.content;
+          } else {
+            if (window.showToast) window.showToast('Failed to read file content', 'error');
+            return null;
+          }
+        }
+
+        if (!content) {
+          if (window.showToast) window.showToast('Document is empty', 'error');
+          return null;
+        }
+      } catch (error) {
+        _log('error', `Failed to read content: ${error.message}`);
+        if (window.showToast) window.showToast('Error reading file', 'error');
+        return null;
+      }
+
+      // Prepare publishing parameters
+      const fileName = currentFile.split('/').pop().replace(/\.[^/.]+$/, '');
       const slug = options.slug || fileName.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 50);
       const password = options.password || '';
 
       if (window.showToast) {
-        window.showToast(useWorker ? 'Publishing to Worker...' : 'Preparing Handoff bundle...', 'info', { sticky: true, id: 'publish' });
+        window.showToast('Publishing document...', 'info', { sticky: true, id: 'publish' });
       }
 
       try {
-        if (useWorker) {
-          // --- NEW WORKER FLOW ---
-          // 1. Get current content
-          let content = '';
-          if (currentFile.startsWith('__DRAFT_')) {
-            if (typeof window.DraftModule !== 'undefined') {
-              content = window.DraftModule.getDraftContent(currentFile);
-            }
-          } else {
-            const res = await window.electronAPI.readFile(currentFile);
-            if (res.success) {
-              content = res.content;
-            } else {
-              if (window.showToast) window.showToast('Failed to read file content', 'error');
-              return null;
-            }
-          }
+        _log('info', `Publishing: ${currentFile} → ${slug}`);
 
-          if (!content) {
-            if (window.showToast) window.showToast('Document is empty', 'error');
-            return null;
-          }
-          
-          const payload = {
-            slug,
-            content: content,
-            password,
-            title: fileName,
-            filePath: currentFile,
-            assets: await _gatherAssets(viewer.state.html)
-          };
+        const result = await PublishOrchestrator.publish({
+          filePath: currentFile,
+          slug,
+          html: viewer.state.html || content,
+          title: fileName,
+          password,
+          settings
+        });
 
-          const result = await window.electronAPI.publishToWorker({
-            payload,
-            workerUrl,
-            secret: adminSecret
-          });
+        // Save publication info
+        this.savePublishInfo(currentFile, {
+          url: result.url,
+          slug: result.slug,
+          type: result.type,
+          publishedAt: result.publishedAt
+        });
 
-          if (result.success) {
-            const baseUrl = workerUrl.replace(/\/$/, '').replace('/publish', '');
-            const fullUrl = `${baseUrl}/${result.slug}`;
-            
-            this.savePublishInfo(currentFile, {
-              url: fullUrl,
-              slug: result.slug,
-              type: 'worker'
-            });
-
-            if (window.showToast) window.showToast('Published to Worker successfully!', 'success', { id: 'publish' });
-            return fullUrl;
-          } else {
-            throw new Error(result.error);
-          }
-        } else {
-          // --- LEGACY HANDOFF FLOW ---
-          const { html } = viewer.state;
-          const assets = await _gatherAssets(html);
-          const assetPaths = Object.values(assets).map(a => a.path);
-          const bundle = _createStandaloneBundle(html, fileName);
-          
-          const result = await window.electronAPI.publishToHandoff({
-            html: bundle,
-            slug,
-            assets: assetPaths,
-            token: handoffToken,
-            password,
-            note: `Published from MDpreview v${window.AppState.version || '1.0.0'}`
-          });
-
-          if (result.success) {
-            const fullUrl = `https://handoff.host${result.url}`;
-            this.savePublishInfo(currentFile, {
-              url: fullUrl,
-              slug: slug,
-              version: result.version,
-              type: 'handoff'
-            });
-            if (window.showToast) window.showToast('Published to Handoff successfully!', 'success', { id: 'publish' });
-            return fullUrl;
-          } else {
-            throw new Error(result.error);
-          }
-        }
-      } catch (error) {
         if (window.showToast) {
-          window.showToast(`Publish failed: ${error.message}`, 'error', { id: 'publish' });
+          window.showToast(`Published successfully! → ${result.url}`, 'success', { id: 'publish' });
+        }
+
+        _log('info', `Published: ${result.url}`);
+        return result.url;
+      } catch (error) {
+        _log('error', `Publish failed: ${error.message}`);
+        if (window.showToast) {
+          const userMsg = PublishingErrorTypes.formatErrorMessage(error);
+          window.showToast(`Publish failed: ${userMsg}`, 'error', { id: 'publish' });
         }
         return null;
       }
+    },
+
+    /**
+     * Get design tokens for programmatic use
+     */
+    getDesignTokens() {
+      return DesignTokenProvider.getAllTokens();
+    },
+
+    /**
+     * Get service configuration info
+     */
+    getServiceInfo() {
+      return PublishOrchestrator.getServiceInfo(window.AppState?.settings);
     }
   };
 })();
 
 // Explicit export
 window.PublishService = PublishService;
+
+```
+</file>
+
+<file path="renderer/js/services/publishing/error-types.js">
+```js
+/**
+ * PublishingErrorTypes
+ * Purpose: Define custom error classes for publishing operations
+ * Enables structured error handling and specific error recovery strategies
+ */
+
+const PublishingErrorTypes = (() => {
+  'use strict';
+
+  /**
+   * Base class for all publishing errors
+   */
+  class PublishingError extends Error {
+    constructor(message, code = 'PUBLISH_ERROR', details = {}) {
+      super(message);
+      this.name = this.constructor.name;
+      this.code = code;
+      this.details = details;
+      this.timestamp = new Date().toISOString();
+      this.retryable = false;
+      this.retryCount = 0;
+      this.maxRetries = 0;
+
+      // Maintain proper stack trace
+      if (Error.captureStackTrace) {
+        Error.captureStackTrace(this, this.constructor);
+      }
+    }
+
+    /**
+     * Get user-friendly error message
+     */
+    getUserMessage() {
+      return this.message;
+    }
+
+    /**
+     * Get detailed error info for logging
+     */
+    toJSON() {
+      return {
+        name: this.name,
+        code: this.code,
+        message: this.message,
+        details: this.details,
+        timestamp: this.timestamp,
+        retryable: this.retryable,
+        retryCount: this.retryCount,
+        maxRetries: this.maxRetries
+      };
+    }
+  }
+
+  /**
+   * Validation error — Input validation failed
+   * Usually NOT retryable (user must fix input)
+   */
+  class ValidationError extends PublishingError {
+    constructor(message, field, value, details = {}) {
+      const code = `VALIDATION_ERROR_${field.toUpperCase()}`;
+      super(message, code, { field, value, ...details });
+      this.field = field;
+      this.value = value;
+      this.retryable = false;
+    }
+
+    getUserMessage() {
+      const fieldName = this.field.charAt(0).toUpperCase() + this.field.slice(1);
+      return `${fieldName}: ${this.message}`;
+    }
+  }
+
+  /**
+   * Network error — Connection or I/O failure
+   * Usually retryable with exponential backoff
+   */
+  class NetworkError extends PublishingError {
+    constructor(message, statusCode = null, details = {}) {
+      const code = statusCode ? `NETWORK_ERROR_${statusCode}` : 'NETWORK_ERROR';
+      super(message, code, { statusCode, ...details });
+      this.statusCode = statusCode;
+      this.retryable = true;
+      this.maxRetries = 3;
+
+      // Some status codes are not retryable
+      if (statusCode && (statusCode === 401 || statusCode === 403 || statusCode === 404)) {
+        this.retryable = false;
+        this.maxRetries = 0;
+      }
+    }
+
+    getUserMessage() {
+      const status = this.statusCode ? ` (${this.statusCode})` : '';
+      return `Network error${status}: ${this.message}. Please check your connection.`;
+    }
+  }
+
+  /**
+   * Timeout error — Request exceeded time limit
+   * Retryable with increasing timeouts
+   */
+  class TimeoutError extends PublishingError {
+    constructor(message, timeout = null, details = {}) {
+      const code = 'TIMEOUT_ERROR';
+      super(message, code, { timeout, ...details });
+      this.timeout = timeout;
+      this.retryable = true;
+      this.maxRetries = 2;
+    }
+
+    getUserMessage() {
+      const timeoutSec = this.timeout ? Math.round(this.timeout / 1000) : 'unknown';
+      return `Request timed out after ${timeoutSec}s. Please try again.`;
+    }
+  }
+
+  /**
+   * Worker error — Error from Cloudflare Worker
+   * May or may not be retryable depending on error type
+   */
+  class WorkerError extends PublishingError {
+    constructor(message, workerCode = null, details = {}) {
+      const code = workerCode ? `WORKER_ERROR_${workerCode}` : 'WORKER_ERROR';
+      super(message, code, { workerCode, ...details });
+      this.workerCode = workerCode;
+      this.retryable = false; // Default: not retryable
+
+      // Specific worker codes that ARE retryable
+      const retryableWorkerCodes = [
+        'WORKER_TIMEOUT',
+        'KV_TIMEOUT',
+        'RATE_LIMITED',
+        'TEMPORARILY_UNAVAILABLE'
+      ];
+
+      if (workerCode && retryableWorkerCodes.includes(workerCode)) {
+        this.retryable = true;
+        this.maxRetries = 3;
+      }
+    }
+
+    getUserMessage() {
+      const codeMsg = this.workerCode ? ` (${this.workerCode})` : '';
+      return `Publishing service error${codeMsg}: ${this.message}`;
+    }
+  }
+
+  /**
+   * Slug conflict error — Slug already exists
+   * Not retryable; user must choose different slug
+   */
+  class SlugConflictError extends PublishingError {
+    constructor(slug, suggestions = [], details = {}) {
+      const message = `Slug "${slug}" is already in use`;
+      super(message, 'SLUG_CONFLICT', { slug, suggestions, ...details });
+      this.slug = slug;
+      this.suggestions = suggestions;
+      this.retryable = false;
+    }
+
+    getUserMessage() {
+      let msg = `The slug "${this.slug}" is already taken.`;
+      if (this.suggestions && this.suggestions.length > 0) {
+        msg += ` Try: ${this.suggestions.join(', ')}`;
+      }
+      return msg;
+    }
+  }
+
+  /**
+   * Asset error — Problem with asset bundling/gathering
+   * Usually not retryable; asset issue must be fixed
+   */
+  class AssetError extends PublishingError {
+    constructor(message, assetPath = null, details = {}) {
+      const code = 'ASSET_ERROR';
+      super(message, code, { assetPath, ...details });
+      this.assetPath = assetPath;
+      this.retryable = false;
+    }
+
+    getUserMessage() {
+      if (this.assetPath) {
+        return `Asset error (${this.assetPath}): ${this.message}`;
+      }
+      return `Asset bundling error: ${this.message}`;
+    }
+  }
+
+  /**
+   * Authentication error — Invalid or missing credentials
+   * Not retryable; user must fix credentials
+   */
+  class AuthenticationError extends PublishingError {
+    constructor(message, credentialType = null, details = {}) {
+      const code = credentialType ? `AUTH_ERROR_${credentialType.toUpperCase()}` : 'AUTH_ERROR';
+      super(message, code, { credentialType, ...details });
+      this.credentialType = credentialType;
+      this.retryable = false;
+    }
+
+    getUserMessage() {
+      const type = this.credentialType ? ` (${this.credentialType})` : '';
+      return `Authentication failed${type}. Please check your credentials.`;
+    }
+  }
+
+  /**
+   * Create appropriate error from response or exception
+   * Intelligently maps errors to correct type
+   */
+  function createErrorFromResponse(response, defaultMessage = 'Unknown error') {
+    if (!response) {
+      return new PublishingError(defaultMessage);
+    }
+
+    // Handle fetch Response objects
+    if (response.status) {
+      const { status, statusText } = response;
+
+      if (status === 0) {
+        return new NetworkError('Network request failed', status);
+      }
+
+      if (status === 401) {
+        return new AuthenticationError('Invalid credentials', 'token');
+      }
+
+      if (status === 403) {
+        return new AuthenticationError('Access denied', 'permission');
+      }
+
+      if (status === 404) {
+        return new NetworkError('Resource not found', status);
+      }
+
+      if (status === 409) {
+        return new SlugConflictError(response.slug || 'unknown');
+      }
+
+      const errorMessage = response.error || response.message || (status >= 500 ? 'Server error' : (statusText || defaultMessage));
+
+      if (status >= 500) {
+        return new WorkerError(errorMessage, `HTTP_${status}`);
+      }
+
+      if (status >= 400) {
+        return new NetworkError(errorMessage, status);
+      }
+
+      if (status >= 300) {
+        return new NetworkError('Unexpected redirect', status);
+      }
+
+      return new NetworkError('Unknown HTTP error', status);
+    }
+
+    // Handle error objects
+    if (response instanceof Error) {
+      if (response.name === 'TimeoutError') {
+        return new TimeoutError(response.message);
+      }
+
+      if (response.name === 'ValidationError') {
+        return new ValidationError(response.message, 'unknown');
+      }
+
+      if (response.message.includes('network')) {
+        return new NetworkError(response.message);
+      }
+
+      return new PublishingError(response.message);
+    }
+
+    // Handle plain objects with error info
+    if (typeof response === 'object') {
+      if (response.code === 'SLUG_CONFLICT') {
+        return new SlugConflictError(response.slug, response.suggestions);
+      }
+
+      if (response.code && response.code.startsWith('WORKER_')) {
+        return new WorkerError(response.message || defaultMessage, response.code);
+      }
+
+      if (response.error) {
+        return new PublishingError(response.error, response.code);
+      }
+
+      return new PublishingError(
+        response.message || defaultMessage,
+        response.code
+      );
+    }
+
+    // Fallback
+    return new PublishingError(String(response) || defaultMessage);
+  }
+
+  // ============================================
+  // PUBLIC API
+  // ============================================
+
+  return {
+    // Error classes
+    PublishingError,
+    ValidationError,
+    NetworkError,
+    TimeoutError,
+    WorkerError,
+    SlugConflictError,
+    AssetError,
+    AuthenticationError,
+
+    // Error creation helper
+    createErrorFromResponse,
+
+    /**
+     * Determine if error is retryable
+     */
+    isRetryable(error) {
+      if (error instanceof PublishingError) {
+        return error.retryable;
+      }
+      return false;
+    },
+
+    /**
+     * Format error for user display
+     */
+    formatErrorMessage(error) {
+      if (error instanceof PublishingError) {
+        return error.getUserMessage();
+      }
+      if (error instanceof Error) {
+        return error.message;
+      }
+      return String(error);
+    }
+  };
+})();
+
+// Export to window for browser context
+window.PublishingErrorTypes = PublishingErrorTypes;
+
+// Export for use in modules
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = PublishingErrorTypes;
+}
+
+```
+</file>
+
+<file path="renderer/js/services/publishing/legacy-handoff-adapter.js">
+```js
+/**
+ * LegacyHandoffAdapter
+ * Purpose: Handle legacy Handoff.host publishing (deprecated)
+ * Note: This adapter maintains backwards compatibility only
+ * New implementations should use WorkerPublishAdapter
+ */
+
+const LegacyHandoffAdapter = (() => {
+  'use strict';
+
+  const LOG_TAG = '[LegacyHandoffAdapter]';
+
+  /**
+   * Publish to legacy Handoff.host service
+   * @deprecated Use WorkerPublishAdapter instead
+   */
+  async function publish(config, options = {}) {
+    const { filePath, slug, html, title, handoffToken } = config;
+    const { retryConfig = RetryStrategy.createConfig('default') } = options;
+
+    _log('warn', 'Using deprecated Handoff.host adapter. Migrate to Worker publishing.');
+
+    // Validation
+    if (!filePath || !slug || !html || !handoffToken) {
+      throw new PublishingErrorTypes.ValidationError(
+        'Missing Handoff configuration',
+        'config',
+        { filePath: !!filePath, slug: !!slug, html: !!html, token: !!handoffToken }
+      );
+    }
+
+    const slugValidation = PublishUtils.validateSlug(slug);
+    if (!slugValidation.valid) {
+      throw new PublishingErrorTypes.ValidationError(slugValidation.error, 'slug', slug);
+    }
+
+    _log('info', `Publishing to Handoff: ${slug}`);
+
+    try {
+      const response = await RetryStrategy.executeWithRetry(
+        () => _sendHandoffRequest(slug, html, title, handoffToken),
+        {
+          ...retryConfig,
+          onRetry: ({ attempt, nextDelayMs }) => {
+            _log('warn', `Handoff publish attempt ${attempt} failed, retrying in ${nextDelayMs}ms`);
+          }
+        }
+      );
+
+      if (!response.success) {
+        throw new PublishingErrorTypes.WorkerError(
+          response.error || 'Handoff publish failed',
+          'HANDOFF_ERROR'
+        );
+      }
+
+      return {
+        success: true,
+        slug: slugValidation.normalized,
+        url: response.url || `https://handoff.host/${slug}`,
+        publishedAt: new Date().toISOString(),
+        type: 'legacy',
+        metadata: { filePath, htmlSize: html.length }
+      };
+    } catch (error) {
+      _log('error', `Handoff publish failed: ${error.message}`);
+      throw PublishingErrorTypes.createErrorFromResponse(error, 'Failed to publish to Handoff');
+    }
+  }
+
+  /**
+   * Unpublish from Handoff
+   * @deprecated Use WorkerPublishAdapter instead
+   */
+  async function unpublish(config) {
+    const { slug, handoffToken } = config;
+
+    const slugValidation = PublishUtils.validateSlug(slug);
+    if (!slugValidation.valid) {
+      throw new PublishingErrorTypes.ValidationError(slugValidation.error, 'slug', slug);
+    }
+
+    _log('info', `Unpublishing from Handoff: ${slug}`);
+
+    try {
+      const response = await RetryStrategy.fetchWithRetry(
+        `https://handoff.host/api/delete`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${handoffToken}`
+          },
+          body: JSON.stringify({ slug: slugValidation.normalized }),
+          retryConfig: RetryStrategy.createConfig('quick')
+        }
+      );
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      return { success: true, slug: slugValidation.normalized };
+    } catch (error) {
+      _log('error', `Handoff unpublish failed: ${error.message}`);
+      throw PublishingErrorTypes.createErrorFromResponse(error, 'Failed to unpublish from Handoff');
+    }
+  }
+
+  // ============================================
+  // PRIVATE
+  // ============================================
+
+  async function _sendHandoffRequest(slug, html, title, token) {
+    const response = await fetch('https://handoff.host/api/publish', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        slug,
+        content: html,
+        title: PublishUtils.escapeHtml(title || 'Untitled')
+      })
+    });
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  }
+
+  function _log(level, message) {
+    const timestamp = new Date().toISOString().substring(11, 19);
+    const prefix = `[${timestamp}] ${LOG_TAG}`;
+    const method = { debug: 'debug', info: 'log', warn: 'warn', error: 'error' }[level];
+    console[method](prefix, message);
+  }
+
+  return {
+    publish,
+    unpublish,
+    type: 'legacy',
+    deprecated: true,
+    deprecationMessage: 'Handoff.host publishing is deprecated. Migrate to Cloudflare Workers.'
+  };
+})();
+
+// Export to window for browser context
+window.LegacyHandoffAdapter = LegacyHandoffAdapter;
+
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = LegacyHandoffAdapter;
+}
+
+```
+</file>
+
+<file path="renderer/js/services/publishing/publish-orchestrator.js">
+```js
+/**
+ * PublishOrchestrator
+ * Purpose: Orchestrate publishing operations using strategy pattern
+ * Selects appropriate adapter (Worker vs Legacy) based on configuration
+ */
+
+const PublishOrchestrator = (() => {
+  'use strict';
+
+  const LOG_TAG = '[PublishOrchestrator]';
+
+  /**
+   * Determine which publishing strategy to use based on available credentials
+   * Priority: Worker > Legacy Handoff
+   */
+  function _selectAdapter(settings) {
+    if (!settings) {
+      throw new PublishingErrorTypes.AuthenticationError(
+        'No publishing configuration found',
+        'settings'
+      );
+    }
+
+    // Worker has priority
+    if (settings.publishWorkerUrl && settings.publishAdminSecret) {
+      _log('debug', 'Selected Worker adapter');
+      return {
+        adapter: WorkerPublishAdapter,
+        type: 'worker',
+        config: {
+          workerUrl: settings.publishWorkerUrl,
+          adminSecret: settings.publishAdminSecret
+        }
+      };
+    }
+
+    // Fall back to legacy Handoff
+    if (settings.publishHandoffToken) {
+      _log('warn', 'Using legacy Handoff adapter (deprecated)');
+      return {
+        adapter: LegacyHandoffAdapter,
+        type: 'legacy',
+        config: {
+          handoffToken: settings.publishHandoffToken
+        }
+      };
+    }
+
+    // No valid configuration
+    throw new PublishingErrorTypes.AuthenticationError(
+      'No publishing service configured. Set up Worker or Handoff credentials.',
+      'missing'
+    );
+  }
+
+  /**
+   * Publish a document using appropriate adapter
+   */
+  async function publish(options = {}) {
+    const {
+      filePath,
+      slug,
+      html,
+      title,
+      password,
+      settings = window.AppState?.settings,
+      retryConfig
+    } = options;
+
+    _log('info', `Publishing: ${filePath} → ${slug}`);
+
+    const { adapter, type, config } = _selectAdapter(settings);
+
+    // Merge configs
+    const publishConfig = {
+      filePath,
+      slug,
+      html,
+      title,
+      password,
+      ...config
+    };
+
+    try {
+      const result = await adapter.publish(publishConfig, { retryConfig });
+      _log('info', `Published via ${type}: ${result.url}`);
+      return result;
+    } catch (error) {
+      _log('error', `Publishing failed (${type}): ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Check slug availability using appropriate adapter
+   */
+  async function checkSlugAvailability(slug, settings = window.AppState?.settings) {
+    const { adapter, config } = _selectAdapter(settings);
+
+    // Only Worker adapter supports slug checking (legacy doesn't)
+    if (adapter === LegacyHandoffAdapter) {
+      _log('debug', 'Skipping slug check (not supported by Handoff adapter)');
+      return true; // Assume available for legacy
+    }
+
+    return adapter.checkSlugAvailability(slug, config.workerUrl);
+  }
+
+  /**
+   * Rename a published slug
+   */
+  async function renameSlug(oldSlug, newSlug, settings = window.AppState?.settings) {
+    const { adapter, type, config } = _selectAdapter(settings);
+
+    // Legacy adapter doesn't support rename
+    if (adapter === LegacyHandoffAdapter) {
+      throw new PublishingErrorTypes.WorkerError(
+        'Slug renaming not supported by Handoff adapter',
+        'NOT_SUPPORTED'
+      );
+    }
+
+    _log('info', `Renaming slug: ${oldSlug} → ${newSlug}`);
+    return adapter.renameSlug({
+      oldSlug,
+      newSlug,
+      ...config
+    });
+  }
+
+  /**
+   * Unpublish a document
+   */
+  async function unpublish(slug, filePath, settings = window.AppState?.settings) {
+    const { adapter, type, config } = _selectAdapter(settings);
+
+    _log('info', `Unpublishing: ${slug} (${filePath})`);
+
+    return adapter.unpublish({
+      slug,
+      filePath,
+      ...config
+    });
+  }
+
+  /**
+   * List all published documents
+   */
+  async function listPublished(settings = window.AppState?.settings) {
+    const { adapter, type, config } = _selectAdapter(settings);
+
+    // Legacy adapter doesn't support list
+    if (adapter === LegacyHandoffAdapter) {
+      _log('info', 'List not supported by Handoff adapter, returning empty');
+      return [];
+    }
+
+    _log('info', 'Fetching published documents list');
+    return adapter.listPublished(config.workerUrl, config.adminSecret);
+  }
+
+  /**
+   * Get information about the currently configured publishing service
+   */
+  function getServiceInfo(settings = window.AppState?.settings) {
+    if (!settings) {
+      return {
+        configured: false,
+        type: null,
+        message: 'No publishing service configured'
+      };
+    }
+
+    if (settings.publishWorkerUrl && settings.publishAdminSecret) {
+      return {
+        configured: true,
+        type: 'worker',
+        workerUrl: settings.publishWorkerUrl,
+        message: `Worker: ${settings.publishWorkerUrl}`
+      };
+    }
+
+    if (settings.publishHandoffToken) {
+      return {
+        configured: true,
+        type: 'legacy',
+        message: 'Handoff.host (deprecated, migrate to Worker)',
+        deprecated: true
+      };
+    }
+
+    return {
+      configured: false,
+      type: null,
+      message: 'No valid publishing credentials'
+    };
+  }
+
+  /**
+   * Log message with tag
+   * @private
+   */
+  function _log(level, message) {
+    const timestamp = new Date().toISOString().substring(11, 19);
+    const prefix = `[${timestamp}] ${LOG_TAG}`;
+    const method = { debug: 'debug', info: 'log', warn: 'warn', error: 'error' }[level];
+    console[method](prefix, message);
+  }
+
+  // ============================================
+  // PUBLIC API
+  // ============================================
+
+  return {
+    publish,
+    checkSlugAvailability,
+    renameSlug,
+    unpublish,
+    listPublished,
+    getServiceInfo,
+
+    /**
+     * Check if a publishing service is configured
+     */
+    isConfigured(settings = window.AppState?.settings) {
+      const info = getServiceInfo(settings);
+      return info.configured;
+    },
+
+    /**
+     * Get active service type
+     */
+    getActiveService(settings = window.AppState?.settings) {
+      const info = getServiceInfo(settings);
+      return info.type;
+    }
+  };
+})();
+
+// Export for use in modules
+// Export to window for browser context
+window.PublishOrchestrator = PublishOrchestrator;
+
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = PublishOrchestrator;
+}
+
+```
+</file>
+
+<file path="renderer/js/services/publishing/publish-utils.js">
+```js
+/**
+ * PublishUtils
+ * Purpose: Shared utilities for publishing operations
+ * Exports: Asset gathering, validation, HTML sanitization helpers
+ */
+
+const PublishUtils = (() => {
+  'use strict';
+
+  const LOG_TAG = '[PublishService]';
+  const MAX_ASSET_SIZE = 10 * 1024 * 1024; // 10MB hard limit
+  const WARN_ASSET_SIZE = 5 * 1024 * 1024; // 5MB warning threshold
+
+  // ============================================
+  // ASSET GATHERING
+  // ============================================
+
+  /**
+   * Extract and resolve all asset references from HTML
+   * Supports: images, fonts, SVGs, inline resources
+   *
+   * @param {string} html - Rendered HTML content
+   * @param {object} options - Configuration options
+   * @returns {Promise<object>} Result with resolved/unresolved assets and errors
+   */
+  async function gatherAssets(html, options = {}) {
+    const {
+      electronAPI = window.electronAPI,
+      maxSize = MAX_ASSET_SIZE,
+      logLevel = 'warn' // 'debug' | 'warn' | 'error'
+    } = options;
+
+    const result = {
+      resolved: {},      // Successfully resolved: { originalPath: {path, type, size} }
+      unresolved: [],    // Failed resolution: [{path, reason}]
+      total: 0,
+      totalSize: 0,
+      errors: [],
+      warnings: []
+    };
+
+    if (!html || typeof html !== 'string') {
+      return result;
+    }
+
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+
+    // ── Image Assets ──────────────────────────────
+    const imgs = tempDiv.querySelectorAll('img');
+    for (const img of imgs) {
+      const src = img.getAttribute('src');
+      if (!src) continue;
+
+      // Skip external and data URLs
+      if (src.startsWith('http') || src.startsWith('data:')) {
+        _log('debug', `Skipping external image: ${src}`);
+        continue;
+      }
+
+      await _resolveAsset(
+        src,
+        'image',
+        result,
+        electronAPI,
+        maxSize,
+        logLevel
+      );
+    }
+
+    // ── SVG Symbols/Inline SVGs ──────────────────
+    const svgs = tempDiv.querySelectorAll('svg use');
+    for (const use of svgs) {
+      const href = use.getAttribute('xlink:href') || use.getAttribute('href');
+      if (!href || href.startsWith('#')) continue; // Skip internal references
+      if (href.startsWith('http') || href.startsWith('data:')) continue;
+
+      await _resolveAsset(
+        href,
+        'svg',
+        result,
+        electronAPI,
+        maxSize,
+        logLevel
+      );
+    }
+
+    // ── Font References in Styles ────────────────
+    const styles = tempDiv.querySelectorAll('style');
+    for (const style of styles) {
+      const fontUrls = _extractFontUrls(style.textContent);
+      for (const fontUrl of fontUrls) {
+        if (fontUrl.startsWith('http') || fontUrl.startsWith('data:')) {
+          _log('debug', `Skipping external font: ${fontUrl}`);
+          continue;
+        }
+
+        await _resolveAsset(
+          fontUrl,
+          'font',
+          result,
+          electronAPI,
+          maxSize,
+          logLevel
+        );
+      }
+    }
+
+    // ── Background Images ────────────────────────
+    const elementsWithBg = tempDiv.querySelectorAll('[style*="background"]');
+    for (const el of elementsWithBg) {
+      const bgUrl = _extractBackgroundUrl(el.getAttribute('style'));
+      if (!bgUrl) continue;
+      if (bgUrl.startsWith('http') || bgUrl.startsWith('data:')) continue;
+
+      await _resolveAsset(
+        bgUrl,
+        'image',
+        result,
+        electronAPI,
+        maxSize,
+        logLevel
+      );
+    }
+
+    _log('info', `Asset gathering complete: ${result.total} total, ` +
+      `${Object.keys(result.resolved).length} resolved, ` +
+      `${result.unresolved.length} unresolved`);
+
+    return result;
+  }
+
+  /**
+   * Resolve a single asset path to absolute location
+   * @private
+   */
+  async function _resolveAsset(path, type, result, electronAPI, maxSize, logLevel) {
+    if (!path || result.resolved[path] || result.unresolved.some(u => u.path === path)) {
+      return; // Already processed
+    }
+
+    result.total++;
+
+    try {
+      if (!electronAPI) {
+        result.unresolved.push({
+          path,
+          reason: 'electronAPI not available'
+        });
+        _log('warn', `Cannot resolve asset (no electronAPI): ${path}`);
+        return;
+      }
+
+      const absolutePath = await electronAPI.getAbsolutePath(path);
+      if (!absolutePath) {
+        result.unresolved.push({
+          path,
+          reason: 'path resolution failed'
+        });
+        _log('warn', `Failed to resolve asset path: ${path}`);
+        return;
+      }
+
+      // Note: Size checking would require file system access in Electron
+      // For now, we just resolve the path
+      result.resolved[path] = {
+        path: absolutePath,
+        type,
+        size: null // Would be set after file system check
+      };
+
+      _log('debug', `Resolved ${type} asset: ${path} → ${absolutePath}`);
+    } catch (error) {
+      result.errors.push({
+        path,
+        error: error.message
+      });
+      result.unresolved.push({
+        path,
+        reason: error.message
+      });
+      _log('error', `Error resolving asset ${path}: ${error.message}`);
+    }
+  }
+
+  /**
+   * Extract font URLs from CSS @font-face declarations
+   * @private
+   */
+  function _extractFontUrls(css) {
+    const urls = [];
+    const fontFaceRegex = /@font-face\s*\{[^}]*url\s*\(\s*['"]?([^'")]+)['"]?\s*\)/g;
+    let match;
+
+    while ((match = fontFaceRegex.exec(css)) !== null) {
+      urls.push(match[1]);
+    }
+
+    return urls;
+  }
+
+  /**
+   * Extract background URL from inline style attribute
+   * @private
+   */
+  function _extractBackgroundUrl(style) {
+    if (!style) return null;
+    const match = style.match(/background(?:-image)?\s*:\s*url\s*\(\s*['"]?([^'")]+)['"]?\s*\)/);
+    return match ? match[1] : null;
+  }
+
+  /**
+   * Log message with tag and optional level filtering
+   * @private
+   */
+  function _log(level, message) {
+    const timestamp = new Date().toISOString().substring(11, 19);
+    const prefix = `[${timestamp}] ${LOG_TAG}`;
+
+    switch (level) {
+      case 'debug':
+        console.debug(prefix, message);
+        break;
+      case 'info':
+        console.log(prefix, message);
+        break;
+      case 'warn':
+        console.warn(prefix, message);
+        break;
+      case 'error':
+        console.error(prefix, message);
+        break;
+    }
+  }
+
+  // ============================================
+  // SLUG VALIDATION
+  // ============================================
+
+  /**
+   * Validate slug format (alphanumeric, hyphens, underscores)
+   * @param {string} slug - Slug to validate
+   * @returns {object} Validation result {valid, error}
+   */
+  function validateSlug(slug) {
+    if (!slug || typeof slug !== 'string') {
+      return {
+        valid: false,
+        error: 'Slug must be a non-empty string'
+      };
+    }
+
+    const trimmed = slug.trim();
+
+    // Check length
+    if (trimmed.length < 3) {
+      return {
+        valid: false,
+        error: 'Slug must be at least 3 characters'
+      };
+    }
+
+    if (trimmed.length > 50) {
+      return {
+        valid: false,
+        error: 'Slug must be less than 50 characters'
+      };
+    }
+
+    // Check format: alphanumeric, hyphens, underscores only
+    const slugRegex = /^[a-z0-9_-]+$/i;
+    if (!slugRegex.test(trimmed)) {
+      return {
+        valid: false,
+        error: 'Slug can only contain letters, numbers, hyphens, and underscores'
+      };
+    }
+
+    // Cannot start or end with hyphen or underscore
+    if (trimmed.startsWith('-') || trimmed.startsWith('_') ||
+        trimmed.endsWith('-') || trimmed.endsWith('_')) {
+      return {
+        valid: false,
+        error: 'Slug cannot start or end with hyphen or underscore'
+      };
+    }
+
+    // Cannot have consecutive hyphens/underscores
+    if (/[-_]{2,}/.test(trimmed)) {
+      return {
+        valid: false,
+        error: 'Slug cannot have consecutive hyphens or underscores'
+      };
+    }
+
+    return {
+      valid: true,
+      error: null,
+      normalized: trimmed.toLowerCase()
+    };
+  }
+
+  // ============================================
+  // HTML ESCAPING
+  // ============================================
+
+  /**
+   * Escape HTML special characters to prevent injection
+   * @param {string} text - Text to escape
+   * @returns {string} Escaped text safe for HTML
+   */
+  function escapeHtml(text) {
+    const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    };
+    return String(text).replace(/[&<>"']/g, char => map[char]);
+  }
+
+  // ============================================
+  // PUBLIC API
+  // ============================================
+
+  return {
+    gatherAssets,
+    validateSlug,
+    escapeHtml,
+
+    /**
+     * Get constant limits
+     */
+    getConstants() {
+      return {
+        MAX_ASSET_SIZE,
+        WARN_ASSET_SIZE,
+        LOG_TAG
+      };
+    }
+  };
+})();
+
+// Export for use in modules
+// Export to window for browser context
+window.PublishUtils = PublishUtils;
+
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = PublishUtils;
+}
+
+```
+</file>
+
+<file path="renderer/js/services/publishing/retry-strategy.js">
+```js
+/**
+ * RetryStrategy
+ * Purpose: Implement retry logic with exponential backoff for transient failures
+ * Uses: PublishingErrorTypes for error classification
+ */
+
+const RetryStrategy = (() => {
+  'use strict';
+
+  /**
+   * Execute function with automatic retry on transient failures
+   * Uses exponential backoff with jitter
+   *
+   * @param {function} fn - Async function to retry
+   * @param {object} options - Retry configuration
+   * @returns {Promise<*>} Result from successful execution
+   * @throws {Error} Original error if all retries exhausted
+   */
+  async function executeWithRetry(fn, options = {}) {
+    const {
+      maxRetries = 3,
+      initialDelayMs = 1000,
+      maxDelayMs = 30000,
+      backoffMultiplier = 2,
+      jitterFraction = 0.1,
+      timeout = null,
+      onRetry = null,
+      shouldRetry = (error) => _isRetryable(error)
+    } = options;
+
+    let lastError;
+    let delayMs = initialDelayMs;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        // Execute with timeout if specified
+        if (timeout) {
+          return await _executeWithTimeout(fn, timeout);
+        }
+        return await fn();
+      } catch (error) {
+        lastError = error;
+
+        // Check if error is retryable
+        if (!shouldRetry(error)) {
+          throw error; // Not retryable, fail immediately
+        }
+
+        // Last attempt, don't retry
+        if (attempt === maxRetries) {
+          throw error;
+        }
+
+        // Calculate delay with exponential backoff + jitter
+        const delay = _calculateDelay(delayMs, maxDelayMs, backoffMultiplier, jitterFraction);
+
+        // Call retry callback if provided
+        if (onRetry) {
+          onRetry({
+            error,
+            attempt: attempt + 1,
+            maxRetries: maxRetries + 1,
+            nextDelayMs: delay
+          });
+        }
+
+        // Wait before retrying
+        await _sleep(delay);
+
+        // Update delay for next iteration
+        delayMs = Math.min(delayMs * backoffMultiplier, maxDelayMs);
+      }
+    }
+
+    throw lastError;
+  }
+
+  /**
+   * Execute function with timeout
+   * @private
+   */
+  async function _executeWithTimeout(fn, timeoutMs) {
+    return Promise.race([
+      fn(),
+      new Promise((_, reject) =>
+        setTimeout(() => {
+          const error = new Error(`Operation timed out after ${timeoutMs}ms`);
+          error.name = 'TimeoutError';
+          error.timeout = timeoutMs;
+          reject(error);
+        }, timeoutMs)
+      )
+    ]);
+  }
+
+  /**
+   * Calculate delay with exponential backoff and jitter
+   * Formula: baseDelay * multiplier ^ attempt + random jitter
+   * @private
+   */
+  function _calculateDelay(baseDelay, maxDelay, multiplier, jitterFraction) {
+    // Exponential backoff
+    let delay = baseDelay * Math.pow(multiplier, 0); // Simplified, just use baseDelay
+    delay = Math.min(delay, maxDelay);
+
+    // Add jitter (±10% by default)
+    const jitter = delay * jitterFraction * (Math.random() * 2 - 1);
+    return Math.round(delay + jitter);
+  }
+
+  /**
+   * Check if error should be retried
+   * @private
+   */
+  function _isRetryable(error) {
+    if (!error) return true; // Retry unknown errors
+
+    // Check for PublishingError with retryable flag
+    if (error.retryable !== undefined) {
+      return error.retryable;
+    }
+
+    // Network errors typically retryable
+    if (error.name === 'NetworkError' || error.name === 'TypeError') {
+      return true;
+    }
+
+    // Timeout errors are retryable
+    if (error.name === 'TimeoutError') {
+      return true;
+    }
+
+    // Default: don't retry
+    return false;
+  }
+
+  /**
+   * Sleep for specified milliseconds
+   * @private
+   */
+  function _sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Create a retry configuration template
+   * Useful for common patterns
+   */
+  function createConfig(pattern = 'default') {
+    const configs = {
+      // Quick retries for temporary glitches
+      quick: {
+        maxRetries: 2,
+        initialDelayMs: 500,
+        maxDelayMs: 2000,
+        backoffMultiplier: 1.5
+      },
+
+      // Default: balanced for most operations
+      default: {
+        maxRetries: 3,
+        initialDelayMs: 1000,
+        maxDelayMs: 10000,
+        backoffMultiplier: 2
+      },
+
+      // Aggressive: for operations that need more time
+      aggressive: {
+        maxRetries: 5,
+        initialDelayMs: 2000,
+        maxDelayMs: 30000,
+        backoffMultiplier: 1.5
+      },
+
+      // Timeout-heavy: for slow operations
+      slowNetwork: {
+        maxRetries: 4,
+        initialDelayMs: 3000,
+        maxDelayMs: 45000,
+        backoffMultiplier: 1.8,
+        timeout: 30000 // 30s per attempt
+      }
+    };
+
+    return configs[pattern] || configs.default;
+  }
+
+  /**
+   * Wrapper for fetch with automatic retry
+   * Common use case: HTTP requests with retry
+   */
+  async function fetchWithRetry(url, options = {}) {
+    const {
+      method = 'GET',
+      headers = {},
+      body = null,
+      retryConfig = createConfig('default'),
+      timeout = 10000
+    } = options;
+
+    return executeWithRetry(
+      () => fetch(url, {
+        method,
+        headers,
+        body,
+        signal: _createTimeoutSignal(timeout)
+      }).then(async response => {
+        if (!response.ok) {
+          const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
+          error.status = response.status;
+          error.response = response;
+          throw error;
+        }
+        return response;
+      }),
+      {
+        ...retryConfig,
+        timeout,
+        shouldRetry: (error) => {
+          // Retry on network errors and 5xx responses
+          if (error.name === 'TypeError') return true; // Network error
+          if (error.status >= 500) return true; // Server error
+          if (error.status === 429) return true; // Rate limited
+          return _isRetryable(error);
+        }
+      }
+    );
+  }
+
+  /**
+   * Create AbortSignal with timeout
+   * @private
+   */
+  function _createTimeoutSignal(timeoutMs) {
+    if (!timeoutMs) return undefined;
+
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), timeoutMs);
+    return controller.signal;
+  }
+
+  /**
+   * Get retry statistics from an error
+   * Useful for debugging and metrics
+   */
+  function getRetryStats(error) {
+    if (!error) return null;
+
+    return {
+      retryable: error.retryable ?? false,
+      retryCount: error.retryCount ?? 0,
+      maxRetries: error.maxRetries ?? 0,
+      errorCode: error.code,
+      errorName: error.name,
+      timestamp: error.timestamp
+    };
+  }
+
+  // ============================================
+  // PUBLIC API
+  // ============================================
+
+  return {
+    executeWithRetry,
+    fetchWithRetry,
+    createConfig,
+    getRetryStats,
+
+    /**
+     * Predefined timeout durations (ms)
+     */
+    timeouts: {
+      SHORT: 5000,      // 5 seconds
+      NORMAL: 10000,    // 10 seconds
+      LONG: 30000,      // 30 seconds
+      VERY_LONG: 60000  // 60 seconds
+    },
+
+    /**
+     * Predefined delay patterns (ms)
+     */
+    delays: {
+      IMMEDIATE: 0,
+      FAST: 500,
+      NORMAL: 1000,
+      SLOW: 3000,
+      VERY_SLOW: 5000
+    }
+  };
+})();
+
+// Export for use in modules
+// Export to window for browser context
+window.RetryStrategy = RetryStrategy;
+
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = RetryStrategy;
+}
+
+```
+</file>
+
+<file path="renderer/js/services/publishing/worker-publish-adapter.js">
+```js
+/**
+ * WorkerPublishAdapter
+ * Purpose: Handle Cloudflare Worker publishing strategy
+ * Dependencies: RetryStrategy, PublishingErrorTypes, PublishUtils
+ */
+
+const WorkerPublishAdapter = (() => {
+  'use strict';
+
+  const LOG_TAG = '[WorkerPublishAdapter]';
+
+  /**
+   * Publish document to Cloudflare Worker via server proxy
+   *
+   * @param {object} config - Publishing configuration
+   * @param {string} config.filePath - Local file path
+   * @param {string} config.slug - Published slug
+   * @param {string} config.html - Rendered HTML content
+   * @param {string} config.title - Document title
+   * @param {string} config.password - Optional password protection
+   * @param {string} config.workerUrl - Worker endpoint URL
+   * @param {string} config.adminSecret - Worker admin secret
+   * @param {object} options - Additional options
+   * @returns {Promise<object>} Publication result {success, url, slug, ...}
+   */
+  async function publish(config, options = {}) {
+    const {
+      filePath,
+      slug,
+      html,
+      title,
+      password,
+      workerUrl,
+      adminSecret
+    } = config;
+
+    const {
+      retryConfig = RetryStrategy.createConfig('default'),
+      timeout = RetryStrategy.timeouts.NORMAL,
+      electronAPI = window.electronAPI
+    } = options;
+
+    // ── Validation ──────────────────────────────
+
+    if (!filePath || !slug || !html) {
+      throw new PublishingErrorTypes.ValidationError(
+        'Missing required publishing configuration',
+        'config',
+        { filePath: !!filePath, slug: !!slug, html: !!html }
+      );
+    }
+
+    const slugValidation = PublishUtils.validateSlug(slug);
+    if (!slugValidation.valid) {
+      throw new PublishingErrorTypes.ValidationError(
+        slugValidation.error,
+        'slug',
+        slug
+      );
+    }
+
+    if (!workerUrl || !adminSecret) {
+      throw new PublishingErrorTypes.AuthenticationError(
+        'Worker URL and admin secret required',
+        'worker'
+      );
+    }
+
+    _log('info', `Publishing document: ${filePath} → ${slug}`);
+
+    // ── Gather Assets ───────────────────────────
+
+    const assetResult = await PublishUtils.gatherAssets(html, { electronAPI });
+
+    if (assetResult.errors && assetResult.errors.length > 0) {
+      _log('warn', `Asset gathering encountered errors: ${assetResult.errors.length} issues`);
+      assetResult.errors.forEach(err => {
+        _log('warn', `  - ${err.path}: ${err.error}`);
+      });
+    }
+
+    if (assetResult.unresolved && assetResult.unresolved.length > 0) {
+      _log('warn', `${assetResult.unresolved.length} assets could not be resolved`);
+    }
+
+    // ── Build Payload ───────────────────────────
+
+    const payload = {
+      slug: slugValidation.normalized,
+      title: PublishUtils.escapeHtml(title || 'Untitled'),
+      html,
+      password: password || null,
+      filePath,
+      // Assets for future implementation
+      assets: assetResult.resolved,
+      assetWarnings: assetResult.unresolved.length > 0 ? assetResult.unresolved : null,
+      metadata: {
+        source: 'mdpreview',
+        version: '1.2.0',
+        timestamp: new Date().toISOString()
+      }
+    };
+
+    // ── Send to Server Proxy ────────────────────
+
+    let response;
+    try {
+      response = await RetryStrategy.executeWithRetry(
+        () => _sendPublishRequest(payload, workerUrl, adminSecret),
+        {
+          ...retryConfig,
+          timeout,
+          onRetry: ({ error, attempt, nextDelayMs }) => {
+            _log('warn', `Publish attempt ${attempt} failed, retrying in ${nextDelayMs}ms: ${error.message}`);
+          }
+        }
+      );
+    } catch (error) {
+      _log('error', `Publishing failed after retries: ${error.message}`);
+      throw PublishingErrorTypes.createErrorFromResponse(error, 'Failed to publish document');
+    }
+
+    // ── Process Response ────────────────────────
+
+    if (!response || !response.success) {
+      const errorMsg = response?.error || 'Unknown publishing error';
+      const workerError = new PublishingErrorTypes.WorkerError(errorMsg, response?.code);
+      _log('error', `Worker rejected publish: ${errorMsg}`);
+      throw workerError;
+    }
+
+    const result = {
+      success: true,
+      slug: response.slug || slugValidation.normalized,
+      url: response.url || `${workerUrl}/${slugValidation.normalized}`,
+      publishedAt: new Date().toISOString(),
+      type: 'worker',
+      metadata: {
+        filePath,
+        workerUrl,
+        assetCount: Object.keys(assetResult.resolved).length,
+        htmlSize: html.length
+      }
+    };
+
+    _log('info', `Publishing successful: ${result.url}`);
+    return result;
+  }
+
+  /**
+   * Check if a slug is available on the worker
+   *
+   * @param {string} slug - Slug to check
+   * @param {string} workerUrl - Worker endpoint URL
+   * @returns {Promise<boolean>} True if slug is available
+   */
+  async function checkSlugAvailability(slug, workerUrl) {
+    const slugValidation = PublishUtils.validateSlug(slug);
+    if (!slugValidation.valid) {
+      _log('warn', `Invalid slug format: ${slug}`);
+      return false;
+    }
+
+    try {
+      const response = await RetryStrategy.fetchWithRetry(
+        `${workerUrl}/check-slug?slug=${encodeURIComponent(slugValidation.normalized)}`,
+        {
+          method: 'GET',
+          retryConfig: RetryStrategy.createConfig('quick'),
+          timeout: RetryStrategy.timeouts.SHORT
+        }
+      );
+
+      const data = await response.json();
+      return data.available !== false;
+    } catch (error) {
+      _log('error', `Slug availability check failed: ${error.message}`);
+      // On error, assume slug might be taken (fail safe)
+      return false;
+    }
+  }
+
+  /**
+   * Rename a published slug
+   *
+   * @param {object} config - Rename configuration
+   * @returns {Promise<object>} Rename result
+   */
+  async function renameSlug(config) {
+    const {
+      oldSlug,
+      newSlug,
+      workerUrl,
+      adminSecret
+    } = config;
+
+    const oldValidation = PublishUtils.validateSlug(oldSlug);
+    const newValidation = PublishUtils.validateSlug(newSlug);
+
+    if (!oldValidation.valid || !newValidation.valid) {
+      throw new PublishingErrorTypes.ValidationError(
+        'Invalid slug format',
+        'slug',
+        { oldSlug, newSlug }
+      );
+    }
+
+    _log('info', `Renaming slug: ${oldSlug} → ${newSlug}`);
+
+    try {
+      const response = await RetryStrategy.fetchWithRetry(
+        `${workerUrl}/rename`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Admin-Secret': adminSecret
+          },
+          body: JSON.stringify({
+            oldSlug: oldValidation.normalized,
+            newSlug: newValidation.normalized
+          }),
+          retryConfig: RetryStrategy.createConfig('default'),
+          timeout: RetryStrategy.timeouts.NORMAL
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (!data.success) {
+        if (data.code === 'SLUG_CONFLICT') {
+          throw new PublishingErrorTypes.SlugConflictError(newSlug);
+        }
+        throw new PublishingErrorTypes.WorkerError(data.error || 'Rename failed', data.code);
+      }
+
+      _log('info', `Slug renamed successfully: ${newSlug}`);
+      return {
+        success: true,
+        oldSlug: oldValidation.normalized,
+        newSlug: newValidation.normalized
+      };
+    } catch (error) {
+      _log('error', `Rename failed: ${error.message}`);
+      throw PublishingErrorTypes.createErrorFromResponse(error, 'Failed to rename slug');
+    }
+  }
+
+  /**
+   * Unpublish (delete) a document
+   *
+   * @param {object} config - Unpublish configuration
+   * @returns {Promise<object>} Unpublish result
+   */
+  async function unpublish(config) {
+    const {
+      slug,
+      workerUrl,
+      adminSecret
+    } = config;
+
+    const slugValidation = PublishUtils.validateSlug(slug);
+    if (!slugValidation.valid) {
+      throw new PublishingErrorTypes.ValidationError(
+        'Invalid slug format',
+        'slug',
+        slug
+      );
+    }
+
+    _log('info', `Unpublishing document: ${slug}`);
+
+    try {
+      const response = await RetryStrategy.fetchWithRetry(
+        `${workerUrl}/publish/${encodeURIComponent(slugValidation.normalized)}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'X-Admin-Secret': adminSecret
+          },
+          retryConfig: RetryStrategy.createConfig('quick'),
+          timeout: RetryStrategy.timeouts.NORMAL
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      _log('info', `Document unpublished: ${slug}`);
+      return {
+        success: true,
+        slug: slugValidation.normalized
+      };
+    } catch (error) {
+      _log('error', `Unpublish failed: ${error.message}`);
+      throw PublishingErrorTypes.createErrorFromResponse(error, 'Failed to unpublish document');
+    }
+  }
+
+  /**
+   * List all published slugs for this worker
+   *
+   * @param {string} workerUrl - Worker endpoint URL
+   * @param {string} adminSecret - Worker admin secret
+   * @returns {Promise<array>} Array of published slug metadata
+   */
+  async function listPublished(workerUrl, adminSecret) {
+    _log('info', 'Fetching published documents list');
+
+    try {
+      const response = await RetryStrategy.fetchWithRetry(
+        `${workerUrl}/list`,
+        {
+          method: 'GET',
+          headers: {
+            'X-Admin-Secret': adminSecret
+          },
+          retryConfig: RetryStrategy.createConfig('quick'),
+          timeout: RetryStrategy.timeouts.NORMAL
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.slugs || [];
+    } catch (error) {
+      _log('error', `Failed to list published documents: ${error.message}`);
+      throw PublishingErrorTypes.createErrorFromResponse(error, 'Failed to fetch published documents');
+    }
+  }
+
+  // ============================================
+  // PRIVATE FUNCTIONS
+  // ============================================
+
+  /**
+   * Send publish request to server proxy
+   * @private
+   */
+  async function _sendPublishRequest(payload, workerUrl, adminSecret) {
+    const response = await fetch('/api/worker-publish', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        payload,
+        workerUrl,
+        secret: adminSecret
+      })
+    });
+
+    const isJson = response.headers.get('content-type')?.includes('application/json');
+    let result = null;
+    
+    try {
+      if (isJson) result = await response.json();
+    } catch (_err) {
+      // Fallback if JSON parsing fails
+    }
+
+    if (!response.ok) {
+      const errorMsg = result?.error || `HTTP ${response.status}: ${response.statusText}`;
+      const error = new Error(errorMsg);
+      error.status = response.status;
+      error.code = result?.code;
+      error.details = result;
+      throw error;
+    }
+
+    return result;
+  }
+
+  /**
+   * Log message with tag and timestamp
+   * @private
+   */
+  function _log(level, message) {
+    const timestamp = new Date().toISOString().substring(11, 19);
+    const prefix = `[${timestamp}] ${LOG_TAG}`;
+
+    switch (level) {
+      case 'debug':
+        console.debug(prefix, message);
+        break;
+      case 'info':
+        console.log(prefix, message);
+        break;
+      case 'warn':
+        console.warn(prefix, message);
+        break;
+      case 'error':
+        console.error(prefix, message);
+        break;
+    }
+  }
+
+  // ============================================
+  // PUBLIC API
+  // ============================================
+
+  return {
+    publish,
+    checkSlugAvailability,
+    renameSlug,
+    unpublish,
+    listPublished,
+    type: 'worker'
+  };
+})();
+
+// Export for use in modules
+// Export to window for browser context
+window.WorkerPublishAdapter = WorkerPublishAdapter;
+
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = WorkerPublishAdapter;
+}
 
 ```
 </file>
@@ -24219,29 +26873,25 @@ window.GDocUtil = GDocUtil;
 
 function initMermaid() {
   if (typeof mermaid === 'undefined') return;
-  mermaid.initialize({
-    startOnLoad: false,
-    theme: 'dark',
-    themeVariables: {
-      primaryColor:        '#ffbf48',
-      primaryTextColor:    '#000000',
-      primaryBorderColor:  '#e6a800',
-      lineColor:           '#aaaaaa',
-      secondaryColor:      '#2a2a3e',
-      tertiaryColor:       '#1d1d2e',
-      mainBkg:             '#2d2d42',
-      nodeBorder:          '#5a5a7a',
-      clusterBkg:          'rgba(255,255,255,0.04)',
-      titleColor:          '#ffffff',
-      edgeLabelBackground: '#1a1a2e',
-      fontFamily:          'Inter, sans-serif'
-    }
-  });
+  mermaid.initialize(window.mermaidConfig.getMermaidConfig('server'));
 }
 
 async function processMermaid(container) {
   if (typeof mermaid === 'undefined') return;
+
+  // Collect nodes to render:
+  // 1. Existing .mermaid divs that haven't been rendered yet (no SVG children)
+  // 2. Legacy pre > code.language-mermaid elements (for backwards compatibility)
   const nodes = [];
+
+  // First: Check for existing mermaid divs that need rendering
+  container.querySelectorAll('.mermaid').forEach(div => {
+    if (!div.querySelector('svg')) {
+      nodes.push(div);
+    }
+  });
+
+  // Second: Handle legacy pre > code.language-mermaid (if any)
   container.querySelectorAll('pre > code.language-mermaid').forEach(el => {
     const content = el.textContent.trim();
     if (!content) return; // Skip empty blocks
@@ -24249,7 +26899,7 @@ async function processMermaid(container) {
     const wrapper = document.createElement('div');
     wrapper.className = 'mermaid';
     wrapper.textContent = content;
-    
+
     // ── Defensive: Force stable width if inside Project Map ──
     // Mermaid's layout engine crashes if it detects the tiny scaled dimensions of the mini-map.
     if (container.closest('.ds-project-map__mirror') || container.classList.contains('ds-project-map__mirror')) {
@@ -24269,12 +26919,12 @@ async function processMermaid(container) {
       // ── Defensive: Only process nodes that are actually in the document and have dimensions ──
       const activeNodes = nodes.filter(node => {
         if (!document.body.contains(node)) return false;
-        
+
         // Use offsetWidth/Height to ensure the element is actually laid out and visible
         // If it's 0, Mermaid's layout engine (D3) will often produce NaN/undefined
         const style = window.getComputedStyle(node);
         const isVisible = style.display !== 'none' && style.visibility !== 'hidden' && node.offsetWidth > 0;
-        
+
         return isVisible;
       });
 
@@ -24591,6 +27241,8 @@ function openZoom(mermaidDiv) {
 
   const modal     = document.getElementById('zoom-modal');
   const container = document.getElementById('zoom-container');
+  if (!modal || !container) return;
+
   container.innerHTML = '';
 
   const clone = svg.cloneNode(true);

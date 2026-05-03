@@ -19,7 +19,7 @@ npm install
 
 # Đồng bộ CSS từ tokens (Phase 1.2)
 echo "🎨 2/4: Syncing publish CSS from tokens..."
-npm run build:publish-css
+npm run build:publish-assets
 
 # Xây dựng lại ứng dụng (chế độ build:dir để nhanh hơn bản DMG)
 echo "🏗️ 3/4: Building application (.app)..."
