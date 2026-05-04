@@ -11,6 +11,8 @@ const EditorModule = (() => {
   let _redoStack = [];
   let _debounceTimer = null;
   let _ignoreNextInput = false; // set to true when we're restoring a snapshot
+  let _isSlashMode = false;
+  let _slashStartPos = -1;
 
   function _snapshot() {
     if (!_textarea) return;
@@ -60,21 +62,93 @@ const EditorModule = (() => {
     _undoStack = [{ value: _textarea.value, ss: _textarea.selectionStart, se: _textarea.selectionEnd }];
     _redoStack = [];
 
-    _textarea.addEventListener('input', () => {
+    _textarea.addEventListener('input', (e) => {
       if (_ignoreNextInput) { _ignoreNextInput = false; return; }
       _scheduleSnapshot();
       
-      // Update Tab Dirty State
       if (typeof TabsModule !== 'undefined' && AppState.currentFile) {
         TabsModule.setDirty(AppState.currentFile, isDirty());
+      }
+
+      // ── Slash Command Logic ──
+      const pos = _textarea.selectionStart;
+      const text = _textarea.value;
+
+      if (e.data === '/') {
+        // Trigger if it's the start of a line or preceded by a space/newline
+        if (pos === 1 || /[\s\n]/.test(text.charAt(pos - 2))) {
+          _isSlashMode = true;
+          _slashStartPos = pos - 1;
+          _showQuickCommand(true, true);
+        }
+      } else if (_isSlashMode) {
+        // If the slash is gone or we moved before it, stop
+        if (text.charAt(_slashStartPos) !== '/' || pos <= _slashStartPos) {
+          _isSlashMode = false;
+          window.QuickCommandPalette.hide();
+          return;
+        }
+
+        const query = text.substring(_slashStartPos + 1, pos);
+        
+        // Stop ONLY on hard line breaks in input event
+        if (/[\n\r]/.test(query)) {
+          _isSlashMode = false;
+          window.QuickCommandPalette.hide();
+          return;
+        }
+        
+        // Update palette (it handles empty matches internally with a friendly UI)
+        window.QuickCommandPalette.updateQuery(query);
       }
     });
 
     _textarea.addEventListener('keydown', (e) => {
+      // If in Slash Mode, intercept Space and Arrows
+      if (_isSlashMode) {
+        if (e.key === ' ') {
+          const cmdId = window.QuickCommandPalette.getSelectedCommandId();
+          if (cmdId) {
+            e.preventDefault();
+            _applySlashCommand(cmdId);
+            return;
+          } else {
+            _isSlashMode = false;
+            window.QuickCommandPalette.hide();
+          }
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          window.QuickCommandPalette.navigate('down');
+          return;
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          window.QuickCommandPalette.navigate('up');
+          return;
+        } else if (e.key === 'Escape') {
+          _isSlashMode = false;
+          window.QuickCommandPalette.hide();
+        } else if (e.key === 'Enter') {
+          const cmdId = window.QuickCommandPalette.getSelectedCommandId();
+          if (cmdId) {
+            e.preventDefault();
+            _applySlashCommand(cmdId);
+            return;
+          }
+        }
+        // Removed Backspace intercept here to let 'input' handle it
+      }
+
       // Global Shortcut Interception (TC-10)
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault();
         save();
+        return;
+      }
+
+      // Quick Command Action (Cmd + /)
+      if ((e.metaKey || e.ctrlKey) && e.key === '/') {
+        e.preventDefault();
+        _showQuickCommand();
         return;
       }
 
@@ -84,6 +158,38 @@ const EditorModule = (() => {
         if (e.shiftKey) redo(); else undo();
       }
     });
+  }
+
+  /**
+   * Applies the command and removes the slash + query text
+   */
+  function _applySlashCommand(cmdId) {
+    const pos = _textarea.selectionStart;
+    // Remove the "/query" part
+    _textarea.setRangeText('', _slashStartPos, pos, 'end');
+    _isSlashMode = false;
+    window.QuickCommandPalette.hide();
+    applyAction(cmdId);
+  }
+
+  /**
+   * Shows the QuickCommandPalette at the current cursor position.
+   * @param {boolean} isSlashTrigger 
+   * @param {boolean} hideInput
+   */
+  function _showQuickCommand(isSlashTrigger = false, hideInput = false) {
+    if (!window.QuickCommandPalette || !window.EditorUtil) return;
+
+    const coords = window.EditorUtil.getCursorCoordinates(_textarea);
+    
+    window.QuickCommandPalette.show(coords.left, coords.top + coords.lineHeight, (actionId) => {
+      if (isSlashTrigger) {
+        const pos = _textarea.selectionStart;
+        _textarea.setRangeText('', _slashStartPos, pos, 'end');
+        _isSlashMode = false;
+      }
+      applyAction(actionId);
+    }, { hideInput });
   }
 
   /**
@@ -230,6 +336,7 @@ const EditorModule = (() => {
       focusWithContext,
       getOriginalContent: () => _originalContent,
       insertContent,
+      triggerQuickCommand: () => _showQuickCommand(),
       revert
   };
 })();

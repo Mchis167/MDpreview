@@ -662,7 +662,13 @@ document.addEventListener('DOMContentLoaded', async () => {
           window.showToast('Document not published yet', 'info');
         }
       },
-      'keyboard-shortcuts': () => window.SearchPalette?.show('shortcut'),
+      'keyboard-shortcuts': () => {
+        if (AppState.currentMode === 'edit' && window.EditorModule) {
+          window.EditorModule.triggerQuickCommand();
+        } else {
+          window.SearchPalette?.show('shortcut');
+        }
+      },
       'open-settings': () => window.SettingsComponent?.toggle(),
       'close-cancel': () => {
          // Close Search

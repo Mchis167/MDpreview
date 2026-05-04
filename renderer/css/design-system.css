@@ -35,6 +35,7 @@
 @import 'design-system/molecules/tab-preview.css';
 @import 'design-system/molecules/project-map.css';
 @import 'design-system/molecules/combo-button.css';
+@import 'design-system/molecules/quick-command-palette.css';
 
 /* ── Organisms ──────────────────────────────────────────── */
 @import 'design-system/organisms/sidebar-left.css';

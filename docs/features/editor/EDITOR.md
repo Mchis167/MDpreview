@@ -77,6 +77,26 @@ Focus vào textarea và đồng bộ con trỏ với read view — dùng khi chu
 
 ---
 
+## Slash Commands
+
+Hỗ trợ hệ thống lệnh nhanh (Slash Commands) giúp định dạng Markdown trực tiếp mà không cần dùng chuột hoặc phím tắt phức tạp.
+
+### Kích hoạt Slash Mode
+Khi gõ ký tự `/` ở đầu dòng hoặc sau một dấu cách/xuống dòng:
+1. `EditorModule` chuyển sang **Slash Mode** (`_isSlashMode = true`).
+2. Gọi `QuickCommandPalette.show()` ở chế độ ẩn input (`hideInput: true`).
+3. Vị trí con trỏ bắt đầu dấu `/` được lưu lại (`_slashStartPos`).
+
+### Tương tác trong Slash Mode
+- **Gõ chữ**: Văn bản sau dấu `/` được gửi xuống `QuickCommandPalette.updateQuery()` để lọc lệnh theo thời gian thực.
+- **Phím mũi tên (Up/Down)**: Được đánh chặn và gửi xuống `QuickCommandPalette.navigate()` để di chuyển vùng chọn trong danh sách lệnh.
+- **Phím Space/Enter**:
+    - Nếu có lệnh đang được chọn: Áp dụng lệnh và thoát Slash Mode.
+    - Nếu không có lệnh nào khớp: Thoát Slash Mode (giữ nguyên text đã gõ).
+- **Xóa lùi (Backspace)**: Slash Mode vẫn tiếp tục cho đến khi dấu `/` tại vị trí bắt đầu bị xóa.
+
+---
+
 ## Keyboard Shortcuts (trong edit mode)
 
 | Shortcut | Hành động |
@@ -84,15 +104,18 @@ Focus vào textarea và đồng bộ con trỏ với read view — dùng khi chu
 | Mod+S | `save()` |
 | Mod+Z | `undo()` |
 | Mod+Shift+Z | `redo()` |
+| `/` | Kích hoạt Slash Mode (ở đầu dòng/sau dấu cách) |
+| Mod+/ | Mở Quick Command Palette (toàn bộ danh sách) |
 
 ---
 
 ## Lưu ý quan trọng
 
 - `bindToElement()` và `unbind()` **phải được gọi đúng cặp** — `MarkdownEditor` component lo việc này khi render/destroy
+- Sau khi áp dụng lệnh qua Slash Mode, `EditorModule` phối hợp với `MarkdownLogicService` để thực hiện **Smart Selection** (chỉ bôi đen nội dung cần sửa, bỏ qua ký tự Markdown).
 - Dirty state được check bởi `loadFile()` và `WorkspaceModule.switchTo()` trước khi chuyển file/workspace
 - Undo stack **không persist** qua session — mỗi lần mở file là stack mới
 
 ---
 
-*Document — 2026-04-29*
+*Document — 2026-05-04*
