@@ -20,7 +20,7 @@ All notable changes to this project will be documented in this file.
 - **Sync Race Conditions**: Sử dụng `lastRequestId` để đảm bảo chỉ kết quả render mới nhất được áp dụng lên giao diện, tránh hiện tượng nội dung cũ ghi đè nội dung mới.
 - **Preview Reload Recovery**: Khắc phục triệt để lỗi màn hình trắng sau khi reload cửa sổ preview thông qua cơ chế tự động nạp lại dữ liệu ngay khi cửa sổ sẵn sàng.
 
-## [1.6.0] — 2026-05-04 17:00
+## [Not Commited] — 2026-05-04 16:38
 
 ### 🚀 Added
 - **Modern Slash Command System**: Triển khai hệ thống lệnh nhanh (`/`) ngay trong trình soạn thảo, hỗ trợ lọc lệnh thời gian thực và thực thi không làm gián đoạn luồng viết.
