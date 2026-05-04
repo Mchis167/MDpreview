@@ -125,6 +125,7 @@ export function buildShell({ slug, html, title = 'Document', assetsUrl = '/publi
         <span class="ds-logo-text">MDpreview</span>
       </div>
       <div class="ds-publish-doc-title">${escapedTitle}</div>
+      <div id="ds-reading-progress" class="ds-reading-progress"></div>
     </div>
   </header>
   <div id="md-publish-loading" class="ds-publish-loading">

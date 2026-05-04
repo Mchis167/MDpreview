@@ -160,6 +160,49 @@ function initZoom() {
     updateZoomTransform();
     updateZoomPercent();
   }, { passive: false });
+
+  // Touch support: Pan and Pinch-to-zoom
+  let initialPinchDist = 0;
+  let initialPinchScale = 1;
+
+  const getDist = (t1, t2) => Math.sqrt(Math.pow(t1.clientX - t2.clientX, 2) + Math.pow(t1.clientY - t2.clientY, 2));
+
+  modal.addEventListener('touchstart', e => {
+    if (e.target.closest('#zoom-close') || e.target.closest('#zoom-controls-bar')) return;
+    if (e.touches.length === 1) {
+      zoomMoving = true;
+      zoomStartX = e.touches[0].clientX - zoomX;
+      zoomStartY = e.touches[0].clientY - zoomY;
+    } else if (e.touches.length === 2) {
+      zoomMoving = false;
+      initialPinchDist = getDist(e.touches[0], e.touches[1]);
+      initialPinchScale = zoomScale;
+    }
+  }, { passive: true });
+
+  modal.addEventListener('touchmove', e => {
+    if (e.touches.length === 1 && zoomMoving) {
+      zoomX = e.touches[0].clientX - zoomStartX;
+      zoomY = e.touches[0].clientY - zoomStartY;
+      updateZoomTransform();
+    } else if (e.touches.length === 2) {
+      e.preventDefault();
+      const dist = getDist(e.touches[0], e.touches[1]);
+      const factor = dist / (initialPinchDist || 1);
+      const newScale = Math.min(10, Math.max(0.05, initialPinchScale * factor));
+      const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      const xs = (centerX - zoomX) / zoomScale;
+      const ys = (centerY - zoomY) / zoomScale;
+      zoomScale = newScale;
+      zoomX = centerX - xs * zoomScale;
+      zoomY = centerY - ys * zoomScale;
+      updateZoomTransform();
+      updateZoomPercent();
+    }
+  }, { passive: false });
+
+  modal.addEventListener('touchend', () => { zoomMoving = false; });
 }
 
 window.openZoom = openZoom;

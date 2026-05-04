@@ -707,7 +707,66 @@ Refer back to this document when:
 
 All notable changes to this project will be documented in this file.
 
+## [Not Commited] — 2026-05-04 14:55
+
+### 🚀 Added
+- **Mobile Pinch-to-Zoom (Mermaid)**: Triển khai khả năng thu phóng biểu đồ Mermaid bằng hai ngón tay trên di động. Chặn hoàn toàn việc phóng to toàn trang để giữ các nút điều hướng cố định và sắc nét.
+- **Reading Progress Indicator (Publish Site)**: Bổ sung thanh tiến trình đọc mỏng (2px) sát cạnh dưới Header, tự động cập nhật theo vị trí cuộn trang.
+- **Mobile TOC Overlay**: Chuyển đổi Mục lục từ Sidebar sang giao diện Lớp phủ (Overlay) cao cấp trên di động, hỗ trợ hiệu ứng Glassmorphism và tự động đóng sau khi chọn mục.
+- **Ergonomic Mobile FAB**: Di chuyển nút Toggle TOC xuống góc dưới bên phải trên di động để tối ưu thao tác bằng một tay.
+
+### 🔧 Changed
+- **Adaptive Header Branding**: Tự động ẩn chữ "MDpreview" trên màn hình < 480px để dành diện tích cho tiêu đề tài liệu.
+- **Mobile Content Padding**: Tinh chỉnh lề nội dung trên màn hình nhỏ để tối đa hóa không gian đọc.
+
+### 🐞 Fixed
+- **Mobile Scroll Conflict**: Triển khai cơ chế khóa cuộn trang (`body.no-scroll`) khi Menu TOC đang mở trên di động, ngăn chặn xung đột cuộn giữa nội dung chính và mục lục.
+- **Table Horizontal Scrolling**: Khắc phục triệt để lỗi bảng bị "khóa" không cuộn ngang được. Giải phóng `overflow` và áp dụng `min-width` cho từng ô để bảo toàn cấu trúc bảng trên mọi thiết bị.
+- **Mobile TOC UI Refinements**: 
+    - Tăng hiệu ứng làm mờ nền (`backdrop-filter: blur(60px)`) cho menu TOC di động để tăng độ tương phản và thẩm mỹ.
+    - Giảm khoảng cách lề trên (`padding-top: 60px`) giúp hiển thị nội dung mục lục sớm hơn trên màn hình nhỏ.
+    - Ẩn thanh chỉ báo mục đang đọc (`::before`) để giao diện Menu gọn gàng hơn, tận dụng sự hiện diện của Reading Progress Bar.
+- **Linting Stabilization**: Duy trì trạng thái **Zero Errors / Zero Warnings** sau khi nâng cấp Mobile UX.
+
+### 🔧 Changed
+- **Mac-Native Shortcut Overhaul**:
+    - **Physical Key Mapping**: Nâng cấp `ShortcutService` sử dụng `e.code` để nhận diện phím gốc, khắc phục triệt để lỗi Mac tự chuyển đổi ký tự khi nhấn phím Option (ví dụ: `Opt+P` thành `π`).
+    - **Mac Symbols UI**: Tự động chuyển đổi hiển thị phím `Alt` thành `⌥` (Option) và `Mod` thành `⌘` (Command) trong Search Palette.
+    - **Standard Mac Redo**: Cập nhật phím tắt Redo thành `Cmd + Shift + Z` cho người dùng Mac.
+    - **Standard Fullscreen**: Chuyển đổi phím tắt Toàn màn hình sang `Cmd + Ctrl + F`.
+    - **Conflict Avoidance**: Đổi phím tắt Markdown Helper sang `Cmd + Opt + H` để tránh xung đột với lệnh ẩn ứng dụng (`Cmd + H`) của macOS.
+- **Shortcut Priority Enforcement**: Áp dụng cơ chế `stopPropagation` và `capture: true` đảm bảo phím tắt ứng dụng luôn được ưu tiên tuyệt đối trước các phím tắt mặc định của trình duyệt.
+
+### 🐞 Fixed
+- **Mac Alt-Key Interception**: Khắc phục lỗi `Cmd + Opt + P` vẫn kích hoạt hộp thoại in của trình duyệt bằng cách cải thiện logic nhận diện phím vật lý.
+- **Linting Stabilization**: Đạt trạng thái **Zero Errors / Zero Warnings** sau khi tinh chỉnh logic phím tắt.
+
+## [1.4.0] — 2026-05-04 14:30
+
+### 🚀 Added
+- **Professional Side-Panel Layout (Publish Site)**: Chuyển đổi giao diện tài liệu xuất bản sang cấu trúc Sidebar cố định (300px), giúp tách biệt rõ ràng giữa Mục lục (TOC) và Nội dung chính.
+- **TOC Active Indicator**: Triển khai thanh chỉ báo trạng thái (Active Indicator) màu cam đặc trưng cho toàn bộ các cấp tiêu đề (h2-h6), hỗ trợ theo dõi vị trí đọc trực quan.
+- **Vietnamese-friendly Slug Utility**: Triển khai hàm `slugifyHeading` hỗ trợ khử dấu Tiếng Việt, xử lý Unicode và tự động xử lý trùng lặp slug cho URL bản publish chuẩn SEO.
+- **Hybrid ID Injection Architecture**: Tái cấu trúc pipeline xuất bản với cơ chế "Double Injection" (render-time + runtime) để đảm bảo ID tiêu đề luôn đồng bộ 100%.
+
+### 🔧 Changed
+- **Modernized Header & UI**: 
+    - Nâng cấp Header với thanh ngăn dọc và hiệu ứng Glassmorphism sâu (100px blur).
+    - Căn giữa nội dung chính với chiều rộng tối ưu (850px) cho trải nghiệm đọc cao cấp.
+    - Chuẩn hóa toàn bộ kích thước: Header/Sidebar (41px top), Sidebar width (300px).
+- **Improved Scroll Sync UX**: Tăng `SCROLL_OFFSET` lên 200px giúp hệ thống nhận diện và highlight section mới sớm hơn, mang lại trải nghiệm cuộn tự nhiên.
+- **UX Layout Refinement**: Di chuyển nút TOC Toggle sang trái màn hình để bám sát sidebar và tối ưu hóa luồng tương tác.
+
+### 🐞 Fixed
+- **TOC Navigation & Highlighting**: 
+    - Khắc phục triệt để lỗi "Highlight bị kẹt" và lỗi "Click TOC không nhảy đến section" trên bản live.
+    - Sửa lỗi hiển thị Indicator ở các cấp h3-h6 thông qua `overflow: visible` cho item-children.
+- **Production Optimization**: Loại bỏ hoàn toàn các `console.log` và `console.warn` trong luồng xử lý runtime của TOC.
+- **Layout Sync**: Đồng bộ hóa các thông số `top` và `height` của sidebar khớp với chiều cao thực tế của header mới.
+
+
 ## [1.3.0] — 2026-05-03 10:15
+
 
 ### 🎉 Added
 - **Dynamic Shell Injection Architecture**: Refactored the publishing pipeline to decouple Markdown content from the HTML shell. This enables instant, global updates to UI, CSS, and JS features across all published documents without manual re-publishing.

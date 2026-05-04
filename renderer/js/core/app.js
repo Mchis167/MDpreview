@@ -646,6 +646,22 @@ document.addEventListener('DOMContentLoaded', async () => {
            if (target) window.TreeModule.collapseOthers(target);
          }
       },
+      'toggle-publish': (e) => {
+        const v = window.MarkdownViewer?.getInstance();
+        if (v && v._publishBtn) {
+          v._togglePublishConfig({ event: e, anchor: v._publishBtn });
+        } else if (window.PublishConfigComponent && window.AppState.currentFile) {
+          window.PublishConfigComponent.toggle({ file: window.AppState.currentFile });
+        }
+      },
+      'view-live': () => {
+        const info = window.PublishService ? window.PublishService.getPublishInfo(window.AppState.currentFile) : null;
+        if (info && info.url) {
+          window.open(info.url, '_blank');
+        } else if (window.showToast) {
+          window.showToast('Document not published yet', 'info');
+        }
+      },
       'keyboard-shortcuts': () => window.SearchPalette?.show('shortcut'),
       'open-settings': () => window.SettingsComponent?.toggle(),
       'close-cancel': () => {

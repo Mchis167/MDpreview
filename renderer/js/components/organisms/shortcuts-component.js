@@ -30,9 +30,16 @@ class ShortcutsComponent {
           { id: 'focus-search', label: 'Focus Search', keys: ['Mod', 'P'], icon: 'search', tags: ['find', 'palette', 'tìm kiếm'] },
           { id: 'scroll-top', label: 'Scroll to Top', keys: ['Mod', '↑'], icon: 'arrow-up', tags: ['up', 'start', 'lên đầu'] },
           { id: 'scroll-bottom', label: 'Scroll to Bottom', keys: ['Mod', '↓'], icon: 'arrow-down', tags: ['down', 'end', 'xuống cuối'] },
-          { id: 'toggle-fullscreen', label: 'Toggle Fullscreen', keys: isMac ? ['Mod', 'Shift', 'F'] : ['F11'], icon: 'maximize', tags: ['window', 'expand', 'toàn màn hình'] },
+          { id: 'toggle-fullscreen', label: 'Toggle Fullscreen', keys: isMac ? ['Mod', 'Control', 'F'] : ['F11'], icon: 'maximize', tags: ['window', 'expand', 'toàn màn hình'] },
           { id: 'toggle-toc', label: 'Toggle Table of Contents', keys: ['Mod', 'Alt', 'T'], icon: 'list-tree', tags: ['outline', 'navigation', 'mục lục'] },
           { id: 'toggle-map', label: 'Toggle Project Map', keys: ['Mod', 'Alt', 'M'], icon: 'map', tags: ['mini-map', 'overview', 'bản đồ'] }
+        ]
+      },
+      {
+        title: 'Publishing',
+        items: [
+          { id: 'toggle-publish', label: 'Publish Configuration', keys: ['Mod', 'Alt', 'P'], icon: 'globe', tags: ['live', 'deploy', 'xuất bản'] },
+          { id: 'view-live', label: 'View Live Page', keys: ['Mod', 'Alt', 'L'], icon: 'external-link', tags: ['browser', 'public', 'xem bản live'] }
         ]
       },
       {
@@ -55,8 +62,8 @@ class ShortcutsComponent {
         items: [
           { id: 'save-file', label: 'Save File', keys: ['Mod', 'S'], icon: 'save', tags: ['persist', 'store', 'write', 'lưu'] },
           { id: 'undo', label: 'Undo', keys: ['Mod', 'Z'], icon: 'undo', tags: ['back', 'reverse', 'quay lại'] },
-          { id: 'redo', label: 'Redo', keys: ['Mod', 'Y'], icon: 'redo', tags: ['forward', 'làm lại'] },
-          { id: 'markdown-helper', label: 'Markdown Helper', keys: ['Mod', 'H'], icon: 'help-circle', tags: ['guide', 'syntax', 'trợ giúp'] }
+          { id: 'redo', label: 'Redo', keys: isMac ? ['Mod', 'Shift', 'Z'] : ['Mod', 'Y'], icon: 'redo', tags: ['forward', 'làm lại'] },
+          { id: 'markdown-helper', label: 'Markdown Helper', keys: ['Mod', 'Alt', 'H'], icon: 'help-circle', tags: ['guide', 'syntax', 'trợ giúp'] }
         ]
       },
       {

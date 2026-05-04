@@ -26,6 +26,7 @@ Popover điều khiển việc xuất bản một file cụ thể. Tích hợp t
 - **Smart Slug**: Tự động chuẩn hóa slug khi gõ.
 - **Live Validation**: Debounced 500ms để kiểm tra tính khả dụng của slug trên Worker.
 - **Overwrite Warning**: Tự động chuyển đổi nút sang "Overwrite & Publish" nếu phát hiện slug bị trùng.
+- **Enter-to-Publish**: Hỗ trợ phím `Enter` khi đang focus vào ô nhập slug để kích hoạt lệnh "Go Live" nhanh chóng nếu nút đã sẵn sàng.
 
 ### `Stale Check (Logic khởi tạo)`
 Khi mở bảng, nếu App ghi nhận file đã đăng, nó sẽ tự đối chiếu với server. Nếu slug không còn tồn tại trên Cloudflare, App sẽ tự động xóa trạng thái cục bộ (**Self-Healing**).
@@ -64,4 +65,6 @@ Hệ thống sử dụng các callback và cơ chế `await` để đảm bảo 
 
 ---
 
-*Document — 2026-04-30*
+---
+
+*Document — 2026-05-04*

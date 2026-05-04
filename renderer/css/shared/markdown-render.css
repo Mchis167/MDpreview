@@ -245,9 +245,8 @@
     border-radius: var(--ds-radius-panel) !important;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
     margin: 2rem 0 !important;
-    overflow: hidden !important;
     width: 100%;
-    overflow-x: auto;
+    overflow-x: auto !important;
     isolation: isolate;
 }
 
@@ -256,7 +255,6 @@
     border-collapse: separate;
     border-spacing: 0;
     font-size: 0.95em;
-    min-width: 600px;
 }
 
 .md-render-body th {
@@ -271,6 +269,7 @@
     border-bottom: 1px solid var(--ds-white-a08);
     white-space: nowrap;
     font-family: var(--ds-font-family-code);
+    min-width: 120px;
 }
 
 .md-render-body td {
@@ -279,6 +278,7 @@
     border-right: 1px solid var(--ds-white-a02);
     color: var(--ds-text-secondary);
     line-height: 1.6;
+    min-width: 120px;
 }
 
 .md-render-body td:last-child {

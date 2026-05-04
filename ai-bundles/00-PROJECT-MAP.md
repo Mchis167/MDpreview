@@ -49,7 +49,8 @@ Vui lòng đọc các file theo thứ tự số thứ tự (00 -> 08) để hi�
 │   ├── Antigravity_Chart_Guide.md
 │   └── Example_Audit_With_Charts.md
 ├── ImplementPlan
-│   └── Implementation Plan_ TOC Shared Module.md
+│   ├── Implementation Plan_ TOC Shared Module.md
+│   └── Update Publish TOC Heading Reader.md
 ├── README.md
 ├── bundle.command
 ├── cf-publish-worker
@@ -131,6 +132,8 @@ Vui lòng đọc các file theo thứ tự số thứ tự (00 -> 08) để hi�
 │   │   ├── 20260429-stable-layout-border-pattern.md
 │   │   ├── 20260502-content-padding-width-synchronization.md
 │   │   ├── 20260502-publish-security-hardening.md
+│   │   ├── 20260504-hybrid-toc-id-injection.md
+│   │   ├── 20260504-vietnamese-slugification-strategy.md
 │   │   └── README.md
 │   ├── features
 │   │   ├── GUIDE.md

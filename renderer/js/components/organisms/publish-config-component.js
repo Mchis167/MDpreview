@@ -129,6 +129,14 @@ const PublishConfigComponent = (() => {
           if (raw !== clean) input.value = clean;
           this._checkSlug(clean);
         });
+
+        // Add Enter key listener to trigger Go Live
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && this.publishBtn && !this.publishBtn.disabled && !this.state.isLoading) {
+            e.preventDefault();
+            this.publishBtn.click();
+          }
+        });
       }
 
       // Initial Check - SKIP IF LOADING

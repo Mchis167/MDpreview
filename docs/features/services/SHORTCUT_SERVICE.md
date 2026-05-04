@@ -13,7 +13,7 @@ Giải quyết các vấn đề về phím tắt phân tán, xung đột phím g
 ## Lifecycle
 
 ### `init()`
-Khởi tạo trình lắng nghe sự kiện `keydown` toàn cục trên `document` với cơ chế **Capture Phase** (`capture: true`) để đánh chặn sự kiện trước khi nó tới các thành phần UI con.
+Khởi tạo trình lắng nghe sự kiện `keydown` toàn cục trên `document` với cơ chế **Capture Phase** (`capture: true`) để đánh chặn sự kiện trước khi nó tới các thành phần UI con. Hệ thống sử dụng `e.preventDefault()` và `e.stopPropagation()` để đảm bảo phím tắt ứng dụng luôn có quyền ưu tiên cao nhất trước trình duyệt.
 
 ---
 
@@ -61,9 +61,10 @@ Mỗi shortcut item trong registry có cấu trúc:
 
 ## Lưu ý quan trọng
 
-- **Không dùng `e.stopPropagation()`**: `ShortcutService` dùng Capture Phase nên nó sẽ nhận sự kiện trước. Nếu module con muốn chặn phím tắt, nó phải được thực hiện ở phase sau.
+- **Ưu tiên chặn sự kiện**: `ShortcutService` sử dụng `e.stopPropagation()` để ngăn chặn phím tắt mặc định của trình duyệt (ví dụ: Cmd+S, Cmd+P) ngay cả khi chúng là phím tắt hệ thống.
+- **Mac Alt-Key Character Fallback**: Trên macOS, khi nhấn phím Option, trình duyệt sẽ biến đổi ký tự (ví dụ: `Opt+P` thành `π`). Service đã được nâng cấp để sử dụng `e.code` (mã phím vật lý) làm phương án dự phòng, đảm bảo phím tắt luôn hoạt động đúng bất kể layout bàn phím.
 - **Browser Conflict**: Các phím `Cmd + 1-4` thường bị trình duyệt chiếm dụng để chuyển Tab, nên Service hỗ trợ thêm `Alt + 1-4` làm phương án dự phòng mặc định.
 
 ---
 
-*Document — 2026-04-30*
+*Document — 2026-05-04*

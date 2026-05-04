@@ -15,6 +15,29 @@ const SearchPalette = (() => {
   let _selectedIndex = -1;
   let _searchTimeout = null;
   let _searchMode = 'all'; // all, file, directory, shortcut
+  const RECENT_SHORTCUTS_KEY = 'mdpreview_recent_shortcuts';
+
+  /**
+   * Add a shortcut ID to the recent list
+   */
+  function _addRecentShortcut(id) {
+    if (!id) return;
+    let recent = _getRecentShortcuts();
+    recent = [id, ...recent.filter(i => i !== id)].slice(0, 5);
+    localStorage.setItem(RECENT_SHORTCUTS_KEY, JSON.stringify(recent));
+  }
+
+  /**
+   * Retrieve the list of recent shortcut IDs
+   */
+  function _getRecentShortcuts() {
+    try {
+      const data = localStorage.getItem(RECENT_SHORTCUTS_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch (_e) {
+      return [];
+    }
+  }
 
   /**
    * Initialize DOM structure
@@ -242,6 +265,7 @@ const SearchPalette = (() => {
 
       // Handle Shortcut Execution
       if (item.type === 'shortcut') {
+        _addRecentShortcut(item.id);
         if (window.ShortcutsComponent && window.ShortcutsComponent.executeAction) {
           window.ShortcutsComponent.executeAction(item.id);
         }
@@ -294,13 +318,43 @@ const SearchPalette = (() => {
 
     // ── Grouped Shortcuts Mode (No Query) ──
     if (_searchMode === 'shortcut' && !query) {
+      const allShortcuts = SearchService.searchShortcuts('');
+      const recentIds = _getRecentShortcuts();
+      
+      let itemIndex = 0;
+
+      // 1. Render Recently Used Section
+      if (recentIds.length > 0) {
+        const header = document.createElement('div');
+        header.className = 'palette-section-header';
+        header.innerHTML = `${DesignSystem.getIcon('history')} Recently Used`;
+        header.style.display = 'flex';
+        header.style.alignItems = 'center';
+        header.style.gap = '8px';
+        _resultsContainer.appendChild(header);
+
+        recentIds.forEach(id => {
+          const itemData = allShortcuts.find(s => s.id === id);
+          if (itemData) {
+            const itemEl = _createShortcutItem(itemData, itemIndex, query);
+            itemEl.classList.add('is-recent-shortcut');
+            _resultsContainer.appendChild(itemEl);
+            itemIndex++;
+          }
+        });
+
+        const divider = document.createElement('div');
+        divider.className = 'palette-divider';
+        _resultsContainer.appendChild(divider);
+      }
+
+      // 2. Render Normal Groups
       const grouped = {};
       _results.forEach(item => {
         if (!grouped[item.group]) grouped[item.group] = [];
         grouped[item.group].push(item);
       });
 
-      let itemIndex = 0;
       let sectionIndex = 0;
       for (const groupTitle in grouped) {
         if (sectionIndex > 0) {
@@ -414,9 +468,10 @@ const SearchPalette = (() => {
     const keysHtml = itemData.keys.map(key => {
       let keyText = key;
       const isMac = /Mac|iPhone|iPod|iPad/.test(navigator.platform) || (navigator.userAgentData && navigator.userAgentData.platform === 'macOS');
-      if (isMac && key === 'Ctrl') keyText = '⌘';
+      if (isMac && (key === 'Ctrl' || key === 'Mod' || key === 'Cmd')) keyText = '⌘';
       if (isMac && key === 'Shift') keyText = '⇧';
-      if (isMac && key === 'Option') keyText = '⌥';
+      if (isMac && (key === 'Alt' || key === 'Option')) keyText = '⌥';
+      if (isMac && key === 'Control') keyText = '⌃';
       if (isMac && key === 'Backspace') keyText = '⌫';
       return `<kbd class="ds-kbd">${keyText}</kbd>`;
     }).join('');

@@ -64,9 +64,16 @@ const ShortcutService = (() => {
    */
   function _handleKeyDown(e) {
     const mod = isMac ? e.metaKey : e.ctrlKey;
-    const key = e.key.toLowerCase();
+    const ctrl = isMac ? e.ctrlKey : false; // Specifically the Control key on Mac
+    let key = e.key.toLowerCase();
     const isShift = e.shiftKey;
     const isAlt = e.altKey;
+
+    // Mac specific: Handle Alt-key character transformations (e.g. Opt+P -> π)
+    // We fallback to e.code to get the base letter if it's a Key* code.
+    if (isMac && isAlt && e.code && e.code.startsWith('Key')) {
+      key = e.code.slice(3).toLowerCase();
+    }
 
     // 1. Global Blocking Logic (Typed in inputs)
     const activeTag = document.activeElement?.tagName;
@@ -80,7 +87,7 @@ const ShortcutService = (() => {
       for (const item of group.items) {
         if (item.isInformative) continue;
 
-        if (_matches(e, mod, key, isShift, isAlt, item.keys, item.requireMod)) {
+        if (_matches(e, mod, key, isShift, isAlt, item.keys, item.requireMod, ctrl)) {
           // Check if this shortcut is allowed in inputs
           if (inInput && !item.allowInInput) {
              if (!mod && !isAlt) continue;
@@ -110,6 +117,7 @@ const ShortcutService = (() => {
       }
 
       e.preventDefault();
+      e.stopPropagation();
       
       try {
         if (typeof matchedItem.handler === 'function') {
@@ -126,12 +134,13 @@ const ShortcutService = (() => {
   /**
    * Helper to check if event matches a shortcut key combo
    */
-  function _matches(e, mod, key, isShift, isAlt, targetKeys, requireMod = true) {
+  function _matches(e, mod, key, isShift, isAlt, targetKeys, requireMod = true, ctrl = false) {
     if (!targetKeys || targetKeys.length === 0) return false;
 
     const hasMod = targetKeys.includes('Ctrl') || targetKeys.includes('Cmd') || targetKeys.includes('Mod');
     const hasShift = targetKeys.includes('Shift');
     const hasAlt = targetKeys.includes('Alt');
+    const hasControl = targetKeys.includes('Control');
     
     // Check Modifiers
     // Special exception for Mode Switching: Allow Mod+1/2/3/4 OR Alt+1/2/3/4 to match ['1'], ['2'] etc.
@@ -147,6 +156,7 @@ const ShortcutService = (() => {
 
     if (hasShift !== !!isShift) return false;
     if (hasAlt !== !!isAlt) return false;
+    if (hasControl !== !!ctrl) return false;
 
     // Check specific Key
     // Normalize target key (e.g. '↑' to 'arrowup')

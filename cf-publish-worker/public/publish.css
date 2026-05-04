@@ -8,7 +8,7 @@
  *   renderer/css/shared/markdown-render.css
  *   cf-publish-worker/src/publish-styles.css
  * Regenerate: npm run build:publish-assets
- * Generated:  2026-05-04T07:16:55.941Z
+ * Generated:  2026-05-04T08:11:00.643Z
  */
 
 /* ============================================================
@@ -667,6 +667,7 @@
   display: none;
   overflow: hidden;
   cursor: grab;
+  touch-action: none;
 }
 
 #zoom-modal.show {
@@ -1026,9 +1027,8 @@
     border-radius: var(--ds-radius-panel) !important;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
     margin: 2rem 0 !important;
-    overflow: hidden !important;
     width: 100%;
-    overflow-x: auto;
+    overflow-x: auto !important;
     isolation: isolate;
 }
 
@@ -1037,7 +1037,6 @@
     border-collapse: separate;
     border-spacing: 0;
     font-size: 0.95em;
-    min-width: 600px;
 }
 
 .md-render-body th {
@@ -1052,6 +1051,7 @@
     border-bottom: 1px solid var(--ds-white-a08);
     white-space: nowrap;
     font-family: var(--ds-font-family-code);
+    min-width: 120px;
 }
 
 .md-render-body td {
@@ -1060,6 +1060,7 @@
     border-right: 1px solid var(--ds-white-a02);
     color: var(--ds-text-secondary);
     line-height: 1.6;
+    min-width: 120px;
 }
 
 .md-render-body td:last-child {
@@ -1197,6 +1198,10 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+body.no-scroll {
+    overflow: hidden !important;
+}
+
 .ds-publish-content-wrapper {
     max-width: 850px;
     margin: 0 auto;
@@ -1269,6 +1274,44 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+/* ── Reading Progress Bar ── */
+.ds-reading-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: 0; /* Updated via JS */
+    background: var(--ds-accent);
+    transition: width 0.1s ease-out;
+    z-index: 1001;
+}
+
+/* ── Mobile Optimization ── */
+@media (width <= 480px) {
+    .ds-logo-text {
+        display: none;
+    }
+    
+    .ds-logo-wrap {
+        border-right: none;
+        margin-right: 12px;
+        padding-right: 0;
+    }
+    
+    .ds-publish-header-inner {
+        padding: 0 16px;
+    }
+
+    /* Hide native scrollbar since we have a progress bar */
+    body {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    body::-webkit-scrollbar {
+        display: none;
+    }
 }
 
 /* ── Design System: Loading ── */
@@ -1537,11 +1580,11 @@ body {
   position: fixed;
   top: 60px;
   left: 16px;
-  z-index: 1100;
-  /* Higher than sidebar */
+  z-index: 1300; /* Above sidebar overlay */
   display: flex;
   flex-direction: column;
   gap: var(--ds-space-sm);
+  transition: all var(--ds-transition-main) var(--ds-ease-spring);
 }
 
 .publish-floating-btn {
@@ -1593,15 +1636,51 @@ body {
   margin-left: 0;
 }
 
-/* Responsive: hide sidebar and toggle on mobile */
-@media (width <=1024px) {
-  .publish-layout {
-    flex-direction: column;
-    padding: 60px 16px 40px;
+/* Responsive: Side-panel to Overlay on Mobile */
+@media (width <= 1024px) {
+  .publish-main-content {
+    padding: 100px 20px 80px;
   }
 
-  .publish-toc-sidebar,
+  .publish-toc-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    z-index: 1200;
+    background: var(--ds-layer-surface-dark-default);
+    backdrop-filter: blur(60px);
+    -webkit-backdrop-filter: blur(60px);
+    border-right: none;
+    padding: 60px 24px 40px;
+    transform: translateY(100%);
+    transition: transform 0.4s var(--ds-ease-spring);
+    display: block !important;
+  }
+
+  /* Show TOC overlay when not hidden */
+  .publish-layout:not(.toc-hidden) .publish-toc-sidebar {
+    transform: translateY(0);
+  }
+
+  .publish-layout.toc-hidden .publish-toc-sidebar {
+    display: block !important; /* Keep for transition */
+    transform: translateY(100%);
+  }
+
+  /* Relocate Floating Actions to Bottom-Right for Mobile Reachability */
   .publish-floating-actions {
-    display: none !important;
+    top: auto;
+    left: auto;
+    bottom: 24px;
+    right: 24px;
+  }
+
+  .publish-floating-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
   }
 }

@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0] — 2026-05-04 15:50
+
+### 🚀 Added
+- **Recently Used Shortcuts**: Bổ sung mục "Recently Used" trong Search Palette hiển thị 5 phím tắt vừa sử dụng nhất, giúp truy cập nhanh các tính năng thường dùng.
+- **Mobile TOC Overlay & UX**: 
+    - Chuyển đổi Mục lục sang giao diện Lớp phủ (Overlay) cao cấp trên di động với hiệu ứng Glassmorphism.
+    - **Ergonomic Mobile FAB**: Di chuyển nút Toggle TOC xuống góc dưới bên phải để tối ưu thao tác một tay.
+- **Reading Progress Indicator**: Thanh tiến trình đọc (2px) sát cạnh dưới Header, tự động cập nhật theo vị trí cuộn trang trên bản publish.
+- **Mobile Pinch-to-Zoom (Mermaid)**: Hỗ trợ thu phóng biểu đồ Mermaid bằng cử chỉ hai ngón tay trên di động, giữ giao diện luôn sắc nét.
+- **Enhanced Publishing Shortcuts**: 
+    - `Cmd + Opt + P`: Mở nhanh bảng cấu hình Publish.
+    - `Cmd + Opt + L`: Xem nhanh trang Live trong trình duyệt.
+    - **Enter-to-Publish**: Hỗ trợ phím `Enter` để kích hoạt "Go Live" ngay trong bảng cấu hình.
+
+### 🔧 Changed
+- **Mac-Native Shortcut Overhaul**:
+    - **Physical Key Mapping**: Sử dụng `e.code` để nhận diện phím gốc, khắc phục lỗi Mac tự chuyển đổi ký tự khi nhấn phím Option.
+    - **Mac Symbols UI**: Tự động hiển thị `⌥` (Option) và `⌘` (Command) trong Search Palette.
+    - **Standard Mac Mappings**: Cập nhật Redo thành `Cmd + Shift + Z` và Toàn màn hình thành `Cmd + Ctrl + F`.
+- **Adaptive Mobile UI**: 
+    - Tự động ẩn chữ "MDpreview" trên màn hình nhỏ để ưu tiên tiêu đề tài liệu.
+    - Ẩn thanh cuộn mặc định, sử dụng Progress Bar làm chỉ báo vị trí duy nhất.
+- **Shortcut Priority Enforcement**: Đảm bảo phím tắt ứng dụng luôn được ưu tiên trước phím tắt mặc định của trình duyệt.
+
+### 🐞 Fixed
+- **Mobile Stability**: 
+    - Khóa cuộn trang (`body.no-scroll`) khi Menu TOC đang mở trên di động.
+    - Khắc phục lỗi bảng bị khóa không cuộn ngang được trên thiết bị nhỏ.
+- **Mac Conflict Resolution**: Đổi phím tắt Markdown Helper sang `Cmd + Opt + H` để tránh xung đột với lệnh ẩn ứng dụng (`Cmd + H`) của macOS.
+- **Linting Stabilization**: Duy trì trạng thái **Zero Errors / Zero Warnings** sau khi nâng cấp hệ thống phím tắt và Mobile UX.
+
 ## [1.4.0] — 2026-05-04 14:30
 
 ### 🚀 Added

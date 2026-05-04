@@ -2900,6 +2900,132 @@ const ASSET_LIMITS = {
 ```
 </file>
 
+<file path="docs/decisions/20260504-hybrid-toc-id-injection.md">
+```md
+# Hybrid ID Injection for TOC Navigation
+
+**Date:** 2026-05-04
+**Status:** accepted
+**Author:** session 2026-05-04
+
+---
+
+## Bối cảnh
+
+Tính năng Table of Contents (TOC) trên bản publish dựa vào các liên kết mỏ neo (`#id`). Tuy nhiên, HTML được gửi đến Cloudflare Worker có thể đến từ hai nguồn:
+1. **Render tại Worker**: Markdown thô được gửi lên và Worker dùng `marked` để render.
+2. **Render tại Local App**: HTML đã render sẵn được gửi lên (để đảm bảo tính đồng nhất 100% với editor).
+
+Vấn đề là bộ render mặc định (cả ở server và app) không tự động sinh ID cho các thẻ heading. Nếu không có ID, TOC sidebar sẽ có các liên kết rỗng và không thể điều hướng hoặc highlight mục đang xem.
+
+---
+
+## Các lựa chọn đã cân nhắc
+
+### Option 1: Chỉ sửa bộ Renderer của Worker
+- **Ưu:** Hiệu năng tốt, sinh ID ngay lúc parse.
+- **Nhược:** Không giải quyết được trường hợp HTML được gửi lên từ App Local (vốn đã mất ID từ trước).
+
+### Option 2: Patch HTML bằng Regex trong Shell Builder
+- **Ưu:** Bao phủ được mọi nguồn HTML (cả local và remote).
+- **Nhược:** Regex replace trên chuỗi HTML lớn có rủi ro về edge case và hiệu năng nếu làm không khéo.
+
+### Option 3: Hybrid Injection (Lựa chọn hiện tại)
+- **Ưu:** Kết hợp cả hai: Sinh ID tại nguồn (Renderer) để tối ưu và "vá" ID tại Shell (Regex) để đảm bảo an toàn tuyệt đối.
+
+---
+
+## Quyết định
+
+**Chọn: Option 3 — Hybrid ID Injection**
+
+Chúng ta triển khai tiêm ID ở cả hai nơi:
+1. **Renderer level**: Override `marked.Renderer` để sinh ID chuẩn ngay khi render.
+2. **Shell level**: Cập nhật `extractHeadingsSSR` để vừa đọc heading vừa thực hiện `replace` các thẻ thiếu ID bằng phiên bản đã tiêm ID.
+
+Lý do chọn: Đảm bảo TOC **luôn luôn hoạt động** bất kể nguồn dữ liệu HTML đến từ đâu, đồng thời giữ cho logic của Worker độc lập với backend cũ.
+
+---
+
+## Hệ quả
+
+**Tích cực:**
+- TOC hoạt động ổn định 100% trên bản live.
+- Anchor links (`#slug`) hoạt động ngay cả khi copy link trực tiếp.
+- Highlight active section chính xác nhờ ID đồng bộ.
+
+**Tiêu cực / Trade-off:**
+- Chi phí xử lý Regex tăng nhẹ khi render trang (không đáng kể với document thông thường).
+
+**Constraint tương lai:**
+- Mọi thay đổi về cách sinh ID (Slugify) phải được đồng bộ giữa Renderer và Shell để tránh lệch ID.
+
+```
+</file>
+
+<file path="docs/decisions/20260504-vietnamese-slugification-strategy.md">
+```md
+# Vietnamese-ready Slugification Strategy
+
+**Date:** 2026-05-04
+**Status:** accepted
+**Author:** session 2026-05-04
+
+---
+
+## Bối cảnh
+
+MDpreview có lượng lớn người dùng Việt Nam. Các thuật toán sinh Slug mặc định (để làm ID cho heading) thường chỉ giữ lại ký tự `a-z` và `0-9`. 
+Đối với Tiếng Việt, điều này dẫn đến việc các tiêu đề có dấu bị biến dạng hoặc mất chữ (ví dụ: "Chào buổi sáng" trở thành "chao-buoi-sang" hoặc tệ hơn là "cho-bi-sang" tùy thư viện).
+
+Cần một thuật toán đồng nhất để tạo ra các ID vừa đẹp (SEO-friendly), vừa giữ được ngữ nghĩa của Tiếng Việt.
+
+---
+
+## Các lựa chọn đã cân nhắc
+
+### Option 1: Dùng thư viện slugify bên ngoài
+- **Ưu:** Đầy đủ tính năng.
+- **Nhược:** Tăng kích thước bundle của Worker, khó tùy chỉnh chính xác các trường hợp chữ `đ`, `ư`, `ơ`.
+
+### Option 2: Giữ nguyên Unicode trong ID (không slugify)
+- **Ưu:** Giữ nguyên 100% nội dung.
+- **Nhược:** Gây lỗi trên một số trình duyệt cũ hoặc khi chia sẻ link qua các nền tảng không hỗ trợ URL chứa ký tự đặc biệt (vị lỗi encoding).
+
+### Option 3: Custom Slugify với Unicode Normalization (Lựa chọn hiện tại)
+- **Ưu:** Nhẹ, không phụ thuộc thư viện, xử lý tốt Tiếng Việt và các ký tự đặc biệt.
+
+---
+
+## Quyết định
+
+**Chọn: Option 3 — Custom Slugify với Unicode Normalization**
+
+Chúng ta triển khai hàm `slugifyHeading` với các bước:
+1. `normalize('NFD')` để tách các dấu ra khỏi chữ cái gốc.
+2. Dùng Regex `[\u0300-\u036f]` để xóa các dấu vừa tách.
+3. Xử lý thủ công các trường hợp đặc biệt của Tiếng Việt như `đ` -> `d`.
+4. Loại bỏ ký tự đặc biệt và thay khoảng trắng bằng dấu gạch ngang.
+5. Triển khai cơ chế **Deduplication** (thêm số thứ tự `-1`, `-2`) bằng `Map` để đảm bảo ID trong cùng một trang luôn là duy nhất.
+
+---
+
+## Hệ quả
+
+**Tích cực:**
+- URL mỏ neo trông chuyên nghiệp và dễ đọc đối với người Việt.
+- Tránh được các lỗi encoding khi chia sẻ link.
+- Đảm bảo tính duy nhất của ID trên toàn document.
+
+**Tiêu cực / Trade-off:**
+- Mất một chút ngữ nghĩa so với việc giữ nguyên dấu (nhưng là tiêu chuẩn chung của web).
+
+**Constraint tương lai:**
+- Hàm này phải được dùng chung cho cả bộ Renderer và bộ Shell Builder của Worker để đảm bảo tính nhất quán.
+
+```
+</file>
+
 <file path="docs/decisions/README.md">
 ```md
 # Decision Log
@@ -2963,6 +3089,8 @@ Ghi lại các quyết định thiết kế và kỹ thuật quan trọng trong 
 | 2026-04-29 | [20260429-menu-anchoring-strategy.md](20260429-menu-anchoring-strategy.md) | Chiến lược định vị Menu theo phần tử neo (Anchored Positioning) | accepted |
 | 2026-04-29 | [20260429-stable-layout-border-pattern.md](20260429-stable-layout-border-pattern.md) | Pattern ổn định Layout qua Border tàng hình (Transparent Border) | accepted |
 | 2026-04-29 | [20260429-gdoc-rasterization-strategy.md](20260429-gdoc-rasterization-strategy.md) | Chiến lược Rasterization và ổn định Layout cho Google Docs Copy | accepted |
+| 2026-05-04 | [20260504-hybrid-toc-id-injection.md](20260504-hybrid-toc-id-injection.md) | Kiến trúc tiêm ID hai lớp cho TOC Navigation trên Worker | accepted |
+| 2026-05-04 | [20260504-vietnamese-slugification-strategy.md](20260504-vietnamese-slugification-strategy.md) | Chiến lược sinh Slug hỗ trợ Tiếng Việt và Unicode | accepted |
 
 
 ---
@@ -3333,11 +3461,11 @@ Start with [function-docs/README.md](function-docs/README.md)!
 ```md
 # Feature Documentation
 
-**Last Updated:** May 2, 2026 (Phase 1.1)  
+**Last Updated:** May 4, 2026 (Phase 2.3)  
 **Total Features:** 37+ modules documented  
 **Status:** Organized by category
 
-> **Recent Update (May 2):** Added comprehensive `PROJECT_MAP.md` documentation with layout padding sync and viewport indicator technical details. See [Components](#-components--ui-elements) section.
+> **Recent Update (May 4):** Refactored Published Document UI into a modern **Side-Panel Layout** with sticky TOC, active indicator sync (h2-h6), and modernized glassmorphism header.
 
 ---
 
@@ -3659,7 +3787,7 @@ When adding new features:
 
 ---
 
-**Last Updated:** May 1, 2026 (Phase 1.1)  
+**Last Updated:** May 4, 2026 (Phase 2.3)  
 **Status:** Organized and complete  
 **Next:** Add Phase 1.1 features to docs as needed
 
@@ -3735,13 +3863,14 @@ Thực hiện tìm kiếm file:
 - **Debounce**: Lệnh tìm kiếm chỉ thực thi sau 150ms kể từ lần gõ phím cuối cùng.
 - **Empty Query**: Nếu query rỗng:
     - Chế độ Files/Folders: Hiển thị file/folder gần đây từ `RecentlyViewedService`.
-    - Chế độ Shortcuts: Hiển thị danh sách tất cả phím tắt được phân nhóm.
+    - Chế độ Shortcuts: Hiển thị mục **"Recently Used"** (5 phím tắt được sử dụng gần đây nhất) ở trên cùng, sau đó là danh sách tất cả phím tắt được phân nhóm.
 - **Fuzzy Search**: Sử dụng `SearchService.search()` hoặc `SearchService.searchShortcuts()` tùy theo chế độ.
 
 ### `_renderResults()`
 Render danh sách kết quả vào DOM:
 - **Section Header**: Hiển thị tiêu đề ngữ cảnh ("Recent Files", "Recent Folders", v.v.) khi ô tìm kiếm trống, hoặc hiển thị chỉ báo số lượng kết quả khi đang tìm kiếm.
 - **Shortcuts Rendering**: Ở chế độ Shortcuts, kết quả được hiển thị với icon riêng biệt cho từng lệnh, nhãn phím tắt (KBD) và hỗ trợ phân nhóm (Navigation, Editor, v.v.).
+    - **Mac Symbols Mapping**: Trên Mac, các phím tắt được tự động hiển thị dưới dạng ký hiệu đồ họa (`⌘` thay cho Ctrl/Mod, `⌥` thay cho Alt, `⇧` thay cho Shift).
 - **Smart Path**: Sử dụng `_formatSmartPath()` để rút gọn đường dẫn dài, chỉ giữ lại 3 cấp thư mục cuối cùng.
 - **Highlighting**: Bôi đậm các ký tự khớp với từ khóa tìm kiếm.
 - **Smart Scroll Mask**: Sử dụng `UIUtils.applySmartScrollMask` để tạo hiệu ứng mờ dần ở cạnh trên khi danh sách kết quả được cuộn.
@@ -3779,7 +3908,9 @@ Thành phần này sử dụng các Design Tokens và Atom chuẩn:
 
 ---
 
-*Document — 2026-04-27 22:33*
+---
+
+*Document — 2026-05-04*
 
 ```
 </file>
@@ -3821,6 +3952,7 @@ Thực thi hành động dựa trên `id` của phím tắt.
 2.  **Editor**: Thao tác văn bản, lưu file, tìm kiếm nội dung.
 3.  **File Operations**: Tạo mới, xóa, đổi tên file/folder.
 4.  **Interface**: Zoom, chế độ hiển thị, đóng/mở panel.
+5.  **Publishing**: Cấu hình xuất bản, xem bản live công khai.
 
 ---
 
@@ -3836,7 +3968,9 @@ ShortcutsComponent.executeAction('toggle-sidebar');
 
 ---
 
-*Document — 2026-04-27 22:35*
+---
+
+*Document — 2026-05-04*
 
 ```
 </file>
@@ -6360,6 +6494,7 @@ Popover điều khiển việc xuất bản một file cụ thể. Tích hợp t
 - **Smart Slug**: Tự động chuẩn hóa slug khi gõ.
 - **Live Validation**: Debounced 500ms để kiểm tra tính khả dụng của slug trên Worker.
 - **Overwrite Warning**: Tự động chuyển đổi nút sang "Overwrite & Publish" nếu phát hiện slug bị trùng.
+- **Enter-to-Publish**: Hỗ trợ phím `Enter` khi đang focus vào ô nhập slug để kích hoạt lệnh "Go Live" nhanh chóng nếu nút đã sẵn sàng.
 
 ### `Stale Check (Logic khởi tạo)`
 Khi mở bảng, nếu App ghi nhận file đã đăng, nó sẽ tự đối chiếu với server. Nếu slug không còn tồn tại trên Cloudflare, App sẽ tự động xóa trạng thái cục bộ (**Self-Healing**).
@@ -6398,7 +6533,9 @@ Hệ thống sử dụng các callback và cơ chế `await` để đảm bảo 
 
 ---
 
-*Document — 2026-04-30*
+---
+
+*Document — 2026-05-04*
 
 ```
 </file>
@@ -6545,9 +6682,17 @@ Sử dụng `CodeBlockModule` chia sẻ để cung cấp:
 - Badge ngôn ngữ lập trình.
 - Hiệu ứng Glassmorphism và Scrollbar premium.
 
+### 3. TOC & Side-Panel Layout
+Tối ưu hóa khả năng điều hướng và cấu trúc tài liệu thông qua mô hình Side-Panel hiện đại:
+- **Side-Panel Layout**: Thay thế giao diện Floating cũ bằng layout hai cột: Sidebar cố định (300px) và Nội dung chính (850px), giúp tách biệt rõ ràng luồng điều hướng và nội dung đọc.
+- **Active Indicator**: Tích hợp thanh chỉ báo màu cam (ds-accent) cho mọi cấp độ tiêu đề (h2-h6) trong TOC, giúp người dùng luôn xác định được vị trí đang đọc trong tài liệu.
+- **Hybrid ID Injection**: Tự động chèn thuộc tính `id` vào các thẻ Heading (`h2-h6`) ở cả tầng Renderer (chuyển đổi Markdown) và tầng Shell Builder (quét HTML đã render).
+- **Vietnamese Slugification**: Thuật toán chuẩn hóa Unicode tạo ID không dấu, chuẩn SEO cho tiêu đề Tiếng Việt.
+- **Enhanced Scroll Synchronization**: Đồng bộ vị trí cuộn với offset **200px**, giúp TOC highlight section mới sớm hơn và tự nhiên hơn khi đọc.
+
 ---
 ...
-*Document — 2026-05-02 (Updated for Dynamic Shell & Asset Pipeline)*
+*Document — 2026-05-04 (Updated for Side-Panel Layout & TOC UX)*
 
 ```
 </file>
@@ -6703,6 +6848,7 @@ Dự án cam kết độ trung thực 100% giữa Editor và bản xuất bản 
 2. **Atomic Blocks**: Mọi đoạn văn bản phải nằm trong `.md-block > .md-line`.
 3. **Premium Blocks**: Các thành phần đặc biệt (Code, Table, Mermaid) sử dụng hệ thống Glassmorphism (`backdrop-filter`, `transparent background`).
 4. **Mermaid Zoom**: Tích hợp thanh điều khiển Zoom và khả năng tương tác mượt mà trên bản Publish, đồng bộ 1:1 với Project Map trong app.
+5. **Anchor Sync (TOC)**: Tự động tiêm ID chuẩn SEO (hỗ trợ Tiếng Việt và Unicode) vào các thẻ Heading thông qua cơ chế **Hybrid Injection**, đảm bảo mục lục (Table of Contents) luôn hoạt động chính xác.
 
 **CSS & Asset Pipeline (Phase 2.3)**: Toàn bộ CSS và JS của Worker được **auto-generated** và đồng bộ thông qua `npm run build:publish-assets`.
 - **CSS**: Bundle từ Design Tokens + shared components (Tab Bar, Zoom Modal).
@@ -6787,7 +6933,7 @@ All errors are logged with timestamp and context. Retry logic uses exponential b
 
 ---
 
-*Document — 2026-05-02 (v1.2.1 Architecture Updates)*
+*Document — 2026-05-04 (v1.2.2 - TOC Anchor Sync & Vietnamese Slugification)*
 
 ```
 </file>
@@ -6980,7 +7126,7 @@ Giải quyết các vấn đề về phím tắt phân tán, xung đột phím g
 ## Lifecycle
 
 ### `init()`
-Khởi tạo trình lắng nghe sự kiện `keydown` toàn cục trên `document` với cơ chế **Capture Phase** (`capture: true`) để đánh chặn sự kiện trước khi nó tới các thành phần UI con.
+Khởi tạo trình lắng nghe sự kiện `keydown` toàn cục trên `document` với cơ chế **Capture Phase** (`capture: true`) để đánh chặn sự kiện trước khi nó tới các thành phần UI con. Hệ thống sử dụng `e.preventDefault()` và `e.stopPropagation()` để đảm bảo phím tắt ứng dụng luôn có quyền ưu tiên cao nhất trước trình duyệt.
 
 ---
 
@@ -7028,12 +7174,13 @@ Mỗi shortcut item trong registry có cấu trúc:
 
 ## Lưu ý quan trọng
 
-- **Không dùng `e.stopPropagation()`**: `ShortcutService` dùng Capture Phase nên nó sẽ nhận sự kiện trước. Nếu module con muốn chặn phím tắt, nó phải được thực hiện ở phase sau.
+- **Ưu tiên chặn sự kiện**: `ShortcutService` sử dụng `e.stopPropagation()` để ngăn chặn phím tắt mặc định của trình duyệt (ví dụ: Cmd+S, Cmd+P) ngay cả khi chúng là phím tắt hệ thống.
+- **Mac Alt-Key Character Fallback**: Trên macOS, khi nhấn phím Option, trình duyệt sẽ biến đổi ký tự (ví dụ: `Opt+P` thành `π`). Service đã được nâng cấp để sử dụng `e.code` (mã phím vật lý) làm phương án dự phòng, đảm bảo phím tắt luôn hoạt động đúng bất kể layout bàn phím.
 - **Browser Conflict**: Các phím `Cmd + 1-4` thường bị trình duyệt chiếm dụng để chuyển Tab, nên Service hỗ trợ thêm `Alt + 1-4` làm phương án dự phòng mặc định.
 
 ---
 
-*Document — 2026-04-30*
+*Document — 2026-05-04*
 
 ```
 </file>

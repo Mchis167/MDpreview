@@ -15,6 +15,10 @@
 
   const ICON_LIST = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>`;
   const ICON_SIDEBAR_COLLAPSE = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6-6 6 6 6"/><path d="M3 12h12"/><path d="M21 19V5"/></svg>`;
+  const ICON_CLOSE = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+
+  const progressBar = document.getElementById('ds-reading-progress');
+  const isMobile = () => window.innerWidth <= 1024;
 
 
 
@@ -30,11 +34,13 @@
     if (visible) {
       root.classList.remove('toc-hidden');
       toggleBtn.classList.add('is-active');
-      toggleBtn.innerHTML = ICON_SIDEBAR_COLLAPSE;
+      toggleBtn.innerHTML = isMobile() ? ICON_CLOSE : ICON_SIDEBAR_COLLAPSE;
+      if (isMobile()) document.body.classList.add('no-scroll');
     } else {
       root.classList.add('toc-hidden');
       toggleBtn.classList.remove('is-active');
       toggleBtn.innerHTML = ICON_LIST;
+      document.body.classList.remove('no-scroll');
     }
     localStorage.setItem(STORAGE_KEY, visible);
   }
@@ -76,6 +82,11 @@
             top: targetTop,
             behavior: 'smooth'
           });
+
+          // Auto-dismiss on mobile after navigation
+          if (isMobile()) {
+            setTocVisible(false);
+          }
         }
       });
     }
@@ -121,12 +132,24 @@
     }
   }
 
+  /**
+   * Updates the reading progress bar based on scroll position.
+   */
+  function updateProgressBar() {
+    if (!progressBar) return;
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = (winScroll / height) * 100;
+    progressBar.style.width = scrolled + '%';
+  }
+
   // Use throttle for performance
   let ticking = false;
   window.addEventListener('scroll', () => {
     if (!ticking) {
       window.requestAnimationFrame(() => {
         updateActive();
+        updateProgressBar();
         ticking = false;
       });
       ticking = true;

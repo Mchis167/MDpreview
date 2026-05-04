@@ -49,13 +49,14 @@ Thực hiện tìm kiếm file:
 - **Debounce**: Lệnh tìm kiếm chỉ thực thi sau 150ms kể từ lần gõ phím cuối cùng.
 - **Empty Query**: Nếu query rỗng:
     - Chế độ Files/Folders: Hiển thị file/folder gần đây từ `RecentlyViewedService`.
-    - Chế độ Shortcuts: Hiển thị danh sách tất cả phím tắt được phân nhóm.
+    - Chế độ Shortcuts: Hiển thị mục **"Recently Used"** (5 phím tắt được sử dụng gần đây nhất) ở trên cùng, sau đó là danh sách tất cả phím tắt được phân nhóm.
 - **Fuzzy Search**: Sử dụng `SearchService.search()` hoặc `SearchService.searchShortcuts()` tùy theo chế độ.
 
 ### `_renderResults()`
 Render danh sách kết quả vào DOM:
 - **Section Header**: Hiển thị tiêu đề ngữ cảnh ("Recent Files", "Recent Folders", v.v.) khi ô tìm kiếm trống, hoặc hiển thị chỉ báo số lượng kết quả khi đang tìm kiếm.
 - **Shortcuts Rendering**: Ở chế độ Shortcuts, kết quả được hiển thị với icon riêng biệt cho từng lệnh, nhãn phím tắt (KBD) và hỗ trợ phân nhóm (Navigation, Editor, v.v.).
+    - **Mac Symbols Mapping**: Trên Mac, các phím tắt được tự động hiển thị dưới dạng ký hiệu đồ họa (`⌘` thay cho Ctrl/Mod, `⌥` thay cho Alt, `⇧` thay cho Shift).
 - **Smart Path**: Sử dụng `_formatSmartPath()` để rút gọn đường dẫn dài, chỉ giữ lại 3 cấp thư mục cuối cùng.
 - **Highlighting**: Bôi đậm các ký tự khớp với từ khóa tìm kiếm.
 - **Smart Scroll Mask**: Sử dụng `UIUtils.applySmartScrollMask` để tạo hiệu ứng mờ dần ở cạnh trên khi danh sách kết quả được cuộn.
@@ -93,4 +94,6 @@ Thành phần này sử dụng các Design Tokens và Atom chuẩn:
 
 ---
 
-*Document — 2026-04-27 22:33*
+---
+
+*Document — 2026-05-04*

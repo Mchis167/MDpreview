@@ -11,6 +11,7 @@
   display: none;
   overflow: hidden;
   cursor: grab;
+  touch-action: none;
 }
 
 #zoom-modal.show {

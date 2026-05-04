@@ -5331,6 +5331,7 @@ body.is-searching .edit-toolbar-container {
   display: none;
   overflow: hidden;
   cursor: grab;
+  touch-action: none;
 }
 
 #zoom-modal.show {
@@ -6164,9 +6165,8 @@ main {
     border-radius: var(--ds-radius-panel) !important;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
     margin: 2rem 0 !important;
-    overflow: hidden !important;
     width: 100%;
-    overflow-x: auto;
+    overflow-x: auto !important;
     isolation: isolate;
 }
 
@@ -6175,7 +6175,6 @@ main {
     border-collapse: separate;
     border-spacing: 0;
     font-size: 0.95em;
-    min-width: 600px;
 }
 
 .md-render-body th {
@@ -6190,6 +6189,7 @@ main {
     border-bottom: 1px solid var(--ds-white-a08);
     white-space: nowrap;
     font-family: var(--ds-font-family-code);
+    min-width: 120px;
 }
 
 .md-render-body td {
@@ -6198,6 +6198,7 @@ main {
     border-right: 1px solid var(--ds-white-a02);
     color: var(--ds-text-secondary);
     line-height: 1.6;
+    min-width: 120px;
 }
 
 .md-render-body td:last-child {
@@ -12277,6 +12278,14 @@ const PublishConfigComponent = (() => {
           if (raw !== clean) input.value = clean;
           this._checkSlug(clean);
         });
+
+        // Add Enter key listener to trigger Go Live
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && this.publishBtn && !this.publishBtn.disabled && !this.state.isLoading) {
+            e.preventDefault();
+            this.publishBtn.click();
+          }
+        });
       }
 
       // Initial Check - SKIP IF LOADING
@@ -13010,6 +13019,29 @@ const SearchPalette = (() => {
   let _selectedIndex = -1;
   let _searchTimeout = null;
   let _searchMode = 'all'; // all, file, directory, shortcut
+  const RECENT_SHORTCUTS_KEY = 'mdpreview_recent_shortcuts';
+
+  /**
+   * Add a shortcut ID to the recent list
+   */
+  function _addRecentShortcut(id) {
+    if (!id) return;
+    let recent = _getRecentShortcuts();
+    recent = [id, ...recent.filter(i => i !== id)].slice(0, 5);
+    localStorage.setItem(RECENT_SHORTCUTS_KEY, JSON.stringify(recent));
+  }
+
+  /**
+   * Retrieve the list of recent shortcut IDs
+   */
+  function _getRecentShortcuts() {
+    try {
+      const data = localStorage.getItem(RECENT_SHORTCUTS_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch (_e) {
+      return [];
+    }
+  }
 
   /**
    * Initialize DOM structure
@@ -13237,6 +13269,7 @@ const SearchPalette = (() => {
 
       // Handle Shortcut Execution
       if (item.type === 'shortcut') {
+        _addRecentShortcut(item.id);
         if (window.ShortcutsComponent && window.ShortcutsComponent.executeAction) {
           window.ShortcutsComponent.executeAction(item.id);
         }
@@ -13289,13 +13322,43 @@ const SearchPalette = (() => {
 
     // ── Grouped Shortcuts Mode (No Query) ──
     if (_searchMode === 'shortcut' && !query) {
+      const allShortcuts = SearchService.searchShortcuts('');
+      const recentIds = _getRecentShortcuts();
+      
+      let itemIndex = 0;
+
+      // 1. Render Recently Used Section
+      if (recentIds.length > 0) {
+        const header = document.createElement('div');
+        header.className = 'palette-section-header';
+        header.innerHTML = `${DesignSystem.getIcon('history')} Recently Used`;
+        header.style.display = 'flex';
+        header.style.alignItems = 'center';
+        header.style.gap = '8px';
+        _resultsContainer.appendChild(header);
+
+        recentIds.forEach(id => {
+          const itemData = allShortcuts.find(s => s.id === id);
+          if (itemData) {
+            const itemEl = _createShortcutItem(itemData, itemIndex, query);
+            itemEl.classList.add('is-recent-shortcut');
+            _resultsContainer.appendChild(itemEl);
+            itemIndex++;
+          }
+        });
+
+        const divider = document.createElement('div');
+        divider.className = 'palette-divider';
+        _resultsContainer.appendChild(divider);
+      }
+
+      // 2. Render Normal Groups
       const grouped = {};
       _results.forEach(item => {
         if (!grouped[item.group]) grouped[item.group] = [];
         grouped[item.group].push(item);
       });
 
-      let itemIndex = 0;
       let sectionIndex = 0;
       for (const groupTitle in grouped) {
         if (sectionIndex > 0) {
@@ -13409,9 +13472,10 @@ const SearchPalette = (() => {
     const keysHtml = itemData.keys.map(key => {
       let keyText = key;
       const isMac = /Mac|iPhone|iPod|iPad/.test(navigator.platform) || (navigator.userAgentData && navigator.userAgentData.platform === 'macOS');
-      if (isMac && key === 'Ctrl') keyText = '⌘';
+      if (isMac && (key === 'Ctrl' || key === 'Mod' || key === 'Cmd')) keyText = '⌘';
       if (isMac && key === 'Shift') keyText = '⇧';
-      if (isMac && key === 'Option') keyText = '⌥';
+      if (isMac && (key === 'Alt' || key === 'Option')) keyText = '⌥';
+      if (isMac && key === 'Control') keyText = '⌃';
       if (isMac && key === 'Backspace') keyText = '⌫';
       return `<kbd class="ds-kbd">${keyText}</kbd>`;
     }).join('');
@@ -13946,9 +14010,16 @@ class ShortcutsComponent {
           { id: 'focus-search', label: 'Focus Search', keys: ['Mod', 'P'], icon: 'search', tags: ['find', 'palette', 'tìm kiếm'] },
           { id: 'scroll-top', label: 'Scroll to Top', keys: ['Mod', '↑'], icon: 'arrow-up', tags: ['up', 'start', 'lên đầu'] },
           { id: 'scroll-bottom', label: 'Scroll to Bottom', keys: ['Mod', '↓'], icon: 'arrow-down', tags: ['down', 'end', 'xuống cuối'] },
-          { id: 'toggle-fullscreen', label: 'Toggle Fullscreen', keys: isMac ? ['Mod', 'Shift', 'F'] : ['F11'], icon: 'maximize', tags: ['window', 'expand', 'toàn màn hình'] },
+          { id: 'toggle-fullscreen', label: 'Toggle Fullscreen', keys: isMac ? ['Mod', 'Control', 'F'] : ['F11'], icon: 'maximize', tags: ['window', 'expand', 'toàn màn hình'] },
           { id: 'toggle-toc', label: 'Toggle Table of Contents', keys: ['Mod', 'Alt', 'T'], icon: 'list-tree', tags: ['outline', 'navigation', 'mục lục'] },
           { id: 'toggle-map', label: 'Toggle Project Map', keys: ['Mod', 'Alt', 'M'], icon: 'map', tags: ['mini-map', 'overview', 'bản đồ'] }
+        ]
+      },
+      {
+        title: 'Publishing',
+        items: [
+          { id: 'toggle-publish', label: 'Publish Configuration', keys: ['Mod', 'Alt', 'P'], icon: 'globe', tags: ['live', 'deploy', 'xuất bản'] },
+          { id: 'view-live', label: 'View Live Page', keys: ['Mod', 'Alt', 'L'], icon: 'external-link', tags: ['browser', 'public', 'xem bản live'] }
         ]
       },
       {
@@ -13971,8 +14042,8 @@ class ShortcutsComponent {
         items: [
           { id: 'save-file', label: 'Save File', keys: ['Mod', 'S'], icon: 'save', tags: ['persist', 'store', 'write', 'lưu'] },
           { id: 'undo', label: 'Undo', keys: ['Mod', 'Z'], icon: 'undo', tags: ['back', 'reverse', 'quay lại'] },
-          { id: 'redo', label: 'Redo', keys: ['Mod', 'Y'], icon: 'redo', tags: ['forward', 'làm lại'] },
-          { id: 'markdown-helper', label: 'Markdown Helper', keys: ['Mod', 'H'], icon: 'help-circle', tags: ['guide', 'syntax', 'trợ giúp'] }
+          { id: 'redo', label: 'Redo', keys: isMac ? ['Mod', 'Shift', 'Z'] : ['Mod', 'Y'], icon: 'redo', tags: ['forward', 'làm lại'] },
+          { id: 'markdown-helper', label: 'Markdown Helper', keys: ['Mod', 'Alt', 'H'], icon: 'help-circle', tags: ['guide', 'syntax', 'trợ giúp'] }
         ]
       },
       {
@@ -16375,6 +16446,22 @@ document.addEventListener('DOMContentLoaded', async () => {
            const target = state.selectedPaths.length > 0 ? state.selectedPaths[0] : null;
            if (target) window.TreeModule.collapseOthers(target);
          }
+      },
+      'toggle-publish': (e) => {
+        const v = window.MarkdownViewer?.getInstance();
+        if (v && v._publishBtn) {
+          v._togglePublishConfig({ event: e, anchor: v._publishBtn });
+        } else if (window.PublishConfigComponent && window.AppState.currentFile) {
+          window.PublishConfigComponent.toggle({ file: window.AppState.currentFile });
+        }
+      },
+      'view-live': () => {
+        const info = window.PublishService ? window.PublishService.getPublishInfo(window.AppState.currentFile) : null;
+        if (info && info.url) {
+          window.open(info.url, '_blank');
+        } else if (window.showToast) {
+          window.showToast('Document not published yet', 'info');
+        }
       },
       'keyboard-shortcuts': () => window.SearchPalette?.show('shortcut'),
       'open-settings': () => window.SettingsComponent?.toggle(),
@@ -25144,9 +25231,16 @@ const ShortcutService = (() => {
    */
   function _handleKeyDown(e) {
     const mod = isMac ? e.metaKey : e.ctrlKey;
-    const key = e.key.toLowerCase();
+    const ctrl = isMac ? e.ctrlKey : false; // Specifically the Control key on Mac
+    let key = e.key.toLowerCase();
     const isShift = e.shiftKey;
     const isAlt = e.altKey;
+
+    // Mac specific: Handle Alt-key character transformations (e.g. Opt+P -> π)
+    // We fallback to e.code to get the base letter if it's a Key* code.
+    if (isMac && isAlt && e.code && e.code.startsWith('Key')) {
+      key = e.code.slice(3).toLowerCase();
+    }
 
     // 1. Global Blocking Logic (Typed in inputs)
     const activeTag = document.activeElement?.tagName;
@@ -25160,7 +25254,7 @@ const ShortcutService = (() => {
       for (const item of group.items) {
         if (item.isInformative) continue;
 
-        if (_matches(e, mod, key, isShift, isAlt, item.keys, item.requireMod)) {
+        if (_matches(e, mod, key, isShift, isAlt, item.keys, item.requireMod, ctrl)) {
           // Check if this shortcut is allowed in inputs
           if (inInput && !item.allowInInput) {
              if (!mod && !isAlt) continue;
@@ -25190,6 +25284,7 @@ const ShortcutService = (() => {
       }
 
       e.preventDefault();
+      e.stopPropagation();
       
       try {
         if (typeof matchedItem.handler === 'function') {
@@ -25206,12 +25301,13 @@ const ShortcutService = (() => {
   /**
    * Helper to check if event matches a shortcut key combo
    */
-  function _matches(e, mod, key, isShift, isAlt, targetKeys, requireMod = true) {
+  function _matches(e, mod, key, isShift, isAlt, targetKeys, requireMod = true, ctrl = false) {
     if (!targetKeys || targetKeys.length === 0) return false;
 
     const hasMod = targetKeys.includes('Ctrl') || targetKeys.includes('Cmd') || targetKeys.includes('Mod');
     const hasShift = targetKeys.includes('Shift');
     const hasAlt = targetKeys.includes('Alt');
+    const hasControl = targetKeys.includes('Control');
     
     // Check Modifiers
     // Special exception for Mode Switching: Allow Mod+1/2/3/4 OR Alt+1/2/3/4 to match ['1'], ['2'] etc.
@@ -25227,6 +25323,7 @@ const ShortcutService = (() => {
 
     if (hasShift !== !!isShift) return false;
     if (hasAlt !== !!isAlt) return false;
+    if (hasControl !== !!ctrl) return false;
 
     // Check specific Key
     // Normalize target key (e.g. '↑' to 'arrowup')
@@ -27462,6 +27559,49 @@ function initZoom() {
     updateZoomTransform();
     updateZoomPercent();
   }, { passive: false });
+
+  // Touch support: Pan and Pinch-to-zoom
+  let initialPinchDist = 0;
+  let initialPinchScale = 1;
+
+  const getDist = (t1, t2) => Math.sqrt(Math.pow(t1.clientX - t2.clientX, 2) + Math.pow(t1.clientY - t2.clientY, 2));
+
+  modal.addEventListener('touchstart', e => {
+    if (e.target.closest('#zoom-close') || e.target.closest('#zoom-controls-bar')) return;
+    if (e.touches.length === 1) {
+      zoomMoving = true;
+      zoomStartX = e.touches[0].clientX - zoomX;
+      zoomStartY = e.touches[0].clientY - zoomY;
+    } else if (e.touches.length === 2) {
+      zoomMoving = false;
+      initialPinchDist = getDist(e.touches[0], e.touches[1]);
+      initialPinchScale = zoomScale;
+    }
+  }, { passive: true });
+
+  modal.addEventListener('touchmove', e => {
+    if (e.touches.length === 1 && zoomMoving) {
+      zoomX = e.touches[0].clientX - zoomStartX;
+      zoomY = e.touches[0].clientY - zoomStartY;
+      updateZoomTransform();
+    } else if (e.touches.length === 2) {
+      e.preventDefault();
+      const dist = getDist(e.touches[0], e.touches[1]);
+      const factor = dist / (initialPinchDist || 1);
+      const newScale = Math.min(10, Math.max(0.05, initialPinchScale * factor));
+      const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      const xs = (centerX - zoomX) / zoomScale;
+      const ys = (centerY - zoomY) / zoomScale;
+      zoomScale = newScale;
+      zoomX = centerX - xs * zoomScale;
+      zoomY = centerY - ys * zoomScale;
+      updateZoomTransform();
+      updateZoomPercent();
+    }
+  }, { passive: false });
+
+  modal.addEventListener('touchend', () => { zoomMoving = false; });
 }
 
 window.openZoom = openZoom;

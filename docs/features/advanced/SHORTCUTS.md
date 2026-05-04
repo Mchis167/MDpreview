@@ -33,6 +33,7 @@ Thực thi hành động dựa trên `id` của phím tắt.
 2.  **Editor**: Thao tác văn bản, lưu file, tìm kiếm nội dung.
 3.  **File Operations**: Tạo mới, xóa, đổi tên file/folder.
 4.  **Interface**: Zoom, chế độ hiển thị, đóng/mở panel.
+5.  **Publishing**: Cấu hình xuất bản, xem bản live công khai.
 
 ---
 
@@ -48,4 +49,6 @@ ShortcutsComponent.executeAction('toggle-sidebar');
 
 ---
 
-*Document — 2026-04-27 22:35*
+---
+
+*Document — 2026-05-04*
