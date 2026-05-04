@@ -44,6 +44,7 @@ Logic bên trong:
 2. Nếu chỉ thay đổi content (không đổi mode/file) → gọi `update()` để patch DOM thay vì render lại toàn bộ
 3. Nếu đổi mode → Toggle hiển thị (`display: none/flex`) giữa Preview và Editor container (Persistent DOM). Không destroy component để bảo toàn scroll position và TOC state.
 4. Nếu đổi file → Gọi `reset()` trên các component liên quan và render lại nội dung mới.
+5. **Đồng bộ Live Preview**: Tự động gọi `PreviewService.updateContent()` để đồng bộ hóa cửa sổ xem trước độc lập ngay khi có sự thay đổi về file hoặc nội dung HTML.
 
 ### `render()`
 Tạo sub-component phù hợp dựa trên `state.mode` và mount vào DOM.
@@ -196,4 +197,4 @@ Mỗi component tự nullify `activeInstance` qua `onClose` callback khi bị đ
 
 ---
 
-*Document — 2026-05-01 (Improved Publish Workflow & Interactive UI)*
+*Document — 2026-05-04 (Mirror Preview Synchronization & Interactive UI)*

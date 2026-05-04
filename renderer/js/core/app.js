@@ -494,6 +494,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   ChangeActionViewBar.init(); // organisms/change-action-view-bar.js
   RightSidebar.init();        // organisms/right-sidebar.js
   EditToolbarComponent.init(); // organisms/edit-toolbar-component.js
+  if (window.PreviewService) window.PreviewService.init();
 
   // 2. Support Modules
   initSocket();

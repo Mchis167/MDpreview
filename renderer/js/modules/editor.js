@@ -38,9 +38,13 @@ const EditorModule = (() => {
   }
 
   function undo() {
-    if (_undoStack.length <= 1) return; 
+    if (_undoStack.length <= 1) return;
     _redoStack.push(_undoStack.pop());
     _restoreSnapshot(_undoStack[_undoStack.length - 1]);
+    // Trigger preview update after undo
+    if (window.PreviewService) {
+      window.PreviewService.triggerUpdate(true);
+    }
   }
 
   function redo() {
@@ -48,6 +52,10 @@ const EditorModule = (() => {
     const snap = _redoStack.pop();
     _undoStack.push(snap);
     _restoreSnapshot(snap);
+    // Trigger preview update after redo
+    if (window.PreviewService) {
+      window.PreviewService.triggerUpdate(true);
+    }
   }
 
   /**
@@ -65,9 +73,33 @@ const EditorModule = (() => {
     _textarea.addEventListener('input', (e) => {
       if (_ignoreNextInput) { _ignoreNextInput = false; return; }
       _scheduleSnapshot();
-      
+
       if (typeof TabsModule !== 'undefined' && AppState.currentFile) {
         TabsModule.setDirty(AppState.currentFile, isDirty());
+      }
+
+      if (window.PreviewService) {
+        window.PreviewService.triggerUpdate();
+      }
+
+      // ── Auto-scroll to keep last lines visible ──
+      requestAnimationFrame(() => {
+        const scrollableHeight = _textarea.scrollHeight - _textarea.clientHeight;
+        const cursorLine = _textarea.value.substring(0, _textarea.selectionStart).split('\n').length;
+        const totalLines = _textarea.value.split('\n').length;
+
+        // Only auto-scroll if on last 3 lines and not already at bottom
+        if (cursorLine >= totalLines - 3 && _textarea.scrollTop < scrollableHeight - 50) {
+          _textarea.scrollTop = scrollableHeight;
+        }
+      });
+
+      // ── Debug: Track current line ──
+      if (window.DebugService) {
+        const pos = _textarea.selectionStart;
+        const textBefore = _textarea.value.substring(0, pos);
+        const lineNum = textBefore.split('\n').length;
+        window.DebugService.updateEditLine(lineNum);
       }
 
       // ── Slash Command Logic ──
@@ -157,6 +189,27 @@ const EditorModule = (() => {
         e.preventDefault();
         if (e.shiftKey) redo(); else undo();
       }
+    });
+
+    // ── Live Preview Scroll Sync ──
+    _textarea.addEventListener('scroll', () => {
+      if (window.SyncService && window.PreviewService) {
+        const data = window.SyncService.captureEditorSyncData();
+        window.PreviewService.sendScroll(data.scrollPct, data.line);
+
+        // ── Debug: Track scroll ──
+        if (window.DebugService) {
+          window.DebugService.updateScroll(data.scrollPct);
+        }
+      }
+    });
+
+    // ── Live Preview Typing Highlight Sync ──
+    _textarea.addEventListener('keyup', () => {
+       if (window.SyncService && window.PreviewService) {
+         const data = window.SyncService.captureEditorSyncData();
+         window.PreviewService.sendScroll(data.scrollPct, data.line);
+       }
     });
   }
 
@@ -268,10 +321,18 @@ const EditorModule = (() => {
     
     // Use the central logic service for transformations
     if (typeof MarkdownLogicService !== 'undefined') {
-      MarkdownLogicService.applyAction(_textarea, action);
+      if (action === 'live-preview') {
+        if (window.PreviewService) window.PreviewService.open();
+      } else {
+        MarkdownLogicService.applyAction(_textarea, action);
+      }
     }
 
     _snapshot(); // Save state after
+    
+    if (window.PreviewService) {
+      window.PreviewService.triggerUpdate(true); // Immediate update after action
+    }
   }
 
   function focusWithContext(context = {}) {
@@ -335,6 +396,8 @@ const EditorModule = (() => {
       },
       focusWithContext,
       getOriginalContent: () => _originalContent,
+      getContent: () => _textarea ? _textarea.value : undefined,
+      getCurrentFileName: () => AppState.currentFile ? AppState.currentFile.split('/').pop() : 'Untitled',
       insertContent,
       triggerQuickCommand: () => _showQuickCommand(),
       revert

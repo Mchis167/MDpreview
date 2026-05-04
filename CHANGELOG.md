@@ -1,6 +1,24 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+ 
+## [Not Commited] — 2026-05-04 17:58
+
+### 🚀 Added
+- **Mirror Preview Handshake**: Triển khai cơ chế "bắt tay" hai chiều (`preview:ready`) giữa Editor và Preview Window cho cả Electron và Web, đảm bảo đồng bộ nội dung tức thì khi khởi động hoặc reload.
+- **Intelligent Data Fallback**: `PreviewService` tự động lấy dữ liệu từ 3 nguồn (`EditorModule`, `MarkdownViewer`, `AppState`) giúp hỗ trợ đồng bộ mượt mà cả trong chế độ Chỉnh sửa và Đọc (Read/Edit Mode).
+- **Detailed Debug Logger**: Hệ thống log chuyên sâu xuyên suốt IPC pipeline giúp truy vết nhanh các lỗi kết nối và trạng thái đồng bộ giữa các cửa sổ.
+- **Web Handshake Support**: Khôi phục tham chiếu `webWindow` tự động qua `postMessage` cho môi trường trình duyệt, khắc phục lỗi mất kết nối sau khi reload.
+
+### 🔧 Changed
+- **Near-Instant Feedback**: Giảm độ trễ `UPDATE_DEBOUNCE` xuống còn **20ms**, mang lại trải nghiệm gõ phím "không độ trễ" (Zero-delay).
+- **Async Post-Processing**: Tách biệt render HTML (tức thì) và render Mermaid/CodeBlock (trì hoãn 300ms) để tránh hiện tượng lag UI khi gõ nhanh trên các document phức tạp.
+- **Tab-Aware Synchronization**: Tích hợp lệnh cập nhật vào `MarkdownViewerComponent.setState`, giúp Preview tự động nhảy theo Tab đang mở ngay khi người dùng chuyển Tab.
+
+### 🐞 Fixed
+- **Preload Path Resolution**: Sửa lỗi đường dẫn `preload.js` trong Electron IPC giúp kích hoạt lại cầu nối `electronAPI` cho cửa sổ phụ.
+- **Sync Race Conditions**: Sử dụng `lastRequestId` để đảm bảo chỉ kết quả render mới nhất được áp dụng lên giao diện, tránh hiện tượng nội dung cũ ghi đè nội dung mới.
+- **Preview Reload Recovery**: Khắc phục triệt để lỗi màn hình trắng sau khi reload cửa sổ preview thông qua cơ chế tự động nạp lại dữ liệu ngay khi cửa sổ sẵn sàng.
 
 ## [1.6.0] — 2026-05-04 17:00
 

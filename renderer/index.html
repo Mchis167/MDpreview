@@ -53,6 +53,30 @@
 
   </div>
 
+  <!-- Debug Panel: Line Number Tracker -->
+  <div id="debug-line-tracker" style="
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #0f0;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 11px;
+    padding: 12px 16px;
+    border-radius: 6px;
+    z-index: 10000;
+    border: 1px solid #0f0;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+    max-width: 250px;
+    display: none;
+  ">
+    <div><strong>[LINE DEBUG]</strong></div>
+    <div>Edit Line: <span id="debug-edit-line">-</span></div>
+    <div>Preview Line: <span id="debug-preview-line">-</span></div>
+    <div>Scroll: <span id="debug-scroll-pct">-</span>%</div>
+    <div style="font-size: 9px; margin-top: 8px; color: #888;">Press <code>Ctrl+D</code> to toggle</div>
+  </div>
+
   <!-- ══════════════════════════════════════════════════
        SCRIPTS PIPELINE
        Load Order = Dependency Order
@@ -124,6 +148,7 @@
   <script src="js/services/recently-viewed-service.js" defer></script>
   <script src="js/services/search-service.js" defer></script>
   <script src="js/services/shortcut-service.js" defer></script>
+  <script src="js/services/debug-service.js" defer></script>
   <script src="js/services/sync-service.js" defer></script>
 
   <!-- ── 3.1 Publishing Service Dependencies (load in order) ── -->
@@ -135,6 +160,7 @@
   <script src="js/services/publishing/legacy-handoff-adapter.js" defer></script>
   <script src="js/services/publishing/publish-orchestrator.js" defer></script>
   <script src="js/services/publish-service.js" defer></script>
+  <script src="js/services/preview-service.js" defer></script>
 
   <!-- ── 4. Utilities ── -->
   <script src="js/services/mermaid-config.js" defer></script>

@@ -12,6 +12,14 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 const server = http.createServer(app);
 const io     = new Server(server);
 
+app.use((req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' ws: http://localhost:* https:;"
+  );
+  next();
+});
+
 const PORT = process.env.PORT || 3737;
 
 /**
@@ -46,9 +54,7 @@ let currentDataDir  = getDefaultDataDir();
 let watcher         = null;
 
 // --- Static renderer assets ---
-app.use('/css',    express.static(path.join(__dirname, '../renderer/css')));
-app.use('/js',     express.static(path.join(__dirname, '../renderer/js')));
-app.use('/testing', express.static(path.join(__dirname, '../renderer/testing')));
+app.use(express.static(path.join(__dirname, '../renderer')));
 app.use('/assets', express.static(path.join(__dirname, '../assets')));
 
 // --- Main HTML ---

@@ -108,6 +108,7 @@ const SettingsService = (() => {
     // 3. Trigger Side Effects
     if (config.type === 'theme') {
       applyTheme();
+      if (window.PreviewService) window.PreviewService.syncTheme();
     } else if (config.type === 'explorer') {
       if (typeof TreeModule !== 'undefined') TreeModule.load();
     }

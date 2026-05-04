@@ -44,5 +44,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
   isElectron: true,
   
   // Custom
-  rebuildApp: () => ipcRenderer.send('rebuild-app')
+  rebuildApp: () => ipcRenderer.send('rebuild-app'),
+
+  // Preview Window
+  openPreview: (options) => ipcRenderer.invoke('preview:open', options),
+  closePreview: ()      => ipcRenderer.invoke('preview:close'),
+  updatePreview: (data) => ipcRenderer.send('preview:update', data),
+  scrollPreview: (data) => ipcRenderer.send('preview:scroll', data),
+  updateTheme: (data) => ipcRenderer.send('preview:theme-update', data),
+  onPreviewUpdate: (cb) => ipcRenderer.on('preview:update', (event, data) => cb(data)),
+  onPreviewScroll: (callback) => ipcRenderer.on('preview:scroll', (_event, value) => callback(value)),
+  onThemeUpdate: (callback) => ipcRenderer.on('preview:theme-update', (_event, value) => callback(value)),
+  previewReady: () => ipcRenderer.send('preview:ready'),
+  onPreviewReady: (callback) => ipcRenderer.on('preview:ready', () => callback()),
+  onPreviewClosed: (callback) => ipcRenderer.on('preview:closed', () => callback())
 });

@@ -130,6 +130,7 @@ require('./ipc/worker-publish').register(ipcMain);
 require('./ipc/workspace').register(ipcMain);
 require('./ipc/comments').register(ipcMain);
 require('./ipc/files').register(ipcMain);
+require('./ipc/preview').register(ipcMain, mainWindow);
 
 app.whenReady().then(createWindow);
 

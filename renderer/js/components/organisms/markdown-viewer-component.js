@@ -59,6 +59,11 @@ class MarkdownViewerComponent {
 
     // Update TOC with debounce
     this._updateTOC();
+
+    // ── Live Preview Sync ──
+    if (window.PreviewService && window.PreviewService.getIsOpen()) {
+      window.PreviewService.updateContent(this.state.html, this.state.file);
+    }
   }
 
   render() {

@@ -43,7 +43,9 @@ const QuickCommandPalette = (() => {
     { id: 'img',label: 'Image', icon: 'image', hint: '/img', tags: ['anh', 'hinh'] },
     { id: 'tb', label: 'Table', icon: 'table', hint: '/table', tags: ['bang'] },
     { id: 'hr', label: 'Divider', icon: 'minus', hint: '/hr', tags: ['phancach', 'duongke'] },
-    { id: 'fn', label: 'Footnote', icon: 'file-text', hint: '/fn', tags: ['chuthich'] }
+    { id: 'fn', label: 'Footnote', icon: 'file-text', hint: '/fn', tags: ['chuthich'] },
+    { divider: true },
+    { id: 'live-preview', label: 'Open Live Preview', icon: 'external-link', hint: '/lp', tags: ['xem', 'preview', 'live'] }
   ];
 
   function _init() {
@@ -109,12 +111,25 @@ const QuickCommandPalette = (() => {
   function _renderResults(rebuild = true) {
     if (rebuild) {
       const query = _input.value.toLowerCase().replace('/', '');
-      _filteredCommands = COMMANDS.filter(cmd => 
-        cmd.label.toLowerCase().includes(query) || 
-        cmd.hint.toLowerCase().includes(query) ||
-        cmd.tags.some(tag => tag.includes(query))
-      );
-      _selectedIndex = _filteredCommands.length > 0 ? 0 : -1;
+      _filteredCommands = COMMANDS.filter(cmd => {
+        if (cmd.divider) return query === ''; // Only show dividers when not searching
+        return (
+          cmd.label.toLowerCase().includes(query) || 
+          cmd.hint.toLowerCase().includes(query) ||
+          cmd.tags.some(tag => tag.includes(query))
+        );
+      });
+      
+      _selectedIndex = -1;
+      if (_filteredCommands.length > 0) {
+        // Find first non-divider
+        for (let i = 0; i < _filteredCommands.length; i++) {
+          if (!_filteredCommands[i].divider) {
+            _selectedIndex = i;
+            break;
+          }
+        }
+      }
     }
 
     _resultsContainer.innerHTML = '';
@@ -127,6 +142,12 @@ const QuickCommandPalette = (() => {
     }
 
     _filteredCommands.forEach((cmd, index) => {
+      if (cmd.divider) {
+        const div = window.DesignSystem.createElement('div', 'palette-divider');
+        _resultsContainer.appendChild(div);
+        return;
+      }
+
       const item = window.DesignSystem.createElement('div', 'palette-item' + (index === _selectedIndex ? ' is-selected' : ''));
       item.innerHTML = `
         <div class="palette-item-icon">${window.DesignSystem.getIcon(cmd.icon)}</div>
@@ -200,11 +221,18 @@ const QuickCommandPalette = (() => {
   function navigate(direction) {
     if (!_isOpen || _filteredCommands.length === 0) return;
 
-    if (direction === 'down') {
-      _selectedIndex = Math.min(_selectedIndex + 1, _filteredCommands.length - 1);
-    } else if (direction === 'up') {
-      _selectedIndex = Math.max(_selectedIndex - 1, 0);
-    }
+    let newIndex = _selectedIndex;
+    const step = direction === 'down' ? 1 : -1;
+
+    do {
+      newIndex += step;
+      // Wrap around or clamp? Clamp is usually better for palettes
+      if (newIndex < 0 || newIndex >= _filteredCommands.length) {
+        return; // Stop at boundaries
+      }
+    } while (_filteredCommands[newIndex] && _filteredCommands[newIndex].divider);
+
+    _selectedIndex = newIndex;
     _renderResults(false);
   }
 

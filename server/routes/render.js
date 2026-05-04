@@ -109,13 +109,25 @@ function renderWithLineNumbers(content) {
     const lineEnd    = lineStart + blockLines - 1;
 
     const isAtomic = ['code', 'blockquote', 'list', 'table', 'html'].includes(token.type);
-    
+
     if (isAtomic) {
       let finalHtml = tokenHtml;
       if (token.type === 'table') {
         finalHtml = `<div class="md-table-wrapper">${tokenHtml}</div>`;
       }
-      html += `<div class="md-block" data-line-start="${lineStart}" data-line-end="${lineEnd}"><div class="md-line" data-line="${lineStart}">${finalHtml}</div></div>\n`;
+
+      // For atomic blocks, split rendered HTML and assign data-line to each line
+      const atomicRenderedLines = finalHtml.trim().split('\n');
+      let atomicWrappedHtml = '';
+      for (let k = 0; k < atomicRenderedLines.length; k++) {
+        const lineNum = lineStart + k;
+        if (lineNum <= lineEnd) {
+          atomicWrappedHtml += `<div class="md-line" data-line="${lineNum}">${atomicRenderedLines[k]}</div>\n`;
+        } else {
+          atomicWrappedHtml += atomicRenderedLines[k] + '\n';
+        }
+      }
+      html += `<div class="md-block" data-line-start="${lineStart}" data-line-end="${lineEnd}">${atomicWrappedHtml}</div>\n`;
       i++;
       continue;
     }
