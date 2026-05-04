@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Not Commited] — 2026-05-04 16:38
+## [1.6.0] — 2026-05-04 17:00
 
 ### 🚀 Added
 - **Modern Slash Command System**: Triển khai hệ thống lệnh nhanh (`/`) ngay trong trình soạn thảo, hỗ trợ lọc lệnh thời gian thực và thực thi không làm gián đoạn luồng viết.
