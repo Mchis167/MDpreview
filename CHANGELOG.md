@@ -2,7 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] — 2026-05-04 14:30
+
+### 🚀 Added
+- **Professional Side-Panel Layout (Publish Site)**: Chuyển đổi giao diện tài liệu xuất bản sang cấu trúc Sidebar cố định (300px), giúp tách biệt rõ ràng giữa Mục lục (TOC) và Nội dung chính.
+- **TOC Active Indicator**: Triển khai thanh chỉ báo trạng thái (Active Indicator) màu cam đặc trưng cho toàn bộ các cấp tiêu đề (h2-h6), hỗ trợ theo dõi vị trí đọc trực quan.
+- **Vietnamese-friendly Slug Utility**: Triển khai hàm `slugifyHeading` hỗ trợ khử dấu Tiếng Việt, xử lý Unicode và tự động xử lý trùng lặp slug cho URL bản publish chuẩn SEO.
+- **Hybrid ID Injection Architecture**: Tái cấu trúc pipeline xuất bản với cơ chế "Double Injection" (render-time + runtime) để đảm bảo ID tiêu đề luôn đồng bộ 100%.
+
+### 🔧 Changed
+- **Modernized Header & UI**: 
+    - Nâng cấp Header với thanh ngăn dọc và hiệu ứng Glassmorphism sâu (100px blur).
+    - Căn giữa nội dung chính với chiều rộng tối ưu (850px) cho trải nghiệm đọc cao cấp.
+    - Chuẩn hóa toàn bộ kích thước: Header/Sidebar (41px top), Sidebar width (300px).
+- **Improved Scroll Sync UX**: Tăng `SCROLL_OFFSET` lên 200px giúp hệ thống nhận diện và highlight section mới sớm hơn, mang lại trải nghiệm cuộn tự nhiên.
+- **UX Layout Refinement**: Di chuyển nút TOC Toggle sang trái màn hình để bám sát sidebar và tối ưu hóa luồng tương tác.
+
+### 🐞 Fixed
+- **TOC Navigation & Highlighting**: 
+    - Khắc phục triệt để lỗi "Highlight bị kẹt" và lỗi "Click TOC không nhảy đến section" trên bản live.
+    - Sửa lỗi hiển thị Indicator ở các cấp h3-h6 thông qua `overflow: visible` cho item-children.
+- **Production Optimization**: Loại bỏ hoàn toàn các `console.log` và `console.warn` trong luồng xử lý runtime của TOC.
+- **Layout Sync**: Đồng bộ hóa các thông số `top` và `height` của sidebar khớp với chiều cao thực tế của header mới.
+
+
 ## [1.3.0] — 2026-05-03 10:15
+
 
 ### 🎉 Added
 - **Dynamic Shell Injection Architecture**: Refactored the publishing pipeline to decouple Markdown content from the HTML shell. This enables instant, global updates to UI, CSS, and JS features across all published documents without manual re-publishing.

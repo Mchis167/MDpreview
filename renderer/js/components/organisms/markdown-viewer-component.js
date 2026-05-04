@@ -598,14 +598,18 @@ class MarkdownViewerComponent {
 
     try {
       let res;
-      if (this.state.file) {
+      const isDraft = this.state.file && this.state.file.startsWith('__DRAFT_');
+
+      if (this.state.file && !isDraft) {
         // Case 1: Physical file on disk
         res = await window.electronAPI.copyFileToClipboard(this.state.file);
       } else if (this.state.content) {
         // Case 2: Draft/Generated content -> Copy as temp file
-        const fileName = (window.AppState && window.AppState.activeTabName) 
-          ? `${window.AppState.activeTabName}.md` 
-          : 'Untitled.md';
+        const fileName = isDraft 
+          ? (window.DraftModule?.getDisplayName(this.state.file) || 'Draft').replace(/\s+/g, '_') + '.md'
+          : (window.AppState && window.AppState.activeTabName) 
+            ? `${window.AppState.activeTabName}.md` 
+            : 'Untitled.md';
         
         // Convert string to Uint8Array for the buffer
         const buffer = new TextEncoder().encode(this.state.content);

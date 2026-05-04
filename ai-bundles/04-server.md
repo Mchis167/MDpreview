@@ -61,6 +61,9 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../renderer/index.html'));
 });
 
+// Handle favicon.ico to avoid 404s
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 // --- Inject watchDir and dataDir into requests ---
 app.use('/api', (req, res, next) => {
   req.watchDir = currentWatchDir;

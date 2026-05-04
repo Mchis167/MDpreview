@@ -226,6 +226,27 @@
         return { success: false, error: error.message };
       }
     },
+
+    copyFileFromBuffer: async (buffer, filename) => {
+      try {
+        // Browser fallback: Trigger download for the buffer
+        const blob = new Blob([buffer], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename || 'document.md';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        if (typeof showToast === 'function') showToast('File download triggered', 'info');
+        return { success: true };
+      } catch (error) {
+        console.error('Browser buffer copy error:', error);
+        return { success: false, error: error.message };
+      }
+    },
     
     startFileDrag: async (filePath, event) => {
       try {

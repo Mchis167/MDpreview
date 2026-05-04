@@ -161,6 +161,8 @@ const ROOT = path.resolve(__dirname, '..');
 const TOKENS_SRC      = path.join(ROOT, 'renderer/css/design-system/tokens.css');
 const TAB_BAR_SRC     = path.join(ROOT, 'renderer/css/design-system/organisms/tab-bar.css');
 const ZOOM_MODAL_SRC   = path.join(ROOT, 'renderer/css/design-system/organisms/zoom-modal.css');
+const TOC_CORE_SRC     = path.join(ROOT, 'renderer/css/shared/toc-core.css');
+const TOC_PUBLISH_SRC  = path.join(ROOT, 'cf-publish-worker/src/toc-publish.css');
 const SHARED_SRC      = path.join(ROOT, 'renderer/css/shared/markdown-render.css');
 const STYLES_SRC      = path.join(ROOT, 'cf-publish-worker/src/publish-styles.css');
 const OUTPUT          = path.join(ROOT, 'cf-publish-worker/public/publish.css');
@@ -168,7 +170,8 @@ const OUTPUT          = path.join(ROOT, 'cf-publish-worker/public/publish.css');
 // JS Assets to sync
 const JS_ASSETS = [
   { src: 'renderer/js/utils/code-blocks.js', dest: 'cf-publish-worker/public/code-blocks.js' },
-  { src: 'renderer/js/utils/zoom.js',        dest: 'cf-publish-worker/public/zoom.js' }
+  { src: 'renderer/js/utils/zoom.js',        dest: 'cf-publish-worker/public/zoom.js' },
+  { src: 'cf-publish-worker/src/toc-publish.js', dest: 'cf-publish-worker/public/toc-publish.js' }
 ];
 
 // Aliases that let publish-styles.css keep its current token names
@@ -192,6 +195,8 @@ function build() {
     ['tokens', TOKENS_SRC],
     ['tab-bar', TAB_BAR_SRC],
     ['zoom-modal', ZOOM_MODAL_SRC],
+    ['toc-core', TOC_CORE_SRC],
+    ['toc-publish', TOC_PUBLISH_SRC],
     ['shared', SHARED_SRC],
     ['styles', STYLES_SRC]
   ];
@@ -206,6 +211,8 @@ function build() {
   const tokens = fs.readFileSync(TOKENS_SRC, 'utf8');
   const tabBar = fs.readFileSync(TAB_BAR_SRC, 'utf8');
   const zoomModal = fs.readFileSync(ZOOM_MODAL_SRC, 'utf8');
+  const tocCore = fs.readFileSync(TOC_CORE_SRC, 'utf8');
+  const tocPublish = fs.readFileSync(TOC_PUBLISH_SRC, 'utf8');
   const shared = fs.readFileSync(SHARED_SRC, 'utf8');
   const styles = fs.readFileSync(STYLES_SRC, 'utf8');
 
@@ -215,6 +222,8 @@ function build() {
     ' *   renderer/css/design-system/tokens.css',
     ' *   renderer/css/design-system/organisms/tab-bar.css',
     ' *   renderer/css/design-system/organisms/zoom-modal.css',
+    ' *   renderer/css/shared/toc-core.css',
+    ' *   cf-publish-worker/src/toc-publish.css',
     ' *   renderer/css/shared/markdown-render.css',
     ' *   cf-publish-worker/src/publish-styles.css',
     ' * Regenerate: npm run build:publish-assets',
@@ -223,7 +232,7 @@ function build() {
     '',
   ].join('\n');
 
-  const output = [banner, tokens, PUBLISH_COMPAT_ALIASES, tabBar, zoomModal, shared, styles].join('\n');
+  const output = [banner, tokens, PUBLISH_COMPAT_ALIASES, tabBar, zoomModal, shared, styles, tocCore, tocPublish].join('\n');
 
   fs.writeFileSync(OUTPUT, output, 'utf8');
 

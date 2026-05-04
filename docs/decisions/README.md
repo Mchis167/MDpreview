@@ -59,6 +59,8 @@ Ghi lại các quyết định thiết kế và kỹ thuật quan trọng trong 
 | 2026-04-29 | [20260429-menu-anchoring-strategy.md](20260429-menu-anchoring-strategy.md) | Chiến lược định vị Menu theo phần tử neo (Anchored Positioning) | accepted |
 | 2026-04-29 | [20260429-stable-layout-border-pattern.md](20260429-stable-layout-border-pattern.md) | Pattern ổn định Layout qua Border tàng hình (Transparent Border) | accepted |
 | 2026-04-29 | [20260429-gdoc-rasterization-strategy.md](20260429-gdoc-rasterization-strategy.md) | Chiến lược Rasterization và ổn định Layout cho Google Docs Copy | accepted |
+| 2026-05-04 | [20260504-hybrid-toc-id-injection.md](20260504-hybrid-toc-id-injection.md) | Kiến trúc tiêm ID hai lớp cho TOC Navigation trên Worker | accepted |
+| 2026-05-04 | [20260504-vietnamese-slugification-strategy.md](20260504-vietnamese-slugification-strategy.md) | Chiến lược sinh Slug hỗ trợ Tiếng Việt và Unicode | accepted |
 
 
 ---

@@ -78,6 +78,7 @@ Dự án cam kết độ trung thực 100% giữa Editor và bản xuất bản 
 2. **Atomic Blocks**: Mọi đoạn văn bản phải nằm trong `.md-block > .md-line`.
 3. **Premium Blocks**: Các thành phần đặc biệt (Code, Table, Mermaid) sử dụng hệ thống Glassmorphism (`backdrop-filter`, `transparent background`).
 4. **Mermaid Zoom**: Tích hợp thanh điều khiển Zoom và khả năng tương tác mượt mà trên bản Publish, đồng bộ 1:1 với Project Map trong app.
+5. **Anchor Sync (TOC)**: Tự động tiêm ID chuẩn SEO (hỗ trợ Tiếng Việt và Unicode) vào các thẻ Heading thông qua cơ chế **Hybrid Injection**, đảm bảo mục lục (Table of Contents) luôn hoạt động chính xác.
 
 **CSS & Asset Pipeline (Phase 2.3)**: Toàn bộ CSS và JS của Worker được **auto-generated** và đồng bộ thông qua `npm run build:publish-assets`.
 - **CSS**: Bundle từ Design Tokens + shared components (Tab Bar, Zoom Modal).
@@ -162,4 +163,4 @@ All errors are logged with timestamp and context. Retry logic uses exponential b
 
 ---
 
-*Document — 2026-05-02 (v1.2.1 Architecture Updates)*
+*Document — 2026-05-04 (v1.2.2 - TOC Anchor Sync & Vietnamese Slugification)*

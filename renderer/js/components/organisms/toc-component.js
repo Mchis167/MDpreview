@@ -1,4 +1,4 @@
-/* global DesignSystem, UIUtils */
+/* global DesignSystem, UIUtils, TocService */
 /**
  * TOCComponent — Table of Contents (Organism)
  * Purpose: Scans headings in the document and renders a navigable tree view.
@@ -23,7 +23,7 @@ const TOCComponent = (() => {
   let _viewSwitcher = null;
   let _lastUpdateId = 0;
   let _mapEl = null;
-  const SCROLL_OFFSET = 240; // PX from top to trigger section change and scroll destination
+  const { SCROLL_OFFSET } = TocService;
 
   const SELECTORS = {
     panel: 'ds-toc-panel',
@@ -39,40 +39,7 @@ const TOCComponent = (() => {
    * Scans headings in the container and builds a tree structure
    */
   function _scanHeadings(container) {
-    if (!container) return [];
-
-    const headingNodes = Array.from(container.querySelectorAll('h2, h3, h4, h5, h6'));
-    const flatList = headingNodes.map(node => {
-      const lineEl = node.closest('.md-line');
-      return {
-        text: node.textContent.trim(),
-        level: parseInt(node.nodeName.substring(1)),
-        line: lineEl ? parseInt(lineEl.getAttribute('data-line')) : 0,
-        element: node
-      };
-    });
-
-    // Build hierarchy
-    const tree = [];
-    const stack = [];
-
-    flatList.forEach(item => {
-      const node = { ...item, children: [] };
-
-      while (stack.length > 0 && stack[stack.length - 1].level >= node.level) {
-        stack.pop();
-      }
-
-      if (stack.length === 0) {
-        tree.push(node);
-      } else {
-        stack[stack.length - 1].children.push(node);
-      }
-
-      stack.push(node);
-    });
-
-    return tree;
+    return TocService.scanHeadings(container);
   }
 
   /**

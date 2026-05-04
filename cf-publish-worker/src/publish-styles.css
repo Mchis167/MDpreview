@@ -3,7 +3,15 @@
    Imports shared markdown styles from app
    ============================================================ */
 
-* { box-sizing: border-box; }
+:root {
+    --header-height: 45px;
+    --ds-toc-padding-x: 16px;
+    --ds-toc-indent-step: 12px;
+}
+
+* {
+    box-sizing: border-box;
+}
 
 body {
     margin: 0;
@@ -16,9 +24,10 @@ body {
 }
 
 .ds-publish-content-wrapper {
-    max-width: 800px;
+    max-width: 850px;
     margin: 0 auto;
-    padding: 100px 24px 60px; /* Top padding for fixed header */
+    padding: 80px 24px 60px;
+    /* Top padding for fixed header */
 }
 
 /* ── Use Shared Header Pattern (TabBar) ── */
@@ -27,23 +36,23 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    height: var(--header-height, 40px);
-    background: var(--ds-bg-toolbar);
+    background: var(--ds-layer-surface-dark-default);
     backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(100px);
     z-index: 1000;
     display: flex;
     align-items: center;
+    border-bottom: 1px solid var(--ds-border-strong);
+    height: var(--header-height, 44px);
 }
 
 .ds-publish-header-inner {
     width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     padding: 0 24px;
+    height: var(--header-height, 44px);
 }
 
 .ds-logo-wrap {
@@ -52,13 +61,17 @@ body {
     gap: 12px;
     text-decoration: none;
     cursor: default;
+    padding-right: 16px;
+    margin-right: 16px;
+    border-right: 1px solid var(--ds-border-subtle);
+    height: var(--header-height, 44px);
 }
 
 .ds-logo-box {
     width: 24px;
     height: 24px;
     background: var(--ds-accent);
-    color: white;
+    color: var(--ds-primitive-white);
     border-radius: var(--ds-radius-widget);
     display: flex;
     align-items: center;
@@ -122,7 +135,9 @@ body {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .ds-publish-loading-text {
@@ -136,5 +151,3 @@ body {
     color: var(--ds-accent);
     font-weight: 600;
 }
-
-

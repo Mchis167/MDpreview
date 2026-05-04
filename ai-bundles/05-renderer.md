@@ -4565,6 +4565,8 @@ body.is-searching .edit-toolbar-container {
 
 <file path="renderer/css/design-system/organisms/toc-panel.css">
 ```css
+@import "../../shared/toc-core.css";
+
 #md-viewer-mount {
   --_toc-right: var(--ds-space-lg);
   --_toc-top: var(--ds-space-lg);
@@ -4713,101 +4715,7 @@ body.is-searching .edit-toolbar-container {
   max-width: 200px;
 }
 
-/* ── TOC Items ── */
-.ds-toc-item {
-  display: flex;
-  flex-direction: column;
-}
-
-.item-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--ds-space-xs) var(--ds-space-xs) var(--ds-space-xs) var(--ds-space-md);
-  border-radius: var(--ds-radius-widget);
-  cursor: pointer;
-  transition: all var(--ds-transition-fast);
-  gap: var(--ds-space-sm);
-}
-
-.item-content:hover {
-  background: var(--ds-layer-subtle-hover);
-}
-
-.item-label {
-  flex: 1;
-  font-size: var(--ds-font-md);
-  color: var(--ds-text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: color var(--ds-transition-fast);
-}
-
-.item-content:hover .item-label {
-  color: var(--ds-text-primary);
-}
-
-.ds-toc-item.is-active>.item-content .item-label {
-  color: var(--ds-text-accent);
-  font-weight: 700;
-}
-
-.ds-toc-item.is-active>.item-content {
-  background: var(--ds-layer-subtle-active-hover);
-}
-
-.item-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--ds-space-lg);
-  height: var(--ds-space-lg);
-  color: var(--ds-text-tertiary);
-  transition: transform var(--ds-transition-fast);
-}
-
-.item-toggle svg {
-  width: 14px;
-  height: 14px;
-}
-
-/* ── Levels & Indentation ── */
-.ds-toc-item.level-2 {
-  padding-left: 0;
-}
-
-.ds-toc-item.level-2:not(:first-child) {
-  border-top: 1px solid var(--ds-border-subtle);
-  margin-top: var(--ds-space-sm);
-  padding-top: var(--ds-space-sm);
-}
-
-.ds-toc-item.level-3 {
-  padding-left: var(--ds-space-md);
-}
-
-.ds-toc-item.level-4 {
-  padding-left: var(--ds-space-xl);
-}
-
-.ds-toc-item.level-5 {
-  padding-left: calc(var(--ds-space-xl) + var(--ds-space-md));
-}
-
-.ds-toc-item.level-6 {
-  padding-left: var(--ds-space-4xl);
-}
-
-/* ── Expansion Logic ── */
-.item-children {
-  display: none;
-  overflow: hidden;
-}
-
-.ds-toc-item.is-expanded>.item-children {
-  display: block;
-}
+/* Styles for .ds-toc-item and .item-content are now in shared/toc-core.css */
 
 /* ── Floating TOC Button ── */
 .floating-action-group {
@@ -6405,6 +6313,110 @@ main {
 ```
 </file>
 
+<file path="renderer/css/shared/toc-core.css">
+```css
+/* toc-core.css — Shared TOC item styles
+   Used by: web app (toc-panel.css) + publish (toc-publish.css) */
+
+/* ── TOC Items ── */
+.ds-toc-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.item-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ds-space-xs) var(--ds-space-xs) var(--ds-space-xs) var(--ds-space-md);
+  border-radius: var(--ds-radius-widget);
+  cursor: pointer;
+  transition: all var(--ds-transition-fast);
+  gap: var(--ds-space-sm);
+}
+
+.item-content:hover {
+  background: var(--ds-layer-subtle-hover);
+}
+
+.item-label {
+  flex: 1;
+  font-size: var(--ds-font-md);
+  color: var(--ds-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--ds-transition-fast);
+}
+
+.item-content:hover .item-label {
+  color: var(--ds-text-primary);
+}
+
+.ds-toc-item.is-active>.item-content .item-label {
+  color: var(--ds-text-accent);
+  font-weight: 700;
+}
+
+.ds-toc-item.is-active>.item-content {
+  background: var(--ds-layer-subtle-active-hover);
+}
+
+.item-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ds-space-lg);
+  height: var(--ds-space-lg);
+  color: var(--ds-text-tertiary);
+  transition: transform var(--ds-transition-fast);
+}
+
+.item-toggle svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ── Levels & Indentation ── */
+.ds-toc-item.level-2 {
+  padding-left: 0;
+}
+
+.ds-toc-item.level-2:not(:first-child) {
+  border-top: 1px solid var(--ds-border-subtle);
+  margin-top: var(--ds-space-sm);
+  padding-top: var(--ds-space-sm);
+}
+
+.ds-toc-item.level-3 {
+  padding-left: var(--ds-space-md);
+}
+
+.ds-toc-item.level-4 {
+  padding-left: var(--ds-space-xl);
+}
+
+.ds-toc-item.level-5 {
+  padding-left: calc(var(--ds-space-xl) + var(--ds-space-md));
+}
+
+.ds-toc-item.level-6 {
+  padding-left: var(--ds-space-4xl);
+}
+
+/* ── Expansion Logic ── */
+.item-children {
+  display: none;
+  overflow: hidden;
+}
+
+.ds-toc-item.is-expanded>.item-children {
+  display: block;
+}
+
+```
+</file>
+
 <file path="renderer/css/styles.css">
 ```css
 /* ============================================================
@@ -6528,6 +6540,7 @@ main {
   <script src="js/components/organisms/settings-component.js" defer></script>
   <script src="js/components/organisms/markdown-helper-component.js" defer></script>
   <script src="js/components/organisms/shortcuts-component.js" defer></script>
+  <script src="js/services/toc-service.js" defer></script>
   <script src="js/components/organisms/toc-component.js" defer></script>
   <script src="js/components/organisms/base-form-modal.js" defer></script>
   <script src="js/components/organisms/publish-settings-form-component.js" defer></script>
@@ -11728,14 +11741,18 @@ class MarkdownViewerComponent {
 
     try {
       let res;
-      if (this.state.file) {
+      const isDraft = this.state.file && this.state.file.startsWith('__DRAFT_');
+
+      if (this.state.file && !isDraft) {
         // Case 1: Physical file on disk
         res = await window.electronAPI.copyFileToClipboard(this.state.file);
       } else if (this.state.content) {
         // Case 2: Draft/Generated content -> Copy as temp file
-        const fileName = (window.AppState && window.AppState.activeTabName) 
-          ? `${window.AppState.activeTabName}.md` 
-          : 'Untitled.md';
+        const fileName = isDraft 
+          ? (window.DraftModule?.getDisplayName(this.state.file) || 'Draft').replace(/\s+/g, '_') + '.md'
+          : (window.AppState && window.AppState.activeTabName) 
+            ? `${window.AppState.activeTabName}.md` 
+            : 'Untitled.md';
         
         // Convert string to Uint8Array for the buffer
         const buffer = new TextEncoder().encode(this.state.content);
@@ -14770,7 +14787,7 @@ window.TabBar = (() => {
 
 <file path="renderer/js/components/organisms/toc-component.js">
 ```js
-/* global DesignSystem, UIUtils */
+/* global DesignSystem, UIUtils, TocService */
 /**
  * TOCComponent — Table of Contents (Organism)
  * Purpose: Scans headings in the document and renders a navigable tree view.
@@ -14795,7 +14812,7 @@ const TOCComponent = (() => {
   let _viewSwitcher = null;
   let _lastUpdateId = 0;
   let _mapEl = null;
-  const SCROLL_OFFSET = 240; // PX from top to trigger section change and scroll destination
+  const { SCROLL_OFFSET } = TocService;
 
   const SELECTORS = {
     panel: 'ds-toc-panel',
@@ -14811,40 +14828,7 @@ const TOCComponent = (() => {
    * Scans headings in the container and builds a tree structure
    */
   function _scanHeadings(container) {
-    if (!container) return [];
-
-    const headingNodes = Array.from(container.querySelectorAll('h2, h3, h4, h5, h6'));
-    const flatList = headingNodes.map(node => {
-      const lineEl = node.closest('.md-line');
-      return {
-        text: node.textContent.trim(),
-        level: parseInt(node.nodeName.substring(1)),
-        line: lineEl ? parseInt(lineEl.getAttribute('data-line')) : 0,
-        element: node
-      };
-    });
-
-    // Build hierarchy
-    const tree = [];
-    const stack = [];
-
-    flatList.forEach(item => {
-      const node = { ...item, children: [] };
-
-      while (stack.length > 0 && stack[stack.length - 1].level >= node.level) {
-        stack.pop();
-      }
-
-      if (stack.length === 0) {
-        tree.push(node);
-      } else {
-        stack[stack.length - 1].children.push(node);
-      }
-
-      stack.push(node);
-    });
-
-    return tree;
+    return TocService.scanHeadings(container);
   }
 
   /**
@@ -16747,6 +16731,27 @@ window.showToast = showToast;
         return { success: true };
       } catch (error) {
         console.error('Browser copy error:', error);
+        return { success: false, error: error.message };
+      }
+    },
+
+    copyFileFromBuffer: async (buffer, filename) => {
+      try {
+        // Browser fallback: Trigger download for the buffer
+        const blob = new Blob([buffer], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename || 'document.md';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        if (typeof showToast === 'function') showToast('File download triggered', 'info');
+        return { success: true };
+      } catch (error) {
+        console.error('Browser buffer copy error:', error);
         return { success: false, error: error.message };
       }
     },
@@ -21446,7 +21451,7 @@ const DesignTokenProvider = (() => {
         }
 
         // Check for mismatches
-        for (const [name, jsValue] of Object.entries(jsTokens)) {
+        for (const [name, _jsValue] of Object.entries(jsTokens)) {
           if (domTokens[name]) {
             result.matches++;
             // Note: Exact match may not be possible due to CSS parsing,
@@ -21458,7 +21463,7 @@ const DesignTokenProvider = (() => {
         }
 
         // Check for tokens in DOM that aren't in JS
-        for (const [name, domValue] of Object.entries(domTokens)) {
+        for (const [name, _domValue] of Object.entries(domTokens)) {
           if (!(name in jsTokens)) {
             result.missingInJs.push(name);
           }
@@ -22210,7 +22215,6 @@ if (typeof exports !== 'undefined') {
  * Works in both browser (global) and Node.js (CommonJS) contexts.
  */
 
-/* eslint-disable no-undef */
 (function() {
   'use strict';
 
@@ -22271,7 +22275,6 @@ if (typeof exports !== 'undefined') {
     module.exports = exports;
   }
 })();
-/* eslint-enable no-undef */
 
 ```
 </file>
@@ -22408,7 +22411,7 @@ ${tokenStyles}
     const timestamp = new Date().toISOString().substring(11, 19);
     const prefix = `[${timestamp}] ${LOG_TAG}`;
     const method = { debug: 'debug', info: 'log', warn: 'warn', error: 'error' }[level] || 'log';
-    console[method](prefix, message);
+    console[method](prefix, message); // eslint-disable-line no-console
   }
 
   // ============================================
@@ -23143,7 +23146,7 @@ const LegacyHandoffAdapter = (() => {
     const timestamp = new Date().toISOString().substring(11, 19);
     const prefix = `[${timestamp}] ${LOG_TAG}`;
     const method = { debug: 'debug', info: 'log', warn: 'warn', error: 'error' }[level];
-    console[method](prefix, message);
+    console[method](prefix, message); // eslint-disable-line no-console
   }
 
   return {
@@ -23280,7 +23283,7 @@ const PublishOrchestrator = (() => {
    * Rename a published slug
    */
   async function renameSlug(oldSlug, newSlug, settings = window.AppState?.settings) {
-    const { adapter, type, config } = _selectAdapter(settings);
+    const { adapter, type: _type, config } = _selectAdapter(settings);
 
     // Legacy adapter doesn't support rename
     if (adapter === LegacyHandoffAdapter) {
@@ -23302,7 +23305,7 @@ const PublishOrchestrator = (() => {
    * Unpublish a document
    */
   async function unpublish(slug, filePath, settings = window.AppState?.settings) {
-    const { adapter, type, config } = _selectAdapter(settings);
+    const { adapter, type: _type, config } = _selectAdapter(settings);
 
     _log('info', `Unpublishing: ${slug} (${filePath})`);
 
@@ -23317,7 +23320,7 @@ const PublishOrchestrator = (() => {
    * List all published documents
    */
   async function listPublished(settings = window.AppState?.settings) {
-    const { adapter, type, config } = _selectAdapter(settings);
+    const { adapter, type: _type, config } = _selectAdapter(settings);
 
     // Legacy adapter doesn't support list
     if (adapter === LegacyHandoffAdapter) {
@@ -23374,7 +23377,7 @@ const PublishOrchestrator = (() => {
     const timestamp = new Date().toISOString().substring(11, 19);
     const prefix = `[${timestamp}] ${LOG_TAG}`;
     const method = { debug: 'debug', info: 'log', warn: 'warn', error: 'error' }[level];
-    console[method](prefix, message);
+    console[method](prefix, message); // eslint-disable-line no-console
   }
 
   // ============================================
@@ -23557,7 +23560,7 @@ const PublishUtils = (() => {
    * Resolve a single asset path to absolute location
    * @private
    */
-  async function _resolveAsset(path, type, result, electronAPI, maxSize, logLevel) {
+  async function _resolveAsset(path, type, result, electronAPI, _maxSize, _logLevel) {
     if (!path || result.resolved[path] || result.unresolved.some(u => u.path === path)) {
       return; // Already processed
     }
@@ -23642,10 +23645,10 @@ const PublishUtils = (() => {
 
     switch (level) {
       case 'debug':
-        console.debug(prefix, message);
+        console.debug(prefix, message); // eslint-disable-line no-console
         break;
       case 'info':
-        console.log(prefix, message);
+        console.log(prefix, message); // eslint-disable-line no-console
         break;
       case 'warn':
         console.warn(prefix, message);
@@ -24475,10 +24478,10 @@ const WorkerPublishAdapter = (() => {
 
     switch (level) {
       case 'debug':
-        console.debug(prefix, message);
+        console.debug(prefix, message); // eslint-disable-line no-console
         break;
       case 'info':
-        console.log(prefix, message);
+        console.log(prefix, message); // eslint-disable-line no-console
         break;
       case 'warn':
         console.warn(prefix, message);
@@ -25527,6 +25530,133 @@ const SyncService = (() => {
 })();
 
 window.SyncService = SyncService;
+
+```
+</file>
+
+<file path="renderer/js/services/toc-service.js">
+```js
+/**
+ * TOCService — Pure logic for scanning headings and building tree structures.
+ * This service is shared between the local application and the Cloudflare Worker.
+ * 
+ * ADR 20260428-toc-scroll-sync-strategy: SCROLL_OFFSET must be consistent across environments.
+ */
+
+const SCROLL_OFFSET = 240;
+
+/**
+ * Scans headings (H2–H6) in a container or HTML string, returns a nested tree.
+ * @param {HTMLElement|string} source - DOM element OR raw HTML string
+ * @returns {Array} tree
+ */
+function scanHeadings(source) {
+  let headingNodes;
+  
+  if (typeof source === 'string') {
+    // SSR context: parse from HTML string (simulated DOM for extraction)
+    // Note: In Cloudflare Worker, we use extractHeadingsSSR instead.
+    const tmp = document.createElement('div');
+    tmp.innerHTML = source;
+    headingNodes = Array.from(tmp.querySelectorAll('h2,h3,h4,h5,h6'));
+  } else {
+    if (!source) return [];
+    headingNodes = Array.from(source.querySelectorAll('h2,h3,h4,h5,h6'));
+  }
+
+  const flatList = headingNodes.map(node => {
+    const lineEl = node.closest ? node.closest('.md-line') : null;
+    return {
+      text: node.textContent.trim(),
+      level: parseInt(node.nodeName.substring(1)),
+      line: lineEl ? parseInt(lineEl.getAttribute('data-line')) : 0,
+      id: node.id || null,
+      element: typeof source === 'string' ? null : node
+    };
+  });
+
+  return buildTree(flatList);
+}
+
+/**
+ * Converts flat heading list into nested tree structure.
+ * @param {Array} flatList
+ * @returns {Array} tree
+ */
+function buildTree(flatList) {
+  const tree = [];
+  const stack = [];
+  
+  flatList.forEach(item => {
+    const node = { ...item, children: [] };
+    
+    while (stack.length > 0 && stack[stack.length - 1].level >= node.level) {
+      stack.pop();
+    }
+    
+    if (stack.length === 0) {
+      tree.push(node);
+    } else {
+      stack[stack.length - 1].children.push(node);
+    }
+    
+    stack.push(node);
+  });
+  
+  return tree;
+}
+
+/**
+ * Renders a TOC item as a DOM element.
+ * Used by web app. Publish uses SSR-injected HTML.
+ * @param {Object} node - tree node
+ * @param {Object} opts - { mode: 'app'|'publish', depth: number, DesignSystem: Object }
+ * @returns {HTMLElement}
+ */
+function renderTocItem(node, opts = {}) {
+  const { mode = 'app', depth = 0, DesignSystem = window.DesignSystem } = opts;
+  
+  if (!DesignSystem) {
+    throw new Error('TOCService.renderTocItem requires DesignSystem');
+  }
+
+  const item = DesignSystem.createElement('div', ['ds-toc-item', `level-${node.level}`], {
+    'data-line': node.line
+  });
+  
+  if (node.id) item.setAttribute('data-heading-id', node.id);
+
+  const content = DesignSystem.createElement('div', 'item-content');
+  const label = DesignSystem.createElement('span', 'item-label', { text: node.text });
+  content.appendChild(label);
+
+  if (mode === 'publish' && node.id) {
+    const link = document.createElement('a');
+    link.href = `#${node.id}`;
+    link.className = 'item-link';
+    link.appendChild(content);
+    item.appendChild(link);
+  } else {
+    item.appendChild(content);
+  }
+
+  if (node.children.length > 0) {
+    const childrenContainer = DesignSystem.createElement('div', 'item-children');
+    node.children.forEach(child => {
+      childrenContainer.appendChild(renderTocItem(child, { ...opts, depth: depth + 1 }));
+    });
+    item.appendChild(childrenContainer);
+  }
+
+  return item;
+}
+
+// Export dual: CommonJS (Worker) + global (browser)
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { scanHeadings, buildTree, renderTocItem, SCROLL_OFFSET };
+} else {
+  window.TocService = { scanHeadings, buildTree, renderTocItem, SCROLL_OFFSET };
+}
 
 ```
 </file>

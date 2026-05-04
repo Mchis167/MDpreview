@@ -48,6 +48,8 @@ Vui lòng đọc các file theo thứ tự số thứ tự (00 -> 08) để hi�
 ├── GraphPreview
 │   ├── Antigravity_Chart_Guide.md
 │   └── Example_Audit_With_Charts.md
+├── ImplementPlan
+│   └── Implementation Plan_ TOC Shared Module.md
 ├── README.md
 ├── bundle.command
 ├── cf-publish-worker
@@ -68,6 +70,7 @@ Vui lòng đọc các file theo thứ tự số thứ tự (00 -> 08) để hi�
 │   ├── public
 │   │   ├── code-blocks.js
 │   │   ├── publish.css
+│   │   ├── toc-publish.js
 │   │   └── zoom.js
 │   ├── src
 │   │   ├── handlers
@@ -79,6 +82,8 @@ Vui lòng đọc các file theo thứ tự số thứ tự (00 -> 08) để hi�
 │   │   ├── publish-styles.css
 │   │   ├── renderer.js
 │   │   ├── shell.js
+│   │   ├── toc-publish.css
+│   │   ├── toc-publish.js
 │   │   └── utils
 │   │       └── slug.js
 │   └── wrangler.toml
@@ -274,7 +279,8 @@ Vui lòng đọc các file theo thứ tự số thứ tự (00 -> 08) để hi�
 │   │   ├── design-system.css
 │   │   ├── layout.css
 │   │   ├── shared
-│   │   │   └── markdown-render.css
+│   │   │   ├── markdown-render.css
+│   │   │   └── toc-core.css
 │   │   └── styles.css
 │   ├── index.html
 │   ├── js
@@ -359,6 +365,7 @@ Vui lòng đọc các file theo thứ tự số thứ tự (00 -> 08) để hi�
 │   │   │   ├── settings-service.js
 │   │   │   ├── shortcut-service.js
 │   │   │   ├── sync-service.js
+│   │   │   ├── toc-service.js
 │   │   │   ├── tree-drag-manager.js
 │   │   │   └── ui-utils.js
 │   │   └── utils

@@ -50,6 +50,14 @@ Sử dụng `CodeBlockModule` chia sẻ để cung cấp:
 - Badge ngôn ngữ lập trình.
 - Hiệu ứng Glassmorphism và Scrollbar premium.
 
+### 3. TOC & Side-Panel Layout
+Tối ưu hóa khả năng điều hướng và cấu trúc tài liệu thông qua mô hình Side-Panel hiện đại:
+- **Side-Panel Layout**: Thay thế giao diện Floating cũ bằng layout hai cột: Sidebar cố định (300px) và Nội dung chính (850px), giúp tách biệt rõ ràng luồng điều hướng và nội dung đọc.
+- **Active Indicator**: Tích hợp thanh chỉ báo màu cam (ds-accent) cho mọi cấp độ tiêu đề (h2-h6) trong TOC, giúp người dùng luôn xác định được vị trí đang đọc trong tài liệu.
+- **Hybrid ID Injection**: Tự động chèn thuộc tính `id` vào các thẻ Heading (`h2-h6`) ở cả tầng Renderer (chuyển đổi Markdown) và tầng Shell Builder (quét HTML đã render).
+- **Vietnamese Slugification**: Thuật toán chuẩn hóa Unicode tạo ID không dấu, chuẩn SEO cho tiêu đề Tiếng Việt.
+- **Enhanced Scroll Synchronization**: Đồng bộ vị trí cuộn với offset **200px**, giúp TOC highlight section mới sớm hơn và tự nhiên hơn khi đọc.
+
 ---
 ...
-*Document — 2026-05-02 (Updated for Dynamic Shell & Asset Pipeline)*
+*Document — 2026-05-04 (Updated for Side-Panel Layout & TOC UX)*

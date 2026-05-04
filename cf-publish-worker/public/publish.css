@@ -3,10 +3,12 @@
  *   renderer/css/design-system/tokens.css
  *   renderer/css/design-system/organisms/tab-bar.css
  *   renderer/css/design-system/organisms/zoom-modal.css
+ *   renderer/css/shared/toc-core.css
+ *   cf-publish-worker/src/toc-publish.css
  *   renderer/css/shared/markdown-render.css
  *   cf-publish-worker/src/publish-styles.css
  * Regenerate: npm run build:publish-assets
- * Generated:  2026-05-02T04:24:33.232Z
+ * Generated:  2026-05-04T07:16:55.941Z
  */
 
 /* ============================================================
@@ -1175,7 +1177,15 @@
    Imports shared markdown styles from app
    ============================================================ */
 
-* { box-sizing: border-box; }
+:root {
+    --header-height: 45px;
+    --ds-toc-padding-x: 16px;
+    --ds-toc-indent-step: 12px;
+}
+
+* {
+    box-sizing: border-box;
+}
 
 body {
     margin: 0;
@@ -1188,9 +1198,10 @@ body {
 }
 
 .ds-publish-content-wrapper {
-    max-width: 800px;
+    max-width: 850px;
     margin: 0 auto;
-    padding: 100px 24px 60px; /* Top padding for fixed header */
+    padding: 80px 24px 60px;
+    /* Top padding for fixed header */
 }
 
 /* ── Use Shared Header Pattern (TabBar) ── */
@@ -1199,23 +1210,23 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    height: var(--header-height, 40px);
-    background: var(--ds-bg-toolbar);
+    background: var(--ds-layer-surface-dark-default);
     backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(100px);
     z-index: 1000;
     display: flex;
     align-items: center;
+    border-bottom: 1px solid var(--ds-border-strong);
+    height: var(--header-height, 44px);
 }
 
 .ds-publish-header-inner {
     width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     padding: 0 24px;
+    height: var(--header-height, 44px);
 }
 
 .ds-logo-wrap {
@@ -1224,13 +1235,17 @@ body {
     gap: 12px;
     text-decoration: none;
     cursor: default;
+    padding-right: 16px;
+    margin-right: 16px;
+    border-right: 1px solid var(--ds-border-subtle);
+    height: var(--header-height, 44px);
 }
 
 .ds-logo-box {
     width: 24px;
     height: 24px;
     background: var(--ds-accent);
-    color: white;
+    color: var(--ds-primitive-white);
     border-radius: var(--ds-radius-widget);
     display: flex;
     align-items: center;
@@ -1294,7 +1309,9 @@ body {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .ds-publish-loading-text {
@@ -1308,5 +1325,283 @@ body {
     color: var(--ds-accent);
     font-weight: 600;
 }
+/* toc-core.css — Shared TOC item styles
+   Used by: web app (toc-panel.css) + publish (toc-publish.css) */
 
+/* ── TOC Items ── */
+.ds-toc-item {
+  display: flex;
+  flex-direction: column;
+}
 
+.item-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ds-space-xs) var(--ds-space-xs) var(--ds-space-xs) var(--ds-space-md);
+  border-radius: var(--ds-radius-widget);
+  cursor: pointer;
+  transition: all var(--ds-transition-fast);
+  gap: var(--ds-space-sm);
+}
+
+.item-content:hover {
+  background: var(--ds-layer-subtle-hover);
+}
+
+.item-label {
+  flex: 1;
+  font-size: var(--ds-font-md);
+  color: var(--ds-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--ds-transition-fast);
+}
+
+.item-content:hover .item-label {
+  color: var(--ds-text-primary);
+}
+
+.ds-toc-item.is-active>.item-content .item-label {
+  color: var(--ds-text-accent);
+  font-weight: 700;
+}
+
+.ds-toc-item.is-active>.item-content {
+  background: var(--ds-layer-subtle-active-hover);
+}
+
+.item-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ds-space-lg);
+  height: var(--ds-space-lg);
+  color: var(--ds-text-tertiary);
+  transition: transform var(--ds-transition-fast);
+}
+
+.item-toggle svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ── Levels & Indentation ── */
+.ds-toc-item.level-2 {
+  padding-left: 0;
+}
+
+.ds-toc-item.level-2:not(:first-child) {
+  border-top: 1px solid var(--ds-border-subtle);
+  margin-top: var(--ds-space-sm);
+  padding-top: var(--ds-space-sm);
+}
+
+.ds-toc-item.level-3 {
+  padding-left: var(--ds-space-md);
+}
+
+.ds-toc-item.level-4 {
+  padding-left: var(--ds-space-xl);
+}
+
+.ds-toc-item.level-5 {
+  padding-left: calc(var(--ds-space-xl) + var(--ds-space-md));
+}
+
+.ds-toc-item.level-6 {
+  padding-left: var(--ds-space-4xl);
+}
+
+/* ── Expansion Logic ── */
+.item-children {
+  display: none;
+  overflow: hidden;
+}
+
+.ds-toc-item.is-expanded>.item-children {
+  display: block;
+}
+
+/* toc-publish.css — Publish-specific TOC layout
+   Sticky sidebar, no glass panel, no animation dependencies */
+
+.publish-layout {
+  display: flex;
+  width: 100%;
+  min-height: calc(100vh - var(--header-height));
+  margin: 0;
+  padding: 0;
+  gap: 0;
+  align-items: stretch;
+}
+
+/* TOC Sidebar */
+.publish-toc-sidebar {
+  width: var(--ds-toc-width, 300px);
+  min-width: 320px;
+  flex-shrink: 0;
+  position: sticky;
+  top: var(--header-height);
+  height: calc(100vh - var(--header-height));
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding: 40px var(--ds-toc-padding-x);
+  background: var(--ds-layer-surface-dark-default);
+  border-right: 1px solid var(--ds-border-strong);
+}
+
+/* Fix clipping for nested indicators */
+.publish-toc-sidebar .item-children {
+  overflow: visible !important;
+}
+
+.publish-toc-sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+.publish-toc-header {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ds-text-tertiary);
+  margin-bottom: 12px;
+  padding: 32px var(--ds-space-xs) 0;
+  font-family: var(--ds-font-family-code);
+}
+
+/* Anchor links — override item-content cursor */
+.publish-toc-sidebar .item-link {
+  text-decoration: none;
+  display: block;
+  color: inherit;
+}
+
+.publish-toc-sidebar .item-content {
+  cursor: pointer;
+}
+
+/* Active highlight via JS */
+.publish-toc-sidebar .ds-toc-item.is-active>.item-link .item-label {
+  color: var(--ds-text-accent);
+  font-weight: 600;
+}
+
+.publish-toc-sidebar .ds-toc-item.is-active>.item-link {
+  position: relative;
+}
+
+.publish-toc-sidebar .ds-toc-item.is-active>.item-link::before {
+  content: "";
+  position: absolute;
+  left: calc(-1 * var(--ds-toc-padding-x));
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 16px;
+  background: var(--ds-accent);
+  border-radius: 0 4px 4px 0;
+}
+
+/* Align indicator to the far left for all levels using centralized tokens */
+.publish-toc-sidebar .ds-toc-item.level-3.is-active>.item-link::before {
+  left: calc(-1 * (var(--ds-toc-padding-x) + var(--ds-toc-indent-step)));
+}
+
+.publish-toc-sidebar .ds-toc-item.level-4.is-active>.item-link::before {
+  left: calc(-1 * (var(--ds-toc-padding-x) + 2 * var(--ds-toc-indent-step)));
+}
+
+.publish-toc-sidebar .ds-toc-item.level-5.is-active>.item-link::before {
+  left: calc(-1 * (var(--ds-toc-padding-x) + 3 * var(--ds-toc-indent-step)));
+}
+
+.publish-toc-sidebar .ds-toc-item.level-6.is-active>.item-link::before {
+  left: calc(-1 * (var(--ds-toc-padding-x) + 4 * var(--ds-toc-indent-step)));
+}
+
+/* Main content area */
+.publish-main-content {
+  flex: 1;
+  min-width: 0;
+  padding: 160px 40px 80px;
+  display: flex;
+  justify-content: center;
+  transition: all var(--ds-transition-main) var(--ds-ease-spring);
+}
+
+/* Floating Actions */
+.publish-floating-actions {
+  position: fixed;
+  top: 60px;
+  left: 16px;
+  z-index: 1100;
+  /* Higher than sidebar */
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-sm);
+}
+
+.publish-floating-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--ds-radius-widget);
+  background: var(--ds-bg-floating-glass);
+  backdrop-filter: blur(var(--ds-blur-lg));
+  -webkit-backdrop-filter: blur(var(--ds-blur-lg));
+  border: 1px solid var(--ds-border-strong);
+  color: var(--ds-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--ds-transition-fast);
+  box-shadow: var(--ds-shadow-lg);
+}
+
+.publish-floating-btn svg {
+  width: var(--ds-space-lg);
+  height: var(--ds-space-lg);
+}
+
+.publish-floating-btn:hover {
+  background: var(--ds-layer-subtle-hover);
+  color: var(--ds-text-primary);
+  transform: translateY(-2px);
+}
+.publish-floating-btn.is-active {
+  background: transparent;
+  border: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.publish-main-content .md-content {
+  max-width: 850px;
+  width: 100%;
+}
+
+/* Sidebar Toggle State */
+.publish-layout.toc-hidden .publish-toc-sidebar {
+  display: none;
+}
+
+.publish-layout.toc-hidden .publish-main-content {
+  margin-left: 0;
+}
+
+/* Responsive: hide sidebar and toggle on mobile */
+@media (width <=1024px) {
+  .publish-layout {
+    flex-direction: column;
+    padding: 60px 16px 40px;
+  }
+
+  .publish-toc-sidebar,
+  .publish-floating-actions {
+    display: none !important;
+  }
+}

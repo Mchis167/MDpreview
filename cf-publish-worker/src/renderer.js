@@ -1,6 +1,7 @@
 import { marked } from 'marked';
 import hljs from 'highlight.js';
 import { highlightCodeBlock, sanitizeHtml, wrapInTableWrapper, renderMermaidBlock } from '../../renderer/js/services/md-renderer-core.js';
+import { slugifyHeading } from './utils/slug.js';
 
 /**
  * High-fidelity renderer port from MDpreview server.
@@ -8,7 +9,15 @@ import { highlightCodeBlock, sanitizeHtml, wrapInTableWrapper, renderMermaidBloc
  */
 export function render(content) {
   const tokens = marked.lexer(content);
+  const usedSlugs = new Map();
   let html = '';
+
+  // Configure custom renderer for headings to inject IDs
+  const renderer = new marked.Renderer();
+  renderer.heading = (text, level, raw) => {
+    const id = slugifyHeading(raw, usedSlugs);
+    return `<h${level} id="${id}">${text}</h${level}>\n`;
+  };
 
   tokens.forEach(token => {
     if (token.type === 'space') return;
@@ -32,7 +41,7 @@ export function render(content) {
     }
     // ── 4. Standard Blocks ──
     else {
-      tokenHtml = marked.parser([token]);
+      tokenHtml = marked.parser([token], { renderer });
     }
 
     // Wrap in standard MDpreview block structure for 100% CSS parity

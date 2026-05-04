@@ -1,10 +1,10 @@
 # Feature Documentation
 
-**Last Updated:** May 2, 2026 (Phase 1.1)  
+**Last Updated:** May 4, 2026 (Phase 2.3)  
 **Total Features:** 37+ modules documented  
 **Status:** Organized by category
 
-> **Recent Update (May 2):** Added comprehensive `PROJECT_MAP.md` documentation with layout padding sync and viewport indicator technical details. See [Components](#-components--ui-elements) section.
+> **Recent Update (May 4):** Refactored Published Document UI into a modern **Side-Panel Layout** with sticky TOC, active indicator sync (h2-h6), and modernized glassmorphism header.
 
 ---
 
@@ -326,6 +326,6 @@ When adding new features:
 
 ---
 
-**Last Updated:** May 1, 2026 (Phase 1.1)  
+**Last Updated:** May 4, 2026 (Phase 2.3)  
 **Status:** Organized and complete  
 **Next:** Add Phase 1.1 features to docs as needed
