@@ -40,6 +40,7 @@ const MarkdownLogicService = (() => {
     const selected = text.substring(start, end);
 
     // ── Helper: Wrap Toggle (Bold, Italic, Code, etc.) ──
+    // If selection already wrapped with symbol → unwrap; otherwise wrap.
     const wrapToggle = (symbol, placeholder) => {
       const isWrapped = selected.startsWith(symbol) && selected.endsWith(symbol);
       if (isWrapped) {
@@ -48,13 +49,13 @@ const MarkdownLogicService = (() => {
         const newText = selected || placeholder;
         textarea.setRangeText(`${symbol}${newText}${symbol}`, start, end, 'select');
         if (!selected) {
-          // Smart Selection: Select only the placeholder content
           textarea.setSelectionRange(start + symbol.length, start + symbol.length + placeholder.length);
         }
       }
     };
 
     // ── Helper: Line Toggle (Quote, List, Task) ──
+    // If line already starts with prefix → remove; otherwise prepend.
     const lineToggle = (prefix, placeholder) => {
       let lineStart = text.lastIndexOf('\n', start - 1) + 1;
       let lineEnd = text.indexOf('\n', end);
@@ -67,17 +68,13 @@ const MarkdownLogicService = (() => {
         textarea.setRangeText(lineText.substring(prefix.length), lineStart, lineEnd, 'select');
       } else {
         textarea.setSelectionRange(lineStart, lineEnd);
-        const content = lineText || placeholder;
-        textarea.setRangeText(`${prefix}${content}`, lineStart, lineEnd, 'select');
-        if (!lineText) {
-          // Smart Selection: Select only the content part
-          const newStart = lineStart + prefix.length;
-          textarea.setSelectionRange(newStart, newStart + content.length);
-        }
+        const newText = lineText || (selected || placeholder);
+        textarea.setRangeText(`${prefix}${newText}`, lineStart, lineEnd, 'select');
       }
     };
 
     // ── Helper: Header Toggle (H1-H6) ──
+    // Cycles to the new level; applying the same level again removes the heading.
     const headerToggle = (level) => {
       const prefix = '#'.repeat(level) + ' ';
       let lineStart = text.lastIndexOf('\n', start - 1) + 1;
@@ -90,20 +87,15 @@ const MarkdownLogicService = (() => {
         const existingLevel = match[1].length;
         textarea.setSelectionRange(lineStart, lineEnd);
         if (existingLevel === level) {
+          // Same level → remove heading
           textarea.setRangeText(lineText.substring(match[0].length), lineStart, lineEnd, 'select');
         } else {
+          // Different level → change to new level
           textarea.setRangeText(`${prefix}${lineText.substring(match[0].length)}`, lineStart, lineEnd, 'select');
-          // Preserve selection of the text part
-          const newStart = lineStart + prefix.length;
-          textarea.setSelectionRange(newStart, lineEnd + (prefix.length - match[0].length));
         }
       } else {
         textarea.setSelectionRange(lineStart, lineEnd);
-        const content = lineText || 'Heading';
-        textarea.setRangeText(`${prefix}${content}`, lineStart, lineEnd, 'select');
-        // Smart Selection: Select only the heading text
-        const newStart = lineStart + prefix.length;
-        textarea.setSelectionRange(newStart, newStart + content.length);
+        textarea.setRangeText(`${prefix}${lineText || (selected || 'Heading')}`, lineStart, lineEnd, 'select');
       }
     };
 
@@ -124,37 +116,18 @@ const MarkdownLogicService = (() => {
       case 'ol': lineToggle('1. ', 'List item'); break;
       case 'tl': lineToggle('- [ ] ', 'Task'); break;
       case 'tl-checked': lineToggle('- [x] ', 'Task done'); break;
-      case 'l': {
-        const content = selected || 'link text';
-        textarea.setRangeText(`[${content}](url)`, start, end, 'select');
-        textarea.setSelectionRange(start + 1, start + 1 + content.length);
+      case 'l':
+        textarea.setRangeText(`[${selected || 'link text'}](url)`, start, end, 'select');
+        textarea.setSelectionRange(start + (selected ? selected.length : 9) + 2, start + (selected ? selected.length : 9) + 5);
         break;
-      }
-      case 'img': {
-        const content = selected || 'alt text';
-        textarea.setRangeText(`![${content}](image-url)`, start, end, 'select');
-        textarea.setSelectionRange(start + 2, start + 2 + content.length);
+      case 'img':
+        textarea.setRangeText(`![${selected || 'alt text'}](image-url)`, start, end, 'select');
+        textarea.setSelectionRange(start + (selected ? selected.length : 8) + 3, start + (selected ? selected.length : 8) + 12);
         break;
-      }
       case 'hr': textarea.setRangeText(`\n---\n`, start, end, 'select'); break;
-      case 'cb': {
-        const content = selected || 'code block';
-        textarea.setRangeText(`\`\`\`\n${content}\n\`\`\``, start, end, 'select');
-        textarea.setSelectionRange(start + 4, start + 4 + content.length);
-        break;
-      }
-      case 'tb': {
-        const content = '| Col 1 | Col 2 |\n| --- | --- |\n| Cell 1 | Cell 2 |';
-        textarea.setRangeText(`\n${content}\n`, start, end, 'select');
-        textarea.setSelectionRange(start + 1, start + 1 + content.length);
-        break;
-      }
-      case 'fn': {
-        const content = selected || 'text';
-        textarea.setRangeText(`${content}[^1]`, start, end, 'select');
-        textarea.setSelectionRange(start, start + content.length);
-        break;
-      }
+      case 'cb': textarea.setRangeText(`\`\`\`\n${selected || 'code block'}\n\`\`\``, start, end, 'select'); break;
+      case 'tb': textarea.setRangeText(`\n| col1 | col2 |\n|------|------|\n| cell | cell |\n`, start, end, 'select'); break;
+      case 'fn': textarea.setRangeText(`${selected || 'text'}[^1]`, start, end, 'select'); break;
     }
 
     textarea.focus();

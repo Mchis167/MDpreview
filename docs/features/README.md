@@ -1,10 +1,10 @@
 # Feature Documentation
 
-**Last Updated:** May 4, 2026 (Phase 2.4)  
-**Total Features:** 39+ modules documented  
+**Last Updated:** May 4, 2026 (Phase 2.3)  
+**Total Features:** 37+ modules documented  
 **Status:** Organized by category
 
-> **Recent Update (May 4):** Modernized the editor experience with a **Slash Command System** (`/`), a context-aware **Quick Command Palette**, and **Smart Selection** for frictionless Markdown formatting.
+> **Recent Update (May 4):** Refactored Published Document UI into a modern **Side-Panel Layout** with sticky TOC, active indicator sync (h2-h6), and modernized glassmorphism header.
 
 ---
 
@@ -71,7 +71,6 @@
 | [**SCROLL_CONTAINER.md**](SCROLL_CONTAINER.md) | Smart scroll area with mask-fade and safe zone | Component |
 | [**PROJECT_MAP.md**](PROJECT_MAP.md) | Mini-map displaying document outline | Component |
 | [**EDIT_TOOLBAR.md**](EDIT_TOOLBAR.md) | Editor toolbar (Heading levels, formatting) | Component |
-| [**QUICK_COMMAND_PALETTE.md**](components/QUICK_COMMAND_PALETTE.md) | Context-aware command palette for slash mode | Component |
 
 **Key Concepts:**
 - Design System is the single source of UI patterns
@@ -109,7 +108,6 @@
 | [**PUBLISH_SERVICE.md**](PUBLISH_SERVICE.md) | Publishing operations (lifecycle, sync) | Service |
 | [**GDOC_UTIL.md**](GDOC_UTIL.md) | HTML to Google Docs conversion (styling, rasterization) | Utility |
 | [**SYNC_SERVICE.md**](SYNC_SERVICE.md) | Position sync (scroll, cursor) between views | Service |
-| [**MARKDOWN_LOGIC_SERVICE.md**](services/MARKDOWN_LOGIC_SERVICE.md) | Headless Markdown logic and smart selection | Service |
 
 **Key Concepts:**
 - Each service manages a domain
@@ -328,6 +326,6 @@ When adding new features:
 
 ---
 
-**Last Updated:** May 4, 2026 (Phase 2.4)  
+**Last Updated:** May 4, 2026 (Phase 2.3)  
 **Status:** Organized and complete  
-**Next:** Maintain Slash Mode and Command Palette logic
+**Next:** Add Phase 1.1 features to docs as needed

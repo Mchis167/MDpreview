@@ -61,9 +61,6 @@ Ghi lại các quyết định thiết kế và kỹ thuật quan trọng trong 
 | 2026-04-29 | [20260429-gdoc-rasterization-strategy.md](20260429-gdoc-rasterization-strategy.md) | Chiến lược Rasterization và ổn định Layout cho Google Docs Copy | accepted |
 | 2026-05-04 | [20260504-hybrid-toc-id-injection.md](20260504-hybrid-toc-id-injection.md) | Kiến trúc tiêm ID hai lớp cho TOC Navigation trên Worker | accepted |
 | 2026-05-04 | [20260504-vietnamese-slugification-strategy.md](20260504-vietnamese-slugification-strategy.md) | Chiến lược sinh Slug hỗ trợ Tiếng Việt và Unicode | accepted |
-| 2026-05-04 | [20260504-slash-command-interaction.md](20260504-slash-command-interaction.md) | Mô hình tương tác Slash Command "Input-less" và Keyboard Forwarding | accepted |
-| 2026-05-04 | [20260504-smart-content-selection.md](20260504-smart-content-selection.md) | Chiến lược bôi đen nội dung thông minh (Smart Selection) cho Markdown | accepted |
-| 2026-05-04 | [20260504-resilient-slash-input.md](20260504-resilient-slash-input.md) | Xử lý input bền bỉ chống lỗi ký tự ẩn và auto-correction | accepted |
 
 
 ---

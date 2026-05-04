@@ -20,26 +20,6 @@ All notable changes to this project will be documented in this file.
 - **Sync Race Conditions**: Sử dụng `lastRequestId` để đảm bảo chỉ kết quả render mới nhất được áp dụng lên giao diện, tránh hiện tượng nội dung cũ ghi đè nội dung mới.
 - **Preview Reload Recovery**: Khắc phục triệt để lỗi màn hình trắng sau khi reload cửa sổ preview thông qua cơ chế tự động nạp lại dữ liệu ngay khi cửa sổ sẵn sàng.
 
-## [Not Commited] — 2026-05-04 16:38
-
-### 🚀 Added
-- **Modern Slash Command System**: Triển khai hệ thống lệnh nhanh (`/`) ngay trong trình soạn thảo, hỗ trợ lọc lệnh thời gian thực và thực thi không làm gián đoạn luồng viết.
-- **Quick Command Palette (Molecule)**: Giao diện điều khiển mới tối giản, hỗ trợ 22+ hành động Markdown với hệ thống tìm kiếm đa từ khóa (Fuzzy Search).
-- **Accelerated Trigger (`Cmd + /`)**: Phím tắt siêu tốc để mở Palette ngay cả khi không ở chế độ gõ Slash.
-- **Smart Selection Logic**: Tự động bôi đen chính xác nội dung (ví dụ: tên tiêu đề) sau khi áp dụng định dạng, loại bỏ các ký tự Markdown (`### `, `**`) giúp người dùng sửa text ngay lập tức.
-
-### 🔧 Changed
-- **Input-less Interaction**: Palette tự động ẩn thanh nhập liệu khi được kích hoạt bằng dấu `/`, ưu tiên trải nghiệm nhập liệu trực tiếp trên văn bản.
-- **Enhanced Keyboard Navigation**: Hỗ trợ sử dụng phím mũi tên (`Up`/`Down`) để chọn lệnh trong Palette ngay cả khi tiêu điểm vẫn nằm tại trình soạn thảo.
-- **Design Parity**: Đồng bộ hóa giao diện Palette với chuẩn `ContextMenu` và hệ thống Design System Tokens cao cấp (Glassmorphism, 100px blur).
-
-### 🐞 Fixed
-- **Slash Mode Resilience**: 
-    - Khắc phục lỗi Palette tự đóng khi xóa ký tự (Backspace).
-    - **Invisible Whitespace Handling**: Tự động bỏ qua các ký tự trắng không tiêu chuẩn (Narrow No-Break Space) từ macOS để tránh xung đột lệnh.
-- **Query Persistence**: Đảm bảo chuỗi tìm kiếm luôn được xóa sạch khi mở lại Palette, tránh hiển thị kết quả cũ.
-- **Selection Range Correction**: Sửa lỗi bôi đen thừa ký tự xuống dòng khi áp dụng các định dạng khối (Header, List).
-
 ## [1.5.0] — 2026-05-04 15:50
 
 ### 🚀 Added
