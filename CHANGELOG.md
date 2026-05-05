@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Not Commited] — 2026-05-05 23:05
+## [1.7.2] — 2026-05-05 23:06
 
 ### 🐞 Fixed
 - **Multi-Select Tree Deletion**: Khắc phục lỗi không thể xóa nhiều item cùng lúc trong cây thư mục do sự kiện click vào menu làm mất trạng thái chọn (selection dismissal).
