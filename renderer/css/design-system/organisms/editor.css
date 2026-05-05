@@ -15,7 +15,7 @@
   color: var(--ds-text-primary);
   font-family: var(--ds-font-family-code);
   font-size: var(--ds-font-base);
-  padding: var(--ds-content-padding-y) var(--ds-content-padding-x);
+  padding: var(--ds-content-padding-y) var(--ds-content-padding-x) 40vh var(--ds-content-padding-x);
   resize: none;
   outline: none;
   line-height: 1.6;

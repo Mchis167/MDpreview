@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.5] — 2026-05-05 14:32
+
+### 🚀 Added
+- **Universal Auto-scroll**: Cơ chế tự động cuộn thông minh giữ con trỏ luôn ở vị trí 60% màn hình, ngăn chặn việc con trỏ chạm đáy gây khó chịu khi gõ.
+- **Smart Palette Flip**: Quick Command Palette (`/`) hiện có khả năng tự động nhảy lên phía trên nếu không gian phía dưới không đủ, tối ưu hóa khi làm việc ở cuối tài liệu.
+- **Enhanced Overscroll**: Bổ sung `40vh` padding-bottom cho trình soạn thảo, cho phép cuộn dòng cuối cùng lên giữa màn hình.
+
+### 🔧 Changed
+- **Stable Rendering Restoration**: Khôi phục hoàn toàn cấu trúc render nguyên tử (Atomic Rendering) cho Table, Code Block và Blockquote, đảm bảo tính ổn định tuyệt đối như bản v1.6.0.
+
+### 🐞 Fixed
+- **Codebase Conflict Resolution**: Giải quyết triệt để tình trạng vỡ cấu trúc HTML do các xung đột commit cũ gây ra.
+- **Palette Icon TypeError**: Sửa lỗi truy cập icon không hợp lệ trong Quick Command Palette.
+
 ## [Not Commited] — 2026-05-04 16:38
 
 ### 🚀 Added

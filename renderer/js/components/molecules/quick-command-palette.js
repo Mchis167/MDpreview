@@ -171,19 +171,35 @@ const QuickCommandPalette = (() => {
       setTimeout(() => _input.focus(), 50);
     }
     
-    // Position palette
+    // Position palette logic
+    _el.style.visibility = 'hidden';
+    _el.style.display = 'flex';
+    _renderResults(); // Render first to get the actual height based on content
+    
     const rect = _el.getBoundingClientRect();
-    let top = y + 20;
+    
+    let top = y + 20; // Default: below cursor
     let left = x;
 
-    // Boundary check
-    if (left + rect.width > window.innerWidth) left = window.innerWidth - rect.width - 20;
-    if (top + rect.height > window.innerHeight) top = y - rect.height - 10;
+    // Horizontal boundary check
+    if (left + rect.width > window.innerWidth) {
+      left = window.innerWidth - rect.width - 20;
+    }
+    if (left < 10) left = 10;
+
+    // Vertical boundary check: Flip to top if bottom space is insufficient
+    const spaceBelow = window.innerHeight - top;
+    if (spaceBelow < rect.height + 20) {
+      // Flip to top of cursor (y is bottom of line, so we go up by rect.height + line offset)
+      top = y - rect.height - 40; 
+    }
+
+    // Final safety check for top boundary
+    if (top < 10) top = 10;
 
     _el.style.top = `${top}px`;
     _el.style.left = `${left}px`;
-
-    _renderResults();
+    _el.style.visibility = 'visible';
   }
 
   function updateQuery(query) {
