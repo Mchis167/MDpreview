@@ -12,6 +12,10 @@ const EditorModule = (() => {
   let _debounceTimer = null;
   let _ignoreNextInput = false; // set to true when we're restoring a snapshot
 
+  // ── Slash Command State ──
+  let _isSlashMode = false;
+  let _slashStartPos = -1;
+
   function _snapshot() {
     if (!_textarea) return;
     const snap = { value: _textarea.value, ss: _textarea.selectionStart, se: _textarea.selectionEnd };
@@ -121,6 +125,35 @@ const EditorModule = (() => {
         const lineNum = textBefore.split('\n').length;
         window.DebugService.updateEditLine(lineNum);
       }
+
+      // ── Slash Command Trigger ──
+      // Logic: If user types '/' at start of line or after space
+      if (text.charAt(pos - 1) === '/') {
+        const before = text.substring(0, pos - 1);
+        if (before === '' || before.endsWith(' ') || before.endsWith('\n')) {
+          _isSlashMode = true;
+          _slashStartPos = pos - 1;
+          _showQuickCommand(true, true);
+        }
+      } else if (_isSlashMode) {
+        // If the slash is gone or we moved before it, stop
+        if (text.charAt(_slashStartPos) !== '/' || pos <= _slashStartPos) {
+          _isSlashMode = false;
+          window.QuickCommandPalette.hide();
+          return;
+        }
+
+        const query = text.substring(_slashStartPos + 1, pos);
+        
+        // Stop ONLY on hard line breaks in input event
+        if (/[\n\r]/.test(query)) {
+          _isSlashMode = false;
+          window.QuickCommandPalette.hide();
+          return;
+        }
+        
+        window.QuickCommandPalette.updateQuery(query);
+      }
     });
 
     _textarea.addEventListener('keydown', (e) => {
@@ -224,6 +257,39 @@ const EditorModule = (() => {
          window.PreviewService.sendScroll(data.scrollPct, data.line);
        }
     });
+  }
+
+  /**
+   * Applies the command and removes the slash + query text
+   */
+  function _applySlashCommand(cmdId) {
+    if (!_textarea) return;
+    const pos = _textarea.selectionStart;
+    // Remove the "/query" part
+    _textarea.setRangeText('', _slashStartPos, pos, 'end');
+    _isSlashMode = false;
+    window.QuickCommandPalette.hide();
+    applyAction(cmdId);
+  }
+
+  /**
+   * Shows the QuickCommandPalette at the current cursor position.
+   * @param {boolean} isSlashTrigger 
+   * @param {boolean} hideInput
+   */
+  function _showQuickCommand(isSlashTrigger = false, hideInput = false) {
+    if (!window.QuickCommandPalette || !window.EditorUtil || !_textarea) return;
+
+    const coords = window.EditorUtil.getCursorCoordinates(_textarea);
+    
+    window.QuickCommandPalette.show(coords.left, coords.top + coords.lineHeight, (actionId) => {
+      if (isSlashTrigger) {
+        const pos = _textarea.selectionStart;
+        _textarea.setRangeText('', _slashStartPos, pos, 'end');
+        _isSlashMode = false;
+      }
+      applyAction(actionId);
+    }, { hideInput });
   }
 
   /**
@@ -377,6 +443,7 @@ const EditorModule = (() => {
       getContent: () => _textarea ? _textarea.value : undefined,
       getCurrentFileName: () => AppState.currentFile ? AppState.currentFile.split('/').pop() : 'Untitled',
       insertContent,
+      triggerQuickCommand: () => _showQuickCommand(),
       revert
   };
 })();

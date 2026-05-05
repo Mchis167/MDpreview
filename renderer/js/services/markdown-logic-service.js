@@ -49,7 +49,9 @@ const MarkdownLogicService = (() => {
         const newText = selected || placeholder;
         textarea.setRangeText(`${symbol}${newText}${symbol}`, start, end, 'select');
         if (!selected) {
-          textarea.setSelectionRange(start + symbol.length, start + symbol.length + placeholder.length);
+          // Smart Selection: Select only the content part
+          const newStart = start + symbol.length;
+          textarea.setSelectionRange(newStart, newStart + placeholder.length);
         }
       }
     };
@@ -68,8 +70,13 @@ const MarkdownLogicService = (() => {
         textarea.setRangeText(lineText.substring(prefix.length), lineStart, lineEnd, 'select');
       } else {
         textarea.setSelectionRange(lineStart, lineEnd);
-        const newText = lineText || (selected || placeholder);
-        textarea.setRangeText(`${prefix}${newText}`, lineStart, lineEnd, 'select');
+        const content = lineText || (selected || placeholder);
+        textarea.setRangeText(`${prefix}${content}`, lineStart, lineEnd, 'select');
+        if (!lineText && !selected) {
+          // Smart Selection: Select only the content part
+          const newStart = lineStart + prefix.length;
+          textarea.setSelectionRange(newStart, newStart + content.length);
+        }
       }
     };
 
@@ -92,10 +99,17 @@ const MarkdownLogicService = (() => {
         } else {
           // Different level → change to new level
           textarea.setRangeText(`${prefix}${lineText.substring(match[0].length)}`, lineStart, lineEnd, 'select');
+          // Preserve selection of the text part
+          const newStart = lineStart + prefix.length;
+          textarea.setSelectionRange(newStart, lineEnd + (prefix.length - match[0].length));
         }
       } else {
         textarea.setSelectionRange(lineStart, lineEnd);
-        textarea.setRangeText(`${prefix}${lineText || (selected || 'Heading')}`, lineStart, lineEnd, 'select');
+        const content = lineText || (selected || 'Heading');
+        textarea.setRangeText(`${prefix}${content}`, lineStart, lineEnd, 'select');
+        // Smart Selection: Select only the heading text
+        const newStart = lineStart + prefix.length;
+        textarea.setSelectionRange(newStart, newStart + content.length);
       }
     };
 
@@ -116,18 +130,37 @@ const MarkdownLogicService = (() => {
       case 'ol': lineToggle('1. ', 'List item'); break;
       case 'tl': lineToggle('- [ ] ', 'Task'); break;
       case 'tl-checked': lineToggle('- [x] ', 'Task done'); break;
-      case 'l':
-        textarea.setRangeText(`[${selected || 'link text'}](url)`, start, end, 'select');
-        textarea.setSelectionRange(start + (selected ? selected.length : 9) + 2, start + (selected ? selected.length : 9) + 5);
+      case 'l': {
+        const content = selected || 'link text';
+        textarea.setRangeText(`[${content}](url)`, start, end, 'select');
+        textarea.setSelectionRange(start + 1, start + 1 + content.length);
         break;
-      case 'img':
-        textarea.setRangeText(`![${selected || 'alt text'}](image-url)`, start, end, 'select');
-        textarea.setSelectionRange(start + (selected ? selected.length : 8) + 3, start + (selected ? selected.length : 8) + 12);
+      }
+      case 'img': {
+        const content = selected || 'alt text';
+        textarea.setRangeText(`![${content}](image-url)`, start, end, 'select');
+        textarea.setSelectionRange(start + 2, start + 2 + content.length);
         break;
+      }
       case 'hr': textarea.setRangeText(`\n---\n`, start, end, 'select'); break;
-      case 'cb': textarea.setRangeText(`\`\`\`\n${selected || 'code block'}\n\`\`\``, start, end, 'select'); break;
-      case 'tb': textarea.setRangeText(`\n| col1 | col2 |\n|------|------|\n| cell | cell |\n`, start, end, 'select'); break;
-      case 'fn': textarea.setRangeText(`${selected || 'text'}[^1]`, start, end, 'select'); break;
+      case 'cb': {
+        const content = selected || 'code block';
+        textarea.setRangeText(`\`\`\`\n${content}\n\`\`\``, start, end, 'select');
+        textarea.setSelectionRange(start + 4, start + 4 + content.length);
+        break;
+      }
+      case 'tb': {
+        const content = '| Col 1 | Col 2 |\n| --- | --- |\n| Cell 1 | Cell 2 |';
+        textarea.setRangeText(`\n${content}\n`, start, end, 'select');
+        textarea.setSelectionRange(start + 1, start + 1 + content.length);
+        break;
+      }
+      case 'fn': {
+        const content = selected || 'text';
+        textarea.setRangeText(`${content}[^1]`, start, end, 'select');
+        textarea.setSelectionRange(start, start + content.length);
+        break;
+      }
     }
 
     textarea.focus();
