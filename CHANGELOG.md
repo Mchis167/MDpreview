@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Not Commited] — 2026-05-05 21:25
+## [1.7.1] — 2026-05-05 21:30
 
 ### 🔧 Changed
 - **Intelligent Markdown Spacing (Flow System)**: Thay thế cơ chế margin rời rạc bằng hệ thống Vertical Rhythm tập trung. Khoảng cách hiện được điều phối thông qua wrapper `.md-block` và các Semantic Tokens chuyên biệt, giúp tài liệu có nhịp điệu đọc chuyên nghiệp và nhất quán hơn.
