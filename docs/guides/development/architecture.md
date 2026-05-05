@@ -203,7 +203,10 @@ curl -X POST http://localhost:3737/api/render-raw \
 
 #### 1. Line Number Tracking
 
-Each markdown block is wrapped with `data-line-start` and `data-line-end`:
+Each markdown block is wrapped with `data-line-start` and `data-line-end`. Since v1.7.0, **Granular List Item Tracking** has been implemented:
+
+- **Block-level**: `<div>` wrappers for paragraphs, code blocks, etc.
+- **Item-level**: Each `<li>` in a list is assigned a specific `data-line` attribute.
 
 ```html
 <div class="md-block" data-line-start="1" data-line-end="1">
@@ -212,14 +215,18 @@ Each markdown block is wrapped with `data-line-start` and `data-line-end`:
   </div>
 </div>
 
-<div class="md-block" data-line-start="3" data-line-end="3">
-  <div class="md-line" data-line="3">
-    <p>Paragraph</p>
-  </div>
+<div class="md-block" data-line-start="3" data-line-end="5">
+  <ul>
+    <li class="md-line" data-line="3">Item 1</li>
+    <li class="md-line" data-line="4">Item 2</li>
+    <li class="md-line" data-line="5">Item 3</li>
+  </ul>
 </div>
 ```
 
-**Purpose:** Enable editor to sync view with cursor position.
+**Purpose:** 
+- Enable editor to sync view with cursor position.
+- **Interactive Task Lists**: Allow View Mode checkboxes to map directly back to the correct line in the source file for real-time updates.
 
 #### 2. Details/Summary Support
 

@@ -35,6 +35,9 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 0;
+  overflow: hidden;
+  flex: 1;
+  margin-right: var(--ds-space-sm);
 }
 
 .ds-workspace-switcher .ws-label {
@@ -45,6 +48,11 @@
   text-transform: uppercase;
   color: var(--ds-text-disabled);
   letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  text-align: left;
 }
 
 .ds-workspace-switcher .ds-workspace-name {
@@ -53,6 +61,11 @@
   font-size: var(--ds-font-lg);
   line-height: 20px;
   color: var(--ds-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  text-align: left;
 }
 
 /* Skeleton state */

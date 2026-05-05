@@ -141,8 +141,127 @@
     margin-bottom: 1.25rem;
 }
 
+/* ── Collapsible Content (details/summary) ── */
+.md-render-body details {
+    background: var(--ds-white-a02);
+    border: 1px solid var(--ds-white-a08);
+    border-radius: var(--ds-radius-panel);
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+    transition: all 0.3s var(--ds-ease-spring);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.md-render-body details[open] {
+    background: var(--ds-white-a04);
+    box-shadow: var(--ds-shadow-lg);
+}
+
+.md-render-body summary {
+    padding: 12px 16px;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--ds-text-primary);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    user-select: none;
+    transition: background 0.2s ease;
+}
+
+.md-render-body summary::-webkit-details-marker {
+    display: none;
+}
+
+.ds-summary-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    color: var(--ds-white-a60);
+    transition: transform 0.3s var(--ds-ease-spring);
+    flex-shrink: 0;
+}
+
+.ds-summary-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.md-render-body details[open] .ds-summary-icon {
+    transform: rotate(90deg);
+}
+
+.md-render-body summary:hover {
+    background: var(--ds-white-a05);
+}
+
+.md-render-body details>div,
+.md-render-body details>p,
+.md-render-body details>ul,
+.md-render-body details>ol {
+    padding: 12px 16px 16px 40px;
+    margin-bottom: 0;
+}
+
 .md-render-body li {
     margin-bottom: 0.5rem;
+}
+
+/* ── Task Lists ── */
+.md-render-body .task-list-item {
+    list-style-type: none;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-left: -1.5rem;
+    padding: 4px 8px;
+    border-radius: var(--ds-radius-sm);
+    transition: background 0.2s ease;
+}
+
+.md-render-body .task-list-item:hover {
+    background: var(--ds-white-a02);
+}
+
+.md-render-body .task-list-item input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--ds-white-a20);
+    border-radius: 4px;
+    background: var(--ds-white-a05);
+    cursor: pointer;
+    position: relative;
+    margin-top: 4px;
+    transition: all 0.2s var(--ds-ease-spring);
+    flex-shrink: 0;
+}
+
+.md-render-body .task-list-item input[type="checkbox"]:hover {
+    border-color: var(--ds-white-a40);
+    background: var(--ds-white-a08);
+}
+
+.md-render-body .task-list-item input[type="checkbox"]:checked {
+    background: var(--ds-accent);
+    border-color: var(--ds-accent);
+}
+
+.md-render-body .task-list-item input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 5px;
+    height: 9px;
+    border: solid var(--ds-primitive-base);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
 }
 
 /* ── Code Blocks ── */
@@ -378,15 +497,56 @@
 }
 
 /* ── Syntax Highlighting (Xcode Palette) ── */
-.hljs-comment, .hljs-quote { color: #a1c659; font-style: italic; }
-.hljs-keyword, .hljs-selector-tag, .hljs-literal { color: #d0a8ff; }
-.hljs-string, .hljs-regexp, .hljs-attribute { color: #ff8170; }
-.hljs-built_in, .hljs-title, .hljs-name, .hljs-type { color: #6bdfff; }
-.hljs-number, .hljs-variable, .hljs-attr { color: #d0a8ff; }
-.hljs-symbol, .hljs-bullet, .hljs-meta { color: #ffa14f; }
-.hljs-strong { font-weight: bold; }
-.hljs-emphasis { font-style: italic; }
+.hljs-comment,
+.hljs-quote {
+    color: #a1c659;
+    font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal {
+    color: #d0a8ff;
+}
+
+.hljs-string,
+.hljs-regexp,
+.hljs-attribute {
+    color: #ff8170;
+}
+
+.hljs-built_in,
+.hljs-title,
+.hljs-name,
+.hljs-type {
+    color: #6bdfff;
+}
+
+.hljs-number,
+.hljs-variable,
+.hljs-attr {
+    color: #d0a8ff;
+}
+
+.hljs-symbol,
+.hljs-bullet,
+.hljs-meta {
+    color: #ffa14f;
+}
+
+.hljs-strong {
+    font-weight: bold;
+}
+
+.hljs-emphasis {
+    font-style: italic;
+}
 
 /* ── Atomic Block Wrappers ── */
-.md-block { margin: 0; }
-.md-line { width: 100%; }
+.md-block {
+    margin: 0;
+}
+
+.md-line {
+    width: 100%;
+}

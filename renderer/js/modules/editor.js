@@ -234,13 +234,10 @@ const EditorModule = (() => {
         return false;
     }
 
-    const res = await fetch('/api/file/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path: AppState.currentFile, content })
-    });
+    if (typeof FileService === 'undefined' || !FileService.saveFile) return false;
+    const success = await FileService.saveFile(AppState.currentFile, content);
     
-    if (res.ok) {
+    if (success) {
       if (typeof showToast === 'function') showToast('File saved successfully');
       _originalContent = content; 
       

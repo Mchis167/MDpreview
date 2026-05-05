@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0] — 2026-05-05 20:00
+
+### 🚀 Added
+- **Interactive Task Lists (View Mode)**: Cho phép tương tác trực tiếp với checkbox trong chế độ Xem. Trạng thái task (`[ ]` <-> `[x]`) được tự động đồng bộ và ghi lại vào file Markdown nguồn.
+- **Granular Line-Level Mapping**: Hệ thống ánh xạ dòng chính xác đến từng mục trong danh sách (`data-line`), đảm bảo việc cập nhật nội dung file diễn ra đúng vị trí ngay cả trong các tài liệu phức tạp.
+- **Premium Task List Styling**: Giao diện checkbox được thiết kế tùy chỉnh với hiệu ứng chuyển động mượt mà, bám sát Design System cao cấp.
+- **Premium Collapsible Content (details/summary)**: Tái lập giao diện nội dung thu gọn với hiệu ứng Glassmorphism, bo góc chuẩn Design System và icon Chevron xoay mượt mà.
+- **Persistent File Service (`saveFile`)**: Bổ sung phương thức lưu file chuyên dụng trong `FileService`, hỗ trợ ghi đè nội dung file an toàn từ mọi thành phần UI.
+
+### 🔧 Changed
+- **High-Fidelity Rendering Pipeline**: Nâng cấp `render.js` phía server để đếm dòng chính xác bằng cách phân tích ký tự xuống dòng (`\n`) trong các token Markdown.
+- **Unified Save Workflow**: Đồng bộ hóa luồng lưu file của `EditorModule` thông qua `FileService.saveFile`, giảm thiểu mã lặp và tăng tính ổn định.
+- **Workspace Switcher Layout**: Giới hạn tên Workspace trên 1 dòng với hiệu ứng ellipsis và căn lề trái (leading alignment), đảm bảo tính thẩm mỹ và ngăn chặn vỡ layout.
+- **Preview Display Optimization**: Chuyển đổi container chính của Viewer sang `display: block` để tối ưu hóa hiệu suất render và độ ổn định của thanh cuộn.
+
+### 🐞 Fixed
+- **Checkbox Persistence Issue**: Khắc phục lỗi checkbox trong View Mode chỉ thay đổi trạng thái tạm thời mà không lưu vào file.
+- **Line Mismatch Bug**: Sửa lỗi ánh xạ sai dòng khiến việc tích checkbox cập nhật nhầm nội dung ở các dòng lân cận.
+- **Layout Alignment**: Giải quyết hiện tượng văn bản workspace bị căn giữa ngoài ý muốn.
+- **Content Inner Full Width**: Khắc phục lỗi `.md-content-inner` bị co lại theo chiều rộng của dòng nội dung dài nhất thay vì chiếm đầy đủ chiều rộng cho phép (`max-width`). Thêm `width: 100%` vào CSS để đảm bảo container nội dung luôn đạt kích thước tối đa ngay cả khi nội dung trong tài liệu rất ngắn.
+
 ## [1.6.5] — 2026-05-05 14:32
 
 ### 🚀 Added

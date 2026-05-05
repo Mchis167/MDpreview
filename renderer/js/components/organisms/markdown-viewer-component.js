@@ -130,7 +130,7 @@ class MarkdownViewerComponent {
       if (editorEl) editorEl.style.display = 'flex';
       if (this.editorComp) this.editorComp.activate();
     } else {
-      if (previewEl) previewEl.style.display = 'flex';
+      if (previewEl) previewEl.style.display = 'block';
       if (editorEl) editorEl.style.display = 'none';
       if (this.editorComp) this.editorComp.deactivate();
     }
@@ -811,6 +811,52 @@ class MarkdownViewerComponent {
       }
     }
   }
+
+  async _toggleTask(lineNum, checked) {
+    const viewer = window.MarkdownViewer && window.MarkdownViewer.getInstance();
+    if (!viewer || !viewer.state.file) return;
+
+    const content = viewer.state.content || '';
+    if (!content) return;
+    
+    const lines = content.split('\n');
+    const lineIndex = lineNum - 1;
+    if (lineIndex < 0 || lineIndex >= lines.length) return;
+    
+    const line = lines[lineIndex];
+
+    // Pattern to match common GFM task list prefixes (handles nesting with \s*)
+    const taskRegex = /^(\s*[-*+] )\[[ xX]\]/;
+    const match = line.match(taskRegex);
+    
+    if (match) {
+      const prefix = match[1];
+      const newMark = checked ? '[x]' : '[ ]';
+      const newLine = line.replace(taskRegex, `${prefix}${newMark}`);
+      
+      lines[lineIndex] = newLine;
+      const newContent = lines.join('\n');
+      
+      // 1. Update component state immediately
+      viewer.setState({ content: newContent });
+      
+      // 2. Save to disk using FileService
+      if (typeof FileService !== 'undefined' && FileService.saveFile) {
+        const success = await FileService.saveFile(viewer.state.file, newContent);
+        
+        if (success) {
+           // 3. Keep Editor in sync
+           if (typeof EditorModule !== 'undefined') {
+             EditorModule.setOriginalContent(newContent);
+           }
+           
+           if (window.showToast) {
+             window.showToast(checked ? 'Task marked as done' : 'Task unmarked', 'success', { duration: 1500 });
+           }
+        }
+      }
+    }
+  }
 }
 
 /* ── MarkdownEmptyState ── */
@@ -867,7 +913,45 @@ class MarkdownPreview {
       try {
         if (window.CodeBlockModule) window.CodeBlockModule.process(inner);
       } catch (_e) { /* CodeBlock error - gracefully skip */ }
+      
+      // Bind checkbox events for task lists
+      this._bindCheckboxEvents(inner);
+      
+      // Inject DS icons into summaries
+      this._processSummaries(inner);
     })();
+  }
+
+  _processSummaries(container) {
+    const summaries = container.querySelectorAll('summary');
+    summaries.forEach(summary => {
+      // Avoid double-processing
+      if (summary.querySelector('.ds-summary-icon')) return;
+
+      const iconHtml = DesignSystem.getIcon('chevron-right');
+      const iconWrap = DesignSystem.createElement('span', 'ds-summary-icon', { html: iconHtml });
+      summary.prepend(iconWrap);
+    });
+  }
+
+  _bindCheckboxEvents(container) {
+    if (!container) return;
+    const checkboxes = container.querySelectorAll('.task-list-item input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+      cb.onchange = async (e) => {
+        const checked = e.target.checked;
+        const lineEl = e.target.closest('.md-line');
+        if (!lineEl) return;
+        
+        const lineNum = parseInt(lineEl.dataset.line, 10);
+        if (isNaN(lineNum)) return;
+        
+        const viewer = window.MarkdownViewer && window.MarkdownViewer.getInstance();
+        if (viewer && viewer._toggleTask) {
+          await viewer._toggleTask(lineNum, checked);
+        }
+      };
+    });
   }
 
   update({ html }) {
@@ -881,6 +965,12 @@ class MarkdownPreview {
         window.processMermaid(inner).catch(_e => { /* Mermaid error - gracefully skip */ });
       }
       if (window.CodeBlockModule) window.CodeBlockModule.process(inner);
+
+      // Re-bind checkbox events
+      this._bindCheckboxEvents(inner);
+
+      // Re-inject DS icons
+      this._processSummaries(inner);
 
       // Ensure scroll is maintained if content size changed
       if (ScrollModule) {

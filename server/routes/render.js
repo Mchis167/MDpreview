@@ -2,21 +2,41 @@ const express     = require('express');
 const router      = express.Router();
 const fs          = require('fs');
 const path        = require('path');
-const hljs        = require('highlight.js');
 const { marked }  = require('marked');
-const { sanitizeHtml, renderMermaidBlock } = require('../../renderer/js/services/md-renderer-core.js');
+const { sanitizeHtml, renderMermaidBlock, highlightCodeBlock, wrapInTableWrapper } = require('../../renderer/js/services/md-renderer-core.js');
 
-// Configure marked with highlight.js
-marked.setOptions({
-  highlight: function(code, lang) {
-    if (lang && hljs.getLanguage(lang)) {
-      try {
-        return hljs.highlight(code, { language: lang }).value;
-      } catch (_ignored) {}
-    }
-    return hljs.highlightAuto(code).value;
-  },
-  langPrefix: 'hljs language-'
+// Configure marked with custom renderer for premium blocks
+const renderer = new marked.Renderer();
+
+// Table wrapper
+renderer.table = (header, body) => {
+  return wrapInTableWrapper(`<table>\n<thead>\n${header}</thead>\n<tbody>\n${body}</tbody>\n</table>\n`);
+};
+
+// Mermaid and Highlighted Code Blocks
+renderer.code = (code, lang) => {
+  if (lang === 'mermaid') {
+    return renderMermaidBlock(code);
+  }
+  const highlighted = highlightCodeBlock(code, lang);
+  return `<pre><code class="hljs language-${lang || ''}">${highlighted}</code></pre>`;
+};
+
+// Custom List Item for Task Lists
+renderer.listitem = (text, task, checked) => {
+  if (task) {
+    // Marked's 'text' for tasks already contains a <input disabled type="checkbox">
+    // We strip it to avoid double-rendering and add our own interactive one.
+    const cleanText = text.replace(/<input\b[^>]*>/i, '').trim();
+    return `<li class="task-list-item"><input type="checkbox" ${checked ? 'checked' : ''}> ${cleanText}</li>\n`;
+  }
+  return `<li>${text}</li>\n`;
+};
+
+marked.use({
+  renderer: renderer,
+  langPrefix: 'hljs language-',
+  gfm: true
 });
 
 /**
@@ -35,15 +55,16 @@ function renderWithLineNumbers(content) {
     if (!token.raw) { i++; continue; }
 
     const lineStart  = currentLine;
-    let tokenRaw     = token.raw;
 
+    // Count lines in this token precisely by counting newlines
+    const tokenNewlines = (token.raw.match(/\n/g) || []).length;
+    const lineEnd = lineStart + tokenNewlines;
 
-
-    // Advance counter for the current token
-    const rawLines = tokenRaw.split('\n');
-    currentLine += rawLines.length - (rawLines[rawLines.length - 1] === '' ? 1 : 0);
-
-    if (token.type === 'space') { i++; continue; }
+    if (token.type === 'space') { 
+      currentLine = lineEnd;
+      i++; 
+      continue; 
+    }
 
     // Check if this token starts a <details> block
     if (token.type === 'html' && token.raw.trim().toLowerCase().startsWith('<details')) {
@@ -65,73 +86,86 @@ function renderWithLineNumbers(content) {
       if (j > i) {
         // We found a complete block or reached the end
         const entireRaw = combinedRaw;
-        const entireHtml = marked.parse(entireRaw);
+        
+        // Manual extraction to ensure nested Markdown is parsed correctly
+        const summaryMatch = entireRaw.match(/<summary>([\s\S]*?)<\/summary>/i);
+        const summaryRaw = summaryMatch ? summaryMatch[1] : 'Details';
+        const contentRaw = entireRaw.replace(/<details[^>]*>/i, '')
+                                    .replace(/<\/details>/i, '')
+                                    .replace(/<summary>[\s\S]*?<\/summary>/i, '');
+        
+        const renderedSummary = marked.parseInline(summaryRaw);
+        const renderedContent = marked.parse(contentRaw);
+        const entireHtml = `<details><summary>${renderedSummary}</summary>\n${renderedContent}</details>`;
         
         // Calculate lines for the entire combined block
-        const entireLines = entireRaw.split('\n');
-        const lineEnd = lineStart + (entireLines.length - (entireLines[entireLines.length - 1] === '' ? 1 : 0)) - 1;
+        const entireNewlines = (entireRaw.match(/\n/g) || []).length;
+        const entireLineEnd = lineStart + entireNewlines;
         
-        html += `<div class="md-block" data-line-start="${lineStart}" data-line-end="${lineEnd}"><div class="md-line" data-line="${lineStart}">${entireHtml}</div></div>\n`;
+        html += `<div class="md-block" data-line-start="${lineStart}" data-line-end="${entireLineEnd}"><div class="md-line" data-line="${lineStart}">${entireHtml}</div></div>\n`;
         
         // Sync the main loop's currentLine and index
-        // We already added lineStart's first token lines, but we need to account for the rest
-        const _extraLines = entireRaw.trimEnd().split('\n').length - rawLines.length;
-        // currentLine += Math.max(0, extraLines); // Already handled by the inner tokens if we continued, but we skip them
-        
-        // Let's just recalculate currentLine properly
-        currentLine = lineStart + entireLines.length - (entireLines[entireLines.length - 1] === '' ? 1 : 0);
-        
+        currentLine = entireLineEnd;
         i = j + 1;
         continue;
       }
     }
 
-    // Default processing for other tokens
-    let tokenHtml = '';
-    if (token.type === 'code' && token.lang === 'mermaid') {
-      tokenHtml = renderMermaidBlock(token.text);
-    } else if (token.type === 'code') {
-      const lang = token.lang || '';
-      let highlighted = '';
-      try {
-        if (lang && hljs.getLanguage(lang)) {
-          highlighted = hljs.highlight(token.text, { language: lang }).value;
-        } else {
-          highlighted = hljs.highlightAuto(token.text).value;
+    // Special handling for lists to provide granular line numbers for items
+    if (token.type === 'list') {
+      let listHtml = token.ordered ? `<ol start="${token.start || 1}">` : '<ul>';
+      let listPrefixOffset = 0;
+      
+      token.items.forEach(item => {
+        const itemText = marked.parseInline(item.text);
+        
+        // Find the exact line number of this item by tracking its character offset within token.raw
+        const itemIndex = token.raw.indexOf(item.raw, listPrefixOffset);
+        if (itemIndex !== -1) {
+          const prefix = token.raw.substring(0, itemIndex);
+          const newlinesBefore = (prefix.match(/\n/g) || []).length;
+          const absoluteItemLine = lineStart + newlinesBefore;
+          
+          if (item.task) {
+            listHtml += `<li class="task-list-item md-line" data-line="${absoluteItemLine}"><input type="checkbox" ${item.checked ? 'checked' : ''}> ${itemText}</li>\n`;
+          } else {
+            listHtml += `<li class="md-line" data-line="${absoluteItemLine}">${itemText}</li>\n`;
+          }
+          listPrefixOffset = itemIndex + item.raw.length;
         }
-      } catch (_e) { highlighted = token.text; }
-      tokenHtml = `<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`;
-    } else {
-      tokenHtml = marked.parser([token]);
+      });
+      
+      listHtml += token.ordered ? '</ol>' : '</ul>';
+      html += `<div class="md-block" data-line-start="${lineStart}" data-line-end="${lineEnd}">${listHtml}</div>\n`;
+      currentLine = lineEnd;
+      i++;
+      continue;
     }
 
-    const blockLines = token.raw.trimEnd().split('\n').length;
-    const lineEnd    = lineStart + blockLines - 1;
-
-    const isAtomic = ['code', 'blockquote', 'list', 'table', 'html'].includes(token.type);
+    // Default processing for other tokens
+    const tokenHtml = marked.parser([token]);
+    const isAtomic = ['code', 'blockquote', 'table', 'html'].includes(token.type);
     
     if (isAtomic) {
-      let finalHtml = tokenHtml;
-      if (token.type === 'table') {
-        finalHtml = `<div class="md-table-wrapper">${tokenHtml}</div>`;
-      }
-      html += `<div class="md-block" data-line-start="${lineStart}" data-line-end="${lineEnd}"><div class="md-line" data-line="${lineStart}">${finalHtml}</div></div>\n`;
+      html += `<div class="md-block" data-line-start="${lineStart}" data-line-end="${lineEnd}"><div class="md-line" data-line="${lineStart}">${tokenHtml}</div></div>\n`;
+      currentLine = lineEnd;
       i++;
       continue;
     }
 
     // Split token HTML by lines and wrap each in .md-line
-    const renderedLines = tokenHtml.trim().split('\n');
+    const renderedLines = tokenHtml.trim().split(/\r?\n/);
     let wrappedHtml = '';
     for (let k = 0; k < renderedLines.length; k++) {
-        const lineNum = lineStart + k;
-        if (lineNum <= lineEnd) {
-            wrappedHtml += `<div class="md-line" data-line="${lineNum}">${renderedLines[k]}</div>\n`;
+        const lNum = lineStart + k;
+        if (lNum <= lineEnd) {
+            wrappedHtml += `<div class="md-line" data-line="${lNum}">${renderedLines[k]}</div>\n`;
         } else {
             wrappedHtml += renderedLines[k] + '\n';
         }
     }
     html += `<div class="md-block" data-line-start="${lineStart}" data-line-end="${lineEnd}">${wrappedHtml}</div>\n`;
+    currentLine = lineEnd;
     i++;
   }
 

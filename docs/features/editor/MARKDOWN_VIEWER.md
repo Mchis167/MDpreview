@@ -42,7 +42,7 @@ MarkdownViewer.setState({
 Logic bên trong:
 1. So sánh `newState` với state cũ để detect thay đổi
 2. Nếu chỉ thay đổi content (không đổi mode/file) → gọi `update()` để patch DOM thay vì render lại toàn bộ
-3. Nếu đổi mode → Toggle hiển thị (`display: none/flex`) giữa Preview và Editor container (Persistent DOM). Không destroy component để bảo toàn scroll position và TOC state.
+3. Nếu đổi mode → Toggle hiển thị (`display: none/block`) giữa Preview và Editor container (Persistent DOM). Không destroy component để bảo toàn scroll position và TOC state.
 4. Nếu đổi file → Gọi `reset()` trên các component liên quan và render lại nội dung mới.
 
 ### `render()`
@@ -58,7 +58,7 @@ Hệ thống tự động thay đổi các nút hiển thị dựa trên `state.
 | **Read** | `Share` (Smart Copy), `TOC`, `Project Map` |
 | **Edit** | `Import` (Thay thế), `Append` (Nối thêm) |
 
-**Cơ chế Singleton**: `_floatingGroup` được duy trì như một biến instance bền vững. Khi chuyển mode, ứng dụng chỉ ẩn/hiện (`display: none/flex`) các nhóm nút tương ứng thay vì tạo lại DOM, giúp tránh các lỗi mất tham chiếu (Ghosting).
+**Cơ chế Singleton**: `_floatingGroup` được duy trì như một biến instance bền vững. Khi chuyển mode, ứng dụng chỉ ẩn/hiện (`display: none/block`) các nhóm nút tương ứng thay vì tạo lại DOM, giúp tránh các lỗi mất tham chiếu (Ghosting).
 
 ### `_renderFloatingScrollTop()`
 Tạo nút "↑ Scroll to top" floating. Hiển thị khi scroll > 300px, ẩn khi gần top.
@@ -104,7 +104,22 @@ Nút **Publish** trong chế độ Read có hành vi thông minh dựa trên tr�
    - Inline CSS cho Table, Code, Quote.
    - Rasterize SVGs (Mermaid) thành ảnh PNG (Retina scale 2.0) một cách tuần tự.
 4. Ghi vào Clipboard dưới 2 định dạng: `text/html` (rich text) và `text/plain` (markdown fallback).
-5. Sử dụng `window.electronAPI.writeClipboardAdvanced` trên Desktop để vượt qua giới hạn của Browser API.
+5. Sử dụng `window.electronAPI.writeClipboardAdvanced` on Desktop để vượt qua giới hạn của Browser API.
+
+---
+
+## Interactive Task Lists (View Mode)
+
+Kể từ phiên bản 1.7.0, người dùng có thể tương tác trực tiếp với các checkbox trong danh sách công việc ngay tại chế độ Xem (Read Mode).
+
+### 🛠 Cơ chế hoạt động:
+1. **Granular Mapping**: Trong quá trình render, server sẽ gán thuộc tính `data-line` chính xác cho từng thẻ `<li>` (hoặc `.task-list-item`).
+2. **Event Binding**: `MarkdownPreview` tự động gán sự kiện `onchange` cho tất cả checkbox trong container.
+3. **Smart Toggle (`_toggleTask`)**:
+   - Khi checkbox thay đổi trạng thái, ứng dụng xác định số dòng (`lineNum`) từ thuộc tính `data-line`. Hệ thống sử dụng cơ chế **Precision Line Tracking** (đếm newline trực tiếp từ source) để đảm bảo `data-line` luôn khớp tuyệt đối với file Markdown ngay cả trong các danh sách phức tạp.
+   - Sử dụng Regex để tìm và thay thế chính xác dấu `[ ]` hoặc `[x]` tại dòng đó trong nội dung Markdown thô.
+   - Gọi `FileService.saveFile` để lưu thay đổi trực tiếp vào file nguồn `.md`.
+4. **State Synchronization**: Sau khi lưu thành công, `EditorModule` được cập nhật nội dung mới để đảm bảo tính nhất quán nếu người dùng chuyển sang chế độ Sửa (Edit Mode).
 
 ---
 
@@ -196,4 +211,4 @@ Mỗi component tự nullify `activeInstance` qua `onClose` callback khi bị đ
 
 ---
 
-*Document — 2026-05-01 (Improved Publish Workflow & Interactive UI)*
+*Document — 2026-05-05 (Precision Line Tracking for Task Lists & UI Polish)*
