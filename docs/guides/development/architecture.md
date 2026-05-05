@@ -223,40 +223,25 @@ Each markdown block is wrapped with `data-line-start` and `data-line-end`:
 
 #### 2. Details/Summary Support
 
-Special handling for `<details>` HTML blocks:
-
-```markdown
-<details>
-<summary>Click to expand</summary>
-
-Hidden content here
-</details>
-```
-
-Accumulates tokens until closing `</details>` tag.
+Special handling for `<details>` HTML blocks. Accumulates tokens until closing `</details>` tag to ensure nested Markdown is parsed correctly.
 
 #### 3. Token-by-Token Processing
 
-Uses `marked.lexer()` for fine-grained control:
+Uses `marked.lexer()` for fine-grained control over rendering specific blocks like Code (Mermaid/Highlight), Tables, and Lists.
 
-```javascript
-const tokens = marked.lexer(content);
-tokens.forEach(token => {
-  switch (token.type) {
-    case 'code':
-      if (token.lang === 'mermaid') {
-        // Render mermaid
-      } else {
-        // Highlight code
-      }
-    case 'table':
-      // Wrap table
-    // ... etc
-  }
-});
-```
+#### 4. Granular List Rendering (NEW in v1.6.6)
 
-### Rendering Flow
+Trình render server-side hiện xử lý danh sách một cách chi tiết để cung cấp số dòng chính xác cho từng mục con:
+
+- **Duyệt từng Item**: Thay vì render cả khối `<ul>` nguyên khối, renderer duyệt qua từng `token.items`.
+- **Tọa độ dòng chuẩn xác**: Mỗi thẻ `<li>` được gán thuộc tính `data-line` riêng biệt.
+- **Xử lý Spacing**: Tự động tính toán các dòng trống (loose lists) để đảm bảo không bị lệch dòng khi tương tác.
+
+**Mục đích:** Hỗ trợ tính năng **Interactive Task Lists** — cho phép tích checkbox ở đúng dòng trong file Markdown gốc.
+
+---
+
+## Worker Renderer: `cf-publish-worker/src/renderer.js`
 
 ```
 Markdown Input

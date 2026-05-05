@@ -125,6 +125,24 @@ const FileService = (() => {
         return await window.electronAPI.openFolder();
     }
 
+    /**
+     * Save content to a file
+     */
+    async function saveFile(absPath, content) {
+        
+        try {
+            const res = await fetch('/api/file/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: absPath, content })
+            });
+            return res.ok;
+        } catch (err) {
+            console.error(`[DEBUG] FileService.saveFile fetch error:`, err);
+            return false;
+        }
+    }
+
     return {
         fetchFiles,
         createFile,
@@ -136,7 +154,8 @@ const FileService = (() => {
         copyFile,
         revealInFinder,
         openFolder,
-        openFiles
+        openFiles,
+        saveFile
     };
 })();
 

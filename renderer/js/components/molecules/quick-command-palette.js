@@ -168,7 +168,8 @@ const QuickCommandPalette = (() => {
       header.style.display = 'none';
     } else {
       header.style.display = 'block';
-      setTimeout(() => _input.focus(), 50);
+      // Optimization: Don't steal focus immediately if we want to keep editor selection visible
+      // The EditorModule will proxy key events to us.
     }
     
     // Position palette logic
@@ -229,9 +230,44 @@ const QuickCommandPalette = (() => {
     _el.style.display = 'none';
     _isOpen = false;
     _selectedIndex = -1;
-    if (_callback) {
-      // Optional: signal close without action
+  }
+
+  /**
+   * Proxied key handler to allow the palette to function while focus remains on the editor.
+   * @param {KeyboardEvent} e 
+   * @returns {boolean} True if handled
+   */
+  function handleKey(e) {
+    if (!_isOpen) return false;
+
+    if (e.key === 'ArrowDown') {
+      navigate('down');
+      return true;
     }
+    if (e.key === 'ArrowUp') {
+      navigate('up');
+      return true;
+    }
+    if (e.key === 'Enter') {
+      _selectItem();
+      return true;
+    }
+    if (e.key === 'Escape') {
+      hide();
+      return true;
+    }
+    if (e.key === 'Backspace') {
+      _input.value = _input.value.slice(0, -1);
+      _renderResults();
+      return true;
+    }
+    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      _input.value += e.key;
+      _renderResults();
+      return true;
+    }
+
+    return false;
   }
 
   return {
@@ -240,6 +276,7 @@ const QuickCommandPalette = (() => {
     updateQuery,
     getSelectedCommandId,
     navigate,
+    handleKey,
     isOpen: () => _isOpen
   };
 })();

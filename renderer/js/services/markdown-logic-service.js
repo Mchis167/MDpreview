@@ -473,9 +473,118 @@ const MarkdownLogicService = (() => {
     });
   }
 
+  /**
+   * Smart Enter Handler: Continues list prefixes or clears empty list lines.
+   * @param {HTMLTextAreaElement} textarea 
+   * @returns {boolean} True if handled, false to let browser continue
+   */
+  function handleEnter(textarea) {
+    if (!textarea) return false;
+    const text = textarea.value;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    // Get the current line
+    const lastNewline = text.lastIndexOf('\n', start - 1);
+    const lineStart = lastNewline === -1 ? 0 : lastNewline + 1;
+    const nextNewline = text.indexOf('\n', start);
+    const lineEnd = nextNewline === -1 ? text.length : nextNewline;
+    const currentLine = text.substring(lineStart, lineEnd);
+
+    // Match patterns: 
+    // 1. Bullet/Checkbox: (indent)(bullet)(checkbox?)(space)(content)
+    // 2. Numbered: (indent)(digits)(dot)(space)(content)
+    const listRegex = /^(\s*)([*+-] (?:\[[ xX]\] )?|(\d+)\. )(.*)/;
+    const match = currentLine.match(listRegex);
+
+    if (match) {
+      const indent = match[1];
+      const prefix = match[2];
+      const number = match[3];
+      const content = match[4];
+
+      // If the line is empty (just prefix), clear the prefix and end list
+      if (content.trim() === '') {
+        textarea.setSelectionRange(lineStart, start);
+        textarea.setRangeText('', lineStart, start, 'end');
+        return false; // Still need a newline, but we cleared the prefix
+      }
+
+      // Calculate next prefix
+      let nextPrefix = prefix;
+      if (number) {
+        const nextNum = parseInt(number, 10) + 1;
+        nextPrefix = nextNum + '. ';
+      }
+
+      const insertText = '\n' + indent + nextPrefix;
+      textarea.setRangeText(insertText, start, end, 'end');
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Smart Tab Handler: Handles multi-line indentation or single-line list indentation.
+   * @param {HTMLTextAreaElement} textarea 
+   * @param {boolean} isShift - True if Shift+Tab (outdent)
+   * @returns {boolean} True if handled
+   */
+  function handleTab(textarea, isShift) {
+    if (!textarea) return false;
+    const text = textarea.value;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    // Find the range of lines involved
+    const firstNewline = text.lastIndexOf('\n', start - 1);
+    const lastNewline = text.indexOf('\n', end);
+    const selectionStart = firstNewline === -1 ? 0 : firstNewline + 1;
+    const selectionEnd = lastNewline === -1 ? text.length : lastNewline;
+
+    const selectedLines = text.substring(selectionStart, selectionEnd).split('\n');
+    
+    // Regex to detect if a line is a list item (optional indent + bullet/number)
+    const listRegex = /^(\s*)([*+-] (?:\[[ xX]\] )?|\d+\. )/;
+    const isListLine = listRegex.test(selectedLines[0]);
+
+    // If multi-line selection OR it's a list line, perform smart indent
+    if (selectedLines.length > 1 || isListLine) {
+      const tabSize = 2;
+      const space = ' '.repeat(tabSize);
+
+      const processedLines = selectedLines.map(line => {
+        if (isShift) {
+          // Outdent: remove up to tabSize spaces
+          if (line.startsWith(space)) return line.substring(tabSize);
+          return line.replace(/^\s{1,2}/, '');
+        } else {
+          // Indent: add tabSize spaces
+          return space + line;
+        }
+      });
+
+      const newText = processedLines.join('\n');
+      textarea.setSelectionRange(selectionStart, selectionEnd);
+      textarea.setRangeText(newText, selectionStart, selectionEnd, 'select');
+      return true;
+    }
+
+    // Default: Insert spaces at cursor if it's just a normal line
+    if (!isShift) {
+      textarea.setRangeText('  ', start, end, 'end');
+      return true;
+    }
+
+    return false;
+  }
+
   return {
     applyAction,
-    syncCursor
+    syncCursor,
+    handleEnter,
+    handleTab
   };
 })();
 window.MarkdownLogicService = MarkdownLogicService;

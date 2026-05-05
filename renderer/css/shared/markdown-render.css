@@ -138,11 +138,53 @@
 .md-render-body ul,
 .md-render-body ol {
     padding-left: 1.5rem;
-    margin-bottom: 1.25rem;
 }
 
 .md-render-body li {
     margin-bottom: 0.5rem;
+}
+
+/* ── Task Lists ── */
+.md-render-body .task-list-item {
+    list-style-type: none !important;
+    padding-left: 0;
+}
+
+.md-render-body .task-list-item input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid var(--ds-border-default);
+    border-radius: var(--ds-radius-chip);
+    background: var(--ds-white-a05);
+    margin: 0 0.6em 0.25em -1.3rem;
+    vertical-align: middle;
+    cursor: pointer;
+    position: relative;
+    transition: all var(--ds-transition-fast);
+}
+
+.md-render-body .task-list-item input[type="checkbox"]:checked {
+    background: var(--ds-accent);
+    border-color: var(--ds-accent);
+}
+
+.md-render-body .task-list-item input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 4.5px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border: solid var(--ds-primitive-white);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.md-render-body .task-list-item input[type="checkbox"]:hover {
+    border-color: var(--ds-accent);
+    background: var(--ds-white-a10);
 }
 
 /* ── Code Blocks ── */
@@ -377,16 +419,145 @@
     font-weight: 700 !important;
 }
 
+/* ── Collapsible Content (Details & Summary) ── */
+.md-render-body details {
+    background: var(--ds-white-a01);
+    border: 1px solid var(--ds-border-subtle);
+    border-radius: var(--ds-radius-panel);
+    margin: 0 0 1.5rem 0;
+    overflow: hidden;
+    transition: all var(--ds-transition-main);
+}
+
+/* Reduce spacing between consecutive details blocks for an accordion-like look */
+/* We target the .md-block wrapper since each details is wrapped for line-syncing */
+.md-block:has(> .md-line > details)+.md-block:has(> .md-line > details) {
+    margin-top: -1.25rem;
+}
+
+.md-render-body details[open] {
+    border-color: var(--ds-border-default);
+    background: var(--ds-white-a02);
+    box-shadow: var(--ds-shadow-sm);
+}
+
+.md-render-body summary {
+    padding: 12px 16px;
+    font-weight: 600;
+    color: var(--ds-text-primary);
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    transition: background var(--ds-transition-fast);
+    list-style: none;
+    /* Hide default arrow */
+}
+
+.md-render-body summary::-webkit-details-marker {
+    display: none;
+    /* Hide default arrow Chrome/Safari */
+}
+
+.md-render-body summary::after {
+    content: '+';
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--ds-radius-widget);
+    background: var(--ds-layer-subtle-hover);
+    color: var(--ds-text-tertiary);
+    font-size: 18px;
+    font-weight: 400;
+    font-family: var(--ds-font-family-code);
+    transition: all var(--ds-transition-fast);
+}
+
+.md-render-body details[open]>summary::after {
+    content: '−';
+    transform: rotate(180deg);
+}
+
+.md-render-body details[open]>summary {
+    border-bottom: 1px solid var(--ds-border-subtle);
+}
+
+.md-render-body summary:hover {
+    background: var(--ds-white-a03);
+    color: var(--ds-accent);
+}
+
+.md-render-body summary:hover::after {
+    background: var(--ds-layer-subtle-active-hover);
+    color: var(--ds-accent);
+    transform: scale(1.1);
+}
+
+.md-render-body details>*:not(summary) {
+    padding: 16px 28px;
+}
+
+.md-render-body details ul,
+.md-render-body details ol {
+    padding-left: 2rem;
+}
+
 /* ── Syntax Highlighting (Xcode Palette) ── */
-.hljs-comment, .hljs-quote { color: #a1c659; font-style: italic; }
-.hljs-keyword, .hljs-selector-tag, .hljs-literal { color: #d0a8ff; }
-.hljs-string, .hljs-regexp, .hljs-attribute { color: #ff8170; }
-.hljs-built_in, .hljs-title, .hljs-name, .hljs-type { color: #6bdfff; }
-.hljs-number, .hljs-variable, .hljs-attr { color: #d0a8ff; }
-.hljs-symbol, .hljs-bullet, .hljs-meta { color: #ffa14f; }
-.hljs-strong { font-weight: bold; }
-.hljs-emphasis { font-style: italic; }
+.hljs-comment,
+.hljs-quote {
+    color: #a1c659;
+    font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal {
+    color: #d0a8ff;
+}
+
+.hljs-string,
+.hljs-regexp,
+.hljs-attribute {
+    color: #ff8170;
+}
+
+.hljs-built_in,
+.hljs-title,
+.hljs-name,
+.hljs-type {
+    color: #6bdfff;
+}
+
+.hljs-number,
+.hljs-variable,
+.hljs-attr {
+    color: #d0a8ff;
+}
+
+.hljs-symbol,
+.hljs-bullet,
+.hljs-meta {
+    color: #ffa14f;
+}
+
+.hljs-strong {
+    font-weight: bold;
+}
+
+.hljs-emphasis {
+    font-style: italic;
+}
 
 /* ── Atomic Block Wrappers ── */
-.md-block { margin: 0; }
-.md-line { width: 100%; }
+.md-block {
+    margin: 0;
+}
+
+.md-line {
+    width: 100%;
+}

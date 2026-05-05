@@ -54,6 +54,8 @@
 }
 
 .md-content-inner {
+  width: 100%;
+  box-sizing: border-box;
   padding: var(--ds-content-padding-y) var(--ds-content-padding-x);
   transition: opacity var(--ds-transition-main);
   max-width: calc(var(--ds-content-width) + (var(--ds-content-padding-x) * 2));

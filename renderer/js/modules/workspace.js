@@ -85,18 +85,27 @@ const WorkspaceModule = (() => {
 
   async function _proceedSwitch(id) {
     const ws = workspaces.find(w => w.id === id);
+    if (!ws) return;
+
     activeId = id;
     AppState.currentWorkspace = ws; // CRITICAL: Update AppState before context switches
     AppState.currentFile = null;
+    
     await window.electronAPI.setActiveWorkspace(id);
+    
+    // CRITICAL: Set watch dir BEFORE switching tabs to avoid 404s when loading active file
+    if (window.electronAPI) {
+      await window.electronAPI.setWatchDir(ws.path);
+    }
+
     if (typeof CommentsModule !== 'undefined') CommentsModule.clearUI();
     setNoFile();
 
-    // Switch tabs context
+    // Switch tabs context (triggers loadFile)
     if (typeof TabsModule !== 'undefined') TabsModule.switchWorkspace(id);
 
     await load();
-    if (typeof showToast === 'function' && ws) {
+    if (typeof showToast === 'function') {
       showToast(`Switched to ${ws.name}`);
     }
   }

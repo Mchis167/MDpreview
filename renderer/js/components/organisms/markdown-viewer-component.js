@@ -872,14 +872,100 @@ class MarkdownPreview {
       try {
         if (window.CodeBlockModule) window.CodeBlockModule.process(inner);
       } catch (_e) { /* CodeBlock error - gracefully skip */ }
+
+      this._bindCheckboxEvents(inner);
     })();
   }
 
-  update({ html }) {
+  _bindCheckboxEvents(inner) {
+    if (!inner) return;
+    inner.querySelectorAll('.task-list-item input[type="checkbox"]').forEach(cb => {
+      cb.onchange = async (e) => {
+        const checked = e.target.checked;
+        const lineEl = e.target.closest('.md-line');
+        if (!lineEl) return;
+        
+        const lineNum = parseInt(lineEl.dataset.line, 10);
+        if (isNaN(lineNum)) return;
+        
+        await this._toggleTask(lineNum, checked);
+      };
+    });
+  }
+
+  async _toggleTask(lineNum, checked) {
+    
+    const viewer = window.MarkdownViewer && window.MarkdownViewer.getInstance();
+    if (!viewer) {
+      console.error('[DEBUG] _toggleTask: Viewer instance not found');
+      return;
+    }
+    if (!viewer.state.file) {
+      console.error('[DEBUG] _toggleTask: viewer.state.file is missing');
+      return;
+    }
+
+    // Source of truth for content should be the component state
+    const content = viewer.state.content || '';
+    if (!content) {
+      console.warn('[DEBUG] _toggleTask: viewer.state.content is empty');
+      return;
+    }
+    
+    const lines = content.split('\n');
+    const lineIndex = lineNum - 1;
+    if (lineIndex < 0 || lineIndex >= lines.length) {
+      console.error(`[DEBUG] _toggleTask: lineIndex ${lineIndex} out of bounds (total lines: ${lines.length})`);
+      return;
+    }
+    
+    const line = lines[lineIndex];
+
+    // Pattern to match common GFM task list prefixes (handles nesting with \s*)
+    const taskRegex = /^(\s*[-*+] )\[[ xX]\]/;
+    const match = line.match(taskRegex);
+    
+    if (match) {
+      const prefix = match[1];
+      const newMark = checked ? '[x]' : '[ ]';
+      const newLine = line.replace(taskRegex, `${prefix}${newMark}`);
+      
+      lines[lineIndex] = newLine;
+      const newContent = lines.join('\n');
+      
+      // 1. Update component state immediately
+      viewer.setState({ content: newContent });
+      
+      // 2. Save to disk using FileService
+      if (typeof FileService !== 'undefined' && FileService.saveFile) {
+        const success = await FileService.saveFile(viewer.state.file, newContent);
+        
+        if (success) {
+           // 3. Keep Editor in sync
+           if (typeof EditorModule !== 'undefined') {
+             EditorModule.setOriginalContent(newContent);
+           }
+           
+           if (window.showToast) {
+             window.showToast(checked ? 'Task marked as done' : 'Task unmarked', 'success', { duration: 1500 });
+           }
+        } else {
+           if (window.showToast) window.showToast('Failed to save task update', 'error');
+        }
+      } else {
+        console.error('[DEBUG] _toggleTask: FileService.saveFile not found');
+      }
+    } else {
+      console.warn(`[DEBUG] _toggleTask: Line ${lineNum} did not match task list regex. Content was: "${line}"`);
+    }
+  }
+
+  update({ html, content: _content }) {
     this.html = html;
     const inner = this.mount.querySelector('.md-content-inner');
     if (inner) {
       inner.innerHTML = html;
+      this._bindCheckboxEvents(inner);
       
       // Re-process for live updates (e.g. Drafts)
       if (window.processMermaid) {
@@ -973,15 +1059,15 @@ class MarkdownEditor {
     this._switchTo('read');
   }
 
-  update({ content }) {
-    this.content = content;
+  update({ content: _content }) {
+    this.content = _content;
     const textarea = this.mount.querySelector('#edit-textarea');
-    if (textarea && textarea.value !== content) {
+    if (textarea && textarea.value !== _content) {
       // Syncing original content will update textarea.value AND preserve selection
       if (EditorModule) {
-        EditorModule.setOriginalContent(content);
+        EditorModule.setOriginalContent(_content);
       } else {
-        textarea.value = content;
+        textarea.value = _content;
       }
     }
   }

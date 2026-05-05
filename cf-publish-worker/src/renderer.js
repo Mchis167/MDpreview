@@ -12,37 +12,29 @@ export function render(content) {
   const usedSlugs = new Map();
   let html = '';
 
-  // Configure custom renderer for headings to inject IDs
+  // Configure custom renderer for parity with app
   const renderer = new marked.Renderer();
+  
   renderer.heading = (text, level, raw) => {
     const id = slugifyHeading(raw, usedSlugs);
     return `<h${level} id="${id}">${text}</h${level}>\n`;
   };
 
+  renderer.table = (header, body) => {
+    return wrapInTableWrapper(`<table>\n<thead>\n${header}</thead>\n<tbody>\n${body}</tbody>\n</table>\n`);
+  };
+
+  renderer.code = (code, lang) => {
+    if (lang === 'mermaid') return renderMermaidBlock(code);
+    const highlighted = highlightCodeBlock(code, lang);
+    return `<pre><code class="hljs language-${lang || ''}">${highlighted}</code></pre>`;
+  };
+
   tokens.forEach(token => {
     if (token.type === 'space') return;
-
-    let tokenHtml = '';
     
-    // ── 1. Handle Premium Code Blocks ──
-    if (token.type === 'code' && token.lang !== 'mermaid') {
-      const lang = token.lang || 'text';
-      const highlighted = highlightCodeBlock(token.text, lang);
-      tokenHtml = `<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`;
-    } 
-    // ── 2. Handle Tables ──
-    else if (token.type === 'table') {
-      const tableHtml = marked.parser([token]);
-      tokenHtml = wrapInTableWrapper(tableHtml);
-    } 
-    // ── 3. Handle Mermaid ──
-    else if (token.type === 'code' && token.lang === 'mermaid') {
-      tokenHtml = renderMermaidBlock(token.text);
-    }
-    // ── 4. Standard Blocks ──
-    else {
-      tokenHtml = marked.parser([token], { renderer });
-    }
+    // Process token using the configured renderer
+    const tokenHtml = marked.parser([token], { renderer });
 
     // Wrap in standard MDpreview block structure for 100% CSS parity
     html += `<div class="md-block"><div class="md-line">${tokenHtml}</div></div>\n`;

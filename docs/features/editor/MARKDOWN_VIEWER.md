@@ -44,7 +44,6 @@ Logic bên trong:
 2. Nếu chỉ thay đổi content (không đổi mode/file) → gọi `update()` để patch DOM thay vì render lại toàn bộ
 3. Nếu đổi mode → Toggle hiển thị (`display: none/flex`) giữa Preview và Editor container (Persistent DOM). Không destroy component để bảo toàn scroll position và TOC state.
 4. Nếu đổi file → Gọi `reset()` trên các component liên quan và render lại nội dung mới.
-5. **Đồng bộ Live Preview**: Tự động gọi `PreviewService.updateContent()` để đồng bộ hóa cửa sổ xem trước độc lập ngay khi có sự thay đổi về file hoặc nội dung HTML.
 
 ### `render()`
 Tạo sub-component phù hợp dựa trên `state.mode` và mount vào DOM.
@@ -111,18 +110,40 @@ Nút **Publish** trong chế độ Read có hành vi thông minh dựa trên tr�
 
 ## MarkdownPreview (read mode)
 
+### `update({ html, content })`
+Patch HTML khi content thay đổi mà không đổi mode — tránh re-mount và mất scroll position. 
+
+Kể từ v1.6.6, `update` cũng thực hiện re-bind các sự kiện tương tác (ví dụ: Checkbox toggling) để đảm bảo UI luôn phản hồi sau khi nội dung được cập nhật từ editor hoặc server.
+
+---
+
+## MarkdownPreview (read mode)
+
 ### `render()`
 Render HTML preview:
 1. Set `innerHTML` với HTML đã được render từ server
 2. Chạy Mermaid.init() cho các diagram block
 3. Highlight syntax code block (Prism/highlight.js)
 4. Wrap table để hỗ trợ horizontal scroll
-5. Khôi phục scroll position từ ScrollModule
+5. **Checkbox Binding**: Khởi tạo `_bindCheckboxEvents()` để hỗ trợ tương tác danh sách công việc.
+6. Khôi phục scroll position từ ScrollModule
 
 Tất cả post-processing (mermaid, code) chạy trong `requestAnimationFrame` để tránh layout thrashing.
 
+### Interactive Task Lists
+`MarkdownPreview` hỗ trợ tích/bỏ tích checkbox trực tiếp ngay trong chế độ Xem.
+
+**Cơ chế hoạt động:**
+1. **Event Delegation**: Lắng nghe sự kiện `change` trên các `input[type="checkbox"]` nằm trong `.md-line`.
+2. **Line Identification**: Sử dụng thuộc tính `data-line` (được render từ server) để xác định chính xác dòng cần thay đổi trong file gốc. Hệ thống sử dụng cơ chế **Precision Line Tracking** (đếm newline trực tiếp từ source) để đảm bảo `data-line` luôn khớp tuyệt đối với file Markdown ngay cả trong các danh sách phức tạp.
+3. **Persistence Flow**: 
+   - Khi click, `_toggleTask(lineNum, checked)` được gọi.
+   - Script thực hiện thay đổi regex trên `viewer.state.content` (chuyển `[ ]` ↔ `[x]`).
+   - Gọi `FileService.saveFile()` để ghi đè nội dung mới vào file vật lý.
+   - Đồng bộ trạng thái mới sang `EditorModule` để đảm bảo tính nhất quán khi chuyển mode.
+
 ### `update({ html })`
-Patch HTML khi content thay đổi mà không đổi mode — tránh re-mount và mất scroll position.
+Patch HTML khi content thay đổi mà không đổi mode.
 
 ---
 
@@ -197,4 +218,4 @@ Mỗi component tự nullify `activeInstance` qua `onClose` callback khi bị đ
 
 ---
 
-*Document — 2026-05-04 (Mirror Preview Synchronization & Interactive UI)*
+*Document — 2026-05-05 (Precision Line Tracking for Task Lists)*

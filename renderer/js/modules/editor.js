@@ -124,6 +124,48 @@ const EditorModule = (() => {
     });
 
     _textarea.addEventListener('keydown', (e) => {
+      // If in Slash Mode, intercept Space and Arrows
+      if (_isSlashMode) {
+        if (e.key === ' ') {
+          const cmdId = window.QuickCommandPalette.getSelectedCommandId();
+          if (cmdId) {
+            e.preventDefault();
+            _applySlashCommand(cmdId);
+            return;
+          } else {
+            _isSlashMode = false;
+            window.QuickCommandPalette.hide();
+          }
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          window.QuickCommandPalette.navigate('down');
+          return;
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          window.QuickCommandPalette.navigate('up');
+          return;
+        } else if (e.key === 'Escape') {
+          _isSlashMode = false;
+          window.QuickCommandPalette.hide();
+        } else if (e.key === 'Enter') {
+          const cmdId = window.QuickCommandPalette.getSelectedCommandId();
+          if (cmdId) {
+            e.preventDefault();
+            _applySlashCommand(cmdId);
+            return;
+          }
+        }
+        // Removed Backspace intercept here to let 'input' handle it
+      }
+
+      // ── Palette Proxy Logic (TC-11) ──
+      // If palette is open, it has priority for key events to keep editor focus/selection visible
+      if (window.QuickCommandPalette && window.QuickCommandPalette.isOpen()) {
+        if (window.QuickCommandPalette.handleKey(e)) {
+          e.preventDefault();
+          return;
+        }
+      }
       // Global Shortcut Interception (TC-10)
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault();
@@ -131,6 +173,30 @@ const EditorModule = (() => {
         return;
       }
 
+      // Quick Command Action (Cmd + /)
+      if ((e.metaKey || e.ctrlKey) && e.key === '/') {
+        e.preventDefault();
+        _showQuickCommand();
+        return;
+      }
+
+      // Smart Lists (Enter)
+      if (e.key === 'Enter' && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
+        if (typeof MarkdownLogicService !== 'undefined' && MarkdownLogicService.handleEnter(_textarea)) {
+          e.preventDefault();
+          _textarea.dispatchEvent(new Event('input'));
+          return;
+        }
+      }
+
+      // Smart Indentation (Tab)
+      if (e.key === 'Tab') {
+        if (typeof MarkdownLogicService !== 'undefined' && MarkdownLogicService.handleTab(_textarea, e.shiftKey)) {
+          e.preventDefault();
+          _textarea.dispatchEvent(new Event('input'));
+          return;
+        }
+      }
       // Sync undo/redo stack
       if (e.key === 'z' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
@@ -184,13 +250,10 @@ const EditorModule = (() => {
         return false;
     }
 
-    const res = await fetch('/api/file/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path: AppState.currentFile, content })
-    });
+    if (typeof FileService === 'undefined' || !FileService.saveFile) return false;
+    const success = await FileService.saveFile(AppState.currentFile, content);
     
-    if (res.ok) {
+    if (success) {
       if (typeof showToast === 'function') showToast('File saved successfully');
       _originalContent = content; 
       

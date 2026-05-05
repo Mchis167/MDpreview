@@ -23,6 +23,30 @@ All notable changes to this project will be documented in this file.
 - **Slash Mode Resilience**: Khắc phục lỗi Palette tự đóng khi xóa ký tự.
 - **Publish State Desync**: Khắc phục lỗi nút Publish không tự động quay lại trạng thái ban đầu.
 
+## [Not Commited] — 2026-05-05 17:35
+
+### 🐞 Fixed
+- **Task List Synchronization Drift**: Khắc phục triệt để lỗi lệch dòng (line drift) khiến việc tích checkbox trong View Mode không tìm đúng dòng trong file Markdown.
+- **Precision Line Tracking**: Chuyển đổi cơ chế đếm dòng từ tách mảng (`split('\n')`) sang đếm ký tự xuống dòng trực tiếp từ `token.raw` trong `render.js`, đảm bảo độ chính xác 100% với file nguồn.
+- **Reliable List Item Mapping**: Sử dụng cơ chế `indexOf` kết hợp đếm newline để xác định vị trí tuyệt đối của từng mục danh sách, hỗ trợ hoàn hảo cho các danh sách phức tạp hoặc lồng nhau.
+
+### 🔧 Changed
+- **Codebase Sanitization**: Loại bỏ toàn bộ các `console.log` debug và xử lý các cảnh báo linting (`no-unused-vars`, `no-console`) để duy trì tiêu chuẩn **Zero Warnings**.
+- **Workspace Switcher UI**: Giới hạn tên Workspace trên 1 dòng với hiệu ứng ellipsis, ngăn chặn hiện tượng vỡ layout khi tên Workspace quá dài.
+
+## [Not Commited] — 2026-05-05 17:10
+
+### 🚀 Added
+- **Interactive Task Lists**: Cho phép người dùng tích/bỏ tích checkbox trực tiếp ngay trong chế độ xem (View Mode).
+- **Persistent File Saving**: Tích hợp cơ chế tự động lưu file nguồn `.md` khi tương tác với checkbox thông qua `FileService.saveFile`.
+- **Premium Checkbox UI**: Giao diện checkbox tùy chỉnh cao cấp với hiệu ứng chuyển động, thay thế cho giao diện mặc định của trình duyệt.
+- **Granular Line Tracking**: Nâng cấp trình render server-side (`render.js`) để gán chính xác `data-line` cho từng mục danh sách (list item), khắc phục lỗi lệch dòng khi thao tác với các danh sách phức tạp.
+- **Diagnostic Debug System**: Bổ sung hệ thống logger chi tiết (`[DEBUG]`) cho cả frontend và backend để theo dõi luồng dữ liệu của Task List.
+
+### 🐞 Fixed
+- **Double-Render Checkbox**: Loại bỏ lỗi hiển thị 2 checkbox (mặc định + tùy chỉnh) trong danh sách công việc.
+- **List Line Mismatch**: Sửa lỗi đếm dòng sai lệch trong các "loose lists" (danh sách có dòng trống).
+
 ## [1.6.5] — 2026-05-05 14:32
 
 ### 🚀 Added
