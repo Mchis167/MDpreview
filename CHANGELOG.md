@@ -2,6 +2,45 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Not Commited] — 2026-05-06 02:25
+
+### 🐞 Fixed
+- **Checkbox Persistence & Flicker**: Khắc phục lỗi checkbox trong chế độ Xem bị reset trạng thái khi đang lưu file. Bổ sung guard clause trong `MarkdownPreview.update` để chặn việc render lại DOM không cần thiết khi nội dung HTML không thay đổi.
+- **Task List Toggle Logic**: Tối ưu hóa `_toggleTask` để hỗ trợ cả tệp tin vật lý và bản nháp (Draft), đồng thời ép xung cập nhật nội dung từ server sau khi lưu để đảm bảo UI luôn đồng bộ với file nguồn.
+
+### 🔧 Changed
+- **Official DS Checkmark Integration**: Thay thế cơ chế vẽ dấu tích bằng CSS (`::after`) rườm rà và dễ lệch bằng việc sử dụng trực tiếp icon `check` chuẩn từ **Design System** làm `background-image`. 
+- **Absolute Centering Guarantee**: Sử dụng `background-position: center` để đảm bảo dấu tích luôn nằm chính xác ở tâm checkbox trên mọi trình duyệt, loại bỏ hoàn toàn các lỗi lệch pixel ("lệch lạc") trên bản Publish.
+- **Published Document Parity**: Nâng cấp `PublishService.js` để tự động nhúng hệ thống style task list cao cấp vào bản xuất bản, mang lại giao diện 1:1 so với ứng dụng gốc.
+
+## [Not Commited] — 2026-05-06 01:44
+
+### 🐞 Fixed
+- **Nested Checklist Rendering**: Giải quyết triệt để lỗi dàn hàng ngang của checklist lồng nhau (Bug 1.3). Triển khai wrapper `.md-list-item-content` với `flex-direction: column` để đảm bảo văn bản cha và danh sách con lồng bên dưới luôn xếp chồng theo chiều dọc đúng chuẩn Markdown.
+- **Isolated Hover Highlights**: Khắc phục hiện tượng "nháy" (flash) và rò rỉ highlight từ cha sang con bằng cơ chế **Granular Hover**. Sử dụng `:has()` và trực tiếp target `.md-block` để cô lập trạng thái sáng của từng cấp độ checklist.
+
+### 🧪 Added
+- **Automated Rendering Tests**: Bổ sung bộ unit test `tests/render-nested-list.test.js` sử dụng Vitest để kiểm chứng cấu trúc HTML của danh sách lồng nhau, đảm bảo tính ổn định lâu dài cho Rendering Pipeline.
+
+### 🔧 Changed
+- **Rendering Pipeline Refactoring**: Export hàm `renderWithLineNumbers` từ `server/routes/render.js` để tăng cường khả năng kiểm thử (testability) và module hóa logic render phía server.
+- **Dynamic Checkbox Alignment**: Thay thế margin cố định bằng đơn vị `em` (0.32em - 0.5em) để đảm bảo checkbox luôn căn giữa dòng đầu tiên của văn bản một cách linh hoạt theo kích thước font.
+
+## [Not Commited] — 2026-05-06 01:32
+
+### 🐞 Fixed
+- **Nested List Hierarchy**: Tái cấu trúc pipeline render để hỗ trợ đệ quy, đảm bảo danh sách lồng nhau (đánh số, dấu chấm, checklist) hiển thị chính xác cấu trúc phân cấp mà không bị vỡ layout.
+- **List Marker Alignment**: Triển khai hệ thống Flexbox Layout cho `li.has-custom-marker`, giúp con số thứ tự đa cấp (ví dụ: `2.1.`) và nội dung văn bản luôn nằm trên cùng một hàng ngang một cách ổn định.
+- **Accidental Column Layout**: Khắc phục lỗi hiển thị chia cột nhầm lẫn khi một danh sách đơn giản chứa danh sách con phức tạp bằng cách giới hạn phạm vi áp dụng class `has-custom-marker`.
+- **Nested List Rendering**: Khắc phục lỗi render danh sách lồng nhau (unordered và checklist) bằng cách sử dụng `marked.parser(item.tokens)` trong pipeline render phía server.
+- **Smart Typing Enhancements**: 
+    - Hỗ trợ đánh số đa cấp cho danh sách có thứ tự (ví dụ: `2.2.` -> `2.3.`).
+    - Triển khai thuật toán tự động đánh số lại (Auto Re-numbering) cho các item phía dưới khi chèn một item mới vào giữa danh sách.
+
+### 🔧 Changed
+- **Synchronized Flow Spacing**: Đồng bộ hóa toàn bộ khoảng cách dọc của danh sách với hệ thống Flow Spacing toàn cục. Sử dụng thuộc tính `gap` cho container và ghi đè `margin-bottom` của `.md-block` bên trong `li` để duy trì nhịp điệu 6px (`--ds-md-list-item-gap`) nhất quán.
+- **Editor Module Architecture**: Tái cấu trúc `EditorModule` để sử dụng các named event handlers, giúp quản lý vòng đời sự kiện ổn định và dễ bảo trì hơn.
+
 ## [1.7.2] — 2026-05-05 23:06
 
 ### 🐞 Fixed

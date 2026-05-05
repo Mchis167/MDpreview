@@ -1,15 +1,14 @@
 # Feature Documentation
 
-**Last Updated:** May 4, 2026 (Phase 2.4)  
+**Last Updated:** May 6, 2026 (Smart Typing Stabilization)  
 **Total Features:** 39+ modules documented  
 **Status:** Organized by category
 
-> **Recent Update (May 4):** Modernized the editor experience with a **Slash Command System** (`/`), a context-aware **Quick Command Palette**, and **Smart Selection** for frictionless Markdown formatting.
+> **Recent Update (May 6):** Stabilized the **Smart Typing** experience with multi-level list support, automated re-numbering, and robust event listener management. Giải quyết triệt để lỗi hiển thị ngang của **Checklist lồng nhau** (Bug 1.3) bằng hệ thống vertical stacking nội bộ. Bổ sung bộ **Rendering Pipeline Tests** tự động.
 
 ---
 
 ## 📚 Quick Navigation
-
 | Category | Purpose | Files |
 |----------|---------|-------|
 | [**Core**](#core--application-foundation) | App state, boot, lifecycle | 2 files |
@@ -328,6 +327,6 @@ When adding new features:
 
 ---
 
-**Last Updated:** May 4, 2026 (Phase 2.4)  
+**Last Updated:** May 6, 2026 (Smart Typing Stabilization)  
 **Status:** Organized and complete  
-**Next:** Maintain Slash Mode and Command Palette logic
+**Next:** Triển khai thêm các kịch bản kiểm thử Edge Case cho bảng biểu (Table) lồng trong danh sách.

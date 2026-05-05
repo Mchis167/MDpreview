@@ -1,8 +1,8 @@
-const express     = require('express');
-const router      = express.Router();
-const fs          = require('fs');
-const path        = require('path');
-const { marked }  = require('marked');
+const express = require('express');
+const router = express.Router();
+const fs = require('fs');
+const path = require('path');
+const { marked } = require('marked');
 const { sanitizeHtml, renderMermaidBlock, highlightCodeBlock, wrapInTableWrapper } = require('../../renderer/js/services/md-renderer-core.js');
 
 // Configure marked with custom renderer for premium blocks
@@ -25,150 +25,185 @@ renderer.code = (code, lang) => {
 // Custom List Item for Task Lists
 renderer.listitem = (text, task, checked) => {
   if (task) {
-    // Marked's 'text' for tasks already contains a <input disabled type="checkbox">
-    // We strip it to avoid double-rendering and add our own interactive one.
     const cleanText = text.replace(/<input\b[^>]*>/i, '').trim();
     return `<li class="task-list-item"><input type="checkbox" ${checked ? 'checked' : ''}> ${cleanText}</li>\n`;
   }
   return `<li>${text}</li>\n`;
 };
 
+/**
+ * Custom preprocessing to handle nested lists and multi-level markers.
+ */
+function preprocessMarkdown(src) {
+  return src.split('\n').map(line => {
+    // Match multi-level ordered list or indented list
+    const match = line.match(/^( {0,})(\d+(?:\.\d+)*)([.)])( +)(.*)/);
+    if (match) {
+      const [, indent, marker, suffix, space, content] = match;
+      // If it's a nested item (indent > 0) or a multi-level marker, convert to '-'
+      if (indent.length > 0 || marker.includes('.')) {
+        // Double the original indent to ensure nesting (2->4, 4->8, etc.)
+        const newIndent = ' '.repeat(indent.length * 2 || 4);
+        return `${newIndent}- <!--M:${marker}${suffix}-->${space}${content}`;
+      }
+    }
+    return line;
+  }).join('\n');
+}
+
 marked.use({
   renderer: renderer,
   langPrefix: 'hljs language-',
-  gfm: true
+  gfm: true,
+  breaks: true
 });
 
 /**
- * Render markdown with line-number annotations on each block.
- * Each top-level block is wrapped in:
- *   <div class="md-block" data-line-start="N" data-line-end="M">...</div>
+ * Recursive helper to render tokens into HTML with md-line and md-block wrappers.
+ * @param {boolean} isTopLevel - If true, wraps output in .md-block.
  */
-function renderWithLineNumbers(content) {
-  const tokens = marked.lexer(content);
-  let currentLine = 1;
+function renderTokens(tokens, lineStart, isTopLevel = true) {
   let html = '';
+  let currentLine = lineStart;
 
-  let i = 0;
-  while (i < tokens.length) {
+  for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
-    if (!token.raw) { i++; continue; }
+    if (!token.raw) continue;
 
-    const lineStart  = currentLine;
-
-    // Count lines in this token precisely by counting newlines
+    const tokenStartLine = currentLine;
     const tokenNewlines = (token.raw.match(/\n/g) || []).length;
-    const lineEnd = lineStart + tokenNewlines;
+    const tokenEndLine = tokenStartLine + tokenNewlines;
 
-    if (token.type === 'space') { 
-      currentLine = lineEnd;
-      i++; 
-      continue; 
+    if (token.type === 'space') {
+      currentLine = tokenEndLine;
+      continue;
     }
 
-    // Check if this token starts a <details> block
+    let tokenHtml = '';
+
+    // ── Details / Summary Block ──
     if (token.type === 'html' && token.raw.trim().toLowerCase().startsWith('<details')) {
-      // Accumulate tokens until we find the closing </details>
       let j = i;
       let depth = 0;
       let combinedRaw = '';
-      
       while (j < tokens.length) {
         combinedRaw += tokens[j].raw;
-        // Simple tag counting (could be more robust with regex)
         if (tokens[j].raw.toLowerCase().includes('<details')) depth++;
         if (tokens[j].raw.toLowerCase().includes('</details>')) depth--;
-        
         if (depth <= 0) break;
         j++;
       }
-      
       if (j > i) {
-        // We found a complete block or reached the end
         const entireRaw = combinedRaw;
-        
-        // Manual extraction to ensure nested Markdown is parsed correctly
         const summaryMatch = entireRaw.match(/<summary>([\s\S]*?)<\/summary>/i);
         const summaryRaw = summaryMatch ? summaryMatch[1] : 'Details';
         const contentRaw = entireRaw.replace(/<details[^>]*>/i, '')
-                                    .replace(/<\/details>/i, '')
-                                    .replace(/<summary>[\s\S]*?<\/summary>/i, '');
-        
+          .replace(/<\/details>/i, '')
+          .replace(/<summary>[\s\S]*?<\/summary>/i, '');
+
         const renderedSummary = marked.parseInline(summaryRaw);
         const renderedContent = marked.parse(contentRaw);
-        const entireHtml = `<details><summary>${renderedSummary}</summary>\n${renderedContent}</details>`;
-        
-        // Calculate lines for the entire combined block
-        const entireNewlines = (entireRaw.match(/\n/g) || []).length;
-        const entireLineEnd = lineStart + entireNewlines;
-        
-        html += `<div class="md-block" data-line-start="${lineStart}" data-line-end="${entireLineEnd}"><div class="md-line" data-line="${lineStart}">${entireHtml}</div></div>\n`;
-        
-        // Sync the main loop's currentLine and index
-        currentLine = entireLineEnd;
-        i = j + 1;
+        tokenHtml = `<details><summary>${renderedSummary}</summary>\n${renderedContent}</details>`;
+        tokenHtml = `<div class="md-line" data-line="${tokenStartLine}">${tokenHtml}</div>`;
+
+        // Always wrap in md-block for Flow Spacing system
+        html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}">${tokenHtml}</div>\n`;
+
+        currentLine = tokenEndLine;
+        i = j;
         continue;
       }
     }
 
-    // Special handling for lists to provide granular line numbers for items
+    // ── Lists (Recursive) ──
     if (token.type === 'list') {
       let listHtml = token.ordered ? `<ol start="${token.start || 1}">` : '<ul>';
       let listPrefixOffset = 0;
-      
+
       token.items.forEach(item => {
-        const itemText = marked.parseInline(item.text);
-        
-        // Find the exact line number of this item by tracking its character offset within token.raw
         const itemIndex = token.raw.indexOf(item.raw, listPrefixOffset);
+        let absoluteItemLine = currentLine;
         if (itemIndex !== -1) {
           const prefix = token.raw.substring(0, itemIndex);
           const newlinesBefore = (prefix.match(/\n/g) || []).length;
-          const absoluteItemLine = lineStart + newlinesBefore;
-          
-          if (item.task) {
-            listHtml += `<li class="task-list-item md-line" data-line="${absoluteItemLine}"><input type="checkbox" ${item.checked ? 'checked' : ''}> ${itemText}</li>\n`;
-          } else {
-            listHtml += `<li class="md-line" data-line="${absoluteItemLine}">${itemText}</li>\n`;
-          }
+          absoluteItemLine = tokenStartLine + newlinesBefore;
           listPrefixOffset = itemIndex + item.raw.length;
         }
+
+        // Inside LI, we set isTopLevel = false to avoid extra <div> wrappers
+        let itemContent = renderTokens(item.tokens || [], absoluteItemLine, false);
+
+        // Restore original marker if found
+        const mMatch = itemContent.match(/<!--M:(.*?)-->/);
+        let markerPrefix = '';
+        if (mMatch) {
+          markerPrefix = `<span class="md-custom-marker">${mMatch[1]}</span>`;
+          itemContent = itemContent.replace(/<!--M:.*?-->\s*/, '');
+        }
+
+        // Clean up paragraph wrappers for all list items
+        itemContent = itemContent.trim().replace(/^<p>/g, '').replace(/<\/p>$/g, '');
+
+        if (item.task) {
+          listHtml += `<li class="task-list-item md-line" data-line="${absoluteItemLine}">${markerPrefix}<input type="checkbox" ${item.checked ? 'checked' : ''}> <div class="md-list-item-content">${itemContent}</div></li>\n`;
+        } else {
+          const liClass = markerPrefix ? 'md-line has-custom-marker' : 'md-line';
+          listHtml += `<li class="${liClass}" data-line="${absoluteItemLine}">${markerPrefix}<div class="md-list-item-content">${itemContent}</div></li>\n`;
+        }
       });
-      
+
       listHtml += token.ordered ? '</ol>' : '</ul>';
-      html += `<div class="md-block" data-line-start="${lineStart}" data-line-end="${lineEnd}">${listHtml}</div>\n`;
-      currentLine = lineEnd;
-      i++;
+
+      // Always wrap in md-block for Flow Spacing system
+      html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}">${listHtml}</div>\n`;
+
+      currentLine = tokenEndLine;
       continue;
     }
 
-    // Default processing for other tokens
-    const tokenHtml = marked.parser([token]);
+    // ── Atomic Blocks ──
     const isAtomic = ['code', 'blockquote', 'table', 'html'].includes(token.type);
-    
     if (isAtomic) {
-      html += `<div class="md-block" data-line-start="${lineStart}" data-line-end="${lineEnd}"><div class="md-line" data-line="${lineStart}">${tokenHtml}</div></div>\n`;
-      currentLine = lineEnd;
-      i++;
+      const atomicHtml = marked.parser([token]);
+      tokenHtml = `<div class="md-line" data-line="${tokenStartLine}">${atomicHtml}</div>`;
+      // Always wrap in md-block for Flow Spacing system
+      html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}">${tokenHtml}</div>\n`;
+      currentLine = tokenEndLine;
       continue;
     }
 
-    // Split token HTML by lines and wrap each in .md-line
-    const renderedLines = tokenHtml.trim().split(/\r?\n/);
+    // ── Default Paragraphs/Text ──
+    let rawHtml = marked.parser([token]);
+    if (!isTopLevel) {
+      // Strip paragraph tags inside lists but we will wrap in md-block instead
+      rawHtml = rawHtml.trim().replace(/^<p>/g, '').replace(/<\/p>$/g, '');
+    }
+    const renderedLines = rawHtml.trim().split(/\r?\n/);
     let wrappedHtml = '';
     for (let k = 0; k < renderedLines.length; k++) {
-        const lNum = lineStart + k;
-        if (lNum <= lineEnd) {
-            wrappedHtml += `<div class="md-line" data-line="${lNum}">${renderedLines[k]}</div>\n`;
-        } else {
-            wrappedHtml += renderedLines[k] + '\n';
-        }
+      const lNum = tokenStartLine + k;
+      if (lNum <= tokenEndLine) {
+        wrappedHtml += `<div class="md-line" data-line="${lNum}">${renderedLines[k]}</div>\n`;
+      } else {
+        wrappedHtml += renderedLines[k] + '\n';
+      }
     }
-    html += `<div class="md-block" data-line-start="${lineStart}" data-line-end="${lineEnd}">${wrappedHtml}</div>\n`;
-    currentLine = lineEnd;
-    i++;
+    
+    // Always wrap in md-block to maintain vertical rhythm via Flow Spacing system
+    html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}">${wrappedHtml}</div>\n`;
+    currentLine = tokenEndLine;
   }
 
+  return html;
+}
+
+/**
+ * Main entry point for rendering markdown with line annotations.
+ */
+function renderWithLineNumbers(content) {
+  const processed = preprocessMarkdown(content);
+  const tokens = marked.lexer(processed);
+  const html = renderTokens(tokens, 1, true); // Root call is top-level
   return sanitizeHtml(html);
 }
 
@@ -184,15 +219,15 @@ function resolvePath(watchDir, filePath) {
 
 router.get('/render', (req, res) => {
   const watchDir = req.watchDir;
-  const file     = req.query.file;
+  const file = req.query.file;
 
   if (!watchDir) return res.status(400).json({ error: 'No workspace set' });
-  if (!file)     return res.status(400).json({ error: 'Missing file param' });
+  if (!file) return res.status(400).json({ error: 'Missing file param' });
 
   try {
-    const fullPath   = resolvePath(watchDir, file);
-    const content    = fs.readFileSync(fullPath, 'utf8');
-    const html       = renderWithLineNumbers(content);
+    const fullPath = resolvePath(watchDir, file);
+    const content = fs.readFileSync(fullPath, 'utf8');
+    const html = renderWithLineNumbers(content);
     const totalLines = content.split('\n').length;
     res.json({ html, file, totalLines, raw: content });
   } catch (err) {
@@ -205,7 +240,7 @@ router.get('/render', (req, res) => {
 
 router.post('/render-raw', (req, res) => {
   const { content } = req.body;
-  
+
   if (content === undefined) {
     return res.status(400).json({ error: 'Missing content body' });
   }
@@ -220,3 +255,4 @@ router.post('/render-raw', (req, res) => {
 });
 
 module.exports = router;
+module.exports.renderWithLineNumbers = renderWithLineNumbers;

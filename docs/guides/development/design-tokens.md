@@ -1,6 +1,6 @@
 # Design Tokens & CSS Build Pipeline
 
-**Last Updated:** May 2, 2026  
+**Last Updated:** May 6, 2026  
 **Purpose:** Centralized design tokens and publish page CSS synchronization
 
 > **Note (May 2, 2026):** Added layout tokens (`--ds-content-padding-x`, `--ds-content-padding-y`, `--ds-content-width`) for content alignment sync across main viewer, editor, and project map. See [Scenario 4](#scenario-4-content-padding--width-adjustment-affects-all-views) for usage.

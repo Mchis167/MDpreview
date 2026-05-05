@@ -1,8 +1,8 @@
 # Rendering Architecture
 
 **Status:** Phase 1.1 Complete (May 1, 2026)  
-**Last Updated:** May 1, 2026  
-**Version:** 2.0 (Consolidated)
+**Last Updated:** May 6, 2026  
+**Version:** 2.1 (Recursive Rendering)
 
 ---
 
@@ -228,7 +228,21 @@ Each markdown block is wrapped with `data-line-start` and `data-line-end`. Since
 - Enable editor to sync view with cursor position.
 - **Interactive Task Lists**: Allow View Mode checkboxes to map directly back to the correct line in the source file for real-time updates.
 
-#### 2. Details/Summary Support
+#### 2. Recursive Rendering Pipeline (v1.7.2)
+
+To ensure high-fidelity rendering of nested structures (especially lists and checklists), the server renderer uses a **Recursive Token Processor**:
+
+- **Recursive Processing**: When a list item contains multiple blocks or nested lists, `renderTokens` is called recursively.
+- **Consistent Wrapper**: Every content block (including nested ones) is wrapped in `.md-block` to enforce the global **Flow Spacing** system.
+- **Flexbox List Layout**: 
+    - `li.has-custom-marker` và `.task-list-item` sử dụng `display: flex`.
+    - Toàn bộ nội dung của `li` được bọc trong `.md-list-item-content` với `flex: 1` và `flex-direction: column`.
+    - Cơ chế này đảm bảo markers (numbers, bullets, checkboxes) luôn căn chỉnh đúng với dòng đầu tiên, trong khi các khối nội dung (văn bản, sub-list, code block) được xếp chồng theo chiều dọc thay vì dàn hàng ngang.
+
+**Purpose:** 
+- Eliminate layout breakage in complex nested ordered lists.
+- Synchronize vertical rhythm across all block types using a unified spacing system.
+- Support interactive task lists with accurate line mapping.
 
 Special handling for `<details>` HTML blocks:
 

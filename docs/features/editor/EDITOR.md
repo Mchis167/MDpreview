@@ -14,7 +14,7 @@ Gắn editor logic vào `<textarea>`. Phải gọi trước khi dùng bất kỳ
 - Tự động gọi `TabsModule.setDirty()` để cập nhật chỉ báo thay đổi trên Tab Bar
 
 ### `unbind()`
-Gỡ bỏ tất cả event listeners và xóa stacks. Gọi khi chuyển khỏi edit mode.
+Gỡ bỏ tất cả event listeners (input, keydown) để tránh rò rỉ bộ nhớ hoặc nhân bản sự kiện khi bind lại. Đồng thời xóa undo/redo stacks và reset Slash Mode. Gọi khi chuyển khỏi edit mode.
 
 ---
 
@@ -118,4 +118,4 @@ Khi gõ ký tự `/` ở đầu dòng hoặc sau một dấu cách/xuống dòng
 
 ---
 
-*Document — 2026-05-04*
+*Document — 2026-05-06*

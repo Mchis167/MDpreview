@@ -500,9 +500,264 @@ const MarkdownLogicService = (() => {
     });
   }
 
+  /**
+   * Computes the new value and cursor position after pressing Enter.
+   * Handles auto-continuing and exiting lists.
+   *
+   * @param {string} value - Textarea value
+   * @param {number} selStart - Selection start index
+   * @param {number} selEnd - Selection end index
+   * @returns {Object|null} { newValue, newCursorPos } or null if no action
+   */
+  function computeSmartEnter(value, selStart, selEnd) {
+    if (selStart !== selEnd) return null;
+
+    // Use original value for indices to avoid shift issues with CRLF
+    const lineStart = value.lastIndexOf('\n', selStart - 1) + 1;
+    let lineEnd = value.indexOf('\n', selStart);
+    if (lineEnd === -1) lineEnd = value.length;
+
+    // Get current line and remove trailing \r if any
+    let currentLine = value.substring(lineStart, selStart).replace(/\r$/, '');
+    const isAtEndOfLine = lineEnd === -1 || selStart === lineEnd || (selStart === lineEnd - 1 && value[lineEnd - 1] === '\r');
+
+    const patterns = [
+      { type: 'task', regex: /^(\s*)-\s\[([ xX])\]\s/ },
+      { type: 'unordered', regex: /^(\s*)([-*+])\s/ },
+      { type: 'ordered', regex: /^(\s*)(\d+(?:\.\d+)*)\.\s/ }
+    ];
+
+    let match = null;
+    let listType = null;
+    for (const p of patterns) {
+      match = currentLine.match(p.regex);
+      if (match) {
+        listType = p.type;
+        break;
+      }
+    }
+
+    if (!match) return null;
+
+    const prefix = match[0];
+    const indent = match[1];
+    const content = currentLine.substring(prefix.length);
+
+    if (content.trim() === '') {
+      // Exit list
+      const newValue = value.substring(0, lineStart) + value.substring(selStart);
+      return { newValue, newCursorPos: lineStart };
+    }
+
+    if (!isAtEndOfLine) return null;
+
+    let newPrefix = '';
+    let nextNum = null;
+    let parentPrefix = '';
+    if (listType === 'task') {
+      newPrefix = `${indent}- [ ] `;
+    } else if (listType === 'unordered') {
+      newPrefix = `${indent}${match[2]} `;
+    } else if (listType === 'ordered') {
+      const parts = match[2].split('.');
+      const last = parseInt(parts.pop(), 10);
+      nextNum = last + 1;
+      parentPrefix = parts.length > 0 ? parts.join('.') + '.' : '';
+      newPrefix = `${indent}${parentPrefix}${nextNum}. `;
+    }
+
+    let newValue = value.substring(0, selStart) + '\n' + newPrefix + value.substring(selStart);
+    const newCursorPos = selStart + 1 + newPrefix.length;
+
+    // Bug 4: Re-numbering logic for Ordered List
+    if (listType === 'ordered' && nextNum !== null) {
+      const lines = newValue.split('\n');
+      const insertLineIdx = newValue.substring(0, newCursorPos).split('\n').length - 1;
+      let changed = false;
+
+      for (let i = insertLineIdx + 1; i < lines.length; i++) {
+        const line = lines[i];
+        const lineMatch = line.match(/^(\s*)(\d+(?:\.\d+)*)\.\s/);
+        if (lineMatch && lineMatch[1] === indent) {
+          const lParts = lineMatch[2].split('.');
+          const lLast = parseInt(lParts.pop(), 10);
+          const lPrefix = lParts.length > 0 ? lParts.join('.') + '.' : '';
+          
+          if (lPrefix === parentPrefix) {
+             const updatedNum = lLast + 1;
+             lines[i] = `${indent}${lPrefix}${updatedNum}. ${line.substring(lineMatch[0].length)}`;
+             changed = true;
+          } else {
+            break; 
+          }
+        } else if (line.trim() === '') {
+          continue;
+        } else {
+          break;
+        }
+      }
+      if (changed) {
+        newValue = lines.join('\n');
+      }
+    }
+
+    return {
+      newValue,
+      newCursorPos
+    };
+  }
+
+  /**
+   * Computes the new value and cursor position for Tab/Shift+Tab.
+   * Handles indenting and dedenting lists.
+   *
+   * @param {string} value - Textarea value
+   * @param {number} selStart - Selection start
+   * @param {number} selEnd - Selection end
+   * @param {'in'|'out'} direction - Indent in or out
+   * @returns {Object|null}
+   */
+  function computeListIndent(value, selStart, selEnd, direction) {
+    const textBefore = value.substring(0, selStart);
+    const codeBlockCount = (textBefore.match(/```/g) || []).length;
+    if (codeBlockCount % 2 !== 0) return null;
+
+    const lineStart = value.lastIndexOf('\n', selStart - 1) + 1;
+    let lineEnd = value.indexOf('\n', selEnd);
+    if (lineEnd === -1) lineEnd = value.length;
+
+    const linesInSelection = value.substring(lineStart, lineEnd).split('\n');
+    const listRegex = /^(\s*)([-*+]|(\d+(?:\.\d+)*\.))\s/;
+
+    if (!linesInSelection.some(l => listRegex.test(l))) return null;
+
+    // 1. Apply Indentation Change
+    const modifiedSelectedLines = linesInSelection.map(line => {
+      if (direction === 'in') {
+        const currentIndent = (line.match(/^(\s*)/)[0] || '').length;
+        if (currentIndent < 12) return '  ' + line;
+      } else {
+        const match = line.match(/^(\s{1,2})/);
+        if (match) return line.substring(match[0].length);
+      }
+      return line;
+    });
+
+    // 2. Full Normalization
+    const allLines = value.split('\n');
+    const startLineIdx = value.substring(0, lineStart).split('\n').length - 1;
+    
+    // Replace original lines with modified ones in the full document array
+    for (let i = 0; i < modifiedSelectedLines.length; i++) {
+      allLines[startLineIdx + i] = modifiedSelectedLines[i];
+    }
+    
+    // Normalize markers for the whole list block
+    const originalFirstLine = value.substring(lineStart, value.indexOf('\n', lineStart) === -1 ? value.length : value.indexOf('\n', lineStart));
+    const normalizedLines = _normalizeOrderedListMarkers(allLines, startLineIdx);
+    
+    // 3. Calculate Deltas for cursor/selection
+    // We need to compare before and after to get precise character offsets
+    const newSelectedBlock = normalizedLines.slice(startLineIdx, startLineIdx + modifiedSelectedLines.length).join('\n');
+    const firstLineDelta = normalizedLines[startLineIdx].length - originalFirstLine.length;
+    const totalDelta = newSelectedBlock.length - value.substring(lineStart, lineEnd).length;
+
+    const newValue = normalizedLines.join('\n');
+    
+    return {
+      newValue,
+      newCursorPos: selStart + firstLineDelta,
+      newSelectionEnd: selEnd + totalDelta
+    };
+  }
+
+  /**
+   * Internal helper to normalize all ordered list markers in a block.
+   * Scans up to find the start of the list, then scans down and fixes all markers.
+   * 
+   * @param {string[]} lines - Array of lines
+   * @param {number} startIdx - Index of the line that changed
+   * @returns {string[]} - The updated lines array
+   */
+  function _normalizeOrderedListMarkers(lines, startIdx) {
+    const listRegex = /^(\s*)([-*+]|(\d+(?:\.\d+)*\.))\s/;
+    const orderedRegex = /^(\s*)(\d+(?:\.\d+)*)\.\s/;
+
+    // 1. Find the true start of the list block
+    let blockStart = startIdx;
+    while (blockStart > 0) {
+      if (!listRegex.test(lines[blockStart - 1]) && lines[blockStart - 1].trim() !== '') break;
+      blockStart--;
+    }
+
+    // 2. Normalize from blockStart downwards
+    const counters = {}; // { "indent-parentPrefix": count }
+    const parentMarkers = {}; // { indent: marker }
+
+    for (let i = blockStart; i < lines.length; i++) {
+      const line = lines[i];
+      const match = line.match(listRegex);
+      
+      if (!match) {
+        if (line.trim() === '') continue; 
+        break; 
+      }
+
+      const indent = match[1].length;
+      const isOrdered = orderedRegex.test(line);
+
+      if (isOrdered) {
+        // Reset counters for all deeper indentation levels
+        Object.keys(counters).forEach(k => {
+          const kIndent = parseInt(k.split('-')[0], 10);
+          if (kIndent > indent) delete counters[k];
+        });
+
+        // Determine parent prefix
+        let parentPrefix = '';
+        for (let j = indent - 2; j >= 0; j -= 2) {
+          if (parentMarkers[j]) {
+            parentPrefix = parentMarkers[j];
+            break;
+          }
+        }
+
+        const counterKey = `${indent}-${parentPrefix}`;
+        if (counters[counterKey] === undefined && i === blockStart) {
+          const oMatch = line.match(orderedRegex);
+          if (oMatch) {
+            const parts = oMatch[2].split('.');
+            const lastNum = parseInt(parts.pop(), 10);
+            if (!isNaN(lastNum)) {
+              counters[counterKey] = lastNum - 1;
+            }
+          }
+        }
+        counters[counterKey] = (counters[counterKey] || 0) + 1;
+        
+        const newMarker = `${parentPrefix}${counters[counterKey]}.`;
+        const content = line.substring(match[0].length);
+        lines[i] = `${match[1]}${newMarker} ${content}`;
+        
+        parentMarkers[indent] = newMarker;
+      } else {
+        // Unordered/Task - clear sequence for this indent level
+        Object.keys(counters).forEach(k => {
+          const kIndent = parseInt(k.split('-')[0], 10);
+          if (kIndent >= indent) delete counters[k];
+        });
+        parentMarkers[indent] = ''; 
+      }
+    }
+    return lines;
+  }
+
   return {
     applyAction,
-    syncCursor
+    syncCursor,
+    computeSmartEnter,
+    computeListIndent
   };
+
 })();
 window.MarkdownLogicService = MarkdownLogicService;

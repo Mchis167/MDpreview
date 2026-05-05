@@ -1,4 +1,4 @@
-/* global AppState, TOCComponent, EditToolbarComponent, EditorModule, MarkdownHelperComponent, MarkdownLogicService, ScrollModule, DesignSystem */
+/* global AppState, TOCComponent, EditToolbarComponent, EditorModule, MarkdownHelperComponent, MarkdownLogicService, ScrollModule, DesignSystem, FileService, DraftModule */
 
 class MarkdownViewerComponent {
   constructor(options = {}) {
@@ -813,10 +813,9 @@ class MarkdownViewerComponent {
   }
 
   async _toggleTask(lineNum, checked) {
-    const viewer = window.MarkdownViewer && window.MarkdownViewer.getInstance();
-    if (!viewer || !viewer.state.file) return;
+    if (!this.state.file) return;
 
-    const content = viewer.state.content || '';
+    const content = this.state.content || '';
     if (!content) return;
     
     const lines = content.split('\n');
@@ -837,23 +836,44 @@ class MarkdownViewerComponent {
       lines[lineIndex] = newLine;
       const newContent = lines.join('\n');
       
-      // 1. Update component state immediately
-      viewer.setState({ content: newContent });
+      // 1. Update component state immediately (Preview will skip re-render if html is same)
+      this.setState({ content: newContent });
       
-      // 2. Save to disk using FileService
-      if (typeof FileService !== 'undefined' && FileService.saveFile) {
-        const success = await FileService.saveFile(viewer.state.file, newContent);
+      // 2. Keep Editor in sync
+      if (typeof EditorModule !== 'undefined') {
+        EditorModule.setOriginalContent(newContent);
+      }
+
+      // 3. Save based on file type
+      let success = false;
+      if (this.state.file.startsWith('__DRAFT_')) {
+        if (typeof DraftModule !== 'undefined') {
+          DraftModule.setDraftContent(newContent);
+          await DraftModule.renderPreview(newContent, this.state.file);
+          success = true;
+        }
+      } else if (typeof FileService !== 'undefined' && FileService.saveFile) {
+        success = await FileService.saveFile(this.state.file, newContent);
         
         if (success) {
-           // 3. Keep Editor in sync
-           if (typeof EditorModule !== 'undefined') {
-             EditorModule.setOriginalContent(newContent);
-           }
-           
-           if (window.showToast) {
-             window.showToast(checked ? 'Task marked as done' : 'Task unmarked', 'success', { duration: 1500 });
-           }
+          // Fetch fresh HTML from server to ensure full sync (async)
+          fetch('/api/render-raw', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: newContent })
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.html) {
+              this.setState({ html: data.html });
+            }
+          })
+          .catch(_err => { /* Fallback ignored, content is already saved */ });
         }
+      }
+
+      if (success && window.showToast) {
+        window.showToast(checked ? 'Task marked as done' : 'Task unmarked', 'success', { duration: 1500 });
       }
     }
   }
@@ -955,6 +975,7 @@ class MarkdownPreview {
   }
 
   update({ html }) {
+    if (this.html === html) return;
     this.html = html;
     const inner = this.mount.querySelector('.md-content-inner');
     if (inner) {

@@ -42,6 +42,23 @@ Khi áp dụng một action lên một dòng trống hoặc không có vùng ch�
 
 ---
 
+## Smart Typing Logic
+
+### `computeSmartEnter(value, selStart, selEnd)`
+Xử lý sự kiện nhấn `Enter` để tự động hóa danh sách (Lists).
+- **Hành vi**: Tự động chèn `- `, `* `, `1. ` hoặc `- [ ] ` vào dòng mới nếu dòng hiện tại là list item.
+- **Auto Re-numbering**: Đối với Ordered List, tự động tăng số thứ tự và cập nhật lại toàn bộ danh sách phía dưới.
+- **Multi-level support**: Hỗ trợ định dạng số đa cấp (ví dụ: `2.2.` -> `2.3.`).
+- **Exit List**: Nhấn `Enter` trên một item rỗng sẽ xóa dấu bullet và kết thúc danh sách.
+
+### `computeListIndent(value, selStart, selEnd, direction)`
+Xử lý sự kiện `Tab` (indent) và `Shift+Tab` (outdent) cho danh sách.
+- **Indent**: Tăng khoảng trắng (2 spaces) và giữ nguyên dấu bullet.
+- **Outdent**: Giảm khoảng trắng và giữ nguyên dấu bullet.
+- **Constraints**: Không can thiệp nếu đang ở trong Code Block hoặc các khối văn bản khác không phải list.
+
+---
+
 ## Kiến trúc nội bộ
 
 ### Mirror DIV Technique
@@ -55,4 +72,4 @@ Khi người dùng chọn văn bản ở bản Read (đã qua render HTML), số
 
 ---
 
-*Document — 2026-05-04*
+*Document — 2026-05-06*

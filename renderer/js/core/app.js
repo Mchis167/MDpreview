@@ -49,7 +49,8 @@ window.AppState = {
     publishData: (() => {
       try { return JSON.parse(localStorage.getItem('md-publish-data') || '{}'); }
       catch (_e) { return {}; }
-    })()
+    })(),
+    smartTypingDisabled: localStorage.getItem('md-smart-typing-disabled') === 'true'
   },
 
   /**

@@ -208,7 +208,8 @@ Mỗi component tự nullify `activeInstance` qua `onClose` callback khi bị đ
 - **Không gọi `setState()` trực tiếp** từ bên ngoài — luôn dùng `loadFile()` hoặc `AppState.onModeChange()` để đảm bảo dirty check chạy
 - Mermaid render là **async** — scroll position có thể bị lệch sau khi diagram render xong (xem `docs/Bug hanofff/markdown_sync_handoff.md`)
 - `isRendering` flag được set trong lúc render để suppress scroll events nhiễu
+- **Nested List Rendering (v1.7.2)**: Pipeline render phía server đã được tối ưu hóa để giữ nguyên cấu trúc khối của danh sách lồng nhau. Sử dụng wrapper `.md-list-item-content` với cơ chế vertical stacking (flex-column) để đảm bảo các checklist lồng nhau và nội dung đa khối (multi-block) hiển thị chính xác theo chiều dọc, loại bỏ hoàn toàn lỗi dàn hàng ngang. Khả năng kiểm thử được tăng cường qua bộ unit test tự động.
 
 ---
 
-*Document — 2026-05-05 (Precision Line Tracking for Task Lists & UI Polish)*
+*Document — 2026-05-06*

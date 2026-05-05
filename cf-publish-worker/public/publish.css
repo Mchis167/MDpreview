@@ -8,7 +8,7 @@
  *   renderer/css/shared/markdown-render.css
  *   cf-publish-worker/src/publish-styles.css
  * Regenerate: npm run build:publish-assets
- * Generated:  2026-05-05T15:58:41.003Z
+ * Generated:  2026-05-05T19:24:16.540Z
  */
 
 /* ============================================================
@@ -925,6 +925,8 @@
 .md-render-body ol {
     padding-left: 1.5rem;
     margin: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 /* ── Collapsible Content (details/summary) ── */
@@ -987,20 +989,46 @@
     background: var(--ds-white-a05);
 }
 
-.md-render-body details > .md-block {
+.md-render-body details>.md-block {
     padding: 0 16px 16px 40px;
 }
 
-.md-render-body details > .md-block:first-of-type {
+.md-render-body details>.md-block:first-of-type {
     padding-top: 12px;
 }
 
+/* ── Custom Multi-level Markers ── */
+.md-render-body li.has-custom-marker {
+    list-style-type: none;
+    display: flex;
+    align-items: baseline;
+    gap: var(--ds-space-sm);
+    margin-left: -1.5rem;
+}
+
+.md-list-item-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
 .md-render-body li {
+    margin: 0;
+}
+
+/* Ensure blocks inside LI follow the list's vertical rhythm (6px instead of 24px) */
+.md-render-body li .md-block {
     margin-bottom: var(--ds-md-list-item-gap);
 }
 
-.md-render-body li:last-child {
+.md-render-body li .md-block:last-child {
     margin-bottom: 0;
+}
+
+.md-custom-marker {
+    flex-shrink: 0;
+    min-width: 1.5rem;
 }
 
 /* ── Task Lists ── */
@@ -1012,11 +1040,27 @@
     margin-left: -1.5rem;
     padding: 4px 8px;
     border-radius: var(--ds-radius-sm);
-    transition: background 0.2s ease;
+    /* No transition on container to avoid inheriting to all nested children */
 }
 
-.md-render-body .task-list-item:hover {
-    background: var(--ds-white-a02);
+.md-render-body .task-list-item .md-block {
+    color: var(--ds-text-secondary);
+    transition: color var(--ds-transition-main);
+}
+
+/* Highlight direct text block when hovered */
+.md-render-body .task-list-item .md-block:hover {
+    color: var(--ds-text-inverse);
+}
+
+/* Sync text highlight when checkbox is hovered */
+.md-render-body .task-list-item input[type="checkbox"]:hover+.md-list-item-content>.md-block {
+    color: var(--ds-text-inverse);
+}
+
+/* Checkbox border highlight when item's direct content is hovered */
+.md-render-body .task-list-item:hover:not(:has(.task-list-item:hover))>input[type="checkbox"] {
+    border-color: var(--ds-white-a40);
 }
 
 .md-render-body .task-list-item input[type="checkbox"] {
@@ -1025,11 +1069,12 @@
     width: 18px;
     height: 18px;
     border: 1.5px solid var(--ds-white-a20);
-    border-radius: 4px;
+    border-radius: 6px;
     background: var(--ds-white-a05);
     cursor: pointer;
     position: relative;
-    margin-top: 4px;
+    margin-top: 0.5em;
+    /* Dynamic centering based on font-size and 1.8 line-height */
     transition: all 0.2s var(--ds-ease-spring);
     flex-shrink: 0;
 }
@@ -1042,18 +1087,10 @@
 .md-render-body .task-list-item input[type="checkbox"]:checked {
     background: var(--ds-accent);
     border-color: var(--ds-accent);
-}
-
-.md-render-body .task-list-item input[type="checkbox"]:checked::after {
-    content: '';
-    position: absolute;
-    left: 5px;
-    top: 2px;
-    width: 5px;
-    height: 9px;
-    border: solid var(--ds-primitive-base);
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23151515' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+    background-size: 13px;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 /* ── Code Blocks ── */

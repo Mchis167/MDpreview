@@ -50,132 +50,159 @@ const EditorModule = (() => {
     _restoreSnapshot(snap);
   }
 
+  function _handleInput(e) {
+    if (!_textarea) return;
+    if (_ignoreNextInput) { _ignoreNextInput = false; return; }
+    _scheduleSnapshot();
+    
+    if (typeof TabsModule !== 'undefined' && AppState.currentFile) {
+      TabsModule.setDirty(AppState.currentFile, isDirty());
+    }
+
+    // ── Universal Auto-scroll ──
+    requestAnimationFrame(() => {
+      if (!_textarea) return;
+      const lineHeight = parseFloat(getComputedStyle(_textarea).lineHeight);
+      const cursorLine = _textarea.value.substring(0, _textarea.selectionStart).split('\n').length;
+      const cursorTop = (cursorLine - 1) * lineHeight;
+      const scrollTop = _textarea.scrollTop;
+      const visibleHeight = _textarea.clientHeight;
+      const cursorYInViewport = cursorTop - scrollTop;
+      if (cursorYInViewport > visibleHeight * 0.8) {
+        const targetScroll = cursorTop - (visibleHeight * 0.6);
+        _textarea.scrollTo({ top: targetScroll, behavior: 'smooth' });
+      }
+    });
+
+    // ── Slash Command Logic ──
+    const pos = _textarea.selectionStart;
+    const text = _textarea.value;
+    if (e.data === '/') {
+      if (pos === 1 || /[\s\n]/.test(text.charAt(pos - 2))) {
+        _isSlashMode = true;
+        _slashStartPos = pos - 1;
+        _showQuickCommand(true, true);
+      }
+    } else if (_isSlashMode) {
+      if (text.charAt(_slashStartPos) !== '/' || pos <= _slashStartPos) {
+        _isSlashMode = false;
+        window.QuickCommandPalette.hide();
+        return;
+      }
+      const query = text.substring(_slashStartPos + 1, pos);
+      if (/[\n\r]/.test(query)) {
+        _isSlashMode = false;
+        window.QuickCommandPalette.hide();
+        return;
+      }
+      window.QuickCommandPalette.updateQuery(query);
+    }
+  }
+
+  function _handleKeyDown(e) {
+    if (!_textarea) return;
+
+    if (_isSlashMode) {
+      if (e.key === ' ') {
+        const cmdId = window.QuickCommandPalette.getSelectedCommandId();
+        if (cmdId) {
+          e.preventDefault();
+          _applySlashCommand(cmdId);
+          return;
+        } else {
+          _isSlashMode = false;
+          window.QuickCommandPalette.hide();
+        }
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        window.QuickCommandPalette.navigate('down');
+        return;
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        window.QuickCommandPalette.navigate('up');
+        return;
+      } else if (e.key === 'Escape') {
+        _isSlashMode = false;
+        window.QuickCommandPalette.hide();
+      } else if (e.key === 'Enter') {
+        const cmdId = window.QuickCommandPalette.getSelectedCommandId();
+        if (cmdId) {
+          e.preventDefault();
+          _applySlashCommand(cmdId);
+          return;
+        }
+      }
+    }
+
+    if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+      e.preventDefault();
+      save();
+      return;
+    }
+
+    if ((e.metaKey || e.ctrlKey) && e.key === '/') {
+      e.preventDefault();
+      _showQuickCommand();
+      return;
+    }
+
+    if (e.key === 'z' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      if (e.shiftKey) redo(); else undo();
+      return;
+    }
+
+    if (typeof MarkdownLogicService !== 'undefined' && !AppState.settings.smartTypingDisabled && !e.isComposing && !_isSlashMode) {
+      if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const res = MarkdownLogicService.computeSmartEnter(_textarea.value, _textarea.selectionStart, _textarea.selectionEnd);
+        if (res) {
+          e.preventDefault();
+          _snapshot();
+          const st = _textarea.scrollTop;
+          _textarea.value = res.newValue;
+          _textarea.setSelectionRange(res.newCursorPos, res.newCursorPos);
+          _textarea.scrollTop = st;
+          _snapshot();
+          _textarea.dispatchEvent(new Event('input'));
+          return;
+        }
+      }
+      if (e.key === 'Tab' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const direction = e.shiftKey ? 'out' : 'in';
+        const res = MarkdownLogicService.computeListIndent(_textarea.value, _textarea.selectionStart, _textarea.selectionEnd, direction);
+        if (res) {
+          e.preventDefault();
+          _snapshot();
+          const st = _textarea.scrollTop;
+          _textarea.value = res.newValue;
+          _textarea.setSelectionRange(res.newCursorPos, res.newSelectionEnd || res.newCursorPos);
+          _textarea.scrollTop = st;
+          _snapshot();
+          _textarea.dispatchEvent(new Event('input'));
+          return;
+        }
+      }
+    }
+  }
+
   /**
    * Binds the editor logic to a specific textarea element.
    * This is called by the MarkdownEditor component.
    */
   function bindToElement(el) {
+    if (!el) return;
+
+    // Unbind previous if exists to avoid duplicate listeners on same element
+    if (_textarea) unbind();
+
     _textarea = el;
-    if (!_textarea) return;
 
     // Reset stacks for new file/session
     _undoStack = [{ value: _textarea.value, ss: _textarea.selectionStart, se: _textarea.selectionEnd }];
     _redoStack = [];
 
-    _textarea.addEventListener('input', (e) => {
-      if (_ignoreNextInput) { _ignoreNextInput = false; return; }
-      _scheduleSnapshot();
-      
-      if (typeof TabsModule !== 'undefined' && AppState.currentFile) {
-        TabsModule.setDirty(AppState.currentFile, isDirty());
-      }
-
-      // ── Universal Auto-scroll (Keep cursor away from bottom edge) ──
-      requestAnimationFrame(() => {
-        const lineHeight = parseFloat(getComputedStyle(_textarea).lineHeight);
-        const cursorLine = _textarea.value.substring(0, _textarea.selectionStart).split('\n').length;
-        const cursorTop = (cursorLine - 1) * lineHeight;
-        const scrollTop = _textarea.scrollTop;
-        const visibleHeight = _textarea.clientHeight;
-        
-        // Calculate where the cursor is relative to the top of the viewport
-        const cursorYInViewport = cursorTop - scrollTop;
-        
-        // If cursor is lower than 80% of the viewport height, scroll it up to 60%
-        if (cursorYInViewport > visibleHeight * 0.8) {
-          const targetScroll = cursorTop - (visibleHeight * 0.6);
-          _textarea.scrollTo({ top: targetScroll, behavior: 'smooth' });
-        }
-      });
-
-      // ── Slash Command Logic ──
-      const pos = _textarea.selectionStart;
-      const text = _textarea.value;
-
-      if (e.data === '/') {
-        // Trigger if it's the start of a line or preceded by a space/newline
-        if (pos === 1 || /[\s\n]/.test(text.charAt(pos - 2))) {
-          _isSlashMode = true;
-          _slashStartPos = pos - 1;
-          _showQuickCommand(true, true);
-        }
-      } else if (_isSlashMode) {
-        // If the slash is gone or we moved before it, stop
-        if (text.charAt(_slashStartPos) !== '/' || pos <= _slashStartPos) {
-          _isSlashMode = false;
-          window.QuickCommandPalette.hide();
-          return;
-        }
-
-        const query = text.substring(_slashStartPos + 1, pos);
-        
-        // Stop ONLY on hard line breaks in input event
-        if (/[\n\r]/.test(query)) {
-          _isSlashMode = false;
-          window.QuickCommandPalette.hide();
-          return;
-        }
-        
-        // Update palette (it handles empty matches internally with a friendly UI)
-        window.QuickCommandPalette.updateQuery(query);
-      }
-    });
-
-    _textarea.addEventListener('keydown', (e) => {
-      // If in Slash Mode, intercept Space and Arrows
-      if (_isSlashMode) {
-        if (e.key === ' ') {
-          const cmdId = window.QuickCommandPalette.getSelectedCommandId();
-          if (cmdId) {
-            e.preventDefault();
-            _applySlashCommand(cmdId);
-            return;
-          } else {
-            _isSlashMode = false;
-            window.QuickCommandPalette.hide();
-          }
-        } else if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          window.QuickCommandPalette.navigate('down');
-          return;
-        } else if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          window.QuickCommandPalette.navigate('up');
-          return;
-        } else if (e.key === 'Escape') {
-          _isSlashMode = false;
-          window.QuickCommandPalette.hide();
-        } else if (e.key === 'Enter') {
-          const cmdId = window.QuickCommandPalette.getSelectedCommandId();
-          if (cmdId) {
-            e.preventDefault();
-            _applySlashCommand(cmdId);
-            return;
-          }
-        }
-        // Removed Backspace intercept here to let 'input' handle it
-      }
-
-      // Global Shortcut Interception (TC-10)
-      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
-        e.preventDefault();
-        save();
-        return;
-      }
-
-      // Quick Command Action (Cmd + /)
-      if ((e.metaKey || e.ctrlKey) && e.key === '/') {
-        e.preventDefault();
-        _showQuickCommand();
-        return;
-      }
-
-      // Sync undo/redo stack
-      if (e.key === 'z' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        if (e.shiftKey) redo(); else undo();
-      }
-    });
+    _textarea.addEventListener('input', _handleInput);
+    _textarea.addEventListener('keydown', _handleKeyDown);
   }
 
   /**
@@ -211,12 +238,17 @@ const EditorModule = (() => {
   }
 
   /**
-   * Clears the textarea reference to prevent memory leaks
+   * Clears the textarea reference and removes event listeners to prevent leaks and duplicate bindings
    */
   function unbind() {
+    if (_textarea) {
+      _textarea.removeEventListener('input', _handleInput);
+      _textarea.removeEventListener('keydown', _handleKeyDown);
+    }
     _textarea = null;
     _undoStack = [];
     _redoStack = [];
+    _isSlashMode = false;
   }
 
   async function save() {
@@ -352,6 +384,7 @@ const EditorModule = (() => {
       getOriginalContent: () => _originalContent,
       insertContent,
       triggerQuickCommand: () => _showQuickCommand(),
+      takeSnapshot: _snapshot,
       revert
   };
 })();

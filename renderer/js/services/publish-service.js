@@ -104,6 +104,41 @@ ${tokenStyles}
             color: var(--ds-text-secondary);
             font-family: var(--ds-font-family-code);
         }
+
+        /* ── Task List Parity & Alignment ── */
+        .task-list-item {
+            list-style-type: none;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-left: -1.5rem;
+            padding: 4px 8px;
+            border-radius: var(--ds-radius-sm);
+        }
+
+        .task-list-item input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 1.5px solid var(--ds-white-a20);
+            border-radius: 6px;
+            background: var(--ds-white-a05);
+            cursor: pointer;
+            position: relative;
+            margin-top: 0.5em;
+            flex-shrink: 0;
+            transition: all 0.2s var(--ds-ease-spring);
+        }
+
+        .task-list-item input[type="checkbox"]:checked {
+            background: var(--ds-accent);
+            border-color: var(--ds-accent);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23151515' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+            background-size: 13px;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
     </style>
 </head>
 <body class="ds-theme-dark">
