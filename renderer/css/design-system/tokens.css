@@ -285,4 +285,11 @@
    --ds-content-padding-x: 80px;
    --ds-content-padding-y: 80px;
    --ds-content-width: 800px;
+
+   /* ── Markdown View Spacing ─────────────────────── */
+   --ds-md-block-gap: var(--ds-space-xl);
+   --ds-md-heading-gap-top: var(--ds-space-3xl);
+   --ds-md-heading-gap-bottom: var(--ds-space-lg);
+   --ds-md-list-item-gap: var(--ds-space-xs);
+   --ds-md-divider-gap: var(--ds-space-3xl);
 }

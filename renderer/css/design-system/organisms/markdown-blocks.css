@@ -6,14 +6,12 @@
 
 /* ── Code Block App-Specific Overrides ───────────────── */
 /* Compact margins when inside details */
-.md-render-body details .premium-code-block {
-  margin-top: 1rem !important;
-  margin-bottom: 1rem !important;
+.md-render-body details .md-block {
+  margin-bottom: var(--ds-space-md);
 }
 
-.md-render-body details>.premium-code-block:first-child,
-.md-render-body details>.md-block:first-child .premium-code-block {
-  margin-top: 0.5rem !important;
+.md-render-body details .md-block:last-child {
+  margin-bottom: 0;
 }
 
 /* App-specific: Box shadow and Code zoom support for preview */

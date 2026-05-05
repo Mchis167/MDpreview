@@ -97,3 +97,22 @@ dist-native/
 
 # Claude specific
 .claude/
+
+# --- AI Agent & Tooling Artifacts ---
+.gemini/
+.antigravity/
+.antigravity_rules
+.ai/
+ai-bundles/
+ImplementPlan/
+GraphPreview/
+
+# --- Development Scratch & Temp ---
+scratch/
+tokens.tmp
+server.log
+
+# --- Local Workspace & User Data ---
+# These contain personal content and local configuration
+data/
+workspaces/

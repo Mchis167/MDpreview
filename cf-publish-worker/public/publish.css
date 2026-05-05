@@ -8,7 +8,7 @@
  *   renderer/css/shared/markdown-render.css
  *   cf-publish-worker/src/publish-styles.css
  * Regenerate: npm run build:publish-assets
- * Generated:  2026-05-05T12:34:03.955Z
+ * Generated:  2026-05-05T14:14:50.792Z
  */
 
 /* ============================================================
@@ -298,6 +298,13 @@
    --ds-content-padding-x: 80px;
    --ds-content-padding-y: 80px;
    --ds-content-width: 800px;
+
+   /* ── Markdown View Spacing ─────────────────────── */
+   --ds-md-block-gap: var(--ds-space-xl);
+   --ds-md-heading-gap-top: var(--ds-space-3xl);
+   --ds-md-heading-gap-bottom: var(--ds-space-lg);
+   --ds-md-list-item-gap: var(--ds-space-xs);
+   --ds-md-divider-gap: var(--ds-space-3xl);
 }
 
 /* ── Publish-page aliases ─────────────────────────────────
@@ -797,8 +804,7 @@
     font-size: 32px;
     font-weight: 700;
     color: var(--ds-text-inverse);
-    margin-top: 0;
-    margin-bottom: 2rem;
+    margin: 0;
     padding-bottom: 1rem;
     border-bottom: 1px solid var(--ds-white-a20);
     letter-spacing: -0.05em;
@@ -809,8 +815,7 @@
     font-size: 24px;
     font-weight: 700;
     color: var(--ds-text-inverse);
-    margin-top: 2rem;
-    margin-bottom: 1.25rem;
+    margin: 0;
     padding-left: 20px;
     position: relative;
     line-height: 1.4;
@@ -831,8 +836,7 @@
     font-size: 18px;
     font-weight: 600;
     color: var(--ds-accent);
-    margin-top: 2rem;
-    margin-bottom: 0.75rem;
+    margin: 0;
     line-height: 1.4;
 }
 
@@ -840,8 +844,7 @@
     font-size: 16px;
     font-weight: 600;
     color: var(--ds-text-inverse);
-    margin-top: 1.5rem;
-    margin-bottom: 0.5rem;
+    margin: 0;
     line-height: 1.4;
 }
 
@@ -849,8 +852,7 @@
     font-size: 14px;
     font-weight: 600;
     color: var(--ds-text-primary);
-    margin-top: 1.25rem;
-    margin-bottom: 0.5rem;
+    margin: 0;
     line-height: 1.4;
 }
 
@@ -860,14 +862,13 @@
     color: var(--ds-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
+    margin: 0;
     line-height: 1.4;
 }
 
 /* ── Inline Elements ── */
 .md-render-body p {
-    margin-bottom: 1.25rem;
+    margin: 0;
 }
 
 .md-render-body a {
@@ -899,18 +900,21 @@
 .md-render-body hr {
     border: none;
     border-bottom: 1px solid var(--ds-border-default);
-    margin: 2rem 0;
+    margin: 0;
 }
 
 /* ── Block Elements ── */
 .md-render-body blockquote {
     border-left: 2px solid var(--ds-accent);
     padding: 16px 24px;
-    margin: 2rem 0;
+    margin: 0;
     background: var(--ds-white-a02);
     border-radius: 0 var(--ds-radius-panel) var(--ds-radius-panel) 0;
     color: var(--ds-text-secondary);
     line-height: 1.7;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-md);
 }
 
 .md-render-body blockquote p {
@@ -920,15 +924,7 @@
 .md-render-body ul,
 .md-render-body ol {
     padding-left: 1.5rem;
-    margin-bottom: 1.25rem;
-}
-
-.md-render-body ul ul {
-    list-style-type: circle;
-}
-
-.md-render-body ul ul ul {
-    list-style-type: square;
+    margin: 0;
 }
 
 /* ── Collapsible Content (details/summary) ── */
@@ -936,11 +932,13 @@
     background: var(--ds-white-a02);
     border: 1px solid var(--ds-white-a08);
     border-radius: var(--ds-radius-panel);
-    margin-bottom: 1.25rem;
+    margin-bottom: 0;
     overflow: hidden;
     transition: all 0.3s var(--ds-ease-spring);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    display: flex;
+    flex-direction: column;
 }
 
 .md-render-body details[open] {
@@ -989,16 +987,20 @@
     background: var(--ds-white-a05);
 }
 
-.md-render-body details>div,
-.md-render-body details>p,
-.md-render-body details>ul,
-.md-render-body details>ol {
-    padding: 12px 16px 16px 40px;
-    margin-bottom: 0;
+.md-render-body details > .md-block {
+    padding: 0 16px 16px 40px;
+}
+
+.md-render-body details > .md-block:first-of-type {
+    padding-top: 12px;
 }
 
 .md-render-body li {
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--ds-md-list-item-gap);
+}
+
+.md-render-body li:last-child {
+    margin-bottom: 0;
 }
 
 /* ── Task Lists ── */
@@ -1062,7 +1064,7 @@
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius: var(--ds-radius-panel) !important;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
-    margin: 2rem 0 !important;
+    margin: 0 !important;
     overflow: hidden !important;
     isolation: isolate;
 }
@@ -1153,7 +1155,7 @@
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius: var(--ds-radius-panel) !important;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
-    margin: 2rem 0 !important;
+    margin: 0 !important;
     width: 100%;
     overflow-x: auto !important;
     isolation: isolate;
@@ -1219,7 +1221,7 @@
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius: var(--ds-radius-panel) !important;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
-    margin: 2rem 0 !important;
+    margin: 0 !important;
     overflow: hidden !important;
     padding: 32px !important;
     display: flex;
@@ -1332,9 +1334,31 @@
     font-style: italic;
 }
 
-/* ── Atomic Block Wrappers ── */
+/* ── Atomic Block Wrappers (Flow System) ── */
 .md-block {
-    margin: 0;
+    margin-bottom: var(--ds-md-block-gap);
+    width: 100%;
+}
+
+.md-block:last-child {
+    margin-bottom: 0;
+}
+
+/* Section Separation (Spacing before headings) */
+.md-block:has(h1, h2, h3, h4, h5, h6) {
+    margin-top: var(--ds-md-heading-gap-top);
+    margin-bottom: var(--ds-md-heading-gap-bottom);
+}
+
+/* Divider Spacing (Flow Balance) */
+.md-block:has(hr) {
+    margin-top: var(--ds-md-divider-gap);
+    margin-bottom: var(--ds-md-divider-gap);
+}
+
+/* Cleanup for first/last elements */
+.md-block:first-child {
+    margin-top: 0 !important;
 }
 
 .md-line {

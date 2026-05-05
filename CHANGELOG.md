@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Not Commited] — 2026-05-05 21:25
+
+### 🔧 Changed
+- **Intelligent Markdown Spacing (Flow System)**: Thay thế cơ chế margin rời rạc bằng hệ thống Vertical Rhythm tập trung. Khoảng cách hiện được điều phối thông qua wrapper `.md-block` và các Semantic Tokens chuyên biệt, giúp tài liệu có nhịp điệu đọc chuyên nghiệp và nhất quán hơn.
+- **Contextual Heading & Divider Spacing**: Sử dụng CSS `:has()` để tự động tối ưu hóa khoảng cách xung quanh các tiêu đề và đường kẻ phân cách (Divider). Tận dụng cơ chế Margin Collapse để đạt được sự cân bằng tuyệt đối giữa các section.
+- **Standardized Block Rhythm**: Đồng bộ hóa khoảng cách trong danh sách, trích dẫn (blockquote) và nội dung thu gọn (details) thông qua hệ thống Token Tier 3 mới.
+- **Git Ignoring Strategy**: Updated `.gitignore` to comprehensively exclude AI agent artifacts (`.gemini/`, `.antigravity/`, `.ai/`), temporary development files (`scratch/`, `ImplementPlan/`, `GraphPreview/`), and local application data (`data/`, `workspaces/`).
+
+### 🗑️ Removed
+- **Untracked Local Artifacts**: Removed previously committed local-only files from Git tracking across several directories including `ai-bundles/`, `data/`, `scratch/`, and AI metadata folders while preserving the physical files on disk.
+
 ## [1.7.0] — 2026-05-05 20:00
 
 ### 🚀 Added
