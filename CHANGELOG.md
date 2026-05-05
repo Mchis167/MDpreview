@@ -1,8 +1,29 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
- 
-## [Not Commited] — 2026-05-04 17:58
+## [1.7.0] — 2026-05-05
+
+### 🚀 Added
+- **Interactive Task Lists**: Cho phép người dùng tích/bỏ tích checkbox trực tiếp ngay trong chế độ xem (View Mode).
+- **Persistent File Saving**: Tích hợp cơ chế tự động lưu file nguồn `.md` khi tương tác với checkbox thông qua `FileService.saveFile`.
+- **Premium Checkbox UI**: Giao diện checkbox tùy chỉnh cao cấp với hiệu ứng chuyển động, thay thế cho giao diện mặc định của trình duyệt.
+- **Granular Line Tracking**: Nâng cấp trình render server-side (`render.js`) để gán chính xác `data-line` cho từng mục danh sách (list item).
+- **Modern Slash Command System**: Triển khai hệ thống lệnh nhanh (`/`) ngay trong trình soạn thảo, hỗ trợ lọc lệnh thời gian thực.
+- **Quick Command Palette (Molecule)**: Giao diện điều khiển mới tối giản, hỗ trợ 22+ hành động Markdown.
+- **Self-Hosted Publishing Engine**: Hoàn thiện tích hợp hệ thống xuất bản tự lưu trữ (Self-Hosted) dựa trên Cloudflare Workers & KV.
+
+### 🔧 Changed
+- **Codebase Sanitization**: Loại bỏ toàn bộ các `console.log` debug và xử lý các cảnh báo linting.
+- **Workspace Switcher UI**: Giới hạn tên Workspace trên 1 dòng với hiệu ứng ellipsis.
+- **Input-less Interaction**: Palette tự động ẩn thanh nhập liệu khi được kích hoạt bằng dấu `/`.
+
+### 🐞 Fixed
+- **Task List Synchronization Drift**: Khắc phục triệt để lỗi lệch dòng (line drift).
+- **Double-Render Checkbox**: Loại bỏ lỗi hiển thị 2 checkbox.
+- **Slash Mode Resilience**: Khắc phục lỗi Palette tự đóng khi xóa ký tự.
+- **Publish State Desync**: Khắc phục lỗi nút Publish không tự động quay lại trạng thái ban đầu.
+
+## [1.6.5] — 2026-05-05 14:32
 
 ### 🚀 Added
 - **Mirror Preview Handshake**: Triển khai cơ chế "bắt tay" hai chiều (`preview:ready`) giữa Editor và Preview Window cho cả Electron và Web, đảm bảo đồng bộ nội dung tức thì khi khởi động hoặc reload.

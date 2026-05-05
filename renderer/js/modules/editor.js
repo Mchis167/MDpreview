@@ -80,6 +80,28 @@ const EditorModule = (() => {
         window.PreviewService.triggerUpdate();
       }
 
+      // ── Universal Auto-scroll (Keep cursor away from bottom edge) ──
+      requestAnimationFrame(() => {
+        const lineHeight = parseFloat(getComputedStyle(_textarea).lineHeight);
+        const cursorLine = _textarea.value.substring(0, _textarea.selectionStart).split('\n').length;
+        const cursorTop = (cursorLine - 1) * lineHeight;
+        const scrollTop = _textarea.scrollTop;
+        const visibleHeight = _textarea.clientHeight;
+        
+        // Calculate where the cursor is relative to the top of the viewport
+        const cursorYInViewport = cursorTop - scrollTop;
+        
+        // If cursor is lower than 80% of the viewport height, scroll it up to 60%
+        if (cursorYInViewport > visibleHeight * 0.8) {
+          const targetScroll = cursorTop - (visibleHeight * 0.6);
+          _textarea.scrollTo({ top: targetScroll, behavior: 'smooth' });
+        }
+      });
+
+      // ── Slash Command Logic ──
+      const pos = _textarea.selectionStart;
+      const text = _textarea.value;
+
       // ── Auto-scroll to keep last lines visible ──
       requestAnimationFrame(() => {
         const scrollableHeight = _textarea.scrollHeight - _textarea.clientHeight;
