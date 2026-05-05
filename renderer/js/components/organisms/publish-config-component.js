@@ -32,7 +32,7 @@ const PublishConfigComponent = (() => {
 
       const { info, isLoading } = this.state;
       const fileName = this.file.split('/').pop().replace(/\.[^/.]+$/, "");
-      const defaultSlug = info ? info.slug : fileName.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 50);
+      const defaultSlug = info ? info.slug : (window.PublishUtils ? window.PublishUtils.slugify(fileName) : fileName.toLowerCase());
 
 
       // 0. Header / Status Section
@@ -167,7 +167,7 @@ const PublishConfigComponent = (() => {
 
       if (info) {
         const unpublishBtn = DesignSystem.createButton({
-          label: 'Remove from Web',
+          label: 'Unpublish',
           variant: 'danger-ghost',
           disabled: isLoading,
           onClick: () => {
@@ -196,7 +196,7 @@ const PublishConfigComponent = (() => {
         onClick: () => window.MenuShield.close()
       });
       const publishBtn = DesignSystem.createButton({
-        label: info ? 'Update Link' : 'Go Live',
+        label: info ? 'Publish Changes' : 'Go Live',
         variant: 'primary',
         disabled: isLoading,
         onClick: async () => {
@@ -254,8 +254,21 @@ const PublishConfigComponent = (() => {
         if (this.publishBtn) this.publishBtn.disabled = true;
         return;
       }
+
+      // 1. Validate format locally first (ERROR - Blocking)
+      const validation = window.PublishUtils ? window.PublishUtils.validateSlug(slug) : { valid: true };
+      if (!validation.valid) {
+        if (this.slugInput) {
+          this.slugInput.setStatus({ text: validation.error, variant: 'error', icon: 'circle-x' });
+          this.slugInput.setVariant('error');
+        }
+        if (this.publishBtn) {
+          this.publishBtn.disabled = true;
+        }
+        return;
+      }
       
-      // Debounce everything to prevent flicker and redundant calls
+      // 2. If format is valid, proceed to check availability (Debounce)
       this._checkTimer = setTimeout(async () => {
         if (this.state.isLoading) return;
         
@@ -278,23 +291,34 @@ const PublishConfigComponent = (() => {
 
           const info = this.state.info;
           if (isAvailable) {
-            this.slugInput.setStatus({ text: 'Slug is available', variant: 'success', icon: 'circle-check' });
-            this.slugInput.setVariant('default');
-            if (this.publishBtn) {
-              this.publishBtn.disabled = false;
-              this.publishBtn.setLabel(info ? 'Update Link' : 'Go Live');
+            // If it matches current info slug, no need to show "available" (it's redundant)
+            if (info && info.slug === slug) {
+              this.slugInput.setStatus(null);
+              this.slugInput.setVariant('default');
+              if (this.publishBtn) {
+                this.publishBtn.disabled = false;
+                this.publishBtn.setLabel('Publish Changes');
+              }
+            } else {
+              this.slugInput.setStatus({ text: 'Slug is available', variant: 'success', icon: 'circle-check' });
+              this.slugInput.setVariant('default');
+              if (this.publishBtn) {
+                this.publishBtn.disabled = false;
+                this.publishBtn.setLabel(info ? 'Update Link' : 'Go Live');
+              }
             }
           } else {
             // If it's already published to THIS slug, it's fine (it's an update)
             if (info && info.slug === slug) {
-              this.slugInput.setStatus({ text: 'Current slug (update mode)', variant: 'success', icon: 'circle-check' });
+              this.slugInput.setStatus(null); // Clear redundant status for current slug
               this.slugInput.setVariant('default');
               if (this.publishBtn) {
                 this.publishBtn.disabled = false;
-                this.publishBtn.setLabel('Update Link');
+                this.publishBtn.setLabel('Publish Changes');
               }
             } else {
-              this.slugInput.setStatus({ text: 'Taken. Clicking Go Live will OVERWRITE.', variant: 'warning', icon: 'circle-x' });
+              // TAKEN - This is a WARNING (Allowed to overwrite)
+              this.slugInput.setStatus({ text: 'Taken. Clicking Go Live will OVERWRITE.', variant: 'warning', icon: 'help-circle' });
               this.slugInput.setVariant('warning');
               if (this.publishBtn) {
                 this.publishBtn.disabled = false;

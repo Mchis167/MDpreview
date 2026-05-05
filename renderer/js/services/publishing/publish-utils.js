@@ -320,6 +320,27 @@ const PublishUtils = (() => {
     return String(text).replace(/[&<>"']/g, char => map[char]);
   }
 
+  /**
+   * Generate a clean, URL-friendly slug from a string
+   * Handles: lowercase, non-alphanumeric removal, collapsing hyphens, trimming edges
+   * @param {string} text - The source text (filename, title, etc.)
+   * @returns {string} A valid slug ready to use
+   */
+  function slugify(text) {
+    if (!text || typeof text !== 'string') return '';
+
+    return text
+      .toString()
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')           // Replace spaces with -
+      .replace(/[^a-z0-9_-]/g, '-')   // Replace all non-alphanumeric (except - and _) with -
+      .replace(/[-_]{2,}/g, '-')      // Replace multiple consecutive - or _ with a single -
+      .replace(/^[-_]+/, '')          // Trim leading - or _
+      .replace(/[-_]+$/, '')          // Trim trailing - or _
+      .substring(0, 50);              // Limit length
+  }
+
   // ============================================
   // PUBLIC API
   // ============================================
@@ -327,6 +348,7 @@ const PublishUtils = (() => {
   return {
     gatherAssets,
     validateSlug,
+    slugify,
     escapeHtml,
 
     /**

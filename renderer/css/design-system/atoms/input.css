@@ -157,7 +157,6 @@
 /* Loading state for status */
 .ds-form-field-status.is-loading {
     color: var(--ds-text-tertiary);
-    font-style: italic;
 }
 
 /* Status Indicator Layout with Icon */

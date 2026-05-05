@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Not Commited] — 2026-05-06 02:45
+
+### 🚀 Added
+- **Clean Slug Generation**: Triển khai hàm `PublishUtils.slugify` giúp tự động tạo URL thân thiện, loại bỏ các ký tự đặc biệt và xử lý chuẩn xác các tiền tố nháp (Draft).
+
+### 🔧 Changed
+- **Advanced Publish UX**:
+    - Phân tách rõ ràng trạng thái Slug: **Error (Đỏ)** cho lỗi định dạng và **Warning (Vàng)** cho trường hợp trùng lặp (Taken).
+    - Tối ưu hóa nhãn nút hành động: Đổi `Remove from Web` thành **`Unpublish`**.
+    - **Contextual Action Labels**: Nút chính tự động chuyển đổi giữa **`Publish Changes`** (khi chỉ cập nhật nội dung) và **`Update Link`** (khi thay đổi URL).
+    - Loại bỏ thông báo "Slug is available" dư thừa khi không có thay đổi so với bản hiện tại.
+- **Toast Notification Refinement**: Rút gọn nội dung thông báo đăng tải thành công, loại bỏ đường dẫn dài để giữ giao diện gọn gàng.
+
+### 🐞 Fixed
+- **Slug Validation UX**: Khắc phục lỗi hiển thị cảnh báo "Taken" sai lệch khi thực tế là lỗi sai định dạng slug.
+
 ## [1.8.0] — 2026-05-06 02:30
 
 ### 🚀 Added

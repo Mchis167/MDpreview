@@ -69,6 +69,11 @@ Tạo và sao chép vào clipboard một bản HTML độc lập (**Standalone B
 - **Fidelity**: Tự động nhúng toàn bộ Design System Tokens và CSS của App vào file HTML.
 - **Independence**: File xuất ra có khả năng hoạt động offline 100% với đầy đủ style cho Code Blocks, Tables và Mermaid.
 
+### `PublishUtils.slugify(text)`
+Tạo Slug sạch và chuẩn SEO từ một chuỗi văn bản (tên file, tiêu đề).
+- **Hành vi**: Chuyển chữ thường, xóa ký tự đặc biệt, gộp dấu gạch ngang, và quan trọng nhất là loại bỏ dấu gạch ngang/gạch dưới ở đầu và cuối chuỗi (xử lý triệt để các file nháp dạng `__DRAFT_`).
+- **Giới hạn**: Tối đa 50 ký tự.
+
 ---
 
 ## Tiêu chuẩn Visual Parity (Độ trung thực hiển thị)
@@ -120,9 +125,9 @@ Trạng thái xuất bản của mỗi file được lưu trong `AppState.settin
 - Server-side: Use salted hashing (PBKDF2/bcrypt) for storage — SHA-256 without salt is vulnerable to rainbow table attacks
 - Client-side: Passwords are never logged to console or stored in localStorage
 
-### Input Validation
-- Slug format validated client-side before sending (`^[a-z0-9\-]{3,50}$`)
-- Server-side validation ensures defense-in-depth
+### Input Validation & UX
+- **Slug Format (Error)**: Kiểm tra định dạng cục bộ trước khi gọi API. Nếu sai định dạng, hiển thị trạng thái `error` (đỏ) và khóa nút Publish.
+- **Availability (Warning)**: Nếu định dạng đúng nhưng Slug đã tồn tại, hiển thị trạng thái `warning` (vàng). Người dùng vẫn có thể ghi đè nếu muốn.
 - Asset size limits enforced: 5MB per asset, 20MB total
 
 ### Mermaid Security
@@ -163,4 +168,4 @@ All errors are logged with timestamp and context. Retry logic uses exponential b
 
 ---
 
-*Document — 2026-05-04 (v1.2.2 - TOC Anchor Sync & Vietnamese Slugification)*
+*Document — 2026-05-06 (v1.8.1 - Clean Slug Generation & Advanced Validation UX)*

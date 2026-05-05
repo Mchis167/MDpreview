@@ -23,10 +23,15 @@ PublishManagerComponent        — [Quản lý tổng thể: List, Rename, Delet
 Popover điều khiển việc xuất bản một file cụ thể. Tích hợp trực tiếp vào thanh toolbar của Markdown Viewer.
 
 ### `init()` & `_checkSlug(slug)`
-- **Smart Slug**: Tự động chuẩn hóa slug khi gõ.
-- **Live Validation**: Debounced 500ms để kiểm tra tính khả dụng của slug trên Worker.
-- **Overwrite Warning**: Tự động chuyển đổi nút sang "Overwrite & Publish" nếu phát hiện slug bị trùng.
-- **Enter-to-Publish**: Hỗ trợ phím `Enter` khi đang focus vào ô nhập slug để kích hoạt lệnh "Go Live" nhanh chóng nếu nút đã sẵn sàng.
+- **Advanced Validation UX**: 
+    - **Error (Đỏ)**: Khi sai định dạng slug. Nút hành động chính bị vô hiệu hóa.
+    - **Warning (Vàng)**: Khi slug đã tồn tại (Taken). Hiển thị icon `help-circle`, cho phép người dùng ghi đè.
+- **Contextual Action Labels**:
+    - **`Publish Changes`**: Hiển thị khi người dùng chỉ cập nhật nội dung (slug không đổi).
+    - **`Update Link`**: Hiển thị khi người dùng thay đổi slug (đổi URL).
+    - **`Unpublish`**: Nút gỡ bài (thay thế cho "Remove from Web").
+- **Slug Redundancy**: Tự động ẩn trạng thái "Available" nếu slug nhập vào trùng khớp với slug hiện tại để giảm nhiễu giao diện.
+- **Enter-to-Publish**: Hỗ trợ phím `Enter` khi đang focus vào ô nhập slug để kích hoạt lệnh đăng tải nhanh chóng.
 
 ### `Stale Check (Logic khởi tạo)`
 Khi mở bảng, nếu App ghi nhận file đã đăng, nó sẽ tự đối chiếu với server. Nếu slug không còn tồn tại trên Cloudflare, App sẽ tự động xóa trạng thái cục bộ (**Self-Healing**).
@@ -67,4 +72,4 @@ Hệ thống sử dụng các callback và cơ chế `await` để đảm bảo 
 
 ---
 
-*Document — 2026-05-04*
+*Document — 2026-05-06 (v1.8.1 - Advanced Publish UX & Button Labeling)*

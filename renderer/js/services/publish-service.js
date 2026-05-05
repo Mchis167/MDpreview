@@ -344,7 +344,7 @@ ${tokenStyles}
 
       // Prepare publishing parameters
       const fileName = currentFile.split('/').pop().replace(/\.[^/.]+$/, '');
-      const slug = options.slug || fileName.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 50);
+      const slug = options.slug || (window.PublishUtils ? window.PublishUtils.slugify(fileName) : fileName.toLowerCase());
       const password = options.password || '';
 
       if (window.showToast) {
@@ -372,7 +372,7 @@ ${tokenStyles}
         });
 
         if (window.showToast) {
-          window.showToast(`Published successfully! → ${result.url}`, 'success', { id: 'publish' });
+          window.showToast('Published successfully!', 'success', { id: 'publish' });
         }
 
         _log('info', `Published: ${result.url}`);
