@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Not Commited] — 2026-05-06 02:45
+## [1.8.1] — 2026-05-06 02:50
 
 ### 🚀 Added
 - **Clean Slug Generation**: Triển khai hàm `PublishUtils.slugify` giúp tự động tạo URL thân thiện, loại bỏ các ký tự đặc biệt và xử lý chuẩn xác các tiền tố nháp (Draft).
