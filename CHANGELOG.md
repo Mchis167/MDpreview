@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Not Commited] — 2026-05-05 23:05
+
+### 🐞 Fixed
+- **Multi-Select Tree Deletion**: Khắc phục lỗi không thể xóa nhiều item cùng lúc trong cây thư mục do sự kiện click vào menu làm mất trạng thái chọn (selection dismissal).
+- **Redundant Deletion Attempts**: Giải quyết hiện tượng báo lỗi tệp tin không tồn tại khi xóa một thư mục chứa các tệp tin khác cũng đang được chọn.
+
+### 🔧 Changed
+- **Robust Batch Operations**: Nâng cấp `TreeModule` để sử dụng cơ chế snapshot dữ liệu (paths snapshot) cho mọi thao tác hàng loạt, đảm bảo tính ổn định ngay cả khi trạng thái UI thay đổi trong quá trình thực thi.
+- **Tree Safe Zone Logic**: Bổ sung các thành phần UI của Menu (Context Menu, Menu Shield) vào "Vùng an toàn" (Safe Zone) để ngăn chặn việc tự động bỏ chọn item khi tương tác với menu chuột phải.
+- **Silent File Operations**: Hỗ trợ chế độ `silent` trong `FileService.deleteFile` để ẩn các thông báo toast lặp lại khi thực hiện xóa hàng loạt, chỉ hiển thị một thông báo tổng kết cuối cùng.
+
 ## [1.7.1] — 2026-05-05 21:30
 
 ### 🔧 Changed

@@ -21,8 +21,9 @@ Creates a new file at the specified path.
 ### `createFolder(absPath)`
 Creates a new directory.
 
-### `deleteFile(absPath)`
+### `deleteFile(absPath, options?)`
 Deletes a file or folder.
+- **options**: `{ silent }`. If `silent: true`, success/error toast notifications will be suppressed (useful for batch operations).
 
 ### `renameFile(oldAbs, newAbs)`
 Renames or moves an item.
@@ -39,3 +40,5 @@ const success = await window.FileService.saveFile(this.state.file, newContent);
 
 - **Desktop**: Routes through `window.electronAPI` for native file system access.
 - **Web/Server**: Uses `POST /api/file/save` to persist changes via the Node.js backend.
+---
+*Document — 2026-05-05 (Updated deleteFile signature)*

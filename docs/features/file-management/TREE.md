@@ -50,10 +50,12 @@ Nhân đôi file được chọn với tên `{name}-copy.md`.
 ### `_handleDelete()`
 Xóa file/folder với confirmation dialog. Nếu file đang mở → đóng tab trước.
 
-### `_handleBatchOp(type)`
+### `_handleBatchOp(type, explicitPaths?)`
 Batch operation cho multi-select:
 - `type = 'delete'` → xóa tất cả file đang chọn
 - `type = 'move'` → di chuyển tất cả vào folder được chọn
+- **Snapshot Support**: Hỗ trợ tham số `explicitPaths` để thực thi lệnh dựa trên "bản chụp" dữ liệu tại thời điểm mở menu, đảm bảo tính ổn định ngay cả khi selection bị xóa trong quá trình tương tác UI.
+- **Redundancy Filtering**: Tự động lọc bỏ các tệp tin con nếu thư mục cha của chúng cũng được chọn trong danh sách xóa.
 
 ### `_handleImportFromSystem()`
 Mở OS file dialog để import file từ bên ngoài vào workspace.
@@ -120,7 +122,7 @@ API export riêng cho môi trường kiểm thử tự động, dùng để test
 |---|---|---|
 | `_handleToggle(node)` | Click Chevron | Đóng/mở thư mục (thao tác trực tiếp trên `treeData` gốc) |
 | `_handleClick(e, node)` | Click Label / API | Select item + Load file. Hỗ trợ **Null-safety**: có thể gọi từ API (Search Palette) bằng cách truyền `e = null`. **Tối ưu hóa**: Nếu file đang chọn đã là file active, bỏ qua việc gọi `loadFile` để tránh render dư thừa. |
-| `deselectAll()` | Escape / Click Background | Bỏ chọn tất cả. Click vào vùng trống của bất kỳ danh sách nào trong Sidebar (Explorer, Hidden) sẽ kích hoạt hành động này. |
+| `deselectAll()` | Escape / Click Background | Bỏ chọn tất cả. Click vào vùng trống của bất kỳ danh sách nào trong Sidebar (Explorer, Hidden) sẽ kích hoạt hành động này. **Safe Zone**: Bỏ qua hành động này nếu click vào các thành phần UI của Menu hoặc Modal. |
 
 ---
 
@@ -152,4 +154,4 @@ Các cài đặt như `showHidden`, `hideEmptyFolders`, `flatView` được qu�
 
 ---
 
-*Document — 2026-04-28 (Refactored: Removed SidebarModule, updated Search trigger)*
+*Document — 2026-05-05 (Fixed Multi-select deletion, updated BatchOp signature & Safe Zones)*

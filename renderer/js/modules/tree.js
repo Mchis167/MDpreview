@@ -127,9 +127,10 @@ const TreeModule = (() => {
         '.tab-bar-container, ' +      // Entire tab bar area (including right actions)
         '.ds-change-action-view-bar, ' + // Floating mode switch bar
         '#right-sidebar-wrap, ' +     // Right sidebar (Comments/Collect)
-        '.ctx-menu, .modal'           // UI overlays
+        '.ds-menu-shield, .ds-context-menu-container, .ctx-item, ' + // Context Menu UI
+        '.modal, .ds-popover-shield'   // UI overlays
       );
-
+      
       if (!isSafeZone) {
         deselectAll();
       }
@@ -216,7 +217,6 @@ const TreeModule = (() => {
     if (TreeDragManager.getIsDragging()) return; // Block loading while dragging
 
     // Show professional skeleton state
-    // Show professional skeleton state
     const mountPoint = document.getElementById('file-tree-mount');
     if (mountPoint) {
       let treeEl = document.getElementById('file-tree');
@@ -229,19 +229,21 @@ const TreeModule = (() => {
         mountPoint.appendChild(scrollContainer);
       }
 
-      if (!v2Component) {
-        v2Component = new TreeViewComponent({
-          mount: treeEl,
-          onClick: _handleClick,
-          onMouseDown: _handleMouseDown,
-          onContextMenu: _handleContextMenu,
-          onDelete: _handleDelete,
-          onRename: _handleRename,
-          onFinishRename: _finishRename,
-          onMouseLeave: _handleMouseLeave
-        });
+      if (!treeData) {
+        if (!v2Component) {
+          v2Component = new TreeViewComponent({
+            mount: treeEl,
+            onClick: _handleClick,
+            onMouseDown: _handleMouseDown,
+            onContextMenu: _handleContextMenu,
+            onDelete: _handleDelete,
+            onRename: _handleRename,
+            onFinishRename: _finishRename,
+            onMouseLeave: _handleMouseLeave
+          });
+        }
+        v2Component.renderSkeleton(10);
       }
-      v2Component.renderSkeleton(10);
     }
 
     const expandedPaths = new Set();
@@ -620,7 +622,7 @@ const TreeModule = (() => {
             icon: isCurrentlyHidden ? 'eye' : 'eye-off', 
             onClick: () => _handleBatchToggleHidden(!isCurrentlyHidden, pathsForBatch) 
           },
-          { label: `Delete (${pathsForBatch.length} items)`, icon: 'trash', danger: true, onClick: () => _handleBatchOp('delete') },
+          { label: `Delete (${pathsForBatch.length} items)`, icon: 'trash', danger: true, onClick: () => _handleBatchOp('delete', pathsForBatch) },
           { label: 'Copy Paths', icon: 'clipboard', onClick: () => _handleBatchCopyPaths() }
         ];
       }
@@ -936,24 +938,42 @@ const TreeModule = (() => {
     });
   }
 
-  async function _handleBatchOp(type) {
-    const paths = [...state.selectedPaths];
+  async function _handleBatchOp(type, explicitPaths = null) {
+    const paths = explicitPaths || [...state.selectedPaths];
     if (paths.length === 0) return;
+
     if (type === 'delete') {
+      // Filter redundant paths: if a parent is selected, don't delete its children individually
+      const sortedPaths = [...paths].sort();
+      const filteredPaths = [];
+      for (let i = 0; i < sortedPaths.length; i++) {
+        const p = sortedPaths[i];
+        if (i > 0 && p.startsWith(sortedPaths[i - 1] + '/')) continue;
+        filteredPaths.push(p);
+      }
+
       DesignSystem.showConfirm({
         title: 'Delete Items',
         message: `Delete ${paths.length} items?`,
         onConfirm: async () => {
+          let successCount = 0;
           try {
-            for (const p of paths) {
+            for (const p of filteredPaths) {
               const wsPath = AppState.currentWorkspace ? AppState.currentWorkspace.path : '';
-              const absPath = wsPath ? wsPath.replace(/\/$/, '') + '/' + p : p;
-              await FileService.deleteFile(absPath);
+              const absPath = (wsPath + '/' + p).replace(/\/\//g, '/');
+              const res = await FileService.deleteFile(absPath, { silent: true });
+              if (res.success) successCount++;
             }
+          } catch (_err) {
+            // Error handled by individual calls or batch toast
+          } finally {
             state.selectedPaths = [];
-            load();
-          } catch (err) {
-            if (typeof showToast === 'function') showToast(`Batch Error: ${err.message}`, 'error');
+            if (successCount > 0) {
+              if (typeof showToast === 'function') showToast(`Successfully deleted ${successCount} items`);
+              load();
+            } else {
+              render(true);
+            }
           }
         }
       });

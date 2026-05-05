@@ -48,12 +48,12 @@ const FileService = (() => {
     /**
      * Delete a file or folder
      */
-    async function deleteFile(absPath) {
+    async function deleteFile(absPath, options = {}) {
         const res = await window.electronAPI.deleteFile(absPath);
         if (res.success) {
-            if (typeof showToast === 'function') showToast('Item deleted');
+            if (!options.silent && typeof showToast === 'function') showToast('Item deleted');
         } else {
-            if (typeof showToast === 'function') showToast(`Error deleting item: ${res.error}`, 'error');
+            if (!options.silent && typeof showToast === 'function') showToast(`Error deleting item: ${res.error}`, 'error');
         }
         return res;
     }
