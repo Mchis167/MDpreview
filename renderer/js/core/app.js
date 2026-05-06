@@ -50,6 +50,10 @@ window.AppState = {
       try { return JSON.parse(localStorage.getItem('md-publish-data') || '{}'); }
       catch (_e) { return {}; }
     })(),
+    customBackgrounds: (() => {
+      try { return JSON.parse(localStorage.getItem('mdpreview_custom_bg_images') || '[]'); }
+      catch (_e) { return []; }
+    })(),
     smartTypingDisabled: localStorage.getItem('md-smart-typing-disabled') === 'true'
   },
 
@@ -69,7 +73,11 @@ window.AppState = {
         Object.assign(this.settings, data.settings);
         Object.keys(data.settings).forEach(key => {
           const storageKey = this._getStorageKey(key);
-          if (storageKey) localStorage.setItem(storageKey, data.settings[key]);
+          if (storageKey) {
+            const val = data.settings[key];
+            const storageValue = typeof val === 'string' ? val : JSON.stringify(val);
+            localStorage.setItem(storageKey, storageValue);
+          }
         });
       }
 
@@ -98,6 +106,7 @@ window.AppState = {
         const hasLocalData = Object.keys(localStorage).some(k =>
           k.startsWith('tabs_') ||
           k.startsWith('md-') ||
+          k === 'mdpreview_custom_bg_images' ||
           k === 'mdpreview_custom_orders' ||
           k === 'mdpreview_expanded_paths'
         );

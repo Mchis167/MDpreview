@@ -37,7 +37,8 @@ const SettingsService = (() => {
     handoffToken: { storageKey: 'md-handoff-token', type: 'none' },
     publishWorkerUrl: { storageKey: 'md-publish-worker-url', type: 'none' },
     publishAdminSecret: { storageKey: 'md-publish-admin-secret', type: 'none' },
-    publishData: { storageKey: 'md-publish-data', type: 'none' }
+    publishData: { storageKey: 'md-publish-data', type: 'none' },
+    customBackgrounds: { storageKey: 'mdpreview_custom_bg_images', type: 'none' }
   };
 
   /**
@@ -154,16 +155,15 @@ const SettingsService = (() => {
 
     // Background Image Management
     getCustomBackgrounds() {
-      try {
-        return JSON.parse(localStorage.getItem('mdpreview_custom_bg_images') || '[]');
-      } catch (_e) { return []; }
+      return AppState.settings.customBackgrounds || [];
     },
 
     addCustomBackground(base64) {
       const bgs = this.getCustomBackgrounds();
       if (bgs.length >= 5) return false;
-      bgs.push(base64);
-      localStorage.setItem('mdpreview_custom_bg_images', JSON.stringify(bgs));
+      
+      const newBgs = [...bgs, base64];
+      this.update('customBackgrounds', newBgs);
       return true;
     },
 
