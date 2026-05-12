@@ -91,11 +91,6 @@
       _currentPath = null;
       this._updateUIState();
       
-      // Close BacklinksDrawer too if it's open (UX: Close all panels when tapping outside)
-      if (typeof BacklinksDrawer !== 'undefined' && BacklinksDrawer.isOpen()) {
-        BacklinksDrawer.close();
-      }
-      
       // Cleanup preview component (freeing observers/listeners)
       if (_previewComp && _previewComp.destroy) {
          try { _previewComp.destroy(); } catch(_e) { /* ignore cleanup errors */ }
@@ -118,7 +113,10 @@
       
       // 1. Overlay (Transparent but with blur)
       const overlay = DesignSystem.createElement('div', 'ds-wiki-drawer-overlay');
-      overlay.onclick = () => this.close();
+      overlay.onclick = () => {
+        this.close();
+        if (typeof BacklinksDrawer !== 'undefined') BacklinksDrawer.close();
+      };
       
       // 2. Panel (The sliding part)
       _panel = DesignSystem.createElement('div', 'ds-wiki-drawer-panel');

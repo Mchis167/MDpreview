@@ -35,6 +35,9 @@ ai-bundles/
 .agents/workflows/
 .agents/rules/
 
+# Planning & Non-Product
+ImplementPlan/
+
 # Media & Assets (Thường là binary, script đã lọc nhưng ignore ở đây để nhanh hơn)
 assets/
 static/assets/

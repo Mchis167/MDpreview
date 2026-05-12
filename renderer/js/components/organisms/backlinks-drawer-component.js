@@ -47,11 +47,6 @@
       if (!_isVisible) return;
       _isVisible = false;
       this._updateUIState();
-
-      // Close WikiDrawer too if it's open (UX: Close all panels when tapping outside)
-      if (typeof WikiDrawer !== 'undefined' && WikiDrawer.isOpen()) {
-        WikiDrawer.close();
-      }
     },
 
     /**
@@ -79,7 +74,10 @@
       const container = DesignSystem.createElement('div', 'ds-backlinks-drawer');
       
       const overlay = DesignSystem.createElement('div', 'ds-backlinks-drawer-overlay');
-      overlay.onclick = () => this.close();
+      overlay.onclick = () => {
+        this.close();
+        if (typeof WikiDrawer !== 'undefined') WikiDrawer.close();
+      };
       
       _panel = DesignSystem.createElement('div', 'ds-backlinks-drawer-panel');
       

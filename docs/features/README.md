@@ -1,10 +1,10 @@
 # Feature Documentation
 
-**Last Updated:** May 6, 2026 (Smart Typing Stabilization)  
-**Total Features:** 39+ modules documented  
+**Last Updated:** May 12, 2026 (Wiki Reader)  
+**Total Features:** 40+ modules documented  
 **Status:** Organized by category
 
-> **Recent Update (May 6):** Stabilized the **Smart Typing** experience with multi-level list support, automated re-numbering, and robust event listener management. Giải quyết triệt để lỗi hiển thị ngang của **Checklist lồng nhau** (Bug 1.3) bằng hệ thống vertical stacking nội bộ. Bổ sung bộ **Rendering Pipeline Tests** tự động.
+> **Recent Update (May 12):** Hoàn thiện **Wiki Reader** — vault indexer, link interception, side drawer, backlinks panel, và scanner control. Xem [WIKI_READER.md](WIKI_READER.md) để hiểu toàn bộ kiến trúc.
 
 ---
 
@@ -19,6 +19,7 @@
 | [**File Management**](#file-management--workspace) | Files, tabs, workspace | 5 files |
 | [**Utilities**](#utilities--helpers) | Helper modules and bridges | 3 files |
 | [**Advanced Features**](#advanced-features) | Shortcuts, TOC, preview | 6 files |
+| [**Wiki Reader**](#wiki-reader) | Vault indexer, link navigation, backlinks | 1 overview |
 
 ---
 
@@ -172,6 +173,23 @@
 - Search Palette provides quick navigation
 - Tab Preview shows file preview on hover
 - TOC auto-syncs with scroll position
+
+---
+
+## 📖 Wiki Reader
+
+**Vault indexer, smart link navigation, and backlinks**
+
+| Module | Purpose | Type |
+|--------|---------|------|
+| [**WIKI_READER.md**](WIKI_READER.md) | Architecture overview, data flow, index format, all APIs | Feature Overview |
+| [**WIKI_SERVICE.md**](services/WIKI_SERVICE.md) | WikiIndexer (server), REST API, WikiService (renderer) | Service |
+
+**Key Concepts:**
+- Opt-in per workspace via Wiki Scanner state machine (`off → scanning → active`)
+- Index build: 3-pass (frontmatter → body mentions → backlinks)
+- Link interception: click `.md` link → WikiDrawer mở file bên phải, không navigate away
+- Resizable drawer, anchor navigation, internal link chaining
 
 ---
 
