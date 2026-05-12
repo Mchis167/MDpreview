@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Not Commited] — 2026-05-12 20:00
+## [1.9.0] — 2026-05-12 20:00
 
 ### 🚀 Added
 - **Wiki Backlinks Drawer (Phase 5)**: Triển khai hệ thống xem các liên kết ngược (Backlinks) thông qua giao diện side-drawer hiện đại.
@@ -13,6 +13,34 @@ All notable changes to this project will be documented in this file.
     - **Resize Handle**: Thêm thanh nắm kéo thả ở mép trái của panel với hiệu ứng hover trực quan.
     - **Smart Constraints**: Giới hạn độ rộng tối thiểu 350px và tối đa 50% chiều rộng màn hình.
     - **Persistence**: Tự động lưu và khôi phục độ rộng drawer qua `localStorage`.
+- **Wiki Reader (Phase 4.1 — Internal Anchor Navigation)**: Triển khai hoàn thiện hệ thống điều hướng đến các phân đoạn cụ thể trong tài liệu.
+    - **Smart Header IDs**: Tự động tạo `id` cho các tiêu đề (Heading) khi render Markdown trên Server.
+    - **Decision Log Recognition**: Hỗ trợ đặc biệt cho định dạng Decision Log (ví dụ: `## T7 — ...` tự động có `id="t7"`), giúp việc link tới các quyết định thiết kế trở nên cực kỳ đơn giản.
+    - **Advanced Slugify**: Nâng cấp bộ tạo ID hỗ trợ Tiếng Việt (loại bỏ dấu chuẩn xác) và chuẩn hóa ký tự đặc biệt.
+    - **Polling Scroll Mechanism**: Triển khai thuật toán "Thăm dò" (Polling) trong `WikiDrawerComponent`, tự động đợi nội dung render xong (tối đa 2s) trước khi thực hiện cuộn, đảm bảo vị trí cuộn luôn chính xác tuyệt đối.
+- **Wiki Reader Service (Phase 2 — Link Classifier)**: Triển khai bộ não điều hướng Wiki tại Renderer.
+    - **`WikiService` (Renderer)**: Module IIFE tập trung, tự động fetch và cache Wiki Index từ `/api/wiki/index` khi khởi động ứng dụng.
+    - **Link Classifier (`classifyLink`)**: Logic phân loại liên kết thông minh, hỗ trợ đầy đủ 4 loại: `external`, `anchor`, `internal` (path-based & ID-based), và `unknown`.
+    - **Browser Path Resolver (`_resolvePath`)**: Thuật toán giải quyết đường dẫn tương đối (`../`, `./`) trong môi trường trình duyệt, không phụ thuộc vào Node.js.
+    - **Real-time Sync**: Renderer tự động làm mới Index khi nhận sự kiện Socket.io `wiki-index-updated` từ Server.
+- **Wiki Link Interception (Phase 3)**: Biến các liên kết Markdown thành hành động thực tế.
+    - **Smart Link Interceptor (`_bindLinkEvents`)**: Cơ chế đánh chặn click toàn bộ Preview sử dụng Event Delegation, được gắn trực tiếp trên `md-content-inner` và tự động tái gắn khi nội dung cập nhật.
+    - **Auto-Navigation**: Click vào link nội bộ (`./file.md`, Wiki ID) tự động gọi `window.loadFile()` để chuyển trang.
+    - **External Link Routing**: Link web (`https://`) được chặn và mở ra trình duyệt mặc định của hệ thống.
+    - **`electronAPI.openExternal`**: Mở rộng Electron Bridge (cả `preload.js` và `electron-bridge.js`) để expose tính năng mở link ngoài một cách an toàn qua IPC handler `open-external`.
+- **Wiki Side Drawer UI (Phase 4)**: Cửa sổ xem trước thông minh, giúp đọc nội dung liên kết mà không mất ngữ cảnh hiện tại.
+    - **`WikiDrawerComponent` (Organism)**: Component IIFE singleton quản lý luồng hiển thị, tải dữ liệu và điều hướng trong drawer.
+    - **Reusable `MarkdownPreview`**: Cải tiến renderer cốt lõi để hỗ trợ hiển thị đệ quy, Mermaid diagrams và CodeBlocks ngay trong drawer.
+    - **Glassmorphism UI**: Giao diện premium với hiệu ứng mờ nền (`backdrop-filter`), đổ bóng chiều sâu (`var(--ds-shadow-xl)`) và hiệu ứng trượt mượt mà.
+- **Wiki Scanner UI (Phase 0)**: Triển khai nền tảng giao diện và logic điều phối cho hệ thống quét Wiki.
+    - **WikiScannerControl Module**: Quản lý vòng đời trạng thái của scanner (`off` -> `onboarding` -> `scanning` -> `active`).
+    - **Premium Onboarding Modal**: Thiết kế lại giao diện giới thiệu tính năng theo chuẩn Atomic Design với bố cục 3 cột (Grid), sử dụng icon minh họa thay cho văn bản thuần túy.
+    - **Emergency Stop Action**: Bổ sung lệnh "Stop Scan" ngay trong Menu chuột phải khi đang ở trạng thái quét, đảm bảo người dùng có toàn quyền kiểm soát tiến trình.
+- **Wiki Reader Engine (Phase 1)**: Hoàn thiện nhân lõi phân tích tài liệu và xây dựng đồ thị quan hệ (Relationship Graph).
+    - **WikiIndexer Service**: Triển khai trình quét tài liệu 3-pass sử dụng `gray-matter`, hỗ trợ trích xuất ID, quan hệ và mentions chuyên sâu.
+    - **Atomic Indexing**: Cơ chế ghi dữ liệu an toàn qua file `.tmp` và tự động backup `.bak`, đảm bảo tính toàn vẹn của dữ liệu Graph.
+    - **Smart Auto-Reindex**: Tích hợp trực tiếp vào File Watcher với cơ chế Debounce (1.5s), tự động cập nhật index ngay khi người dùng lưu file `.md`.
+    - **Graph Query API**: Cung cấp hệ thống endpoint `/api/wiki/index` hỗ trợ Renderer truy cập toàn bộ mạng lưới liên kết trong Vault.
 
 ### 🔧 Changed
 - **Side-by-Side Drawer Layout**: Tối ưu hóa giao diện khi mở đồng thời nhiều drawer.
@@ -21,107 +49,34 @@ All notable changes to this project will be documented in this file.
 - **Unified Drawer Interaction**:
     - **Joint Closing**: Click vào vùng trống bên ngoài hoặc nhấn `Esc` sẽ đóng tất cả các panel đang mở (Wiki & Backlinks).
     - **Pointer Events Optimization**: Phân tách luồng xử lý sự kiện chuột, đảm bảo cursor nằm trên layer nào thì scroll/click sẽ tác động trực tiếp vào layer đó.
-- **`MarkdownViewerComponent`**: Tích hợp nút bấm nổi `Backlinks` (icon waypoints) vào nhóm floating actions trong Read Mode.
-
-### 🐞 Fixed
-- **Layer Blocking Issue**: Khắc phục lỗi lớp phủ của drawer trên cùng chặn toàn bộ thao tác cuộn của các layer bên dưới bằng cách chuyển đổi cơ chế quản lý `pointer-events`.
-
-## [Not Commited] — 2026-05-12 17:48
-
-### 🔧 Changed
 - **Wiki Navigation Resilience**: Nâng cấp hệ thống điều hướng Wiki để hoạt động bền bỉ ngay cả khi chưa có dữ liệu Index.
     - **Smart Path Resolution**: Cải tiến `WikiService.classifyLink` để tự động giải quyết các đường dẫn tương đối (`../`, `./`) mà không phụ thuộc vào Wiki Index.
     - **Async Indexing**: Chuyển đổi `WikiIndexer` (Server) sang sử dụng `fs.promises` hoàn toàn, ngăn chặn việc chặn Event Loop trong quá trình quét tài liệu.
     - **Boot Sequencing**: Di chuyển lệnh khởi tạo `WikiService` sang listener `workspace-changed` để đảm bảo đồng bộ hóa chính xác với trạng thái Server.
-
-### 🐞 Fixed
-- **Infinite Skeleton State**: Khắc phục lỗi giao diện bị treo ở trạng thái loading khi gặp lỗi tải file (như 403 Forbidden) bằng cách đảm bảo dọn dẹp class `is-loading` trong khối xử lý lỗi của `loadFile`.
-- **Race Condition Handling**: Gia cố cơ chế Ticket trong `app.js` để xử lý các yêu cầu tải file chồng chéo một cách an toàn và chính xác hơn.
-
-## [Not Commited] — 2026-05-12 17:47
-
-### 🐞 Fixed
-- **Draft UI Reset**: Khắc phục triệt để lỗi Edit Toolbar và Right Sidebars (Comment/Collect) bị kẹt lại khi đóng Draft hoặc file mà không lưu.
-    - **State Synchronization**: Đảm bảo `_handleModeSwitch` luôn được gọi khi chuyển về trạng thái `empty` trong `MarkdownViewerComponent`.
-    - **Cleanup Robustness**: Gỡ bỏ guard clause gây kẹt logic cleanup khi `viewport` đã bị hủy, đồng thời cưỡng bức đóng các sidebar chế độ Comment/Collect để giải phóng không gian giao diện.
-
-## [Not Commited] — 2026-05-10 07:45
-
-### 🚀 Added
-- **Wiki Reader (Phase 4.1 — Internal Anchor Navigation)**: Triển khai hoàn thiện hệ thống điều hướng đến các phân đoạn cụ thể trong tài liệu.
-    - **Smart Header IDs**: Tự động tạo `id` cho các tiêu đề (Heading) khi render Markdown trên Server.
-    - **Decision Log Recognition**: Hỗ trợ đặc biệt cho định dạng Decision Log (ví dụ: `## T7 — ...` tự động có `id="t7"`), giúp việc link tới các quyết định thiết kế trở nên cực kỳ đơn giản.
-    - **Advanced Slugify**: Nâng cấp bộ tạo ID hỗ trợ Tiếng Việt (loại bỏ dấu chuẩn xác) và chuẩn hóa ký tự đặc biệt.
-    - **Polling Scroll Mechanism**: Triển khai thuật toán "Thăm dò" (Polling) trong `WikiDrawerComponent`, tự động đợi nội dung render xong (tối đa 2s) trước khi thực hiện cuộn, đảm bảo vị trí cuộn luôn chính xác tuyệt đối.
-
-### 🔧 Changed
 - **Link Interception Pipeline**: Cập nhật `MarkdownViewerComponent` và `WikiService` để bóc tách và truyền tham số `anchor` xuyên suốt từ Main Viewer vào Side Drawer.
-- **Same-file Navigation**: Tối ưu hóa trải nghiệm khi click vào link anchor trong cùng một file đang mở — Drawer sẽ thực hiện cuộn mượt mà (smooth scroll) thay vì tải lại toàn bộ nội dung từ server.
-- **Context Binding**: Chuẩn hóa việc sử dụng tham chiếu Singleton `WikiDrawer` thay cho `this` để đảm bảo tính ổn định của các callback bất đồng bộ.
-
-### 🐞 Fixed
-- **Scroll Container Target**: Khắc phục lỗi không cuộn được do xác định sai phần tử chứa thanh cuộn (`ds-scroll-container`) trong cấu trúc Design System mới.
-- **Anchor Logic Collision**: Sửa lỗi mất tham số `anchor` khi điều hướng từ Main Viewer vào Drawer do thiếu tham số trong callback `onInternalLink`.
-
-## [Not Commited] — 2026-05-10 06:50
-
-### 🚀 Added
-- **Wiki Reader Service (Phase 2 — Link Classifier)**: Triển khai bộ não điều hướng Wiki tại Renderer.
-    - **`WikiService` (Renderer)**: Module IIFE tập trung, tự động fetch và cache Wiki Index từ `/api/wiki/index` khi khởi động ứng dụng.
-    - **Link Classifier (`classifyLink`)**: Logic phân loại liên kết thông minh, hỗ trợ đầy đủ 4 loại: `external`, `anchor`, `internal` (path-based & ID-based), và `unknown`.
-    - **Browser Path Resolver (`_resolvePath`)**: Thuật toán giải quyết đường dẫn tương đối (`../`, `./`) trong môi trường trình duyệt, không phụ thuộc vào Node.js.
-    - **Real-time Sync**: Renderer tự động làm mới Index khi nhận sự kiện Socket.io `wiki-index-updated` từ Server.
-    - **Unit Tests**: Bộ kiểm thử `tests/wiki-service.test.js` với 11 kịch bản xác nhận logic phân loại và path resolution đạt 100% pass.
-- **Wiki Link Interception (Phase 3)**: Biến các liên kết Markdown thành hành động thực tế.
-    - **Smart Link Interceptor (`_bindLinkEvents`)**: Cơ chế đánh chặn click toàn bộ Preview sử dụng Event Delegation, được gắn trực tiếp trên `md-content-inner` và tự động tái gắn khi nội dung cập nhật.
-    - **Auto-Navigation**: Click vào link nội bộ (`./file.md`, Wiki ID) tự động gọi `window.loadFile()` để chuyển trang.
-    - **External Link Routing**: Link web (`https://`) được chặn và mở ra trình duyệt mặc định của hệ thống.
-    - **`electronAPI.openExternal`**: Mở rộng Electron Bridge (cả `preload.js` và `electron-bridge.js`) để expose tính năng mở link ngoài một cách an toàn qua IPC handler `open-external`.
-    - **Integration Tests**: Bộ kiểm thử `tests/link-interception.test.js` với 6 kịch bản tích hợp xác nhận toàn bộ luồng đánh chặn link đạt 100% pass.
-- **Wiki Side Drawer UI (Phase 4)**: Cửa sổ xem trước thông minh, giúp đọc nội dung liên kết mà không mất ngữ cảnh hiện tại.
-    - **`WikiDrawerComponent` (Organism)**: Component IIFE singleton quản lý luồng hiển thị, tải dữ liệu và điều hướng trong drawer.
-    - **Reusable `MarkdownPreview`**: Cải tiến renderer cốt lõi để hỗ trợ hiển thị đệ quy, Mermaid diagrams và CodeBlocks ngay trong drawer.
-    - **Glassmorphism UI**: Giao diện premium với hiệu ứng mờ nền (`backdrop-filter`), đổ bóng chiều sâu (`var(--ds-shadow-xl)`) và hiệu ứng trượt mượt mà.
-    - **Navigation Integration**: Hỗ trợ mở link trong drawer (cập nhật drawer) hoặc mở chính thức trong main view qua nút "Open in main view".
-
-### 🔧 Changed
-- **`MarkdownPreview` Component**: Bổ sung bước `_bindLinkEvents(inner)` vào vòng đời post-render (cả `render()` và `update()`), đảm bảo link interception hoạt động ngay cả sau khi nội dung được làm mới động.
-- **`app.js` Boot Sequence**: Tích hợp `WikiService.init()` vào luồng khởi động ứng dụng và thêm listener cho sự kiện `wiki-index-updated`.
-
-## [Not Commited] — 2026-05-10 04:45
-
-### 🚀 Added
-- **Wiki Scanner UI (Phase 0)**: Triển khai nền tảng giao diện và logic điều phối cho hệ thống quét Wiki.
-    - **WikiScannerControl Module**: Quản lý vòng đời trạng thái của scanner (`off` -> `onboarding` -> `scanning` -> `active`).
-    - **Premium Onboarding Modal**: Thiết kế lại giao diện giới thiệu tính năng theo chuẩn Atomic Design với bố cục 3 cột (Grid), sử dụng icon minh họa thay cho văn bản thuần túy.
-    - **Emergency Stop Action**: Bổ sung lệnh "Stop Scan" ngay trong Menu chuột phải khi đang ở trạng thái quét, đảm bảo người dùng có toàn quyền kiểm soát tiến trình.
-    - **Design System Integration**: Đăng ký các icon mới (`refresh-cw`, `pause`, `play`, `loader`, `x-circle`) và sử dụng 100% Semantic Tokens cho giao diện Onboarding.
-- **Wiki Reader Engine (Phase 1)**: Hoàn thiện nhân lõi phân tích tài liệu và xây dựng đồ thị quan hệ (Relationship Graph).
-    - **WikiIndexer Service**: Triển khai trình quét tài liệu 3-pass sử dụng `gray-matter`, hỗ trợ trích xuất ID, quan hệ và mentions chuyên sâu.
-    - **Atomic Indexing**: Cơ chế ghi dữ liệu an toàn qua file `.tmp` và tự động backup `.bak`, đảm bảo tính toàn vẹn của dữ liệu Graph.
-    - **Smart Auto-Reindex**: Tích hợp trực tiếp vào File Watcher với cơ chế Debounce (1.5s), tự động cập nhật index ngay khi người dùng lưu file `.md`.
-    - **Graph Query API**: Cung cấp hệ thống endpoint `/api/wiki/index` hỗ trợ Renderer truy cập toàn bộ mạng lưới liên kết trong Vault.
-- **Data Integrity Roadmap**: Cập nhật kế hoạch triển khai Phase 1 với các ghi chú quan trọng về việc bảo toàn dữ liệu (Atomic indexing, `.tmp` file buffering, và cơ chế backup).
-
-### 🔧 Changed
+- **`MarkdownPreview` Component**: Bổ sung bước `_bindLinkEvents(inner)` vào vòng đời post-render, đảm bảo link interception hoạt động ngay cả sau khi nội dung được làm mới động.
 - **Markdown Renderer Refactoring**: Chuyển đổi cơ chế nhận diện Frontmatter từ Regex thủ công sang sử dụng `gray-matter`.
-    - Tăng cường độ ổn định khi xử lý các định dạng YAML phức tạp.
     - Duy trì sự nhất quán giữa bộ quét Index và bộ hiển thị Preview.
     - Tối ưu hóa việc tính toán dòng (`data-line`) giúp Scroll Sync hoạt động ổn định hơn.
 - **Modal Architecture Refinement**: Chuẩn hóa cấu trúc Modal bằng cách sử dụng wrapper `.ds-form-body` để đồng bộ padding và layout với hệ thống Form toàn cục.
+- **`app.js` Boot Sequence**: Tích hợp `WikiService.init()` vào luồng khởi động ứng dụng và thêm listener cho sự kiện `wiki-index-updated`.
 - **Scanner State Machine**: Tối ưu hóa logic chuyển đổi trạng thái để hỗ trợ việc khôi phục và dừng quét an toàn.
 
-## [Unreleased] — 2026-05-10
-
 ### 🐞 Fixed
-- **Scroll Sync Accuracy (Read → Edit)**: Khắc phục triệt để hiện tượng lệch vị trí lớn (8–13 dòng) khi chuyển từ Read Mode sang Edit Mode với các nội dung phức tạp.
-  - **Bảng (Tables)**: Mỗi hàng `<tr>` nay được gắn `data-line` riêng biệt thay vì toàn bộ bảng dùng chung dòng đầu. Khắc phục độ lệch tối đa 8 dòng khi người dùng đang nhìn vào cuối bảng.
-  - **Code Blocks**: Thẻ `<pre>` nay mang thêm `data-line-start`/`data-line-end`. `SyncService` sử dụng vị trí Y tương đối (proportional positioning) trong viewport để ước tính chính xác dòng code đang hiển thị, giảm độ lệch từ 13 dòng xuống còn ~1–2 dòng.
-  - **Khối `<details>`**: Cải thiện độ chính xác định vị nội dung bên trong các khối `<details>` lồng nhau với bảng và code block.
+- **Layer Blocking Issue**: Khắc phục lỗi lớp phủ của drawer trên cùng chặn toàn bộ thao tác cuộn của các layer bên dưới bằng cách chuyển đổi cơ chế quản lý `pointer-events`.
+- **Infinite Skeleton State**: Khắc phục lỗi giao diện bị treo ở trạng thái loading khi gặp lỗi tải file (như 403 Forbidden).
+- **Race Condition Handling**: Gia cố cơ chế Ticket trong `app.js` để xử lý các yêu cầu tải file chồng chéo một cách an toàn.
+- **Draft UI Reset**: Khắc phục lỗi Edit Toolbar và Right Sidebars bị kẹt lại khi đóng Draft mà không lưu.
+- **Scroll Sync Accuracy (Read → Edit)**: Khắc phục triệt để hiện tượng lệch vị trí lớn (8–13 dòng) khi chuyển chế độ với các nội dung phức tạp.
+  - **Bảng (Tables)**: Mỗi hàng `<tr>` nay được gắn `data-line` riêng biệt.
+  - **Code Blocks**: Thẻ `<pre>` mang thêm `data-line-start`/`data-line-end` để ước tính vị trí proportional.
+  - **Khối `<details>`**: Cải thiện độ chính xác định vị nội dung bên trong các khối lồng nhau.
+- **Scroll Container Target**: Khắc phục lỗi không cuộn được do xác định sai phần tử chứa thanh cuộn trong cấu trúc Design System mới.
+- **Anchor Logic Collision**: Sửa lỗi mất tham số `anchor` khi điều hướng từ Main Viewer vào Drawer.
 
 ### 🧪 Tests
-- **`tests/sync-cursor-formats.test.js`** (88 tests): Bộ kiểm thử toàn diện cho logic fuzzy-match cursor sync với tất cả các định dạng Markdown được hỗ trợ — heading, paragraph, list (ordered/unordered/nested/task), blockquote, code block, table, `<details>`, link, và các ký tự đặc biệt.
-- **`tests/sync-cursor-send-message.test.js`** (36 tests): Kiểm thử độ lệch (offset audit) trên file thực tế phức tạp (`send-message.md`) với các khối `<details>` lồng nhau chứa bảng và code block. Xác nhận tất cả độ lệch < 150 dòng (ngưỡng fuzzy-match).
+- **Comprehensive Wiki Testing**: Triển khai bộ unit/integration tests cho WikiService, WikiIndexer, Link Interception và WikiDrawer đạt 100% pass.
+- **Scroll Sync Accuracy Tests**: Bộ kiểm thử `tests/sync-cursor-formats.test.js` (88 tests) và `tests/sync-cursor-send-message.test.js` (36 tests) xác nhận độ chính xác của Scroll Sync.
 
 ---
 
