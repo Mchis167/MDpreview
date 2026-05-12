@@ -30,7 +30,10 @@
 
   const SERVER_CONFIG = Object.assign({}, BASE_CONFIG, {
     startOnLoad: false,
-    themeVariables: MERMAID_THEME_COLORS
+    themeVariables: MERMAID_THEME_COLORS,
+    flowchart: { useMaxWidth: false },
+    sequence: { useMaxWidth: false },
+    gantt: { useMaxWidth: false }
   });
 
   const WORKER_CONFIG = Object.assign({}, BASE_CONFIG, {

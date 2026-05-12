@@ -200,12 +200,18 @@
     background: var(--ds-white-a05);
 }
 
-.md-render-body details>.md-block {
-    padding: 0 16px 16px 40px;
+.md-render-body .md-details-content {
+    padding: 12px 40px 24px 40px;
+    border-top: 1px solid var(--ds-white-a05);
 }
 
-.md-render-body details>.md-block:first-of-type {
-    padding-top: 12px;
+/* Maintain vertical rhythm for blocks inside details */
+.md-render-body .md-details-content .md-block {
+    margin-bottom: var(--ds-md-block-gap);
+}
+
+.md-render-body .md-details-content .md-block:last-child {
+    margin-bottom: 0;
 }
 
 /* ── Custom Multi-level Markers ── */
@@ -476,12 +482,15 @@
     align-items: center;
     justify-content: center;
     isolation: isolate;
+    cursor: zoom-in;
 }
 
 .mermaid svg {
     color: var(--ds-text-inverse) !important;
     display: block;
     max-width: 100% !important;
+    max-height: 1600px !important;
+    width: auto !important;
     height: auto !important;
 }
 

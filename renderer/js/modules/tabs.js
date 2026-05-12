@@ -6,7 +6,8 @@ const TabsModule = (function () {
     dirtyFiles: [], // Array of files with unsaved changes
     activeFile: null,
     selectedFiles: [], // Array of selected file paths
-    lastSelectedFile: null // For shift-range selection
+    lastSelectedFile: null, // For shift-range selection
+    isSidebarCollapsed: localStorage.getItem('mdpreview_sidebar_left_collapsed') === 'true'
   };
 
   let tabBar = null;
@@ -84,9 +85,8 @@ const TabsModule = (function () {
       document.body.classList.toggle('is-fullscreen', isFS);
     });
 
-    // Handle Sidebar toggle icon initial state
-    const isCollapsed = localStorage.getItem('mdpreview_sidebar_left_collapsed') === 'true';
-    updateSidebarToggleIcon(isCollapsed);
+    // Handle Sidebar toggle icon initial state (already handled by TabBar init via localStorage in TabBarComponent)
+
 
     // Global click to deselect tabs
     document.addEventListener('mousedown', (e) => {
@@ -110,30 +110,22 @@ const TabsModule = (function () {
     });
   }
 
-  function updateSidebarToggleIcon(isCollapsed) {
-    const btn = document.getElementById('sidebar-toggle-btn');
-    if (btn) {
-      const iconName = isCollapsed ? 'sidebar-expand' : 'sidebar-collapse';
-      btn.innerHTML = DesignSystem.getIcon(iconName);
-      btn.title = isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar';
-      // Sync premium tooltip
-      DesignSystem.applyTooltip(btn, btn.title, 'bottom');
-    }
-  }
-
   function toggleSidebar() {
     const sidebarWrap = document.getElementById('sidebar-left-wrap');
     if (sidebarWrap) {
       const nowCollapsed = sidebarWrap.classList.toggle('sidebar-collapsed');
+      state.isSidebarCollapsed = nowCollapsed;
       localStorage.setItem('mdpreview_sidebar_left_collapsed', nowCollapsed);
-      updateSidebarToggleIcon(nowCollapsed);
+      
+      if (tabBar) {
+        tabBar.setState({ isSidebarCollapsed: nowCollapsed });
+      }
       return nowCollapsed;
     }
     return false;
   }
 
   // Exposed global for toolbar.js to call if needed (fallback)
-  window.updateSidebarToggleIcon = updateSidebarToggleIcon;
   window.toggleSidebar = toggleSidebar;
 
   function saveToStorage() {

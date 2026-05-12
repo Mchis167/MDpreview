@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, shell } = require('electron');
 const path = require('path');
 
 let mainWindow;
@@ -125,11 +125,20 @@ ipcMain.on('rebuild-app', () => {
 });
 
 // Register domain IPC handlers
+ipcMain.handle('open-external', async (event, url) => {
+  if (url && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('mailto:') || url.startsWith('tel:'))) {
+    await shell.openExternal(url);
+    return true;
+  }
+  return false;
+});
+
 require('./ipc/handoff').register(ipcMain);
 require('./ipc/worker-publish').register(ipcMain);
 require('./ipc/workspace').register(ipcMain);
 require('./ipc/comments').register(ipcMain);
 require('./ipc/files').register(ipcMain);
+require('./ipc/wiki').register(ipcMain);
 
 app.whenReady().then(createWindow);
 

@@ -3,7 +3,7 @@
    TreeModule, WorkspaceModule, CollectModule, 
    DraftModule, EditorModule, 
    EditToolbarComponent,
-   TabsModule, TabPreview, io, initMermaid, initZoom, ScrollModule, RecentlyViewedModule, ChangeActionViewBar, CommentsModule */
+   TabsModule, TabPreview, io, initMermaid, initZoom, ScrollModule, RecentlyViewedModule, ChangeActionViewBar, CommentsModule, WikiService, WikiDrawer, BacklinksDrawer */
 /* ============================================================
    app.js — Core state, file loading, socket connection, boot
    Other responsibilities live in dedicated modules:
@@ -305,10 +305,15 @@ function initSocket() {
     TreeModule.load();
   });
 
+  AppState.socket.on('wiki-index-updated', () => {
+    if (typeof WikiService !== 'undefined') WikiService.init();
+  });
+
   AppState.socket.on('workspace-changed', () => {
     TreeModule.load();
     setNoFile();
     RecentlyViewedModule.render();
+    if (typeof WikiService !== 'undefined') WikiService.init();
   });
 }
 
@@ -373,15 +378,19 @@ async function loadFile(filePath, options = {}) {
   } else {
     try {
       const res = await fetch(`/api/render?file=${encodeURIComponent(filePath)}`);
+      
       if (currentTicket !== loadTicket) return;
 
       if (!res.ok) {
         throw new Error(`Failed to load file: ${filePath} (Status: ${res.status})`);
       }
       data = await res.json();
-    } catch (_err) {
-      if (currentTicket === loadTicket && viewer) {
-        viewer.setState({ mode: 'read', file: filePath, html: '<div class="ds-error-state">Failed to render markdown.</div>' });
+    } catch (err) {
+      if (currentTicket === loadTicket) {
+        if (inner) inner.classList.remove('is-loading');
+        if (viewer) {
+          viewer.setState({ mode: 'read', file: filePath, html: `<div class="ds-error-state">Failed to render markdown: ${err.message}</div>` });
+        }
       }
       return;
     }
@@ -504,6 +513,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   ChangeActionViewBar.init(); // organisms/change-action-view-bar.js
   RightSidebar.init();        // organisms/right-sidebar.js
   EditToolbarComponent.init(); // organisms/edit-toolbar-component.js
+  if (typeof WikiDrawer !== 'undefined') WikiDrawer.init();
+  if (typeof BacklinksDrawer !== 'undefined') BacklinksDrawer.init();
+  if (window.WikiScannerControl) window.WikiScannerControl.init();
 
   // 2. Support Modules
   initSocket();
@@ -542,7 +554,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       },
       'toggle-sidebar': () => {
         if (window.TabsModule?.toggleSidebar) window.TabsModule.toggleSidebar();
-        else document.getElementById('sidebar-toggle-btn')?.click();
       },
       'focus-search': () => window.SearchPalette?.show(),
       'scroll-top': () => {

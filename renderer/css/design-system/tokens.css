@@ -133,6 +133,7 @@
    /* ── Surface Layers (Static Backgrounds) ────────── */
    --ds-surface-main: var(--ds-glass-main);
    --ds-surface-sidebar: var(--ds-glass-sidebar);
+   --ds-surface-drawer: var(--ds-glass-drawer);
    --ds-surface-overlay: var(--ds-primitive-deep);
    --ds-surface-card: var(--ds-white-a02);
 
@@ -187,6 +188,7 @@
 
    --ds-glass-sidebar: linear-gradient(166deg, var(--ds-black-a05) 0%, var(--ds-black-a20) 100%);
    --ds-glass-main: linear-gradient(168deg, var(--ds-black-a20) 0%, var(--ds-black-a30) 100%);
+   --ds-glass-drawer: linear-gradient(180deg, var(--ds-white-a01) 0%, var(--ds-black-a20) 100%);
    --ds-glass-hover: var(--ds-white-a05);
 
    /* ── Borders ───────────────────────────────────────────── */
@@ -265,12 +267,14 @@
    /* ── Blur ───────────────────────────────────────────── */
    --ds-blur-sidebar: var(--ds-blur-xl);
    --ds-blur-searchbox: var(--ds-blur-xl);
+   --ds-blur-drawer: var(--ds-blur-lg);
 
    /* ── Z-Index Scale ─────────────────────────────────────── */
    --ds-z-index-base: 1;
    --ds-z-index-toolbar: 100;
    --ds-z-index-overlay: 1000;
    --ds-z-index-popover: 1100;
+   --ds-z-index-drawer: 2000;
    --ds-z-index-max: 9999;
 
    /* ── Transitions & Animations ────────────────────── */

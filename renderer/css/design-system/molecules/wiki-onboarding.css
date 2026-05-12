@@ -1,0 +1,90 @@
+/* ── Design System: Wiki Onboarding (Molecules) ── */
+
+.ds-wiki-onboarding {
+  color: var(--ds-text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-lg);
+  padding: 0 var(--ds-space-xl) var(--ds-space-md) var(--ds-space-xl);
+}
+
+.ds-wiki-onboarding-intro {
+  font-size: var(--ds-font-md);
+  color: var(--ds-text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--ds-space-sm);
+}
+
+.ds-wiki-onboarding-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--ds-space-md);
+  width: 100%;
+}
+
+.ds-wiki-onboarding-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-sm);
+  padding: var(--ds-space-md);
+  background: var(--ds-layer-surface-subtle);
+  border-radius: var(--ds-radius-md);
+  border: 1px solid var(--ds-border-subtle);
+  text-align: left;
+}
+
+.ds-wiki-onboarding-card-icon {
+  width: var(--ds-space-xl);
+  height: var(--ds-space-xl);
+  color: var(--ds-layer-accent-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ds-layer-accent-subtle);
+  border-radius: var(--ds-radius-sm);
+  margin-bottom: var(--ds-space-xs);
+}
+
+.ds-wiki-onboarding-card-icon svg {
+  width: var(--ds-space-lg);
+  height: var(--ds-space-lg);
+}
+
+.ds-wiki-onboarding-card strong {
+  color: var(--ds-text-primary);
+  font-size: var(--ds-font-md);
+  display: block;
+}
+
+.ds-wiki-onboarding-card span {
+  font-size: var(--ds-font-sm);
+  color: var(--ds-text-secondary);
+  line-height: 1.4;
+}
+
+.ds-wiki-onboarding-privacy-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-sm);
+  padding: var(--ds-space-sm) var(--ds-space-md);
+  background: var(--ds-layer-surface-subtle);
+  border: 1px solid var(--ds-border-subtle);
+  border-radius: var(--ds-radius-sm);
+  width: 100%;
+  color: var(--ds-text-tertiary);
+  font-size: var(--ds-font-sm);
+}
+
+.ds-wiki-onboarding-privacy-bar svg {
+  width: var(--ds-space-md);
+  height: var(--ds-space-md);
+  flex-shrink: 0;
+}
+
+.ds-modal-footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ds-space-md);
+  width: 100%;
+  padding-top: var(--ds-space-md);
+}

@@ -33,7 +33,8 @@ class TabBarComponent {
       pinnedFiles: [],
       dirtyFiles: [],
       activeFile: null,
-      selectedFiles: []
+      selectedFiles: [],
+      isSidebarCollapsed: localStorage.getItem('mdpreview_sidebar_left_collapsed') === 'true'
     };
 
     this.init();
@@ -70,9 +71,8 @@ class TabBarComponent {
     const toggleWrapper = document.createElement('div');
     toggleWrapper.className = 'tab-bar__sidebar-toggle-wrapper';
 
-    const isCollapsed = localStorage.getItem('mdpreview_sidebar_left_collapsed') === 'true';
-    const initialIcon = isCollapsed ? 'sidebar-expand' : 'sidebar-collapse';
-    const sidebarToggle = DesignSystem.createHeaderAction(initialIcon, 'Toggle Sidebar (Mod+B)', () => this.options.onToggleSidebar(), 'sidebar-toggle-btn');
+    const isCollapsed = this.state.isSidebarCollapsed;
+    const sidebarToggle = DesignSystem.createHeaderAction('panel-left', isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar', () => this.options.onToggleSidebar(), 'sidebar-toggle-btn');
     toggleWrapper.appendChild(sidebarToggle);
 
     this.mount.appendChild(toggleWrapper);

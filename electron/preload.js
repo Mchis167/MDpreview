@@ -44,5 +44,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   isElectron: true,
   
   // Custom
-  rebuildApp: () => ipcRenderer.send('rebuild-app')
+  rebuildApp: () => ipcRenderer.send('rebuild-app'),
+  openExternal: (url) => ipcRenderer.invoke('open-external', url)
 });

@@ -18,6 +18,8 @@
 
   <!-- ── Application Styles ─────────────────────────── -->
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/design-system/organisms/wiki-drawer.css">
+  <link rel="stylesheet" href="css/design-system/organisms/backlinks-drawer.css">
 </head>
 
 <body>
@@ -52,6 +54,10 @@
     <div id="right-sidebar-wrap" class="ds-right-sidebar-wrap"></div>
 
   </div>
+
+  <!-- Wiki Drawer: Mounted by WikiDrawerComponent -->
+  <div id="wiki-drawer-mount"></div>
+  <div id="backlinks-drawer-mount"></div>
 
   <!-- ══════════════════════════════════════════════════
        SCRIPTS PIPELINE
@@ -100,6 +106,8 @@
   <script src="js/components/organisms/edit-toolbar-component.js" defer></script>
   <script src="js/components/organisms/markdown-viewer-component.js" defer></script>
   <script src="js/components/organisms/right-sidebar.js" defer></script>
+  <script src="js/components/organisms/wiki-drawer-component.js" defer></script>
+  <script src="js/components/organisms/backlinks-drawer-component.js" defer></script>
   <script src="js/components/organisms/comment-form-component.js" defer></script>
   <script src="js/components/organisms/workspace-picker-component.js" defer></script>
   <script src="js/components/organisms/workspace-form-component.js" defer></script>
@@ -125,6 +133,7 @@
   <script src="js/services/search-service.js" defer></script>
   <script src="js/services/shortcut-service.js" defer></script>
   <script src="js/services/sync-service.js" defer></script>
+  <script src="js/services/wiki-service.js" defer></script>
 
   <!-- ── 3.1 Publishing Service Dependencies (load in order) ── -->
   <script src="js/services/design-token-provider.js" defer></script>
@@ -147,6 +156,7 @@
 
   <!-- ── 5. Business Logic Modules ── -->
   <script src="js/modules/tree.js" defer></script>
+  <script src="js/modules/wiki-scanner-control.js" defer></script>
   <script src="js/modules/workspace.js" defer></script>
   <script src="js/modules/comments.js" defer></script>
   <script src="js/modules/collect.js" defer></script>

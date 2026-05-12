@@ -37,12 +37,30 @@ router.post('/workspaces', (req, res) => {
     id: uuidv4(),
     name,
     path: folderPath,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    wikiScanner: {
+      enabled: false,
+      status: 'off',
+      lastScanned: null,
+      errorMessage: null
+    }
   };
   data.workspaces.push(ws);
   if (!data.activeWorkspaceId) data.activeWorkspaceId = ws.id;
   saveWorkspaces(req.dataDir, data);
   res.json(ws);
+});
+
+// POST update wiki scanner state
+router.post('/workspaces/update-wiki', (req, res) => {
+  const { id, wikiScanner } = req.body;
+  const data = loadWorkspaces(req.dataDir);
+  const ws = data.workspaces.find(w => w.id === id);
+  if (ws) {
+    ws.wikiScanner = { ...ws.wikiScanner, ...wikiScanner };
+    saveWorkspaces(req.dataDir, data);
+  }
+  res.json(data);
 });
 
 // DELETE workspace

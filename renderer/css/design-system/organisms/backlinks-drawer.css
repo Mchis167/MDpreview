@@ -1,0 +1,157 @@
+/* ============================================================
+   organisms/backlinks-drawer.css — Side Drawer for Backlinks
+   Atomic Design System (Organism)
+   ============================================================ */
+
+.ds-backlinks-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: var(--ds-z-index-drawer);
+    pointer-events: none;
+    visibility: hidden;
+    transition: visibility var(--ds-transition-main);
+}
+
+.ds-backlinks-drawer.is-open {
+    visibility: visible;
+}
+
+/* ── Overlay ── */
+.ds-backlinks-drawer-overlay {
+    position: absolute;
+    inset: 0;
+    right: calc(var(--ds-backlinks-drawer-width-current, 0px) + var(--ds-wiki-drawer-width-current, 0px));
+    opacity: 0;
+    pointer-events: auto;
+    /* Explicitly capture clicks on the overlay */
+    transition: opacity var(--ds-transition-main);
+}
+
+.ds-backlinks-drawer.is-open .ds-backlinks-drawer-overlay {
+    opacity: 1;
+}
+
+/* ── Panel ── */
+.ds-backlinks-drawer-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 320px;
+    /* Slimmer than wiki drawer */
+    background: var(--ds-surface-drawer);
+    backdrop-filter: blur(var(--ds-blur-drawer)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--ds-blur-drawer)) saturate(180%);
+    border-left: 1px solid var(--ds-border-strong);
+    display: flex;
+    flex-direction: column;
+    pointer-events: auto;
+    /* Explicitly capture clicks/scroll on the panel */
+    transform: translateX(100%);
+    transition: transform var(--ds-transition-main);
+}
+
+.ds-backlinks-drawer.is-open .ds-backlinks-drawer-panel {
+    transform: translateX(0);
+}
+
+/* ── Header ── */
+.ds-backlinks-drawer-header {
+    height: 48px;
+    padding: 0 var(--ds-space-md) 0 var(--ds-space-xl);
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-md);
+    border-bottom: 1px solid var(--ds-border-subtle);
+}
+
+.ds-backlinks-drawer-title {
+    flex: 1;
+    font-weight: 600;
+    font-size: var(--ds-font-md);
+    color: var(--ds-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ds-backlinks-drawer-actions {
+    display: flex;
+    gap: var(--ds-space-xs);
+}
+
+/* ── Content ── */
+.ds-backlinks-drawer-content {
+    position: relative;
+    flex: 1;
+}
+
+.ds-backlinks-drawer-scroll {
+    flex: 1;
+}
+
+/* ── List ── */
+.ds-backlinks-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.ds-backlinks-item {
+    padding: var(--ds-space-md) var(--ds-space-md) var(--ds-space-md) var(--ds-space-xl);
+    border-bottom: 1px solid var(--ds-border-subtle);
+    background: var(--ds-layer-surface-defaul);
+    cursor: pointer;
+    transition: all var(--ds-transition-main);
+}
+
+.ds-backlinks-item:hover {
+    background: var(--ds-layer-surface-hover);
+}
+
+.ds-backlinks-item-title {
+    font-weight: 600;
+    font-size: var(--ds-font-sm);
+    color: var(--ds-text-primary);
+    margin-bottom: var(--ds-space-xs);
+}
+
+.ds-backlinks-item-path {
+    font-size: var(--ds-font-xs);
+    color: var(--ds-text-secondary);
+    font-family: var(--ds-font-family-mono);
+    opacity: 0.7;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Empty State ── */
+.ds-backlinks-empty {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--ds-space-xl);
+    opacity: 0.6;
+}
+
+.ds-backlinks-empty-icon {
+    font-size: 48px;
+    margin-bottom: var(--ds-space-lg);
+    color: var(--ds-text-secondary);
+}
+
+.ds-backlinks-empty-text {
+    font-weight: 600;
+    font-size: var(--ds-font-md);
+    color: var(--ds-text-primary);
+    margin-bottom: var(--ds-space-sm);
+}
+
+.ds-backlinks-empty-sub {
+    font-size: var(--ds-font-sm);
+    color: var(--ds-text-secondary);
+    line-height: 1.5;
+}

@@ -3,6 +3,7 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const { marked } = require('marked');
+const matter = require('gray-matter');
 const { sanitizeHtml, renderMermaidBlock, highlightCodeBlock, wrapInTableWrapper } = require('../../renderer/js/services/md-renderer-core.js');
 
 // Configure marked with custom renderer for premium blocks
@@ -59,6 +60,23 @@ marked.use({
 });
 
 /**
+ * Advanced slugify for header IDs.
+ * Supports Vietnamese characters and cleans up special symbols.
+ */
+function slugify(text) {
+  return text
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')               // Break down combined characters (accents)
+    .replace(/[\u0300-\u036f]/g, '') // Remove accents
+    .replace(/[đĐ]/g, 'd')          // Special case for 'đ'
+    .trim()
+    .replace(/\s+/g, '-')           // Replace spaces with -
+    .replace(/[^\w-]+/g, '')        // Remove all non-word chars
+    .replace(/--+/g, '-');          // Replace multiple - with single -
+}
+
+/**
  * Recursive helper to render tokens into HTML with md-line and md-block wrappers.
  * @param {boolean} isTopLevel - If true, wraps output in .md-block.
  */
@@ -82,6 +100,7 @@ function renderTokens(tokens, lineStart, isTopLevel = true) {
     let tokenHtml = '';
 
     // ── Details / Summary Block ──
+    // ... (rest of the logic remains same, we will update heading below)
     if (token.type === 'html' && token.raw.trim().toLowerCase().startsWith('<details')) {
       let j = i;
       let depth = 0;
@@ -102,8 +121,12 @@ function renderTokens(tokens, lineStart, isTopLevel = true) {
           .replace(/<summary>[\s\S]*?<\/summary>/i, '');
 
         const renderedSummary = marked.parseInline(summaryRaw);
-        const renderedContent = marked.parse(contentRaw);
-        tokenHtml = `<details><summary>${renderedSummary}</summary>\n${renderedContent}</details>`;
+
+        // Render inner content with proper block wrappers and line numbering support
+        const innerTokens = marked.lexer(contentRaw);
+        const renderedContent = renderTokens(innerTokens, tokenStartLine, true); 
+
+        tokenHtml = `<details><summary>${renderedSummary}</summary><div class="md-details-content">${renderedContent}</div></details>`;
         tokenHtml = `<div class="md-line" data-line="${tokenStartLine}">${tokenHtml}</div>`;
 
         // Always wrap in md-block for Flow Spacing system
@@ -161,8 +184,59 @@ function renderTokens(tokens, lineStart, isTopLevel = true) {
       continue;
     }
 
+    // ── Tables (per-row data-line annotation) ──
+    // Each <tr> gets its own data-line so scroll sync can target specific rows,
+    // not just the first line of the entire table block.
+    if (token.type === 'table') {
+      let tableHtml = marked.parser([token]);
+      let trCount = 0;
+      tableHtml = tableHtml.replace(/<tr>/gi, () => {
+        // Header row → tokenStartLine
+        // Separator row is not rendered as <tr> by marked
+        // Data rows → tokenStartLine + 1 (separator) + trCount
+        const line = trCount === 0 ? tokenStartLine : tokenStartLine + 1 + trCount;
+        trCount++;
+        return `<tr data-line="${line}">`;
+      });
+      tokenHtml = `<div class="md-line" data-line="${tokenStartLine}">${tableHtml}</div>`;
+      html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}">${tokenHtml}</div>\n`;
+      currentLine = tokenEndLine;
+      continue;
+    }
+
+    // ── Code Blocks (with line-range metadata for proportional positioning) ──
+    // Adds data-line-start / data-line-end to <pre> so sync-service can
+    // estimate which code line is at the center of the viewport.
+    if (token.type === 'code') {
+      const highlighted = highlightCodeBlock(token.text, token.lang);
+      const atomicHtml = `<pre data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}"><code class="hljs language-${token.lang || ''}">${highlighted}</code></pre>`;
+      tokenHtml = `<div class="md-line" data-line="${tokenStartLine}">${atomicHtml}</div>`;
+      html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}">${tokenHtml}</div>\n`;
+      currentLine = tokenEndLine;
+      continue;
+    }
+
+    // ── Headings (with smart auto-ID generation) ──
+    if (token.type === 'heading') {
+      let id = slugify(token.text);
+      
+      // Smart detection for Decision Log pattern (e.g. "T7 — ...")
+      // If it starts with T followed by numbers, use that as the ID
+      const decisionMatch = token.text.match(/^(T\d+)\s*[—:-]/i);
+      if (decisionMatch) {
+        id = decisionMatch[1].toLowerCase();
+      }
+
+      const level = token.depth;
+      const headingHtml = `<h${level} id="${id}">${token.text}</h${level}>`;
+      tokenHtml = `<div class="md-line" data-line="${tokenStartLine}">${headingHtml}</div>`;
+      html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}">${tokenHtml}</div>\n`;
+      currentLine = tokenEndLine;
+      continue;
+    }
+
     // ── Atomic Blocks ──
-    const isAtomic = ['code', 'blockquote', 'table', 'html'].includes(token.type);
+    const isAtomic = ['blockquote', 'html'].includes(token.type);
     if (isAtomic) {
       const atomicHtml = marked.parser([token]);
       tokenHtml = `<div class="md-line" data-line="${tokenStartLine}">${atomicHtml}</div>`;
@@ -201,9 +275,18 @@ function renderTokens(tokens, lineStart, isTopLevel = true) {
  * Main entry point for rendering markdown with line annotations.
  */
 function renderWithLineNumbers(content) {
-  const processed = preprocessMarkdown(content);
+  // Use gray-matter to cleanly separate frontmatter and body content
+  const parsed = matter(content);
+  const processedContent = parsed.content;
+
+  // Calculate exactly how many lines the frontmatter occupied to maintain
+  // accurate data-line attributes for scroll synchronization.
+  const bodyStartOffset = content.indexOf(processedContent);
+  const frontmatterLines = content.substring(0, bodyStartOffset).split(/\r?\n/).length - 1;
+
+  const processed = preprocessMarkdown(processedContent);
   const tokens = marked.lexer(processed);
-  const html = renderTokens(tokens, 1, true); // Root call is top-level
+  const html = renderTokens(tokens, 1 + frontmatterLines, true); // Root call is top-level
   return sanitizeHtml(html);
 }
 

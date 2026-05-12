@@ -169,8 +169,11 @@ class SidebarLeftComponent {
       }
     });
 
+    const wikiBtn = (window.WikiScannerControl) ? window.WikiScannerControl.createButton() : null;
+
     mount.appendChild(settingsBtn);
     mount.appendChild(shortcutsBtn);
+    if (wikiBtn) mount.appendChild(wikiBtn);
     mount.appendChild(DesignSystem.createElement('div', 'sidebar-footer-spacer'));
     mount.appendChild(explorerSettingsBtn);
   }

@@ -5,6 +5,7 @@ const path     = require('path');
 const chokidar = require('chokidar');
 const os       = require('os');
 const fs       = require('fs');
+const WikiIndexer = require('./services/wiki-indexer');
 
 const app    = express();
 app.use(express.json({ limit: '50mb' }));
@@ -82,6 +83,7 @@ app.use('/api', require('./routes/files'));
 app.use('/api', require('./routes/render'));
 app.use('/api', require('./routes/workspaces'));
 app.use('/api', require('./routes/comments'));
+app.use('/api', require('./routes/wiki'));
 app.use('/api', require('./routes/file-ops'));
 app.use('/api', require('./routes/handoff'));
 app.use('/api', require('./routes/worker-publish'));
@@ -93,14 +95,50 @@ function startWatcher(dir) {
 
   watcher = chokidar
     .watch(dir, { ignored: /(node_modules|\.git)/, persistent: true, ignoreInitial: true })
-    .on('change',    (fp) => io.emit('file-changed', { file: path.relative(dir, fp) }))
-    .on('add',       ()   => io.emit('tree-changed'))
+    .on('change',    (fp) => {
+      io.emit('file-changed', { file: path.relative(dir, fp) });
+      if (fp.endsWith('.md')) {
+        triggerReindex(dir);
+      }
+    })
+    .on('add',       (fp) => {
+      io.emit('tree-changed');
+      if (fp.endsWith('.md')) {
+        triggerReindex(dir);
+      }
+    })
     .on('unlink',    (fp) => {
       io.emit('file-deleted', { file: path.relative(dir, fp) });
       io.emit('tree-changed');
+      if (fp.endsWith('.md')) {
+        triggerReindex(dir);
+      }
     })
     .on('addDir',    ()   => io.emit('tree-changed'))
     .on('unlinkDir', ()   => io.emit('tree-changed'));
+}
+
+let reindexTimeout = null;
+function triggerReindex(dir) {
+  if (reindexTimeout) clearTimeout(reindexTimeout);
+  reindexTimeout = setTimeout(async () => {
+    try {
+      const workspacesFile = path.join(currentDataDir, 'workspaces.json');
+      if (!fs.existsSync(workspacesFile)) return;
+
+      const data = JSON.parse(fs.readFileSync(workspacesFile, 'utf8'));
+      const ws = data.workspaces.find(w => w.path === dir);
+      
+      if (ws && ws.wikiScanner && ws.wikiScanner.enabled) {
+        console.log(`[Server] Auto-reindexing Wiki for ${dir}`);
+        const indexer = new WikiIndexer(dir);
+        await indexer.build();
+        io.emit('wiki-index-updated');
+      }
+    } catch (err) {
+      console.error('[Server] Auto-reindex failed:', err.message);
+    }
+  }, 1500); // 1.5s debounce
 }
 
 function setWatchDir(dir) {

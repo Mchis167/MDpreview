@@ -1,0 +1,138 @@
+/* ============================================================
+   organisms/wiki-drawer.css — Side Drawer for Wiki Reader
+   Atomic Design System (Organism)
+   ============================================================ */
+
+.ds-wiki-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: var(--ds-z-index-drawer);
+    pointer-events: none;
+    visibility: hidden;
+    transition: visibility var(--ds-transition-main);
+}
+
+.ds-wiki-drawer.is-open {
+    visibility: visible;
+}
+
+/* ── Overlay ── */
+.ds-wiki-drawer-overlay {
+    position: absolute;
+    inset: 0;
+    right: calc(var(--ds-wiki-drawer-width-current, 0px) + var(--ds-backlinks-drawer-width-current, 0px));
+    opacity: 0;
+    pointer-events: auto;
+    transition: opacity var(--ds-transition-main);
+}
+
+.ds-wiki-drawer.is-open .ds-wiki-drawer-overlay {
+    opacity: 1;
+}
+
+/* ── Panel ── */
+.ds-wiki-drawer-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: var(--ds-wiki-drawer-width-current, 45%);
+    min-width: 350px;
+    max-width: 50vw;
+    background: var(--ds-surface-drawer);
+    backdrop-filter: blur(var(--ds-blur-drawer)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--ds-blur-drawer)) saturate(180%);
+    border-left: 1px solid var(--ds-border-strong);
+    display: flex;
+    flex-direction: column;
+    pointer-events: auto;
+    transform: translateX(100%);
+    transition: transform var(--ds-transition-main), right var(--ds-transition-main);
+}
+
+.ds-wiki-drawer.is-open .ds-wiki-drawer-panel {
+    transform: translateX(0);
+}
+
+body.ds-has-backlinks-drawer .ds-wiki-drawer-panel {
+    right: 320px; /* Width of Backlinks Drawer */
+}
+
+/* ── Resizer ── */
+.ds-wiki-drawer-resizer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    cursor: col-resize;
+    z-index: 100;
+    transition: background var(--ds-transition-main);
+}
+
+.ds-wiki-drawer-resizer:hover {
+    background: var(--ds-accent-main);
+    opacity: 0.3;
+}
+
+body.is-resizing-wiki .ds-wiki-drawer-panel {
+    transition: none !important; /* Disable transition during drag for performance */
+}
+
+body.is-resizing-wiki .ds-wiki-drawer-resizer {
+    background: var(--ds-accent-main);
+    opacity: 0.5;
+}
+
+body.is-resizing-wiki {
+    cursor: col-resize !important;
+    user-select: none !important;
+}
+
+/* ── Header ── */
+.ds-wiki-drawer-header {
+    height: 48px;
+    padding: 0 var(--ds-space-md) 0 var(--ds-space-xl);
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-md);
+    border-bottom: 1px solid var(--ds-border-subtle);
+}
+
+.ds-wiki-drawer-title {
+    flex: 1;
+    font-weight: 600;
+    font-size: var(--ds-font-md);
+    color: var(--ds-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ds-wiki-drawer-actions {
+    display: flex;
+    gap: var(--ds-space-xs);
+}
+
+/* ── Content ── */
+.ds-wiki-drawer-content {
+    padding: var(--ds-space-xl);
+    position: relative;
+}
+
+.ds-wiki-drawer-scroll {
+    flex: 1;
+}
+
+/* ── Nested Content Adjustments ── */
+.ds-wiki-drawer-content .md-content {
+    padding: 0 !important;
+    max-width: 100% !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.ds-wiki-drawer-content .md-content-inner {
+    padding: 0 !important;
+    max-width: 100% !important;
+}

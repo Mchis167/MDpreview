@@ -60,8 +60,8 @@ const SyncService = (() => {
     }
     
     if (centerEl) {
-      const line = parseInt(centerEl.getAttribute('data-line') || centerEl.getAttribute('data-source-line'), 10);
-      
+      let line = parseInt(centerEl.getAttribute('data-line') || centerEl.getAttribute('data-source-line'), 10);
+
       const extractCleanText = (node) => {
         let text = "";
         node.childNodes.forEach(child => {
@@ -83,6 +83,32 @@ const SyncService = (() => {
         });
         return text;
       };
+
+      // ── Code block: use proportional Y position for accurate line estimate ──
+      // render.js now adds data-line-start / data-line-end to <pre> elements.
+      // When the center of the viewport is inside a code block, estimate which
+      // source line is at that Y position rather than always reporting the fence line.
+      const preEl = centerEl.querySelector && centerEl.querySelector('pre[data-line-start]');
+      if (preEl) {
+        const lStart = parseInt(preEl.getAttribute('data-line-start'), 10);
+        const lEnd   = parseInt(preEl.getAttribute('data-line-end'),    10);
+        if (!isNaN(lStart) && !isNaN(lEnd) && lEnd > lStart + 2) {
+          const preRect = preEl.getBoundingClientRect();
+          if (preRect.height > 0) {
+            const relY = Math.max(0, Math.min(1, (centerY - preRect.top) / preRect.height));
+            const contentLines = Math.max(1, lEnd - lStart - 2); // exclude opening/closing fences
+            line = lStart + 1 + Math.round(relY * contentLines);
+            line = Math.max(lStart + 1, Math.min(lEnd - 1, line));
+            // Pick the specific code line as selectionText for fuzzy match
+            const codeLines = (preEl.textContent || '').split('\n');
+            const lineIdx   = Math.min(Math.floor(relY * contentLines), codeLines.length - 1);
+            const specificLine = (codeLines[Math.max(0, lineIdx)] || '').trim();
+            if (specificLine.length > 2) {
+              return { line, selectionText: specificLine, isRealSelection: false };
+            }
+          }
+        }
+      }
 
       const selectionText = extractCleanText(centerEl).trim().substring(0, 200);
       return { line, selectionText, isRealSelection: false };

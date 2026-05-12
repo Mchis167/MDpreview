@@ -55,6 +55,9 @@ const WorkspaceModule = (() => {
       if (empty) empty.classList.add('show');
       if (typeof TabsModule !== 'undefined') TabsModule.switchWorkspace(null);
     }
+
+    // Notify other modules that workspace state is ready
+    window.dispatchEvent(new CustomEvent('workspace-changed'));
   }
 
   // ── Switch workspace ────────────────────────────────────────

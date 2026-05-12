@@ -20,6 +20,7 @@
     "chokidar": "^3.6.0",
     "electron-clipboard-ex": "^1.3.3",
     "express": "^4.19.2",
+    "gray-matter": "^4.0.3",
     "highlight.js": "^11.11.1",
     "marked": "^12.0.0",
     "socket.io": "^4.7.5",

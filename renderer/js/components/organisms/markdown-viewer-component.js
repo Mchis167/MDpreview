@@ -1,4 +1,4 @@
-/* global AppState, TOCComponent, EditToolbarComponent, EditorModule, MarkdownHelperComponent, MarkdownLogicService, ScrollModule, DesignSystem, FileService, DraftModule */
+/* global AppState, TOCComponent, EditToolbarComponent, EditorModule, MarkdownHelperComponent, MarkdownLogicService, ScrollModule, DesignSystem, FileService, DraftModule, WikiService, WikiDrawer, BacklinksDrawer */
 
 class MarkdownViewerComponent {
   constructor(options = {}) {
@@ -45,7 +45,7 @@ class MarkdownViewerComponent {
     this.state = { ...this.state, ...newState };
 
     if (fileChanged) {
-      this.render();
+      this.render(oldMode);
     } else if (modeChanged) {
       this._handleModeSwitch(oldMode, newState.mode);
       // Ensure hidden components are updated with latest state even on mode switch
@@ -61,7 +61,7 @@ class MarkdownViewerComponent {
     this._updateTOC();
   }
 
-  render() {
+  render(oldMode = null) {
     if (!this.mount) return;
     
     window._isMDViewerRendering = true;
@@ -83,6 +83,7 @@ class MarkdownViewerComponent {
       if (TOCComponent) TOCComponent.reset();
       
       if (this.state.mode === 'empty') {
+        this._handleModeSwitch(oldMode, 'empty');
         new MarkdownEmptyState({ mount: this.mount });
         return;
       }
@@ -97,7 +98,13 @@ class MarkdownViewerComponent {
       this.previewComp = new MarkdownPreview({ 
         mount: this.viewport, 
         html: this.state.html,
-        file: this.state.file
+        file: this.state.file,
+        options: {
+          onInternalLink: (path, anchor) => {
+            if (typeof WikiDrawer !== 'undefined') WikiDrawer.open(path, anchor);
+            else if (window.loadFile) window.loadFile(path);
+          }
+        }
       });
 
       this.editorComp = new MarkdownEditor({ 
@@ -118,21 +125,23 @@ class MarkdownViewerComponent {
   }
 
   _handleModeSwitch(oldMode, newMode) {
-    if (!this.mount || !this.viewport) return;
+    if (!this.mount) return;
 
     this.mount.setAttribute('data-mode', newMode);
 
-    const previewEl = this.viewport.querySelector('#md-content');
-    const editorEl = this.viewport.querySelector('#edit-viewer');
+    if (this.viewport) {
+      const previewEl = this.viewport.querySelector('#md-content');
+      const editorEl = this.viewport.querySelector('#edit-viewer');
 
-    if (newMode === 'edit') {
-      if (previewEl) previewEl.style.display = 'none';
-      if (editorEl) editorEl.style.display = 'flex';
-      if (this.editorComp) this.editorComp.activate();
-    } else {
-      if (previewEl) previewEl.style.display = 'block';
-      if (editorEl) editorEl.style.display = 'none';
-      if (this.editorComp) this.editorComp.deactivate();
+      if (newMode === 'edit') {
+        if (previewEl) previewEl.style.display = 'none';
+        if (editorEl) editorEl.style.display = 'flex';
+        if (this.editorComp) this.editorComp.activate();
+      } else {
+        if (previewEl) previewEl.style.display = 'block';
+        if (editorEl) editorEl.style.display = 'none';
+        if (this.editorComp) this.editorComp.deactivate();
+      }
     }
 
     if (EditToolbarComponent) {
@@ -149,8 +158,8 @@ class MarkdownViewerComponent {
       }
     }
 
-    if (oldMode === 'comment' && window.CommentsModule) window.CommentsModule.removeCommentMode();
-    if (oldMode === 'collect' && window.CollectModule) window.CollectModule.removeCollectMode();
+    if ((oldMode === 'comment' || newMode === 'empty') && window.CommentsModule) window.CommentsModule.removeCommentMode();
+    if ((oldMode === 'collect' || newMode === 'empty') && window.CollectModule) window.CollectModule.removeCollectMode();
 
     if (newMode === 'comment' && window.CommentsModule) window.CommentsModule.applyCommentMode();
     if (newMode === 'collect' && window.CollectModule) window.CollectModule.applyCollectMode();
@@ -176,6 +185,7 @@ class MarkdownViewerComponent {
     // Toggle visibility
     if (isReadGroup && !this._tocBtn) this._renderReadFloatingActions();
     if (this._tocBtn) this._tocBtn.style.display = isReadGroup ? 'flex' : 'none';
+    if (this._backlinksBtn) this._backlinksBtn.style.display = isReadGroup ? 'flex' : 'none';
     if (this._comboBtn) this._comboBtn.style.display = isReadGroup ? 'flex' : 'none';
     if (this._publishBtn) this._publishBtn.style.display = isReadGroup ? 'flex' : 'none';
     
@@ -274,6 +284,23 @@ class MarkdownViewerComponent {
       if (TOCComponent) TOCComponent.toggle(this.mount);
     };
 
+    // 1.5. Backlinks Button
+    this._backlinksBtn = DesignSystem.createButton({
+      variant: 'subtitle',
+      offLabel: true,
+      leadingIcon: 'waypoints',
+      title: 'Backlinks',
+      className: 'floating-backlinks-btn'
+    });
+    this._backlinksBtn.id = 'floating-backlinks-btn';
+
+    this._backlinksBtn.onclick = (e) => {
+      e.stopPropagation();
+      if (typeof BacklinksDrawer !== 'undefined' && this.state.file) {
+        BacklinksDrawer.toggle(this.state.file);
+      }
+    };
+
     // 2. Combo Button (Smart Copy & Drag)
     this._comboBtn = DesignSystem.createComboButton({
       label: 'Copy',
@@ -344,6 +371,7 @@ class MarkdownViewerComponent {
     }
 
     this._floatingGroup.appendChild(this._tocBtn);
+    this._floatingGroup.appendChild(this._backlinksBtn);
     this._floatingGroup.appendChild(this._comboBtn);
     
     // 3. Publish Button State
@@ -903,10 +931,11 @@ class MarkdownEmptyState {
 
 /* ── MarkdownPreview ── */
 class MarkdownPreview {
-  constructor({ mount, html, file }) {
+  constructor({ mount, html, file, options = {} }) {
     this.mount = mount;
     this.html = html;
     this.file = file;
+    this.options = options;
     this.render();
   }
 
@@ -919,7 +948,7 @@ class MarkdownPreview {
     this.mount.appendChild(container);
 
     // Post-render integration (Small delay to ensure DOM is ready for calculations)
-    if (ScrollModule) {
+    if (ScrollModule && !this.options.skipScroll) {
       ScrollModule.setContainer(this.mount, this.file);
       ScrollModule.restore(this.file);
     }
@@ -934,12 +963,71 @@ class MarkdownPreview {
         if (window.CodeBlockModule) window.CodeBlockModule.process(inner);
       } catch (_e) { /* CodeBlock error - gracefully skip */ }
       
+      
       // Bind checkbox events for task lists
       this._bindCheckboxEvents(inner);
+
+      // Bind link interception
+      this._bindLinkEvents(inner);
       
       // Inject DS icons into summaries
       this._processSummaries(inner);
     })();
+  }
+
+  _bindLinkEvents(container) {
+    if (!container) return;
+
+    // Use event delegation on the container
+    container.addEventListener('click', (e) => {
+      const anchor = e.target.closest('a');
+      if (!anchor) return;
+
+      const href = anchor.getAttribute('href');
+      // Ignore empty or placeholder links
+      if (!href || href === '#') return;
+
+      const classification = (typeof WikiService !== 'undefined')
+        ? WikiService.classifyLink(href, this.file)
+        : { type: 'unknown' };
+
+      switch (classification.type) {
+        case 'external':
+          e.preventDefault();
+          if (window.electronAPI && window.electronAPI.openExternal) {
+            window.electronAPI.openExternal(classification.url);
+          } else {
+            window.open(classification.url, '_blank');
+          }
+          break;
+
+        case 'anchor':
+          // Let standard browser behavior handle anchors (scroll to ID)
+          break;
+
+        case 'internal':
+          e.preventDefault();
+          // Phase 3 Navigation: Use loadFile directly (Phase 4 will introduce WikiDrawer)
+          if (classification.resolvedPath) {
+            if (this.options.onInternalLink) {
+              this.options.onInternalLink(classification.resolvedPath, classification.anchor);
+            } else if (window.loadFile) {
+              window.loadFile(classification.resolvedPath);
+            } else {
+              console.warn('[WikiReader] Navigation failed: loadFile global not found');
+            }
+          }
+          break;
+
+        case 'unknown':
+          // If it looks like a markdown file but unknown to index, try loading it anyway
+          if (href.toLowerCase().endsWith('.md')) {
+            e.preventDefault();
+            if (window.loadFile) window.loadFile(href);
+          }
+          break;
+      }
+    });
   }
 
   _processSummaries(container) {
@@ -989,6 +1077,9 @@ class MarkdownPreview {
 
       // Re-bind checkbox events
       this._bindCheckboxEvents(inner);
+
+      // Re-bind link events
+      this._bindLinkEvents(inner);
 
       // Re-inject DS icons
       this._processSummaries(inner);
@@ -1096,6 +1187,10 @@ class MarkdownEditor {
     if (EditorModule) EditorModule.unbind();
   }
 }
+
+// Explicit exports for reuse
+window.MarkdownEmptyState = MarkdownEmptyState;
+window.MarkdownPreview = MarkdownPreview;
 
 // Singleton Bridge
 window.MarkdownViewer = (() => {

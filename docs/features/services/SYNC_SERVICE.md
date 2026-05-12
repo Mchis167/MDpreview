@@ -44,11 +44,37 @@ Service này cũng hỗ trợ **Forced Sync Context** thông qua `AppState.force
 
 ---
 
+## Cơ chế định vị nâng cao
+
+### Per-Row `data-line` cho Tables
+`render.js` inject `data-line` vào từng thẻ `<tr>` thay vì chỉ vào wrapper của toàn bảng. Công thức tính dòng:
+- Header row → `tokenStartLine`
+- Data row N → `tokenStartLine + 1 + N` (cộng 1 để bù cho separator row `|---|---|` trong markdown nguồn)
+
+Nhờ đó `captureReadViewSyncData` và `scrollReadViewToLine` (qua `querySelectorAll('[data-line]')`) đều nhìn thấy từng hàng riêng lẻ, giảm độ lệch từ tối đa 8 dòng xuống còn 0–1 dòng.
+
+### Proportional Positioning cho Code Blocks
+`render.js` thêm `data-line-start` và `data-line-end` vào thẻ `<pre>`. Trong `captureReadViewSyncData`, sau khi tìm được `centerEl`, service kiểm tra xem viewport center có nằm trong `<pre data-line-start>` không:
+
+```js
+const preEl = centerEl.querySelector('pre[data-line-start]');
+if (preEl) {
+  const relY = (centerY - preRect.top) / preRect.height;   // 0.0 → 1.0
+  const contentLines = lEnd - lStart - 2;                  // loại trừ fence lines
+  line = lStart + 1 + Math.round(relY * contentLines);     // ước tính dòng code
+}
+```
+
+Điều này giảm độ lệch code block từ 13 dòng (chỉ dùng fence line) xuống còn ~1–2 dòng.
+
+---
+
 ## Lưu ý quan trọng
 
 - **Race Condition**: Khi chuyển sang Read Mode, việc cuộn có thể thất bại nếu nội dung (như Mermaid) chưa render xong. Service tích hợp cơ chế `requestAnimationFrame` và check `isRendering` flag của Viewer.
 - **Precision**: Độ chính xác của việc đồng bộ phụ thuộc vào thuật toán Sandwich Strategy trong `MarkdownLogicService`.
+- **Short Items**: List item chỉ có ≤2 ký tự sau khi strip markdown markers sẽ bị fuzzy-match bỏ qua và rơi vào line-number fallback. Đây là hành vi dự kiến.
 
 ---
 
-*Document — 2026-04-29 (Updated Forced Sync mechanism)*
+*Document — 2026-05-10 (Per-row table data-line + code block proportional positioning)*

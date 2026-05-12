@@ -32,12 +32,28 @@ function register(ipcMain) {
       id: uuidv4(),
       name,
       path: folderPath,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      wikiScanner: {
+        enabled: false,
+        status: 'off',
+        lastScanned: null,
+        errorMessage: null
+      }
     };
     data.workspaces.push(ws);
     if (!data.activeWorkspaceId) data.activeWorkspaceId = ws.id;
     save(data);
     return ws;
+  });
+
+  ipcMain.handle('update-workspace-wiki', (event, { id, wikiScanner }) => {
+    const data = load();
+    const ws = data.workspaces.find(w => w.id === id);
+    if (ws) {
+      ws.wikiScanner = { ...ws.wikiScanner, ...wikiScanner };
+      save(data);
+    }
+    return data;
   });
 
   ipcMain.handle('delete-workspace', (event, id) => {

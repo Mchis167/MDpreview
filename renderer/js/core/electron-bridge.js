@@ -86,6 +86,60 @@
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
       return res.json();
     },
+    updateWorkspaceWiki: async (id, wikiScanner) => {
+      const res = await fetch('/api/workspaces/update-wiki', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, wikiScanner })
+      });
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      return res.json();
+    },
+
+    // Wiki Scanner
+    wikiAPI: {
+      getStatus: async (workspaceId) => {
+        const res = await fetch(`/api/wiki/status?workspaceId=${encodeURIComponent(workspaceId)}`);
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        return res.json();
+      },
+      enable: async (workspaceId, path) => {
+        const res = await fetch('/api/wiki/enable', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ workspaceId, path })
+        });
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        return res.json();
+      },
+      disable: async (workspaceId) => {
+        const res = await fetch('/api/wiki/disable', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ workspaceId })
+        });
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        return res.json();
+      },
+      remove: async (workspaceId, path) => {
+        const res = await fetch('/api/wiki/remove', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ workspaceId, path })
+        });
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        return res.json();
+      },
+      rescan: async (workspaceId, path) => {
+        const res = await fetch('/api/wiki/rescan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ workspaceId, path })
+        });
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        return res.json();
+      }
+    },
 
     // Comments
     getComments: async (wsId, file) => {
@@ -405,6 +459,10 @@
     // Custom
     rebuildApp: () => {
       if (typeof showToast === 'function') showToast('Rebuild is only available in the desktop app.', 'error');
+    },
+    openExternal: (url) => {
+      window.open(url, '_blank');
+      return Promise.resolve(true);
     }
   };
 })();
