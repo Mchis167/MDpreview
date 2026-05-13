@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Not Commited] — 2026-05-14 04:40
+## [2.0.0] — 2026-05-14 04:55
 
 ### 🚀 Added
 - **Monaco Editor Integration (Phases 1 — 6)**: Hoàn tất lộ trình nâng cấp trình soạn thảo sang Monaco Editor với trải nghiệm IDE-grade.
