@@ -1,80 +1,69 @@
-# Sync Service (`renderer/js/services/sync-service.js`)
+# Sync Service (`renderer/js/services/sync-service.js` & `monaco-sync-service.js`)
 
-> Headless service quản lý việc đồng bộ hóa vị trí (scroll và cursor) giữa chế độ xem (Read Mode) và chế độ chỉnh sửa (Edit Mode).
+> Headless service quản lý việc đồng bộ hóa vị trí (scroll và cursor) giữa chế độ xem (Read Mode) và chế độ chỉnh sửa (Edit Mode) dựa trên cơ chế Absolute Character Offset.
 
 ---
 
 ## Mục đích
 
-Giải quyết bài toán "Line Parity" — đảm bảo khi người dùng chuyển từ Read sang Edit (hoặc ngược lại), nội dung đang hiển thị tại vị trí cũ sẽ tiếp tục được hiển thị tại vị trí mới, giảm thiểu sự xao nhãng và mất dấu dòng đang đọc/viết.
+Giải quyết bài toán "Line Parity" với độ chính xác tuyệt đối. Khi người dùng chuyển đổi giữa Read và Edit, ứng dụng đảm bảo nội dung đang hiển thị (hoặc văn bản đang chọn) sẽ được định vị chính xác tại trung tâm màn hình ở chế độ mới, loại bỏ hoàn toàn hiện tượng lệch dòng thường thấy ở các trình soạn thảo Markdown thông thường.
+
+---
+
+## Cơ chế cốt lõi: Absolute Sync Engine
+
+Thay vì dựa trên số dòng (Line Number) vốn dễ bị sai lệch do quá trình render HTML (gộp dòng, bóc tách code block, bảng), hệ thống sử dụng **Character Offset** (vị trí ký tự tuyệt đối trong file nguồn).
+
+### 1. Phía Server / Render
+Trong quá trình render Markdown sang HTML, server (hoặc worker) sẽ inject metadata vào từng phần tử DOM:
+- **`data-src-start`**: Vị trí ký tự bắt đầu của block/inline element trong file Markdown gốc.
+- **`data-src-end`**: Vị trí ký tự kết thúc.
+- **`data-line`**: (Fallback) Số dòng tương ứng.
+
+### 2. Phía Read Mode (`captureReadViewSyncData`)
+Khi người dùng chuyển sang Edit mode:
+1. **Nếu có vùng chọn (Selection)**: Lấy phần tử cha gần nhất có `data-src-start`. Kết hợp với `window.getSelection()` để xác định dải ký tự (`srcStart` và `srcEnd`).
+2. **Nếu không có vùng chọn**: Tìm phần tử nằm tại tọa độ trung tâm Viewport (Center Element) và lấy `data-src-start` của nó.
+3. Trả về metadata: `{ srcStart, srcEnd, selectionText, isRealSelection }`.
+
+### 3. Phía Edit Mode (`monaco-sync-service.js`)
+Khi nhận metadata từ Read mode:
+1. **Absolute Match (Stage 0)**: Nếu có `srcStart`, Monaco Service sẽ gọi `model.getPositionAt(srcStart)` để lấy tọa độ (line, column) chính xác và cuộn tới đó.
+2. **Fuzzy Match (Stage 1)**: Nếu không có offset (ví dụ: load từ bản cũ), service sử dụng "Sandwich Strategy" để tìm kiếm chuỗi văn bản (`selectionText`) trong model Monaco.
+3. **Line Fallback (Stage 2)**: Cuối cùng mới sử dụng số dòng làm phương án dự phòng.
 
 ---
 
 ## Key Functions
 
-### `syncPosition(fromMode, toMode, options)`
-Hàm chính điều phối việc lưu và khôi phục vị trí.
+### `SyncService.captureReadViewSyncData()`
+Quét DOM để thu thập ngữ cảnh đồng bộ. Ưu tiên cao nhất cho `data-src-start`.
 
-**Flow:**
-1. **Lưu (Save)**: Lấy metadata vị trí từ `fromMode`.
-   - Nếu `read` -> `edit`: Gọi `_getReadMetadata()` để lấy dòng trên cùng đang hiển thị.
-   - Nếu `edit` -> `read`: Gọi `_getEditMetadata()` để lấy dòng chứa con trỏ (cursor).
-2. **Khôi phục (Restore)**: Áp dụng metadata vào `toMode`.
-   - Chuyển sang `edit`: Cuộn textarea tới dòng đã lưu và set cursor.
-   - Chuyển sang `read`: Sử dụng `MarkdownLogicService` để tìm phần tử DOM tương ứng và cuộn tới đó.
+### `SyncService.syncReadView(context)`
+Được gọi khi chuyển từ Edit sang Read.
+- Duyệt tất cả phần tử có `data-src-start` để tìm phần tử bao phủ vị trí cursor.
+- **Smart Open**: Tự động mở các khối `<details>` nếu mục tiêu nằm bên trong.
+- **Proportional Scroll**: Nếu block quá lớn (như một code block dài), service sẽ tính toán tỷ lệ % vị trí ký tự để cuộn chính xác phần nội dung bên trong block ra giữa màn hình.
 
-### `_getReadMetadata()`
-Quét Viewport để tìm dòng văn bản (paragraph, heading, v.v.) đang nằm ở cạnh trên của màn hình.
-
-### `_getEditMetadata()`
-Lấy chỉ số dòng (line number) hiện tại của con trỏ trong trình soạn thảo.
+### `MonacoSyncService.syncCursor(monacoService, context)`
+Cầu nối xử lý logic đồng bộ phía Monaco. Thực hiện các bước từ Stage 0 đến Stage 3 (Reveal & Selection).
 
 ---
 
 ## Kiến trúc nội bộ
 
-Service này hoạt động như một Bridge giữa:
-- **MarkdownViewer**: Cung cấp truy cập tới DOM elements (textarea, preview mount).
-- **MarkdownLogicService**: Cung cấp thuật toán tìm kiếm dòng tương ứng trong HTML rendered.
-- **AppState**: Cung cấp thông tin về mode hiện tại.
-
-Sử dụng `window._suppressScrollSync` (token) để tạm dừng các listener cuộn tự động trong quá trình thực hiện đồng bộ, tránh hiện tượng "vòng lặp cuộn" (scroll loops).
-
-Service này cũng hỗ trợ **Forced Sync Context** thông qua `AppState.forceSyncContext`. Nếu thuộc tính này tồn tại, `ChangeActionViewBar` sẽ bỏ qua việc tự chụp vị trí mà dùng trực tiếp dữ liệu này để đồng bộ, giúp bảo toàn vùng chọn khi bôi đen và Edit.
-
----
-
-## Cơ chế định vị nâng cao
-
-### Per-Row `data-line` cho Tables
-`render.js` inject `data-line` vào từng thẻ `<tr>` thay vì chỉ vào wrapper của toàn bảng. Công thức tính dòng:
-- Header row → `tokenStartLine`
-- Data row N → `tokenStartLine + 1 + N` (cộng 1 để bù cho separator row `|---|---|` trong markdown nguồn)
-
-Nhờ đó `captureReadViewSyncData` và `scrollReadViewToLine` (qua `querySelectorAll('[data-line]')`) đều nhìn thấy từng hàng riêng lẻ, giảm độ lệch từ tối đa 8 dòng xuống còn 0–1 dòng.
-
-### Proportional Positioning cho Code Blocks
-`render.js` thêm `data-line-start` và `data-line-end` vào thẻ `<pre>`. Trong `captureReadViewSyncData`, sau khi tìm được `centerEl`, service kiểm tra xem viewport center có nằm trong `<pre data-line-start>` không:
-
-```js
-const preEl = centerEl.querySelector('pre[data-line-start]');
-if (preEl) {
-  const relY = (centerY - preRect.top) / preRect.height;   // 0.0 → 1.0
-  const contentLines = lEnd - lStart - 2;                  // loại trừ fence lines
-  line = lStart + 1 + Math.round(relY * contentLines);     // ước tính dòng code
-}
-```
-
-Điều này giảm độ lệch code block từ 13 dòng (chỉ dùng fence line) xuống còn ~1–2 dòng.
+- **`data-src-start` Anchoring**: Đây là "nguồn sự thật" duy nhất. Mọi thành phần render (Table, List, Mermaid) đều phải tuân thủ việc inject các attributes này.
+- **Race Condition Handling**: Khi chuyển sang Read mode, `SyncService` sẽ thực hiện tối đa 10 lần thử (`maxAttempts`) qua `requestAnimationFrame` để đợi layout ổn định (sau khi ảnh hoặc Mermaid render xong) trước khi thực hiện cú cuộn cuối cùng.
+- **Scroll Suppression**: Sử dụng `window._suppressScrollSync = true` để tạm dừng các listener cuộn tự động, tránh hiện tượng phản hồi ngược (feedback loops) gây rung giật màn hình.
 
 ---
 
 ## Lưu ý quan trọng
 
-- **Race Condition**: Khi chuyển sang Read Mode, việc cuộn có thể thất bại nếu nội dung (như Mermaid) chưa render xong. Service tích hợp cơ chế `requestAnimationFrame` và check `isRendering` flag của Viewer.
-- **Precision**: Độ chính xác của việc đồng bộ phụ thuộc vào thuật toán Sandwich Strategy trong `MarkdownLogicService`.
-- **Short Items**: List item chỉ có ≤2 ký tự sau khi strip markdown markers sẽ bị fuzzy-match bỏ qua và rơi vào line-number fallback. Đây là hành vi dự kiến.
+- **Precision**: Độ chính xác hiện đạt mức 1:1 cho mọi loại nội dung.
+- **Large Elements**: Với các khối văn bản cực lớn, thuật toán Proportional Scroll đảm bảo bạn không chỉ thấy đầu block mà thấy đúng đoạn văn bản đang viết.
+- **Legacy Support**: Vẫn duy trì code xử lý `data-line` và `textarea` (trong logic fallback) để đảm bảo tính tương thích ngược trong quá trình chuyển đổi hoàn toàn sang Monaco.
 
 ---
 
-*Document — 2026-05-10 (Per-row table data-line + code block proportional positioning)*
+*Document — 2026-05-14 (Absolute character-offset sync update)*

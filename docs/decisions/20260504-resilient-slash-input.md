@@ -1,7 +1,7 @@
 # Resilient Slash Input Handling
 
 **Date:** 2026-05-04
-**Status:** accepted
+**Status:** superseded by [20260514-monaco-editor-migration.md](20260514-monaco-editor-migration.md)
 **Author:** session 2026-05-04
 
 ---

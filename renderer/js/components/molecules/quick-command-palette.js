@@ -43,10 +43,12 @@ const QuickCommandPalette = (() => {
 
     // ── Insert ──
     { id: 'l',  label: 'Link', icon: 'link', hint: '/link', tags: ['lienket'] },
-    { id: 'img',label: 'Image', icon: 'image', hint: '/img', tags: ['anh', 'hinh'] },
+    { id: 'img',label: 'Image Link', icon: 'image', hint: '/img', tags: ['anh', 'hinh'] },
+    { id: 'img-upload', label: 'Upload Image', icon: 'upload', hint: '/upload', tags: ['anh', 'hinh', 'upload'] },
     { id: 'tb', label: 'Table', icon: 'table', hint: '/table', tags: ['bang'] },
     { id: 'hr', label: 'Divider', icon: 'minus', hint: '/hr', tags: ['phancach', 'duongke'] },
-    { id: 'fn', label: 'Footnote', icon: 'file-text', hint: '/fn', tags: ['chuthich'] }
+    { id: 'fn', label: 'Footnote', icon: 'file-text', hint: '/fn', tags: ['chuthich'] },
+    { id: 'global-shortcuts-search', label: 'Search App Shortcuts', icon: 'keyboard', hint: '/shortcuts', tags: ['help', 'phim tat'] }
   ];
 
   function _init() {

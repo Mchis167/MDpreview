@@ -1,4 +1,4 @@
-/* global AppState, SidebarLeft, MarkdownViewer, RightSidebar, BugLogger,
+/* global AppState, SidebarLeft, MarkdownViewer, RightSidebar,
    SettingsService, SearchPalette, ShortcutsComponent, ShortcutService,
    TreeModule, WorkspaceModule, CollectModule, 
    DraftModule, EditorModule, 
@@ -567,7 +567,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       'toggle-sidebar': () => {
         if (window.TabsModule?.toggleSidebar) window.TabsModule.toggleSidebar();
       },
-      'focus-search': () => window.Seak,
+      'focus-search': () => window.SearchPalette?.show('all'),
       'scroll-top': () => {
         const v = window.MarkdownViewer?.getInstance();
         const scrollEl = v ? v.getActiveScrollElement() : document.getElementById('md-viewer-mount');
@@ -708,11 +708,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       },
       'keyboard-shortcuts': () => {
-        if (AppState.currentMode === 'edit' && window.EditorModule) {
+        if (window.AppState?.currentMode === 'edit' && window.EditorModule) {
           window.EditorModule.triggerQuickCommand();
         } else {
           window.SearchPalette?.show('shortcut');
         }
+      },
+      'global-shortcuts-search': () => {
+        window.SearchPalette?.show('shortcut');
       },
       'open-settings': () => window.SettingsComponent?.toggle(),
       'close-cancel': () => {

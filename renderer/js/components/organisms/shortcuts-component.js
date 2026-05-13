@@ -95,7 +95,8 @@ class ShortcutsComponent {
       {
         title: 'General',
         items: [
-          { id: 'keyboard-shortcuts', label: 'Keyboard Shortcuts', keys: ['Mod', '/'], icon: 'keyboard', tags: ['help', 'commands', 'phím tắt'] },
+          { id: 'keyboard-shortcuts', label: 'Command Palette', keys: ['Mod', '/'], icon: 'command', tags: ['help', 'commands', 'phím tắt'] },
+          { id: 'global-shortcuts-search', label: 'Search App Shortcuts', keys: ['Mod', 'Shift', '/'], icon: 'keyboard', tags: ['help', 'all shortcuts', 'tìm phím tắt'] },
           { id: 'open-settings', label: 'Open Settings', keys: ['Mod', ','], icon: 'settings', tags: ['preferences', 'config', 'cài đặt'] },
           { id: 'close-cancel', label: 'Close / Cancel', keys: ['Esc'], icon: 'x', tags: ['exit', 'hide', 'thoát'] }
         ]

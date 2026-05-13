@@ -2,18 +2,45 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Not Commited] — 2026-05-13 02:05
+## [Not Commited] — 2026-05-14 04:40
 
 ### 🚀 Added
-- **Monaco Editor Integration (Phase 0 — Foundation)**: Khởi động lộ trình nâng cấp trình soạn thảo từ `<textarea>` sang Monaco Editor (IDE-grade).
-    - **`monaco-editor` Dependency**: Cài đặt thư viện Monaco Editor v0.55.1 vào hệ thống.
-    - **Monaco Static Route**: Cấu hình server để phục vụ thư viện Monaco qua `/monaco`, sẵn sàng cho cơ chế Dynamic Loading.
-    - **API & Token Mapping**: Xây dựng bộ tài liệu kỹ thuật chi tiết (`02-api-mapping.md`, `03-token-mapping.md`) để đảm bảo tính tương thích và thẩm mỹ đồng bộ của editor mới.
-    - **Implementation Blueprint**: Lập kế hoạch triển khai 8 giai đoạn (`00-blueprint.md`) nhằm giảm thiểu rủi ro và đảm bảo không gây lỗi tính năng cũ.
+- **Monaco Editor Integration (Phases 1 — 6)**: Hoàn tất lộ trình nâng cấp trình soạn thảo sang Monaco Editor với trải nghiệm IDE-grade.
+    - **Smart Slash Commands (`/`)**: Hệ thống lệnh nhanh với thuật toán tìm kiếm mờ (Fuzzy Search) và chấm điểm (Scoring), ưu tiên các lệnh thường dùng và hỗ trợ phím tắt `Cmd + /`.
+    - **Absolute Sync Engine**: Chuyển đổi cơ chế đồng bộ cuộn (Scroll Sync) sang sử dụng vị trí ký tự tuyệt đối (`character-offset`), loại bỏ hoàn toàn hiện tượng lệch dòng.
+    - **Smart Image Management**: Menu ngữ cảnh chuyên dụng cho ảnh Markdown, hỗ trợ Upload, Reveal in Finder, và Delete trực tiếp từ editor.
+    - **Advanced Image Fingerprinting**: Tự động nhận diện ảnh trùng lặp trong Vault dựa trên metadata (size, name) để tối ưu không gian lưu trữ.
+    - **Sticky Scroll UI**: Triển khai thanh tiêu đề cố định khi cuộn với hiệu ứng glassmorphism và divider tinh tế.
+    - **BugLogger Service**: Hệ thống theo dõi trạng thái editor và chẩn đoán lỗi đồng bộ thời gian thực.
+- **Shortcut & Asset Refinement**:
+    - **Global Shortcut Search (`Cmd + Shift + /`)**: Phím tắt chuyên dụng để tra cứu phím tắt ứng dụng mọi lúc, kể cả khi đang soạn thảo.
+    - **"Upload Image" Action**: Tích hợp lệnh `/upload` vào Command Palette, hỗ trợ chọn ảnh, tự động nén vào `/assets` và chèn link Markdown chỉ với một thao tác.
+    - **Integrated Shortcut Search**: Thêm mục "Search App Shortcuts" vào bảng lệnh Slash Command để truy cập nhanh hướng dẫn phím tắt.
+- **Project Map High-Fidelity**:
+    - **SVG Cloning**: Khắc phục triệt để lỗi tỷ lệ Mermaid bằng cách sao chép trực tiếp SVG từ Viewer sang Mini-map.
+    - **Interactive State Sync**: Đồng bộ hóa trạng thái đóng/mở của các khối `<details>` giữa Viewer và Project Map.
 
 ### 🔧 Changed
-- **Express Server Configuration**: Cập nhật `server/index.js` để hỗ trợ phục vụ tài nguyên tĩnh từ `node_modules` cho các thành phần UI phức tạp.
-- **Architectural Research**: Hoàn thành nghiên cứu về xung đột AMD Loader của Monaco trong môi trường Electron, xác định chiến lược load động (dynamic loading) để bảo vệ các thư viện hiện có như Mermaid và Socket.io.
+- **Editor Safety & Reliability**:
+    - **Internal ID Locking**: Cơ chế khóa save theo ID nội bộ để ngăn chặn việc ghi đè dữ liệu cũ khi chuyển tab nhanh.
+    - **Safe-Save Guard**: Tự động chặn lệnh lưu nếu editor rỗng trong khi file nguồn có dữ liệu (chống mất dữ liệu do race condition).
+    - **Native Shortcut Restoration**: Khôi phục hoàn toàn các phím tắt hệ thống (Cmd+A, Cmd+Z, Cmd+C/V) và phím Enter/Backspace chuẩn IDE.
+    - **Permissive Shortcut Policy**: Chuyển đổi sang mô hình "Pass-through" cho phép các phím tắt toàn cục (Sidebar, Settings, Search) hoạt động xuyên thấu vào Editor trong khi vẫn bảo vệ các phím soạn thảo cốt lõi.
+    - **Token-based Styling**: Ánh xạ toàn bộ giao diện Monaco (active line, focus border, widgets) sang hệ thống Design Tokens (Tier 3).
+- **Markdown Logic Refinement**:
+    - **Smart Heading Toggle**: Tự động bôi đen nội dung tiêu đề sau khi áp dụng định dạng để người dùng sửa nhanh.
+    - **Advanced List Handling**: Tối ưu hóa logic thụt lề và tự động đánh số lại cho danh sách đa cấp (multi-level lists).
+- **Developer Experience**:
+    - **Zero-Console-Log Policy**: Loại bỏ các log debug gây nhiễu từ WikiService và ShortcutService.
+
+### 🐞 Fixed
+- **Monaco Mount Race**: Khắc phục lỗi editor hiển thị trắng hoặc bị treo khi tải file lớn hoặc chuyển đổi chế độ liên tục.
+- **Ghost Content Overwrite**: Sửa lỗi nội dung cũ bị kẹt lại khi mở file mới do không dọn dẹp model Monaco đúng cách.
+- **List Marker Corruption**: Khắc phục lỗi hiển thị marker sai (ví dụ `3. .3.`) khi nhấn Enter ở cuối danh sách.
+- **Shortcut Dispatcher Fixes**:
+    - **Broken 'Cmd + P'**: Sửa lỗi gọi sai hàm (`window.Seak`) giúp khôi phục bảng tìm kiếm file toàn cục.
+    - **Palette Dispatcher Race**: Khắc phục lỗi các lệnh hệ thống (như Image Upload) không kích hoạt được từ Command Palette.
+- **Zero-Violation Linting**: Dọn dẹp toàn bộ biến dư thừa và tham chiếu global lỗi thời trên 5 module cốt lõi, đạt trạng thái 0 errors/0 warnings.
 
 ## [1.9.0] — 2026-05-12 20:00
 

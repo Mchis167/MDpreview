@@ -4,7 +4,7 @@
  * Pattern: IIFE Singleton
  */
 
-/* global monaco, require, BugLogger */
+/* global monaco, require */
 
 const MonacoService = (() => {
   'use strict';

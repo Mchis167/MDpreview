@@ -2,7 +2,7 @@
    draft.js — Logic for Multiple Draft tabs
    ============================================================ */
 
-/* global AppState, MarkdownViewer, EditorModule, updateHeaderUI, processMermaid, CodeBlockModule, BugLogger */
+/* global AppState, MarkdownViewer, EditorModule, updateHeaderUI, processMermaid, CodeBlockModule */
 
 const DraftModule = (() => {
   // Map of drafts: { [draftId]: { draftContent, renderedHtml, lastTouched } }

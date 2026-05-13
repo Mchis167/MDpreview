@@ -59,13 +59,18 @@ Ghi lại các quyết định thiết kế và kỹ thuật quan trọng trong 
 | 2026-04-29 | [20260429-menu-anchoring-strategy.md](20260429-menu-anchoring-strategy.md) | Chiến lược định vị Menu theo phần tử neo (Anchored Positioning) | accepted |
 | 2026-04-29 | [20260429-stable-layout-border-pattern.md](20260429-stable-layout-border-pattern.md) | Pattern ổn định Layout qua Border tàng hình (Transparent Border) | accepted |
 | 2026-04-29 | [20260429-gdoc-rasterization-strategy.md](20260429-gdoc-rasterization-strategy.md) | Chiến lược Rasterization và ổn định Layout cho Google Docs Copy | accepted |
+| 2026-05-02 | [20260502-content-padding-width-synchronization.md](20260502-content-padding-width-synchronization.md) | Đồng bộ Token cho Content Padding và Width | accepted |
+| 2026-05-02 | [20260502-publish-security-hardening.md](20260502-publish-security-hardening.md) | Gia cố bảo mật cho hệ thống Publish (XSS Protection) | accepted |
 | 2026-05-04 | [20260504-hybrid-toc-id-injection.md](20260504-hybrid-toc-id-injection.md) | Kiến trúc tiêm ID hai lớp cho TOC Navigation trên Worker | accepted |
 | 2026-05-04 | [20260504-vietnamese-slugification-strategy.md](20260504-vietnamese-slugification-strategy.md) | Chiến lược sinh Slug hỗ trợ Tiếng Việt và Unicode | accepted |
-| 2026-05-04 | [20260504-slash-command-interaction.md](20260504-slash-command-interaction.md) | Mô hình tương tác Slash Command "Input-less" và Keyboard Forwarding | accepted |
-| 2026-05-04 | [20260504-smart-content-selection.md](20260504-smart-content-selection.md) | Chiến lược bôi đen nội dung thông minh (Smart Selection) cho Markdown | accepted |
-| 2026-05-04 | [20260504-resilient-slash-input.md](20260504-resilient-slash-input.md) | Xử lý input bền bỉ chống lỗi ký tự ẩn và auto-correction | accepted |
+| 2026-05-04 | [20260504-slash-command-interaction.md](20260504-slash-command-interaction.md) | Mô hình tương tác Slash Command "Input-less" | superseded |
+| 2026-05-04 | [20260504-smart-content-selection.md](20260504-smart-content-selection.md) | Chiến lược bôi đen nội dung thông minh (Smart Selection) | accepted |
+| 2026-05-04 | [20260504-resilient-slash-input.md](20260504-resilient-slash-input.md) | Xử lý input bền bỉ chống lỗi ký tự ẩn | superseded |
 | 2026-05-13 | [20260513-monaco-active-line-styling.md](20260513-monaco-active-line-styling.md) | Tinh chỉnh thẩm mỹ highlight dòng trong Monaco Editor | accepted |
-
+| 2026-05-14 | [20260514-monaco-editor-migration.md](20260514-monaco-editor-migration.md) | Di cư sang Monaco Editor làm Engine soạn thảo chính | accepted |
+| 2026-05-14 | [20260514-absolute-character-offset-sync.md](20260514-absolute-character-offset-sync.md) | Chiến lược đồng bộ Absolute Character Offset | accepted |
+| 2026-05-14 | [20260514-permissive-shortcut-strategy.md](20260514-permissive-shortcut-strategy.md) | Chiến lược Phím tắt Xuyên thấu cho trình soạn thảo IDE | accepted |
+| 2026-05-14 | [20260514-centralized-asset-upload.md](20260514-centralized-asset-upload.md) | Quy chuẩn Luồng tải ảnh tập trung | accepted |
 
 ---
 

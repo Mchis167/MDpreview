@@ -1,36 +1,24 @@
 # Editor Module (`renderer/js/modules/editor.js`)
 
-> Quản lý trạng thái textarea trong edit mode: undo/redo, dirty tracking, save, và markdown formatting.
+> Quản lý trạng thái và tương tác của trình soạn thảo Monaco Editor: lưu trữ, theo dõi thay đổi (dirty tracking), và thực thi các lệnh định dạng.
 
 ---
 
 ## Lifecycle
 
-### `bindToElement(el)`
-Gắn editor logic vào `<textarea>`. Phải gọi trước khi dùng bất kỳ function nào khác.
-- Khởi tạo undo/redo stacks với snapshot đầu tiên
-- Đăng ký keyboard shortcuts: **Mod+S**, **Mod+Z**, **Mod+Shift+Z**
-- Bắt đầu debounced snapshot (300ms) khi user gõ
-- Tự động gọi `TabsModule.setDirty()` để cập nhật chỉ báo thay đổi trên Tab Bar
+### `bind()`
+Kết nối EditorModule với phiên bản Monaco Editor đang hoạt động.
+- Đăng ký lắng nghe sự kiện thay đổi nội dung để thực hiện dirty tracking.
+- Tự động gọi `TabsModule.setDirty()` để cập nhật trạng thái trên Tab Bar.
 
 ### `unbind()`
-Gỡ bỏ tất cả event listeners (input, keydown) để tránh rò rỉ bộ nhớ hoặc nhân bản sự kiện khi bind lại. Đồng thời xóa undo/redo stacks và reset Slash Mode. Gọi khi chuyển khỏi edit mode.
+Gỡ bỏ tất cả các listener (change, cursor, keydown) để tránh rò rỉ bộ nhớ. Gọi khi component soạn thảo bị destroy hoặc chuyển workspace.
 
 ---
 
 ## Undo / Redo
 
-Mỗi snapshot lưu `{ value, selectionStart, selectionEnd }` để khôi phục cả nội dung lẫn vị trí cursor.
-
-- Stack tối đa **200 snapshots** (cũ nhất bị xóa)
-- Snapshot được tạo **debounced 300ms** khi user gõ, không phải mỗi keystroke
-- Khi undo/redo → khôi phục cả selection → không bị mất vị trí con trỏ
-
-### `undo()`
-Di chuyển về snapshot trước. Cập nhật textarea value và selection.
-
-### `redo()`
-Di chuyển tới snapshot sau (nếu đã undo trước đó). Snapshot mới sẽ xóa redo branch.
+Các thay đổi trong Monaco được quản lý bởi `MonacoService` sử dụng stack nội bộ của Monaco, thay vì quản lý thủ công trong EditorModule như trước đây.
 
 ---
 
@@ -46,7 +34,7 @@ Chèn nội dung văn bản vào editor. Tự động chụp snapshot để hỗ
 ## Save & Dirty Tracking
 
 ### `save()`
-Lưu nội dung textarea:
+Lưu nội dung Monaco Editor:
 - Nếu file là **draft** → lưu qua DraftModule
 - Nếu là **file thật** → POST `/api/file` hoặc gọi Electron API
 - Sau khi save → gọi `setOriginalContent()` để reset dirty flag và thông báo cho `TabsModule`.
@@ -61,19 +49,40 @@ Cập nhật baseline. Gọi sau khi load file hoặc sau khi save thành công.
 Đánh dấu dirty/clean thủ công — dùng khi cần override dirty detection (ví dụ: sau auto-save).
 
 ### `revert()`
-Khôi phục textarea về `originalContent`, xóa toàn bộ undo/redo stacks và thông báo "clean" cho `TabsModule`.
+Khôi phục editor về `originalContent`, xóa toàn bộ undo/redo stacks và thông báo "clean" cho `TabsModule`.
 
 ---
 
-## Markdown Formatting
+## Safety Guards
+
+Để đảm bảo an toàn dữ liệu tuyệt đối trong môi trường bất đồng bộ, `EditorModule` triển khai các cơ chế bảo vệ sau:
+
+### 1. Internal ID Locking
+Mỗi yêu cầu lưu file được gắn với một ID nội bộ của tab hiện tại. 
+- Nếu người dùng chuyển tab cực nhanh trong khi lệnh save đang thực thi, hệ thống sẽ đối chiếu ID.
+- Nếu ID không khớp (đã chuyển sang file khác) → lệnh save sẽ bị hủy bỏ để ngăn việc ghi đè nội dung của file mới vào file cũ (hoặc ngược lại).
+
+### 2. Safe-Save Guard
+Cơ chế bảo vệ chống lại race condition khiến editor bị rỗng:
+- Trước khi thực hiện lệnh save, hệ thống kiểm tra: Nếu nội dung Monaco hiện tại rỗng (`""`) NHƯNG `originalContent` (dữ liệu từ file nguồn) lại có dữ liệu → Chặn lệnh save và ghi log cảnh báo.
+- Điều này ngăn chặn việc vô tình xóa sạch nội dung file do lỗi khởi tạo Monaco chậm.
+
+---
+
+## Command Dispatcher
 
 ### `applyAction(action)`
-Áp dụng markdown formatting lên text đang chọn trong textarea. Delegate xuống `MarkdownLogicService`.
+Cửa ngõ duy nhất để thực thi các lệnh từ UI (Toolbar, Command Palette, Context Menu).
 
-Các action phổ biến: `bold`, `italic`, `heading`, `link`, `image`, `code`, `quote`, `list-bullet`, `list-numbered`, `table`, `divider`.
+**1. System Commands (Lệnh hệ thống):**
+- **`img-upload`**: Kích hoạt `AttachmentService.pickAndInsertImage()` để tải ảnh lên assets.
+- **`global-shortcuts-search`**: Mở bảng tra cứu phím tắt ứng dụng.
+
+**2. Formatting Commands (Lệnh định dạng):**
+- Delegate xuống `MonacoActionService` để xử lý các thẻ Markdown (Bold, Italic, Link, etc.).
 
 ### `focusWithContext(context)`
-Focus vào textarea và đồng bộ con trỏ với read view — dùng khi chuyển từ read mode sang edit mode để giữ vị trí cuộn.
+Focus vào Monaco Editor và đồng bộ con trỏ với read view — dùng khi chuyển từ read mode sang edit mode để giữ vị trí cuộn.
 
 ---
 
@@ -97,15 +106,14 @@ Khi gõ ký tự `/` ở đầu dòng hoặc sau một dấu cách/xuống dòng
 
 ---
 
-## Keyboard Shortcuts (trong edit mode)
+## Keyboard Shortcuts (Edit Mode)
 
 | Shortcut | Hành động |
 |---|---|
-| Mod+S | `save()` |
-| Mod+Z | `undo()` |
-| Mod+Shift+Z | `redo()` |
-| `/` | Kích hoạt Slash Mode (ở đầu dòng/sau dấu cách) |
-| Mod+/ | Mở Quick Command Palette (toàn bộ danh sách) |
+| Mod + S | `save()` |
+| / | Kích hoạt Slash Mode |
+| Mod + / | Mở Quick Command Palette (Toàn bộ danh sách) |
+| Mod + Shift + / | Mở bảng tra cứu phím tắt (Global Shortcut Search) |
 
 ---
 
@@ -118,4 +126,4 @@ Khi gõ ký tự `/` ở đầu dòng hoặc sau một dấu cách/xuống dòng
 
 ---
 
-*Document — 2026-05-06*
+*Document — 2026-05-14*

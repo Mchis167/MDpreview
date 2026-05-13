@@ -1,4 +1,4 @@
-/* global AppState, TabsModule, FileService, showToast, loadFile, DraftModule, MarkdownLogicService, MonacoService, monaco, MonacoActionService, MonacoSyncService, BugLogger */
+/* global AppState, TabsModule, FileService, showToast, loadFile, DraftModule, MarkdownLogicService, MonacoService, monaco, MonacoActionService, MonacoSyncService */
 
 const EditorModule = (() => {
   let _originalContent = '';
@@ -9,7 +9,7 @@ const EditorModule = (() => {
   let _cursorListener = null;
   let _keyListener = null;
   let _boundFileId = null; // ID locking to prevent saving to wrong file during transitions
-  const isMac = /Mac|iPhone|iPod|iPad/.test(navigator.platform);
+
 
   function undo() {
     if (MonacoService) MonacoService.undo();
@@ -129,7 +129,7 @@ const EditorModule = (() => {
       }
 
       if (e.ctrlKey || e.metaKey) {
-        const comboStr = `${isMac ? 'Cmd' : 'Ctrl'}${e.shiftKey ? '+Shift' : ''}+${e.browserEvent.key}`;
+        // const comboStr = `${isMac ? 'Cmd' : 'Ctrl'}${e.shiftKey ? '+Shift' : ''}+${e.browserEvent.key}`;
         
         if (e.keyCode === K_PERIOD && e.shiftKey) {
           e.preventDefault();
@@ -172,7 +172,7 @@ const EditorModule = (() => {
         }
         if (e.keyCode === K_Z) {
           e.preventDefault();
-          const action = e.shiftKey ? 'redo' : 'undo';
+          // const action = e.shiftKey ? 'redo' : 'undo';
           if (e.shiftKey) redo(); else undo();
           return;
         }
@@ -429,14 +429,27 @@ const EditorModule = (() => {
 
   function applyAction(action) {
     if (!MonacoService.isInitialized()) return;
+
+    // 1. Handle system-level commands that shouldn't go through formatting logic
+    if (action === 'global-shortcuts-search') {
+      if (window.ShortcutService) window.ShortcutService.execute('global-shortcuts-search');
+      return;
+    }
+    if (action === 'img-upload') {
+      // Small delay to ensure palette is closed and focus is returned
+      setTimeout(() => {
+        if (window.AttachmentService) window.AttachmentService.pickAndInsertImage();
+      }, 10);
+      return;
+    }
     
-      // Use the dedicated action service for formatting
-      if (typeof MonacoActionService !== 'undefined') {
-        MonacoActionService.applyAction(MonacoService, action);
-      } else if (typeof MarkdownLogicService !== 'undefined') {
-        // Fallback for safety (though it shouldn't be needed)
-        MarkdownLogicService.applyAction(MonacoService, action);
-      }
+    // 2. Use the dedicated action service for formatting
+    if (typeof MonacoActionService !== 'undefined') {
+      MonacoActionService.applyAction(MonacoService, action);
+    } else if (typeof MarkdownLogicService !== 'undefined') {
+      // Fallback for safety (though it shouldn't be needed)
+      MarkdownLogicService.applyAction(MonacoService, action);
+    }
   }
 
   function focusWithContext(context = {}) {

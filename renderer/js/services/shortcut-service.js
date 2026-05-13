@@ -79,7 +79,6 @@ const ShortcutService = (() => {
     const activeEl = document.activeElement;
     const activeTag = activeEl?.tagName;
     const isMonaco = activeEl?.closest('.monaco-editor') || activeEl?.classList.contains('monaco-editor');
-    const isEditMode = window.AppState?.currentMode === 'edit';
     const inInput = activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeEl?.isContentEditable || isMonaco;
 
     // 2. Iterate through registry to find a match
@@ -93,11 +92,14 @@ const ShortcutService = (() => {
         if (_matches(e, mod, key, isShift, isAlt, item.keys, item.requireMod, ctrl)) {
           // Check if this shortcut is allowed in inputs
           if (inInput && !item.allowInInput) {
-             if (!mod && !isAlt) continue;
-             // ONLY allow absolute essential global commands in input areas
-             const allowedInInput = ['s', 'z', 'y', 'p', '1', '2', '3', '4'];
-             if (isEditMode && !allowedInInput.includes(key)) continue;
-             if (!allowedInInput.includes(key)) continue;
+            // If no modifier is pressed, it's normal typing (or standard navigation keys), we skip
+            if (!mod && !isAlt) continue;
+
+            // Keys that MUST bubble to the editor for native or IDE-grade behavior
+            const protectedKeys = ['a', 'c', 'v', 'x', 'z', 'y', 'd', 'f', 'g', 'h'];
+            if (protectedKeys.includes(key)) continue;
+
+            // Otherwise, let the shortcut execute globally (e.g., Mod+P, Mod+B, Mod+,)
           }
 
           if (/^[1-4]$/.test(key) && !mod && inInput) continue;

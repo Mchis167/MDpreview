@@ -36,9 +36,12 @@ Trả về toàn bộ dữ liệu phím tắt đang được đăng ký trong re
 Hệ thống áp dụng các quy tắc sau để đảm bảo trải nghiệm người dùng không bị gián đoạn:
 
 1. **Capture Phase**: Lắng nghe sự kiện sớm nhất có thể để chặn các phím tắt mặc định của trình duyệt hoặc các xử lý riêng của ô nhập liệu.
-2. **Input Detection**: Tự động nhận diện khi người dùng đang focus vào `input`, `textarea` hoặc `contenteditable`.
-3. **Whitelist (`allowedInInput`)**: Chỉ các phím tắt quan trọng (Save, Undo, Redo, Navigation với phím Mod) mới được phép kích hoạt khi đang gõ văn bản.
-4. **Standard Editing Keys Bubbling**: Khi đang focus vào input, các phím tắt soạn thảo cơ bản (`Mod + A, C, V, X, Z, Y`) sẽ không bị chặn bởi các shortcut hệ thống (ví dụ: "Select All Tabs") để đảm bảo hành vi chọn văn bản mặc định của trình duyệt hoạt động bình thường.
+2. **Input Detection**: Tự động nhận diện khi người dùng đang focus vào `input`, `textarea`, `contenteditable` hoặc **Monaco Editor**.
+3. **Mô hình "Permissive with Blacklist"**: 
+    - Để hỗ trợ các trình soạn thảo phức tạp như Monaco Editor, hệ thống không còn sử dụng Whitelist hạn chế. 
+    - Thay vào đó, **tất cả** các phím tắt đi kèm phím bổ trợ (`Mod`, `Alt`) đều được phép đi xuyên qua (Pass-through) để kích hoạt lệnh ứng dụng.
+    - **Blacklist**: Các phím tắt soạn thảo cốt lõi (`Mod + A, C, V, X, Z, Y, D, F, G, H`) sẽ bị bỏ qua (Blacklisted) để nhường quyền xử lý hoàn toàn cho trình soạn thảo hoặc trình duyệt.
+4. **Standard Editing Keys Bubbling**: Đảm bảo các phím trong Blacklist luôn giữ được hành vi mặc định (chọn văn bản, tìm kiếm nội bộ, undo/redo).
 5. **Numeric Override**: Phím số `1, 2, 3, 4` khi nhấn đơn lẻ sẽ ưu tiên nhập liệu, nhưng khi nhấn kèm `Mod` hoặc `Alt` sẽ kích hoạt chuyển Mode ngay cả khi đang gõ.
 
 ---
@@ -67,4 +70,4 @@ Mỗi shortcut item trong registry có cấu trúc:
 
 ---
 
-*Document — 2026-05-04*
+*Document — 2026-05-14*

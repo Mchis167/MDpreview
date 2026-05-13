@@ -1,4 +1,4 @@
-/* global AppState, TOCComponent, EditToolbarComponent, EditorModule, MarkdownHelperComponent, MarkdownLogicService, ScrollModule, DesignSystem, FileService, DraftModule, WikiService, WikiDrawer, BacklinksDrawer, MonacoService, MonacoSyncService, SyncService, BugLogger */
+/* global AppState, TOCComponent, EditToolbarComponent, EditorModule, MarkdownHelperComponent, MarkdownLogicService, ScrollModule, DesignSystem, FileService, DraftModule, WikiService, WikiDrawer, BacklinksDrawer, MonacoService, MonacoSyncService, SyncService */
 
 class MarkdownViewerComponent {
   constructor(options = {}) {

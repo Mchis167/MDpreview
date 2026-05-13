@@ -91,6 +91,7 @@ Các phím tắt toàn cục được quản lý tập trung qua `ShortcutServic
 |---|---|---|
 | **Mod+,** | `open-settings` | `SettingsComponent.toggle()` |
 | **Mod+/** | `keyboard-shortcuts` | `ShortcutsComponent.toggle()` |
+| **Mod+Shift+/** | `global-shortcuts-search` | `SearchPalette.show('all')` |
 | **Mod+P** | `focus-search` | `SearchPalette.show()` |
 | **Mod+O** | `workspace-picker` | `WorkspaceModule.openPanel()` |
 | **Mod+S** | `save-file` | `EditorModule.save()` |
@@ -128,4 +129,4 @@ Thứ tự khởi động nghiêm ngặt — **không thay đổi thứ tự**:
 
 ---
 
-*Document — 2026-04-30 (Added Publishing state)*
+*Document — 2026-05-14*

@@ -1,48 +1,30 @@
-# MarkdownLogicService (`renderer/js/services/markdown-logic-service.js`)
+# Markdown Logic Service (`renderer/js/services/markdown-logic-service.js`)
 
-> Headless service xử lý các thuật toán biến đổi văn bản Markdown và đồng bộ hóa vị trí con trỏ.
+> Headless service xử lý các thuật toán biến đổi văn bản Markdown, hiện đã được tối ưu hóa để làm việc với Monaco Editor.
 
 ---
 
 ## Mục đích
 
-`MarkdownLogicService` đóng vai trò là "bộ não" xử lý văn bản thuần túy, không phụ thuộc vào trạng thái UI phức tạp của Editor. Nó đảm bảo tính nhất quán khi áp dụng các định dạng Markdown và giúp người dùng không bị mất dấu vị trí khi chuyển đổi giữa các chế độ xem.
+`MarkdownLogicService` đóng vai trò là bộ thư viện xử lý chuỗi Markdown. Trong kiến trúc mới, service này tập trung vào việc tính toán các thay đổi văn bản (text transformations) và để việc thực thi (apply) cho các service chuyên biệt của Monaco.
 
 ---
 
-## Key Functions
+## Key Functions (Legacy & Core)
 
 ### `applyAction(textarea, action)`
-Áp dụng định dạng Markdown lên vùng chọn của textarea.
+**Lưu ý**: Hàm này hiện chủ yếu phục vụ cho các component cũ hoặc bản Web đơn giản vẫn dùng `textarea`. Đối với trình soạn thảo chính, vui lòng sử dụng `MonacoActionService`.
 
 **Các loại Action:**
 - **Wrap Toggle**: `b` (**bold**), `i` (*italic*), `c` (`code`), `s` (~~strike~~).
 - **Line Toggle**: `q` (> quote), `ul` (* list), `ol` (1. list), `tl` (- [ ] task).
 - **Header Toggle**: `h1` đến `h6`.
-- **Insert**: `l` (link), `img` (image), `hr` (divider), `cb` (code block), `tb` (table).
-
-**Smart Selection Logic:**
-Khi áp dụng một action lên một dòng trống hoặc không có vùng chọn, service sẽ tự động:
-1. Chèn văn bản giữ chỗ (placeholder) phù hợp (ví dụ: "Heading", "bold text").
-2. **Chỉ bôi đen phần nội dung** cần sửa, bỏ qua các ký hiệu Markdown (như `### `, `**`).
-3. Điều này cho phép người dùng gõ nội dung mới ngay lập tức mà không cần xóa ký hiệu Markdown bằng tay.
-
----
-
-### `syncCursor(textarea, context)`
-Đồng bộ hóa vị trí con trỏ và thanh cuộn của textarea dựa trên ngữ cảnh từ Read view.
-
-**Thuật toán (3 giai đoạn):**
-1. **Precise Selection Match**: Tìm kiếm chuỗi văn bản chính xác hoặc dùng thuật toán "Sandwich Fuzzy Match" để tìm đoạn văn bản tương ứng trong mã nguồn Markdown.
-2. **Simple Line Fallback**: Nếu không tìm thấy văn bản, nhảy đến dòng (line number) được chỉ định.
-3. **Scroll & Selection**: 
-   - Sử dụng một "Mirror DIV" ẩn để tính toán tọa độ Pixel Y chính xác của ký tự trong textarea.
-   - Cuộn textarea để đưa vị trí đó ra giữa màn hình.
-   - Highlight vùng chọn nếu `isRealSelection` là true.
 
 ---
 
 ## Smart Typing Logic
+
+Đây là phần quan trọng nhất của service, được `EditorModule` gọi khi người dùng tương tác bàn phím trong Monaco.
 
 ### `computeSmartEnter(value, selStart, selEnd)`
 Xử lý sự kiện nhấn `Enter` để tự động hóa danh sách (Lists).
@@ -55,21 +37,27 @@ Xử lý sự kiện nhấn `Enter` để tự động hóa danh sách (Lists).
 Xử lý sự kiện `Tab` (indent) và `Shift+Tab` (outdent) cho danh sách.
 - **Indent**: Tăng khoảng trắng (2 spaces) và giữ nguyên dấu bullet.
 - **Outdent**: Giảm khoảng trắng và giữ nguyên dấu bullet.
-- **Constraints**: Không can thiệp nếu đang ở trong Code Block hoặc các khối văn bản khác không phải list.
+- **Monaco Integration**: Được gọi từ `MonacoActionService` để tính toán text mới trước khi thực hiện `executeEdits`.
 
 ---
 
-## Kiến trúc nội bộ
+## Mối quan hệ với Monaco
 
-### Mirror DIV Technique
-Do phần tử `<textarea>` của trình duyệt không cung cấp API để lấy tọa độ (X, Y) của một ký tự cụ thể, service tạo một thẻ `DIV` ẩn có cùng style (font, padding, width) để giả lập layout và đo đạc `offsetTop`.
-
-### Fuzzy Match Strategy
-Khi người dùng chọn văn bản ở bản Read (đã qua render HTML), số dòng có thể lệch so với bản gốc Markdown. Thuật toán Fuzzy Match sẽ:
-- Tokenize văn bản thành các từ quan trọng.
-- Xây dựng Regex "Sandwich" (đầu + cuối) để tìm đoạn khớp nhất.
-- Sử dụng `_deltaCache` để ghi nhớ độ lệch dòng cho các lần gọi sau trên cùng một file.
+Trong hệ thống mới:
+1. **`MonacoActionService`**: Nhận yêu cầu từ UI, lấy vùng chọn từ Monaco, và gọi `MarkdownLogicService` để tính toán chuỗi kết quả.
+2. **`MarkdownLogicService`**: Thực hiện các thuật toán Regex phức tạp (ví dụ: tìm điểm bắt đầu của list, tính toán số thứ tự tiếp theo).
+3. **`MonacoActionService`**: Nhận chuỗi kết quả và dùng `editor.executeEdits()` để đưa vào Monaco, giúp duy trì Undo/Redo stack.
 
 ---
 
-*Document — 2026-05-06*
+## Các thuật toán đặc biệt
+
+### Smart Selection Logic
+Khi áp dụng một action (như Bold), service không chỉ chèn `**text**` mà còn tính toán vùng chọn mới sao cho **chỉ bôi đen nội dung**, bỏ qua các ký tự Markdown. Điều này giúp người dùng có thể gõ đè nội dung mới ngay lập tức mà không làm hỏng định dạng.
+
+### Ordered List Re-numbering
+Thuật toán duyệt ngược lên trên để tìm số thứ tự gốc và duyệt xuôi xuống dưới để cập nhật lại toàn bộ các item bị ảnh hưởng bởi việc chèn/xóa dòng.
+
+---
+
+*Document — 2026-05-14 (Monaco-ready update)*

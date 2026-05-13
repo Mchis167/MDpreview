@@ -36,12 +36,12 @@ const AttachmentService = (() => {
   }
 
   /**
-   * Internal helper: Process a list of image files (deduplicate + save + insert)
+   * Process a list of image files (deduplicate + save + insert)
    * @param {Array<File>} imageFiles 
    * @param {Object|null} pos { lineNumber, column } or null for current cursor
    * @param {string} vaultPath 
    */
-  async function _processImageFiles(imageFiles, pos, vaultPath) {
+  async function processImageFiles(imageFiles, pos, vaultPath) {
     if (imageFiles.length === 0) return;
 
     if (window.showToast) {
@@ -159,7 +159,7 @@ const AttachmentService = (() => {
     if (imageFiles.length > 0) {
       e.preventDefault();
       e.stopPropagation();
-      await _processImageFiles(imageFiles, null, vaultPath);
+      await processImageFiles(imageFiles, null, vaultPath);
     }
   }
 
@@ -179,8 +179,7 @@ const AttachmentService = (() => {
 
     e.preventDefault();
     e.stopPropagation();
-
-    await _processImageFiles(imageFiles, pos, vaultPath);
+    await processImageFiles(imageFiles, pos, vaultPath);
   }
 
   /**
@@ -257,6 +256,47 @@ const AttachmentService = (() => {
   }
 
   /**
+   * Picking an image and inserting it as a Markdown link at cursor
+   */
+  async function pickAndInsertImage() {
+    const vaultPath = window.AppState?.currentWorkspace?.path;
+    if (!vaultPath) return;
+
+    if (window.electronAPI.isElectron) {
+      const paths = await window.electronAPI.openFiles({
+        title: 'Select Image to Upload',
+        filters: [{ name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'gif', 'webp'] }]
+      });
+
+      if (paths && paths.length > 0) {
+        const imageFiles = [];
+        for (const filePath of paths) {
+          const data = await window.electronAPI.readFile(filePath);
+          if (data.success) {
+            const blob = new Blob([data.content]);
+            const file = new File([blob], filePath.split(/[\\/]/).pop(), { type: 'image/png' });
+            // Add path for deduplication logic in processImageFiles
+            Object.defineProperty(file, 'path', { value: filePath });
+            imageFiles.push(file);
+          }
+        }
+        await processImageFiles(imageFiles, null, vaultPath);
+      }
+    } else {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.multiple = true;
+      input.onchange = async () => {
+        if (input.files && input.files.length > 0) {
+          await processImageFiles(Array.from(input.files), null, vaultPath);
+        }
+      };
+      input.click();
+    }
+  }
+
+  /**
    * Reveal the asset in OS file explorer
    */
   async function revealAsset(url) {
@@ -284,7 +324,9 @@ const AttachmentService = (() => {
     saveImage,
     handlePaste,
     handleDrop,
+    processImageFiles,
     pickAndReplaceImage,
+    pickAndInsertImage,
     revealAsset
   };
 })();
