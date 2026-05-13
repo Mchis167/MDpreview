@@ -1,4 +1,4 @@
-/* global AppState, TOCComponent, EditToolbarComponent, EditorModule, MarkdownHelperComponent, MarkdownLogicService, ScrollModule, DesignSystem, FileService, DraftModule, WikiService, WikiDrawer, BacklinksDrawer, MonacoService, MonacoSyncService */
+/* global AppState, TOCComponent, EditToolbarComponent, EditorModule, MarkdownHelperComponent, MarkdownLogicService, ScrollModule, DesignSystem, FileService, DraftModule, WikiService, WikiDrawer, BacklinksDrawer, MonacoService, MonacoSyncService, SyncService, BugLogger */
 
 class MarkdownViewerComponent {
   constructor(options = {}) {
@@ -42,6 +42,14 @@ class MarkdownViewerComponent {
     }
     
     const oldMode = this.state.mode;
+
+    // GUARD: If file changed but content/html are NOT provided, 
+    // we MUST reset them to prevent "ghost content" leaking from previous file.
+    if (fileChanged) {
+      if (newState.content === undefined) newState.content = '';
+      if (newState.html === undefined) newState.html = '';
+    }
+
     this.state = { ...this.state, ...newState };
 
     if (fileChanged) {
@@ -70,8 +78,12 @@ class MarkdownViewerComponent {
     window._isMDViewerRendering = true;
     
     try {
-      if (this.previewComp && this.previewComp.destroy) this.previewComp.destroy();
-      if (this.editorComp && this.editorComp.destroy) this.editorComp.destroy();
+      if (this.previewComp && this.previewComp.destroy) {
+        try { this.previewComp.destroy(); } catch(_e) {}
+      }
+      if (this.editorComp && this.editorComp.destroy) {
+        try { this.editorComp.destroy(); } catch(_e) {}
+      }
       
       this.mount.innerHTML = '';
       this._tocBtn = null;
@@ -270,38 +282,9 @@ class MarkdownViewerComponent {
    * Captures the current visible context (line/selection) for Read -> Edit sync
    */
   _captureSyncContext() {
-    if (!this.viewport || !window.AppState) return;
-
-    const ctx = {
-      line: 1,
-      offset: 0,
-      selectionText: '',
-      _fileKey: this.state.file
-    };
-
-    // 1. Check for active text selection (Highest priority for sync)
-    const selection = window.getSelection();
-    if (selection && !selection.isCollapsed && this.viewport.contains(selection.anchorNode)) {
-      ctx.selectionText = selection.toString();
-      const lineEl = selection.anchorNode.parentElement?.closest('[data-line]');
-      if (lineEl) {
-        ctx.line = parseInt(lineEl.dataset.line, 10);
-      }
-    } else {
-      // 2. Find top-most visible line in the viewport
-      const viewportRect = this.viewport.getBoundingClientRect();
-      const elements = this.viewport.querySelectorAll('[data-line]');
-      
-      for (const el of elements) {
-        const rect = el.getBoundingClientRect();
-        if (rect.top >= viewportRect.top - 20) {
-          ctx.line = parseInt(el.dataset.line, 10);
-          break;
-        }
-      }
+    if (window.SyncService) {
+      window.AppState.lastSyncContext = SyncService.captureReadViewSyncData();
     }
-
-    window.AppState.lastSyncContext = ctx;
   }
 
   /**
@@ -1154,37 +1137,50 @@ class MarkdownEditor {
     this.mount.appendChild(container);
 
     // Initial mount to MonacoService
-    MonacoService.mount(monacoEl, {
+    this._mountPromise = MonacoService.mount(monacoEl, {
       value: this.content,
       language: 'markdown'
     });
   }
 
   activate() {
-    // Initialize Editor Logic
-    if (EditorModule) {
-      EditorModule.bind();
-    }
+    // ── Async Activation Flow ──
+    // We must wait for mount to finish before binding EditorModule or syncing cursor.
+    const run = async () => {
+      if (this._mountPromise) await this._mountPromise;
 
-    MonacoService.layout();
-
-    // Tell ScrollModule to watch the editor
-    if (ScrollModule) {
-      const scrollEl = MonacoService.getScrollContainer();
-      ScrollModule.setContainer(scrollEl, this.file);
-      ScrollModule.restore(this.file);
-    }
-
-    // Restore cursor if context exists in AppState
-    const ctx = window.AppState && window.AppState.lastSyncContext;
-    if (ctx && (ctx.line || ctx.scrollPct)) {
-      if (typeof MonacoSyncService !== 'undefined') {
-        MonacoSyncService.syncCursor(MonacoService, ctx);
-      } else if (typeof MarkdownLogicService !== 'undefined') {
-        MarkdownLogicService.syncCursor(MonacoService, ctx);
+      // Initialize Editor Logic
+      if (EditorModule) {
+        EditorModule.bind();
+        
+        // Final catch-up: ensure the latest content is pushed after bind
+        if (this.content !== undefined) {
+          EditorModule.setOriginalContent(this.content);
+        }
       }
-      window.AppState.lastSyncContext = null;
-    }
+
+      MonacoService.layout();
+
+      // Tell ScrollModule to watch the editor
+      if (ScrollModule) {
+        const scrollEl = MonacoService.getScrollContainer();
+        ScrollModule.setContainer(scrollEl, this.file);
+        ScrollModule.restore(this.file);
+      }
+
+      // Restore cursor if context exists in AppState
+      const ctx = window.AppState && window.AppState.lastSyncContext;
+      if (ctx && (ctx.line || ctx.scrollPct)) {
+        if (typeof MonacoSyncService !== 'undefined') {
+          MonacoSyncService.syncCursor(MonacoService, ctx);
+        } else if (typeof MarkdownLogicService !== 'undefined') {
+          MarkdownLogicService.syncCursor(MonacoService, ctx);
+        }
+        window.AppState.lastSyncContext = null;
+      }
+    };
+    
+    run();
   }
 
   deactivate() {
@@ -1218,12 +1214,13 @@ class MarkdownEditor {
 
   update({ content }) {
     this.content = content;
-    if (MonacoService.isInitialized() && MonacoService.getValue() !== content) {
-      if (EditorModule) {
-        EditorModule.setOriginalContent(content);
-      } else {
-        MonacoService.setValue(content);
-      }
+    
+    // Always sync target content to EditorModule even if not initialized yet.
+    // EditorModule.setOriginalContent will handle the 'pending' state.
+    if (EditorModule) {
+      EditorModule.setOriginalContent(content);
+    } else if (MonacoService.isInitialized()) {
+      MonacoService.setValue(content);
     }
   }
 

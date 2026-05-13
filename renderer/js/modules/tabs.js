@@ -409,7 +409,7 @@ const TabsModule = (function () {
         AppState.currentMode === "edit" &&
         filePath === AppState.currentFile
       ) {
-        content = document.getElementById("edit-textarea")?.value || "";
+        content = (window.MonacoService && window.MonacoService.isInitialized()) ? window.MonacoService.getValue() : '';
       } else if (typeof DraftModule !== "undefined") {
         content = DraftModule.getDraftContent(filePath);
       }

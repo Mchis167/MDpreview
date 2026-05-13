@@ -46,12 +46,19 @@
 .ds-quick-command-palette .palette-input {
   width: 100%;
   background: transparent;
-  border: none;
+  border: none !important;
   color: var(--ds-text-primary);
   font-family: var(--ds-font-family-text);
   font-size: var(--ds-font-md);
-  outline: none;
+  outline: none !important;
+  box-shadow: none !important;
   padding: var(--ds-space-2xs) 0;
+}
+
+.ds-quick-command-palette .palette-input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
 }
 
 .ds-quick-command-palette .palette-results {

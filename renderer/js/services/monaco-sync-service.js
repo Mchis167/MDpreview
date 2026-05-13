@@ -27,7 +27,28 @@ const MonacoSyncService = (() => {
     let targetChar = -1;
     let targetCharMatchLen = 0;
 
-    // ── Stage 1: Precise Selection Match ──────────────────────────
+    // ── Stage 0: Absolute Character Offset Sync (Premium) ─────────────
+    if (context.srcStart !== undefined) {
+      requestAnimationFrame(() => {
+        const model = monacoService.getInstance().getModel();
+        const startPos = model.getPositionAt(context.srcStart);
+        
+        if (context.isRealSelection && context.srcEnd !== undefined) {
+          const endPos = model.getPositionAt(context.srcEnd);
+          monacoService.setSelection({
+            startLineNumber: startPos.lineNumber,
+            startColumn: startPos.column,
+            endLineNumber: endPos.lineNumber,
+            endColumn: endPos.column
+          });
+        } else {
+          monacoService.setCursorPosition(startPos);
+        }
+        // Monaco revealPosition handles centering logic
+        monacoService.getInstance().revealPositionInCenterIfOutsideViewport(startPos);
+      });
+      return;
+    }
     if (context.line && context.selectionText && context.selectionText.length > 2) {
       const lines = text.split('\n');
 

@@ -32,25 +32,7 @@ renderer.listitem = (text, task, checked) => {
   return `<li>${text}</li>\n`;
 };
 
-/**
- * Custom preprocessing to handle nested lists and multi-level markers.
- */
-function preprocessMarkdown(src) {
-  return src.split('\n').map(line => {
-    // Match multi-level ordered list or indented list
-    const match = line.match(/^( {0,})(\d+(?:\.\d+)*)([.)])( +)(.*)/);
-    if (match) {
-      const [, indent, marker, suffix, space, content] = match;
-      // If it's a nested item (indent > 0) or a multi-level marker, convert to '-'
-      if (indent.length > 0 || marker.includes('.')) {
-        // Double the original indent to ensure nesting (2->4, 4->8, etc.)
-        const newIndent = ' '.repeat(indent.length * 2 || 4);
-        return `${newIndent}- <!--M:${marker}${suffix}-->${space}${content}`;
-      }
-    }
-    return line;
-  }).join('\n');
-}
+// Pre-processing is now handled during token rendering to preserve character offsets.
 
 marked.use({
   renderer: renderer,
@@ -77,16 +59,96 @@ function slugify(text) {
 }
 
 /**
+ * Helper to render inline tokens with character offset metadata.
+ */
+function renderInlineTokens(tokens, originalSource, baseOffset) {
+  let html = '';
+  let lastOffset = baseOffset;
+
+  if (!tokens) return '';
+
+  for (const token of tokens) {
+    let start = originalSource.indexOf(token.raw, lastOffset);
+    if (start === -1) {
+      // Fallback if not found exactly (should not happen if source is consistent)
+      start = lastOffset;
+    }
+    const end = start + token.raw.length;
+    lastOffset = end;
+
+    const data = `data-src-start="${start}" data-src-end="${end}"`;
+
+    switch (token.type) {
+      case 'text': {
+        // Escape HTML entities in text
+        const escapedText = token.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        html += `<span ${data}>${escapedText}</span>`;
+        break;
+      }
+      case 'strong': {
+        // Find the inner content offset: skip the opening delimiter (**text** or __text__)
+        const strongDelimLen = token.raw.startsWith('***') ? 3 : 2;
+        const strongInnerStart = start + strongDelimLen;
+        html += `<strong ${data}>${renderInlineTokens(token.tokens, originalSource, strongInnerStart)}</strong>`;
+        break;
+      }
+      case 'em': {
+        // Find the inner content offset: skip the opening delimiter (*text* or _text_)
+        const emDelimLen = token.raw.startsWith('**') ? 2 : 1;
+        const emInnerStart = start + emDelimLen;
+        html += `<em ${data}>${renderInlineTokens(token.tokens, originalSource, emInnerStart)}</em>`;
+        break;
+      }
+      case 'codespan':
+        html += `<code class="hljs" ${data}>${token.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code>`;
+        break;
+      case 'link': {
+        const linkInnerStart = start + 1; // skip '['
+        html += `<a href="${token.href}" title="${token.title || ''}" ${data}>${renderInlineTokens(token.tokens, originalSource, linkInnerStart)}</a>`;
+        break;
+      }
+      case 'br':
+        html += '<br>';
+        break;
+      case 'del': {
+        const delInnerStart = start + 2; // skip '~~'
+        html += `<del ${data}>${renderInlineTokens(token.tokens, originalSource, delInnerStart)}</del>`;
+        break;
+      }
+      case 'image':
+        html += `<img src="${token.href}" alt="${token.text}" title="${token.title || ''}" ${data}>`;
+        break;
+      case 'escape':
+        html += `<span ${data}>${token.text}</span>`;
+        break;
+      case 'html':
+        html += `<span ${data}>${token.text}</span>`;
+        break;
+      default:
+        html += `<span ${data}>${(token.text || token.raw).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`;
+    }
+  }
+  return html;
+}
+
+/**
  * Recursive helper to render tokens into HTML with md-line and md-block wrappers.
+ * @param {string} originalSource - The raw markdown source for offset calculation.
+ * @param {number} baseOffset - The character offset where this token set begins.
  * @param {boolean} isTopLevel - If true, wraps output in .md-block.
  */
-function renderTokens(tokens, lineStart, isTopLevel = true) {
+function renderTokens(tokens, originalSource, baseOffset, lineStart, isTopLevel = true) {
   let html = '';
   let currentLine = lineStart;
+  let lastOffset = baseOffset;
 
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
     if (!token.raw) continue;
+
+    const tokenStartOffset = originalSource.indexOf(token.raw, lastOffset);
+    const tokenEndOffset = tokenStartOffset + token.raw.length;
+    lastOffset = tokenEndOffset;
 
     const tokenStartLine = currentLine;
     const tokenNewlines = (token.raw.match(/\n/g) || []).length;
@@ -123,14 +185,17 @@ function renderTokens(tokens, lineStart, isTopLevel = true) {
         const renderedSummary = marked.parseInline(summaryRaw);
 
         // Render inner content with proper block wrappers and line numbering support
+        // We calculate the inner content's start offset relative to the full raw string
+  const innerContentIndex = entireRaw.indexOf(contentRaw);
+        const innerBaseOffset = tokenStartOffset + (innerContentIndex !== -1 ? innerContentIndex : 0);
         const innerTokens = marked.lexer(contentRaw);
-        const renderedContent = renderTokens(innerTokens, tokenStartLine, true); 
+        const renderedContent = renderTokens(innerTokens, originalSource, innerBaseOffset, tokenStartLine, true); 
 
         tokenHtml = `<details><summary>${renderedSummary}</summary><div class="md-details-content">${renderedContent}</div></details>`;
-        tokenHtml = `<div class="md-line" data-line="${tokenStartLine}">${tokenHtml}</div>`;
+        tokenHtml = `<div class="md-line" data-line="${tokenStartLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${tokenHtml}</div>`;
 
         // Always wrap in md-block for Flow Spacing system
-        html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}">${tokenHtml}</div>\n`;
+        html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${tokenHtml}</div>\n`;
 
         currentLine = tokenEndLine;
         i = j;
@@ -144,41 +209,57 @@ function renderTokens(tokens, lineStart, isTopLevel = true) {
       let listPrefixOffset = 0;
 
       token.items.forEach(item => {
-        const itemIndex = token.raw.indexOf(item.raw, listPrefixOffset);
+        const itemIndexInList = token.raw.indexOf(item.raw, listPrefixOffset);
         let absoluteItemLine = currentLine;
-        if (itemIndex !== -1) {
-          const prefix = token.raw.substring(0, itemIndex);
+        let itemStartOffset = tokenStartOffset;
+
+        if (itemIndexInList !== -1) {
+          const prefix = token.raw.substring(0, itemIndexInList);
           const newlinesBefore = (prefix.match(/\n/g) || []).length;
           absoluteItemLine = tokenStartLine + newlinesBefore;
-          listPrefixOffset = itemIndex + item.raw.length;
+          itemStartOffset = tokenStartOffset + itemIndexInList;
+          listPrefixOffset = itemIndexInList + item.raw.length;
+        }
+        
+        const itemEndOffset = itemStartOffset + item.raw.length;
+
+        // ── Nested List Marker Handling ──
+        // Detect multi-level markers like "1.1. Item" directly from item.raw.
+        // This is display-only: we render a <span> for the marker, then use item.tokens
+        // (which are the already-lexed sub-tokens) for the content.
+        let markerPrefix = '';
+        const markerMatch = item.raw.match(/^( {0,})(\d+(?:\.\d+)*)([.)])( +)/);
+        if (markerMatch) {
+          const [, indent, marker, suffix] = markerMatch;
+          if (indent.length > 0 || marker.includes('.')) {
+            markerPrefix = `<span class="md-custom-marker">${marker}${suffix}</span>`;
+          }
         }
 
         // Inside LI, we set isTopLevel = false to avoid extra <div> wrappers
-        let itemContent = renderTokens(item.tokens || [], absoluteItemLine, false);
+        let itemContent = renderTokens(item.tokens || [], originalSource, itemStartOffset, absoluteItemLine, false);
 
-        // Restore original marker if found
-        const mMatch = itemContent.match(/<!--M:(.*?)-->/);
-        let markerPrefix = '';
-        if (mMatch) {
-          markerPrefix = `<span class="md-custom-marker">${mMatch[1]}</span>`;
-          itemContent = itemContent.replace(/<!--M:.*?-->\s*/, '');
+        // Inject visual marker prefix if detected
+        if (markerPrefix && !itemContent.includes('md-custom-marker')) {
+          itemContent = itemContent.replace(/^<div class="md-line"([^>]*)>/, `<div class="md-line"$1>${markerPrefix}`);
         }
 
         // Clean up paragraph wrappers for all list items
         itemContent = itemContent.trim().replace(/^<p>/g, '').replace(/<\/p>$/g, '');
 
+        const liData = `data-line="${absoluteItemLine}" data-src-start="${itemStartOffset}" data-src-end="${itemEndOffset}"`;
         if (item.task) {
-          listHtml += `<li class="task-list-item md-line" data-line="${absoluteItemLine}">${markerPrefix}<input type="checkbox" ${item.checked ? 'checked' : ''}> <div class="md-list-item-content">${itemContent}</div></li>\n`;
+          listHtml += `<li class="task-list-item md-line" ${liData}>${markerPrefix}<input type="checkbox" ${item.checked ? 'checked' : ''}> <div class="md-list-item-content">${itemContent}</div></li>\n`;
         } else {
           const liClass = markerPrefix ? 'md-line has-custom-marker' : 'md-line';
-          listHtml += `<li class="${liClass}" data-line="${absoluteItemLine}">${markerPrefix}<div class="md-list-item-content">${itemContent}</div></li>\n`;
+          listHtml += `<li class="${liClass}" ${liData}>${markerPrefix}<div class="md-list-item-content">${itemContent}</div></li>\n`;
         }
       });
 
       listHtml += token.ordered ? '</ol>' : '</ul>';
 
       // Always wrap in md-block for Flow Spacing system
-      html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}">${listHtml}</div>\n`;
+      html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${listHtml}</div>\n`;
 
       currentLine = tokenEndLine;
       continue;
@@ -196,10 +277,10 @@ function renderTokens(tokens, lineStart, isTopLevel = true) {
         // Data rows → tokenStartLine + 1 (separator) + trCount
         const line = trCount === 0 ? tokenStartLine : tokenStartLine + 1 + trCount;
         trCount++;
-        return `<tr data-line="${line}">`;
+        return `<tr data-line="${line}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">`;
       });
-      tokenHtml = `<div class="md-line" data-line="${tokenStartLine}">${tableHtml}</div>`;
-      html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}">${tokenHtml}</div>\n`;
+      tokenHtml = `<div class="md-line" data-line="${tokenStartLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${tableHtml}</div>`;
+      html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${tokenHtml}</div>\n`;
       currentLine = tokenEndLine;
       continue;
     }
@@ -208,10 +289,19 @@ function renderTokens(tokens, lineStart, isTopLevel = true) {
     // Adds data-line-start / data-line-end to <pre> so sync-service can
     // estimate which code line is at the center of the viewport.
     if (token.type === 'code') {
+      if (token.lang === 'mermaid') {
+        const atomicHtml = renderMermaidBlock(token.text, tokenStartLine, tokenEndLine, tokenStartOffset, tokenEndOffset);
+        // For Mermaid, we use a slightly flatter structure to ensure the renderer 
+        // can accurately measure dimensions. We still keep md-block for sync anchoring.
+        html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${atomicHtml}</div>\n`;
+        currentLine = tokenEndLine;
+        continue;
+      }
+
       const highlighted = highlightCodeBlock(token.text, token.lang);
-      const atomicHtml = `<pre data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}"><code class="hljs language-${token.lang || ''}">${highlighted}</code></pre>`;
-      tokenHtml = `<div class="md-line" data-line="${tokenStartLine}">${atomicHtml}</div>`;
-      html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}">${tokenHtml}</div>\n`;
+      const atomicHtml = `<pre data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}"><code class="hljs language-${token.lang || ''}">${highlighted}</code></pre>`;
+      tokenHtml = `<div class="md-line" data-line="${tokenStartLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${atomicHtml}</div>`;
+      html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${tokenHtml}</div>\n`;
       currentLine = tokenEndLine;
       continue;
     }
@@ -228,9 +318,13 @@ function renderTokens(tokens, lineStart, isTopLevel = true) {
       }
 
       const level = token.depth;
-      const headingHtml = `<h${level} id="${id}">${token.text}</h${level}>`;
-      tokenHtml = `<div class="md-line" data-line="${tokenStartLine}">${headingHtml}</div>`;
-      html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}">${tokenHtml}</div>\n`;
+      // Find exact position of heading text after the '#' markers and spaces
+      // e.g. "## My Heading" -> level=2, text starts at index 3 ("## " = 3 chars)
+      const headingPrefixEnd = tokenStartOffset + level + (originalSource[tokenStartOffset + level] === ' ' ? 1 : 0);
+      const headingContent = token.tokens ? renderInlineTokens(token.tokens, originalSource, headingPrefixEnd) : token.text;
+      const headingHtml = `<h${level} id="${id}">${headingContent}</h${level}>`;
+      tokenHtml = `<div class="md-line" data-line="${tokenStartLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${headingHtml}</div>`;
+      html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${tokenHtml}</div>\n`;
       currentLine = tokenEndLine;
       continue;
     }
@@ -239,32 +333,37 @@ function renderTokens(tokens, lineStart, isTopLevel = true) {
     const isAtomic = ['blockquote', 'html'].includes(token.type);
     if (isAtomic) {
       const atomicHtml = marked.parser([token]);
-      tokenHtml = `<div class="md-line" data-line="${tokenStartLine}">${atomicHtml}</div>`;
+      tokenHtml = `<div class="md-line" data-line="${tokenStartLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${atomicHtml}</div>`;
       // Always wrap in md-block for Flow Spacing system
-      html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}">${tokenHtml}</div>\n`;
+      html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${tokenHtml}</div>\n`;
       currentLine = tokenEndLine;
       continue;
     }
 
     // ── Default Paragraphs/Text ──
-    let rawHtml = marked.parser([token]);
-    if (!isTopLevel) {
-      // Strip paragraph tags inside lists but we will wrap in md-block instead
-      rawHtml = rawHtml.trim().replace(/^<p>/g, '').replace(/<\/p>$/g, '');
+    let rawHtml = '';
+    if (token.tokens && token.type === 'paragraph') {
+      rawHtml = renderInlineTokens(token.tokens, originalSource, tokenStartOffset);
+    } else {
+      rawHtml = marked.parser([token]);
+      if (!isTopLevel) {
+        // Strip paragraph tags inside lists but we will wrap in md-block instead
+        rawHtml = rawHtml.trim().replace(/^<p>/g, '').replace(/<\/p>$/g, '');
+      }
     }
     const renderedLines = rawHtml.trim().split(/\r?\n/);
     let wrappedHtml = '';
     for (let k = 0; k < renderedLines.length; k++) {
       const lNum = tokenStartLine + k;
       if (lNum <= tokenEndLine) {
-        wrappedHtml += `<div class="md-line" data-line="${lNum}">${renderedLines[k]}</div>\n`;
+        wrappedHtml += `<div class="md-line" data-line="${lNum}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${renderedLines[k]}</div>\n`;
       } else {
         wrappedHtml += renderedLines[k] + '\n';
       }
     }
     
     // Always wrap in md-block to maintain vertical rhythm via Flow Spacing system
-    html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}">${wrappedHtml}</div>\n`;
+    html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${wrappedHtml}</div>\n`;
     currentLine = tokenEndLine;
   }
 
@@ -284,9 +383,11 @@ function renderWithLineNumbers(content) {
   const bodyStartOffset = content.indexOf(processedContent);
   const frontmatterLines = content.substring(0, bodyStartOffset).split(/\r?\n/).length - 1;
 
-  const processed = preprocessMarkdown(processedContent);
-  const tokens = marked.lexer(processed);
-  const html = renderTokens(tokens, 1 + frontmatterLines, true); // Root call is top-level
+  const tokens = marked.lexer(processedContent);
+  // CRITICAL: Pass full 'content' (not just body) as originalSource.
+  // Monaco receives the full file including frontmatter, so data-src-* offsets
+  // must be absolute positions within the FULL file for getPositionAt() to work correctly.
+  const html = renderTokens(tokens, content, bodyStartOffset, 1 + frontmatterLines, true);
   return sanitizeHtml(html);
 }
 

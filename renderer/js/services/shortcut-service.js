@@ -103,7 +103,6 @@ const ShortcutService = (() => {
           if (/^[1-4]$/.test(key) && !mod && inInput) continue;
 
           matchedItem = item;
-          console.warn(`[DEBUG-GLOBAL-SHORTCUT] Matched ID: ${matchedItem.id}, Combo: ${item.keys.join('+')}`);
           break;
         }
       }

@@ -54,9 +54,17 @@ function wrapInTableWrapper(html) {
 
 /**
  * Render a Mermaid diagram block.
+ * Escapes minimum HTML entities to prevent browser tag breakage while
+ * ensuring mermaid.js can correctly parse labels and quotes.
  */
-function renderMermaidBlock(text) {
-  return `<div class="mermaid">${text}</div>`;
+function renderMermaidBlock(text, lineStart, lineEnd, srcStart, srcEnd) {
+  const escaped = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  
+  const metadata = lineStart !== undefined ? `data-line-start="${lineStart}" data-line-end="${lineEnd}" data-src-start="${srcStart}" data-src-end="${srcEnd}"` : '';
+  return `<div class="mermaid" ${metadata}>${escaped}</div>`;
 }
 
 // Export for both environments

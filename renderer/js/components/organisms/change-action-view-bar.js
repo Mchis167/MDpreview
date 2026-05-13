@@ -231,7 +231,7 @@ class ChangeActionViewBarComponent {
 
       if (prevMode === 'edit' && syncData) {
         requestAnimationFrame(() => {
-          this.scrollReadViewToLine(syncData.line, syncData.selectionText, syncData.isRealSelection);
+          if (window.SyncService) SyncService.syncReadView(syncData);
         });
       }
     } else if (targetMode === 'edit') {
@@ -335,7 +335,9 @@ class ChangeActionViewBarComponent {
   }
 
   scrollReadViewToLine(line, selectionText = '', isRealSelection = false) {
-    if (window.SyncService) SyncService.scrollReadViewToLine(line, selectionText, isRealSelection);
+    if (window.SyncService) {
+      SyncService.syncReadView({ line, selectionText, isRealSelection });
+    }
   }
 
   async loadRawContent() {
@@ -354,9 +356,6 @@ class ChangeActionViewBarComponent {
         const text = await res.text();
         if (typeof EditorModule !== 'undefined') {
             EditorModule.setOriginalContent(text);
-        } else {
-            const textarea = document.getElementById('edit-textarea');
-            if (textarea) textarea.value = text;
         }
     }
   }
@@ -366,7 +365,7 @@ class ChangeActionViewBarComponent {
 
     let content = '';
     if (AppState.currentMode === 'edit' && typeof EditorModule !== 'undefined') {
-      content = document.getElementById('edit-textarea')?.value || '';
+      content = (window.MonacoService && window.MonacoService.isInitialized()) ? window.MonacoService.getValue() : '';
     } else if (typeof DraftModule !== 'undefined') {
       content = DraftModule.getDraftContent();
     }
@@ -455,7 +454,7 @@ class ChangeActionViewBarComponent {
     // Skip confirmation if draft is empty
     let content = "";
     if (AppState.currentMode === "edit" && typeof EditorModule !== "undefined") {
-      content = document.getElementById("edit-textarea")?.value || "";
+      content = (window.MonacoService && window.MonacoService.isInitialized()) ? window.MonacoService.getValue() : '';
     } else if (typeof DraftModule !== "undefined") {
       content = DraftModule.getDraftContent();
     }

@@ -4,7 +4,7 @@
  * Pattern: IIFE Singleton
  */
 
-/* global monaco, require */
+/* global monaco, require, BugLogger */
 
 const MonacoService = (() => {
   'use strict';
@@ -12,7 +12,9 @@ const MonacoService = (() => {
   let _editor = null;
   let _model = null;
   let _isInitialized = false;
+  let _mountCount = 0; // Guard against overlapping mount calls
   let _loadPromise = null;
+  let _rejectionListenerAttached = false;
 
   /**
    * Configure Monaco Loader
@@ -41,7 +43,7 @@ const MonacoService = (() => {
   function _buildTheme() {
     const style = getComputedStyle(document.documentElement);
     const get = (v) => style.getPropertyValue(v).trim();
-    
+
     /**
      * Converts rgb/rgba or hex to a #RRGGBB or #RRGGBBAA hex string.
      * Monaco rules require strict hex format.
@@ -49,7 +51,7 @@ const MonacoService = (() => {
     const _toHex = (color) => {
       if (!color || color === 'transparent') return '#00000000';
       if (color.startsWith('#')) return color;
-      
+
       const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
       if (match) {
         const r = parseInt(match[1]).toString(16).padStart(2, '0');
@@ -81,7 +83,7 @@ const MonacoService = (() => {
         { token: 'attribute.value', foreground: '98C379' },  // Green
         { token: 'operator', foreground: '56B6C2' },         // Cyan
         { token: 'delimiter', foreground: 'ABB2BF' },        // Gray (Dots, commas, brackets)
-        
+
         // ── Markdown Special Tokens ──
         { token: 'header', foreground: '56B6C2', fontStyle: 'bold' },
         { token: 'list.bullet', foreground: 'D19A66' },
@@ -96,11 +98,11 @@ const MonacoService = (() => {
       colors: {
         'editor.background': '#00000000', // Transparent
         'editor.foreground': '#ABB2BF', // Standard One Dark gray foreground
-        
+
         // Disable internal highlighting to use CSS
         'editor.lineHighlightBackground': '#00000000',
         'editor.lineHighlightBorder': _toHex(get('--ds-white-a10')), // Subtle border with alpha
-        
+
         // UI Interaction colors
         'focusBorder': _toHex(get('--ds-white-a10')), // Subdue the harsh blue focus border
         'editor.selectionBackground': get('--ds-white-a20'),
@@ -140,7 +142,14 @@ const MonacoService = (() => {
      * @param {Object} options 
      */
     async mount(containerEl, options = {}) {
+      const currentMountID = ++_mountCount;
       await this.init();
+      
+      // If a newer mount request has started, abort this one
+      if (currentMountID !== _mountCount) {
+        console.warn('[MonacoService] Mount aborted: superseded by newer request.');
+        return;
+      }
 
       if (_editor) {
         this.dispose();
@@ -171,7 +180,7 @@ const MonacoService = (() => {
         padding: { top: 20, bottom: 20 },
         scrollBeyondLastLine: true,
         smoothScrolling: true,
-        renderLineHighlight: 'line', 
+        renderLineHighlight: 'line',
         renderLineHighlightOnlyWhenFocus: true,
         cursorSmoothCaretAnimation: 'on',
         renderWhitespace: 'none',        // Disable dots for spaces
@@ -186,16 +195,29 @@ const MonacoService = (() => {
           verticalScrollbarSize: 4,
           horizontalScrollbarSize: 4,
           useShadows: false
-        }
+        },
+
+        // Disable suggestions/IntelliSense
+        quickSuggestions: false,
+        suggestOnTriggerCharacters: false,
+        wordBasedSuggestions: false,
+        parameterHints: { enabled: false },
+        snippetSuggestions: 'none',
+        tabCompletion: 'off'
       };
 
       _editor = monaco.editor.create(containerEl, { ...defaultOptions, ...options });
+      
+      // Force layout after a small delay to ensure container dimensions are ready (crucial for Web)
+      setTimeout(() => {
+        if (_editor) _editor.layout();
+      }, 50);
       _model = _editor.getModel();
 
       // 5. Xcode-style Navigation & Selection
       // ... (existing commands)
       _editor.addCommand(monaco.KeyMod.Alt | monaco.KeyCode.UpArrow, () => {
-        _editor.trigger('keyboard', 'cursorUp', {}); 
+        _editor.trigger('keyboard', 'cursorUp', {});
       });
       _editor.addCommand(monaco.KeyMod.Alt | monaco.KeyCode.DownArrow, () => {
         _editor.trigger('keyboard', 'cursorDown', {});
@@ -208,103 +230,108 @@ const MonacoService = (() => {
         _editor.trigger('keyboard', 'cursorDownSelect', {});
       });
 
-        // 6. Attachment Integration (Drop only, Paste handled globally in AttachmentService)
-        const domNode = _editor.getDomNode();
-        if (domNode) {
-          // Handle Drag Events to prevent default indicators from getting stuck
-          const handleDrag = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          };
+      // Relocate Toggle Comment to Cmd + Option + /
+      _editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Alt | monaco.KeyCode.Slash, () => {
+        _editor.trigger('keyboard', 'editor.action.commentLine', {});
+      });
 
-          domNode.addEventListener('dragenter', handleDrag, true);
-          domNode.addEventListener('dragover', handleDrag, true);
-          
-          domNode.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }, true);
+      // 6. Attachment Integration (Drop only, Paste handled globally in AttachmentService)
+      const domNode = _editor.getDomNode();
+      if (domNode) {
+        // Handle Drag Events to prevent default indicators from getting stuck
+        const handleDrag = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        };
 
-          domNode.addEventListener('drop', (e) => {
-            if (window.AttachmentService && window.AppState?.currentWorkspace) {
-              const target = _editor.getTargetAtClientPoint(e.clientX, e.clientY);
-              if (target && target.position) {
-                window.AttachmentService.handleDrop(e, target.position, window.AppState.currentWorkspace.path);
-              } else {
-                // Fallback to current cursor if target not found
-                window.AttachmentService.handleDrop(e, _editor.getPosition(), window.AppState.currentWorkspace.path);
-              }
-            }
-          }, true);
+        domNode.addEventListener('dragenter', handleDrag, true);
+        domNode.addEventListener('dragover', handleDrag, true);
 
-          // 7. Custom Context Menu for Images
-          domNode.addEventListener('contextmenu', (e) => {
+        domNode.addEventListener('dragleave', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }, true);
+
+        domNode.addEventListener('drop', (e) => {
+          if (window.AttachmentService && window.AppState?.currentWorkspace) {
             const target = _editor.getTargetAtClientPoint(e.clientX, e.clientY);
-            if (!target || !target.position) return;
+            if (target && target.position) {
+              window.AttachmentService.handleDrop(e, target.position, window.AppState.currentWorkspace.path);
+            } else {
+              // Fallback to current cursor if target not found
+              window.AttachmentService.handleDrop(e, _editor.getPosition(), window.AppState.currentWorkspace.path);
+            }
+          }
+        }, true);
 
-            const pos = target.position;
-            const model = _editor.getModel();
-            if (!model) return;
+        // 7. Custom Context Menu for Images
+        domNode.addEventListener('contextmenu', (e) => {
+          const target = _editor.getTargetAtClientPoint(e.clientX, e.clientY);
+          if (!target || !target.position) return;
 
-            const lineContent = model.getLineContent(pos.lineNumber);
-            const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
-            let match;
-            let foundImage = null;
+          const pos = target.position;
+          const model = _editor.getModel();
+          if (!model) return;
 
-            while ((match = imageRegex.exec(lineContent)) !== null) {
-              const startColumn = match.index + 1;
-              const endColumn = startColumn + match[0].length;
-              
-              if (pos.column >= startColumn && pos.column <= endColumn) {
-                const url = match[2];
-                const urlStartColumn = startColumn + match[1].length + 4;
-                const urlEndColumn = urlStartColumn + url.length;
-                
-                foundImage = {
-                  url: url,
-                  range: new monaco.Range(pos.lineNumber, urlStartColumn, pos.lineNumber, urlEndColumn),
-                  fullRange: new monaco.Range(pos.lineNumber, startColumn, pos.lineNumber, endColumn)
-                };
-                break;
+          const lineContent = model.getLineContent(pos.lineNumber);
+          const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
+          let match;
+          let foundImage = null;
+
+          while ((match = imageRegex.exec(lineContent)) !== null) {
+            const startColumn = match.index + 1;
+            const endColumn = startColumn + match[0].length;
+
+            if (pos.column >= startColumn && pos.column <= endColumn) {
+              const url = match[2];
+              const urlStartColumn = startColumn + match[1].length + 4;
+              const urlEndColumn = urlStartColumn + url.length;
+
+              foundImage = {
+                url: url,
+                range: new monaco.Range(pos.lineNumber, urlStartColumn, pos.lineNumber, urlEndColumn),
+                fullRange: new monaco.Range(pos.lineNumber, startColumn, pos.lineNumber, endColumn)
+              };
+              break;
+            }
+          }
+
+          if (foundImage && window.ContextMenuComponent) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const items = [
+              {
+                label: 'Upload from device',
+                icon: 'upload',
+                onClick: () => window.AttachmentService.pickAndReplaceImage(foundImage.range)
+              }
+            ];
+
+            const isLocal = foundImage.url.startsWith('/assets/') ||
+              foundImage.url.startsWith('assets/') ||
+              (!foundImage.url.startsWith('http') && foundImage.url.length > 0);
+
+            if (isLocal) {
+              items.push({ divider: true });
+
+              // Open in Finder - Only for Electron
+              if (window.electronAPI.isElectron) {
+                items.push({
+                  label: 'Open in Finder',
+                  icon: 'external-link',
+                  onClick: () => window.AttachmentService.revealAsset(foundImage.url)
+                });
               }
             }
 
-            if (foundImage && window.ContextMenuComponent) {
-              e.preventDefault();
-              e.stopPropagation();
-
-              const items = [
-                {
-                  label: 'Upload from device',
-                  icon: 'upload',
-                  onClick: () => window.AttachmentService.pickAndReplaceImage(foundImage.range)
-                }
-              ];
-
-              const isLocal = foundImage.url.startsWith('/assets/') || 
-                              foundImage.url.startsWith('assets/') || 
-                              (!foundImage.url.startsWith('http') && foundImage.url.length > 0);
-
-              if (isLocal) {
-                items.push({ divider: true });
-                
-                // Open in Finder - Only for Electron
-                if (window.electronAPI.isElectron) {
-                  items.push({
-                    label: 'Open in Finder',
-                    icon: 'external-link',
-                    onClick: () => window.AttachmentService.revealAsset(foundImage.url)
-                  });
-                }
-              }
-
-              window.ContextMenuComponent.open({
-                event: e,
-                items: items
-              });
-            }
-          }, true);
-        }
+            window.ContextMenuComponent.open({
+              event: e,
+              items: items
+            });
+          }
+        }, true);
+      }
 
       // Also ensure Alt+Left/Right behaves like Xcode (Move by word) - Monaco does this by default on Mac
       // but we can enforce it if needed.
@@ -320,10 +347,43 @@ const MonacoService = (() => {
      */
     dispose() {
       if (_editor) {
-        _editor.dispose();
+        const editorToDispose = _editor;
         _editor = null;
         _model = null;
         _isInitialized = false;
+
+        // 1. Detach model immediately to stop internal async loops (decorations, etc.)
+        try {
+          if (editorToDispose.getModel()) {
+            editorToDispose.setModel(null);
+          }
+        } catch (_e) { /* ignore */ }
+
+        // 2. Attach a temporary global listener to swallow the "Canceled" rejection 
+        // that often fires asynchronously after dispose().
+        if (!_rejectionListenerAttached) {
+          const handler = (event) => {
+            if (event.reason === 'Canceled' || (event.reason && event.reason.message === 'Canceled')) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+          };
+          window.addEventListener('unhandledrejection', handler);
+          _rejectionListenerAttached = true;
+          // Keep it for 1 second to catch delayed rejections, then cleanup is optional 
+          // as we want this filtered globally for Monaco anyway.
+        }
+
+        // 3. Dispose in next frame to allow any pending sync events to clear
+        requestAnimationFrame(() => {
+          try {
+            editorToDispose.dispose();
+          } catch (e) {
+            if (e && e.message !== 'Canceled' && e.name !== 'Canceled') {
+              console.warn('[MonacoService] Delayed dispose error:', e);
+            }
+          }
+        });
       }
     },
 
@@ -479,6 +539,21 @@ const MonacoService = (() => {
       const pos = _editor.getPosition();
       const pixelPos = _editor.getScrolledVisiblePosition(pos);
       return pixelPos;
+    },
+
+    /**
+     * Content Widgets
+     */
+    addContentWidget(widget) {
+      if (_editor) _editor.addContentWidget(widget);
+    },
+
+    layoutContentWidget(widget) {
+      if (_editor) _editor.layoutContentWidget(widget);
+    },
+
+    removeContentWidget(widget) {
+      if (_editor) _editor.removeContentWidget(widget);
     },
 
     /**

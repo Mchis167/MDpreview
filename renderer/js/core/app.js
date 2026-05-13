@@ -1,4 +1,4 @@
-/* global AppState, SidebarLeft, MarkdownViewer, RightSidebar, 
+/* global AppState, SidebarLeft, MarkdownViewer, RightSidebar, BugLogger,
    SettingsService, SearchPalette, ShortcutsComponent, ShortcutService,
    TreeModule, WorkspaceModule, CollectModule, 
    DraftModule, EditorModule, 
@@ -350,7 +350,16 @@ async function loadFile(filePath, options = {}) {
     window.ScrollModule.save(AppState.currentFile);
   }
 
-  // 0. Show skeleton only if NOT silent
+  // 0. Pre-fetch draft data if applicable (sync & priority)
+  let draftData = null;
+  if (filePath && filePath.startsWith('__DRAFT_') && typeof DraftModule !== 'undefined') {
+    draftData = {
+      raw: DraftModule.getDraftContent ? DraftModule.getDraftContent(filePath) : '',
+      html: DraftModule.getRenderedHtml ? DraftModule.getRenderedHtml(filePath) : ''
+    };
+  }
+
+  // 1. Show skeleton only if NOT silent
   const viewer = MarkdownViewer.getInstance();
   const mdContent = document.getElementById('md-content');
   const inner = mdContent ? (mdContent.querySelector('.md-content-inner') || mdContent) : null;
@@ -364,16 +373,20 @@ async function loadFile(filePath, options = {}) {
       inner.classList.add('is-loading');
     }
     if (viewer) {
-      viewer.setState({ mode: 'read', file: filePath, html: '<div class="skeleton-text" style="width: 100%; height: 200px;"></div>' });
+      // UX Optimization: If we have draft data, show it immediately even in skeleton call
+      const targetMode = draftData ? AppState.getFileViewMode(filePath) : 'read';
+      viewer.setState({ 
+        mode: targetMode, 
+        file: filePath, 
+        content: draftData ? draftData.raw : '',
+        html: draftData ? draftData.html : '<div class="skeleton-text" style="width: 100%; height: 200px;"></div>', 
+        _source: 'loadFile_skeleton' 
+      });
     }
   }
 
-  let data = { html: '' };
-  if (filePath && filePath.startsWith('__DRAFT_')) {
-    if (typeof DraftModule !== 'undefined') {
-      data.html = DraftModule.getRenderedHtml ? DraftModule.getRenderedHtml(filePath) : '';
-    }
-  } else {
+  let data = draftData || { html: '' };
+  if (!draftData) {
     try {
       const res = await fetch(`/api/render?file=${encodeURIComponent(filePath)}`);
 
@@ -387,7 +400,7 @@ async function loadFile(filePath, options = {}) {
       if (currentTicket === loadTicket) {
         if (inner) inner.classList.remove('is-loading');
         if (viewer) {
-          viewer.setState({ mode: 'read', file: filePath, html: `<div class="ds-error-state">Failed to render markdown: ${err.message}</div>` });
+          viewer.setState({ mode: 'read', file: filePath, html: `<div class="ds-error-state">Failed to render markdown: ${err.message}</div>`, _source: 'loadFile_error' });
         }
       }
       return;
@@ -404,7 +417,8 @@ async function loadFile(filePath, options = {}) {
       mode: AppState.getFileViewMode(filePath),
       file: filePath,
       content: data.raw || '',
-      html: data.html
+      html: data.html,
+      _source: 'loadFile'
     });
   } else if (mdContent && inner) {
     // Legacy fallback
@@ -442,7 +456,7 @@ function setNoFile() {
 
   const viewer = MarkdownViewer.getInstance();
   if (viewer) {
-    viewer.setState({ mode: 'empty', file: null, content: '', html: '' });
+    viewer.setState({ mode: 'empty', file: null, content: '', html: '', _source: 'setNoFile' });
   } else {
     const emptyState = document.getElementById('empty-state');
     const mdContent = document.getElementById('md-content');

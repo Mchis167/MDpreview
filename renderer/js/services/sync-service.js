@@ -25,6 +25,33 @@ const SyncService = (() => {
         const node = range.startContainer;
         let el = node.nodeType === 1 ? node : node.parentElement;
         
+        // ── Character Offset Anchoring (New) ──
+        let srcEl = el;
+        while (srcEl && srcEl !== mdContent && !srcEl.hasAttribute('data-src-start')) {
+          srcEl = srcEl.parentElement;
+        }
+
+        if (srcEl && srcEl !== mdContent) {
+          const srcStart = parseInt(srcEl.getAttribute('data-src-start'), 10);
+          const selectionText = sel.toString();
+          // For block-level anchors, we don't add relativeOffset because:
+          // 1. HTML-rendered text nodes don't map 1:1 to source chars (escaping, syntax stripping)
+          // 2. The inline <span> children have their own data-src-start which is more precise
+          // So we use srcEl's own data-src-start as the anchor for scroll-to,
+          // and let Monaco use the closest offset to find the actual selection.
+          const finalSrcStart = srcStart;
+          const finalSrcEnd = finalSrcStart + selectionText.length;
+
+          return { 
+            srcStart: finalSrcStart, 
+            srcEnd: finalSrcEnd, 
+            selectionText, 
+            isRealSelection: true,
+            line: parseInt(srcEl.getAttribute('data-line'), 10) || 1
+          };
+        }
+
+        // ── Legacy Line-based Fallback ──
         while (el && el !== mdContent && !el.hasAttribute('data-line') && !el.hasAttribute('data-source-line')) {
           el = el.parentElement;
         }
@@ -60,178 +87,134 @@ const SyncService = (() => {
     }
     
     if (centerEl) {
-      let line = parseInt(centerEl.getAttribute('data-line') || centerEl.getAttribute('data-source-line'), 10);
-
-      const extractCleanText = (node) => {
-        let text = "";
-        node.childNodes.forEach(child => {
-          if (child.nodeType === Node.TEXT_NODE) {
-            text += child.textContent;
-          } else if (child.nodeType === Node.ELEMENT_NODE) {
-            const tagName = child.tagName.toUpperCase();
-            const style = window.getComputedStyle(child);
-            const isTechnicalTag = ['STYLE', 'DEFS', 'SCRIPT', 'METADATA', 'BUTTON', 'SVG'].includes(tagName);
-            const isUI = isTechnicalTag || 
-                         style.userSelect === 'none' ||
-                         child.classList.contains('code-block-header') ||
-                         child.hasAttribute('aria-hidden');
-            
-            if (!isUI) {
-              text += extractCleanText(child);
-            }
-          }
-        });
-        return text;
-      };
-
-      // ── Code block: use proportional Y position for accurate line estimate ──
-      // render.js now adds data-line-start / data-line-end to <pre> elements.
-      // When the center of the viewport is inside a code block, estimate which
-      // source line is at that Y position rather than always reporting the fence line.
-      const preEl = centerEl.querySelector && centerEl.querySelector('pre[data-line-start]');
-      if (preEl) {
-        const lStart = parseInt(preEl.getAttribute('data-line-start'), 10);
-        const lEnd   = parseInt(preEl.getAttribute('data-line-end'),    10);
-        if (!isNaN(lStart) && !isNaN(lEnd) && lEnd > lStart + 2) {
-          const preRect = preEl.getBoundingClientRect();
-          if (preRect.height > 0) {
-            const relY = Math.max(0, Math.min(1, (centerY - preRect.top) / preRect.height));
-            const contentLines = Math.max(1, lEnd - lStart - 2); // exclude opening/closing fences
-            line = lStart + 1 + Math.round(relY * contentLines);
-            line = Math.max(lStart + 1, Math.min(lEnd - 1, line));
-            // Pick the specific code line as selectionText for fuzzy match
-            const codeLines = (preEl.textContent || '').split('\n');
-            const lineIdx   = Math.min(Math.floor(relY * contentLines), codeLines.length - 1);
-            const specificLine = (codeLines[Math.max(0, lineIdx)] || '').trim();
-            if (specificLine.length > 2) {
-              return { line, selectionText: specificLine, isRealSelection: false };
-            }
-          }
-        }
+      // ── Character Offset Anchoring (New) ──
+      let srcEl = centerEl;
+      while (srcEl && srcEl !== mdContent && !srcEl.hasAttribute('data-src-start')) {
+        srcEl = srcEl.parentElement;
       }
-
-      const selectionText = extractCleanText(centerEl).trim().substring(0, 200);
-      return { line, selectionText, isRealSelection: false };
+      
+      if (srcEl) {
+        const srcStart = parseInt(srcEl.getAttribute('data-src-start'), 10);
+        return { 
+          srcStart, 
+          srcEnd: srcStart, 
+          isRealSelection: false,
+          line: parseInt(srcEl.getAttribute('data-line'), 10) || 1
+        };
+      }
     }
 
-    // 3. Final Fallback: Proportional Scroll
     const scrollPct = viewer.scrollTop / (viewer.scrollHeight - viewer.clientHeight || 1);
     return { scrollPct, isRealSelection: false };
   }
 
   /**
-   * Captures a sync context snapshot from the Edit View (textarea).
+   * Captures a sync context snapshot from the Monaco Editor.
    */
   function captureEditorSyncData() {
-    const textarea = document.getElementById('edit-textarea');
-    if (!textarea) return {};
-
-    const posStart = textarea.selectionStart;
-    const posEnd = textarea.selectionEnd;
-    const text = textarea.value;
-    const lines = text.split('\n');
-
-    const textBefore = text.substring(0, posStart);
-    const lineIndex = textBefore.split('\n').length - 1;
-    const line = lineIndex + 1;
-
-    let selectionText = text.substring(posStart, posEnd);
-    let isRealSelection = selectionText.trim().length > 0;
-
-    if (!isRealSelection) {
-      const currentLineText = lines[lineIndex] || '';
-      const prevLineText = lines[lineIndex - 1] || '';
-      const nextLineText = lines[lineIndex + 1] || '';
-      const isNoisy = (str) => !str.trim() || str.trim().match(/^[#*`_\-+=~> ]+$/);
-
-      if (isNoisy(currentLineText)) {
-        selectionText = (!isNoisy(prevLineText) ? prevLineText : nextLineText).replace(/[#*`_~\[\]()>\-+]/g, ' ').trim();
-      } else {
-        selectionText = currentLineText.replace(/[#*`_~\[\]()>\-+]/g, ' ').trim();
-      }
-    }
-
-    const scrollPct = textarea.scrollTop / (textarea.scrollHeight - textarea.clientHeight || 1);
-    return { line, selectionText, scrollPct, isRealSelection, offset: 0 };
+    if (!window.MonacoService || !window.MonacoService.isInitialized()) return {};
+    const editor = window.MonacoService.getInstance();
+    const model = editor.getModel();
+    const selection = editor.getSelection();
+    
+    const srcStart = model.getOffsetAt(selection.getStartPosition());
+    const srcEnd = model.getOffsetAt(selection.getEndPosition());
+    const selectionText = model.getValueInRange(selection);
+    
+    return {
+      srcStart,
+      srcEnd,
+      selectionText,
+      isRealSelection: !selection.isEmpty(),
+      line: selection.startLineNumber
+    };
   }
 
   /**
-   * Scrolls the Edit View to match a given line/offset.
+   * Scrolls the Edit View to match a given context.
    */
-  function scrollEditorToLine(lineNum, offset = 0, length = 0) {
-    const textarea = document.getElementById('edit-textarea');
-    if (!textarea || !lineNum) return;
-
-    if (window.MarkdownLogicService) {
-        const fileKey = window.AppState?.currentFile || 'default';
-        window.MarkdownLogicService.syncCursor(textarea, { line: lineNum, offset, length, _fileKey: fileKey });
+  function scrollEditorToLine(context) {
+    if (window.MonacoSyncService && window.MonacoService) {
+      window.MonacoSyncService.syncCursor(window.MonacoService, context);
     }
   }
 
   /**
-   * Scrolls the Read View to the element that best matches (line, selectionText).
+   * Synchronizes the Read View to match a given context (Offset-based).
    */
-  function scrollReadViewToLine(line, selectionText = '', isRealSelection = false) {
+  function syncReadView(context = {}) {
     const viewer = document.getElementById('md-viewer-mount');
     const mdContent = document.getElementById('md-content');
     if (!viewer || !mdContent) return;
 
+    const { srcStart, isRealSelection, selectionText } = context;
+
     let attempts = 0;
-    const maxAttempts = 5;
+    const maxAttempts = 10;
     let lastTop = -1;
     let stableCount = 0;
 
-    const tryScroll = () => {
+    const trySync = () => {
       let target = null;
 
-      if (selectionText && selectionText.trim().length > 3) {
-        const cleanSearchText = selectionText.replace(/[#*`_~\[\]()>\-+]/g, ' ').trim();
-        const words = cleanSearchText.split(/\s+/).filter(w => w.length > 2);
+      // 1. Precise Offset Matching
+      if (srcStart !== undefined) {
+        const allElements = Array.from(mdContent.querySelectorAll('[data-src-start]'));
+        let bestMatch = null;
+        let minRange = Infinity;
 
-        if (words.length > 0) {
-          const allElements = Array.from(mdContent.querySelectorAll('[data-line], [data-source-line]'));
-          let bestMatch = null;
-          let maxScore = 0;
-          let bestDistance = Infinity;
-          const searchRange = 60;
-
-          allElements.forEach(el => {
-            const elLine = parseInt(el.getAttribute('data-line') || el.getAttribute('data-source-line'), 10);
-            if (Math.abs(elLine - line) > searchRange) return;
-
-            const content = el.textContent;
-            let score = 0;
-            words.forEach(word => {
-              if (content.includes(word)) score++;
-            });
-
-            const distance = Math.abs(elLine - line);
-            if (score > maxScore || (score === maxScore && score > 0 && distance < bestDistance)) {
-              maxScore = score;
+        allElements.forEach(el => {
+          const start = parseInt(el.getAttribute('data-src-start'), 10);
+          const end = parseInt(el.getAttribute('data-src-end'), 10);
+          
+          if (srcStart >= start && srcStart <= end) {
+            const range = end - start;
+            if (range < minRange) {
+              minRange = range;
               bestMatch = el;
-              bestDistance = distance;
             }
-          });
-
-          if (bestMatch && maxScore >= Math.min(words.length, 1)) {
-            target = bestMatch;
           }
-        }
+        });
+        target = bestMatch;
       }
 
-      if (!target) {
-        target = mdContent.querySelector(`[data-line="${line}"], [data-source-line="${line}"]`);
+      // 2. Legacy Line Fallback (Only if offset fails)
+      if (!target && context.line) {
+        target = mdContent.querySelector(`[data-line="${context.line}"], [data-source-line="${context.line}"]`);
       }
       
       if (target) {
+        // ── SMART OPEN: Expand parent <details> if target is hidden ──
+        let current = target;
+        while (current && current !== mdContent) {
+          if (current.tagName === 'DETAILS' && !current.open) {
+            current.open = true;
+          }
+          current = current.parentElement;
+        }
+
         const currentTop = target.getBoundingClientRect().top + window.scrollY;
-        if (Math.abs(currentTop - lastTop) < 1) stableCount++;
+        if (Math.abs(currentTop - lastTop) < 0.5) stableCount++;
         else stableCount = 0;
         lastTop = currentTop;
 
-        if (stableCount >= 3 || attempts >= maxAttempts - 1) {
+          // Ensure we wait for layout stability (especially for Mermaid/Images)
+        if (stableCount >= 2 || attempts >= maxAttempts - 1) {
           window._suppressScrollSync = true;
-          target.scrollIntoView({ behavior: 'auto', block: 'center' });
+          
+          // Proportional Scroll within block for large elements
+          const start = parseInt(target.getAttribute('data-src-start'), 10);
+          const end = parseInt(target.getAttribute('data-src-end'), 10);
+          const blockRect = target.getBoundingClientRect();
+          
+          if (srcStart !== undefined && !isNaN(start) && !isNaN(end) && end > start && blockRect.height > viewer.clientHeight) {
+            const pct = (srcStart - start) / (end - start);
+            const scrollOffset = (blockRect.height * pct) - (viewer.clientHeight / 2);
+            viewer.scrollTop = (viewer.scrollTop + blockRect.top + scrollOffset) - viewer.getBoundingClientRect().top;
+          } else {
+            target.scrollIntoView({ behavior: 'auto', block: 'center' });
+          }
+
           requestAnimationFrame(() => { window._suppressScrollSync = false; });
 
           if (viewer._scrollObserver) {
@@ -239,6 +222,7 @@ const SyncService = (() => {
             viewer._scrollObserver = null;
           }
 
+          // Handle Selection Highlighting in Read View
           if (isRealSelection && selectionText) {
             try {
               const selection = window.getSelection();
@@ -256,11 +240,6 @@ const SyncService = (() => {
                   found = true;
                 }
               }
-              if (!found) {
-                const range = document.createRange();
-                range.selectNodeContents(target);
-                selection.addRange(range);
-              }
             } catch(_e) {}
           }
           return;
@@ -269,18 +248,20 @@ const SyncService = (() => {
 
       attempts++;
       if (attempts < maxAttempts) {
-        requestAnimationFrame(tryScroll);
+        requestAnimationFrame(trySync);
       }
     };
 
-    requestAnimationFrame(tryScroll);
+    requestAnimationFrame(trySync);
   }
 
   return {
     captureReadViewSyncData,
     captureEditorSyncData,
     scrollEditorToLine,
-    scrollReadViewToLine
+    syncReadView,
+    // Keep legacy name for backward compatibility during transition if needed
+    scrollReadViewToLine: (line, text, sel) => syncReadView({ line, selectionText: text, isRealSelection: sel })
   };
 })();
 

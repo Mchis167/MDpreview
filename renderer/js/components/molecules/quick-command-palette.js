@@ -3,6 +3,7 @@
  * Purpose: Provide a context-aware style and command palette in the editor.
  * Dependencies: DesignSystem, EditorModule, EditorUtil
  */
+/* global DesignSystem, monaco */
 const QuickCommandPalette = (() => {
   'use strict';
 
@@ -13,6 +14,8 @@ const QuickCommandPalette = (() => {
   let _selectedIndex = -1;
   let _filteredCommands = [];
   let _callback = null;
+  let _usageCounts = {};
+  const USAGE_KEY = 'mdpreview_slash_usage';
 
   const COMMANDS = [
     // ── Headings ──
@@ -49,11 +52,11 @@ const QuickCommandPalette = (() => {
   function _init() {
     if (_el) return;
 
-    _el = window.DesignSystem.createElement('div', 'ds-quick-command-palette');
+    _el = DesignSystem.createElement('div', 'ds-quick-command-palette');
     _el.style.display = 'none';
 
-    const header = window.DesignSystem.createElement('div', 'palette-header');
-    _input = window.DesignSystem.createElement('input', 'palette-input', {
+    const header = DesignSystem.createElement('div', 'palette-header');
+    _input = DesignSystem.createElement('input', 'palette-input', {
       type: 'text',
       placeholder: 'Type a command...',
       spellcheck: 'false',
@@ -61,9 +64,9 @@ const QuickCommandPalette = (() => {
     });
     header.appendChild(_input);
 
-    _resultsContainer = window.DesignSystem.createElement('div', 'palette-results');
+    _resultsContainer = DesignSystem.createElement('div', 'palette-results');
 
-    const footer = window.DesignSystem.createElement('div', 'palette-footer');
+    const footer = DesignSystem.createElement('div', 'palette-footer');
     footer.innerHTML = `
       <span>↑↓ Navigate</span>
       <span>↵ Select</span>
@@ -73,9 +76,35 @@ const QuickCommandPalette = (() => {
     document.body.appendChild(_el);
 
     _bindEvents();
+    _loadUsage();
+  }
+
+  function _loadUsage() {
+    try {
+      const data = localStorage.getItem(USAGE_KEY);
+      _usageCounts = data ? JSON.parse(data) : {};
+    } catch (_e) {
+      _usageCounts = {};
+    }
+  }
+
+  function _incrementUsage(id) {
+    if (!id) return;
+    _usageCounts[id] = (_usageCounts[id] || 0) + 1;
+    localStorage.setItem(USAGE_KEY, JSON.stringify(_usageCounts));
+
+    // Unified Sync: Push to server if AppState is available
+    if (window.AppState && window.AppState.savePersistentState) {
+      window.AppState.savePersistentState();
+    }
   }
 
   function _bindEvents() {
+    // Prevent scroll propagation to Monaco
+    _el.addEventListener('wheel', (e) => {
+      e.stopPropagation();
+    }, { passive: false });
+
     _input.addEventListener('input', () => {
       _renderResults();
     });
@@ -108,12 +137,55 @@ const QuickCommandPalette = (() => {
 
   function _renderResults(rebuild = true) {
     if (rebuild) {
-      const query = _input.value.toLowerCase().replace('/', '');
-      _filteredCommands = COMMANDS.filter(cmd => 
-        cmd.label.toLowerCase().includes(query) || 
-        cmd.hint.toLowerCase().includes(query) ||
-        cmd.tags.some(tag => tag.includes(query))
-      );
+      const query = _input.value.toLowerCase().trim().replace(/^\/+/, '');
+      
+      if (!query) {
+        _filteredCommands = [...COMMANDS];
+      } else {
+        _filteredCommands = COMMANDS.map(cmd => {
+          let score = 0;
+          const label = cmd.label.toLowerCase();
+          const hint = cmd.hint.toLowerCase().replace(/^\/+/, '');
+          const id = cmd.id.toLowerCase();
+          const tags = (cmd.tags || []).map(t => t.toLowerCase());
+
+          // 1. Exact matches (Highest priority)
+          if (id === query || hint === query) {
+            score += 100;
+          } 
+          // 2. Exact Tag match
+          else if (tags.includes(query)) {
+            score += 80;
+          }
+          // 3. Starts with matches (Label or ID or Hint)
+          else if (label.startsWith(query) || id.startsWith(query) || hint.startsWith(query)) {
+            score += 50;
+          }
+          // 4. Includes matches
+          else if (label.includes(query)) {
+            score += 10;
+          }
+          // 5. Tag partial matches (Only if query is long enough)
+          else if (query.length > 1 && tags.some(t => t.includes(query))) {
+            score += 5;
+          }
+
+          // 6. Usage-based boost (Max 30 points)
+          const usageCount = _usageCounts[cmd.id] || 0;
+          if (score > 0 || !query) {
+            score += Math.min(usageCount * 1.5, 30);
+          }
+
+          return { ...cmd, score };
+        })
+        .filter(cmd => cmd.score > 0)
+        .sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
+          // Tie-break: Shorter labels first
+          return a.label.length - b.label.length;
+        });
+      }
+
       _selectedIndex = _filteredCommands.length > 0 ? 0 : -1;
     }
 
@@ -127,9 +199,9 @@ const QuickCommandPalette = (() => {
     }
 
     _filteredCommands.forEach((cmd, index) => {
-      const item = window.DesignSystem.createElement('div', 'palette-item' + (index === _selectedIndex ? ' is-selected' : ''));
+      const item = DesignSystem.createElement('div', 'palette-item' + (index === _selectedIndex ? ' is-selected' : ''));
       item.innerHTML = `
-        <div class="palette-item-icon">${window.DesignSystem.getIcon(cmd.icon)}</div>
+        <div class="palette-item-icon">${DesignSystem.getIcon(cmd.icon)}</div>
         <div class="palette-item-label">${cmd.label}</div>
         <div class="palette-item-hint">${cmd.hint}</div>
       `;
@@ -149,6 +221,7 @@ const QuickCommandPalette = (() => {
   function _selectItem() {
     const cmd = _filteredCommands[_selectedIndex];
     if (cmd && _callback) {
+      _incrementUsage(cmd.id);
       _callback(cmd.id);
     }
     hide();
@@ -158,7 +231,6 @@ const QuickCommandPalette = (() => {
     _init();
     _callback = callback;
     _isOpen = true;
-    _el.style.display = 'flex';
     
     // Header & Input visibility
     const header = _el.querySelector('.palette-header');
@@ -171,41 +243,68 @@ const QuickCommandPalette = (() => {
       setTimeout(() => _input.focus(), 50);
     }
     
-    // Position palette logic
-    _el.style.visibility = 'hidden';
-    _el.style.display = 'flex';
-    _renderResults(); // Render first to get the actual height based on content
-    
-    const rect = _el.getBoundingClientRect();
-    
-    let top = y + 20; // Default: below cursor
-    let left = x;
+    _renderResults();
 
-    // Horizontal boundary check
-    if (left + rect.width > window.innerWidth) {
-      left = window.innerWidth - rect.width - 20;
+    if (window.MonacoService && window.MonacoService.isInitialized()) {
+      // Use Monaco's ContentWidget system
+      _el.style.display = 'flex';
+      _el.style.position = 'absolute'; // Monaco handles positioning relative to lines
+      _el.style.top = '0';
+      _el.style.left = '0';
+      _el.style.visibility = 'visible';
+      window.MonacoService.addContentWidget(QuickCommandPalette);
+    } else {
+      // Fallback for legacy (if any)
+      _el.style.display = 'flex';
+      _el.style.visibility = 'hidden';
+      
+      const rect = _el.getBoundingClientRect();
+      let top = y + 20;
+      let left = x;
+
+      if (left + rect.width > window.innerWidth) {
+        left = window.innerWidth - rect.width - 20;
+      }
+      if (left < 10) left = 10;
+
+      const spaceBelow = window.innerHeight - top;
+      if (spaceBelow < rect.height + 20) {
+        top = y - rect.height - 40; 
+      }
+      if (top < 10) top = 10;
+
+      _el.style.top = `${top}px`;
+      _el.style.left = `${left}px`;
+      _el.style.visibility = 'visible';
     }
-    if (left < 10) left = 10;
-
-    // Vertical boundary check: Flip to top if bottom space is insufficient
-    const spaceBelow = window.innerHeight - top;
-    if (spaceBelow < rect.height + 20) {
-      // Flip to top of cursor (y is bottom of line, so we go up by rect.height + line offset)
-      top = y - rect.height - 40; 
-    }
-
-    // Final safety check for top boundary
-    if (top < 10) top = 10;
-
-    _el.style.top = `${top}px`;
-    _el.style.left = `${left}px`;
-    _el.style.visibility = 'visible';
   }
 
   function updateQuery(query) {
     if (!_isOpen) return;
-    _input.value = query;
+    _input.value = query.replace('/', ''); // Remove slash for filtering
     _renderResults();
+    
+    // Notify Monaco to reposition if height changed
+    if (window.MonacoService) {
+      window.MonacoService.layoutContentWidget(QuickCommandPalette);
+    }
+  }
+
+  // --- Monaco ContentWidget Interface ---
+  function getId() { return 'editor.contrib.quickCommandPalette'; }
+  function getDomNode() { 
+    _init(); 
+    return _el; 
+  }
+  function getPosition() {
+    if (!_isOpen || !window.MonacoService) return null;
+    return {
+      position: window.MonacoService.getCursorPosition(),
+      preference: [
+        monaco.editor.ContentWidgetPositionPreference.BELOW,
+        monaco.editor.ContentWidgetPositionPreference.ABOVE
+      ]
+    };
   }
 
   function getSelectedCommandId() {
@@ -225,13 +324,15 @@ const QuickCommandPalette = (() => {
   }
 
   function hide() {
-    if (!_el) return;
+    if (!_el || !_isOpen) return;
+    
+    if (window.MonacoService && window.MonacoService.isInitialized()) {
+      window.MonacoService.removeContentWidget(QuickCommandPalette);
+    }
+    
     _el.style.display = 'none';
     _isOpen = false;
     _selectedIndex = -1;
-    if (_callback) {
-      // Optional: signal close without action
-    }
   }
 
   return {
@@ -240,7 +341,12 @@ const QuickCommandPalette = (() => {
     updateQuery,
     getSelectedCommandId,
     navigate,
-    isOpen: () => _isOpen
+    isOpen: () => _isOpen,
+    
+    // Monaco IContentWidget exports
+    getId,
+    getDomNode,
+    getPosition
   };
 })();
 

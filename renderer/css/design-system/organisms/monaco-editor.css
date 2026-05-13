@@ -109,3 +109,20 @@
 .monaco-editor .monaco-list-row:hover {
   background-color: var(--ds-layer-subtle-hover) !important;
 }
+
+/* 6. Sticky Widget (Breadcrumbs/Sticky Lines) */
+.monaco-editor .sticky-widget {
+  --_sticky-bg: var(--ds-surface-overlay);
+  --_sticky-border: var(--ds-border-default);
+  --_sticky-divider: var(--ds-border-subtle);
+  
+  background-color: var(--_sticky-bg) !important;
+  backdrop-filter: blur(var(--ds-blur-md));
+  border-bottom: 1px solid var(--_sticky-border) !important;
+  /* Double divider effect: border + inner-shadow line */
+  box-shadow: 0 1px 0 0 var(--_sticky-divider), var(--ds-shadow-sm) !important;
+}
+
+.monaco-editor .sticky-widget .sticky-line-content {
+  background-color: transparent !important;
+}

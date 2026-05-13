@@ -1,4 +1,4 @@
-/* global AppState, TabsModule, FileService, showToast, loadFile, DraftModule, MarkdownLogicService, MonacoService, monaco, MonacoActionService, MonacoSyncService */
+/* global AppState, TabsModule, FileService, showToast, loadFile, DraftModule, MarkdownLogicService, MonacoService, monaco, MonacoActionService, MonacoSyncService, BugLogger */
 
 const EditorModule = (() => {
   let _originalContent = '';
@@ -6,7 +6,9 @@ const EditorModule = (() => {
   let _isSlashMode = false;
   let _slashStartPos = -1;
   let _changeListener = null;
+  let _cursorListener = null;
   let _keyListener = null;
+  let _boundFileId = null; // ID locking to prevent saving to wrong file during transitions
   const isMac = /Mac|iPhone|iPod|iPad/.test(navigator.platform);
 
   function undo() {
@@ -22,29 +24,55 @@ const EditorModule = (() => {
       TabsModule.setDirty(AppState.currentFile, isDirty());
     }
 
-    // ── Slash Command Logic (Simplified for Monaco) ──
+    // ── Slash Command Logic (Hybrid with Monaco) ──
     if (!MonacoService.isInitialized()) return;
     
-    const pos = MonacoService.getCursorPosition(); // { lineNumber, column }
-    const content = MonacoService.getValue();
-    const lines = content.split('\n');
-    const currentLineText = lines[pos.lineNumber - 1] || '';
-    const lastChar = currentLineText.charAt(pos.column - 2);
+    const pos = MonacoService.getCursorPosition();
+    const model = MonacoService.getInstance().getModel();
+    if (!model || pos.lineNumber > model.getLineCount()) return;
+    
+    const lineContent = model.getLineContent(pos.lineNumber);
 
-    if (lastChar === '/') {
-      // Check if it's the start of line or preceded by space
-      const beforeSlash = currentLineText.substring(0, pos.column - 2);
-      if (pos.column === 2 || /[\s\n]$/.test(beforeSlash)) {
-        _isSlashMode = true;
-        _slashStartPos = pos.column - 2; 
-        _showQuickCommand(true, true);
-      } else {
+    if (_isSlashMode) {
+      // Validate session: Is the cursor still on the same line and after _slashStartPos?
+      const textAfterSlash = lineContent.substring(_slashStartPos + 1, pos.column - 1);
+      
+      // If user typed space (handled in KeyDown now) or moved cursor before/at slash, or character at start is no longer /
+      if (lineContent.charAt(_slashStartPos) !== '/' || pos.column <= _slashStartPos + 1) {
         _isSlashMode = false;
         if (window.QuickCommandPalette) window.QuickCommandPalette.hide();
+      } else {
+        // Update the live filter with what's after the slash
+        if (window.QuickCommandPalette) window.QuickCommandPalette.updateQuery(textAfterSlash);
       }
     } else {
-      _isSlashMode = false;
-      if (window.QuickCommandPalette) window.QuickCommandPalette.hide();
+      // Detect start of slash command
+      const charAtCursor = lineContent.charAt(pos.column - 1);
+      const charBeforeCursor = lineContent.charAt(pos.column - 2);
+      
+      let slashIdx = -1;
+      if (charBeforeCursor === '/') {
+        slashIdx = pos.column - 2;
+      } else if (charAtCursor === '/') {
+        slashIdx = pos.column - 1;
+      }
+
+      if (slashIdx !== -1) {
+        const charAfterSlash = lineContent.charAt(slashIdx + 1);
+        const beforeSlash = lineContent.substring(0, slashIdx);
+        
+        // Trigger ONLY if not followed by space (allows `/` alone or `/cmd`)
+        // Trigger ONLY if not followed by space (allows `/` alone or `/cmd`)
+        if ((slashIdx === 0 || /[\s\n]$/.test(beforeSlash)) && charAfterSlash !== ' ') {
+          _isSlashMode = true;
+          _slashStartPos = slashIdx; 
+          _showQuickCommand(true, true);
+          
+          // Calculate query immediately from current cursor position
+          const currentQuery = lineContent.substring(slashIdx + 1, pos.column - 1);
+          if (window.QuickCommandPalette) window.QuickCommandPalette.updateQuery(currentQuery);
+        }
+      }
     }
   }
 
@@ -52,34 +80,48 @@ const EditorModule = (() => {
     try {
       const K_ENTER = 3;
       const K_TAB = 2;
-      const K_DOWN = 18;
-      const K_UP = 16;
-      const K_ESC = 9;
       const K_S = 49;
       const K_B = 32;
       const K_I = 39;
       const K_K = 41;
-      const K_SLASH = 47;
       const K_Z = 56;
       const K_PERIOD = 46; // "." key
 
-      if (_isSlashMode) {
-        if (e.keyCode === K_ENTER) {
+      if (_isSlashMode && window.QuickCommandPalette) {
+        if (e.keyCode === monaco.KeyCode.Enter || e.keyCode === monaco.KeyCode.Space) {
+          const query = _getCurrentSlashQuery();
           const cmdId = window.QuickCommandPalette.getSelectedCommandId();
-          if (cmdId) {
+          
+          if (e.keyCode === monaco.KeyCode.Space) {
+            if (query.length > 0 && cmdId) {
+              e.preventDefault();
+              e.stopPropagation();
+              _applySlashCommand(cmdId);
+              return;
+            } else {
+              // If empty slash or no match, just dismiss and let space be typed
+              _isSlashMode = false;
+              window.QuickCommandPalette.hide();
+            }
+          } else if (e.keyCode === monaco.KeyCode.Enter && cmdId) {
             e.preventDefault();
+            e.stopPropagation();
             _applySlashCommand(cmdId);
             return;
           }
-        } else if (e.keyCode === K_DOWN) {
+        } else if (e.keyCode === monaco.KeyCode.DownArrow) {
           e.preventDefault();
+          e.stopPropagation();
           window.QuickCommandPalette.navigate('down');
           return;
-        } else if (e.keyCode === K_UP) {
+        } else if (e.keyCode === monaco.KeyCode.UpArrow) {
           e.preventDefault();
+          e.stopPropagation();
           window.QuickCommandPalette.navigate('up');
           return;
-        } else if (e.keyCode === K_ESC) {
+        } else if (e.keyCode === monaco.KeyCode.Escape) {
+          e.preventDefault();
+          e.stopPropagation();
           _isSlashMode = false;
           window.QuickCommandPalette.hide();
           return;
@@ -91,44 +133,46 @@ const EditorModule = (() => {
         
         if (e.keyCode === K_PERIOD && e.shiftKey) {
           e.preventDefault();
-          console.warn(`[DEBUG-SHORTCUT] Action: blockquote, Combo: ${comboStr}`);
           applyAction('q');
           return;
         }
         if (e.keyCode === K_S) {
           e.preventDefault();
-          console.warn(`[DEBUG-SHORTCUT] Action: save, Combo: ${comboStr}`);
-          save();
+          const returnToRead = e.shiftKey;
+          save(returnToRead);
           return;
         }
         if (e.keyCode === K_B) {
           e.preventDefault();
-          console.warn(`[DEBUG-SHORTCUT] Action: bold, Combo: ${comboStr}`);
           applyAction('b');
           return;
         }
         if (e.keyCode === K_I) {
           e.preventDefault();
-          console.warn(`[DEBUG-SHORTCUT] Action: italic, Combo: ${comboStr}`);
           applyAction('i');
           return;
         }
         if (e.keyCode === K_K) {
           e.preventDefault();
-          console.warn(`[DEBUG-SHORTCUT] Action: link, Combo: ${comboStr}`);
           applyAction('l');
           return;
         }
-        if (e.keyCode === K_SLASH) {
+        if (e.keyCode === monaco.KeyCode.Slash && (e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey) {
           e.preventDefault();
-          console.warn(`[DEBUG-SHORTCUT] Action: quick-command, Combo: ${comboStr}`);
+          e.stopPropagation();
           _showQuickCommand();
           return;
+        }
+
+        // Trigger on plain '/' key (immediate)
+        if (e.keyCode === monaco.KeyCode.Slash && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+          // We let the character be typed (no preventDefault)
+          // but we trigger the content change logic immediately after this event loop
+          setTimeout(() => _handleContentChange(), 0);
         }
         if (e.keyCode === K_Z) {
           e.preventDefault();
           const action = e.shiftKey ? 'redo' : 'undo';
-          console.warn(`[DEBUG-SHORTCUT] Action: ${action}, Combo: ${comboStr}`);
           if (e.shiftKey) redo(); else undo();
           return;
         }
@@ -190,22 +234,64 @@ const EditorModule = (() => {
   }
 
   /**
+   * Helper to get current slash query text
+   */
+  function _getCurrentSlashQuery() {
+    if (!_isSlashMode || !MonacoService.isInitialized()) return '';
+    const pos = MonacoService.getCursorPosition();
+    const model = MonacoService.getInstance().getModel();
+    if (!model || pos.lineNumber > model.getLineCount()) return '';
+    const lineContent = model.getLineContent(pos.lineNumber);
+    return lineContent.substring(_slashStartPos + 1, pos.column - 1);
+  }
+
+  /**
    * Binds the editor logic to Monaco Editor.
    */
   async function bind() {
+    const fileId = AppState.currentFile;
+    const isNewFile = fileId !== _boundFileId;
+
     // Unbind previous if exists
     unbind();
+    
+    _boundFileId = fileId;
+
+    // Reset state ONLY if we actually switched to a different file.
+    // If it's a reload or same-file transition, keep the _originalContent 
+    // that might have been set by setOriginalContent() just before bind().
+    if (isNewFile) {
+      _originalContent = '';
+    }
 
     // Ensure Monaco is ready
     if (!MonacoService.isInitialized()) {
       await MonacoService.init();
-      // Wait a tiny bit more for the instance to be created after init
-      await new Promise(r => setTimeout(r, 100));
+      // Note: MarkdownEditor.activate awaits the mount promise, 
+      // so by the time we continue here, Monaco should be truly ready.
+      await new Promise(r => setTimeout(r, 50)); 
+    }
+
+    // Sync state with editor
+    if (MonacoService.isInitialized()) {
+      const editorValue = MonacoService.getValue();
+      
+      if (_originalContent && editorValue !== _originalContent) {
+        // We have pending content (e.g. from loadFile), push it to Monaco
+        MonacoService.setValue(_originalContent);
+      } else if (!_originalContent) {
+        // No pending content, take from Monaco
+        _originalContent = editorValue;
+      }
     }
 
     // Listen to content changes
     _changeListener = MonacoService.onContentChange(() => {
       _handleContentChange();
+    });
+
+    _cursorListener = MonacoService.onCursorChange(() => {
+      if (_isSlashMode) _handleContentChange();
     });
 
     // Listen to keydown
@@ -263,21 +349,34 @@ const EditorModule = (() => {
       _changeListener.dispose();
       _changeListener = null;
     }
+    if (_cursorListener) {
+      _cursorListener.dispose();
+      _cursorListener = null;
+    }
     if (_keyListener) {
       _keyListener.dispose();
       _keyListener = null;
     }
     _isSlashMode = false;
+    _boundFileId = null;
   }
 
-  async function save() {
-    if (!AppState.currentFile || !MonacoService.isInitialized()) return false;
+  async function save(returnToRead = true) {
+    const targetFile = _boundFileId || AppState.currentFile;
+    if (!targetFile || !MonacoService.isInitialized()) return false;
+    
     const content = MonacoService.getValue();
+    
+    // SAFE GUARD: If content is empty but original was not, it's likely a race condition during mount.
+    // This prevents "white-out" bugs where a draft is cleared accidentally.
+    if (content.length === 0 && _originalContent.length > 0) {
+      return false;
+    }
 
-    if (AppState.currentFile && AppState.currentFile.startsWith('__DRAFT_')) {
+    if (targetFile && targetFile.startsWith('__DRAFT_')) {
         if (typeof DraftModule !== 'undefined') {
-            DraftModule.setDraftContent(content);
-            await DraftModule.renderPreview(content, AppState.currentFile);
+            DraftModule.setDraftContent(content, targetFile);
+            await DraftModule.renderPreview(content, targetFile);
             _originalContent = content;
             if (typeof showToast === 'function') showToast('Draft updated');
             return true;
@@ -286,21 +385,23 @@ const EditorModule = (() => {
     }
 
     if (typeof FileService === 'undefined' || !FileService.saveFile) return false;
-    const success = await FileService.saveFile(AppState.currentFile, content);
+    const success = await FileService.saveFile(targetFile, content);
     
     if (success) {
       if (typeof showToast === 'function') showToast('File saved successfully');
       _originalContent = content; 
       
-      if (typeof TabsModule !== 'undefined' && AppState.currentFile) {
-        TabsModule.setDirty(AppState.currentFile, false);
+      if (typeof TabsModule !== 'undefined' && targetFile) {
+        TabsModule.setDirty(targetFile, false);
       }
       
-      // Return to read mode after successful save
-      if (window.AppState && AppState.updateToolbarUI) {
-        AppState.updateToolbarUI('read');
-      } else if (typeof loadFile === 'function') {
-        loadFile(AppState.currentFile);
+      // Return to read mode if requested
+      if (returnToRead) {
+        if (window.AppState && AppState.updateToolbarUI) {
+          AppState.updateToolbarUI('read');
+        } else if (typeof loadFile === 'function') {
+          loadFile(targetFile);
+        }
       }
       return true;
     } else {
@@ -310,11 +411,15 @@ const EditorModule = (() => {
   }
 
   function setOriginalContent(text) {
-      _originalContent = text;
-      if (MonacoService.isInitialized() && MonacoService.getValue() !== text) {
+    // Always update the internal buffer so that bind() can pick it up
+    _originalContent = text;
+
+    if (MonacoService.isInitialized()) {
+      if (MonacoService.getValue() !== text) {
         // Monaco handles value sync and its own stack
         MonacoService.setValue(text);
       }
+    }
   }
 
   function isDirty() {

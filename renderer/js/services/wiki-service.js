@@ -11,6 +11,14 @@
      * Tải và cache dữ liệu wiki index từ server.
      */
     async init() {
+      // Avoid fetch if wiki scanner is not enabled to prevent 404 in console
+      const ws = window.AppState?.currentWorkspace;
+      if (!ws?.wikiScanner?.enabled) {
+        index = null;
+        isInitialized = false;
+        return false;
+      }
+
       try {
         const response = await fetch('/api/wiki/index');
         if (!response.ok) {
@@ -19,8 +27,8 @@
         index = await response.json();
         isInitialized = true;
         return true;
-      } catch (err) {
-        console.warn('[WikiService] Could not load wiki index:', err.message);
+      } catch (_err) {
+        // Silently fail if wiki index is not available
         index = null;
         isInitialized = false;
         return false;

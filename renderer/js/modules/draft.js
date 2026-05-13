@@ -2,6 +2,8 @@
    draft.js — Logic for Multiple Draft tabs
    ============================================================ */
 
+/* global AppState, MarkdownViewer, EditorModule, updateHeaderUI, processMermaid, CodeBlockModule, BugLogger */
+
 const DraftModule = (() => {
   // Map of drafts: { [draftId]: { draftContent, renderedHtml, lastTouched } }
   let drafts = {};
@@ -57,6 +59,7 @@ const DraftModule = (() => {
     const currentTicket = ++renderTicket;
 
     if (!finalContent || finalContent.trim() === '') {
+      const mdContent = document.getElementById('md-content');
       if (mdContent) {
         const inner = mdContent.querySelector('.md-content-inner') || mdContent;
         if (inner) inner.innerHTML = '';
@@ -77,6 +80,12 @@ const DraftModule = (() => {
       // Cancel if a newer render request was started
       if (currentTicket !== renderTicket) return;
 
+      // CRITICAL: Verify if the draft we rendered is still the active one.
+      // This prevents "ghost content" from an old draft leaking into a newly created/switched one.
+      if (AppState.currentFile !== draftId) {
+        return;
+      }
+
       // Update via MarkdownViewer
       const viewer = MarkdownViewer.getInstance();
       if (viewer) {
@@ -84,7 +93,8 @@ const DraftModule = (() => {
           mode: AppState.currentMode === 'edit' ? 'edit' : 'read',
           file: draftId,
           content: finalContent,
-          html: data.html
+          html: data.html,
+          _source: 'renderPreview'
         });
       } else {
         // Legacy fallback
@@ -161,8 +171,9 @@ const DraftModule = (() => {
   // ── Helper ────────────────────────────────────────────────
   function getDraftContent(id) { 
     const draftId = id || (window.AppState ? AppState.currentFile : null);
+    const content = (drafts[draftId] && drafts[draftId].draftContent) || '';
     if (!draftId || !drafts[draftId]) return '';
-    return drafts[draftId].draftContent || ''; 
+    return content; 
   }
 
   function getDraftViewMode(id) {
@@ -295,6 +306,7 @@ const DraftModule = (() => {
     renderPreview(content, draftId);
   }
 
+
   function saveToStorage() {
     if (typeof AppState === 'undefined' || !AppState.currentWorkspace) return;
     const key = `drafts_v2_${AppState.currentWorkspace.id}`;
@@ -415,7 +427,8 @@ const DraftModule = (() => {
         mode: AppState.currentMode === 'edit' ? 'edit' : 'read',
         file: draftId,
         content: data.draftContent,
-        html: data.renderedHtml
+        html: data.renderedHtml,
+        _source: 'syncPreview'
       });
       updateHeader('draft');
     } else {

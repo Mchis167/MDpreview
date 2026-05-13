@@ -248,6 +248,24 @@ const ProjectMap = (() => {
         isDragging = false; 
       });
 
+      // ── NEW: Live Sync for <details> toggles (Required for height accuracy) ──
+      viewerEl.addEventListener('toggle', (e) => {
+        if (e.target.tagName === 'DETAILS') {
+          const detailsMain = Array.from(viewerEl.querySelectorAll('details'));
+          const index = detailsMain.indexOf(e.target);
+          const mirror = root.querySelector(SELECTORS.mirror);
+          if (mirror && index !== -1) {
+            const detailsMirror = mirror.querySelectorAll('details');
+            if (detailsMirror[index]) {
+              if (e.target.open) detailsMirror[index].setAttribute('open', '');
+              else detailsMirror[index].removeAttribute('open');
+              // Recalculate heights and indicator position immediately
+              this.syncScroll(root);
+            }
+          }
+        }
+      }, true); // Use capture to catch toggle events from children
+
       // Initial load
       this.update(root, viewerEl);
 
@@ -265,10 +283,9 @@ const ProjectMap = (() => {
         content = viewer.state.content || '';
       }
 
-      // If in edit mode, the latest content is in the textarea
-      const textarea = document.getElementById('edit-textarea');
-      if (textarea && viewer && viewer.state.mode === 'edit') {
-        content = textarea.value;
+      // If in edit mode, the latest content is in the editor
+      if (viewer && viewer.state.mode === 'edit') {
+        content = (window.MonacoService && window.MonacoService.isInitialized()) ? window.MonacoService.getValue() : content;
       }
 
       if (_updateTimer) clearTimeout(_updateTimer);
@@ -362,7 +379,32 @@ const ProjectMap = (() => {
             // ── 4. Post-process (Delayed to ensure mirror is in DOM) ──
             requestAnimationFrame(() => {
               if (innerEl.isConnected) {
-                if (html && window.processMermaid) window.processMermaid(innerEl);
+                // ── NEW: High-Fidelity Sync Strategy (Optical Mirror) ──
+                
+                // 1. Sync <details> open states from main viewer to ensure height parity
+                const mainDetails = _mainViewer.querySelectorAll('details');
+                const mirrorDetails = innerEl.querySelectorAll('details');
+                mirrorDetails.forEach((detail, idx) => {
+                  if (mainDetails[idx]) {
+                    if (mainDetails[idx].open) detail.setAttribute('open', '');
+                    else detail.removeAttribute('open');
+                  }
+                });
+
+                // 2. Clone Mermaid SVGs instead of re-rendering (prevents "Giant Graph" scale bugs)
+                const mainMermaids = _mainViewer.querySelectorAll('.mermaid');
+                const mirrorMermaids = innerEl.querySelectorAll('.mermaid');
+                mirrorMermaids.forEach((mirrorContainer, idx) => {
+                  const mainContainer = mainMermaids[idx];
+                  if (mainContainer) {
+                    const svg = mainContainer.querySelector('svg');
+                    if (svg) {
+                      mirrorContainer.innerHTML = svg.outerHTML;
+                    }
+                  }
+                });
+
+                // 3. Process remaining static content (Code Blocks, etc.)
                 if (html && window.CodeBlockModule) window.CodeBlockModule.process(innerEl);
               }
             });
