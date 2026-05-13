@@ -6,10 +6,8 @@
    TabsModule, TabPreview, io, initMermaid, initZoom, ScrollModule, RecentlyViewedModule, ChangeActionViewBar, CommentsModule, WikiService, WikiDrawer, BacklinksDrawer */
 /* ============================================================
    app.js — Core state, file loading, socket connection, boot
-   Other responsibilities live in dedicated modules:
-     zoom.js     — Zoom modal
-     mermaid.js  — Diagram rendering
    ============================================================ */
+
 
 
 window.AppState = {
@@ -30,7 +28,7 @@ window.AppState = {
     hideEmptyFolders: localStorage.getItem('md-hide-empty') === 'true',
     flatView: localStorage.getItem('md-flat-view') === 'true',
     hiddenPaths: (() => {
-      try { return JSON.parse(localStorage.getItem('md-hidden-paths') || '[]'); } 
+      try { return JSON.parse(localStorage.getItem('md-hidden-paths') || '[]'); }
       catch (_e) { return []; }
     })(),
     showHiddenInSearch: localStorage.getItem('md-show-hidden-search') === 'true',
@@ -362,7 +360,7 @@ async function loadFile(filePath, options = {}) {
     if (emptyState) emptyState.style.display = 'none';
     if (mdContent && inner) {
       mdContent.style.display = 'block';
-      inner.innerHTML = ''; 
+      inner.innerHTML = '';
       inner.classList.add('is-loading');
     }
     if (viewer) {
@@ -378,7 +376,7 @@ async function loadFile(filePath, options = {}) {
   } else {
     try {
       const res = await fetch(`/api/render?file=${encodeURIComponent(filePath)}`);
-      
+
       if (currentTicket !== loadTicket) return;
 
       if (!res.ok) {
@@ -402,11 +400,11 @@ async function loadFile(filePath, options = {}) {
   TabsModule.open(filePath);
 
   if (viewer) {
-    viewer.setState({ 
-      mode: AppState.getFileViewMode(filePath), 
-      file: filePath, 
-      content: data.raw || '', 
-      html: data.html 
+    viewer.setState({
+      mode: AppState.getFileViewMode(filePath),
+      file: filePath,
+      content: data.raw || '',
+      html: data.html
     });
   } else if (mdContent && inner) {
     // Legacy fallback
@@ -525,11 +523,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ── Shortcut Management ──
   if (typeof ShortcutService !== 'undefined' && typeof ShortcutsComponent !== 'undefined') {
     ShortcutService.init();
-    
+
     // Register Default Groups from ShortcutsComponent
     const isMac = ShortcutService.isMac();
     const groups = ShortcutsComponent.getShortcutData(isMac);
-    
+
     // Assign Handlers
     const handlers = {
       'mode-read': () => {
@@ -555,7 +553,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       'toggle-sidebar': () => {
         if (window.TabsModule?.toggleSidebar) window.TabsModule.toggleSidebar();
       },
-      'focus-search': () => window.SearchPalette?.show(),
+      'focus-search': () => window.Seak,
       'scroll-top': () => {
         const v = window.MarkdownViewer?.getInstance();
         const scrollEl = v ? v.getActiveScrollElement() : document.getElementById('md-viewer-mount');
@@ -619,8 +617,20 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         }
       },
-      'undo': () => document.execCommand('undo'),
-      'redo': () => document.execCommand('redo'),
+      'undo': () => {
+        if (window.AppState.currentMode === 'edit' && window.EditorModule) {
+          window.EditorModule.undo();
+        } else {
+          document.execCommand('undo');
+        }
+      },
+      'redo': () => {
+        if (window.AppState.currentMode === 'edit' && window.EditorModule) {
+          window.EditorModule.redo();
+        } else {
+          document.execCommand('redo');
+        }
+      },
       'markdown-helper': () => window.MarkdownHelperComponent?.open(),
       'select-all-tabs': () => window.TabsModule?.selectAll(),
       'close-active-tab': () => {
@@ -642,30 +652,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         else if (window.TreeModule) window.TreeModule.createNewFile();
       },
       'new-folder': () => {
-         if (window.TreeModule) window.TreeModule.createNewFolder();
+        if (window.TreeModule) window.TreeModule.createNewFolder();
       },
       'rename-selected': () => {
-         if (window.TreeModule) window.TreeModule.renameSelected();
+        if (window.TreeModule) window.TreeModule.renameSelected();
       },
       'duplicate-file': () => {
-         if (window.TreeModule) window.TreeModule.duplicateSelected();
+        if (window.TreeModule) window.TreeModule.duplicateSelected();
       },
       'delete-selected': () => {
-         if (window.TreeModule) window.TreeModule.deleteSelected();
+        if (window.TreeModule) window.TreeModule.deleteSelected();
       },
       'workspace-picker': () => document.getElementById('workspace-switcher')?.click(),
       'hide-unhide': () => {
-         if (window.TreeModule) window.TreeModule.toggleHiddenItems();
+        if (window.TreeModule) window.TreeModule.toggleHiddenItems();
       },
       'collapse-all': () => {
-         if (window.TreeModule) window.TreeModule.collapseAll();
+        if (window.TreeModule) window.TreeModule.collapseAll();
       },
       'collapse-others': () => {
-         if (window.TreeModule) {
-           const state = window.TreeModule.getState();
-           const target = state.selectedPaths.length > 0 ? state.selectedPaths[0] : null;
-           if (target) window.TreeModule.collapseOthers(target);
-         }
+        if (window.TreeModule) {
+          const state = window.TreeModule.getState();
+          const target = state.selectedPaths.length > 0 ? state.selectedPaths[0] : null;
+          if (target) window.TreeModule.collapseOthers(target);
+        }
       },
       'toggle-publish': (e) => {
         const v = window.MarkdownViewer?.getInstance();
@@ -692,17 +702,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       },
       'open-settings': () => window.SettingsComponent?.toggle(),
       'close-cancel': () => {
-         // Close Search
-         if (window.SearchPalette && window.SearchPalette.isOpen()) {
-           window.SearchPalette.hide();
-         }
-         // Close Settings
-         if (window.SettingsComponent && window.SettingsComponent.activeInstance) {
-           window.SettingsComponent.hide();
-         }
-         // Global deselect
-         if (window.TabsModule) window.TabsModule.deselectAll();
-         if (window.TreeModule) window.TreeModule.deselectAll();
+        // Close Search
+        if (window.SearchPalette && window.SearchPalette.isOpen()) {
+          window.SearchPalette.hide();
+        }
+        // Close Settings
+        if (window.SettingsComponent && window.SettingsComponent.activeInstance) {
+          window.SettingsComponent.hide();
+        }
+        // Global deselect
+        if (window.TabsModule) window.TabsModule.deselectAll();
+        if (window.TreeModule) window.TreeModule.deselectAll();
       }
     };
 
@@ -753,7 +763,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 function showToast(message, type = 'success', options = {}) {
   const toastId = options.id || 'default-toast';
   let container = document.getElementById(`toast-${toastId}`);
-  
+
   if (!container) {
     container = document.createElement('div');
     container.id = `toast-${toastId}`;

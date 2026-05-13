@@ -454,6 +454,17 @@
       }
     },
     
+    saveAttachment: async (data) => {
+      const { buffer, originalName } = data;
+      const res = await fetch(`/api/file-ops/save-attachment?name=${encodeURIComponent(originalName)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/octet-stream' },
+        body: buffer
+      });
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      return res.json();
+    },
+
     isElectron: false,
     
     // Custom

@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Not Commited] — 2026-05-13 02:05
+
+### 🚀 Added
+- **Monaco Editor Integration (Phase 0 — Foundation)**: Khởi động lộ trình nâng cấp trình soạn thảo từ `<textarea>` sang Monaco Editor (IDE-grade).
+    - **`monaco-editor` Dependency**: Cài đặt thư viện Monaco Editor v0.55.1 vào hệ thống.
+    - **Monaco Static Route**: Cấu hình server để phục vụ thư viện Monaco qua `/monaco`, sẵn sàng cho cơ chế Dynamic Loading.
+    - **API & Token Mapping**: Xây dựng bộ tài liệu kỹ thuật chi tiết (`02-api-mapping.md`, `03-token-mapping.md`) để đảm bảo tính tương thích và thẩm mỹ đồng bộ của editor mới.
+    - **Implementation Blueprint**: Lập kế hoạch triển khai 8 giai đoạn (`00-blueprint.md`) nhằm giảm thiểu rủi ro và đảm bảo không gây lỗi tính năng cũ.
+
+### 🔧 Changed
+- **Express Server Configuration**: Cập nhật `server/index.js` để hỗ trợ phục vụ tài nguyên tĩnh từ `node_modules` cho các thành phần UI phức tạp.
+- **Architectural Research**: Hoàn thành nghiên cứu về xung đột AMD Loader của Monaco trong môi trường Electron, xác định chiến lược load động (dynamic loading) để bảo vệ các thư viện hiện có như Mermaid và Socket.io.
+
 ## [1.9.0] — 2026-05-12 20:00
 
 ### 🚀 Added

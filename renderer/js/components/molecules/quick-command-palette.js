@@ -19,7 +19,7 @@ const QuickCommandPalette = (() => {
     { id: 'h1', label: 'Heading 1', icon: 'heading-1', hint: '/h1', tags: ['tieude1', 'h1'] },
     { id: 'h2', label: 'Heading 2', icon: 'heading-2', hint: '/h2', tags: ['tieude2', 'h2'] },
     { id: 'h3', label: 'Heading 3', icon: 'heading-3', hint: '/h3', tags: ['tieude3', 'h3'] },
-    { id: 'h',  label: 'Heading 4', icon: 'heading-4', hint: '/h4', tags: ['tieude4', 'h4'] },
+    { id: 'h4', label: 'Heading 4', icon: 'heading-4', hint: '/h4', tags: ['tieude4', 'h4'] },
     { id: 'h5', label: 'Heading 5', icon: 'heading-5', hint: '/h5', tags: ['tieude5', 'h5'] },
     { id: 'h6', label: 'Heading 6', icon: 'heading-6', hint: '/h6', tags: ['tieude6', 'h6'] },
 

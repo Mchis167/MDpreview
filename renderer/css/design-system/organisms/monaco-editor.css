@@ -1,0 +1,111 @@
+/* Monaco Editor Organism */
+ 
+/* Disable main container scrollbar when in Edit mode to prevent dual scrollbars */
+#md-viewer-mount[data-mode="edit"] {
+  overflow: hidden !important;
+}
+
+#edit-viewer {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+
+#monaco-editor-container {
+  width: 100%;
+  height: 100%;
+  outline: none !important;
+  border: none !important;
+}
+
+/* Aggressive Focus & Line Border Removal */
+.monaco-editor,
+.monaco-editor.focused,
+.monaco-editor .overflow-guard, 
+.monaco-editor .view-lines, 
+.monaco-editor .view-overlays .current-line,
+.monaco-editor textarea {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  caret-color: transparent !important;
+  color: transparent !important;
+}
+
+/* Override Monaco internal styles to match Design System */
+.monaco-editor {
+  padding-top: 0;
+}
+
+/* 1. Gutter & Line Numbers */
+.monaco-editor .margin {
+  background-color: transparent !important;
+}
+
+.monaco-editor .line-numbers {
+  color: var(--ds-text-tertiary) !important;
+  font-size: var(--ds-font-sm) !important;
+  font-family: var(--ds-font-family-code);
+}
+
+.monaco-editor .line-numbers.active-line-number {
+  color: var(--ds-text-secondary) !important;
+  font-weight: 600 !important;
+}
+
+/* 2. Active Line & Selection */
+.monaco-editor .view-overlays .current-line {
+  background-color: var(--ds-layer-subtle-hover) !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.monaco-editor .selected-text {
+  background-color: var(--ds-white-a20) !important;
+}
+
+/* 3. Cursor */
+.monaco-editor .cursor {
+  background-color: var(--ds-accent) !important;
+  border-color: var(--ds-accent) !important;
+}
+
+/* 4. Scrollbar (Modern Look) */
+.monaco-editor .monaco-scrollable-element .scrollbar .slider {
+  background: var(--ds-border-strong) !important;
+  border-radius: var(--ds-radius-pill) !important;
+  transition: background var(--ds-transition-fast);
+}
+
+.monaco-editor .monaco-scrollable-element .scrollbar .slider:hover {
+  background: var(--ds-border-xstrong) !important;
+}
+
+.monaco-editor .monaco-scrollable-element .scrollbar .slider.active {
+  background: var(--ds-border-selected) !important;
+}
+
+.monaco-editor .scroll-decoration {
+  box-shadow: none !important;
+}
+
+/* 5. Widgets (Suggest, Hover, etc.) */
+.monaco-editor .suggest-widget,
+.monaco-editor .hover-widget {
+  border: 1px solid var(--ds-border-default) !important;
+  border-radius: var(--ds-radius-panel) !important;
+  box-shadow: var(--ds-shadow-lg) !important;
+  background-color: var(--ds-surface-overlay) !important;
+  backdrop-filter: blur(var(--ds-blur-md));
+}
+
+.monaco-editor .monaco-list-row.focused {
+  background-color: var(--ds-layer-subtle-active) !important;
+}
+
+.monaco-editor .monaco-list-row:hover {
+  background-color: var(--ds-layer-subtle-hover) !important;
+}

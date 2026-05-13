@@ -31,7 +31,7 @@ class MarkdownHelperComponent {
           { label: 'H1', syntax: '# H1', action: 'h1' },
           { label: 'H2', syntax: '## H2', action: 'h2' },
           { label: 'H3', syntax: '### H3', action: 'h3' },
-          { label: 'H4', syntax: '#### H4', action: 'h' },
+          { label: 'H4', syntax: '#### H4', action: 'h4' },
           { label: 'H5', syntax: '##### H5', action: 'h5' },
           { label: 'H6', syntax: '###### H6', action: 'h6' }
         ]
@@ -80,7 +80,7 @@ class MarkdownHelperComponent {
             // Mapping actions to tags for insertText
             const map = {
               'b': ['**', '**'], 'i': ['*', '*'], 'bi': ['***', '***'], 's': ['~~', '~~'], 'c': ['`', '`'],
-              'h1': ['# ', ''], 'h2': ['## ', ''], 'h3': ['### ', ''], 'h': ['#### ', ''], 'h5': ['##### ', ''], 'h6': ['###### ', ''],
+              'h1': ['# ', ''], 'h2': ['## ', ''], 'h3': ['### ', ''], 'h4': ['#### ', ''], 'h5': ['##### ', ''], 'h6': ['###### ', ''],
               'ul': ['- ', ''], 'ol': ['1. ', ''], 'tl': ['- [ ] ', ''], 'tl-checked': ['- [x] ', ''],
               'q': ['> ', ''], 'l': ['[', '](url)'], 'img': ['![', '](url)'], 'cb': ['```\n', '\n```'],
               'tb': ['| Col 1 | Col 2 |\n| --- | --- |\n| Cell 1 | Cell 2 |', ''], 'hr': ['---\n', ''], 'fn': ['[^1]', '']

@@ -64,6 +64,7 @@ Ghi lại các quyết định thiết kế và kỹ thuật quan trọng trong 
 | 2026-05-04 | [20260504-slash-command-interaction.md](20260504-slash-command-interaction.md) | Mô hình tương tác Slash Command "Input-less" và Keyboard Forwarding | accepted |
 | 2026-05-04 | [20260504-smart-content-selection.md](20260504-smart-content-selection.md) | Chiến lược bôi đen nội dung thông minh (Smart Selection) cho Markdown | accepted |
 | 2026-05-04 | [20260504-resilient-slash-input.md](20260504-resilient-slash-input.md) | Xử lý input bền bỉ chống lỗi ký tự ẩn và auto-correction | accepted |
+| 2026-05-13 | [20260513-monaco-active-line-styling.md](20260513-monaco-active-line-styling.md) | Tinh chỉnh thẩm mỹ highlight dòng trong Monaco Editor | accepted |
 
 
 ---

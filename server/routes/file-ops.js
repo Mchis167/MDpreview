@@ -183,4 +183,61 @@ router.post('/file-ops/create-folder', (req, res) => {
   }
 });
 
+// POST save attachment (for web version)
+router.post('/file-ops/save-attachment', express.raw({ type: 'application/octet-stream', limit: '50mb' }), async (req, res) => {
+  const watchDir = req.watchDir;
+  const originalName = req.query.name || 'pasted-image.png';
+  
+  if (!watchDir) return res.status(400).json({ error: 'No workspace set' });
+
+  try {
+    const assetsDir = path.join(watchDir, 'assets');
+    if (!fs.existsSync(assetsDir)) {
+      fs.mkdirSync(assetsDir, { recursive: true });
+    }
+
+    const ext = path.extname(originalName).toLowerCase() || '.png';
+    const timestamp = Date.now();
+    const fileName = `image-${timestamp}${ext}`;
+    const fullPath = path.join(assetsDir, fileName);
+
+    fs.writeFileSync(fullPath, req.body);
+
+    res.json({ 
+      success: true, 
+      relativePath: `/assets/${fileName}`,
+      fileName: fileName
+    });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+// --- Check if asset already exists by metadata (for Browser support) ---
+router.post('/file-ops/check-asset', (req, res) => {
+  const { name, size, lastModified, watchDir } = req.body;
+  if (!watchDir || !name) return res.status(400).json({ error: 'Missing info' });
+
+  const assetsDir = path.join(watchDir, 'assets');
+  if (!fs.existsSync(assetsDir)) return res.json({ exists: false });
+
+  // Look for a file with the same name
+  const filePath = path.join(assetsDir, name);
+  if (fs.existsSync(filePath)) {
+    const stats = fs.statSync(filePath);
+    // Compare size and mtime (allow 2s difference for some filesystem quirks)
+    const sizeMatch = stats.size === size;
+    const timeMatch = Math.abs(stats.mtimeMs - lastModified) < 2000;
+
+    if (sizeMatch && timeMatch) {
+      return res.json({ 
+        exists: true, 
+        relativePath: `/assets/${name}` 
+      });
+    }
+  }
+
+  res.json({ exists: false });
+});
+
 module.exports = router;

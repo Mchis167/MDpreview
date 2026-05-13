@@ -49,8 +49,24 @@ let watcher         = null;
 // --- Static renderer assets ---
 app.use('/css',    express.static(path.join(__dirname, '../renderer/css')));
 app.use('/js',     express.static(path.join(__dirname, '../renderer/js')));
+app.use('/monaco', express.static(path.join(__dirname, '../node_modules/monaco-editor')));
 app.use('/testing', express.static(path.join(__dirname, '../renderer/testing')));
-app.use('/assets', express.static(path.join(__dirname, '../assets')));
+app.use('/assets', (req, res, next) => {
+  if (currentWatchDir) {
+    const workspaceAssetPath = path.join(currentWatchDir, 'assets', req.path);
+    // Debug log for asset resolution
+    console.log(`[Server] Asset request: ${req.path} -> Looking in: ${workspaceAssetPath}`);
+    
+    if (fs.existsSync(workspaceAssetPath)) {
+      return res.sendFile(workspaceAssetPath);
+    } else {
+      console.warn(`[Server] Asset not found in workspace: ${workspaceAssetPath}`);
+    }
+  } else {
+    console.warn('[Server] Asset requested but currentWatchDir is not set');
+  }
+  next();
+}, express.static(path.join(__dirname, '../assets')));
 
 // --- Main HTML ---
 app.get('/', (req, res) => {

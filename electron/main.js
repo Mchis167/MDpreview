@@ -139,6 +139,7 @@ require('./ipc/workspace').register(ipcMain);
 require('./ipc/comments').register(ipcMain);
 require('./ipc/files').register(ipcMain);
 require('./ipc/wiki').register(ipcMain);
+require('./ipc/attachments').register(ipcMain);
 
 app.whenReady().then(createWindow);
 

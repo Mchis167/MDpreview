@@ -1,217 +1,236 @@
-/* ── Editor Toolbar Logic ─────────────────────────────── */
+/* global AppState, TabsModule, FileService, showToast, loadFile, DraftModule, MarkdownLogicService, MonacoService, monaco, MonacoActionService, MonacoSyncService */
 
 const EditorModule = (() => {
   let _originalContent = '';
-  let _textarea = null;
 
-  // ── Undo / Redo Stack ──────────────────────────────────
-  /** @type {{ value: string, ss: number, se: number }[]} */
-  let _undoStack = [];
-  /** @type {{ value: string, ss: number, se: number }[]} */
-  let _redoStack = [];
-  let _debounceTimer = null;
-  let _ignoreNextInput = false; // set to true when we're restoring a snapshot
   let _isSlashMode = false;
   let _slashStartPos = -1;
-
-  function _snapshot() {
-    if (!_textarea) return;
-    const snap = { value: _textarea.value, ss: _textarea.selectionStart, se: _textarea.selectionEnd };
-    const last = _undoStack[_undoStack.length - 1];
-    if (last && last.value === snap.value) return;
-    _undoStack.push(snap);
-    if (_undoStack.length > 200) _undoStack.shift(); 
-    _redoStack = []; 
-  }
-
-  function _scheduleSnapshot() {
-    clearTimeout(_debounceTimer);
-    _debounceTimer = setTimeout(_snapshot, 300);
-  }
-
-  function _restoreSnapshot(snap) {
-    if (!_textarea || !snap) return;
-    _ignoreNextInput = true;
-    _textarea.value = snap.value;
-    _textarea.setSelectionRange(snap.ss, snap.se);
-    _textarea.focus();
-  }
+  let _changeListener = null;
+  let _keyListener = null;
+  const isMac = /Mac|iPhone|iPod|iPad/.test(navigator.platform);
 
   function undo() {
-    if (_undoStack.length <= 1) return; 
-    _redoStack.push(_undoStack.pop());
-    _restoreSnapshot(_undoStack[_undoStack.length - 1]);
+    if (MonacoService) MonacoService.undo();
   }
 
   function redo() {
-    if (_redoStack.length === 0) return;
-    const snap = _redoStack.pop();
-    _undoStack.push(snap);
-    _restoreSnapshot(snap);
+    if (MonacoService) MonacoService.redo();
   }
 
-  function _handleInput(e) {
-    if (!_textarea) return;
-    if (_ignoreNextInput) { _ignoreNextInput = false; return; }
-    _scheduleSnapshot();
-    
+  function _handleContentChange() {
     if (typeof TabsModule !== 'undefined' && AppState.currentFile) {
       TabsModule.setDirty(AppState.currentFile, isDirty());
     }
 
-    // ── Universal Auto-scroll ──
-    requestAnimationFrame(() => {
-      if (!_textarea) return;
-      const lineHeight = parseFloat(getComputedStyle(_textarea).lineHeight);
-      const cursorLine = _textarea.value.substring(0, _textarea.selectionStart).split('\n').length;
-      const cursorTop = (cursorLine - 1) * lineHeight;
-      const scrollTop = _textarea.scrollTop;
-      const visibleHeight = _textarea.clientHeight;
-      const cursorYInViewport = cursorTop - scrollTop;
-      if (cursorYInViewport > visibleHeight * 0.8) {
-        const targetScroll = cursorTop - (visibleHeight * 0.6);
-        _textarea.scrollTo({ top: targetScroll, behavior: 'smooth' });
-      }
-    });
+    // ── Slash Command Logic (Simplified for Monaco) ──
+    if (!MonacoService.isInitialized()) return;
+    
+    const pos = MonacoService.getCursorPosition(); // { lineNumber, column }
+    const content = MonacoService.getValue();
+    const lines = content.split('\n');
+    const currentLineText = lines[pos.lineNumber - 1] || '';
+    const lastChar = currentLineText.charAt(pos.column - 2);
 
-    // ── Slash Command Logic ──
-    const pos = _textarea.selectionStart;
-    const text = _textarea.value;
-    if (e.data === '/') {
-      if (pos === 1 || /[\s\n]/.test(text.charAt(pos - 2))) {
+    if (lastChar === '/') {
+      // Check if it's the start of line or preceded by space
+      const beforeSlash = currentLineText.substring(0, pos.column - 2);
+      if (pos.column === 2 || /[\s\n]$/.test(beforeSlash)) {
         _isSlashMode = true;
-        _slashStartPos = pos - 1;
+        _slashStartPos = pos.column - 2; 
         _showQuickCommand(true, true);
-      }
-    } else if (_isSlashMode) {
-      if (text.charAt(_slashStartPos) !== '/' || pos <= _slashStartPos) {
+      } else {
         _isSlashMode = false;
-        window.QuickCommandPalette.hide();
-        return;
+        if (window.QuickCommandPalette) window.QuickCommandPalette.hide();
       }
-      const query = text.substring(_slashStartPos + 1, pos);
-      if (/[\n\r]/.test(query)) {
-        _isSlashMode = false;
-        window.QuickCommandPalette.hide();
-        return;
-      }
-      window.QuickCommandPalette.updateQuery(query);
+    } else {
+      _isSlashMode = false;
+      if (window.QuickCommandPalette) window.QuickCommandPalette.hide();
     }
   }
 
   function _handleKeyDown(e) {
-    if (!_textarea) return;
+    try {
+      const K_ENTER = 3;
+      const K_TAB = 2;
+      const K_DOWN = 18;
+      const K_UP = 16;
+      const K_ESC = 9;
+      const K_S = 49;
+      const K_B = 32;
+      const K_I = 39;
+      const K_K = 41;
+      const K_SLASH = 47;
+      const K_Z = 56;
+      const K_PERIOD = 46; // "." key
 
-    if (_isSlashMode) {
-      if (e.key === ' ') {
-        const cmdId = window.QuickCommandPalette.getSelectedCommandId();
-        if (cmdId) {
+      if (_isSlashMode) {
+        if (e.keyCode === K_ENTER) {
+          const cmdId = window.QuickCommandPalette.getSelectedCommandId();
+          if (cmdId) {
+            e.preventDefault();
+            _applySlashCommand(cmdId);
+            return;
+          }
+        } else if (e.keyCode === K_DOWN) {
           e.preventDefault();
-          _applySlashCommand(cmdId);
+          window.QuickCommandPalette.navigate('down');
           return;
-        } else {
+        } else if (e.keyCode === K_UP) {
+          e.preventDefault();
+          window.QuickCommandPalette.navigate('up');
+          return;
+        } else if (e.keyCode === K_ESC) {
           _isSlashMode = false;
           window.QuickCommandPalette.hide();
-        }
-      } else if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        window.QuickCommandPalette.navigate('down');
-        return;
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        window.QuickCommandPalette.navigate('up');
-        return;
-      } else if (e.key === 'Escape') {
-        _isSlashMode = false;
-        window.QuickCommandPalette.hide();
-      } else if (e.key === 'Enter') {
-        const cmdId = window.QuickCommandPalette.getSelectedCommandId();
-        if (cmdId) {
-          e.preventDefault();
-          _applySlashCommand(cmdId);
           return;
         }
       }
-    }
 
-    if ((e.metaKey || e.ctrlKey) && e.key === 's') {
-      e.preventDefault();
-      save();
-      return;
-    }
-
-    if ((e.metaKey || e.ctrlKey) && e.key === '/') {
-      e.preventDefault();
-      _showQuickCommand();
-      return;
-    }
-
-    if (e.key === 'z' && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault();
-      if (e.shiftKey) redo(); else undo();
-      return;
-    }
-
-    if (typeof MarkdownLogicService !== 'undefined' && !AppState.settings.smartTypingDisabled && !e.isComposing && !_isSlashMode) {
-      if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        const res = MarkdownLogicService.computeSmartEnter(_textarea.value, _textarea.selectionStart, _textarea.selectionEnd);
-        if (res) {
+      if (e.ctrlKey || e.metaKey) {
+        const comboStr = `${isMac ? 'Cmd' : 'Ctrl'}${e.shiftKey ? '+Shift' : ''}+${e.browserEvent.key}`;
+        
+        if (e.keyCode === K_PERIOD && e.shiftKey) {
           e.preventDefault();
-          _snapshot();
-          const st = _textarea.scrollTop;
-          _textarea.value = res.newValue;
-          _textarea.setSelectionRange(res.newCursorPos, res.newCursorPos);
-          _textarea.scrollTop = st;
-          _snapshot();
-          _textarea.dispatchEvent(new Event('input'));
+          console.warn(`[DEBUG-SHORTCUT] Action: blockquote, Combo: ${comboStr}`);
+          applyAction('q');
+          return;
+        }
+        if (e.keyCode === K_S) {
+          e.preventDefault();
+          console.warn(`[DEBUG-SHORTCUT] Action: save, Combo: ${comboStr}`);
+          save();
+          return;
+        }
+        if (e.keyCode === K_B) {
+          e.preventDefault();
+          console.warn(`[DEBUG-SHORTCUT] Action: bold, Combo: ${comboStr}`);
+          applyAction('b');
+          return;
+        }
+        if (e.keyCode === K_I) {
+          e.preventDefault();
+          console.warn(`[DEBUG-SHORTCUT] Action: italic, Combo: ${comboStr}`);
+          applyAction('i');
+          return;
+        }
+        if (e.keyCode === K_K) {
+          e.preventDefault();
+          console.warn(`[DEBUG-SHORTCUT] Action: link, Combo: ${comboStr}`);
+          applyAction('l');
+          return;
+        }
+        if (e.keyCode === K_SLASH) {
+          e.preventDefault();
+          console.warn(`[DEBUG-SHORTCUT] Action: quick-command, Combo: ${comboStr}`);
+          _showQuickCommand();
+          return;
+        }
+        if (e.keyCode === K_Z) {
+          e.preventDefault();
+          const action = e.shiftKey ? 'redo' : 'undo';
+          console.warn(`[DEBUG-SHORTCUT] Action: ${action}, Combo: ${comboStr}`);
+          if (e.shiftKey) redo(); else undo();
           return;
         }
       }
-      if (e.key === 'Tab' && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        const direction = e.shiftKey ? 'out' : 'in';
-        const res = MarkdownLogicService.computeListIndent(_textarea.value, _textarea.selectionStart, _textarea.selectionEnd, direction);
-        if (res) {
-          e.preventDefault();
-          _snapshot();
-          const st = _textarea.scrollTop;
-          _textarea.value = res.newValue;
-          _textarea.setSelectionRange(res.newCursorPos, res.newSelectionEnd || res.newCursorPos);
-          _textarea.scrollTop = st;
-          _snapshot();
-          _textarea.dispatchEvent(new Event('input'));
-          return;
+
+      if (typeof MarkdownLogicService !== 'undefined' && !AppState.settings.smartTypingDisabled && !e.isComposing && !_isSlashMode) {
+        if (e.keyCode === K_ENTER && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          const model = MonacoService.getInstance().getModel();
+          const pos = MonacoService.getCursorPosition();
+          const offset = model.getOffsetAt(pos);
+          
+          const res = MarkdownLogicService.computeSmartEnter(MonacoService.getValue(), offset, offset);
+          if (res) {
+            e.preventDefault();
+            if (res.range && res.text) {
+              MonacoService.executeEdit(res.range, res.text);
+            } else {
+              MonacoService.setValue(res.newValue);
+            }
+
+            const newPos = model.getPositionAt(res.newCursorPos);
+            MonacoService.setCursorPosition(newPos);
+            return;
+          }
+        }
+        if (e.keyCode === K_TAB && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          const direction = e.shiftKey ? 'out' : 'in';
+          const model = MonacoService.getInstance().getModel();
+          const sel = MonacoService.getSelection();
+          const startOffset = model.getOffsetAt(sel.getStartPosition());
+          const endOffset = model.getOffsetAt(sel.getEndPosition());
+
+          const res = MarkdownLogicService.computeListIndent(MonacoService.getValue(), startOffset, endOffset, direction);
+          if (res) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (res.range && res.text) {
+              MonacoService.executeEdit(res.range, res.text);
+            } else {
+              MonacoService.setValue(res.newValue);
+            }
+
+            const newStartPos = model.getPositionAt(res.newCursorPos);
+            const newEndPos = model.getPositionAt(res.newSelectionEnd || res.newCursorPos);
+            MonacoService.setSelection({
+              startLineNumber: newStartPos.lineNumber,
+              startColumn: newStartPos.column,
+              endLineNumber: newEndPos.lineNumber,
+              endColumn: newEndPos.column
+            });
+            return;
+          }
         }
       }
+    } catch (err) {
+      console.error('[EditorModule] KeyDown Error:', err);
     }
   }
 
   /**
-   * Binds the editor logic to a specific textarea element.
-   * This is called by the MarkdownEditor component.
+   * Binds the editor logic to Monaco Editor.
    */
-  function bindToElement(el) {
-    if (!el) return;
+  async function bind() {
+    // Unbind previous if exists
+    unbind();
 
-    // Unbind previous if exists to avoid duplicate listeners on same element
-    if (_textarea) unbind();
+    // Ensure Monaco is ready
+    if (!MonacoService.isInitialized()) {
+      await MonacoService.init();
+      // Wait a tiny bit more for the instance to be created after init
+      await new Promise(r => setTimeout(r, 100));
+    }
 
-    _textarea = el;
+    // Listen to content changes
+    _changeListener = MonacoService.onContentChange(() => {
+      _handleContentChange();
+    });
 
-    // Reset stacks for new file/session
-    _undoStack = [{ value: _textarea.value, ss: _textarea.selectionStart, se: _textarea.selectionEnd }];
-    _redoStack = [];
-
-    _textarea.addEventListener('input', _handleInput);
-    _textarea.addEventListener('keydown', _handleKeyDown);
+    // Listen to keydown
+    const editor = MonacoService.getInstance();
+    if (editor) {
+      _keyListener = editor.onKeyDown((e) => {
+        _handleKeyDown(e);
+      });
+    } else {
+      console.warn('[EditorModule] Failed to bind listeners: Monaco instance not found');
+    }
   }
 
   /**
    * Applies the command and removes the slash + query text
    */
   function _applySlashCommand(cmdId) {
-    const pos = _textarea.selectionStart;
-    // Remove the "/query" part
-    _textarea.setRangeText('', _slashStartPos, pos, 'end');
+    if (!MonacoService.isInitialized()) return;
+    
+    const pos = MonacoService.getCursorPosition();
+
+    // Calculate the range to remove: from _slashStartPos (column on current line) to current column
+    const range = new monaco.Range(pos.lineNumber, _slashStartPos + 1, pos.lineNumber, pos.column);
+    
+    MonacoService.executeEdit(range, '');
     _isSlashMode = false;
     window.QuickCommandPalette.hide();
     applyAction(cmdId);
@@ -223,37 +242,37 @@ const EditorModule = (() => {
    * @param {boolean} hideInput
    */
   function _showQuickCommand(isSlashTrigger = false, hideInput = false) {
-    if (!window.QuickCommandPalette || !window.EditorUtil) return;
+    if (!window.QuickCommandPalette || !MonacoService.isInitialized()) return;
 
-    const coords = window.EditorUtil.getCursorCoordinates(_textarea);
+    const coords = MonacoService.getCursorPixelPosition();
     
-    window.QuickCommandPalette.show(coords.left, coords.top + coords.lineHeight, (actionId) => {
+    window.QuickCommandPalette.show(coords.left, coords.top + 20, (actionId) => {
       if (isSlashTrigger) {
-        const pos = _textarea.selectionStart;
-        _textarea.setRangeText('', _slashStartPos, pos, 'end');
-        _isSlashMode = false;
+        _applySlashCommand(actionId);
+      } else {
+        applyAction(actionId);
       }
-      applyAction(actionId);
     }, { hideInput });
   }
 
   /**
-   * Clears the textarea reference and removes event listeners to prevent leaks and duplicate bindings
+   * Clears listeners to prevent leaks
    */
   function unbind() {
-    if (_textarea) {
-      _textarea.removeEventListener('input', _handleInput);
-      _textarea.removeEventListener('keydown', _handleKeyDown);
+    if (_changeListener) {
+      _changeListener.dispose();
+      _changeListener = null;
     }
-    _textarea = null;
-    _undoStack = [];
-    _redoStack = [];
+    if (_keyListener) {
+      _keyListener.dispose();
+      _keyListener = null;
+    }
     _isSlashMode = false;
   }
 
   async function save() {
-    if (!AppState.currentFile || !_textarea) return false;
-    const content = _textarea.value;
+    if (!AppState.currentFile || !MonacoService.isInitialized()) return false;
+    const content = MonacoService.getValue();
 
     if (AppState.currentFile && AppState.currentFile.startsWith('__DRAFT_')) {
         if (typeof DraftModule !== 'undefined') {
@@ -291,53 +310,46 @@ const EditorModule = (() => {
   }
 
   function setOriginalContent(text) {
-    _originalContent = text;
-    if (_textarea && _textarea.value !== text) {
-      const ss = _textarea.selectionStart;
-      const se = _textarea.selectionEnd;
-      _textarea.value = text;
-      // Try to preserve selection if possible
-      try { _textarea.setSelectionRange(ss, se); } catch(_e) {}
-      _undoStack = [{ value: text, ss: 0, se: 0 }];
-      _redoStack = [];
-    }
+      _originalContent = text;
+      if (MonacoService.isInitialized() && MonacoService.getValue() !== text) {
+        // Monaco handles value sync and its own stack
+        MonacoService.setValue(text);
+      }
   }
 
   function isDirty() {
-    if (!_textarea) return false;
-    return _textarea.value !== _originalContent;
+    if (!MonacoService.isInitialized()) return false;
+    return MonacoService.getValue() !== _originalContent;
   }
 
   function applyAction(action) {
-    if (!_textarea) return;
+    if (!MonacoService.isInitialized()) return;
     
-    _snapshot(); // Save state before
-    
-    // Use the central logic service for transformations
-    if (typeof MarkdownLogicService !== 'undefined') {
-      MarkdownLogicService.applyAction(_textarea, action);
-    }
-
-    _snapshot(); // Save state after
+      // Use the dedicated action service for formatting
+      if (typeof MonacoActionService !== 'undefined') {
+        MonacoActionService.applyAction(MonacoService, action);
+      } else if (typeof MarkdownLogicService !== 'undefined') {
+        // Fallback for safety (though it shouldn't be needed)
+        MarkdownLogicService.applyAction(MonacoService, action);
+      }
   }
 
   function focusWithContext(context = {}) {
-    if (!_textarea) return;
+    if (!MonacoService.isInitialized()) return;
     
-    _textarea.focus();
+    MonacoService.focus();
 
-    // Use the central logic service for cursor & scroll synchronization
-    if (typeof MarkdownLogicService !== 'undefined') {
-      MarkdownLogicService.syncCursor(_textarea, context);
+    // Use the dedicated sync service for cursor & scroll synchronization
+    if (typeof MonacoSyncService !== 'undefined') {
+      MonacoSyncService.syncCursor(MonacoService, context);
+    } else if (typeof MarkdownLogicService !== 'undefined') {
+      MarkdownLogicService.syncCursor(MonacoService, context);
     }
   }
 
   function revert() {
-    if (_textarea) {
-      _textarea.value = _originalContent;
-      // Reset undo/redo stacks to sync with the reverted state
-      _undoStack = [{ value: _textarea.value, ss: 0, se: 0 }];
-      _redoStack = [];
+    if (MonacoService.isInitialized()) {
+      MonacoService.setValue(_originalContent);
 
       if (typeof TabsModule !== 'undefined' && AppState.currentFile) {
         TabsModule.setDirty(AppState.currentFile, false);
@@ -346,37 +358,31 @@ const EditorModule = (() => {
   }
 
   function insertContent(text, mode = 'insert') {
-    if (!_textarea) return;
-
-    _snapshot();
+    if (!MonacoService.isInitialized()) return;
 
     if (mode === 'replace') {
-      _textarea.value = text;
+      MonacoService.setValue(text);
     } else if (mode === 'append') {
-      const current = _textarea.value;
-      _textarea.value = current + (current && !current.endsWith('\n') ? '\n\n' : (current ? '\n' : '')) + text;
+      const current = MonacoService.getValue();
+      const newVal = current + (current && !current.endsWith('\n') ? '\n\n' : (current ? '\n' : '')) + text;
+      MonacoService.setValue(newVal);
     } else {
-      const start = _textarea.selectionStart;
-      const end = _textarea.selectionEnd;
-      _textarea.setRangeText(text, start, end, 'select');
+      const sel = MonacoService.getSelection();
+      MonacoService.executeEdit(sel, text);
     }
 
-    _snapshot();
-    _textarea.focus();
-
-    // Trigger input event to update dirty state
-    _textarea.dispatchEvent(new Event('input'));
+    MonacoService.focus();
   }
 
   return { 
-      bindToElement, unbind, save, isDirty, setOriginalContent, undo, redo, 
+      bind, unbind, save, isDirty, setOriginalContent, undo, redo, 
       applyAction,
       setDirty: (isDirty) => {
         if (isDirty) {
           _originalContent = _originalContent + ' '; // Force dirty
         } else {
-          if (_textarea) {
-            _originalContent = _textarea.value;
+          if (MonacoService.isInitialized()) {
+            _originalContent = MonacoService.getValue();
           }
         }
       },
@@ -384,7 +390,7 @@ const EditorModule = (() => {
       getOriginalContent: () => _originalContent,
       insertContent,
       triggerQuickCommand: () => _showQuickCommand(),
-      takeSnapshot: _snapshot,
+      takeSnapshot: () => {}, // No-op now
       revert
   };
 })();

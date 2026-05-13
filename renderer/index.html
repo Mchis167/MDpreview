@@ -15,11 +15,13 @@
   <!-- ── Libraries ───────────────────────────────────── -->
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js" defer></script>
   <script src="/socket.io/socket.io.js" defer></script>
+  <script src="/monaco/min/vs/loader.js" defer></script>
 
   <!-- ── Application Styles ─────────────────────────── -->
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/design-system/organisms/wiki-drawer.css">
   <link rel="stylesheet" href="css/design-system/organisms/backlinks-drawer.css">
+  <link rel="stylesheet" href="css/design-system/organisms/monaco-editor.css">
 </head>
 
 <body>
@@ -128,12 +130,16 @@
   <script src="js/services/settings-service.js" defer></script>
   <script src="js/services/file-service.js" defer></script>
   <script src="js/services/markdown-logic-service.js" defer></script>
+  <script src="js/services/monaco-action-service.js" defer></script>
+  <script src="js/services/monaco-sync-service.js" defer></script>
   <script src="js/services/tree-drag-manager.js" defer></script>
   <script src="js/services/recently-viewed-service.js" defer></script>
   <script src="js/services/search-service.js" defer></script>
   <script src="js/services/shortcut-service.js" defer></script>
   <script src="js/services/sync-service.js" defer></script>
+  <script src="js/services/monaco-service.js" defer></script>
   <script src="js/services/wiki-service.js" defer></script>
+  <script src="js/services/attachment-service.js" defer></script>
 
   <!-- ── 3.1 Publishing Service Dependencies (load in order) ── -->
   <script src="js/services/design-token-provider.js" defer></script>
@@ -166,7 +172,6 @@
 
   <!-- ── 6. Application Entry ── -->
   <script src="js/core/app.js" defer></script>
-
 </body>
 
 </html>

@@ -47,7 +47,7 @@ class WikiIndexer {
         // Khởi tạo outgoing links cho file
         index.outgoing[relativePath] = {
           flows: this._toArray(data['related-flows'] || data.flows),
-          functions: this._toArray(data['referenced-functions']),
+          functions: this._toArray(data['referenced-functions'] || data['involves-functions']),
           decisions: this._toArray(data['governed-by'] || data.decisions),
           generic: []
         };

@@ -1,4 +1,4 @@
-/* global AppState, TOCComponent, EditToolbarComponent, EditorModule, MarkdownHelperComponent, MarkdownLogicService, ScrollModule, DesignSystem, FileService, DraftModule, WikiService, WikiDrawer, BacklinksDrawer */
+/* global AppState, TOCComponent, EditToolbarComponent, EditorModule, MarkdownHelperComponent, MarkdownLogicService, ScrollModule, DesignSystem, FileService, DraftModule, WikiService, WikiDrawer, BacklinksDrawer, MonacoService, MonacoSyncService */
 
 class MarkdownViewerComponent {
   constructor(options = {}) {
@@ -47,6 +47,9 @@ class MarkdownViewerComponent {
     if (fileChanged) {
       this.render(oldMode);
     } else if (modeChanged) {
+      if (newState.mode === 'edit' && oldMode === 'read') {
+        this._captureSyncContext();
+      }
       this._handleModeSwitch(oldMode, newState.mode);
       // Ensure hidden components are updated with latest state even on mode switch
       if (this.previewComp) this.previewComp.update(this.state);
@@ -258,9 +261,47 @@ class MarkdownViewerComponent {
    */
   getActiveScrollElement() {
     if (this.state.mode === 'edit') {
-      return this.mount.querySelector('#edit-textarea');
+      return MonacoService.getScrollContainer();
     }
     return this.viewport;
+  }
+
+  /**
+   * Captures the current visible context (line/selection) for Read -> Edit sync
+   */
+  _captureSyncContext() {
+    if (!this.viewport || !window.AppState) return;
+
+    const ctx = {
+      line: 1,
+      offset: 0,
+      selectionText: '',
+      _fileKey: this.state.file
+    };
+
+    // 1. Check for active text selection (Highest priority for sync)
+    const selection = window.getSelection();
+    if (selection && !selection.isCollapsed && this.viewport.contains(selection.anchorNode)) {
+      ctx.selectionText = selection.toString();
+      const lineEl = selection.anchorNode.parentElement?.closest('[data-line]');
+      if (lineEl) {
+        ctx.line = parseInt(lineEl.dataset.line, 10);
+      }
+    } else {
+      // 2. Find top-most visible line in the viewport
+      const viewportRect = this.viewport.getBoundingClientRect();
+      const elements = this.viewport.querySelectorAll('[data-line]');
+      
+      for (const el of elements) {
+        const rect = el.getBoundingClientRect();
+        if (rect.top >= viewportRect.top - 20) {
+          ctx.line = parseInt(el.dataset.line, 10);
+          break;
+        }
+      }
+    }
+
+    window.AppState.lastSyncContext = ctx;
   }
 
   /**
@@ -1107,37 +1148,42 @@ class MarkdownEditor {
 
   render() {
     const container = DesignSystem.createElement('div', 'edit-viewer', { id: 'edit-viewer' });
+    const monacoEl = DesignSystem.createElement('div', '', { id: 'monaco-editor-container' });
     
-    const textarea = DesignSystem.createElement('textarea', '', { 
-      id: 'edit-textarea', 
-      placeholder: 'Start writing...' 
-    });
-    textarea.value = this.content;
-    
-    container.appendChild(textarea);
+    container.appendChild(monacoEl);
     this.mount.appendChild(container);
+
+    // Initial mount to MonacoService
+    MonacoService.mount(monacoEl, {
+      value: this.content,
+      language: 'markdown'
+    });
   }
 
   activate() {
-    const textarea = this.mount.querySelector('#edit-textarea');
-    if (textarea) {
-      // Initialize Editor Logic
-      if (EditorModule) {
-        EditorModule.bindToElement(textarea);
-      }
+    // Initialize Editor Logic
+    if (EditorModule) {
+      EditorModule.bind();
+    }
 
-      // Tell ScrollModule to watch the textarea
-      if (ScrollModule) {
-        ScrollModule.setContainer(textarea, this.file);
-        ScrollModule.restore(this.file);
-      }
+    MonacoService.layout();
 
-      // Restore cursor if context exists in AppState
-      const ctx = window.AppState && window.AppState.lastSyncContext;
-      if (ctx && (ctx.line || ctx.scrollPct) && MarkdownLogicService) {
-        MarkdownLogicService.syncCursor(textarea, ctx);
-        window.AppState.lastSyncContext = null;
+    // Tell ScrollModule to watch the editor
+    if (ScrollModule) {
+      const scrollEl = MonacoService.getScrollContainer();
+      ScrollModule.setContainer(scrollEl, this.file);
+      ScrollModule.restore(this.file);
+    }
+
+    // Restore cursor if context exists in AppState
+    const ctx = window.AppState && window.AppState.lastSyncContext;
+    if (ctx && (ctx.line || ctx.scrollPct)) {
+      if (typeof MonacoSyncService !== 'undefined') {
+        MonacoSyncService.syncCursor(MonacoService, ctx);
+      } else if (typeof MarkdownLogicService !== 'undefined') {
+        MarkdownLogicService.syncCursor(MonacoService, ctx);
       }
+      window.AppState.lastSyncContext = null;
     }
   }
 
@@ -1172,19 +1218,18 @@ class MarkdownEditor {
 
   update({ content }) {
     this.content = content;
-    const textarea = this.mount.querySelector('#edit-textarea');
-    if (textarea && textarea.value !== content) {
-      // Syncing original content will update textarea.value AND preserve selection
+    if (MonacoService.isInitialized() && MonacoService.getValue() !== content) {
       if (EditorModule) {
         EditorModule.setOriginalContent(content);
       } else {
-        textarea.value = content;
+        MonacoService.setValue(content);
       }
     }
   }
 
   destroy() {
     if (EditorModule) EditorModule.unbind();
+    MonacoService.dispose();
   }
 }
 

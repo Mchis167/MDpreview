@@ -35,6 +35,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Clipboard & Drag
   copyFileToClipboard: (filePath) => ipcRenderer.invoke('copy-file-to-clipboard', filePath),
   copyFileFromBuffer: (buffer, filename) => ipcRenderer.invoke('copy-file-from-buffer', { buffer, filename }),
+  saveAttachment: (data) => ipcRenderer.invoke('attachment:save-image', data),
   startFileDrag: (filePath)       => ipcRenderer.send('start-file-drag', filePath),
   getAbsolutePath: (filePath)     => ipcRenderer.invoke('get-absolute-path', filePath),
   rasterizeSVG: (svg, w, h)       => ipcRenderer.invoke('rasterize-svg', svg, w, h),

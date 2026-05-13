@@ -76,8 +76,11 @@ const ShortcutService = (() => {
     }
 
     // 1. Global Blocking Logic (Typed in inputs)
-    const activeTag = document.activeElement?.tagName;
-    const inInput = activeTag === 'INPUT' || activeTag === 'TEXTAREA' || document.activeElement?.isContentEditable;
+    const activeEl = document.activeElement;
+    const activeTag = activeEl?.tagName;
+    const isMonaco = activeEl?.closest('.monaco-editor') || activeEl?.classList.contains('monaco-editor');
+    const isEditMode = window.AppState?.currentMode === 'edit';
+    const inInput = activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeEl?.isContentEditable || isMonaco;
 
     // 2. Iterate through registry to find a match
     let matchedItem = null;
@@ -91,13 +94,16 @@ const ShortcutService = (() => {
           // Check if this shortcut is allowed in inputs
           if (inInput && !item.allowInInput) {
              if (!mod && !isAlt) continue;
-             const allowedInInput = ['s', 'z', 'y', 'x', 'c', 'v', 'a', 'b', 'f', 'p', '/', '[', ',', '1', '2', '3', '4'];
+             // ONLY allow absolute essential global commands in input areas
+             const allowedInInput = ['s', 'z', 'y', 'p', '1', '2', '3', '4'];
+             if (isEditMode && !allowedInInput.includes(key)) continue;
              if (!allowedInInput.includes(key)) continue;
           }
 
           if (/^[1-4]$/.test(key) && !mod && inInput) continue;
 
           matchedItem = item;
+          console.warn(`[DEBUG-GLOBAL-SHORTCUT] Matched ID: ${matchedItem.id}, Combo: ${item.keys.join('+')}`);
           break;
         }
       }
