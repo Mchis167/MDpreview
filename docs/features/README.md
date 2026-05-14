@@ -107,6 +107,7 @@
 | [**DESIGN_TOKEN_PROVIDER.md**](services/DESIGN_TOKEN_PROVIDER.md) | Programmatic access to Design Tokens | Service |
 | [**ATTACHMENT_SERVICE.md**](services/ATTACHMENT_SERVICE.md) | Asset management, deduplication, and compression | Service |
 | [**WIKI_SERVICE.md**](services/WIKI_SERVICE.md) | Wiki Indexer, Graph, and Backlinks | Service |
+| [**DRAFT_SERVICE.md**](services/DRAFT_SERVICE.md) | Centralized draft lifecycle, sync, and pruning | Service |
 | [**FILE_SERVICE.md**](services/FILE_SERVICE.md) | Low-level file I/O and safety | Service |
 | [**MARKDOWN_LOGIC_SERVICE.md**](services/MARKDOWN_LOGIC_SERVICE.md) | Text transformation library (Smart Enter/Indent) | Service |
 | [**GDOC_UTIL.md**](services/GDOC_UTIL.md) | HTML to Google Docs conversion | Utility |

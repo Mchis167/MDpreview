@@ -13,7 +13,8 @@ const TreeModule = (() => {
     renamingPath: null,
     sortMethod: (typeof AppState !== 'undefined' && AppState.settings && AppState.settings.sortMethod) || localStorage.getItem('mdpreview_sort_method') || 'alphabetical_asc',
     expandedPaths: JSON.parse(localStorage.getItem('mdpreview_expanded_paths') || '[]'),
-    customOrders: JSON.parse(localStorage.getItem('mdpreview_custom_orders') || '{}')
+    customOrders: JSON.parse(localStorage.getItem('mdpreview_custom_orders') || '{}'),
+    isCreatingNew: false
   };
   let hiddenItemsV2Component = null;
 
@@ -1012,12 +1013,18 @@ const TreeModule = (() => {
       if (res.success) {
         TreeDragManager.syncCustomOrder(oldPath, newRelative, state);
         if (typeof RecentlyViewedModule !== 'undefined') RecentlyViewedModule.swap(oldPath, newRelative);
-        if (AppState.currentFile === oldPath) AppState.currentFile = newRelative;
+        if (AppState.currentFile === oldPath || state.isCreatingNew) {
+          if (window.loadFile) {
+            window.loadFile(newRelative).catch(() => {});
+          }
+        }
+        state.isCreatingNew = false;
         load();
       } else {
         render(true);
       }
     } else {
+      state.isCreatingNew = false;
       render(true);
     }
   }
@@ -1057,6 +1064,7 @@ const TreeModule = (() => {
     }
 
     if (res.success) {
+      state.isCreatingNew = true;
 
       // Register in Custom Order if parent has one
       if (state.customOrders[parentPath]) {

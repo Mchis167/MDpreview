@@ -28,6 +28,18 @@ class MarkdownViewerComponent {
     this.render();
   }
 
+  show() {
+    if (this.mount) {
+      this.mount.style.display = 'flex';
+    }
+  }
+
+  hide() {
+    if (this.mount) {
+      this.mount.style.display = 'none';
+    }
+  }
+
   /**
    * Main update entry point
    * @param {Object} newState 
@@ -37,7 +49,8 @@ class MarkdownViewerComponent {
     const modeChanged = newState.mode !== undefined && newState.mode !== this.state.mode;
     
     // 1. Save scroll position before switching file OR mode
-    if ((fileChanged || modeChanged) && this.state.file && ScrollModule) {
+    // FIX: Do NOT save if we are entering 'empty' mode (Home) as it will be hidden/already saved
+    if ((fileChanged || modeChanged) && this.state.file && newState.mode !== 'empty' && ScrollModule) {
       ScrollModule.save(this.state.file);
     }
     
@@ -99,6 +112,9 @@ class MarkdownViewerComponent {
       
       if (this.state.mode === 'empty') {
         this._handleModeSwitch(oldMode, 'empty');
+        if (window.ScrollModule) {
+          window.ScrollModule.setContainer(null, null);
+        }
         new MarkdownEmptyState({ mount: this.mount });
         return;
       }
@@ -133,6 +149,11 @@ class MarkdownViewerComponent {
     } catch (_err) {
       // Error handled during individual component renders
     } finally {
+      // ── NEW: Correctly register the scroll container for persistence ──
+      if (window.ScrollModule) {
+        window.ScrollModule.setContainer(this.getActiveScrollElement(), this.state.file);
+      }
+
       setTimeout(() => {
         window._isMDViewerRendering = false;
       }, 300);
@@ -180,6 +201,12 @@ class MarkdownViewerComponent {
     if (newMode === 'collect' && window.CollectModule) window.CollectModule.applyCollectMode();
 
     this._updateFloatingButtons();
+    
+    // ── SYNC SCROLL CONTAINER ──
+    if (window.ScrollModule) {
+      window.ScrollModule.setContainer(this.getActiveScrollElement(), this.state.file);
+    }
+
     this._refreshScrollTopListener();
   }
 

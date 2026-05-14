@@ -355,6 +355,27 @@ const DraftModule = (() => {
   }
 
   /**
+   * Remove any drafts that are not present in the active tab list.
+   * This prevents "ghost drafts" from occupying name slots (e.g. Draft 1, Draft 2).
+   */
+  function pruneOrphans(activeIds) {
+    if (!activeIds || !Array.isArray(activeIds)) return;
+    const idsToKeep = new Set(activeIds);
+    let changed = false;
+
+    Object.keys(drafts).forEach(id => {
+      if (id.startsWith('__DRAFT_') && !idsToKeep.has(id)) {
+        delete drafts[id];
+        changed = true;
+      }
+    });
+
+    if (changed) {
+      saveToStorage();
+    }
+  }
+
+  /**
    * Explicitly initialize a new draft to prevent ghost content
    * and ensure correct numbering.
    */
@@ -446,7 +467,7 @@ const DraftModule = (() => {
     }
   }
 
-  return { init, toggleFooter, updateHeader, syncPreview, renderPreview, clear, getDraftContent, setDraftContent, getRenderedHtml, saveToStorage, loadFromStorage, getDraftViewMode, setDraftViewMode, getDisplayName, createDraft };
+  return { init, toggleFooter, updateHeader, syncPreview, renderPreview, clear, getDraftContent, setDraftContent, getRenderedHtml, saveToStorage, loadFromStorage, pruneOrphans, getDraftViewMode, setDraftViewMode, getDisplayName, createDraft };
 })();
 
 window.DraftModule = DraftModule;

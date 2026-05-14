@@ -149,6 +149,7 @@ const TabsModule = (function () {
       state.openFiles = [];
       state.activeFile = null;
       state.selectedFiles = [];
+      if (typeof DraftModule !== 'undefined') DraftModule.loadFromStorage(null);
       render();
       return;
     }
@@ -176,6 +177,12 @@ const TabsModule = (function () {
     }
 
     state.selectedFiles = [];
+
+    // Cleanup: Remove any draft data that is no longer in the active tab list
+    if (typeof DraftModule !== 'undefined') {
+      const activeDrafts = state.openFiles.filter(f => f && f.startsWith('__DRAFT_'));
+      DraftModule.pruneOrphans(activeDrafts);
+    }
     render();
 
     if (state.activeFile) {
@@ -472,6 +479,11 @@ const TabsModule = (function () {
     }
   }
 
+  function clearActive() {
+    state.activeFile = null;
+    render();
+  }
+
   function render() {
     if (tabBar) {
       tabBar.setState({
@@ -567,6 +579,7 @@ const TabsModule = (function () {
     swap,
     render,
     switchWorkspace,
+    clearActive,
     selectAll,
     deselectAll,
     closeAll,
@@ -578,6 +591,7 @@ const TabsModule = (function () {
     togglePin,
     toggleSidebar,
     syncSelectionFromTree,
+    saveToStorage,
     getActive: () => state.activeFile,
     getOpenFiles: () => state.openFiles,
     getSelectedFiles: () => state.selectedFiles

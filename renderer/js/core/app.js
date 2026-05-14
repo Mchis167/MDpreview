@@ -3,7 +3,7 @@
    TreeModule, WorkspaceModule, CollectModule, 
    DraftModule, EditorModule, 
    EditToolbarComponent,
-   TabsModule, TabPreview, io, initMermaid, initZoom, ScrollModule, RecentlyViewedModule, ChangeActionViewBar, CommentsModule, WikiService, WikiDrawer, BacklinksDrawer */
+   TabsModule, TabPreview, io, initMermaid, initZoom, ScrollModule, RecentlyViewedModule, ChangeActionViewBar, CommentsModule, WikiService, WikiDrawer, BacklinksDrawer, Home */
 /* ============================================================
    app.js — Core state, file loading, socket connection, boot
    ============================================================ */
@@ -93,7 +93,14 @@ window.AppState = {
         });
       }
 
-      // 2c. Restore Globals
+      // 2c. Restore Drafts
+      if (data.allDrafts) {
+        Object.keys(data.allDrafts).forEach(wsId => {
+          localStorage.setItem(`drafts_v2_${wsId}`, JSON.stringify(data.allDrafts[wsId]));
+        });
+      }
+
+      // 2d. Restore Globals
       if (data.sessionModes) localStorage.setItem('mdpreview_session_modes', JSON.stringify(data.sessionModes));
       if (data.customOrders) localStorage.setItem('mdpreview_custom_orders', JSON.stringify(data.customOrders));
       if (data.expandedPaths) localStorage.setItem('mdpreview_expanded_paths', JSON.stringify(data.expandedPaths));
@@ -103,6 +110,7 @@ window.AppState = {
       if (!hasServerData) {
         const hasLocalData = Object.keys(localStorage).some(k =>
           k.startsWith('tabs_') ||
+          k.startsWith('drafts_v2_') ||
           k.startsWith('md-') ||
           k === 'mdpreview_custom_bg_images' ||
           k === 'mdpreview_custom_orders' ||
@@ -132,6 +140,7 @@ window.AppState = {
       try {
         const allTabs = {};
         const allRecent = {};
+        const allDrafts = {};
 
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
@@ -144,12 +153,17 @@ window.AppState = {
             const wsId = key.replace('mdpreview_recent_', '');
             try { allRecent[wsId] = JSON.parse(localStorage.getItem(key)); } catch (_e) { }
           }
+          else if (key.startsWith('drafts_v2_')) {
+            const wsId = key.replace('drafts_v2_', '');
+            try { allDrafts[wsId] = JSON.parse(localStorage.getItem(key)); } catch (_e) { }
+          }
         }
 
         const state = {
           settings: this.settings,
           allTabs,
           allRecent,
+          allDrafts,
           sessionModes: JSON.parse(localStorage.getItem('mdpreview_session_modes') || '{}'),
           customOrders: JSON.parse(localStorage.getItem('mdpreview_custom_orders') || '{}'),
           expandedPaths: JSON.parse(localStorage.getItem('mdpreview_expanded_paths') || '[]'),
@@ -227,6 +241,15 @@ window.AppState = {
     }
 
     if (mode === 'draft') {
+      // Orchestration: Ensure Home is hidden and Viewer is shown for new drafts
+      if (window.Home) {
+        window.Home.getInstance().hide();
+      }
+      const viewerComp = MarkdownViewer.getInstance();
+      if (viewerComp) {
+        viewerComp.show();
+      }
+
       const isSwitching = !!targetId;
       const draftId = targetId || `__DRAFT_${Date.now()}__`;
 
@@ -360,7 +383,15 @@ async function loadFile(filePath, options = {}) {
   }
 
   // 1. Show skeleton only if NOT silent
+  if (window.Home) {
+    window.Home.getInstance().hide();
+  }
+
   const viewer = MarkdownViewer.getInstance();
+  if (viewer) {
+    viewer.show();
+  }
+
   const mdContent = document.getElementById('md-content');
   const inner = mdContent ? (mdContent.querySelector('.md-content-inner') || mdContent) : null;
   const emptyState = document.getElementById('empty-state');
@@ -451,20 +482,23 @@ async function loadFile(filePath, options = {}) {
 }
 
 function setNoFile() {
+  if (AppState.currentFile && window.ScrollModule) {
+    window.ScrollModule.save(AppState.currentFile);
+  }
   AppState.currentFile = null;
   AppState.currentMode = 'read';
 
   const viewer = MarkdownViewer.getInstance();
   if (viewer) {
+    viewer.hide();
     viewer.setState({ mode: 'empty', file: null, content: '', html: '', _source: 'setNoFile' });
-  } else {
-    const emptyState = document.getElementById('empty-state');
-    const mdContent = document.getElementById('md-content');
-    const editViewer = document.getElementById('edit-viewer');
+  }
+  if (window.Home) {
+    window.Home.getInstance().show();
+  }
 
-    if (emptyState) emptyState.style.display = 'flex';
-    if (mdContent) mdContent.style.display = 'none';
-    if (editViewer) editViewer.style.display = 'none';
+  if (window.TabsModule) {
+    window.TabsModule.clearActive();
   }
 
   updateHeaderUI();
@@ -648,8 +682,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       'markdown-helper': () => window.MarkdownHelperComponent?.open(),
       'select-all-tabs': () => window.TabsModule?.selectAll(),
       'close-active-tab': () => {
-        const active = window.TabsModule?.getActive();
-        if (active) window.TabsModule.remove(active);
+        const selected = window.TabsModule?.getSelectedFiles() || [];
+        if (selected.length > 0) {
+          window.TabsModule.closeSelected();
+        } else {
+          const active = window.TabsModule?.getActive();
+          if (active) window.TabsModule.remove(active);
+        }
       },
       'close-all-tabs': () => window.TabsModule?.closeAll(),
       'toggle-pin-tab': () => {
@@ -753,9 +792,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   DraftModule.init();        // draft.js
   MarkdownViewer.init();      // organisms/markdown-viewer-component.js
+  Home.init();                // organisms/home-component.js
   ScrollModule.init();       // scroll.js
   TabPreview.init();         // molecules/tab-preview.js
-  ScrollModule.setContainer(document.getElementById('md-viewer-mount'));
+  // Scroll container registration is now handled dynamically by components
 
   // 4. Tab System (triggers initial loadFile)
   TabsModule.init();         // tabs.js

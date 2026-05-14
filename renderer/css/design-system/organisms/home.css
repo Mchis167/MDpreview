@@ -1,0 +1,178 @@
+/* ══════════════════════════════════════════════════
+   Home.css — Workspace Dashboard Aesthetics
+   Atomic Design System (Organism)
+   ════════════════════════════════════════════════════ */
+
+/* ── Home Mount (Organism Layout) ── */
+#home-mount {
+  --_padding: var(--ds-content-padding-y) var(--ds-content-padding-x);
+  --_gap-section: var(--ds-space-lg);
+  --_gap-search: var(--ds-space-lg);
+  --_search-width: 640px;
+  --_search-height: 44px;
+  --_recent-width: 880px;
+  --_radius-card: var(--ds-radius-panel);
+  --_radius-search: var(--ds-radius-panel);
+  --_transition: var(--ds-transition-main);
+  --_anim-fade: ds-fade-in var(--ds-transition-slow);
+
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.ds-home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: var(--_padding);
+  height: 100%;
+  overflow-y: auto;
+  gap: var(--_gap-section);
+  animation: var(--_anim-fade);
+}
+
+/* ── Search Section ── */
+.ds-home-search-section {
+  width: 100%;
+  max-width: var(--_search-width);
+  display: flex;
+  flex-direction: column;
+  gap: var(--_gap-search);
+  text-align: center;
+}
+
+.ds-home-search-box {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--ds-space-lg);
+  height: var(--_search-height);
+  background: var(--ds-layer-surface-default);
+  border: 1px solid var(--ds-border-subtle);
+  border-radius: var(--_radius-search);
+  cursor: text;
+  transition: all var(--_transition);
+  backdrop-filter: var(--ds-blur-searchbox);
+  -webkit-backdrop-filter: var(--ds-blur-searchbox);
+}
+
+.ds-home-search-box:hover {
+  border-color: var(--ds-border-strong);
+  box-shadow: var(--ds-shadow-lg);
+  transform: translateY(-1px);
+}
+
+.ds-home-search-icon {
+  width: var(--ds-space-lg);
+  height: var(--ds-space-lg);
+  color: var(--ds-text-tertiary);
+  margin-right: var(--ds-space-md);
+  display: flex;
+  align-items: center;
+}
+
+.ds-home-search-placeholder {
+  color: var(--ds-text-secondary);
+  font-size: var(--ds-font-md);
+  user-select: none;
+}
+
+/* ── Quick Actions ── */
+.ds-home-quick-actions {
+  display: flex;
+  gap: var(--ds-space-sm);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ── Recent Section ── */
+.ds-home-recent-section {
+  width: 100%;
+  max-width: var(--_recent-width);
+  display: flex;
+  flex-direction: column;
+  margin-top: 72px;
+}
+
+.ds-home-section-title {
+  font-size: var(--ds-font-xs);
+  color: var(--ds-text-tertiary);
+  text-transform: uppercase;
+  padding-bottom: var(--ds-space-lg);
+  border-bottom: 1px solid var(--ds-border-strong);
+}
+
+.ds-home-recent-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 var(--ds-space-4xl);
+}
+
+.ds-home-recent-item {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  background: var(--ds-layer-subtle-default);
+  cursor: pointer;
+  border-bottom: 1px solid var(--ds-border-subtle);
+}
+
+.ds-home-recent-name {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-xs);
+  font-size: var(--ds-font-lg);
+  font-weight: bold;
+  color: var(--ds-text-secondary);
+  margin-bottom: var(--ds-space-xs);
+  min-width: 0;
+  transition: color var(--ds-transition-main);
+}
+
+.ds-home-recent-item:hover .ds-home-recent-name {
+  color: var(--ds-text-primary);
+}
+
+.ds-home-recent-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.ds-home-recent-icon {
+  width: var(--ds-space-lg);
+  height: var(--ds-space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-text-tertiary);
+  opacity: 0;
+  transition: opacity var(--ds-transition-main);
+  flex-shrink: 0;
+}
+
+.ds-home-recent-item:hover .ds-home-recent-icon {
+  opacity: 1;
+  color: var(--ds-text-tertiary);
+}
+
+.ds-home-recent-meta {
+  font-family: var(--ds-font-family-code);
+  font-size: var(--ds-font-sm);
+  color: var(--ds-text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Responsive */
+@media (width <=768px) {
+  .ds-home-recent-grid {
+    grid-template-columns: 1fr;
+  }
+}

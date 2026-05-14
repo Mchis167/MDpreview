@@ -18,11 +18,12 @@
 | `forceSyncContext` | `object \| null` | Dữ liệu vị trí ép buộc dùng cho SyncService (dùng khi Edit Selection) |
 
 ### `AppState.loadPersistentState()`
-Fetch state từ server (`GET /api/state`) và đồng bộ vào localStorage. Được gọi khi app khởi động.
-Trong quá trình boot, app có cơ chế **Self-Healing** (Tự phục hồi): nếu dữ liệu cấu hình trong localStorage bị hỏng (parse JSON thất bại), app sẽ tự động fallback về cấu trúc mặc định an toàn thay vì crash.
+Fetch state từ server (`GET /api/state`) và đồng bộ vào localStorage. 
+- **Đồng bộ:** Cấu hình cài đặt, danh sách tab, danh sách file gần đây, và **toàn bộ dữ liệu bản nháp (`drafts_v2_`)**.
+- **Self-Healing:** Nếu dữ liệu cấu hình bị hỏng, app tự động fallback về cấu trúc mặc định.
 
 ### `AppState.savePersistentState()`
-Debounced 500ms — POST toàn bộ state lên server. Được gọi sau mỗi thay đổi quan trọng.
+Debounced 500ms — POST toàn bộ state lên server (bao gồm cả nội dung các bản nháp đang dở dang). Được gọi sau mỗi thay đổi quan trọng.
 
 ### `AppState._getStorageKey(key)`
 Delegate việc tìm kiếm storage key sang **`SettingsService.getStorageKey(key)`**. Đây là cơ chế duy nhất để xác định key lưu trữ, đảm bảo tính nhất quán giữa State và Persistence.
@@ -129,4 +130,4 @@ Thứ tự khởi động nghiêm ngặt — **không thay đổi thứ tự**:
 
 ---
 
-*Document — 2026-05-14*
+*Document — 2026-05-14 (updated draft persistence)*

@@ -71,6 +71,7 @@ Ghi lại các quyết định thiết kế và kỹ thuật quan trọng trong 
 | 2026-05-14 | [20260514-absolute-character-offset-sync.md](20260514-absolute-character-offset-sync.md) | Chiến lược đồng bộ Absolute Character Offset | accepted |
 | 2026-05-14 | [20260514-permissive-shortcut-strategy.md](20260514-permissive-shortcut-strategy.md) | Chiến lược Phím tắt Xuyên thấu cho trình soạn thảo IDE | accepted |
 | 2026-05-14 | [20260514-centralized-asset-upload.md](20260514-centralized-asset-upload.md) | Quy chuẩn Luồng tải ảnh tập trung | accepted |
+| 2026-05-14 | [20260514-draft-data-consistency.md](20260514-draft-data-consistency.md) | Chiến lược dọn dẹp và đồng bộ dữ liệu bản nháp | accepted |
 
 ---
 

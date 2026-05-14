@@ -67,15 +67,20 @@ class TabBarComponent {
     this.mount.innerHTML = '';
     this.mount.className = 'tab-bar-container';
 
-    // ── 1. Left Section: Sidebar Toggle ──────────────────
-    const toggleWrapper = document.createElement('div');
-    toggleWrapper.className = 'tab-bar__sidebar-toggle-wrapper';
-
+    // ── 1. Left Section: Sidebar Toggle & Home ──────────────────
     const isCollapsed = this.state.isSidebarCollapsed;
     const sidebarToggle = DesignSystem.createHeaderAction('panel-left', isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar', () => this.options.onToggleSidebar(), 'sidebar-toggle-btn');
-    toggleWrapper.appendChild(sidebarToggle);
+    this.mount.appendChild(sidebarToggle);
 
-    this.mount.appendChild(toggleWrapper);
+    this.mount.appendChild(this._createDivider());
+
+    const homeBtn = DesignSystem.createHeaderAction('house', 'Home', () => {
+      if (typeof window.setNoFile === 'function') {
+        window.setNoFile();
+        if (window.TabsModule) window.TabsModule.saveToStorage();
+      }
+    }, 'home-action-btn');
+    this.mount.appendChild(homeBtn);
 
     this.mount.appendChild(this._createDivider());
 

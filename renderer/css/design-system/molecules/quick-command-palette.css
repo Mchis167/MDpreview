@@ -11,7 +11,7 @@
   --_item-height: 38px;
 
   position: fixed;
-  z-index: var(--ds-z-index-popover);
+  z-index: var(--ds-z-index-popover) !important;
   width: var(--_width);
   background: var(--_bg);
   backdrop-filter: blur(var(--ds-blur-lg)) saturate(180%);

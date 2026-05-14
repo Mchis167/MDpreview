@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Not Commited] — 2026-05-14 22:50
+
+### 🚀 Added
+- **Workspace Home Screen**: Triển khai giao diện Dashboard hiện đại thay thế cho trạng thái rỗng của không gian làm việc.
+    - **Home Dashboard (Organism)**: Tích hợp Search Bar trung tâm, nhóm Quick Actions (New File, Draft, Shortcuts) và danh sách Recent Files (2 cột).
+    - **Interactive Recent Files**: Hiệu ứng hover động hiển thị icon mở rộng và tự động rút gọn đường dẫn file dài (ellipsis).
+    - **Home Navigation**: Bổ sung nút Home (biểu tượng Lucide `house`) vào TabBar, được phân tách tinh tế bằng divider.
+- **Multi-Tab Management Enhancements**:
+    - **Batch Closing**: Phím tắt `Cmd + W` nay hỗ trợ đóng đồng thời tất cả các tab đang được chọn (multi-select), thay vì chỉ đóng tab active.
+    - **Selection State Persistence**: Duy trì trạng thái chọn tab ổn định trong quá trình thao tác hàng loạt.
+- **Draft Persistence & Syncing**: Nâng cấp toàn diện hệ thống quản lý bản nháp (Drafts) để đảm bảo tính nhất quán và bảo toàn dữ liệu.
+    - **Draft Data Sync**: Tích hợp key `drafts_v2_` vào hệ thống đồng bộ hóa server, bảo toàn nội dung khi chuyển đổi thiết bị.
+    - **Automated Draft Pruning**: Cơ chế Garbage Collection tự động dọn dẹp "bản nháp ma" không có tab tương ứng mỗi khi nạp Workspace.
+- **Tree Navigation Refinement**: 
+    - **Auto-load on Creation**: Tự động mở và focus vào editor ngay sau khi tạo file mới hoặc đổi tên trong Tree View.
+- **System Documentation**:
+    - **`DRAFT_SERVICE.md`**: Tài liệu hóa toàn bộ cơ chế quản lý bản nháp và vòng đời của Draft.
+    - **Updated `CORE_APP.md` & `TABS.md`**: Cập nhật kiến trúc điều phối mới giữa Home View và Tab System.
+
+### 🐞 Fixed
+- **UI Overlap & Orchestration**: 
+    - Khắc phục triệt để lỗi Home View đè lên Editor (Overlap) bằng cơ chế điều phối tập trung trong `app.js`.
+    - **Async Render Guarding**: Triển khai cờ hiệu `_isHiding` trong `HomeComponent` để ngăn chặn việc render "ma" sau khi đã chuyển trang.
+- **Scroll Persistence Regressions**: 
+    - **Visibility Guard**: Chặn `ScrollModule` lưu vị trí cuộn khi viewport đang ẩn (offsetParent null), tránh việc ghi đè giá trị 0 vào storage.
+    - **Dynamic Container Registration**: Tự động đăng ký lại scroll container (Monaco vs Viewport) ngay khi render, đảm bảo Scroll Sync luôn trỏ đúng phần tử.
+- **Stuck Draft Names**: Khắc phục lỗi số thứ tự draft bị kẹt (ví dụ: nhảy vọt lên Draft 7) bằng cách loại bỏ orphaned drafts khỏi bộ đếm.
+- **Tab Preview & Skeleton Hangs**: 
+    - Sửa lỗi Tab Preview bị trắng (0px height) khi Viewer ẩn bằng fallback height.
+    - Khắc phục lỗi treo Skeleton vô tận khi mở lại cùng một file sau khi về Home.
+
+### 🔧 Changed
+- **Monaco Find Widget Refinement**: Tái cấu trúc và hiện đại hóa thanh tìm kiếm trong Monaco Editor.
+    - **Top-Center Positioning**: Di chuyển thanh tìm kiếm vào vị trí trung tâm phía trên.
+    - **Premium Glassmorphism UI**: Áp dụng hiệu ứng nền mờ, bo góc panel và đổ bóng chiều sâu.
+    - **Optimized Layout**: Cố định chiều rộng 480px, tối ưu hóa khoảng cách cho các thành phần nội bộ.
+- **Home-First Orchestration**: Chuyển hướng mọi hành động tạo File/Draft mới qua bộ điều phối `window.loadFile` để đảm bảo Home View luôn được ẩn đúng lúc.
+
 ## [2.0.0] — 2026-05-14 04:55
 
 ### 🚀 Added

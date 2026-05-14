@@ -367,6 +367,21 @@ Tham khảo: [test-cases.md](test-cases.md)
 
 ---
 
+#### 📜 `/session-log` — Session Log Management
+**Mục đích:** Duy trì bối cảnh làm việc xuyên suốt nhiều session trong cùng một task lớn.
+
+**Khi dùng:**
+- Chạy sau mỗi task nhỏ để AI tóm tắt chính xác.
+- Khi chuẩn bị bàn giao (handoff) sang session mới.
+
+**Cú pháp:**
+- `/session-log new`: Khởi tạo task lớn.
+- `/session-log update`: Cập nhật tiến độ.
+
+Tham khảo: [18.session-log.md](18.session-log.md)
+
+---
+
 ## 🚀 Workflow Combinations (Common Patterns)
 
 ### Pattern 1: Thêm tính năng mới
@@ -436,6 +451,7 @@ Tham khảo: [test-cases.md](test-cases.md)
 | Planning | `/plan [task]` | Plan implementation | Implementation plan artifact |
 | Refactor | `/refactor-to-atomic` | Refactor legacy | New atomic component, cleanup |
 | Test Cases | `/test [feature]` | Design tests | Test case artifact |
+| **Session Log** | **`/session-log`** | **Duy trì bối cảnh task lớn** | **Updated .agents/session-logs/*** |
 
 ---
 
@@ -523,6 +539,7 @@ Tham khảo: [test-cases.md](test-cases.md)
 ├── 15.update-docs.md        ← Cập nhật function docs (iff need)
 ├── 16.new-doc.md            ← Tạo doc mới cho module/tính năng mới
 ├── 17.decision.md           ← Ghi lại quyết định thiết kế / kỹ thuật
+├── 18.session-log.md        ← Quản lý bối cảnh phiên làm việc (Session Log)
 ├── create-component.md      ← Atomic component creation
 ├── plan.md                  ← Implementation planning
 ├── refactor-component.md    ← Legacy refactoring

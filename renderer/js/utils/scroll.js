@@ -37,17 +37,20 @@ const ScrollModule = (() => {
   let activeFileInContainer = null;
 
   function setContainer(el, filePath) {
-    if (!el) return;
-    
     scrollContainer = el;
-    if (filePath) activeFileInContainer = filePath;
+    activeFileInContainer = filePath;
+
+    if (!el) return;
 
     // Use a robust way to ensure only one listener exists
     if (!el._scrollListenerAttached) {
       el.addEventListener('scroll', _debounce(() => {
         const ws = AppState.currentWorkspace;
         const currentFile = activeFileInContainer;
-        
+
+        // Guard: Only save if this file is actually the one supposed to be active
+        if (currentFile !== AppState.currentFile) return;
+
         if (currentFile && ws && el && !window._isMDViewerRendering && !window._isGlobalSyncing && !window._suppressScrollSync) {
           const currentScroll = el.scrollTop;
           const key = `${ws.id}:${currentFile}`;
@@ -79,6 +82,12 @@ const ScrollModule = (() => {
     const container = scrollContainer || document.getElementById('md-viewer-mount');
     
     if (container && filePath && ws) {
+      // VISIBILITY GUARD: If element is hidden (offsetParent null), it returns scrollTop 0.
+      // We MUST NOT save in this state as it overwrites good data.
+      if (container.offsetParent === null && container.tagName !== 'BODY') {
+        return;
+      }
+
       const currentScroll = container.scrollTop;
       const key = `${ws.id}:${filePath}`;
       

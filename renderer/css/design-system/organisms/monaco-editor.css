@@ -1,5 +1,5 @@
 /* Monaco Editor Organism */
- 
+
 /* Disable main container scrollbar when in Edit mode to prevent dual scrollbars */
 #md-viewer-mount[data-mode="edit"] {
   overflow: hidden !important;
@@ -24,8 +24,8 @@
 /* Aggressive Focus & Line Border Removal */
 .monaco-editor,
 .monaco-editor.focused,
-.monaco-editor .overflow-guard, 
-.monaco-editor .view-lines, 
+.monaco-editor .overflow-guard,
+.monaco-editor .view-lines,
 .monaco-editor .view-overlays .current-line,
 .monaco-editor textarea {
   outline: none !important;
@@ -33,6 +33,11 @@
   box-shadow: none !important;
   caret-color: transparent !important;
   color: transparent !important;
+}
+
+/* Hide resizable sashes */
+.monaco-editor .monaco-sash {
+  display: none !important;
 }
 
 /* Override Monaco internal styles to match Design System */
@@ -110,12 +115,17 @@
   background-color: var(--ds-layer-subtle-hover) !important;
 }
 
+/* Ensure content widgets (slash command palette, suggest, etc.) are above lines */
+.monaco-editor .contentWidgets {
+  z-index: 100 !important;
+}
+
 /* 6. Sticky Widget (Breadcrumbs/Sticky Lines) */
 .monaco-editor .sticky-widget {
   --_sticky-bg: var(--ds-surface-overlay);
   --_sticky-border: var(--ds-border-default);
   --_sticky-divider: var(--ds-border-subtle);
-  
+
   background-color: var(--_sticky-bg) !important;
   backdrop-filter: blur(var(--ds-blur-md));
   border-bottom: 1px solid var(--_sticky-border) !important;
@@ -125,4 +135,82 @@
 
 .monaco-editor .sticky-widget .sticky-line-content {
   background-color: transparent !important;
+}
+
+/* 7. Find Widget (Search Bar) */
+.monaco-editor .find-widget {
+  background-color: var(--ds-surface-overlay) !important;
+  backdrop-filter: blur(var(--ds-blur-md)) !important;
+  border: 1px solid var(--ds-border-strong) !important;
+  border-radius: var(--ds-radius-panel) !important;
+  box-shadow: var(--ds-shadow-xl) !important;
+  padding: 4px 8px !important;
+  transition: transform var(--ds-transition-smooth), opacity var(--ds-transition-smooth) !important;
+  
+  /* Initial state: ensure it respects Monaco's hiding logic */
+  pointer-events: none;
+  opacity: 0;
+}
+
+.monaco-editor .find-widget.visible {
+  top: 12px !important;
+  right: 50% !important;
+  transform: translateX(50%) !important;
+  width: 480px !important;
+  height: fit-content !important;
+  opacity: 1 !important;
+  pointer-events: all !important;
+}
+
+/* Inner Search Layout */
+.monaco-editor .find-widget > .find-part,
+.monaco-editor .find-widget > .replace-part {
+  margin: 3px 25px 3px 17px !important;
+}
+
+
+
+/* Inner Search Inputs */
+.monaco-editor .find-widget .monaco-inputbox {
+  background-color: var(--ds-layer-subtle) !important;
+  border-color: var(--ds-border-default) !important;
+  border-radius: var(--ds-radius-sm) !important;
+  padding: 2px 6px !important;
+  margin-right: 12px !important;
+}
+
+.monaco-editor .find-widget .monaco-inputbox .input {
+  color: var(--ds-text-primary) !important;
+  font-family: var(--ds-font-family-code) !important;
+  caret-color: var(--ds-accent) !important;
+}
+
+.monaco-editor .find-widget .matchesCount {
+  margin-left: 12px !important;
+  color: var(--ds-text-secondary) !important;
+}
+
+/* Find Widget Buttons */
+.monaco-editor .find-widget .button {
+  background-color: transparent !important;
+  border-radius: var(--ds-radius-sm) !important;
+  color: var(--ds-text-secondary) !important;
+  transition: background var(--ds-transition-fast) !important;
+}
+
+.monaco-editor .find-widget .button:hover {
+  color: var(--ds-text-primary) !important;
+}
+
+.monaco-editor .find-widget > .button.codicon-widget-close {
+  position: absolute !important;
+  top: 12px !important;
+  right: 8px !important;
+  z-index: 10 !important;
+}
+
+.monaco-editor .find-widget .button.checked {
+  background-color: var(--ds-accent-a20) !important;
+  color: var(--ds-accent) !important;
+  border: 1px solid var(--ds-accent-a30) !important;
 }

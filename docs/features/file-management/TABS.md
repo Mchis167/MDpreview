@@ -52,7 +52,9 @@ Bật/Tắt hiển thị Sidebar trái (`#sidebar-left-wrap`). Hàm này đồng
 Đánh dấu một file có thay đổi chưa lưu để hiển thị chỉ báo "Dirty dot". Thường được gọi từ `EditorModule`.
 
 ### `switchWorkspace(workspaceId)`
-Load lại danh sách tab và trạng thái ghim đã lưu cho workspace mới từ localStorage.
+Load lại danh sách tab và trạng thái ghim đã lưu cho workspace mới. 
+- **Garbage Collection:** Tự động gọi `DraftModule.pruneOrphans()` để dọn dẹp các bản nháp không còn tab tương ứng, đảm bảo thứ tự đánh số chính xác.
+- **Empty State:** Nếu `workspaceId` là null, hệ thống sẽ xóa toàn bộ trạng thái tab và dọn dẹp bộ nhớ Draft.
 
 ---
 
@@ -83,7 +85,7 @@ Load lại danh sách tab và trạng thái ghim đã lưu cho workspace mới t
 ## Persistence
 
 ### `saveToStorage()`
-Lưu `openFiles` vào localStorage với key `mdpreview_tabs_{workspaceId}`. Được gọi sau mỗi thay đổi.
+Lưu `openFiles` vào localStorage với key `tabs_{workspaceId}`. Được gọi sau mỗi thay đổi.
 
 ### `render()`
 Sync trạng thái sang TabBar component và highlight file active trong tree sidebar. Trạng thái **Active** được ưu tiên hiển thị cao hơn trạng thái **Selected** để tránh xung đột màu sắc.
@@ -100,4 +102,4 @@ TabsModule.getSelectedFiles() // → string[]
 
 ---
 
-*Document — 2026-04-27 (updated selection logic & pinned closure strategy)*
+*Document — 2026-05-14 (updated workspace switching & pruning)*

@@ -46,6 +46,7 @@ Theme được xây dựng động từ hệ thống Design Tokens:
 - **Editor Background**: Luôn trong suốt để tận dụng hiệu ứng Glassmorphism của ứng dụng.
 - **Syntax Highlighting**: Sử dụng palette màu lấy cảm hứng từ One Dark / Xcode.
 - **Line Highlight**: Chỉ hiển thị khi editor có tiêu điểm (focus) để tránh gây xao nhãng.
+- **Find Widget UI**: Thanh tìm kiếm được tùy biến hoàn toàn với vị trí trung tâm phía trên, hiệu ứng Glassmorphism và layout 480px cố định để không che khuất toolbar.
 
 ---
 
@@ -54,6 +55,7 @@ Theme được xây dựng động từ hệ thống Design Tokens:
 1. **Attachment Integration**: Lắng nghe sự kiện `drop` và chuyển hướng xử lý tới `AttachmentService` kèm theo tọa độ dòng/cột chính xác nơi file được thả.
 2. **Image Context Menu**: Tự động nhận diện nếu cursor đang nằm trên một link ảnh Markdown và hiển thị menu chuột phải chuyên dụng (Upload, Open in Finder).
 3. **Layout Guard**: Tự động gọi `editor.layout()` sau khi mount để đảm bảo kích thước editor khớp chính xác với container trong môi trường trình duyệt.
+4. **UI Cleanup**: Tự động ẩn các thành phần dư thừa như resizable sashes (`.monaco-sash`) để giữ giao diện sạch sẽ.
 
 ---
 

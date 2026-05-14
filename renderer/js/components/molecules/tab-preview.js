@@ -115,7 +115,7 @@ const TabPreview = (() => {
       
       // 6. Perfect Scroll Sync via Mirror Viewport
       const viewer = document.getElementById('md-viewer-mount');
-      const viewerHeight = viewer ? viewer.clientHeight : 600;
+      const viewerHeight = (viewer && viewer.clientHeight > 0) ? viewer.clientHeight : 600;
       
       const mirror = preview.querySelector('.ds-tab-preview__mirror');
       if (mirror) {
