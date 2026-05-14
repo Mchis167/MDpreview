@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Not Commited] — 2026-05-14 22:50
+## [2.1.0] — 2026-05-14 22:53
 
 ### 🚀 Added
 - **Workspace Home Screen**: Triển khai giao diện Dashboard hiện đại thay thế cho trạng thái rỗng của không gian làm việc.
