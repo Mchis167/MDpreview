@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Not Commited] — 2026-05-16 04:55
+
+### 🚀 Added
+- **Markdown Viewer**: Triển khai tính năng **"Right-click to Edit"**. Hỗ trợ chuột phải vào bất kỳ nội dung nào (văn bản, hình ảnh, placeholder ảnh lỗi) để chuyển sang chế độ Edit và tự động nhảy đến đúng dòng trong Monaco Editor.
+- **Renderer**: Hỗ trợ **Granular Inline Metadata**. Gắn thông tin dòng (`data-line`) cho từng thành phần inline (ảnh, link) giúp tăng độ chính xác tuyệt đối khi chuyển đổi ngữ cảnh, đặc biệt là trong các paragraph chứa nhiều ảnh.
+
+### 🔧 Changed
+- **Design System Icons**: Chuẩn hóa icon `image-off` sử dụng `stroke="currentColor"` giúp tự động đổi màu theo Dark/Light mode.
+
+### 🐞 Fixed
+- **Markdown Viewer**: Khắc phục lỗi tranh chấp dữ liệu (race condition) khiến `lastSyncContext` bị ghi đè bởi trình tự auto-capture trong quá trình chuyển đổi chế độ.
+- **Markdown Viewer**: Giải quyết lỗi nhảy dòng sai ("First image jump") khi click vào các ảnh khác nhau trong cùng một paragraph.
+
 ## [2.3.0] — 2026-05-16 03:43
 
 ### 🚀 Added

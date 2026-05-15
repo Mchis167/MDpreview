@@ -114,10 +114,22 @@ Tất cả 3 case đã hoạt động đúng:
 - Case 1: Bôi đen + context menu → Edit → jump đúng vị trí ✅
 - Case 2: Bôi đen + shortcut → Edit → jump đúng vị trí ✅ (baseline, không bị phá)
 - Case 3: Right-click element → "Edit this section" → jump đúng dòng ✅
+- **Cải tiến mới**: Fix triệt để nhảy dòng trong khối nhiều ảnh liên tiếp (Granular Inline Metadata) ✅
 
 **Files đã thay đổi (cần commit):**
 - `renderer/js/components/organisms/markdown-viewer-component.js` — guard trong `_captureSyncContext()`
 - `renderer/js/components/organisms/change-action-view-bar.js` — `_activeCtx` local variable pattern
-- `renderer/js/services/monaco-sync-service.js` — không thay đổi (code gốc)
+- `server/routes/render.js` — gắn `data-line` cho từng thành phần inline (precised jump)
+
+---
+
+### 🚀 Cập nhật bổ sung: Granular Inline Metadata
+
+**Vấn đề:** Khi có nhiều ảnh (hoặc link) nằm trong cùng một paragraph, chuột phải vào bất kỳ thành phần nào cũng nhảy về dòng của ảnh đầu tiên do metadata chỉ được gắn ở cấp Block/Paragraph.
+
+**Giải pháp:**
+Gắn `data-line` cho **từng thẻ con** bên trong `renderInlineTokens`.
+- Sử dụng running counter `currentLine` trong renderer để tính toán số dòng chính xác cho mỗi token dựa trên char offset trong `originalSource`.
+- Điều này giúp lệnh `closest('[data-line]')` trong JS đạt độ chính xác tới từng từ/ảnh.
 
 **Bước tiếp theo**: `/changelog` + `/github` để commit và release nếu muốn.

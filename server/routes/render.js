@@ -64,6 +64,8 @@ function slugify(text) {
 function renderInlineTokens(tokens, originalSource, baseOffset) {
   let html = '';
   let lastOffset = baseOffset;
+  let currentLine = originalSource.substring(0, baseOffset).split('\n').length;
+  let lastProcessedOffset = baseOffset;
 
   if (!tokens) return '';
 
@@ -76,7 +78,12 @@ function renderInlineTokens(tokens, originalSource, baseOffset) {
     const end = start + token.raw.length;
     lastOffset = end;
 
-    const data = `data-src-start="${start}" data-src-end="${end}"`;
+    // Increment current line based on newlines between the last token and this one
+    const linesInBetween = originalSource.substring(lastProcessedOffset, start).split('\n').length - 1;
+    currentLine += linesInBetween;
+    lastProcessedOffset = start;
+
+    const data = `data-src-start="${start}" data-src-end="${end}" data-line="${currentLine}"`;
 
     switch (token.type) {
       case 'text': {
