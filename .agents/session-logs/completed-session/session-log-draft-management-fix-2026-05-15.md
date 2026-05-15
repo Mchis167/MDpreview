@@ -1,4 +1,8 @@
-# Draft Management & Persistence Fix Session Log
+# [Draft Management & Persistence Fix] Session Log — 2026-05-15
+
+## 🔗 Liên kết (Links)
+- **Log trước**: (Không có)
+- **Log kế tiếp**: (Không có)
 
 ## 📝 Tổng quan (Overview)
 Khắc phục các bug nhỏ và cải thiện tính nhất quán cho hệ thống Tab Bar và quản lý bản nháp (Drafts).

@@ -1,4 +1,8 @@
-# [Assets Management System] Session Log
+# [Assets Management System] Session Log — 2026-05-15
+
+## 🔗 Liên kết (Links)
+- **Log trước**: (Không có)
+- **Log kế tiếp**: (Không có)
 
 ## 📝 Tổng quan (Overview)
 Nâng cấp hệ thống quản lý Asset của MDpreview từ việc quản lý file vật lý đơn thuần sang một hệ thống chuyên nghiệp có **Indexing**, **Reference Tracking**, và **UI Management**.

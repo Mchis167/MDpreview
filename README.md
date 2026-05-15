@@ -145,7 +145,7 @@ Applied to:
 - ✅ Worker rendering (published pages)
 - ✅ All user-provided markdown content
 
-**Test:** See [Manual Testing Guide](docs/manual-testing-phase-1-1.md)
+**Test:** Use `npm run test` or check server render output.
 
 ---
 
@@ -253,7 +253,7 @@ npm run test
 ```
 
 ### Manual Testing
-See [Manual Testing Guide](docs/manual-testing-phase-1-1.md) for:
+Perform manual verification for:
 - XSS protection verification
 - Feature testing (Mermaid, code highlighting, tables)
 - Server and worker testing
@@ -272,17 +272,6 @@ curl -X POST http://localhost:3737/api/render-raw \
   -d '{"content":"```mermaid\ngraph LR\nA --> B\n```"}' | jq '.html | contains("mermaid")'
 # Expected: true (mermaid div created)
 ```
-
----
-
-## Documentation
-
-- [**Phase 1.1 Completion**](docs/phase-1-1-completion.md) — Render logic consolidation & security fix
-- [**Phase 1.2 Completion**](docs/phase-1-2-completion.md) — CSS build pipeline
-- [**Manual Testing Guide**](docs/manual-testing-phase-1-1.md) — Step-by-step test cases
-- [**Scripts Guide**](docs/scripts-guide.md) — Build and deployment commands
-- [**CSS Pipeline**](docs/css-pipeline.md) — Token system and CSS build process
-- [**Decisions**](docs/decisions/) — Architecture decisions and rationales
 
 ---
 
@@ -424,7 +413,7 @@ See [CHANGELOG.md](CHANGELOG.md) for release notes and version history.
 
 - 📧 Email: mchis1607@gmail.com
 - 🐛 Issues: [GitHub Issues](https://github.com/your-repo/issues)
-- 📚 Docs: See `/docs` directory
+- 📚 Docs: Check CHANGELOG.md for history
 
 ---
 

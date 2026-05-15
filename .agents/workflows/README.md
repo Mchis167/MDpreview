@@ -35,9 +35,8 @@ Bộ quy trình chuẩn hoá toàn diện để phát triển tính năng, quả
 - Khi chuyển sang một nhiệm vụ lớn hoặc module mới.
 
 **Key features:**
-- ✅ Mandatory read: rules, changelog, architecture.
-- ✅ Context audit: docs, decisions, function-docs.
-- ✅ Environment check: files, dependencies.
+- ✅ Mandatory read: rules, architecture.
+- ✅ Context audit: environment, files, dependencies.
 - ✅ Briefing: Tóm tắt bối cảnh và đề xuất bước tiếp theo.
 
 **File:** [0.startup.md](0.startup.md)
@@ -386,17 +385,22 @@ Tham khảo: [test-cases.md](test-cases.md)
 ---
 
 #### 📜 `/session-log` — Session Log Management
-**Mục đích:** Duy trì bối cảnh làm việc xuyên suốt nhiều session trong cùng một task lớn.
+**Mục đích:** Duy trì bối cảnh làm việc xuyên suốt nhiều session trong cùng một task lớn thông qua chuỗi file log có gắn ngày.
 
 **Khi dùng:**
 - Chạy sau mỗi task nhỏ để AI tóm tắt chính xác.
-- Khi chuẩn bị bàn giao (handoff) sang session mới.
+- Khi chuyển sang ngày mới hoặc giai đoạn mới của task.
+
+**Key features:**
+- ✅ Naming convention: `session-log-{task}-{YYYY-MM-DD}.md`
+- ✅ Inter-log linking: Liên kết Log trước/Log sau để AI dễ dàng truy vết lịch sử.
+- ✅ Checkpoint "Tại sao": Lưu trữ các quyết định kiến trúc không hiển thị trong code.
 
 **Cú pháp:**
-- `/session-log new`: Khởi tạo task lớn.
-- `/session-log update`: Cập nhật tiến độ.
+- `/session-log new`: Khởi tạo file log mới cho task (tự động link nếu có file cũ).
+- `/session-log update`: Cập nhật tiến độ vào file log của ngày hiện tại.
 
-Tham khảo: [18.session-log.md](18.session-log.md)
+Tham khảo: [16.session-log.md](16.session-log.md)
 
 ---
 
@@ -412,10 +416,8 @@ Tham khảo: [18.session-log.md](18.session-log.md)
 6. /console-test     → Verify tính năng
 7. /test             → Design test cases
 8. /changelog        → Cập nhật changelog
-9. /new-doc          → Tạo doc mới nếu module/tính năng chưa có doc
-   /update-docs      → Hoặc update doc hiện có nếu đã có
-10. /linting-gates   → Verify linting
-11. /github          → Release (nếu ready)
+9. /linting-gates   → Verify linting
+10. /github          → Release (nếu ready)
 ```
 
 ### Pattern 2: Fix bug
@@ -425,7 +427,6 @@ Tham khảo: [18.session-log.md](18.session-log.md)
 3. /console-test     → Verify fix
 4. /linting-gates    → Check linting
 5. /changelog        → Document fix
-6. /update-docs      → Cập nhật docs nếu behavior thay đổi
 ```
 
 ### Pattern 3: Refactor component
@@ -436,15 +437,13 @@ Tham khảo: [18.session-log.md](18.session-log.md)
 4. /smart-edit       → Fine-tune nếu cần
 5. /linting-gates    → Verify
 6. /changelog        → Document
-7. /update-docs      → Cập nhật docs (thường cần vì API thay đổi)
 ```
 
 ### Pattern 4: Release version
 ```
 1. /changelog        → Compile [Not Committed]
-2. /update-docs      → Final docs check (iff need)
-3. /linting-gates    → Final check (0 errors)
-4. /github           → Commit + push + update version
+2. /linting-gates    → Final check (0 errors)
+3. /github           → Commit + push + update version
 ```
 
 ---
@@ -456,9 +455,6 @@ Tham khảo: [18.session-log.md](18.session-log.md)
 | Smart Edit | `/smart-edit` | Fix/update code | Modified files |
 | Discuss | `/discuss [topic]` | Analyze, propose solutions | Analysis + proposals |
 | Changelog | `/changelog` | Document changes | Updated CHANGELOG.md |
-| **Update Docs** | **`/update-docs`** | **Cập nhật function docs (iff need)** | **Updated docs/function-docs/*** |
-| **New Doc** | **`/new-doc [module]`** | **Tạo doc mới cho tính năng / module mới** | **New file docs/function-docs/*** |
-| **Decision** | **`/decision`** | **Ghi lại quyết định thiết kế / kỹ thuật** | **New file docs/decisions/*** |
 | GitHub | `/github` | Release version | New commit, tag, updated CHANGELOG |
 | Artifact Docs | `/artifact-docs` | Create plan/test suite | Artifact artifact |
 | Console Test | `/console-test [feature]` | Test on console | JavaScript test script |
@@ -555,10 +551,7 @@ Tham khảo: [18.session-log.md](18.session-log.md)
 ├── 7.token-management.md    ← Token system
 ├── 8.module-creation.md     ← Module scaffolding
 ├── 9.linting-gates.md       ← Linting verification
-├── 15.update-docs.md        ← Cập nhật function docs (iff need)
-├── 16.new-doc.md            ← Tạo doc mới cho module/tính năng mới
-├── 17.decision.md           ← Ghi lại quyết định thiết kế / kỹ thuật
-├── 18.session-log.md        ← Quản lý bối cảnh phiên làm việc (Session Log)
+├── 16.session-log.md        ← Quản lý bối cảnh phiên làm việc (Session Log)
 ├── create-component.md      ← Atomic component creation
 ├── plan.md                  ← Implementation planning
 ├── 11.1.phase-detail.md     ← Phase detail planning

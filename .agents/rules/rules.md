@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # MDpreview — AI Rules & Architecture Guide
 
 **Single source of truth** for AI agents. Reference: [ARCHITECTURE.md](../../ARCHITECTURE.md), [Workflows README](../workflows/README.md)
@@ -244,14 +248,6 @@ Modules → Boot sequence
 
 ```bash
 # Project ID: PVT_kwHOBots8c4BTH09
-
-Status IDs:
-- Backlog:    f75ad846
-- Ready:      61e4505c
-- In progress: 47fc9ee4
-- In review:  df73e18b (set after code changes)
-- Done:       98236657
-```
 
 ---
 

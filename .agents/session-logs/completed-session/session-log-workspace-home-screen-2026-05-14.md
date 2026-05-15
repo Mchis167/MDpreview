@@ -1,4 +1,8 @@
-# [Workspace Home Screen] Session Log
+# [Workspace Home Screen] Session Log — 2026-05-14
+
+## 🔗 Liên kết (Links)
+- **Log trước**: (Không có)
+- **Log kế tiếp**: (Không có)
 
 ## 📝 Tổng quan (Overview)
 Thiết lập giao diện Home View mới cho ứng dụng MDpreview khi không có file nào được mở. Thay thế trạng thái trống (empty state) đơn điệu bằng một dashboard hữu ích bao gồm Search Bar trung tâm, Quick Actions (New file, Draft, Shortcuts) và danh sách Recent Files (2 cột). Task này cũng bao gồm việc giải quyết các lỗi phát sinh về quản lý trạng thái Tab và đồng bộ hóa hiển thị giữa Home và Markdown Viewer.

@@ -1,4 +1,8 @@
-# [Universal Zoom System] Session Log
+# [Universal Zoom System] Session Log — 2026-05-15
+
+## 🔗 Liên kết (Links)
+- **Log trước**: (Không có)
+- **Log kế tiếp**: (Không có)
 
 ## 📝 Tổng quan (Overview)
 Hiện đại hóa hệ thống zoom từ một tiện ích dành riêng cho Mermaid (`zoom.js`) thành một hệ thống `ZoomSystem` dùng chung, hỗ trợ cả SVG và hình ảnh (Assets), tích hợp Design System và tối ưu hóa UI/UX.
