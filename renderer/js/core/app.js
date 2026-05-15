@@ -3,7 +3,7 @@
    TreeModule, WorkspaceModule, CollectModule, 
    DraftModule, EditorModule, 
    EditToolbarComponent,
-   TabsModule, TabPreview, io, initMermaid, ZoomSystem, ScrollModule, RecentlyViewedModule, ChangeActionViewBar, CommentsModule, WikiService, WikiDrawer, BacklinksDrawer, Home, AssetManager */
+   TabsModule, TabPreview, io, initMermaid, ZoomSystem, ScrollModule, RecentlyViewedModule, ChangeActionViewBar, CommentsModule, WikiService, WikiDrawer, BacklinksDrawer, Home, AssetManager, MonacoValidationService */
 /* ============================================================
    app.js — Core state, file loading, socket connection, boot
    ============================================================ */
@@ -798,6 +798,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   DraftModule.init();        // draft.js
   MarkdownViewer.init();      // organisms/markdown-viewer-component.js
+  if (typeof MonacoValidationService !== 'undefined') MonacoValidationService.init();
   Home.init();                // organisms/home-component.js
   if (typeof AssetManager !== 'undefined') AssetManager.init();
   ScrollModule.init();       // scroll.js

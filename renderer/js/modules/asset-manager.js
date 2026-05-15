@@ -18,10 +18,17 @@ window.AssetManager = (() => {
 
       if (typeof AppState !== 'undefined' && AppState.socket) {
         AppState.socket.on('assets-changed', () => {
-          console.warn('[AssetManager] Assets changed on disk, refreshing...');
           this.refresh();
         });
       }
+
+      // Refresh assets whenever the workspace is loaded or changed
+      window.addEventListener('workspace-changed', () => {
+        this.refresh();
+      });
+
+      // Initial fetch attempt
+      this.refresh();
     },
 
     /**
@@ -43,6 +50,9 @@ window.AssetManager = (() => {
         
         // Cập nhật badge trên Home View nếu có (Phase 4 enhancement)
         this.updateBadges();
+
+        // Sync broken link warnings in Editor
+        if (window.MonacoValidationService) window.MonacoValidationService.trigger();
       } catch (err) {
         console.error('[AssetManager] Refresh failed:', err);
       }

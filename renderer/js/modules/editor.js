@@ -27,6 +27,9 @@ const EditorModule = (() => {
     // ── Slash Command Logic (Hybrid with Monaco) ──
     if (!MonacoService.isInitialized()) return;
     
+    // Trigger Broken Link Validation
+    if (window.MonacoValidationService) window.MonacoValidationService.trigger();
+    
     const pos = MonacoService.getCursorPosition();
     const model = MonacoService.getInstance().getModel();
     if (!model || pos.lineNumber > model.getLineCount()) return;
@@ -298,6 +301,9 @@ const EditorModule = (() => {
         _handleContentChange();
       });
     }
+
+    // Initial Validation
+    if (window.MonacoValidationService) window.MonacoValidationService.trigger();
   }
 
   /**
