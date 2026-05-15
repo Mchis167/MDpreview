@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Not Commited] — 2026-05-16 03:37
+## [2.3.0] — 2026-05-16 03:43
 
 ### 🚀 Added
 - **Global Keyboard Shortcuts**: Bổ sung phím tắt toàn cục cho các thao tác điều hướng cốt lõi:
