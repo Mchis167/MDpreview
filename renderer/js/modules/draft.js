@@ -125,9 +125,14 @@ const DraftModule = (() => {
       
       saveToStorage(); // Persist rendered draft
       
-      // If we are in edit mode, sync the editor with the new content
+      // ── Sync Guard ──────────────────────────────────────────
+      // Only push content back to the editor if it's NOT the active 
+      // focus, to avoid overwriting user typing with rendered state.
       if (AppState.currentMode === 'edit' && typeof EditorModule !== 'undefined') {
+        const isCurrentlyEditing = (AppState.currentFile === draftId && EditorModule.isDirty());
+        if (!isCurrentlyEditing) {
           EditorModule.setOriginalContent(finalContent);
+        }
       }
       
       // Reset scroll

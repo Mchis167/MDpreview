@@ -339,6 +339,24 @@ Tham khảo: [plan.md](plan.md)
 
 ---
 
+#### 1️⃣1️⃣.1️⃣ `/phase-detail` — Chi tiết hóa Phase từ Master Plan
+**Mục đích:** Bóc tách và chi tiết hóa kế hoạch triển khai cho một Phase cụ thể.
+
+**Khi dùng:**
+- Sau khi đã có Master Plan tổng thể.
+- Khi chuẩn bị thực thi một giai đoạn (Phase) cụ thể.
+
+**Key features:**
+- ✅ Anatomy chuẩn: Mục tiêu, Risk, Duration.
+- ✅ Sub-task mapping: 1 task = 1 file.
+- ✅ Code snippet bắt buộc cho mỗi task.
+- ✅ Future constraints để bảo vệ codebase.
+- ✅ Layered checklist & Success Criteria.
+
+**File:** [11.1.phase-detail.md](11.1.phase-detail.md)
+
+---
+
 #### ✂️ `/refactor-to-atomic` — Refactor Legacy → Atomic
 **Mục đích:** Bóc tách, chuyển đổi component cũ thành Atomic Design
 
@@ -449,6 +467,7 @@ Tham khảo: [18.session-log.md](18.session-log.md)
 | Linting Gates | `/linting-gates` | Verify code quality | npm run lint output |
 | Atomic Gen | `/atomic-gen [name] [level]` | Create component | New component scaffolded |
 | Planning | `/plan [task]` | Plan implementation | Implementation plan artifact |
+| **Phase Detail** | **`/phase-detail`** | **Chi tiết hóa Phase** | **Phase Detail artifact** |
 | Refactor | `/refactor-to-atomic` | Refactor legacy | New atomic component, cleanup |
 | Test Cases | `/test [feature]` | Design tests | Test case artifact |
 | **Session Log** | **`/session-log`** | **Duy trì bối cảnh task lớn** | **Updated .agents/session-logs/*** |
@@ -542,6 +561,7 @@ Tham khảo: [18.session-log.md](18.session-log.md)
 ├── 18.session-log.md        ← Quản lý bối cảnh phiên làm việc (Session Log)
 ├── create-component.md      ← Atomic component creation
 ├── plan.md                  ← Implementation planning
+├── 11.1.phase-detail.md     ← Phase detail planning
 ├── refactor-component.md    ← Legacy refactoring
 ├── test-cases.md            ← Test case design
 └── standardize-ds.md        ← Design system standardization

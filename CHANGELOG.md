@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2.0] — 2026-05-15 19:20
+
+### 🚀 Added
+- **Asset Management System (Phases 1 — 4)**: Triển khai hệ thống quản lý tài nguyên chuyên nghiệp với khả năng Indexing và Reference Tracking.
+    - **Asset Indexing Service**: Tự động quét và theo dõi tần suất sử dụng của ảnh trong toàn bộ workspace (hỗ trợ cả Markdown và HTML tags).
+    - **Smart Reference Tracking**: Hiển thị số lượng tham chiếu (Ref Count) và cảnh báo khi xóa ảnh đang được sử dụng.
+    - **IPC Native Actions**: Hỗ trợ Import (hàng loạt), Rename và Delete trực tiếp qua hệ thống file của OS.
+    - **Smart Rename Engine**: Tự động cập nhật tất cả các đường dẫn ảnh trong file `.md` khi file ảnh gốc được đổi tên.
+    - **Broken Asset Management**: Nhận diện và hỗ trợ dọn dẹp (Cleanup) các tham chiếu hỏng khi file ảnh không còn tồn tại.
+- **High-Fidelity Asset UI**:
+    - **Dual View Modes**: Hỗ trợ chuyển đổi mượt mà giữa Grid View (lưới ảnh) và List View (danh sách chi tiết) với khả năng bảo toàn vị trí cuộn.
+    - **Premium Filter Tabs**: Hệ thống tab lọc (All, Active, Orphan, Broken) với chỉ báo màu sắc và số lượng real-time.
+    - **Skeleton Shimmer**: Trải nghiệm tải dữ liệu mượt mà với hiệu ứng shimmer trong quá trình mở drawer.
+    - **Advanced Context Menus**: Tích hợp menu chuột phải đầy đủ tính năng: Reveal in Finder, View Full Image, Rename, Delete.
+- **Performance Optimizations**:
+    - **Server-side Thumbnails**: Tự động tạo ảnh thu nhỏ (thumbnail) trên server để tối ưu tốc độ tải và giảm chiếm dụng bộ nhớ client.
+    - **IntersectionObserver Lazy Loading**: Chỉ tải ảnh khi người dùng cuộn tới, đảm bảo hiệu năng 60fps ngay cả với hàng nghìn ảnh.
+
+### 🔧 Changed
+- **AssetPanel Modularization (Architectural Refactor)**: Tái cấu trúc toàn bộ file `asset-panel-component.js` (1000+ dòng) thành kiến trúc module nhỏ gọn.
+    - **Shared State**: Triển khai `AssetPanelState` làm Single Source of Truth cho toàn bộ drawer.
+    - **Specialized Modules**: Tách biệt logic thành các module chuyên biệt: `Header`, `Tabs`, `Content`, `Item`, `Selection`, và `Actions`.
+- **Advanced Selection UX**:
+    - **Persistent Selection Mode**: Hỗ trợ chọn nhiều bằng `Shift + Click` hoặc click trực tiếp khi đang ở chế độ chọn.
+    - **Multi-Action Bar**: Thanh công cụ nổi phía dưới hỗ trợ các tác vụ hàng loạt (Batch Delete) với thông tin tóm tắt.
+- **Inline Renaming UX**: Thay thế modal đổi tên bằng chế độ edit trực tiếp trên Grid/List, hỗ trợ tự động focus và bôi đen tên file.
+
+### 🐞 Fixed
+- **Asset Path Encoding**: Khắc phục triệt để lỗi 404 khi tải các file ảnh có tên chứa khoảng trắng hoặc ký tự đặc biệt.
+- **Layering & Z-Index**: Sửa lỗi Context Menu bị che khuất bởi Drawer bằng cách chuẩn hóa hệ thống layer của Design System.
+- **IPC Payload Serialization**: Khắc phục lỗi truyền dữ liệu rỗng lên backend trong các tác vụ xóa file.
+
 ## [2.1.0] — 2026-05-14 22:53
 
 ### 🚀 Added

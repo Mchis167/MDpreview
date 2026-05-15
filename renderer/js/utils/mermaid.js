@@ -76,7 +76,11 @@ async function processMermaid(container) {
 
 function setupMermaidClicks(container) {
   container.querySelectorAll('.mermaid').forEach(div => {
-    div.onclick = () => window.openZoom(div);
+    div.onclick = () => {
+      if (window.ZoomSystem) {
+        window.ZoomSystem.open(div, 'svg');
+      }
+    };
   });
 }
 

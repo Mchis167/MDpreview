@@ -6,7 +6,7 @@
 .ds-tooltip {
   --_offset: 8px;
   position: fixed;
-  z-index: 10000;
+  z-index: 100000;
   pointer-events: none;
   background: var(--ds-bg-elevated);
   backdrop-filter: blur(12px);

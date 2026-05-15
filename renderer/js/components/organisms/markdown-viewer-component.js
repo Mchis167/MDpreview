@@ -47,13 +47,13 @@ class MarkdownViewerComponent {
   setState(newState) {
     const fileChanged = newState.file !== undefined && newState.file !== this.state.file;
     const modeChanged = newState.mode !== undefined && newState.mode !== this.state.mode;
-    
+
     // 1. Save scroll position before switching file OR mode
     // FIX: Do NOT save if we are entering 'empty' mode (Home) as it will be hidden/already saved
     if ((fileChanged || modeChanged) && this.state.file && newState.mode !== 'empty' && ScrollModule) {
       ScrollModule.save(this.state.file);
     }
-    
+
     const oldMode = this.state.mode;
 
     // GUARD: If file changed but content/html are NOT provided, 
@@ -87,17 +87,17 @@ class MarkdownViewerComponent {
 
   render(oldMode = null) {
     if (!this.mount) return;
-    
+
     window._isMDViewerRendering = true;
-    
+
     try {
       if (this.previewComp && this.previewComp.destroy) {
-        try { this.previewComp.destroy(); } catch(_e) {}
+        try { this.previewComp.destroy(); } catch (_e) { }
       }
       if (this.editorComp && this.editorComp.destroy) {
-        try { this.editorComp.destroy(); } catch(_e) {}
+        try { this.editorComp.destroy(); } catch (_e) { }
       }
-      
+
       this.mount.innerHTML = '';
       this._tocBtn = null;
       this._comboBtn = null;
@@ -106,10 +106,10 @@ class MarkdownViewerComponent {
       this._publishBtn = null;
       this._floatingGroup = null;
       this._scrollTopBtn = null;
-      
+
       // Reset TOC internal state to clear old content and show skeleton
       if (TOCComponent) TOCComponent.reset();
-      
+
       if (this.state.mode === 'empty') {
         this._handleModeSwitch(oldMode, 'empty');
         if (window.ScrollModule) {
@@ -126,8 +126,8 @@ class MarkdownViewerComponent {
       this.viewport.oncontextmenu = (e) => this._handleContextMenu(e);
 
       // Render both but they control their own initial visibility
-      this.previewComp = new MarkdownPreview({ 
-        mount: this.viewport, 
+      this.previewComp = new MarkdownPreview({
+        mount: this.viewport,
         html: this.state.html,
         file: this.state.file,
         options: {
@@ -138,8 +138,8 @@ class MarkdownViewerComponent {
         }
       });
 
-      this.editorComp = new MarkdownEditor({ 
-        mount: this.viewport, 
+      this.editorComp = new MarkdownEditor({
+        mount: this.viewport,
         content: this.state.content,
         file: this.state.file
       });
@@ -162,8 +162,6 @@ class MarkdownViewerComponent {
 
   _handleModeSwitch(oldMode, newMode) {
     if (!this.mount) return;
-
-    this.mount.setAttribute('data-mode', newMode);
 
     if (this.viewport) {
       const previewEl = this.viewport.querySelector('#md-content');
@@ -201,7 +199,7 @@ class MarkdownViewerComponent {
     if (newMode === 'collect' && window.CollectModule) window.CollectModule.applyCollectMode();
 
     this._updateFloatingButtons();
-    
+
     // ── SYNC SCROLL CONTAINER ──
     if (window.ScrollModule) {
       window.ScrollModule.setContainer(this.getActiveScrollElement(), this.state.file);
@@ -213,7 +211,7 @@ class MarkdownViewerComponent {
   _updateFloatingButtons() {
     const mode = this.state.mode;
     if (!this._scrollTopBtn) this._renderFloatingScrollTop();
-    
+
     // Ensure group exists
     if (!this._floatingGroup) {
       this._floatingGroup = DesignSystem.createElement('div', 'floating-action-group');
@@ -230,11 +228,11 @@ class MarkdownViewerComponent {
     if (this._backlinksBtn) this._backlinksBtn.style.display = isReadGroup ? 'flex' : 'none';
     if (this._comboBtn) this._comboBtn.style.display = isReadGroup ? 'flex' : 'none';
     if (this._publishBtn) this._publishBtn.style.display = isReadGroup ? 'flex' : 'none';
-    
+
     if (isReadGroup) this._updatePublishButtonState();
-    
+
     if (isEditGroup && !this._editImportBtn) this._renderEditFloatingActions();
-    
+
     if (this._editImportBtn) this._editImportBtn.style.display = isEditGroup ? 'flex' : 'none';
     if (this._editAppendBtn) this._editAppendBtn.style.display = isEditGroup ? 'flex' : 'none';
 
@@ -242,7 +240,7 @@ class MarkdownViewerComponent {
       if (TOCComponent && TOCComponent.isVisible()) {
         TOCComponent.show(this.mount);
       }
-      
+
       this.viewport.onscroll = () => {
         if (TOCComponent) TOCComponent.updateActiveHeading(this.viewport);
       };
@@ -284,7 +282,7 @@ class MarkdownViewerComponent {
 
     // Remove old listener if exists (via replacement of node or tracking)
     if (this._currentScrollEl === scrollEl) return;
-    
+
     this._currentScrollEl = scrollEl;
     scrollEl.addEventListener('scroll', () => {
       if (scrollEl.scrollTop > 300) {
@@ -368,20 +366,20 @@ class MarkdownViewerComponent {
       toggleTooltip: 'Advanced Copy',
       toggleAction: () => {
         DesignSystem.createMenu(this._comboBtn, [
-          { 
-            label: 'Copy as File', 
-            icon: 'file-plus', 
+          {
+            label: 'Copy as File',
+            icon: 'file-plus',
             onClick: () => this._handleCopyAsFile()
           },
-          { 
-            label: 'Copy for Google Docs', 
-            icon: 'file-text', 
+          {
+            label: 'Copy for Google Docs',
+            icon: 'file-text',
             onClick: () => this._handleGDocCopy()
           },
           { divider: true },
-          { 
-            label: 'Copy File Path', 
-            icon: 'link', 
+          {
+            label: 'Copy File Path',
+            icon: 'link',
             onClick: () => {
               if (this.state.file) {
                 navigator.clipboard.writeText(this.state.file);
@@ -424,10 +422,10 @@ class MarkdownViewerComponent {
     this._floatingGroup.appendChild(this._tocBtn);
     this._floatingGroup.appendChild(this._backlinksBtn);
     this._floatingGroup.appendChild(this._comboBtn);
-    
+
     // 3. Publish Button State
     this._updatePublishButtonState();
-    
+
     // Immediate initial sync
     this._updateTOC();
   }
@@ -439,7 +437,7 @@ class MarkdownViewerComponent {
     if (!this._floatingGroup) return;
     const file = this.state.file;
     const info = window.PublishService ? window.PublishService.getPublishInfo(file) : null;
-    
+
     // Remove old button if it exists in DOM
     if (this._publishBtn && this._publishBtn.parentElement) {
       this._publishBtn.remove();
@@ -471,23 +469,23 @@ class MarkdownViewerComponent {
         toggleTooltip: 'Publication Options',
         toggleAction: () => {
           DesignSystem.createMenu(this._publishBtn, [
-            { 
-              label: 'View Live Page', 
-              icon: 'external-link', 
+            {
+              label: 'View Live Page',
+              icon: 'external-link',
               onClick: () => window.open(info.url, '_blank')
             },
-            { 
-              label: 'Copy Public Link', 
-              icon: 'link', 
+            {
+              label: 'Copy Public Link',
+              icon: 'link',
               onClick: () => {
                 navigator.clipboard.writeText(info.url);
                 if (window.showToast) window.showToast('Public link copied');
               }
             },
             { divider: true },
-            { 
-              label: 'Unpublish (Local state)', 
-              icon: 'trash-2', 
+            {
+              label: 'Unpublish (Local state)',
+              icon: 'trash-2',
               danger: true,
               onClick: () => {
                 DesignSystem.showConfirm({
@@ -575,9 +573,9 @@ class MarkdownViewerComponent {
 
             this._switchToMode('collect');
             window.CollectModule.addIdea(
-              capturedData.selectedText, 
-              capturedData.lineStart, 
-              capturedData.lineEnd, 
+              capturedData.selectedText,
+              capturedData.lineStart,
+              capturedData.lineEnd,
               capturedData.selectedText
             );
           }
@@ -684,12 +682,12 @@ class MarkdownViewerComponent {
         res = await window.electronAPI.copyFileToClipboard(this.state.file);
       } else if (this.state.content) {
         // Case 2: Draft/Generated content -> Copy as temp file
-        const fileName = isDraft 
+        const fileName = isDraft
           ? (window.DraftModule?.getDisplayName(this.state.file) || 'Draft').replace(/\s+/g, '_') + '.md'
-          : (window.AppState && window.AppState.activeTabName) 
-            ? `${window.AppState.activeTabName}.md` 
+          : (window.AppState && window.AppState.activeTabName)
+            ? `${window.AppState.activeTabName}.md`
             : 'Untitled.md';
-        
+
         // Convert string to Uint8Array for the buffer
         const buffer = new TextEncoder().encode(this.state.content);
         res = await window.electronAPI.copyFileFromBuffer(buffer, fileName);
@@ -712,45 +710,45 @@ class MarkdownViewerComponent {
     if (window.showToast) {
       window.showToast('Preparing smart copy...', 'info', { id: 'gdoc-copy', sticky: true, progress: 0 });
     }
-    
-    try {
-       const previewInner = this.viewport.querySelector('.md-content-inner');
-       const sourceHtml = previewInner ? previewInner.innerHTML : this.state.html;
 
-       const result = await window.GDocUtil.transform(sourceHtml, this.mount);
-       const transformedHtml = result.html;
-       
-       const html = `<div style="font-family: sans-serif; color: #24292e;">${transformedHtml}</div>`;
-       
-       if (window.electronAPI && typeof window.electronAPI.writeClipboardAdvanced === 'function') {
-         const res = await window.electronAPI.writeClipboardAdvanced({
-           html: html,
-           text: this.state.content || ''
-         });
-         if (res.success) {
-           if (window.showToast) {
-             const msg = result.totalCount > 0 
-               ? `Smart copy ready! (${result.successCount}/${result.totalCount} charts)`
-               : 'Smart copy for GDocs ready!';
-             const type = result.failCount > 0 ? 'warn' : 'success';
-             window.showToast(msg, type, { id: 'gdoc-copy' });
-           }
-         } else {
-           throw new Error(res.error);
-         }
-       } else {
-         // Fallback to simple clipboard
-         await navigator.clipboard.write([
-            new ClipboardItem({
-              "text/html": new Blob([html], { type: "text/html" }),
-              "text/plain": new Blob([this.state.content || ''], { type: "text/plain" })
-            })
-         ]);
-         if (window.showToast) window.showToast('Smart copy ready! (Browser)', 'success', { id: 'gdoc-copy' });
-       }
+    try {
+      const previewInner = this.viewport.querySelector('.md-content-inner');
+      const sourceHtml = previewInner ? previewInner.innerHTML : this.state.html;
+
+      const result = await window.GDocUtil.transform(sourceHtml, this.mount);
+      const transformedHtml = result.html;
+
+      const html = `<div style="font-family: sans-serif; color: #24292e;">${transformedHtml}</div>`;
+
+      if (window.electronAPI && typeof window.electronAPI.writeClipboardAdvanced === 'function') {
+        const res = await window.electronAPI.writeClipboardAdvanced({
+          html: html,
+          text: this.state.content || ''
+        });
+        if (res.success) {
+          if (window.showToast) {
+            const msg = result.totalCount > 0
+              ? `Smart copy ready! (${result.successCount}/${result.totalCount} charts)`
+              : 'Smart copy for GDocs ready!';
+            const type = result.failCount > 0 ? 'warn' : 'success';
+            window.showToast(msg, type, { id: 'gdoc-copy' });
+          }
+        } else {
+          throw new Error(res.error);
+        }
+      } else {
+        // Fallback to simple clipboard
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            "text/html": new Blob([html], { type: "text/html" }),
+            "text/plain": new Blob([this.state.content || ''], { type: "text/plain" })
+          })
+        ]);
+        if (window.showToast) window.showToast('Smart copy ready! (Browser)', 'success', { id: 'gdoc-copy' });
+      }
     } catch (err) {
-       console.error('[DEBUG] GDoc copy failed:', err);
-       if (window.showToast) window.showToast('Failed to prepare smart copy', 'error', { id: 'gdoc-copy' });
+      console.error('[DEBUG] GDoc copy failed:', err);
+      if (window.showToast) window.showToast('Failed to prepare smart copy', 'error', { id: 'gdoc-copy' });
     }
   }
 
@@ -768,7 +766,7 @@ class MarkdownViewerComponent {
 
     this._editImportBtn.onclick = async (e) => {
       e.stopPropagation();
-      const paths = await window.FileService.openFiles({ 
+      const paths = await window.FileService.openFiles({
         properties: ['openFile'],
         filters: [{ name: 'Markdown', extensions: ['md'] }]
       });
@@ -777,7 +775,7 @@ class MarkdownViewerComponent {
         try {
           const res = await window.electronAPI.readFile(paths[0]);
           if (!res.success) throw new Error(res.error || 'Failed to read file');
-          
+
           if (res.content !== undefined) {
             const isDirty = EditorModule.isDirty();
             if (isDirty) {
@@ -811,7 +809,7 @@ class MarkdownViewerComponent {
 
     this._editAppendBtn.onclick = async (e) => {
       e.stopPropagation();
-      const paths = await window.FileService.openFiles({ 
+      const paths = await window.FileService.openFiles({
         properties: ['openFile'],
         filters: [{ name: 'Markdown', extensions: ['md'] }]
       });
@@ -820,7 +818,7 @@ class MarkdownViewerComponent {
         try {
           const res = await window.electronAPI.readFile(paths[0]);
           if (!res.success) throw new Error(res.error || 'Failed to read file');
-          
+
           if (res.content !== undefined) {
             EditorModule.insertContent(res.content, 'append');
             if (window.showToast) window.showToast('Content appended to end');
@@ -837,7 +835,7 @@ class MarkdownViewerComponent {
 
   _updateTOC() {
     if (this._tocUpdateTimeout) clearTimeout(this._tocUpdateTimeout);
-    
+
     // Only update TOC in non-edit modes
     if (this.state.mode === 'edit') return;
 
@@ -845,10 +843,10 @@ class MarkdownViewerComponent {
       if (TOCComponent && this.viewport) {
         const isSkeleton = !!(this.state.html && this.state.html.includes('skeleton-text'));
         const input = this.viewport.querySelector('.md-render-body') || this.viewport;
-          
-        TOCComponent.update(input, { 
-          mode: this.state.mode, 
-          isSkeleton: isSkeleton 
+
+        TOCComponent.update(input, {
+          mode: this.state.mode,
+          isSkeleton: isSkeleton
         });
       }
       this._tocUpdateTimeout = null;
@@ -896,28 +894,28 @@ class MarkdownViewerComponent {
 
     const content = this.state.content || '';
     if (!content) return;
-    
+
     const lines = content.split('\n');
     const lineIndex = lineNum - 1;
     if (lineIndex < 0 || lineIndex >= lines.length) return;
-    
+
     const line = lines[lineIndex];
 
     // Pattern to match common GFM task list prefixes (handles nesting with \s*)
     const taskRegex = /^(\s*[-*+] )\[[ xX]\]/;
     const match = line.match(taskRegex);
-    
+
     if (match) {
       const prefix = match[1];
       const newMark = checked ? '[x]' : '[ ]';
       const newLine = line.replace(taskRegex, `${prefix}${newMark}`);
-      
+
       lines[lineIndex] = newLine;
       const newContent = lines.join('\n');
-      
+
       // 1. Update component state immediately (Preview will skip re-render if html is same)
       this.setState({ content: newContent });
-      
+
       // 2. Keep Editor in sync
       if (typeof EditorModule !== 'undefined') {
         EditorModule.setOriginalContent(newContent);
@@ -933,7 +931,7 @@ class MarkdownViewerComponent {
         }
       } else if (typeof FileService !== 'undefined' && FileService.saveFile) {
         success = await FileService.saveFile(this.state.file, newContent);
-        
+
         if (success) {
           // Fetch fresh HTML from server to ensure full sync (async)
           fetch('/api/render-raw', {
@@ -941,13 +939,13 @@ class MarkdownViewerComponent {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ content: newContent })
           })
-          .then(res => res.json())
-          .then(data => {
-            if (data && data.html) {
-              this.setState({ html: data.html });
-            }
-          })
-          .catch(_err => { /* Fallback ignored, content is already saved */ });
+            .then(res => res.json())
+            .then(data => {
+              if (data && data.html) {
+                this.setState({ html: data.html });
+              }
+            })
+            .catch(_err => { /* Fallback ignored, content is already saved */ });
         }
       }
 
@@ -994,7 +992,7 @@ class MarkdownPreview {
     const container = DesignSystem.createElement('div', 'md-content md-render-body', { id: 'md-content' });
     const inner = DesignSystem.createElement('div', 'md-content-inner');
     inner.innerHTML = this.html;
-    
+
     container.appendChild(inner);
     this.mount.appendChild(container);
 
@@ -1003,7 +1001,7 @@ class MarkdownPreview {
       ScrollModule.setContainer(this.mount, this.file);
       ScrollModule.restore(this.file);
     }
-    
+
     // Mermaid and CodeBlocks still benefit from a frame delay for layout
     (async () => {
       await new Promise(resolve => requestAnimationFrame(resolve));
@@ -1013,14 +1011,14 @@ class MarkdownPreview {
       try {
         if (window.CodeBlockModule) window.CodeBlockModule.process(inner);
       } catch (_e) { /* CodeBlock error - gracefully skip */ }
-      
-      
+
+
       // Bind checkbox events for task lists
       this._bindCheckboxEvents(inner);
 
       // Bind link interception
       this._bindLinkEvents(inner);
-      
+
       // Inject DS icons into summaries
       this._processSummaries(inner);
     })();
@@ -1101,10 +1099,10 @@ class MarkdownPreview {
         const checked = e.target.checked;
         const lineEl = e.target.closest('.md-line');
         if (!lineEl) return;
-        
+
         const lineNum = parseInt(lineEl.dataset.line, 10);
         if (isNaN(lineNum)) return;
-        
+
         const viewer = window.MarkdownViewer && window.MarkdownViewer.getInstance();
         if (viewer && viewer._toggleTask) {
           await viewer._toggleTask(lineNum, checked);
@@ -1119,7 +1117,7 @@ class MarkdownPreview {
     const inner = this.mount.querySelector('.md-content-inner');
     if (inner) {
       inner.innerHTML = html;
-      
+
       // Re-process for live updates (e.g. Drafts)
       if (window.processMermaid) {
         window.processMermaid(inner).catch(_e => { /* Mermaid error - gracefully skip */ });
@@ -1159,7 +1157,7 @@ class MarkdownEditor {
   render() {
     const container = DesignSystem.createElement('div', 'edit-viewer', { id: 'edit-viewer' });
     const monacoEl = DesignSystem.createElement('div', '', { id: 'monaco-editor-container' });
-    
+
     container.appendChild(monacoEl);
     this.mount.appendChild(container);
 
@@ -1179,7 +1177,7 @@ class MarkdownEditor {
       // Initialize Editor Logic
       if (EditorModule) {
         EditorModule.bind();
-        
+
         // Final catch-up: ensure the latest content is pushed after bind
         if (this.content !== undefined) {
           EditorModule.setOriginalContent(this.content);
@@ -1205,8 +1203,11 @@ class MarkdownEditor {
         }
         window.AppState.lastSyncContext = null;
       }
+
+      // Ensure focus after all async mounting and binding is done
+      MonacoService.focus();
     };
-    
+
     run();
   }
 
@@ -1241,7 +1242,7 @@ class MarkdownEditor {
 
   update({ content }) {
     this.content = content;
-    
+
     // Always sync target content to EditorModule even if not initialized yet.
     // EditorModule.setOriginalContent will handle the 'pending' state.
     if (EditorModule) {

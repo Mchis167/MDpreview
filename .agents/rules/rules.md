@@ -149,6 +149,7 @@ Modules → Boot sequence
 | Linting Gates | Verify code quality | `/linting-gates` |
 | Atomic Gen | Create component | `/atomic-gen [name] [level]` |
 | Planning | Implementation plan | `/plan` |
+| Phase Detail | Chi tiết Phase | `/phase-detail` |
 | Refactor | Legacy → Atomic | `/refactor-to-atomic` |
 | Test Cases | Design test suite | `/test [feature]` |
 

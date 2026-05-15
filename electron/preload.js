@@ -42,7 +42,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
   writeClipboardAdvanced: (data)  => ipcRenderer.invoke('write-clipboard-advanced', data),
   publishToHandoff: (options)     => ipcRenderer.invoke('publish-to-handoff', options),
   publishToWorker: (options)      => ipcRenderer.invoke('publish-to-worker', options),
+  
+  // Assets Management
+  assets: {
+    import: (vaultPath) => ipcRenderer.invoke('assets:import', vaultPath),
+    rename: (data) => ipcRenderer.invoke('assets:rename', data),
+    delete: (filePath) => ipcRenderer.invoke('assets:delete', filePath),
+    purgeOrphans: (vaultPath) => ipcRenderer.invoke('assets:purge-orphans', vaultPath),
+    purgeBroken: (vaultPath) => ipcRenderer.invoke('assets:purge-broken', vaultPath),
+  },
+  
   isElectron: true,
+
   
   // Custom
   rebuildApp: () => ipcRenderer.send('rebuild-app'),

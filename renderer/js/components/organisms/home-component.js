@@ -110,6 +110,13 @@ class HomeComponent {
         onClick: () => {
           if (window.SearchPalette) window.SearchPalette.show('shortcut');
         }
+      },
+      {
+        label: 'Assets',
+        icon: 'images',
+        onClick: () => {
+          if (window.AssetManager) window.AssetManager.openPanel();
+        }
       }
     ];
 

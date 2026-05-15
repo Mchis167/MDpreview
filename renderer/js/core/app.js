@@ -3,7 +3,7 @@
    TreeModule, WorkspaceModule, CollectModule, 
    DraftModule, EditorModule, 
    EditToolbarComponent,
-   TabsModule, TabPreview, io, initMermaid, initZoom, ScrollModule, RecentlyViewedModule, ChangeActionViewBar, CommentsModule, WikiService, WikiDrawer, BacklinksDrawer, Home */
+   TabsModule, TabPreview, io, initMermaid, ZoomSystem, ScrollModule, RecentlyViewedModule, ChangeActionViewBar, CommentsModule, WikiService, WikiDrawer, BacklinksDrawer, Home, AssetManager */
 /* ============================================================
    app.js — Core state, file loading, socket connection, boot
    ============================================================ */
@@ -566,7 +566,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 2. Support Modules
   initSocket();
   initMermaid();          // mermaid.js
-  initZoom();             // zoom.js
+  if (typeof ZoomSystem !== 'undefined') ZoomSystem.init();
 
   // ── Shortcut Management ──
   if (typeof ShortcutService !== 'undefined' && typeof ShortcutsComponent !== 'undefined') {
@@ -793,6 +793,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   DraftModule.init();        // draft.js
   MarkdownViewer.init();      // organisms/markdown-viewer-component.js
   Home.init();                // organisms/home-component.js
+  if (typeof AssetManager !== 'undefined') AssetManager.init();
   ScrollModule.init();       // scroll.js
   TabPreview.init();         // molecules/tab-preview.js
   // Scroll container registration is now handled dynamically by components

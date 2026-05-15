@@ -8,7 +8,7 @@ const ShortcutService = (() => {
 
   let _registry = [];
   const isMac = (
-    (typeof navigator !== 'undefined' && /Mac|iPhone|iPod|iPad/.test(navigator.platform)) || 
+    (typeof navigator !== 'undefined' && /Mac|iPhone|iPod|iPad/.test(navigator.platform)) ||
     (typeof navigator !== 'undefined' && /Mac/.test(navigator.userAgent)) ||
     (navigator.userAgentData && navigator.userAgentData.platform === 'macOS')
   );
@@ -79,11 +79,12 @@ const ShortcutService = (() => {
     const activeEl = document.activeElement;
     const activeTag = activeEl?.tagName;
     const isMonaco = activeEl?.closest('.monaco-editor') || activeEl?.classList.contains('monaco-editor');
+
     const inInput = activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeEl?.isContentEditable || isMonaco;
 
     // 2. Iterate through registry to find a match
     let matchedItem = null;
-    
+
     // Find the first matching shortcut
     for (const group of _registry) {
       for (const item of group.items) {
@@ -125,7 +126,7 @@ const ShortcutService = (() => {
 
       e.preventDefault();
       e.stopPropagation();
-      
+
       try {
         if (typeof matchedItem.handler === 'function') {
           matchedItem.handler();
@@ -148,17 +149,17 @@ const ShortcutService = (() => {
     const hasShift = targetKeys.includes('Shift');
     const hasAlt = targetKeys.includes('Alt');
     const hasControl = targetKeys.includes('Control');
-    
+
     // Check Modifiers
     // Special exception for Mode Switching: Allow Mod+1/2/3/4 OR Alt+1/2/3/4 to match ['1'], ['2'] etc.
     // This ensures mode switching works reliably even when typing, as Cmd+Number is often blocked by browsers.
     const isNumericModeKey = /^[1-4]$/.test(key) && !hasMod;
     const isModifierPressed = mod || isAlt;
-    
+
     if (isNumericModeKey && isModifierPressed && requireMod) {
-       // Allow it to proceed
+      // Allow it to proceed
     } else if (hasMod !== !!mod && requireMod) {
-       return false;
+      return false;
     }
 
     if (hasShift !== !!isShift) return false;

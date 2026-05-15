@@ -129,8 +129,6 @@ const EditorModule = (() => {
       }
 
       if (e.ctrlKey || e.metaKey) {
-        // const comboStr = `${isMac ? 'Cmd' : 'Ctrl'}${e.shiftKey ? '+Shift' : ''}+${e.browserEvent.key}`;
-        
         if (e.keyCode === K_PERIOD && e.shiftKey) {
           e.preventDefault();
           applyAction('q');
@@ -163,19 +161,18 @@ const EditorModule = (() => {
           _showQuickCommand();
           return;
         }
-
-        // Trigger on plain '/' key (immediate)
-        if (e.keyCode === monaco.KeyCode.Slash && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
-          // We let the character be typed (no preventDefault)
-          // but we trigger the content change logic immediately after this event loop
-          setTimeout(() => _handleContentChange(), 0);
-        }
         if (e.keyCode === K_Z) {
           e.preventDefault();
-          // const action = e.shiftKey ? 'redo' : 'undo';
           if (e.shiftKey) redo(); else undo();
           return;
         }
+      }
+      
+      // Trigger on plain '/' key (immediate)
+      if (e.keyCode === monaco.KeyCode.Slash && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+        // We let the character be typed (no preventDefault)
+        // but we trigger the content change logic immediately after this event loop
+        setTimeout(() => _handleContentChange(), 0);
       }
 
       if (typeof MarkdownLogicService !== 'undefined' && !AppState.settings.smartTypingDisabled && !e.isComposing && !_isSlashMode) {
@@ -509,7 +506,25 @@ const EditorModule = (() => {
       insertContent,
       triggerQuickCommand: () => _showQuickCommand(),
       takeSnapshot: () => {}, // No-op now
-      revert
+      revert,
+      revealLine: (line) => {
+        if (MonacoService.isInitialized()) {
+          MonacoService.revealLine(line);
+          // Highlight and select the line
+          const editor = MonacoService.getInstance();
+          const model = editor.getModel();
+          if (model) {
+            const lineLength = model.getLineMaxColumn(line);
+            MonacoService.setSelection({
+              startLineNumber: line,
+              startColumn: 1,
+              endLineNumber: line,
+              endColumn: lineLength
+            });
+          }
+          MonacoService.focus();
+        }
+      }
   };
 })();
 

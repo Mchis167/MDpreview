@@ -332,7 +332,7 @@ npm run build      # Runs build:publish-css first, then electron-builder
 
 #### 2. Components (`renderer/js/components/`)
 
-**Atoms:** `icon-action-button.js`, `switch-toggle.js`, `textarea.js`, `input-component.js`, `status-badge.js`
+**Atoms:** `icon-action-button.js`, `switch-toggle.js`, `textarea.js`, `input-component.js`, `status-badge.js`, `checkbox.js`
 ```javascript
 const IconActionButton = (() => {
   'use strict';
@@ -348,6 +348,13 @@ const IconActionButton = (() => {
 })();
 
 window.IconActionButton = IconActionButton;
+
+window.Checkbox = (() => {
+  'use strict';
+  function create(options) { /* ... */ return el; }
+  return { create };
+})();
+window.Checkbox = Checkbox;
 ```
 
 **Molecules:** `context-menu.js`, `search-component.js`, `sidebar-section-header.js`, `setting-toggle-item.js`, `inline-message.js`

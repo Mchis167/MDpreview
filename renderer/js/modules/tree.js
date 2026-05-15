@@ -302,6 +302,9 @@ const TreeModule = (() => {
     // 1. Filter Main Tree (Visible)
     const filterVisible = (nodes) => {
       return nodes.reduce((acc, node) => {
+        // Filter out system assets folder
+        if (node.type === 'directory' && node.name === 'assets' && node.path === 'assets') return acc;
+        
         if (hiddenPaths.has(node.path)) return acc;
         const newNode = { ...node };
         if (node.type === 'directory' && node.children) {

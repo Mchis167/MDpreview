@@ -6,8 +6,9 @@
 .ds-popover-floating {
   position: absolute;
   inset: 0;
-  z-index: 2500;
+  z-index: var(--ds-z-index-popover);
   pointer-events: none;
+
   opacity: 0;
   transition: all var(--ds-transition-main);
 }

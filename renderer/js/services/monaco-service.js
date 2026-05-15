@@ -107,8 +107,8 @@ const MonacoService = (() => {
         'focusBorder': _toHex(get('--ds-white-a10')), // Subdue the harsh blue focus border
         'editor.selectionBackground': get('--ds-white-a20'),
         'editorCursor.foreground': _toHex(get('--ds-accent')),
-        'editorIndentGuide.background': '#3b4048',
-        'editorIndentGuide.activeBackground': '#528bff'
+        'editorIndentGuide.background': _toHex(get('--ds-white-a08')),
+        'editorIndentGuide.activeBackground': _toHex(get('--ds-accent'))
       }
     });
   }
@@ -184,10 +184,10 @@ const MonacoService = (() => {
         renderLineHighlightOnlyWhenFocus: true,
         cursorSmoothCaretAnimation: 'on',
         renderWhitespace: 'none',        // Disable dots for spaces
-        renderIndentGuides: false,      // Disable vertical lines
+        renderIndentGuides: true,       // Enable vertical lines
         guides: {
-          indentation: false,           // Explicitly disable all indentation guides
-          bracketPairs: false           // Disable bracket pair guides
+          indentation: true,            // Enable indentation guides
+          bracketPairs: true            // Enable bracket pair guides
         },
         scrollbar: {
           vertical: 'visible',
@@ -196,6 +196,7 @@ const MonacoService = (() => {
           horizontalScrollbarSize: 4,
           useShadows: false
         },
+        fixedOverflowWidgets: true,
 
         // Disable suggestions/IntelliSense
         quickSuggestions: false,
@@ -203,16 +204,23 @@ const MonacoService = (() => {
         wordBasedSuggestions: false,
         parameterHints: { enabled: false },
         snippetSuggestions: 'none',
-        tabCompletion: 'off'
+        tabCompletion: 'off',
+        experimentalEditContextEnabled: false
       };
 
-      _editor = monaco.editor.create(containerEl, { ...defaultOptions, ...options });
+      _editor = monaco.editor.create(containerEl, { 
+        ...defaultOptions, 
+        ...options,
+        // Force TextArea strategy
+        editContext: false,
+        experimentalEditContextEnabled: false
+      });
+      _model = _editor.getModel();
       
-      // Force layout after a small delay to ensure container dimensions are ready (crucial for Web)
+      // Force layout after a small delay
       setTimeout(() => {
         if (_editor) _editor.layout();
       }, 50);
-      _model = _editor.getModel();
 
       // 5. Xcode-style Navigation & Selection
       // ... (existing commands)

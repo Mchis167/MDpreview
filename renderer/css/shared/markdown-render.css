@@ -271,43 +271,17 @@
 }
 
 /* Sync text highlight when checkbox is hovered */
-.md-render-body .task-list-item input[type="checkbox"]:hover+.md-list-item-content>.md-block {
+.md-render-body .task-list-item .ds-checkbox:hover+.md-list-item-content>.md-block {
     color: var(--ds-text-inverse);
 }
 
 /* Checkbox border highlight when item's direct content is hovered */
-.md-render-body .task-list-item:hover:not(:has(.task-list-item:hover))>input[type="checkbox"] {
+.md-render-body .task-list-item:hover:not(:has(.task-list-item:hover))>.ds-checkbox {
     border-color: var(--ds-white-a40);
 }
 
-.md-render-body .task-list-item input[type="checkbox"] {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
-    border: 1.5px solid var(--ds-white-a20);
-    border-radius: 6px;
-    background: var(--ds-white-a05);
-    cursor: pointer;
-    position: relative;
-    margin-top: 0.5em;
-    /* Dynamic centering based on font-size and 1.8 line-height */
-    transition: all 0.2s var(--ds-ease-spring);
-    flex-shrink: 0;
-}
-
-.md-render-body .task-list-item input[type="checkbox"]:hover {
-    border-color: var(--ds-white-a40);
-    background: var(--ds-white-a08);
-}
-
-.md-render-body .task-list-item input[type="checkbox"]:checked {
-    background: var(--ds-accent);
-    border-color: var(--ds-accent);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23151515' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
-    background-size: 13px;
-    background-position: center;
-    background-repeat: no-repeat;
+.md-render-body .task-list-item .ds-checkbox {
+    margin-top: 0.5em; /* Specific alignment for markdown text flow */
 }
 
 /* ── Code Blocks ── */

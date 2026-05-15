@@ -51,8 +51,13 @@
 }
 
 @keyframes ds-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .ds-btn-icon-leading,
@@ -145,9 +150,9 @@
 }
 
 .ds-btn-danger {
-  --_bg: var(--ds-status-danger);
-  --_color: var(--ds-text-on-accent);
-  --_bg-hover: var(--ds-status-danger-hover, var(--ds-red-800));
+  --_bg: var(--ds-layer-danger-light);
+  --_color: var(--ds-text-danger);
+  --_bg-hover: var(--ds-layer-danger-hover);
 }
 
 .ds-btn-danger-ghost {

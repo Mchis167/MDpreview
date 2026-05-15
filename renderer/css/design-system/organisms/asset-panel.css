@@ -1,0 +1,532 @@
+/* ══════════════════════════════════════════════════
+   AssetPanel.css — Organism Styling
+   Atomic Design System (High-Fidelity)
+   ════════════════════════════════════════════════════ */
+
+.ds-asset-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--ds-z-index-drawer);
+  pointer-events: none;
+  visibility: hidden;
+  transition: visibility var(--ds-transition-main);
+}
+
+.ds-asset-drawer.is-open {
+  visibility: visible;
+}
+
+/* ── Overlay ── */
+.ds-asset-drawer-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: auto;
+  transition: opacity var(--ds-transition-main);
+}
+
+.ds-asset-drawer.is-open .ds-asset-drawer-overlay {
+  opacity: 1;
+}
+
+/* ── Panel ── */
+.ds-asset-drawer-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 640px;
+  max-width: 90vw;
+  background: var(--ds-glass-drawer);
+  backdrop-filter: blur(var(--ds-blur-drawer));
+  border-left: 1px solid var(--ds-border-default);
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  transform: translateX(100%);
+  transition: transform var(--ds-transition-main);
+}
+
+.ds-asset-drawer.is-open .ds-asset-drawer-panel {
+  transform: translateX(0);
+}
+
+.ds-asset-panel-handle {
+  height: 2px;
+  background: var(--ds-white-a10);
+  margin: var(--ds-space-sm) auto 0;
+  width: 32px;
+  border-radius: 1px;
+}
+
+.ds-asset-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ── Header ── */
+.ds-asset-panel-header {
+  padding: var(--ds-space-md) var(--ds-space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ds-asset-panel-title {
+  font-size: var(--ds-font-xs);
+  font-weight: 700;
+  color: var(--ds-text-tertiary);
+  letter-spacing: 0.1em;
+}
+
+.ds-asset-panel-actions {
+  display: flex;
+  gap: var(--ds-space-2xs);
+}
+
+/* ── Filter Tabs ── */
+.ds-asset-filter-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--ds-border-default);
+  border-bottom: 1px solid var(--ds-border-default);
+}
+
+.ds-asset-tab-item {
+  padding: 0 var(--ds-space-sm);
+  cursor: pointer;
+  transition: all var(--ds-transition-fast);
+  position: relative;
+  border-right: 1px solid var(--ds-border-default);
+}
+
+.ds-asset-tab-item:hover {
+  background: var(--ds-white-a02);
+}
+
+.ds-asset-tab-stack {
+  padding: var(--ds-space-lg) var(--ds-space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2xs);
+  border-bottom: 2px solid transparent;
+}
+
+.ds-asset-tab-item.is-active .ds-asset-tab-stack {
+  border-bottom-color: var(--ds-accent);
+}
+
+.ds-asset-tab-item:last-child {
+  border-right: none;
+}
+
+.ds-asset-tab-label {
+  font-family: var(--ds-font-family-code);
+  font-size: var(--ds-font-xs);
+  font-weight: 500;
+  color: var(--ds-text-secondary);
+}
+
+.ds-asset-tab-count {
+  font-family: var(--ds-font-family-code);
+  font-size: var(--ds-space-2xl);
+  font-weight: 600;
+  color: var(--ds-text-primary);
+  line-height: 1;
+}
+
+.ds-asset-tab-dot {
+  position: absolute;
+  top: var(--ds-space-lg);
+  right: var(--ds-space-lg);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* ── Content Area ── */
+.ds-asset-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ── Grid View ── */
+.ds-asset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  align-items: stretch;
+}
+
+.ds-asset-card {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  border-right: 1px solid var(--ds-border-subtle);
+  border-bottom: 1px solid var(--ds-border-subtle);
+  transition: background var(--ds-transition-main);
+  background: transparent;
+  min-width: 0;
+  /* Quan trọng: Ngăn card làm giãn cột grid */
+  overflow: hidden;
+}
+
+.ds-asset-card:hover {
+  background: var(--ds-white-a02);
+}
+
+.ds-asset-preview {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--ds-layer-control-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.ds-asset-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transition: opacity var(--ds-transition-main), transform var(--ds-transition-slow);
+}
+
+.ds-asset-preview img.is-loaded {
+  opacity: 1;
+}
+
+.ds-asset-card:hover .ds-asset-preview img.is-loaded {
+  transform: scale(1.05);
+}
+
+.ds-asset-card-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--ds-radius-full);
+  flex-shrink: 0;
+}
+
+.ds-asset-ref-badge {
+  font-family: var(--ds-font-family-code);
+  position: absolute;
+  top: var(--ds-space-sm);
+  right: var(--ds-space-sm);
+  padding: 2px var(--ds-space-xs);
+  background: var(--ds-accent);
+  color: var(--ds-text-on-accent);
+  font-size: 9px;
+  font-weight: bold;
+  z-index: 5;
+}
+
+.ds-asset-card-meta {
+  padding: var(--ds-space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2xs);
+  overflow: hidden;
+}
+
+.ds-asset-card-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-sm);
+}
+
+.ds-asset-card-name {
+  font-family: var(--ds-font-family-code);
+  font-size: var(--ds-font-xs);
+  font-weight: bold;
+  color: var(--ds-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.ds-asset-card-info {
+  font-family: var(--ds-font-family-code);
+  font-size: var(--ds-font-xs);
+  color: var(--ds-text-tertiary);
+}
+
+/* ── List View ── */
+.ds-asset-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.ds-asset-list-head {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--ds-border-default);
+  background: var(--ds-layer-elevated-default);
+  backdrop-filter: var(--ds-glass-blur);
+}
+
+.ds-asset-list-col {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ds-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ds-asset-list-row {
+  font-size: var(--ds-font-md);
+  font-family: var(--ds-font-family-code);
+  color: var(--ds-text-tertiary);
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--ds-border-subtle);
+  transition: background var(--ds-transition-fast);
+  cursor: pointer;
+}
+
+.ds-asset-list-row:hover {
+  background: var(--ds-white-a02);
+}
+
+/* Column Widths */
+
+
+.ds-asset-list-col-thumb {
+  width: 64px;
+  flex-shrink: 0;
+}
+
+.ds-asset-list-col-name {
+  color: var(--ds-text-secondary);
+  flex: 1;
+  padding-left: 16px;
+  min-width: 0;
+}
+
+.ds-asset-list-col-ref {
+  width: 100px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.ds-asset-list-col-size {
+  width: 100px;
+  text-align: right;
+  flex-shrink: 0;
+  padding-right: var(--ds-space-md);
+}
+
+.ds-asset-list-col-type {
+  width: 100px;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ds-asset-list-thumb {
+  width: 64px;
+  height: 64px;
+  background: var(--ds-layer-control-default);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ds-asset-list-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--ds-transition-main);
+}
+
+.ds-asset-list-thumb img.is-loaded {
+  opacity: 1;
+}
+
+.ds-asset-list-name {
+  font-weight: 500;
+  color: var(--ds-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ds-asset-list-meta {
+  font-family: var(--ds-font-family-code);
+  font-size: var(--ds-font-xs);
+  color: var(--ds-text-secondary);
+}
+
+.ds-asset-empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-text-tertiary);
+  text-align: center;
+  gap: var(--ds-space-md);
+}
+
+/* ── Skeleton State ── */
+.ds-asset-skeleton-card {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--ds-border-subtle);
+  border-bottom: 1px solid var(--ds-border-subtle);
+  overflow: hidden;
+}
+
+.ds-asset-skeleton-preview {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--ds-white-a05);
+  position: relative;
+  overflow: hidden;
+}
+
+.ds-asset-skeleton-meta {
+  padding: var(--ds-space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2xs);
+}
+
+.ds-asset-skeleton-text {
+  height: 12px;
+  background: var(--ds-white-a05);
+  border-radius: var(--ds-radius-sm);
+  width: 80%;
+  position: relative;
+  overflow: hidden;
+}
+
+.ds-asset-skeleton-text.short {
+  width: 40%;
+}
+
+/* Shimmer Animation */
+.ds-asset-skeleton-preview::after,
+.ds-asset-skeleton-text::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+      transparent,
+      var(--ds-white-a10),
+      transparent);
+  transform: translateX(-100%);
+  animation: ds-shimmer 1.5s infinite;
+}
+
+@keyframes ds-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ── Inline Rename Input ── */
+.ds-asset-inline-input {
+  width: 100%;
+  background: var(--ds-layer-control-focus);
+  border: 1px solid var(--ds-accent);
+  border-radius: var(--ds-radius-xs);
+  color: var(--ds-text-primary);
+  font-family: var(--ds-font-family-code);
+  font-size: var(--ds-font-xs);
+  padding: 2px 4px;
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ds-orange-a15);
+  margin: -3px -5px;
+  /* Pull into padding to align with text */
+}
+
+.ds-asset-list-col-name .ds-asset-inline-input {
+  margin: 0;
+  max-width: 300px;
+}
+
+/* ── Selection States ── */
+.ds-asset-list-row.is-selected {
+  background: var(--ds-accent-a15) !important;
+  border-left: 3px solid var(--ds-accent);
+}
+
+/* Checkbox Overlay for Grid */
+.ds-asset-card-checkbox {
+  position: absolute;
+  top: var(--ds-space-sm);
+  left: var(--ds-space-sm);
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--ds-transition-fast);
+}
+
+.ds-asset-card:hover .ds-asset-card-checkbox,
+.ds-asset-card.is-selected .ds-asset-card-checkbox {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+
+/* ── Selection Mode States ── */
+.ds-asset-panel.is-selection-mode .ds-asset-card-checkbox {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ds-asset-panel.is-selection-mode .ds-asset-card:hover,
+.ds-asset-panel.is-selection-mode .ds-asset-list-row:hover {
+  background: var(--ds-accent-a10) !important;
+}
+
+/* Selection Bar */
+.ds-asset-selection-bar {
+  padding: var(--ds-space-md) var(--ds-space-lg);
+  background: var(--ds-bg-base);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 100;
+  box-shadow: inset 0 1px 0 0 var(--ds-border-xstrong);
+}
+
+.ds-asset-selection-left {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2xs);
+}
+
+.ds-asset-selection-count {
+  font-weight: 600;
+  font-size: var(--ds-font-md);
+  color: var(--ds-text-secondary);
+  margin-right: var(--ds-space-md);
+}
+
+.ds-asset-selection-divider {
+  width: 1px;
+  height: 12px;
+  background: var(--ds-white-a12);
+}
+
+
+
+.ds-asset-selection-right {
+  display: flex;
+  gap: var(--ds-space-sm);
+}

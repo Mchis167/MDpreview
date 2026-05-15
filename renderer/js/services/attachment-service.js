@@ -314,7 +314,6 @@ const AttachmentService = (() => {
     // Check if the focus is within Monaco
     const activeEl = document.activeElement;
     const isMonaco = activeEl?.closest('.monaco-editor') || activeEl?.classList.contains('monaco-editor');
-    
     if (isMonaco && window.AppState?.currentWorkspace) {
       handlePaste(e, window.AppState.currentWorkspace.path);
     }

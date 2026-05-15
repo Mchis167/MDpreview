@@ -23,6 +23,8 @@
   <link rel="stylesheet" href="css/design-system/organisms/backlinks-drawer.css">
   <link rel="stylesheet" href="css/design-system/organisms/monaco-editor.css">
   <link rel="stylesheet" href="css/design-system/organisms/home.css">
+  <link rel="stylesheet" href="css/design-system/organisms/asset-panel.css">
+  <link rel="stylesheet" href="css/design-system/organisms/asset-detail.css">
 </head>
 
 <body>
@@ -62,6 +64,7 @@
   <!-- Wiki Drawer: Mounted by WikiDrawerComponent -->
   <div id="wiki-drawer-mount"></div>
   <div id="backlinks-drawer-mount"></div>
+  <div id="asset-panel-mount"></div>
 
   <!-- ══════════════════════════════════════════════════
        SCRIPTS PIPELINE
@@ -87,6 +90,7 @@
   <script src="js/components/atoms/switch-toggle.js" defer></script>
   <script src="js/components/atoms/input-component.js" defer></script>
   <script src="js/components/atoms/status-badge.js" defer></script>
+  <script src="js/components/atoms/checkbox.js" defer></script>
 
   <!-- Molecules (Compound Elements) -->
   <script src="js/components/molecules/workspace-switcher.js" defer></script>
@@ -119,6 +123,15 @@
   <script src="js/components/organisms/settings-component.js" defer></script>
   <script src="js/components/organisms/markdown-helper-component.js" defer></script>
   <script src="js/components/organisms/shortcuts-component.js" defer></script>
+  <script src="js/components/organisms/asset-panel/asset-panel-state.js" defer></script>
+  <script src="js/components/organisms/asset-panel/asset-panel-actions.js" defer></script>
+  <script src="js/components/organisms/asset-panel/asset-panel-selection.js" defer></script>
+  <script src="js/components/organisms/asset-panel/asset-panel-item.js" defer></script>
+  <script src="js/components/organisms/asset-panel/asset-panel-tabs.js" defer></script>
+  <script src="js/components/organisms/asset-panel/asset-panel-header.js" defer></script>
+  <script src="js/components/organisms/asset-panel/asset-panel-content.js" defer></script>
+  <script src="js/components/organisms/asset-panel-component.js" defer></script>
+  <script src="js/components/organisms/asset-detail-panel.js" defer></script>
   <script src="js/services/toc-service.js" defer></script>
   <script src="js/components/organisms/toc-component.js" defer></script>
   <script src="js/components/organisms/base-form-modal.js" defer></script>
@@ -173,6 +186,7 @@
   <script src="js/modules/draft.js" defer></script>
   <script src="js/modules/editor.js" defer></script>
   <script src="js/modules/tabs.js" defer></script>
+  <script src="js/modules/asset-manager.js" defer></script>
 
   <!-- ── 6. Application Entry ── -->
   <script src="js/core/app.js" defer></script>

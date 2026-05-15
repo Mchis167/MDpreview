@@ -27,7 +27,7 @@ renderer.code = (code, lang) => {
 renderer.listitem = (text, task, checked) => {
   if (task) {
     const cleanText = text.replace(/<input\b[^>]*>/i, '').trim();
-    return `<li class="task-list-item"><input type="checkbox" ${checked ? 'checked' : ''}> ${cleanText}</li>\n`;
+    return `<li class="task-list-item"><input type="checkbox" class="ds-checkbox" ${checked ? 'checked' : ''}> ${cleanText}</li>\n`;
   }
   return `<li>${text}</li>\n`;
 };
@@ -80,9 +80,8 @@ function renderInlineTokens(tokens, originalSource, baseOffset) {
 
     switch (token.type) {
       case 'text': {
-        // Escape HTML entities in text
-        const escapedText = token.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        html += `<span ${data}>${escapedText}</span>`;
+        // token.text is already escaped by marked
+        html += `<span ${data}>${token.text}</span>`;
         break;
       }
       case 'strong': {
@@ -100,7 +99,8 @@ function renderInlineTokens(tokens, originalSource, baseOffset) {
         break;
       }
       case 'codespan':
-        html += `<code class="hljs" ${data}>${token.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code>`;
+        // token.text is already escaped by marked
+        html += `<code class="hljs" ${data}>${token.text}</code>`;
         break;
       case 'link': {
         const linkInnerStart = start + 1; // skip '['
@@ -124,8 +124,12 @@ function renderInlineTokens(tokens, originalSource, baseOffset) {
       case 'html':
         html += `<span ${data}>${token.text}</span>`;
         break;
-      default:
-        html += `<span ${data}>${(token.text || token.raw).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`;
+      default: {
+        // Use token.text (already escaped) or fallback to raw (manually escape)
+        const fallback = token.raw ? token.raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
+        const content = token.text || fallback;
+        html += `<span ${data}>${content}</span>`;
+      }
     }
   }
   return html;
@@ -249,7 +253,7 @@ function renderTokens(tokens, originalSource, baseOffset, lineStart, isTopLevel 
 
         const liData = `data-line="${absoluteItemLine}" data-src-start="${itemStartOffset}" data-src-end="${itemEndOffset}"`;
         if (item.task) {
-          listHtml += `<li class="task-list-item md-line" ${liData}>${markerPrefix}<input type="checkbox" ${item.checked ? 'checked' : ''}> <div class="md-list-item-content">${itemContent}</div></li>\n`;
+          listHtml += `<li class="task-list-item md-line" ${liData}>${markerPrefix}<input type="checkbox" class="ds-checkbox" ${item.checked ? 'checked' : ''}> <div class="md-list-item-content">${itemContent}</div></li>\n`;
         } else {
           const liClass = markerPrefix ? 'md-line has-custom-marker' : 'md-line';
           listHtml += `<li class="${liClass}" ${liData}>${markerPrefix}<div class="md-list-item-content">${itemContent}</div></li>\n`;

@@ -19,6 +19,8 @@
 @import 'design-system/atoms/textarea.css';
 @import 'design-system/atoms/kbd.css';
 @import 'design-system/atoms/status-badge.css';
+@import 'design-system/atoms/checkbox.css';
+
 
 /* ── Molecules ──────────────────────────────────────────── */
 @import 'design-system/molecules/workspace-switcher.css';

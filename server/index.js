@@ -53,15 +53,44 @@ app.use('/monaco', express.static(path.join(__dirname, '../node_modules/monaco-e
 app.use('/testing', express.static(path.join(__dirname, '../renderer/testing')));
 app.use('/assets', (req, res, next) => {
   if (currentWatchDir) {
-    const workspaceAssetPath = path.join(currentWatchDir, 'assets', req.path);
-    // Debug log for asset resolution
-    console.log(`[Server] Asset request: ${req.path} -> Looking in: ${workspaceAssetPath}`);
-    
-    if (fs.existsSync(workspaceAssetPath)) {
-      return res.sendFile(workspaceAssetPath);
-    } else {
-      console.warn(`[Server] Asset not found in workspace: ${workspaceAssetPath}`);
+    try {
+      const decodedPath = decodeURIComponent(req.path);
+      const workspaceAssetPath = path.join(currentWatchDir, 'assets', decodedPath);
+
+      // Security: Ngăn chặn directory traversal
+      const assetsDir = path.join(currentWatchDir, 'assets');
+      const relative = path.relative(assetsDir, workspaceAssetPath);
+      if (relative.includes('..') || path.isAbsolute(relative)) {
+        console.warn(`[Server] Forbidden asset path: ${workspaceAssetPath}`);
+        return res.status(403).send('Forbidden');
+      }
+
+      if (fs.existsSync(workspaceAssetPath)) {
+        // Thumbnail optimization
+        if (req.query.thumbnail === 'true') {
+          try {
+            const electron = require('electron');
+            if (electron && electron.nativeImage) {
+              const image = electron.nativeImage.createFromPath(workspaceAssetPath);
+              if (!image.isEmpty()) {
+                const thumb = image.resize({ width: 300 }); // Resize to 300px for high-dpi
+                res.type('image/jpeg');
+                return res.send(thumb.toJPEG(75)); // 75% quality for performance
+              }
+            }
+          } catch (_err) {
+            // Fallback to full image if electron/nativeImage fails
+          }
+
+        }
+        return res.sendFile(workspaceAssetPath);
+      } else {
+        console.warn(`[Server] Asset not found in workspace: ${workspaceAssetPath}`);
+      }
+    } catch (_e) {
+      console.error('[Server] Failed to decode asset path:', req.path);
     }
+
   } else {
     console.warn('[Server] Asset requested but currentWatchDir is not set');
   }
@@ -100,6 +129,7 @@ app.use('/api', require('./routes/render'));
 app.use('/api', require('./routes/workspaces'));
 app.use('/api', require('./routes/comments'));
 app.use('/api', require('./routes/wiki'));
+app.use('/api', require('./routes/assets'));
 app.use('/api', require('./routes/file-ops'));
 app.use('/api', require('./routes/handoff'));
 app.use('/api', require('./routes/worker-publish'));
@@ -116,11 +146,17 @@ function startWatcher(dir) {
       if (fp.endsWith('.md')) {
         triggerReindex(dir);
       }
+      if (fp.includes(path.sep + 'assets' + path.sep)) {
+        io.emit('assets-changed');
+      }
     })
     .on('add',       (fp) => {
       io.emit('tree-changed');
       if (fp.endsWith('.md')) {
         triggerReindex(dir);
+      }
+      if (fp.includes(path.sep + 'assets' + path.sep)) {
+        io.emit('assets-changed');
       }
     })
     .on('unlink',    (fp) => {
@@ -129,9 +165,22 @@ function startWatcher(dir) {
       if (fp.endsWith('.md')) {
         triggerReindex(dir);
       }
+      if (fp.includes(path.sep + 'assets' + path.sep)) {
+        io.emit('assets-changed');
+      }
     })
-    .on('addDir',    ()   => io.emit('tree-changed'))
-    .on('unlinkDir', ()   => io.emit('tree-changed'));
+    .on('addDir',    (dp) => {
+      io.emit('tree-changed');
+      if (dp.endsWith(path.sep + 'assets')) {
+        io.emit('assets-changed');
+      }
+    })
+    .on('unlinkDir', (dp) => {
+      io.emit('tree-changed');
+      if (dp.endsWith(path.sep + 'assets')) {
+        io.emit('assets-changed');
+      }
+    });
 }
 
 let reindexTimeout = null;

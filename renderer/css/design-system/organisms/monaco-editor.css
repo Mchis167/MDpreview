@@ -31,8 +31,6 @@
   outline: none !important;
   border: none !important;
   box-shadow: none !important;
-  caret-color: transparent !important;
-  color: transparent !important;
 }
 
 /* Hide resizable sashes */
@@ -117,7 +115,7 @@
 
 /* Ensure content widgets (slash command palette, suggest, etc.) are above lines */
 .monaco-editor .contentWidgets {
-  z-index: 100 !important;
+  z-index: var(--ds-z-index-max) !important;
 }
 
 /* 6. Sticky Widget (Breadcrumbs/Sticky Lines) */

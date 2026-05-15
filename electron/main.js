@@ -140,6 +140,9 @@ require('./ipc/comments').register(ipcMain);
 require('./ipc/files').register(ipcMain);
 require('./ipc/wiki').register(ipcMain);
 require('./ipc/attachments').register(ipcMain);
+require('./ipc/assets').register(ipcMain, dialog);
+
+
 
 app.whenReady().then(createWindow);
 

@@ -465,7 +465,74 @@
       return res.json();
     },
 
+    // Assets Management Mock
+    assets: {
+      import: async (_vaultPath) => {
+        return new Promise((resolve) => {
+          const input = document.createElement('input');
+          input.type = 'file';
+          input.multiple = true;
+          input.accept = 'image/*';
+          
+          input.onchange = async (e) => {
+            const files = Array.from(e.target.files);
+            if (!files.length) return resolve({ success: true, count: 0 });
+            
+            const payload = [];
+            for (const file of files) {
+              const base64 = await new Promise((res) => {
+                const reader = new FileReader();
+                reader.onload = () => res(reader.result.split(',')[1]);
+                reader.readAsDataURL(file);
+              });
+              payload.push({ name: file.name, data: base64 });
+            }
+            
+            try {
+              const res = await fetch('/api/assets/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ files: payload })
+              });
+              resolve(await res.json());
+            } catch (err) {
+              resolve({ success: false, error: err.message });
+            }
+          };
+          
+          input.oncancel = () => resolve({ success: true, count: 0 });
+          input.click();
+        });
+      },
+      rename: async (data) => {
+        const res = await fetch('/api/assets/rename', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        return res.json();
+      },
+      delete: async (data) => {
+        const res = await fetch('/api/assets/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        return res.json();
+      },
+      purgeOrphans: async (_vaultPath) => {
+        const res = await fetch('/api/assets/purge-orphans', { method: 'POST' });
+        return res.json();
+      },
+      purgeBroken: async (_vaultPath) => {
+        const res = await fetch('/api/assets/purge-broken', { method: 'POST' });
+        return res.json();
+      }
+    },
+
+
     isElectron: false,
+
     
     // Custom
     rebuildApp: () => {
