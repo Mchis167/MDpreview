@@ -32,7 +32,7 @@ const MonacoSyncService = (() => {
       requestAnimationFrame(() => {
         const model = monacoService.getInstance().getModel();
         const startPos = model.getPositionAt(context.srcStart);
-        
+
         if (context.isRealSelection && context.srcEnd !== undefined) {
           const endPos = model.getPositionAt(context.srcEnd);
           monacoService.setSelection({

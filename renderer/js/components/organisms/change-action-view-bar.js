@@ -247,21 +247,23 @@ class ChangeActionViewBarComponent {
       const _currentScrollPct = (mdContentMount && viewerMount) ? (viewerMount.scrollTop / (viewerMount.scrollHeight - viewerMount.clientHeight || 1)) : 0;
 
       if (AppState.currentFile) {
-        if (viewerComp) {
-          // Set sync context for the editor component to consume on mount
-          if (syncData) AppState.lastSyncContext = syncData;
+        // Resolve effective context once, before setState() triggers _captureSyncContext().
+        // Priority: explicit ctx set by _switchToMode > auto-captured syncData.
+        // Store as local so activate() clearing AppState.lastSyncContext doesn't affect focusWithContext.
+        const _activeCtx = AppState.lastSyncContext || syncData;
+        if (_activeCtx) AppState.lastSyncContext = _activeCtx;
 
-          viewerComp.setState({ 
+        if (viewerComp) {
+          viewerComp.setState({
             mode: 'edit',
             file: AppState.currentFile
           });
         }
-        
+
         await this.loadRawContent();
-        
-        // Secondary sync after content is loaded to ensure accuracy
-        if (typeof EditorModule !== 'undefined' && syncData) {
-          EditorModule.focusWithContext({ ...syncData, _fileKey: AppState.currentFile || 'default' });
+
+        if (typeof EditorModule !== 'undefined' && _activeCtx) {
+          EditorModule.focusWithContext({ ..._activeCtx, _fileKey: AppState.currentFile || 'default' });
         }
       }
       

@@ -307,7 +307,7 @@ class MarkdownViewerComponent {
    * Captures the current visible context (line/selection) for Read -> Edit sync
    */
   _captureSyncContext() {
-    if (window.SyncService) {
+    if (window.SyncService && !window.AppState.lastSyncContext) {
       window.AppState.lastSyncContext = SyncService.captureReadViewSyncData();
     }
   }
@@ -600,6 +600,26 @@ class MarkdownViewerComponent {
       items.push({ divider: true });
     }
 
+    // 1.5. Block Actions (Edit nearest content on right-click)
+    if (!hasSelection) {
+      const blockEl = e.target.closest('[data-line], [data-line-start]');
+      if (blockEl) {
+        const lineStart = parseInt(blockEl.dataset.line || blockEl.dataset.lineStart, 10);
+        const _lineEnd = parseInt(blockEl.dataset.lineEnd || lineStart, 10);
+
+        if (!isNaN(lineStart)) {
+          items.push({
+            label: 'Edit this section',
+            icon: 'pen-line',
+            onClick: () => {
+              this._switchToMode('edit', { line: lineStart });
+            }
+          });
+          items.push({ divider: true });
+        }
+      }
+    }
+
     // 2. Advanced Copy
     items.push({
       label: 'Copy as Markdown',
@@ -660,7 +680,7 @@ class MarkdownViewerComponent {
 
   _switchToMode(mode, context = null) {
     if (context && window.AppState) {
-      AppState.forceSyncContext = context;
+      AppState.lastSyncContext = context;
     }
     const btn = document.querySelector(`.ds-segment-item[data-id="${mode}"]`);
     if (btn) {
@@ -996,6 +1016,9 @@ class MarkdownPreview {
     container.appendChild(inner);
     this.mount.appendChild(container);
 
+    // Bind image error events (once per instance)
+    this._bindImageEvents(inner);
+
     // Post-render integration (Small delay to ensure DOM is ready for calculations)
     if (ScrollModule && !this.options.skipScroll) {
       ScrollModule.setContainer(this.mount, this.file);
@@ -1109,6 +1132,30 @@ class MarkdownPreview {
         }
       };
     });
+  }
+
+  _bindImageEvents(container) {
+    if (!container) return;
+    // Use capture phase to catch 'error' events which don't bubble
+    container.addEventListener('error', (e) => {
+      if (e.target.tagName === 'IMG') {
+        const img = e.target;
+        const alt = img.alt || 'Untitled Image';
+        
+        // Create a premium placeholder instead of just adding a class
+        const placeholder = DesignSystem.createElement('div', 'ds-broken-image-placeholder');
+        
+        // Copy data attributes (important for sync-scroll and smart-edit)
+        Object.assign(placeholder.dataset, img.dataset);
+        
+        placeholder.innerHTML = `
+          <div class="ds-broken-image-icon">${DesignSystem.getIcon('image-off')}</div>
+          <div class="ds-broken-image-label">Broken Image Link: ${alt}</div>
+        `;
+        
+        img.replaceWith(placeholder);
+      }
+    }, true);
   }
 
   update({ html }) {

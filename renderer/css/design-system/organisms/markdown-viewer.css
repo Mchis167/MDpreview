@@ -154,3 +154,46 @@
   color: var(--ds-text-secondary);
   line-height: 26px;
 }
+
+/* ── Broken Image Placeholder ───────────────────────────── */
+.ds-broken-image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: var(--ds-space-xl);
+  margin: var(--ds-space-lg) 0;
+  background: var(--ds-red-a08);
+  border: 1px dashed var(--ds-status-danger);
+  color: var(--ds-status-danger);
+  border-radius: var(--ds-radius-panel);
+  gap: var(--ds-space-md);
+  text-align: center;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.ds-broken-image-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  opacity: 0.8;
+}
+
+.ds-broken-image-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.ds-broken-image-label {
+  font-family: var(--ds-font-family-text);
+  font-size: var(--ds-font-sm);
+  font-weight: 600;
+  opacity: 0.9;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
