@@ -18,6 +18,7 @@ trigger: always_on
 
 **Anti-patterns:**
 - ❌ Auto-proceed after plan (wait for approval)
+- ❌ Guessing CSS tokens: Always check `tokens.css` first
 - ❌ Leave task "In progress" after code changes (move to "In review")
 - ❌ Auto-update CHANGELOG (only when explicitly requested)
 - ❌ Bypass linting gates
@@ -80,6 +81,7 @@ Electron App (MDpreview)
 
 ### CSS Rules (Enforced)
 - ✅ Always use tokens: `var(--ds-...)`
+- ✅ **Mandatory**: Check `renderer/css/design-system/tokens.css` before writing any CSS to ensure correct token usage (No guessing).
 - ✅ Use local variables for variants: `--_varname`
 - ✅ Semantic naming: `--ds-[category]-[value]-[variant]`
 - ✅ Run `npm run lint:css` (0 errors mandatory)
@@ -136,51 +138,26 @@ Modules → Boot sequence
 
 ---
 
-## 📚 Workflows (Use These!)
+## 📚 Workflows
 
-**9 Core Workflows** + **4 Specialized** — Reference: [Workflows README](../workflows/README.md)
+Full registry: [command-router.md](../command-router.md) | [workflows/README.md](../workflows/README.md)
 
-| Workflow | Use | Command |
-|----------|-----|---------|
-| Smart Edit | Fix/update code | `/smart-edit` |
-| Discuss | Analyze without changes | `/discuss` |
-| Changelog | Document changes | `/changelog` |
-| GitHub | Release automation | `/github` |
-| Artifact Docs | Plan/test artifacts | `/artifact-docs` |
-| Console Test | Browser automation test | `/console-test` |
-| Token Mgmt | Add/update tokens | `/token-management` |
-| Module Creation | Create new module | `/module-creation` |
-| Linting Gates | Verify code quality | `/linting-gates` |
-| Atomic Gen | Create component | `/atomic-gen [name] [level]` |
-| Implementation | Implementation plan | /plan |
-| Phase Detail | Chi tiết Phase | `/phase-detail` |
-| Refactor | Legacy → Atomic | `/refactor-to-atomic` |
-| Test Cases | Design test suite | `/test [feature]` |
+| Flow | Commands |
+|------|---------|
+| **Bug fix** | `/discuss` → `/smart-edit` → `/linting-gates` → `/changelog` |
+| **New feature** | `/discuss` → `/plan` → `/atomic-gen` → `/smart-edit` → `/linting-gates` → `/changelog` |
+| **Release** | `/changelog` → `/linting-gates` → `/github` |
+| **Refactor** | `/discuss` → `/plan` → `/refactor-to-atomic` → `/linting-gates` |
 
 ---
 
-## ✅ Adding New Features — Checklist
+## ✅ Feature Checklist
 
-### New Atomic Component
-- [ ] Run `/atomic-gen [name] [level]` workflow
-- [ ] CSS: `renderer/css/design-system/[level]/[name].css` (use tokens only)
-- [ ] JS: `renderer/js/components/[level]/[name].js` (IIFE pattern if interactive)
-- [ ] Register: CSS import + script in index.html + init in app.js
-- [ ] Verify: `npm run lint` → 0 errors
-- [ ] Update: ARCHITECTURE.md + `/changelog`
+**New component** (`/atomic-gen`): CSS file (tokens only) → JS file (IIFE) → register in design-system.css + index.html + app.js → `npm run lint` → `/changelog`
 
-### New Feature Module
-- [ ] Use `/module-creation [name]` workflow
-- [ ] IIFE pattern + dependencies declared + window.* export
-- [ ] Register in index.html (correct order) + app.js init call
-- [ ] Verify: `npm run lint` → 0 errors
-- [ ] Update: ARCHITECTURE.md + `/changelog`
+**New module** (`/module-creation`): IIFE + `window.*` export → register in index.html (correct order) + app.js → `npm run lint` → `/changelog`
 
-### Bug Fix / Code Update
-- [ ] Use `/smart-edit` workflow (surgical edits, minimal diffs)
-- [ ] `npm run lint` after each edit
-- [ ] Use `/console-test` if interactive
-- [ ] Update `/changelog`
+**Bug fix** (`/smart-edit`): surgical edit → `npm run lint` → `/console-test` if interactive → `/changelog`
 
 ---
 
@@ -204,31 +181,68 @@ Modules → Boot sequence
 
 ---
 
-## 🚫 Hard Rules (Never Do This)
 
-### CSS
-- ❌ Hardcode colors: Use `var(--ds-...)`
-- ❌ Hardcode spacing: Use `var(--ds-space-...)`
-- ❌ Write CSS in styles.css: Use `@import` only
-- ❌ Duplicate selectors: Merge into one definition
-- ❌ Unspaced operators in calc(): Add spaces
+## ⚠️ Known Gotchas & Architecture Decisions
 
-### JavaScript
-- ❌ Global variables: Use IIFE + `window.*` exports
-- ❌ Duplicate state: Use `AppState` only
-- ❌ Use `var`: Use `const`/`let`
-- ❌ Loose equality `==`: Use `===`
-- ❌ `console.log`: Use `console.warn`/`console.error`
+> Kiến thức này không suy ra được từ code — được trích xuất từ session logs sau khi debug thực tế. Đọc trước khi sửa các file liên quan.
 
-### HTML
-- ❌ New HTML files: Only use `index.html`
-- ❌ Wrong sections: Respect section order
+### Component API Pitfalls
 
-### General
-- ❌ Bypass linting: `npm run lint` must pass
-- ❌ Skip `/changelog`: Always document
-- ❌ Assume plan correct: Wait for approval
-- ❌ Auto-proceed: Wait for explicit approval
+| Component | Sai phổ biến | Đúng |
+|-----------|-------------|------|
+| `SegmentedControlComponent` | Dùng kết quả `.create()` như DOM Node | Phải dùng `.create().el` |
+| `ButtonComponent` | Set `.loading = true` | Phải dùng `.setLoading(true)` |
+
+### Monaco Editor — 4 Quy tắc Cứng
+
+1. **`dispose()` phải synchronous** — Không dùng `requestAnimationFrame`. Nếu old editor dispose chạy sau khi new editor đã focused, Monaco global focus registry bị xáo trộn → "The Focus Ghost" bug (typing block).
+2. **`MarkdownEditor` tồn tại trong 'read' mode là CỐ Ý** — Architecture cần cả 2 instance để mode switch nhanh (không remount). Đừng "tối ưu" xóa nó.
+3. **Sau dispose→create cycle: `blur()` TRƯỚC `focus()`** — Monaco auto-focus textarea khi mount, nên plain `focus()` là no-op → `TextAreaHandler` không sync → `onDidChangeContent` silent dù `onKeyDown` fires.
+4. **`_destroyed` flag bắt buộc trong mọi async coroutine** — `activate().run()` là async; nếu `render()` được gọi trong khi `run()` đang await, stale coroutine sẽ `bind()` lại listeners của new editor với state sai.
+
+### Draft System Invariants
+
+1. **"Draft đi đôi với Tab"** — Draft không có tab tương ứng = orphan, bị `DraftModule.pruneOrphans()` xóa tự động. Không tạo draft standalone.
+2. **`_isSyncing` DROP (không queue)** — `ChangeActionViewBar.updateUI()` trong 400ms lock window bị DROP hoàn toàn (không retry). `AppState.currentMode` có thể lệch với UI nếu call bị drop. Long-term nên refactor thành queue.
+3. **Triple dirty check là độc lập** — `loadFile`, `onModeChange`, `updateUI` là 3 dirty check riêng biệt. Risk double-modal nếu 2 cùng fire trên 1 action. Chưa được refactor về 1 entry point.
+
+---
+
+## 🔴 High-Risk Files (đọc session logs trước khi sửa)
+
+Các file này có race condition, async lifecycle, hoặc kiến trúc đặc thù. Đọc session log tương ứng trước khi đề xuất thay đổi.
+
+| File | Session Log liên quan | Vì sao nguy hiểm |
+|------|-----------------------|-----------------|
+| `renderer/js/services/monaco-service.js` | `session-log-editor-block-typing-debug` | dispose() timing, global focus registry |
+| `renderer/js/components/organisms/markdown-viewer-component.js` | `session-log-editor-block-typing-debug` | MarkdownEditor lifecycle, async activate() |
+| `renderer/js/components/organisms/change-action-view-bar.js` | `session-log-draft-switch-bug`, `session-log-editor-block-typing-debug` | _isSyncing lock, 3 dirty checks |
+| `renderer/js/modules/editor.js` | `session-log-draft-switch-bug` | _originalContent sync, silent save param |
+| `renderer/js/core/app.js` | `session-log-draft-management-fix` | loadFile dirty check, triple coordination |
+
+---
+
+## 🔬 DIAG Debug Pattern (khi bug phức tạp)
+
+Dùng khi bug không thể reproduce bằng code reading — cần trace runtime behavior.
+
+```
+1. Cài logger tại 5-6 điểm quan trọng:
+   console.warn('[DIAG][Module.method] label', { key: value });
+
+2. Để trace caller của unexpected call:
+   console.warn('[DIAG] caller:', new Error().stack.split('\n')[2]);
+
+3. Yêu cầu user reproduce và paste log vào chat.
+
+4. Phân tích call stack từ log → xác định root cause.
+
+5. Fix → verify với user → CLEANUP BẮT BUỘC:
+   Xóa TẤT CẢ console.warn [DIAG] trước khi chạy lint.
+   (npm run lint:js sẽ fail nếu còn console.warn không phải error path)
+```
+
+> ⚠️ Không commit code khi còn [DIAG] loggers. Lint sẽ báo `no-console` violation.
 
 ---
 
@@ -244,39 +258,13 @@ Modules → Boot sequence
 
 ---
 
-## 📱 GitHub Project Status
+## 🎓 4 Core Principles
 
-```bash
-# Project ID: PVT_kwHOBots8c4BTH09
-
----
-
-## 🎓 Summary: 4 Core Principles
-
-1. **Context-Aware** — Check session logs (`.agents/session-logs/`) to understand past architectural decisions before answering complex questions or proposing changes.
-2. **Analysis-First** — Plan before code, wait for approval
-3. **Quality Gates** — Zero linting errors, mandatory
-4. **Minimal Diffs** — Surgical edits, no cleanup/reformat
-
-**Development Cycle:**
-```
-/discuss (analyze)
-  ↓
-/plan (create plan artifact)
-  ↓
-Wait for approval
-  ↓
-/smart-edit (implement per plan)
-  ↓
-/console-test (verify)
-  ↓
-/changelog (document)
-  ↓
-npm run lint (0 errors mandatory)
-  ↓
-Commit & PR
-```
+1. **Context-Aware** — Check `.agents/session-logs/` before touching high-risk files
+2. **Analysis-First** — `/discuss` → `/plan` → wait approval → `/smart-edit`
+3. **Quality Gates** — `npm run lint` = 0 errors + 0 warnings, mandatory
+4. **Minimal Diffs** — Surgical edits only, no cleanup/reformat
 
 ---
 
-**Last Updated:** 2026-05-15 | **Version:** 2.1 | **Status:** Current ✅
+**Last Updated:** 2026-05-16 | **Version:** 2.2 | **Status:** Current ✅

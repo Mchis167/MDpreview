@@ -145,6 +145,103 @@
   border-radius: 50%;
 }
 
+/* ── Utility Bar (Flat UI) ── */
+.ds-asset-utility-bar {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  background: var(--ds-white-a02);
+  border-bottom: 1px solid var(--ds-border-default);
+}
+
+.ds-asset-search-container {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.ds-asset-search-icon {
+  width: 40px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-text-tertiary);
+  flex-shrink: 0;
+}
+
+.ds-asset-search-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.5px;
+}
+
+/* Custom Override for InputComponent in Asset Panel Utility Bar */
+.ds-asset-search-container .ds-form-field {
+  flex: 1;
+  height: 100%;
+}
+
+.ds-asset-search-container .ds-input-wrapper,
+.ds-asset-search-container .ds-input-group {
+  height: 100%;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+.ds-asset-search-container .ds-input {
+  height: 100%;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding-left: 0;
+  font-size: var(--ds-font-sm);
+  color: var(--ds-text-primary);
+}
+
+.ds-asset-search-container .ds-input:hover,
+.ds-asset-search-container .ds-input:focus {
+  background: transparent;
+}
+
+.ds-asset-search-container .ds-input-group-action.ds-btn {
+  height: 100%;
+  width: 32px;
+  border: none !important;
+  opacity: 0.5;
+  transition: opacity var(--ds-transition-fast);
+}
+
+.ds-asset-search-container .is-empty .ds-input-group-action.ds-btn {
+  display: none;
+}
+
+.ds-asset-search-container .ds-input-group-action.ds-btn:hover {
+  opacity: 1;
+  background: transparent;
+}
+
+.ds-asset-utility-actions {
+  display: flex;
+  height: 100%;
+}
+
+.ds-asset-utility-actions .ds-btn {
+  height: 100%;
+  width: 40px;
+  border: none;
+  border-radius: 0;
+  border-left: 1px solid var(--ds-border-subtle);
+  background: transparent;
+}
+
+.ds-asset-utility-actions .ds-btn:hover {
+  background: var(--ds-white-a05);
+  transform: none;
+}
+
 /* ── Content Area ── */
 .ds-asset-content {
   flex: 1;
@@ -375,7 +472,6 @@
   justify-content: center;
   color: var(--ds-text-tertiary);
   text-align: center;
-  gap: var(--ds-space-md);
 }
 
 /* ── Skeleton State ── */

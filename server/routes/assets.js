@@ -191,6 +191,27 @@ router.post('/assets/purge-broken', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/assets/replace
+ * Thay thế một tham chiếu hỏng bằng asset khác hoặc upload mới.
+ */
+router.post('/assets/replace', async (req, res) => {
+  const { watchDir } = req;
+  const { oldName, newName, isUpload, fileData } = req.body;
+
+  if (!watchDir) return res.status(400).json({ error: 'No workspace set' });
+  if (!oldName || !newName) return res.status(400).json({ error: 'Missing parameters' });
+
+  try {
+    const service = new AssetService(watchDir);
+    const result = await service.replaceBrokenAsset(oldName, newName, { isUpload, fileData });
+    res.json(result);
+  } catch (err) {
+    console.error('[AssetsRoute] Replace failed:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
 
 

@@ -109,15 +109,19 @@ class ChangeActionViewBarComponent {
   async updateUI(modeId) {
     if (!this.toolbarEl) return;
     if (typeof AppState === 'undefined') return;
-    
+
     if (!this.isStandalone) {
         const hasFile = !!AppState.currentFile;
         this.container.style.display = hasFile ? 'flex' : 'none';
-        if (!hasFile) return; // Safe: _isSyncing not yet set
+        if (!hasFile) {
+          return; // Safe: _isSyncing not yet set
+        }
     }
 
     // Strict Sync Guard to prevent loops
-    if (this._isSyncing) return;
+    if (this._isSyncing) {
+      return;
+    }
     this._isSyncing = true;
     window._isGlobalSyncing = true; // Global flag for other modules to honor
 
@@ -149,7 +153,7 @@ class ChangeActionViewBarComponent {
         const isFirstEdit = EditorModule.getOriginalContent() === '';
 
         if (isDraft || isFirstEdit) {
-            await EditorModule.save();
+            await EditorModule.save(true, 'updateUI:auto', true);
         } else {
             DesignSystem.showConfirm({
                 title: 'Unsaved Changes',
@@ -157,10 +161,10 @@ class ChangeActionViewBarComponent {
                 onConfirm: async () => {
                     this._isSyncing = false;
                     window._isGlobalSyncing = false;
-                    const saved = await EditorModule.save();
-                    if (saved) {
-                        this._proceedUpdateUI(targetMode, syncData, prevMode);
-                    }
+                    await EditorModule.save(true, 'updateUI:confirm');
+                    // Always proceed regardless of save result — the goal is to switch mode.
+                    // Blocking on save=false leaves currentMode stuck at 'edit' forever.
+                    this._proceedUpdateUI(targetMode, syncData, prevMode);
                 },
                 onCancel: () => {
                     this._isSyncing = false;

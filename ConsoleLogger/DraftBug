@@ -1,0 +1,142 @@
+scenario 1
+installHook.js:1 [MODECHANGE] mode=draft targetId=undefined | currentFile=null | currentMode=read | isDirty=false
+installHook.js:1 [UPDATEUI] prevMode=read → targetMode=edit | file=__DRAFT_1778875598336__ | isDirty=false
+installHook.js:1 [BIND] fileId=__DRAFT_1778875598336__ | prevBound=null | isNewFile=true | originalLen=0
+installHook.js:1 [MODECHANGE] mode=draft targetId=undefined | currentFile=__DRAFT_1778875598336__ | currentMode=edit | isDirty=true
+installHook.js:1 [MODECHANGE dirty-check] AUTO-SAVE | isDraft=true isFirstEdit=true
+installHook.js:1 [SAVE] caller=onModeChange:auto | target=__DRAFT_1778875598336__ | monacoReady=true | boundId=__DRAFT_1778875598336__
+installHook.js:1 [SAVE] ✅ draft save | id=__DRAFT_1778875598336__ | contentLen=20
+installHook.js:1 [UPDATEUI] prevMode=edit → targetMode=edit | file=__DRAFT_1778875609907__ | isDirty=false
+installHook.js:1 [BIND] fileId=__DRAFT_1778875609907__ | prevBound=null | isNewFile=true | originalLen=0
+4
+(index):1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+installHook.js:1 [LOADFILE dirty-check] AUTO-SAVE | isDraft=true isFirstEdit=true | from=__DRAFT_1778875609907__ → AssetManagement/AssetManagementStart.md
+installHook.js:1 [SAVE] caller=loadFile:auto | target=__DRAFT_1778875609907__ | monacoReady=true | boundId=__DRAFT_1778875609907__
+installHook.js:1 [SAVE] ✅ draft save | id=__DRAFT_1778875609907__ | contentLen=18
+installHook.js:1 [LOADFILE] ✅ commit | prev=__DRAFT_1778875609907__ → next=AssetManagement/AssetManagementStart.md | mode=edit
+installHook.js:1 [BIND] fileId=AssetManagement/AssetManagementStart.md | prevBound=null | isNewFile=true | originalLen=3778
+installHook.js:1 [UPDATEUI] prevMode=edit → targetMode=edit | file=AssetManagement/AssetManagementStart.md | isDirty=false
+﻿
+
+---
+
+scenario 2
+
+installHook.js:1 [LOADFILE] ✅ commit | prev=null → next=__DRAFT_1778875598336__ | mode=read
+overrideMethod @ installHook.js:1
+loadFile @ app.js:448
+switchWorkspace @ tabs.js:190
+_applyActive @ workspace.js:49
+await in _applyActive
+load @ workspace.js:25
+await in load
+init @ workspace.js:12
+(anonymous) @ app.js:822
+setTimeout
+(anonymous) @ app.js:820
+installHook.js:1 [UPDATEUI] prevMode=read → targetMode=edit | file=__DRAFT_1778875598336__ | isDirty=false
+overrideMethod @ installHook.js:1
+updateUI @ change-action-view-bar.js:130
+(anonymous) @ change-action-view-bar.js:87
+loadFile @ app.js:484
+await in loadFile
+switchWorkspace @ tabs.js:190
+_applyActive @ workspace.js:49
+await in _applyActive
+load @ workspace.js:25
+await in load
+init @ workspace.js:12
+(anonymous) @ app.js:822
+setTimeout
+(anonymous) @ app.js:820
+installHook.js:1 [BIND] fileId=__DRAFT_1778875598336__ | prevBound=null | isNewFile=true | originalLen=20
+overrideMethod @ installHook.js:1
+bind @ editor.js:251
+run @ markdown-viewer-component.js:1182
+await in run
+activate @ markdown-viewer-component.js:1235
+_handleModeSwitch @ markdown-viewer-component.js:173
+render @ markdown-viewer-component.js:147
+setState @ markdown-viewer-component.js:69
+loadFile @ app.js:414
+switchWorkspace @ tabs.js:190
+_applyActive @ workspace.js:49
+await in _applyActive
+load @ workspace.js:25
+await in load
+init @ workspace.js:12
+(anonymous) @ app.js:822
+setTimeout
+(anonymous) @ app.js:820
+installHook.js:1 [LOADFILE] ✅ commit | prev=__DRAFT_1778875598336__ → next=__DRAFT_1778875609907__ | mode=edit
+overrideMethod @ installHook.js:1
+loadFile @ app.js:448
+onTabSwitch @ tabs.js:37
+_createTabItem.item.onclick @ tab-bar.js:211
+installHook.js:1 [BIND] fileId=__DRAFT_1778875609907__ | prevBound=null | isNewFile=true | originalLen=18
+overrideMethod @ installHook.js:1
+bind @ editor.js:251
+run @ markdown-viewer-component.js:1182
+await in run
+activate @ markdown-viewer-component.js:1235
+_handleModeSwitch @ markdown-viewer-component.js:173
+render @ markdown-viewer-component.js:147
+setState @ markdown-viewer-component.js:69
+loadFile @ app.js:414
+onTabSwitch @ tabs.js:37
+_createTabItem.item.onclick @ tab-bar.js:211
+installHook.js:1 [UPDATEUI] prevMode=edit → targetMode=edit | file=__DRAFT_1778875609907__ | isDirty=false
+overrideMethod @ installHook.js:1
+updateUI @ change-action-view-bar.js:130
+(anonymous) @ change-action-view-bar.js:87
+loadFile @ app.js:484
+await in loadFile
+onTabSwitch @ tabs.js:37
+_createTabItem.item.onclick @ tab-bar.js:211
+installHook.js:1 [LOADFILE] ✅ commit | prev=__DRAFT_1778875609907__ → next=AssetManagement/AssetManagementStart.md | mode=edit
+overrideMethod @ installHook.js:1
+loadFile @ app.js:448
+await in loadFile
+onTabSwitch @ tabs.js:37
+_createTabItem.item.onclick @ tab-bar.js:211
+installHook.js:1 [UPDATEUI] prevMode=edit → targetMode=read | file=AssetManagement/AssetManagementStart.md | isDirty=true
+overrideMethod @ installHook.js:1
+updateUI @ change-action-view-bar.js:130
+(anonymous) @ change-action-view-bar.js:87
+loadFile @ app.js:484
+await in loadFile
+onTabSwitch @ tabs.js:37
+_createTabItem.item.onclick @ tab-bar.js:211
+installHook.js:1 [UPDATEUI dirty-check] MODAL | file=AssetManagement/AssetManagementStart.md
+overrideMethod @ installHook.js:1
+updateUI @ change-action-view-bar.js:161
+(anonymous) @ change-action-view-bar.js:87
+loadFile @ app.js:484
+await in loadFile
+onTabSwitch @ tabs.js:37
+_createTabItem.item.onclick @ tab-bar.js:211
+installHook.js:1 [UPDATEUI dirty-check] MODAL confirmed
+overrideMethod @ installHook.js:1
+onConfirm @ change-action-view-bar.js:166
+confirmBtn.onclick @ modal.js:140
+installHook.js:1 [SAVE] caller=updateUI:confirm | target=AssetManagement/AssetManagementStart.md | monacoReady=true | boundId=null
+overrideMethod @ installHook.js:1
+save @ editor.js:362
+onConfirm @ change-action-view-bar.js:169
+confirmBtn.onclick @ modal.js:140
+installHook.js:1 [UPDATEUI dirty-check] save result=false
+overrideMethod @ installHook.js:1
+onConfirm @ change-action-view-bar.js:170
+await in onConfirm
+confirmBtn.onclick @ modal.js:140
+installHook.js:1 [UPDATEUI dirty-check] ⚠️ save=false → _proceedUpdateUI SKIPPED → currentMode stays=edit
+overrideMethod @ installHook.js:1
+onConfirm @ change-action-view-bar.js:174
+await in onConfirm
+confirmBtn.onclick @ modal.js:140
+installHook.js:1 [LOADFILE dirty-check] MODAL | from=AssetManagement/AssetManagementStart.md → __DRAFT_1778875609907__
+overrideMethod @ installHook.js:1
+loadFile @ app.js:361
+onTabSwitch @ tabs.js:37
+_createTabItem.item.onclick @ tab-bar.js:211
+installHook.js:1 [SAVE] caller=loadFile:confirm | target=AssetManagement/AssetManagementStart.md | monacoReady=true | boundId=null

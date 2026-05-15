@@ -256,6 +256,76 @@ window.AssetPanelActions = (() => {
     },
 
     /**
+     * Hành động: Thay thế một ảnh bị hỏng.
+     * @param {Object} item - Ảnh hỏng cần thay thế
+     * @param {string} mode - 'existing' hoặc 'upload'
+     */
+    async handleReplaceBroken(item, mode = 'existing') {
+      if (!window.AssetReplacementDialog) return;
+
+      const _onConfirm = async (payload) => {
+        if (!window.AppState || !window.AppState.currentWorkspace) return;
+        const vaultPath = window.AppState.currentWorkspace.path;
+
+        const res = await window.electronAPI.assets.replace({
+          vaultPath,
+          ...payload
+        });
+
+        if (res.success) {
+          if (typeof showToast === 'function') {
+            showToast(`Asset replaced successfully. Updated ${res.updatedFiles} files.`, 'success');
+          }
+          if (window.AssetManager) window.AssetManager.refresh();
+          
+          if (window.AssetDetailPanel) {
+            const currentItem = window.AssetDetailPanel.getCurrentItem();
+            if (currentItem && currentItem.name === item.name) {
+              window.AssetDetailPanel.close();
+            }
+          }
+        } else {
+          throw new Error(res.error || 'Replacement failed');
+        }
+      };
+
+      if (mode === 'upload') {
+        // Mở file picker hệ thống ngay lập tức
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const fileData = {
+              name: file.name,
+              size: file.size,
+              data: event.target.result.split(',')[1],
+              preview: event.target.result
+            };
+            // Sau khi chọn file, hiện Dialog để xác nhận việc đặt tên (Restore vs New)
+            window.AssetReplacementDialog.show(item, {
+              mode: 'upload',
+              file: fileData,
+              onConfirm: _onConfirm
+            });
+          };
+          reader.readAsDataURL(file);
+        };
+        input.click();
+      } else {
+        // Chế độ Existing: Hiện danh sách ảnh để chọn
+        window.AssetReplacementDialog.show(item, {
+          mode: 'existing',
+          onConfirm: _onConfirm
+        });
+      }
+    },
+
+    /**
      * Hành động: Mở file trong OS Explorer.
      */
     async revealInFinder(name) {

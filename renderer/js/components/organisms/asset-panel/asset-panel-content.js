@@ -13,24 +13,60 @@ window.AssetPanelContent = (() => {
 
   function _getFilteredItems() {
     const { assets, orphans, broken } = _state.registry;
-    if (_state.filter === 'active') return assets.map(i => ({ ...i, type: 'active' }));
-    if (_state.filter === 'orphan') return orphans.map(i => ({ ...i, type: 'orphan' }));
-    if (_state.filter === 'broken') return broken.map(i => ({ ...i, type: 'broken' }));
-    
-    return [
-      ...broken.map(i => ({ ...i, type: 'broken' })),
-      ...assets.map(i => ({ ...i, type: 'active' })),
-      ...orphans.map(i => ({ ...i, type: 'orphan' }))
-    ];
+    let items = [];
+
+    if (_state.filter === 'active') items = assets.map(i => ({ ...i, type: 'active' }));
+    else if (_state.filter === 'orphan') items = orphans.map(i => ({ ...i, type: 'orphan' }));
+    else if (_state.filter === 'broken') items = broken.map(i => ({ ...i, type: 'broken' }));
+    else {
+      items = [
+        ...broken.map(i => ({ ...i, type: 'broken' })),
+        ...assets.map(i => ({ ...i, type: 'active' })),
+        ...orphans.map(i => ({ ...i, type: 'orphan' }))
+      ];
+    }
+
+    // 1. Apply Search Query
+    if (_state.searchQuery) {
+      items = items.filter(item => item.name.toLowerCase().includes(_state.searchQuery));
+    }
+
+    // 2. Apply Sort Order
+    items.sort((a, b) => {
+      switch (_state.sortOrder) {
+        case 'name-asc': return a.name.localeCompare(b.name);
+        case 'name-desc': return b.name.localeCompare(a.name);
+        case 'size-desc': return (b.size || 0) - (a.size || 0);
+        case 'size-asc': return (a.size || 0) - (b.size || 0);
+        case 'ref-desc': return (b.refCount || 0) - (a.refCount || 0);
+        case 'ref-asc': return (a.refCount || 0) - (b.refCount || 0);
+        default: return 0;
+      }
+    });
+
+    return items;
   }
 
+  let _itemsContainer = null;
+  let _contentArea = null;
+  let _lastOnToggleSelection = null;
+
   function _renderEmptyState() {
-    const empty = DesignSystem.createElement('div', 'ds-asset-empty');
-    empty.innerHTML = `
-      <div class="ds-asset-empty-icon">${DesignSystem.getIcon('images', { width: 48, height: 48 })}</div>
-      <div class="ds-asset-empty-text">No images found in this workspace</div>
-    `;
-    return empty;
+    return window.EmptyStateComponent.create({
+      icon: 'images',
+      title: 'No images found',
+      description: 'Images and SVGs in your workspace will appear here.',
+      className: 'ds-asset-empty'
+    });
+  }
+
+  function _renderNoResultsState(query) {
+    return window.EmptyStateComponent.create({
+      icon: 'search-x',
+      title: 'No results found',
+      description: `We couldn't find anything matching "${query}"`,
+      className: 'ds-asset-empty'
+    });
   }
 
   function _renderSkeletonGrid() {
@@ -62,55 +98,110 @@ window.AssetPanelContent = (() => {
     return head;
   }
 
+  function _renderItems() {
+    if (!_contentArea) return;
+    _contentArea.innerHTML = '';
+
+    if (_state.isOpening) {
+      _contentArea.appendChild(_renderSkeletonGrid());
+    } else if (_isEmpty()) {
+      _contentArea.appendChild(_renderEmptyState());
+    } else {
+      const itemsToShow = _getFilteredItems();
+      
+      if (itemsToShow.length === 0 && _state.searchQuery) {
+        _contentArea.appendChild(_renderNoResultsState(_state.searchQuery));
+        return;
+      }
+
+      if (_state.viewMode === 'grid') {
+        const grid = DesignSystem.createElement('div', 'ds-asset-grid');
+        itemsToShow.forEach(item => {
+          if (window.AssetPanelItem) {
+            grid.appendChild(window.AssetPanelItem.renderCard(item, item.type, _contentArea, _lastOnToggleSelection));
+          }
+        });
+        _contentArea.appendChild(grid);
+      } else {
+        // Render List Head
+        _contentArea.appendChild(_renderListHead());
+        const list = DesignSystem.createElement('div', 'ds-asset-list');
+        itemsToShow.forEach(item => {
+          if (window.AssetPanelItem) {
+            list.appendChild(window.AssetPanelItem.renderListRow(item, _contentArea, _lastOnToggleSelection));
+          }
+        });
+        _contentArea.appendChild(list);
+      }
+    }
+  }
+
   return {
     render(options) {
       const { container, onToggleSelection } = options;
+      _lastOnToggleSelection = onToggleSelection;
       
-      // 1. Filter Tabs
-      if (window.AssetPanelTabs) {
-        container.appendChild(window.AssetPanelTabs.render(() => {
-          if (window.AssetPanel) window.AssetPanel.render();
-        }));
-      }
+      // 1. Check if structure already exists (Smart Render)
+      let tabsWrapper = container.querySelector('.ds-asset-tabs-container');
+      let utilityBar = container.querySelector('.ds-asset-utility-bar');
+      _itemsContainer = container.querySelector('.ds-asset-items-wrapper');
+      _contentArea = container.querySelector('.ds-asset-content');
 
-      // 2. Optional List Header
-      if (!_state.isOpening && _state.viewMode === 'list' && !_isEmpty()) {
-        container.appendChild(_renderListHead());
-      }
+      if (!tabsWrapper || !utilityBar || !_itemsContainer || !_contentArea) {
+        // Full Render: structure is missing
+        container.innerHTML = '';
+        
+        // 1a. Filter Tabs
+        tabsWrapper = DesignSystem.createElement('div', 'ds-asset-tabs-container');
+        const _renderTabsPart = () => {
+          if (!window.AssetPanelTabs) return;
+          tabsWrapper.innerHTML = '';
+          tabsWrapper.appendChild(window.AssetPanelTabs.render(() => {
+            _renderTabsPart();
+            _renderItems();
+          }));
+        };
+        _renderTabsPart();
+        container.appendChild(tabsWrapper);
 
-      // 3. Content Area
-      const contentArea = DesignSystem.createElement('div', 'ds-asset-content');
-      
-      if (_state.isOpening) {
-        contentArea.appendChild(_renderSkeletonGrid());
-      } else if (_isEmpty()) {
-        contentArea.appendChild(_renderEmptyState());
-      } else {
-        const itemsToShow = _getFilteredItems();
-        if (_state.viewMode === 'grid') {
-          const grid = DesignSystem.createElement('div', 'ds-asset-grid');
-          itemsToShow.forEach(item => {
-            if (window.AssetPanelItem) {
-              grid.appendChild(window.AssetPanelItem.renderCard(item, item.type, contentArea, onToggleSelection));
+        // 1b. Utility Bar
+        if (window.AssetPanelUtilityBar) {
+          container.appendChild(window.AssetPanelUtilityBar.render({
+            onUpdate: () => _renderItems(),
+            onToggleView: () => {
+              _state.viewMode = _state.viewMode === 'grid' ? 'list' : 'grid';
+              localStorage.setItem('mdpreview_asset_view_mode', _state.viewMode);
+              if (window.AssetPanel) {
+                window.AssetPanel.render(); // Full render for layout change
+                window.AssetPanel._updateUIState();
+              }
             }
-          });
-          contentArea.appendChild(grid);
-        } else {
-          const list = DesignSystem.createElement('div', 'ds-asset-list');
-          itemsToShow.forEach(item => {
-            if (window.AssetPanelItem) {
-              list.appendChild(window.AssetPanelItem.renderListRow(item, contentArea, onToggleSelection));
-            }
-          });
-          contentArea.appendChild(list);
+          }));
         }
+
+        // 1c. Items Container & Scrollable Content Area
+        _itemsContainer = DesignSystem.createElement('div', 'ds-asset-items-wrapper', {
+          style: 'flex: 1; display: flex; flex-direction: column; overflow: hidden;'
+        });
+        _contentArea = DesignSystem.createElement('div', 'ds-asset-content');
+        _itemsContainer.appendChild(_contentArea);
+        container.appendChild(_itemsContainer);
       }
-      container.appendChild(contentArea);
+
+      // 2. Initial/Update render of items
+      _renderItems();
       
-      // 4. Selection Bar
+      // 3. Selection Bar (Always re-render or update)
+      const oldSelectionBar = container.querySelector('.ds-asset-selection-bar');
+      if (oldSelectionBar) oldSelectionBar.remove();
+      
       if (_state.selected.size > 0 && window.AssetPanelSelection) {
         container.appendChild(window.AssetPanelSelection.renderSelectionBar());
       }
+    },
+
+    updateList() {
+      _renderItems();
     }
   };
 })();

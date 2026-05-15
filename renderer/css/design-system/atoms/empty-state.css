@@ -1,0 +1,37 @@
+/* ── Design System: Empty State (Atom) ── */
+
+.ds-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ds-space-4xl);
+  text-align: center;
+  width: 100%;
+  gap: var(--ds-space-sm);
+}
+
+.ds-empty-state-icon {
+  color: var(--ds-text-tertiary);
+  opacity: 0.2;
+}
+
+.ds-empty-state-icon svg {
+  width: 48px;
+  height: 48px;
+}
+
+.ds-empty-state-title {
+  color: var(--ds-text-primary);
+  font-size: var(--ds-font-lg);
+  font-weight: 600;
+}
+
+.ds-empty-state-desc {
+  color: var(--ds-text-tertiary);
+  font-size: var(--ds-font-md);
+  max-width: 320px;
+  line-height: 1.5;
+  margin-left: auto;
+  margin-right: auto;
+}

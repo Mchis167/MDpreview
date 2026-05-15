@@ -70,6 +70,19 @@ window.AssetManager = (() => {
     },
 
     /**
+     * Đóng/Mở Asset Panel luân phiên.
+     */
+    async togglePanel() {
+      if (typeof AssetPanel !== 'undefined') {
+        if (AssetPanel.isOpen()) {
+          this.closePanel();
+        } else {
+          await this.openPanel();
+        }
+      }
+    },
+
+    /**
      * Trả về dữ liệu hiện tại.
      */
     getRegistry() {

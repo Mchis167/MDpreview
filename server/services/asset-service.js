@@ -253,10 +253,53 @@ class AssetService {
     await fs.promises.rename(oldPath, newPath);
 
     // 2. Cập nhật tham chiếu trong các file Markdown
+    const updatedFilesCount = await this._updateAllReferences(oldName, newName);
+
+    return { success: true, updatedFiles: updatedFilesCount };
+  }
+
+  /**
+   * Thay thế một tham chiếu hỏng bằng một asset khác hoặc upload mới.
+   * @param {string} oldName - Tên asset đang bị hỏng (missing)
+   * @param {string} newName - Tên asset thay thế
+   * @param {Object} options { isUpload: boolean, fileData: string (base64) }
+   */
+  async replaceBrokenAsset(oldName, newName, options = {}) {
+    let actualNewName = newName;
+
+    // 1. Nếu là upload, lưu file trước
+    if (options.isUpload && options.fileData) {
+      const buffer = Buffer.from(options.fileData, 'base64');
+      const targetPath = path.join(this.assetsDir, newName);
+      
+      // Đảm bảo thư mục assets tồn tại
+      if (!fs.existsSync(this.assetsDir)) {
+        await fs.promises.mkdir(this.assetsDir, { recursive: true });
+      }
+
+      await fs.promises.writeFile(targetPath, buffer);
+    } else {
+      // Nếu không phải upload, kiểm tra xem newName có tồn tại không
+      const targetPath = path.join(this.assetsDir, newName);
+      if (!fs.existsSync(targetPath)) {
+        throw new Error(`Target asset "${newName}" does not exist`);
+      }
+    }
+
+    // 2. Cập nhật tất cả tham chiếu từ oldName sang actualNewName
+    const updatedFilesCount = await this._updateAllReferences(oldName, actualNewName);
+
+    return { success: true, updatedFiles: updatedFilesCount, newName: actualNewName };
+  }
+
+  /**
+   * Helper: Cập nhật tất cả tham chiếu từ oldName sang newName trong toàn bộ file Markdown.
+   * @private
+   */
+  async _updateAllReferences(oldName, newName) {
     const allMdFiles = await this._getAllMdFiles(this.vaultRoot);
     let updatedFilesCount = 0;
 
-    // Escape regex
     const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const escapedOldName = escapeRegExp(oldName);
     const escapedOldNameEncoded = escapeRegExp(encodeURIComponent(oldName));
@@ -267,13 +310,14 @@ class AssetService {
     for (const file of allMdFiles) {
       try {
         const originalContent = await fs.promises.readFile(file, 'utf8');
+        if (!originalContent.includes(oldName) && !originalContent.includes(encodeURIComponent(oldName))) continue;
+
         const parsed = matter(originalContent);
         const tokens = marked.lexer(parsed.content);
         
         let changed = false;
         const processTokens = (tokenList) => {
           for (const token of tokenList) {
-            // Bỏ qua các khối code
             if (token.type === 'code' || token.type === 'codespan') continue;
             
             const oldRaw = token.raw;
@@ -295,11 +339,11 @@ class AssetService {
           updatedFilesCount++;
         }
       } catch (err) {
-        console.error(`[AssetService] Rename failed for file ${file}:`, err.message);
+        console.error(`[AssetService] Reference update failed for file ${file}:`, err.message);
       }
     }
 
-    return { success: true, updatedFiles: updatedFilesCount };
+    return updatedFilesCount;
   }
 
   /**
@@ -327,13 +371,14 @@ class AssetService {
       const escapedNameEncoded = escapeRegExp(encodeURIComponent(name));
 
       // Regex để xóa toàn bộ tag ![]() hoặc <img>
-      // Lưu ý: Việc xóa sạch có thể để lại dòng trống, nhưng giúp UI sạch hơn
       const mdRegex = new RegExp(`!\\[.*?\\]\\s*\\(\\/?assets\\/(${escapedName}|${escapedNameEncoded})\\)`, 'g');
       const htmlRegex = new RegExp(`<img\\s+[^>]*src=["']\\/?assets\\/(${escapedName}|${escapedNameEncoded})["'][^>]*\\/?>`, 'g');
 
       for (const file of allMdFiles) {
         try {
           const originalContent = await fs.promises.readFile(file, 'utf8');
+          if (!originalContent.includes(name) && !originalContent.includes(encodeURIComponent(name))) continue;
+
           const parsed = matter(originalContent);
           const tokens = marked.lexer(parsed.content);
           

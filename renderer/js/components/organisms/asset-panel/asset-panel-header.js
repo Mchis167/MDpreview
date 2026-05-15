@@ -31,7 +31,7 @@ window.AssetPanelHeader = (() => {
 
   return {
     render(options) {
-      const { onClose, onToggleView, onImport } = options;
+      const { onClose, _onToggleView, onImport } = options;
       
       const header = DesignSystem.createElement('div', 'ds-asset-panel-header');
       const leftActions = DesignSystem.createElement('div', 'ds-asset-panel-left-actions');
@@ -57,13 +57,6 @@ window.AssetPanelHeader = (() => {
         }
       });
 
-      const toggleBtn = DesignSystem.createButton({
-        variant: 'subtitle',
-        leadingIcon: _state.viewMode === 'grid' ? 'list' : 'layout-grid',
-        offLabel: true,
-        onClick: onToggleView
-      });
-
       const moreBtn = DesignSystem.createButton({
         variant: 'subtitle',
         leadingIcon: 'more-vertical',
@@ -81,7 +74,6 @@ window.AssetPanelHeader = (() => {
 
       actions.appendChild(importBtn);
       actions.appendChild(refreshBtn);
-      actions.appendChild(toggleBtn);
       actions.appendChild(moreBtn);
       actions.appendChild(closeBtn);
 

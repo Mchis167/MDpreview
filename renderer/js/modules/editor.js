@@ -251,7 +251,7 @@ const EditorModule = (() => {
 
     // Unbind previous if exists
     unbind();
-    
+
     _boundFileId = fileId;
 
     // Reset state ONLY if we actually switched to a different file.
@@ -294,11 +294,9 @@ const EditorModule = (() => {
     // Listen to keydown
     const editor = MonacoService.getInstance();
     if (editor) {
-      _keyListener = editor.onKeyDown((e) => {
-        _handleKeyDown(e);
+      _keyListener = editor.onKeyDown(() => {
+        _handleContentChange();
       });
-    } else {
-      console.warn('[EditorModule] Failed to bind listeners: Monaco instance not found');
     }
   }
 
@@ -358,12 +356,14 @@ const EditorModule = (() => {
     _boundFileId = null;
   }
 
-  async function save(returnToRead = true) {
+  async function save(returnToRead = true, _callerLabel = '?', silent = false) {
     const targetFile = _boundFileId || AppState.currentFile;
-    if (!targetFile || !MonacoService.isInitialized()) return false;
-    
+    if (!targetFile || !MonacoService.isInitialized()) {
+      return false;
+    }
+
     const content = MonacoService.getValue();
-    
+
     // SAFE GUARD: If content is empty but original was not, it's likely a race condition during mount.
     // This prevents "white-out" bugs where a draft is cleared accidentally.
     if (content.length === 0 && _originalContent.length > 0) {
@@ -375,7 +375,7 @@ const EditorModule = (() => {
             DraftModule.setDraftContent(content, targetFile);
             await DraftModule.renderPreview(content, targetFile);
             _originalContent = content;
-            if (typeof showToast === 'function') showToast('Draft updated');
+            if (!silent && typeof showToast === 'function') showToast('Draft updated');
             return true;
         }
         return false;
@@ -385,7 +385,7 @@ const EditorModule = (() => {
     const success = await FileService.saveFile(targetFile, content);
     
     if (success) {
-      if (typeof showToast === 'function') showToast('File saved successfully');
+      if (!silent && typeof showToast === 'function') showToast('File saved successfully');
       _originalContent = content; 
       
       if (typeof TabsModule !== 'undefined' && targetFile) {

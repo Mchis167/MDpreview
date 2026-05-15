@@ -26,6 +26,8 @@ class ShortcutsComponent {
           { id: 'mode-edit', label: 'Switch to Edit mode', keys: ['2'], icon: 'pen-line', tags: ['write', 'editor', 'sửa'] },
           { id: 'mode-comment', label: 'Switch to Comment mode', keys: ['3'], icon: 'message-circle', tags: ['feedback', 'review', 'chú thích', 'góp ý'] },
           { id: 'mode-collect', label: 'Switch to Collect mode', keys: ['4'], icon: 'bookmark', tags: ['save', 'bookmark', 'favorite', 'thu thập'] },
+          { id: 'back-to-home', label: 'Back to Home', keys: ['Mod', 'Shift', 'H'], icon: 'house', tags: ['home', 'house', 'start', 'welcome', 'index', 'trang chủ', 'về trang chủ', 'thoát file'] },
+          { id: 'open-asset-manager', label: 'Open Asset Manager', keys: ['Mod', 'Shift', 'A'], icon: 'images', tags: ['assets', 'images', 'gallery', 'media', 'files', 'quản lý tài sản', 'quản lý file', 'hình ảnh'] },
           { id: 'toggle-sidebar', label: 'Toggle Sidebar', keys: ['Mod', 'B'], icon: 'panel-left', tags: ['navigation', 'panel', 'thanh bên'] },
           { id: 'focus-search', label: 'Focus Search', keys: ['Mod', 'P'], icon: 'search', tags: ['find', 'palette', 'tìm kiếm'] },
           { id: 'scroll-top', label: 'Scroll to Top', keys: ['Mod', '↑'], icon: 'arrow-up', tags: ['up', 'start', 'lên đầu'] },
@@ -86,17 +88,17 @@ class ShortcutsComponent {
           { id: 'rename-selected', label: 'Rename Selected', keys: ['Enter'], icon: 'edit', tags: ['change name', 'đổi tên'] },
           { id: 'duplicate-file', label: 'Duplicate File', keys: ['Mod', 'D'], icon: 'copy', tags: ['clone', 'copy', 'nhân bản'] },
           { id: 'delete-selected', label: 'Delete Selected', keys: isMac ? ['Mod', 'Backspace'] : ['Delete'], icon: 'trash', tags: ['remove', 'bin', 'trash', 'xóa'] },
-           { id: 'workspace-picker', label: 'Workspace Picker', keys: ['Mod', 'O'], icon: 'briefcase', tags: ['project', 'folder', 'dự án'] },
-           { id: 'hide-unhide', label: 'Hide / Unhide', keys: ['Mod', 'Shift', 'H'], icon: 'eye-off', tags: ['dotfiles', 'hidden files', 'ẩn hiện file'] },
-           { id: 'collapse-all', label: 'Collapse All Folders', keys: ['Mod', '['], icon: 'chevrons-down-up', tags: ['tidy', 'close all', 'thu gọn'] },
-           { id: 'collapse-others', label: 'Collapse Other Folders', keys: ['Mod', 'Shift', '['], icon: 'chevrons-down-up', tags: ['focus', 'thu gọn khác'] }
+          { id: 'workspace-picker', label: 'Workspace Picker', keys: ['Mod', 'O'], icon: 'briefcase', tags: ['project', 'folder', 'dự án'] },
+          { id: 'hide-unhide', label: 'Hide / Unhide', keys: ['Mod', 'Shift', '.'], icon: 'eye-off', tags: ['dotfiles', 'hidden files', 'ẩn hiện file'] },
+          { id: 'collapse-all', label: 'Collapse All Folders', keys: ['Mod', '['], icon: 'chevrons-down-up', tags: ['tidy', 'close all', 'thu gọn'] },
+          { id: 'collapse-others', label: 'Collapse Other Folders', keys: ['Mod', 'Shift', '['], icon: 'chevrons-down-up', tags: ['focus', 'thu gọn khác'] }
          ]
        },
       {
         title: 'General',
         items: [
           { id: 'keyboard-shortcuts', label: 'Command Palette', keys: ['Mod', '/'], icon: 'command', tags: ['help', 'commands', 'phím tắt'] },
-          { id: 'global-shortcuts-search', label: 'Search App Shortcuts', keys: ['Mod', 'Shift', '/'], icon: 'keyboard', tags: ['help', 'all shortcuts', 'tìm phím tắt'] },
+          { id: 'global-shortcuts-search', label: 'Search App Shortcuts', keys: ['Mod', 'Shift', '/'], icon: 'square-chevron-right', tags: ['help', 'all shortcuts', 'tìm phím tắt'] },
           { id: 'open-settings', label: 'Open Settings', keys: ['Mod', ','], icon: 'settings', tags: ['preferences', 'config', 'cài đặt'] },
           { id: 'close-cancel', label: 'Close / Cancel', keys: ['Esc'], icon: 'x', tags: ['exit', 'hide', 'thoát'] }
         ]

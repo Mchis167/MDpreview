@@ -18,6 +18,7 @@ const ModalComponent = (() => {
       width = null,
       hasBackdrop = true,
       showHeader = true,
+      subtitle = null,
       position = null,
       alignment = 'center', // 'center', 'bottom-left', or 'custom'
       container = document.body,
@@ -41,7 +42,15 @@ const ModalComponent = (() => {
     }
 
     const header = DesignSystem.createElement('div', 'ds-popover-header');
+    const headerMain = DesignSystem.createElement('div', 'ds-popover-header-main');
     const titleEl = DesignSystem.createElement('h2', 'ds-popover-title', { text: title });
+    headerMain.appendChild(titleEl);
+
+    if (subtitle) {
+      const subtitleEl = DesignSystem.createElement('div', 'ds-popover-subtitle', { text: subtitle });
+      headerMain.appendChild(subtitleEl);
+    }
+
     const closeBtn = DesignSystem.createElement('button', 'ds-popover-close', { 
       html: DesignSystem.getIcon('x') || '✕' 
     });
@@ -54,7 +63,7 @@ const ModalComponent = (() => {
     }
 
     if (showHeader) {
-      header.appendChild(titleEl);
+      header.appendChild(headerMain);
       header.appendChild(closeBtn);
       card.appendChild(header);
     }

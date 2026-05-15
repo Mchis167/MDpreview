@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Not Commited] — 2026-05-16 03:37
+
+### 🚀 Added
+- **Global Keyboard Shortcuts**: Bổ sung phím tắt toàn cục cho các thao tác điều hướng cốt lõi:
+    - **Back to Home**: Chuyển về màn hình Home nhanh chóng.
+    - **Open Asset Manager**: Mở bảng quản lý tài nguyên (Asset Panel) từ bất kỳ đâu.
+- **Asset Replacement Flow**: Tích hợp quy trình "Replace Broken Asset" hoàn chỉnh giúp dễ dàng khôi phục các liên kết ảnh bị hỏng:
+    - Bổ sung tùy chọn `Replace` vào Context Menu của các ảnh hỏng trong Asset Panel.
+    - Giao diện `AssetReplacementDialog` tối giản hỗ trợ tìm kiếm ảnh thay thế trong Vault hoặc tải file lên trực tiếp.
+    - Cập nhật tự động toàn bộ tham chiếu trong các file Markdown khi ảnh được thay thế thành công (`POST /api/assets/replace`).
+- **Enhanced Modal Subtitles**: Mở rộng `ModalComponent` hỗ trợ hiển thị `subtitle` chuyên dụng, giúp làm rõ ngữ cảnh thông tin (ví dụ: hiển thị tên file bị hỏng) thay vì dồn chung vào tiêu đề.
+
+### 🔧 Changed
+- **Asset Panel Utility Bar**: Nâng cấp thanh công cụ của Asset Panel theo hướng phẳng hóa (Flat UI):
+    - Tích hợp tính năng sắp xếp đa tiêu chí (Name, Size, Ref Count) với giao diện tối giản.
+    - Nâng cấp ô tìm kiếm với trạng thái động và nút Clear `x`.
+    - **Smart Rendering**: Áp dụng kiến trúc render từng phần để bảo toàn tiêu điểm (focus) của input và tránh load lại ảnh gây chớp nháy khi bộ lọc thay đổi.
+- **Asset Reference Engine**: Tái cấu trúc bộ máy quét đường dẫn (`AssetService._updateAllReferences`), tối ưu hiệu năng bằng cơ chế "early exit" đối với các file Markdown không chứa từ khóa liên quan.
+- **Modern Dialog UI**: Chuẩn hóa ô tìm kiếm bên trong các hộp thoại (như Replace Asset) thành dạng vuông góc cạnh (bỏ border-radius) để khớp tuyệt đối với Design System mới.
+- **Search Palette UI**: Bổ sung hệ thống từ khóa tìm kiếm phím tắt và biểu tượng `square-chevron-right` cải thiện phản hồi thị giác trong bảng lệnh.
+
+### 🐞 Fixed
+- **Editor Typing Blockage (Focus Ghost)**: Khắc phục triệt để lỗi nghiêm trọng khiến Monaco Editor không nhận bàn phím khi chuyển đổi nhanh qua lại giữa các bản nháp trống.
+    - **Synchronous Dispose**: Thực thi lệnh `dispose()` đồng bộ (loại bỏ delay rAF) để làm sạch hoàn toàn trạng thái Focus toàn cục của Monaco trước khi mount Editor mới.
+    - **TextArea Warm-up**: Áp dụng kỹ thuật gọi `blur()` trước khi `focus()` để ép trình duyệt và Monaco `TextAreaHandler` đồng bộ hóa lại trạng thái nhập liệu nội bộ.
+    - **Coroutine Guard**: Bổ sung cờ `_destroyed` để ngăn chặn các tiến trình khởi tạo bất đồng bộ (`activate().run()`) cũ tiếp tục chạy và ghi đè listener sai lệch.
+
 ## [2.2.0] — 2026-05-15 19:20
 
 ### 🚀 Added

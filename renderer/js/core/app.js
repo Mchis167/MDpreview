@@ -226,7 +226,7 @@ window.AppState = {
       const isFirstEdit = EditorModule.getOriginalContent() === '';
 
       if (isDraft || isFirstEdit) {
-        await EditorModule.save();
+        await EditorModule.save(true, 'onModeChange:auto', true);
       } else {
         DesignSystem.showConfirm({
           title: 'Unsaved Changes',
@@ -352,13 +352,13 @@ async function loadFile(filePath, options = {}) {
 
     if (isDraft || isFirstEdit) {
       // Auto-save and proceed silently
-      await EditorModule.save();
+      await EditorModule.save(true, 'loadFile:auto', true);
     } else if (AppState.currentFile !== filePath) { // Only prompt if switching files
       DesignSystem.showConfirm({
         title: 'Unsaved Changes',
         message: `You have unsaved changes. Save them before switching to ${filePath.split('/').pop()}?`,
         onConfirm: async () => {
-          const saved = await EditorModule.save();
+          const saved = await EditorModule.save(true, 'loadFile:confirm');
           if (saved) loadFile(filePath, options).catch(() => { });
         }
       });
@@ -597,6 +597,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const btn = document.querySelector('.ds-segment-item[data-id="collect"]');
         if (btn) btn.click();
         else if (window.AppState?.onModeChange) AppState.onModeChange('collect');
+      },
+      'back-to-home': () => {
+        if (window.setNoFile) window.setNoFile();
+      },
+      'open-asset-manager': () => {
+        if (window.AssetManager?.togglePanel) window.AssetManager.togglePanel();
       },
       'toggle-sidebar': () => {
         if (window.TabsModule?.toggleSidebar) window.TabsModule.toggleSidebar();

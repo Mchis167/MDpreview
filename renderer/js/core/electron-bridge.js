@@ -527,6 +527,14 @@
       purgeBroken: async (_vaultPath) => {
         const res = await fetch('/api/assets/purge-broken', { method: 'POST' });
         return res.json();
+      },
+      replace: async (data) => {
+        const res = await fetch('/api/assets/replace', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        return res.json();
       }
     },
 

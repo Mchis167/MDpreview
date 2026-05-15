@@ -143,11 +143,11 @@ const MonacoService = (() => {
      */
     async mount(containerEl, options = {}) {
       const currentMountID = ++_mountCount;
+
       await this.init();
-      
+
       // If a newer mount request has started, abort this one
       if (currentMountID !== _mountCount) {
-        console.warn('[MonacoService] Mount aborted: superseded by newer request.');
         return;
       }
 
@@ -367,7 +367,7 @@ const MonacoService = (() => {
           }
         } catch (_e) { /* ignore */ }
 
-        // 2. Attach a temporary global listener to swallow the "Canceled" rejection 
+        // 2. Attach a temporary global listener to swallow the "Canceled" rejection
         // that often fires asynchronously after dispose().
         if (!_rejectionListenerAttached) {
           const handler = (event) => {
@@ -378,20 +378,19 @@ const MonacoService = (() => {
           };
           window.addEventListener('unhandledrejection', handler);
           _rejectionListenerAttached = true;
-          // Keep it for 1 second to catch delayed rejections, then cleanup is optional 
-          // as we want this filtered globally for Monaco anyway.
         }
 
-        // 3. Dispose in next frame to allow any pending sync events to clear
-        requestAnimationFrame(() => {
-          try {
-            editorToDispose.dispose();
-          } catch (e) {
-            if (e && e.message !== 'Canceled' && e.name !== 'Canceled') {
-              console.warn('[MonacoService] Delayed dispose error:', e);
-            }
+        // 3. Dispose synchronously so Monaco's global focus registry is cleared
+        // BEFORE the new editor is mounted and calls focus(). Previously, the rAF
+        // delay caused the old editor's dispose to fire AFTER the new editor was
+        // focused, clearing the new editor's _focused state and blocking input.
+        try {
+          editorToDispose.dispose();
+        } catch (e) {
+          if (e && e.message !== 'Canceled' && e.name !== 'Canceled') {
+            console.warn('[MonacoService] Dispose error:', e);
           }
-        });
+        }
       }
     },
 

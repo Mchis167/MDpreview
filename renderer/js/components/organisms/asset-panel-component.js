@@ -49,6 +49,7 @@ window.AssetPanel = (function() {
       
       _state.selected.clear();
       _state.lastSelectedIndex = -1;
+      _state.searchQuery = '';
       if (window.AssetDetailPanel) window.AssetDetailPanel.close();
     },
 
@@ -76,8 +77,13 @@ window.AssetPanel = (function() {
         _state.observer = null;
       }
 
-      _content.innerHTML = '';
-      const container = DesignSystem.createElement('div', 'ds-asset-panel');
+      // 1. Get or Create stable container
+      let container = _content.querySelector('.ds-asset-panel');
+      if (!container) {
+        _content.innerHTML = '';
+        container = DesignSystem.createElement('div', 'ds-asset-panel');
+        _content.appendChild(container);
+      }
 
       // 1. Đồng bộ Selection Mode class
       container.classList.toggle('is-selection-mode', _state.selected.size > 0);
@@ -89,8 +95,6 @@ window.AssetPanel = (function() {
           onToggleSelection: (name, isShift) => this._handleToggleSelection(name, isShift)
         });
       }
-      
-      _content.appendChild(container);
     },
 
     _renderSkeleton() {

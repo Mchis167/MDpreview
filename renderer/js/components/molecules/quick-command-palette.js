@@ -48,7 +48,7 @@ const QuickCommandPalette = (() => {
     { id: 'tb', label: 'Table', icon: 'table', hint: '/table', tags: ['bang'] },
     { id: 'hr', label: 'Divider', icon: 'minus', hint: '/hr', tags: ['phancach', 'duongke'] },
     { id: 'fn', label: 'Footnote', icon: 'file-text', hint: '/fn', tags: ['chuthich'] },
-    { id: 'global-shortcuts-search', label: 'Search App Shortcuts', icon: 'keyboard', hint: '/shortcuts', tags: ['help', 'phim tat'] }
+    { id: 'global-shortcuts-search', label: 'Search App Shortcuts', icon: 'square-chevron-right', hint: '/shortcuts', tags: ['help', 'phim tat'] }
   ];
 
   function _init() {

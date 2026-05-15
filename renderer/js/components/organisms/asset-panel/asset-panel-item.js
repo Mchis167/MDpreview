@@ -39,6 +39,26 @@ window.AssetPanelItem = (() => {
 
   function _showContextMenu(e, item, type) {
     const items = [
+      // Nhóm 1: Thay thế (Chỉ cho ảnh hỏng)
+      { 
+        label: 'Replace with Existing Asset...', 
+        icon: 'image',
+        visible: type === 'broken',
+        onClick: () => {
+          if (window.AssetPanelActions) window.AssetPanelActions.handleReplaceBroken(item, 'existing');
+        }
+      },
+      { 
+        label: 'Replace with Imported Image...', 
+        icon: 'upload',
+        visible: type === 'broken',
+        onClick: () => {
+          if (window.AssetPanelActions) window.AssetPanelActions.handleReplaceBroken(item, 'upload');
+        }
+      },
+      { divider: true, visible: type === 'broken' },
+
+      // Nhóm 2: Xem & Reveal
       { 
         label: 'View Full Image', 
         icon: 'maximize',
@@ -48,7 +68,6 @@ window.AssetPanelItem = (() => {
           if (window.ZoomSystem) window.ZoomSystem.open(src, 'image');
         }
       },
-      { divider: true },
       { 
         label: 'Reveal in Finder', 
         icon: 'external-link',
@@ -58,14 +77,18 @@ window.AssetPanelItem = (() => {
         }
       },
       { divider: true },
+
+      // Nhóm 3: Rename (Chỉ cho ảnh hợp lệ)
       { 
         label: 'Rename', 
         icon: 'rename-cursor',
-        disabled: type === 'broken',
+        visible: type !== 'broken',
         onClick: () => {
           if (window.AssetPanelActions) window.AssetPanelActions.handleRename(item);
         }
       },
+
+      // Nhóm 4: Xóa
       { 
         label: 'Delete', 
         icon: 'trash-2',
@@ -74,7 +97,7 @@ window.AssetPanelItem = (() => {
           if (window.AssetPanelActions) window.AssetPanelActions.handleDelete(item, type);
         }
       }
-    ];
+    ].filter(item => item.visible !== false);
 
     DesignSystem.createContextMenu(e, items);
   }

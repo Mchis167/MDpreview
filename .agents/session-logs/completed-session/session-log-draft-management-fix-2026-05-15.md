@@ -2,7 +2,7 @@
 
 ## 🔗 Liên kết (Links)
 - **Log trước**: (Không có)
-- **Log kế tiếp**: (Không có)
+- **Log kế tiếp**: [session-log-editor-block-typing-debug-2026-05-15.md](file:///Users/mchisdo/MDpreview/.agents/session-logs/session-log-editor-block-typing-debug-2026-05-15.md)
 
 ## 📝 Tổng quan (Overview)
 Khắc phục các bug nhỏ và cải thiện tính nhất quán cho hệ thống Tab Bar và quản lý bản nháp (Drafts).

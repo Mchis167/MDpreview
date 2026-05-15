@@ -81,6 +81,18 @@
   color: var(--ds-text-primary);
 }
 
+.ds-popover-header-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-xs);
+}
+
+.ds-popover-subtitle {
+  font-size: var(--ds-font-sm);
+  color: var(--ds-text-tertiary);
+  font-weight: 400;
+}
+
 .ds-popover-close {
   width: 32px;
   height: 32px;

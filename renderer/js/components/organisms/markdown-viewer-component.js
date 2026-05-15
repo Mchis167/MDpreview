@@ -699,7 +699,7 @@ class MarkdownViewerComponent {
         throw new Error(res.error);
       }
     } catch (err) {
-      console.error('[DEBUG] Copy as File failed:', err);
+      console.error('Copy as File failed:', err);
       if (window.showToast) window.showToast(`Copy failed: ${err.message}`, 'error');
     }
   }
@@ -747,7 +747,7 @@ class MarkdownViewerComponent {
         if (window.showToast) window.showToast('Smart copy ready! (Browser)', 'success', { id: 'gdoc-copy' });
       }
     } catch (err) {
-      console.error('[DEBUG] GDoc copy failed:', err);
+      console.error('GDoc copy failed:', err);
       if (window.showToast) window.showToast('Failed to prepare smart copy', 'error', { id: 'gdoc-copy' });
     }
   }
@@ -1166,6 +1166,15 @@ class MarkdownEditor {
       value: this.content,
       language: 'markdown'
     });
+
+    // Sync _originalContent after mount regardless of mode (edit or read).
+    // Without this, opening a file in 'read' mode leaves _originalContent pointing
+    // at the previous file/draft, causing isDirty() false-positives and modal loops.
+    this._mountPromise.then(() => {
+      if (!this._destroyed && typeof EditorModule !== 'undefined') {
+        EditorModule.setOriginalContent(this.content || '');
+      }
+    });
   }
 
   activate() {
@@ -1173,6 +1182,9 @@ class MarkdownEditor {
     // We must wait for mount to finish before binding EditorModule or syncing cursor.
     const run = async () => {
       if (this._mountPromise) await this._mountPromise;
+
+      // Guard: abort if this instance was destroyed while awaiting mount
+      if (this._destroyed) return;
 
       // Initialize Editor Logic
       if (EditorModule) {
@@ -1183,6 +1195,8 @@ class MarkdownEditor {
           EditorModule.setOriginalContent(this.content);
         }
       }
+
+      if (this._destroyed) return;
 
       MonacoService.layout();
 
@@ -1204,8 +1218,27 @@ class MarkdownEditor {
         window.AppState.lastSyncContext = null;
       }
 
-      // Ensure focus after all async mounting and binding is done
-      MonacoService.focus();
+      // Ensure focus after all async mounting and binding is done.
+      // Use rAF to give Monaco's global state 1 layout frame to settle after the
+      // dispose→create cycle. Without this, empty drafts (no model.setValue() call
+      // to warm up TextAreaHandler) end up with Monaco's internal _focused=true but
+      // TextAreaState un-synced — onKeyDown fires but onDidChangeContent stays silent.
+      if (!this._destroyed) {
+        requestAnimationFrame(() => {
+          if (!this._destroyed && MonacoService.isInitialized()) {
+            // layout() forces Monaco to recalculate its full view (incl. TextAreaHandler sync)
+            // before focus — fixes typing block on empty drafts after dispose→create cycle.
+            MonacoService.layout();
+            // Blur textarea first to force a real focus event on re-focus.
+            // After dispose→create cycle Monaco may have auto-focused the new textarea,
+            // making a plain focus() call a no-op (no event → TextAreaHandler never syncs).
+            const _domNode = MonacoService.getInstance()?.getDomNode();
+            const _textarea = _domNode?.querySelector('textarea');
+            if (_textarea) _textarea.blur();
+            MonacoService.focus();
+          }
+        });
+      }
     };
 
     run();
@@ -1253,6 +1286,7 @@ class MarkdownEditor {
   }
 
   destroy() {
+    this._destroyed = true;
     if (EditorModule) EditorModule.unbind();
     MonacoService.dispose();
   }

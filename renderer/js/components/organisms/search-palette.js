@@ -289,9 +289,6 @@ const SearchPalette = (() => {
     _resultsContainer.classList.toggle('is-empty', _results.length === 0);
 
     if (_results.length === 0) {
-      const emptyState = document.createElement('div');
-      emptyState.className = 'palette-empty-state';
-
       const labels = {
         'all': { item: 'items', recent: 'items' },
         'file': { item: 'files', recent: 'files' },
@@ -300,17 +297,15 @@ const SearchPalette = (() => {
       };
       const ctx = labels[_searchMode] || { item: 'items', recent: 'items' };
 
-      const icon = DesignSystem.getIcon('search-x');
-      const title = query ? `No ${ctx.item} found` : `No recent ${ctx.recent}`;
-      const desc = query
-        ? `We couldn't find any ${ctx.item} matching "${query}"`
-        : `Your recently accessed ${ctx.recent} will appear here.`;
+      const emptyState = window.EmptyStateComponent.create({
+        icon: 'search-x',
+        title: query ? `No ${ctx.item} found` : `No recent ${ctx.recent}`,
+        description: query
+          ? `We couldn't find any ${ctx.item} matching "${query}"`
+          : `Your recently accessed ${ctx.recent} will appear here.`,
+        className: 'palette-empty-state'
+      });
 
-      emptyState.innerHTML = `
-        <div class="empty-state-icon">${icon}</div>
-        <div class="empty-state-title">${title}</div>
-        <div class="empty-state-desc">${desc}</div>
-      `;
       _resultsContainer.appendChild(emptyState);
       _updateMorphHeight();
       return;
