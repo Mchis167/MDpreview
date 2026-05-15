@@ -152,7 +152,7 @@ Modules → Boot sequence
 | Module Creation | Create new module | `/module-creation` |
 | Linting Gates | Verify code quality | `/linting-gates` |
 | Atomic Gen | Create component | `/atomic-gen [name] [level]` |
-| Planning | Implementation plan | `/plan` |
+| Implementation | Implementation plan | /plan |
 | Phase Detail | Chi tiết Phase | `/phase-detail` |
 | Refactor | Legacy → Atomic | `/refactor-to-atomic` |
 | Test Cases | Design test suite | `/test [feature]` |
@@ -251,11 +251,12 @@ Modules → Boot sequence
 
 ---
 
-## 🎓 Summary: 3 Core Principles
+## 🎓 Summary: 4 Core Principles
 
-1. **Analysis-First** — Plan before code, wait for approval
-2. **Quality Gates** — Zero linting errors, mandatory
-3. **Minimal Diffs** — Surgical edits, no cleanup/reformat
+1. **Context-Aware** — Check session logs (`.agents/session-logs/`) to understand past architectural decisions before answering complex questions or proposing changes.
+2. **Analysis-First** — Plan before code, wait for approval
+3. **Quality Gates** — Zero linting errors, mandatory
+4. **Minimal Diffs** — Surgical edits, no cleanup/reformat
 
 **Development Cycle:**
 ```
@@ -278,4 +279,4 @@ Commit & PR
 
 ---
 
-**Last Updated:** 2026-04-25 | **Version:** 2.0 | **Status:** Current ✅
+**Last Updated:** 2026-05-15 | **Version:** 2.1 | **Status:** Current ✅

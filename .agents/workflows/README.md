@@ -324,17 +324,15 @@ Tham khảo: [create-component.md](create-component.md)
 
 ---
 
-#### 📝 `/plan` — Implementation Planning
-**Mục đp:** Lập kế hoạch trước khi implement (artifact-based)
+#### 1️⃣1️⃣ `/plan` — Create New Implementation Plan
+**Mục đích:** Khởi tạo file kế hoạch chi tiết trước khi thực hiện bất kỳ thay đổi mã nguồn nào.
 
-**Checklist trước implement:**
-- Objective rõ ràng
-- Files to change (table)
-- Step-by-step (sequential)
-- Risks & considerations
-- Verification checklist
+**Quy tắc:**
+- Định dạng tên file: `[tên-tính-năng]-[yyyy-mm-dd].md`
+- Thư mục lưu trữ: `ImplementPlan/`
+- Checklist trước implement: objective, files, step-by-step, risks, DoD.
 
-Tham khảo: [plan.md](plan.md)
+Tham khảo: [11. create-implementation-plan.md](11. create-implementation-plan.md)
 
 ---
 
@@ -462,7 +460,7 @@ Tham khảo: [16.session-log.md](16.session-log.md)
 | Module Creation | `/module-creation [name] [level]` | Create new module | New CSS + JS files, registered |
 | Linting Gates | `/linting-gates` | Verify code quality | npm run lint output |
 | Atomic Gen | `/atomic-gen [name] [level]` | Create component | New component scaffolded |
-| Planning | `/plan [task]` | Plan implementation | Implementation plan artifact |
+| **Implementation** | **`/plan`** | **Khởi tạo kế hoạch** | **ImplementPlan/[name].md** |
 | **Phase Detail** | **`/phase-detail`** | **Chi tiết hóa Phase** | **Phase Detail artifact** |
 | Refactor | `/refactor-to-atomic` | Refactor legacy | New atomic component, cleanup |
 | Test Cases | `/test [feature]` | Design tests | Test case artifact |
@@ -553,7 +551,7 @@ Tham khảo: [16.session-log.md](16.session-log.md)
 ├── 9.linting-gates.md       ← Linting verification
 ├── 16.session-log.md        ← Quản lý bối cảnh phiên làm việc (Session Log)
 ├── create-component.md      ← Atomic component creation
-├── plan.md                  ← Implementation planning
+├── 11. create-implementation-plan.md ← Implementation planning
 ├── 11.1.phase-detail.md     ← Phase detail planning
 ├── refactor-component.md    ← Legacy refactoring
 ├── test-cases.md            ← Test case design
