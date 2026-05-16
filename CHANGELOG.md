@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Not Commited] — 2026-05-17 02:05
+## [2.5.0] — 2026-05-17 02:05
 
 ### 🚀 Added
 - **Pinned Documents System**: Implementation of a dedicated section for workspace-specific document pinning on the Home Dashboard.
