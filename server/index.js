@@ -6,6 +6,7 @@ const chokidar = require('chokidar');
 const os       = require('os');
 const fs       = require('fs');
 const WikiIndexer = require('./services/wiki-indexer');
+const { resolvePath } = require('./utils/path-util');
 
 const app    = express();
 app.use(express.json({ limit: '50mb' }));
@@ -54,16 +55,9 @@ app.use('/testing', express.static(path.join(__dirname, '../renderer/testing')))
 app.use('/assets', (req, res, next) => {
   if (currentWatchDir) {
     try {
-      const decodedPath = decodeURIComponent(req.path);
-      const workspaceAssetPath = path.join(currentWatchDir, 'assets', decodedPath);
-
-      // Security: Ngăn chặn directory traversal
+      const decodedPath = decodeURIComponent(req.path).replace(/^\//, '');
       const assetsDir = path.join(currentWatchDir, 'assets');
-      const relative = path.relative(assetsDir, workspaceAssetPath);
-      if (relative.includes('..') || path.isAbsolute(relative)) {
-        console.warn(`[Server] Forbidden asset path: ${workspaceAssetPath}`);
-        return res.status(403).send('Forbidden');
-      }
+      const workspaceAssetPath = resolvePath(assetsDir, decodedPath);
 
       if (fs.existsSync(workspaceAssetPath)) {
         // Thumbnail optimization
@@ -119,8 +113,16 @@ app.get('/api/ping', (req, res) => res.json({ status: 'alive', time: new Date().
 app.post('/api/set-watch-dir', (req, res) => {
   const { dir } = req.body;
   if (!dir) return res.status(400).send('Missing directory path');
-  setWatchDir(dir);
-  res.json({ success: true, watchDir: dir });
+
+  let normalizedDir = dir;
+  try {
+    normalizedDir = fs.realpathSync(dir);
+  } catch (_e) {
+    // Keep original if normalization fails
+  }
+
+  setWatchDir(normalizedDir);
+  res.json({ success: true, watchDir: normalizedDir });
 });
 
 app.use('/api', require('./routes/state'));
@@ -145,6 +147,7 @@ function startWatcher(dir) {
       io.emit('file-changed', { file: path.relative(dir, fp) });
       if (fp.endsWith('.md')) {
         triggerReindex(dir);
+        io.emit('assets-changed');
       }
       if (fp.includes(path.sep + 'assets' + path.sep)) {
         io.emit('assets-changed');
@@ -154,6 +157,7 @@ function startWatcher(dir) {
       io.emit('tree-changed');
       if (fp.endsWith('.md')) {
         triggerReindex(dir);
+        io.emit('assets-changed');
       }
       if (fp.includes(path.sep + 'assets' + path.sep)) {
         io.emit('assets-changed');
@@ -164,6 +168,7 @@ function startWatcher(dir) {
       io.emit('tree-changed');
       if (fp.endsWith('.md')) {
         triggerReindex(dir);
+        io.emit('assets-changed');
       }
       if (fp.includes(path.sep + 'assets' + path.sep)) {
         io.emit('assets-changed');

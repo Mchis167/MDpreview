@@ -136,6 +136,17 @@ window.AssetPanelContent = (() => {
     }
   }
 
+  function _updateTabs(tabsWrapper) {
+    if (!window.AssetPanelTabs) return;
+    if (!tabsWrapper) return;
+
+    tabsWrapper.innerHTML = '';
+    tabsWrapper.appendChild(window.AssetPanelTabs.render(() => {
+      _updateTabs(tabsWrapper);
+      _renderItems();
+    }));
+  }
+
   return {
     render(options) {
       const { container, onToggleSelection } = options;
@@ -153,15 +164,7 @@ window.AssetPanelContent = (() => {
         
         // 1a. Filter Tabs
         tabsWrapper = DesignSystem.createElement('div', 'ds-asset-tabs-container');
-        const _renderTabsPart = () => {
-          if (!window.AssetPanelTabs) return;
-          tabsWrapper.innerHTML = '';
-          tabsWrapper.appendChild(window.AssetPanelTabs.render(() => {
-            _renderTabsPart();
-            _renderItems();
-          }));
-        };
-        _renderTabsPart();
+        _updateTabs(tabsWrapper);
         container.appendChild(tabsWrapper);
 
         // 1b. Utility Bar
@@ -186,6 +189,9 @@ window.AssetPanelContent = (() => {
         _contentArea = DesignSystem.createElement('div', 'ds-asset-content');
         _itemsContainer.appendChild(_contentArea);
         container.appendChild(_itemsContainer);
+      } else {
+        // Update existing tabs when registry changes
+        _updateTabs(tabsWrapper);
       }
 
       // 2. Initial/Update render of items

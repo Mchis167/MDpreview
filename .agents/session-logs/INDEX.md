@@ -21,6 +21,9 @@
 | Zoom / universal zoom | `completed-session/session-log-universal-zoom-system-2026-05-15.md` |
 | Workspace / home screen | `completed-session/session-log-workspace-home-screen-2026-05-14.md` |
 | Reset state / close tab / tab mode / identity guard / session mode | `completed-session/session-log-reset-tab-state-2026-05-16.md` |
+| Path normalization / asset routing / workspace path / file access / server path | `completed-session/session-log-path-normalization-and-asset-routing-fixes-2026-05-16.md` |
+| Context menu / image replacement / valid vs broken asset / global replacement / Monaco Editor / dialog title | `completed-session/session-log-smart-image-context-menu-2026-05-16.md` |
+| Asset management / stale data / broken link count / tabs render / socket events / registry sync | `completed-session/session-log-asset-management-stale-data-fix-2026-05-16.md` |
 
 ---
 

@@ -5,6 +5,7 @@
  */
 window.AssetManager = (() => {
   let registry = { assets: [], orphans: [], broken: [] };
+  let _refreshTimer = null;
 
   return {
     /**
@@ -18,7 +19,7 @@ window.AssetManager = (() => {
 
       if (typeof AppState !== 'undefined' && AppState.socket) {
         AppState.socket.on('assets-changed', () => {
-          this.refresh();
+          this._debounceRefresh();
         });
       }
 
@@ -104,6 +105,17 @@ window.AssetManager = (() => {
      */
     updateBadges() {
       // Sẽ thực hiện ở Phase 4: Hiển thị chấm đỏ trên nút Assets nếu có broken links
+    },
+
+    /**
+     * Debounce refresh để tránh over-triggering khi multiple files thay đổi.
+     */
+    _debounceRefresh() {
+      if (_refreshTimer) clearTimeout(_refreshTimer);
+      _refreshTimer = setTimeout(() => {
+        this.refresh();
+        _refreshTimer = null;
+      }, 300);
     }
   };
 })();
