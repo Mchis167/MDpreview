@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Not Committed] — 2026-05-17 01:00
+## [2.4.0] — 2026-05-17 01:00
 
 ### 🚀 Added
 - **Publish Image Cache System**: Triển khai cơ chế cache dựa trên content hash (SHA-256) để tránh re-compress và re-upload ảnh không thay đổi khi publish. Chỉ ảnh có nội dung thực sự thay đổi (kể cả replace cùng tên) mới được xử lý lại.
@@ -25,7 +25,7 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [Not Committed] — 2026-05-16 23:59
+## [2.3.3] — 2026-05-16 23:59
 
 ### 🐞 Fixed
 - **Monaco Scroll Sync — First-Load Bug**: Khắc phục triệt để bug scroll sai khi switch Read → Edit lần đầu tiên sau khi load file. Root cause: `setSelection()` trong `syncCursor` kích hoạt Monaco internal smooth scroll animation chạy async qua nhiều RAF frames (535→650→678→1842→2041px), liên tục override `revealPositionInCenter`. Fix: thêm `ScrollType.Immediate` (`=1`) vào `revealPositionInCenter` để snap đồng bộ và cancel toàn bộ queued smooth scroll animations. Lần đầu và mọi lần switch sau đều cuộn đúng vị trí.
@@ -36,7 +36,7 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [Not Committed] — 2026-05-16 17:30
+## [2.3.2] — 2026-05-16 17:30
 
 ### 🐞 Fixed
 - **Monaco Editor — Block Typing (Empty File)**: Khắc phục triệt để bug typing bị block khi tạo file mới (rỗng) và chuyển sang Edit mode. Root cause: Chrome deregisters textarea khỏi OS text input pipeline sau nhiều lần `setValue('')` trong quá trình init — `beforeinput`/`input` events không bao giờ fire dù `keydown` và DOM focus hoạt động bình thường. Fix: thêm `setTimeout(blur→focus, 150ms)` với guard `getValue() === ''` trong `activate()` để warm up browser text input pipeline. Guard tránh clobber cursor position của non-empty files.
