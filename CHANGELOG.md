@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Not Committed] — 2026-05-16 17:30
+
+### 🐞 Fixed
+- **Monaco Editor — Block Typing (Empty File)**: Khắc phục triệt để bug typing bị block khi tạo file mới (rỗng) và chuyển sang Edit mode. Root cause: Chrome deregisters textarea khỏi OS text input pipeline sau nhiều lần `setValue('')` trong quá trình init — `beforeinput`/`input` events không bao giờ fire dù `keydown` và DOM focus hoạt động bình thường. Fix: thêm `setTimeout(blur→focus, 150ms)` với guard `getValue() === ''` trong `activate()` để warm up browser text input pipeline. Guard tránh clobber cursor position của non-empty files.
+- **Cursor Sync Preserved**: Đảm bảo fix trên không phá logic sync cursor khi bôi đen / right-click context menu → Edit (cursor vẫn nhảy đúng vị trí).
+
+### 🔧 Changed
+- **`renderer/js/components/organisms/markdown-viewer-component.js`**: Thêm `setTimeout(150)` với empty-model guard vào `activate()`; xóa BugLogger debug instrumentation.
+- **`renderer/js/modules/editor.js`**: Đơn giản hóa `setOriginalContent()`, `bind()`, `onKeyDown` listener; xóa toàn bộ BugLogger debug code.
+- **`.agents/rules/rules.md`**: Cập nhật lên v2.3 — thêm Monaco Rule #5 (empty model warm-up pattern) và section mới "Browser Event Debugging Layer Checklist" với window-spy-first principle.
+
+---
+
 ## [Not Commited] — 2026-05-16 15:51
 
 ### 🚀 Added

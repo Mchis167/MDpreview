@@ -1,27 +1,101 @@
-bug-logger.js:15 🐛 [BugLogger] [11:33:35.529] [setOriginalContent] called {textLen: 0, isInitialized: true, currentVal: '""', stack: '    at Object.setOriginalContent (http://localhost…ts/organisms/markdown-viewer-component.js:1222:22'}
-bug-logger.js:15 🐛 [BugLogger] [11:33:35.531] [setOriginalContent] → calling setValue() {textLen: 0}
-bug-logger.js:17 🐛 [BugLogger] [11:33:35.531] [setOriginalContent] → setValue() returned
-bug-logger.js:15 🐛 [BugLogger] [11:33:35.937] [setOriginalContent] called {textLen: 0, isInitialized: true, currentVal: '""', stack: '    at Object.setOriginalContent (http://localhost…nents/organisms/change-action-view-bar.js:263:22)'}
-bug-logger.js:15 🐛 [BugLogger] [11:33:35.937] [setOriginalContent] → calling setValue() {textLen: 0}
-bug-logger.js:17 🐛 [BugLogger] [11:33:35.938] [setOriginalContent] → setValue() returned
-bug-logger.js:15 🐛 [BugLogger] [11:33:35.938] [bind] START {fileId: 'Test 1121.md', prevBoundFileId: null, isNewFile: true, _originalContent: '""'}
-bug-logger.js:15 🐛 [BugLogger] [11:33:35.939] [bind] SYNC CHECK {_originalContent: '""', editorValue: '""'}
-bug-logger.js:17 🐛 [BugLogger] [11:33:35.939] [bind] → _originalContent empty, taking from Monaco
-bug-logger.js:17 🐛 [BugLogger] [11:33:35.939] [bind] attaching listeners
-bug-logger.js:15 🐛 [BugLogger] [11:33:35.939] [setOriginalContent] called {textLen: 0, isInitialized: true, currentVal: '""', stack: '    at Object.setOriginalContent (http://localhost…s/organisms/markdown-viewer-component.js:1242:24)'}
-bug-logger.js:15 🐛 [BugLogger] [11:33:35.939] [setOriginalContent] → calling setValue() {textLen: 0}
-bug-logger.js:17 🐛 [BugLogger] [11:33:35.939] [onContentChange] FIRED
-bug-logger.js:17 🐛 [BugLogger] [11:33:35.939] [setOriginalContent] → setValue() returned
-bug-logger.js:15 🐛 [BugLogger] [11:33:35.943] [activate] scheduling rAF focus {_destroyed: undefined}
-bug-logger.js:15 🐛 [BugLogger] [11:33:35.946] [activate] rAF fired {_destroyed: undefined, isInitialized: true}
-bug-logger.js:15 🐛 [BugLogger] [11:33:35.947] [activate] blur→focus {textareaFound: true, hasDocumentFocus: true}
-bug-logger.js:15 🐛 [BugLogger] [11:33:35.954] [activate] focus() called {activeElement: 'TEXTAREA', isFocused: true, textareaValue: '""'}
-bug-logger.js:15 🐛 [BugLogger] [11:33:35.954] [activate] post-focus state {textareaVal: '""', selStart: 0, selEnd: 0, readOnly: false, disabled: false, …}
-bug-logger.js:15 🐛 [BugLogger] [11:33:35.954] [monaco-internal] {isDoingComposition: undefined, textAreaStateVal: '"N/A"'}
-bug-logger.js:15 🐛 [BugLogger] [11:33:37.080] [onKeyDown] fired {keyCode: 31, modelVersion: 4}
-bug-logger.js:15 🐛 [BugLogger] [11:33:37.080] [textarea-keydown] bubble end {key: 'a', keyCode: 65, defaultPrevented: false}
-bug-logger.js:15 🐛 [BugLogger] [11:33:37.301] [onKeyDown] fired {keyCode: 34, modelVersion: 4}
-bug-logger.js:15 🐛 [BugLogger] [11:33:37.325] [onKeyDown] fired {keyCode: 49, modelVersion: 4}
-bug-logger.js:15 🐛 [BugLogger] [11:33:37.491] [onKeyDown] fired {keyCode: 36, modelVersion: 4}
-(index):1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+(async function() {
+  const script = document.createElement('script');
+  script.src = '/testing/test-image-wasm.js';
+  document.head.appendChild(script);
+})();
+
+Promise {<fulfilled>: undefined}
+test-image-wasm.js:6 🧪 Starting WASM Compression Test...
+test-image-wasm.js:24 Original size: 537.12 KB
+test-image-wasm.js:28 Processing WebP...
+installHook.js:1 [ImageProcessorUtil] Worker encoding failed, falling back to Canvas: Error: Failed to execute 'postMessage' on 'DedicatedWorkerGlobalScope': Failed to convert value to 'object'.
+    at Worker.onMessage (worker-pool.js:64:23)
+overrideMethod @ installHook.js:1
+processForPublish @ image-processor-util.js:38
+await in processForPublish
+testWasmCompression @ test-image-wasm.js:29
+await in testWasmCompression
+(anonymous) @ test-image-wasm.js:58
+PendingScript
+(anonymous) @ VM611:4
+(anonymous) @ VM611:5
+test-image-wasm.js:30 ✓ WebP Processed: {size: '537.12 KB', mime: 'image/png', ext: 'png'}
+test-image-wasm.js:36 Processing JPEG...
+image-encoder.worker.bundle.js:3777 wasm streaming compile failed: TypeError: Failed to execute 'compile' on 'WebAssembly': HTTP status code is not ok
+(anonymous) @ image-encoder.worker.bundle.js:3777
+Promise.then
+(anonymous) @ image-encoder.worker.bundle.js:3776
+Promise.then
+instantiateAsync @ image-encoder.worker.bundle.js:3774
+createWasm @ image-encoder.worker.bundle.js:3808
+(anonymous) @ image-encoder.worker.bundle.js:4884
+initEmscriptenModule2 @ image-encoder.worker.bundle.js:4972
+init2 @ image-encoder.worker.bundle.js:4989
+self.onmessage @ image-encoder.worker.bundle.js:5062
+image-encoder.worker.bundle.js:3778 falling back to ArrayBuffer instantiation
+(anonymous) @ image-encoder.worker.bundle.js:3778
+Promise.then
+(anonymous) @ image-encoder.worker.bundle.js:3776
+Promise.then
+instantiateAsync @ image-encoder.worker.bundle.js:3774
+createWasm @ image-encoder.worker.bundle.js:3808
+(anonymous) @ image-encoder.worker.bundle.js:4884
+initEmscriptenModule2 @ image-encoder.worker.bundle.js:4972
+init2 @ image-encoder.worker.bundle.js:4989
+self.onmessage @ image-encoder.worker.bundle.js:5062
+image-encoder.worker.bundle.js:3768 failed to asynchronously prepare wasm: CompileError: WebAssembly.instantiate(): expected magic word 00 61 73 6d, found 3c 21 44 4f @+0
+(anonymous) @ image-encoder.worker.bundle.js:3768
+Promise.then
+instantiateArrayBuffer @ image-encoder.worker.bundle.js:3767
+(anonymous) @ image-encoder.worker.bundle.js:3779
+Promise.then
+(anonymous) @ image-encoder.worker.bundle.js:3776
+Promise.then
+instantiateAsync @ image-encoder.worker.bundle.js:3774
+createWasm @ image-encoder.worker.bundle.js:3808
+(anonymous) @ image-encoder.worker.bundle.js:4884
+initEmscriptenModule2 @ image-encoder.worker.bundle.js:4972
+init2 @ image-encoder.worker.bundle.js:4989
+self.onmessage @ image-encoder.worker.bundle.js:5062
+image-encoder.worker.bundle.js:3725 Aborted(CompileError: WebAssembly.instantiate(): expected magic word 00 61 73 6d, found 3c 21 44 4f @+0)
+abort @ image-encoder.worker.bundle.js:3725
+(anonymous) @ image-encoder.worker.bundle.js:3769
+Promise.then
+instantiateArrayBuffer @ image-encoder.worker.bundle.js:3767
+(anonymous) @ image-encoder.worker.bundle.js:3779
+Promise.then
+(anonymous) @ image-encoder.worker.bundle.js:3776
+Promise.then
+instantiateAsync @ image-encoder.worker.bundle.js:3774
+createWasm @ image-encoder.worker.bundle.js:3808
+(anonymous) @ image-encoder.worker.bundle.js:4884
+initEmscriptenModule2 @ image-encoder.worker.bundle.js:4972
+init2 @ image-encoder.worker.bundle.js:4989
+self.onmessage @ image-encoder.worker.bundle.js:5062
+installHook.js:1 [ImageProcessorUtil] Worker encoding failed, falling back to Canvas: Error: Aborted(CompileError: WebAssembly.instantiate(): expected magic word 00 61 73 6d, found 3c 21 44 4f @+0). Build with -sASSERTIONS for more info.
+    at Worker.onMessage (worker-pool.js:64:23)
+overrideMethod @ installHook.js:1
+processForPublish @ image-processor-util.js:38
+await in processForPublish
+testWasmCompression @ test-image-wasm.js:37
+await in testWasmCompression
+(anonymous) @ test-image-wasm.js:58
+PendingScript
+(anonymous) @ VM611:4
+(anonymous) @ VM611:5
+test-image-wasm.js:38 ✓ JPEG Processed: {size: '24.69 KB', mime: 'image/jpeg', ext: 'jpg'}
+test-image-wasm.js:44 Processing OxiPNG...
+installHook.js:1 [ImageProcessorUtil] Worker encoding failed, falling back to Canvas: Error: Failed to execute 'postMessage' on 'DedicatedWorkerGlobalScope': Failed to convert value to 'object'.
+    at Worker.onMessage (worker-pool.js:64:23)
+overrideMethod @ installHook.js:1
+processForPublish @ image-processor-util.js:38
+await in processForPublish
+testWasmCompression @ test-image-wasm.js:45
+await in testWasmCompression
+(anonymous) @ test-image-wasm.js:58
+PendingScript
+(anonymous) @ VM611:4
+(anonymous) @ VM611:5
+test-image-wasm.js:46 ✓ PNG Processed: {size: '537.12 KB', mime: 'image/png', ext: 'png'}
+test-image-wasm.js:52 🎉 ALL TESTS PASSED!
 (index):1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received

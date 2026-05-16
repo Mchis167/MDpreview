@@ -59,7 +59,7 @@ self.onmessage = async (event) => {
         success: true,
         buffer: resultBuffer,
         mimeType
-      }, [resultBuffer.buffer]);
+      }, [resultBuffer]);
     } else {
       throw new Error(`Unsupported encoding type: ${type}`);
     }

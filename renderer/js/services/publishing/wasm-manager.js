@@ -6,7 +6,7 @@
 const WasmManager = (() => {
   'use strict';
 
-  const _wasmBase = '/assets/wasm'; // We copied WASM files to renderer/assets/wasm
+  const _wasmBase = '/js/lib/jsquash/wasm'; // Served by existing /js route, no restart needed
 
   /**
    * Get the absolute URL for a WASM asset
