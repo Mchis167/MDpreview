@@ -108,6 +108,37 @@ window.AssetPanelItem = (() => {
       const card = DesignSystem.createElement('div', `ds-asset-card ${isSelected ? 'is-selected' : ''}`);
       card.setAttribute('data-name', item.name);
       
+      // ── Drag & Drop Source ──
+      card.draggable = true;
+      card.ondragstart = (e) => {
+        // Guard: Don't allow drag if a modal or search palette is open
+        const hasOpenModal = !!document.querySelector('.ds-popover-shield, .ds-popover-floating');
+        const isSearchOpen = window.SearchPalette && window.SearchPalette.isOpen();
+        if (hasOpenModal || isSearchOpen) {
+          e.preventDefault();
+          return;
+        }
+
+        const isSelected = _state.selected.has(item.name);
+        const dragList = isSelected ? Array.from(_state.selected) : [item.name];
+        e.dataTransfer.setData('application/mdpreview-assets', JSON.stringify(dragList));
+        e.dataTransfer.effectAllowed = 'copy';
+        
+        // Add dragging state to drawer to allow drop-through overlay
+        const drawer = document.querySelector('.ds-asset-drawer');
+        if (drawer) drawer.classList.add('is-dragging');
+
+        // Custom drag ghost for multiple items
+        if (dragList.length > 1) {
+          const ghost = document.createElement('div');
+          ghost.className = 'ds-asset-drag-ghost';
+          ghost.textContent = `📦 Dragging ${dragList.length} assets`;
+          document.body.appendChild(ghost);
+          e.dataTransfer.setDragImage(ghost, 0, 0);
+          setTimeout(() => document.body.removeChild(ghost), 0);
+        }
+      };
+
       const preview = DesignSystem.createElement('div', 'ds-asset-preview');
       
       const checkbox = Checkbox.create({
@@ -206,6 +237,37 @@ window.AssetPanelItem = (() => {
       const row = DesignSystem.createElement('div', `ds-asset-list-row ${isSelected ? 'is-selected' : ''}`);
       row.setAttribute('data-name', item.name);
       
+      // ── Drag & Drop Source ──
+      row.draggable = true;
+      row.ondragstart = (e) => {
+        // Guard: Don't allow drag if a modal or search palette is open
+        const hasOpenModal = !!document.querySelector('.ds-popover-shield, .ds-popover-floating');
+        const isSearchOpen = window.SearchPalette && window.SearchPalette.isOpen();
+        if (hasOpenModal || isSearchOpen) {
+          e.preventDefault();
+          return;
+        }
+
+        const isSelected = _state.selected.has(item.name);
+        const dragList = isSelected ? Array.from(_state.selected) : [item.name];
+        e.dataTransfer.setData('application/mdpreview-assets', JSON.stringify(dragList));
+        e.dataTransfer.effectAllowed = 'copy';
+        
+        // Add dragging state to drawer to allow drop-through overlay
+        const drawer = document.querySelector('.ds-asset-drawer');
+        if (drawer) drawer.classList.add('is-dragging');
+
+        // Custom drag ghost for multiple items
+        if (dragList.length > 1) {
+          const ghost = document.createElement('div');
+          ghost.className = 'ds-asset-drag-ghost';
+          ghost.textContent = `📦 Dragging ${dragList.length} assets`;
+          document.body.appendChild(ghost);
+          e.dataTransfer.setDragImage(ghost, 0, 0);
+          setTimeout(() => document.body.removeChild(ghost), 0);
+        }
+      };
+
       const thumbCol = DesignSystem.createElement('div', 'ds-asset-list-col-thumb');
       const thumb = DesignSystem.createElement('div', 'ds-asset-list-thumb');
       if (item.type === 'broken') {

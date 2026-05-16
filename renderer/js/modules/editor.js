@@ -1,4 +1,4 @@
-/* global AppState, TabsModule, FileService, showToast, loadFile, DraftModule, MarkdownLogicService, MonacoService, monaco, MonacoActionService, MonacoSyncService */
+/* global AppState, TabsModule, FileService, showToast, loadFile, DraftModule, MarkdownLogicService, MonacoService, monaco, MonacoActionService, MonacoSyncService, MonacoHoverService */
 
 const EditorModule = (() => {
   let _originalContent = '';
@@ -301,6 +301,9 @@ const EditorModule = (() => {
       });
     }
 
+    // Activate Hover Service
+    if (typeof MonacoHoverService !== 'undefined') MonacoHoverService.activate(editor);
+
     // Initial Validation
     if (window.MonacoValidationService) window.MonacoValidationService.trigger();
   }
@@ -359,6 +362,7 @@ const EditorModule = (() => {
     }
     _isSlashMode = false;
     _boundFileId = null;
+    if (typeof MonacoHoverService !== 'undefined') MonacoHoverService.deactivate();
   }
 
   async function save(returnToRead = true, _callerLabel = '?', silent = false) {
@@ -434,6 +438,10 @@ const EditorModule = (() => {
     // 1. Handle system-level commands that shouldn't go through formatting logic
     if (action === 'global-shortcuts-search') {
       if (window.ShortcutService) window.ShortcutService.execute('global-shortcuts-search');
+      return;
+    }
+    if (action === 'open-asset-panel') {
+      if (window.ShortcutService) window.ShortcutService.execute('open-asset-manager');
       return;
     }
     if (action === 'img-upload') {

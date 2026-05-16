@@ -247,9 +247,14 @@ const MonacoService = (() => {
       const domNode = _editor.getDomNode();
       if (domNode) {
         // Handle Drag Events to prevent default indicators from getting stuck
+        const container = document.getElementById('monaco-editor-container');
         const handleDrag = (e) => {
           e.preventDefault();
           e.stopPropagation();
+          if (container && e.dataTransfer?.types?.includes('application/mdpreview-assets')) {
+            e.dataTransfer.dropEffect = 'copy';
+            container.classList.add('is-drop-target');
+          }
         };
 
         domNode.addEventListener('dragenter', handleDrag, true);
@@ -258,9 +263,13 @@ const MonacoService = (() => {
         domNode.addEventListener('dragleave', (e) => {
           e.preventDefault();
           e.stopPropagation();
+          if (container && !domNode.contains(e.relatedTarget)) {
+            container.classList.remove('is-drop-target');
+          }
         }, true);
 
         domNode.addEventListener('drop', (e) => {
+          if (container) container.classList.remove('is-drop-target');
           if (window.AttachmentService && window.AppState?.currentWorkspace) {
             const target = _editor.getTargetAtClientPoint(e.clientX, e.clientY);
             if (target && target.position) {

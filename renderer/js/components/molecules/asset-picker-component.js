@@ -19,13 +19,15 @@ window.AssetPickerComponent = (() => {
       title = 'Pick Asset',
       subtitle = '',
       confirmLabel = 'Select',
-      onConfirm = null
+      onConfirm = null,
+      multiSelect = false
     } = config;
 
     const registry = (window.AssetPanelState && window.AssetPanelState.registry) || { assets: [], orphans: [] };
     const assets = [...(registry.assets || []), ...(registry.orphans || [])];
     
-    let selectedExisting = null;
+    const selectedNames = new Set();
+    let lastSelectedIndex = -1;
 
     const content = DesignSystem.createElement('div', 'ds-asset-picker-dialog');
     
@@ -58,8 +60,9 @@ window.AssetPickerComponent = (() => {
           return;
         }
 
-        filtered.forEach(asset => {
-          const item = DesignSystem.createElement('div', `ds-asset-picker-item ${selectedExisting === asset.name ? 'is-selected' : ''}`);
+        filtered.forEach((asset, index) => {
+          const isSelected = selectedNames.has(asset.name);
+          const item = DesignSystem.createElement('div', `ds-asset-picker-item ${isSelected ? 'is-selected' : ''}`);
           
           const thumb = DesignSystem.createElement('div', 'ds-asset-picker-thumb');
           const img = document.createElement('img');
@@ -71,8 +74,22 @@ window.AssetPickerComponent = (() => {
           item.appendChild(thumb);
           item.appendChild(name);
           
-          item.onclick = () => {
-            selectedExisting = asset.name;
+          item.onclick = (e) => {
+            if (multiSelect && e.shiftKey && lastSelectedIndex !== -1) {
+              const start = Math.min(lastSelectedIndex, index);
+              const end = Math.max(lastSelectedIndex, index);
+              for (let i = start; i <= end; i++) {
+                selectedNames.add(filtered[i].name);
+              }
+            } else if (multiSelect) {
+              if (selectedNames.has(asset.name)) selectedNames.delete(asset.name);
+              else selectedNames.add(asset.name);
+            } else {
+              selectedNames.clear();
+              selectedNames.add(asset.name);
+            }
+
+            lastSelectedIndex = index;
             renderItems(filterText);
             _updateFooter();
           };
@@ -105,7 +122,13 @@ window.AssetPickerComponent = (() => {
     });
 
     function _updateFooter() {
-      confirmBtn.disabled = !selectedExisting;
+      const count = selectedNames.size;
+      confirmBtn.disabled = count === 0;
+      if (multiSelect && count > 0) {
+        confirmBtn.setLabel(`${confirmLabel} (${count})`);
+      } else {
+        confirmBtn.setLabel(confirmLabel);
+      }
     }
 
     cancelBtn.onclick = () => modal.close();
@@ -113,7 +136,10 @@ window.AssetPickerComponent = (() => {
     confirmBtn.onclick = async () => {
       confirmBtn.setLoading(true);
       try {
-        if (onConfirm) await onConfirm(selectedExisting);
+        if (onConfirm) {
+          const result = multiSelect ? Array.from(selectedNames) : Array.from(selectedNames)[0];
+          await onConfirm(result);
+        }
         modal.close();
       } catch (err) {
         console.error('Picker confirm failed:', err);

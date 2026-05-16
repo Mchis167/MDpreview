@@ -1,0 +1,64 @@
+/* ── Design System: Monaco Image Preview (Molecules) ── */
+
+.ds-monaco-image-preview {
+  position: fixed;
+  z-index: var(--ds-z-index-max);
+  background: var(--ds-bg-popover-glass);
+  backdrop-filter: blur(var(--ds-blur-lg));
+  -webkit-backdrop-filter: blur(var(--ds-blur-lg));
+  border: 1px solid var(--ds-border-default);
+  border-radius: var(--ds-radius-panel);
+  box-shadow: var(--ds-shadow-xl);
+  padding: 10px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px) scale(0.98);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 340px;
+}
+
+.ds-monaco-image-preview.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.ds-monaco-image-preview__header {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ds-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.ds-monaco-image-preview__body {
+  width: 100%;
+  min-width: 200px;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: var(--ds-radius-panel);
+  overflow: hidden;
+  border: 1px solid var(--ds-white-a08);
+}
+
+.ds-monaco-image-preview__img {
+  max-width: 320px;
+  max-height: 240px;
+  object-fit: contain;
+  display: block;
+}
+
+.ds-monaco-image-preview__footer {
+  font-size: 10px;
+  color: var(--ds-text-tertiary);
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

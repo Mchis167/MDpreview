@@ -316,6 +316,7 @@ const SearchPalette = (() => {
       const allShortcuts = SearchService.searchShortcuts('');
       const recentIds = _getRecentShortcuts();
       
+      const newResults = []; // Rebuild results to match UI order
       let itemIndex = 0;
 
       // 1. Render Recently Used Section
@@ -331,6 +332,7 @@ const SearchPalette = (() => {
         recentIds.forEach(id => {
           const itemData = allShortcuts.find(s => s.id === id);
           if (itemData) {
+            newResults.push(itemData);
             const itemEl = _createShortcutItem(itemData, itemIndex, query);
             itemEl.classList.add('is-recent-shortcut');
             _resultsContainer.appendChild(itemEl);
@@ -345,7 +347,7 @@ const SearchPalette = (() => {
 
       // 2. Render Normal Groups
       const grouped = {};
-      _results.forEach(item => {
+      allShortcuts.forEach(item => {
         if (!grouped[item.group]) grouped[item.group] = [];
         grouped[item.group].push(item);
       });
@@ -364,12 +366,15 @@ const SearchPalette = (() => {
         _resultsContainer.appendChild(header);
 
         grouped[groupTitle].forEach(itemData => {
+          newResults.push(itemData);
           const itemEl = _createShortcutItem(itemData, itemIndex, query);
           _resultsContainer.appendChild(itemEl);
           itemIndex++;
         });
         sectionIndex++;
       }
+
+      _results = newResults; // Sync internal state with UI
       _updateMorphHeight();
       return;
     }
@@ -479,7 +484,8 @@ const SearchPalette = (() => {
       </div>
     `;
 
-    item.onclick = () => {
+    item.onclick = (e) => {
+      e.stopPropagation();
       _selectedIndex = idx;
       _openSelected();
     };

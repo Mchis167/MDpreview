@@ -31,6 +31,18 @@
   opacity: 1;
 }
 
+.ds-asset-drawer.is-dragging {
+  pointer-events: none;
+}
+
+.ds-asset-drawer.is-dragging .ds-asset-drawer-overlay {
+  visibility: hidden;
+}
+
+.ds-asset-drawer.is-dragging .ds-asset-drawer-panel {
+  pointer-events: auto;
+}
+
 /* ── Panel ── */
 .ds-asset-drawer-panel {
   position: absolute;
@@ -262,7 +274,7 @@
 .ds-asset-card {
   display: flex;
   flex-direction: column;
-  cursor: pointer;
+  cursor: grab;
   border-right: 1px solid var(--ds-border-subtle);
   border-bottom: 1px solid var(--ds-border-subtle);
   transition: background var(--ds-transition-main);
@@ -270,6 +282,10 @@
   min-width: 0;
   /* Quan trọng: Ngăn card làm giãn cột grid */
   overflow: hidden;
+}
+
+.ds-asset-card:active {
+  cursor: grabbing;
 }
 
 .ds-asset-card:hover {
@@ -389,7 +405,11 @@
   align-items: center;
   border-bottom: 1px solid var(--ds-border-subtle);
   transition: background var(--ds-transition-fast);
-  cursor: pointer;
+  cursor: grab;
+}
+
+.ds-asset-list-row:active {
+  cursor: grabbing;
 }
 
 .ds-asset-list-row:hover {
@@ -628,4 +648,18 @@
 .ds-asset-selection-right {
   display: flex;
   gap: var(--ds-space-sm);
+}
+
+/* ── Drag Ghost ── */
+.ds-asset-drag-ghost {
+  padding: var(--ds-space-sm) var(--ds-space-md);
+  background: var(--ds-accent);
+  color: var(--ds-text-on-accent);
+  border-radius: var(--ds-radius-xs);
+  font-size: var(--ds-font-sm);
+  font-weight: bold;
+  pointer-events: none;
+  position: absolute;
+  top: -1000px;
+  z-index: var(--ds-z-index-drag);
 }

@@ -3,7 +3,7 @@
    TreeModule, WorkspaceModule, CollectModule, 
    DraftModule, EditorModule, 
    EditToolbarComponent,
-   TabsModule, TabPreview, io, initMermaid, ZoomSystem, ScrollModule, RecentlyViewedModule, ChangeActionViewBar, CommentsModule, WikiService, WikiDrawer, BacklinksDrawer, Home, AssetManager, MonacoValidationService */
+   TabsModule, TabPreview, io, initMermaid, ZoomSystem, ScrollModule, RecentlyViewedModule, ChangeActionViewBar, CommentsModule, WikiService, WikiDrawer, BacklinksDrawer, Home, AssetManager, MonacoValidationService, MonacoHoverService */
 /* ============================================================
    app.js — Core state, file loading, socket connection, boot
    ============================================================ */
@@ -304,6 +304,7 @@ window.AppState = {
       if (!isSwitching && typeof DraftModule !== 'undefined') {
         DraftModule.createDraft(draftId);
         if (typeof EditorModule !== 'undefined') {
+          EditorModule.bind();
           EditorModule.setOriginalContent('');
         }
       }
@@ -846,6 +847,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   DraftModule.init();        // draft.js
   MarkdownViewer.init();      // organisms/markdown-viewer-component.js
   if (typeof MonacoValidationService !== 'undefined') MonacoValidationService.init();
+  if (typeof MonacoHoverService !== 'undefined') MonacoHoverService.init();
   Home.init();                // organisms/home-component.js
   if (typeof AssetManager !== 'undefined') AssetManager.init();
   ScrollModule.init();       // scroll.js

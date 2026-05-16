@@ -27,6 +27,9 @@ Khôi phục chức năng Inline Quick Command Palette và thực hiện tái c�
 - [03:57] **AttachmentService Interception**: Cập nhật `processImageFiles` để hiển thị `AssetUploadPreview` cho mọi hành động upload đơn lẻ (Paste, Drop, /upload).
 - [04:15] **Fix Duplicate Picker**: Giải quyết lỗi hiện 2 lần cửa sổ chọn file bằng cách đóng gói (encapsulate) logic `input.click()` và `FileReader` hoàn toàn vào trong `AssetReplacementDialog`.
 - [04:18] **Surgical Code Cleanup**: Loại bỏ logic picker dư thừa tại `AssetPanelActions.js` và `AttachmentService.js`, chuyển sang mô hình "Dumb Callers".
+- [04:26] **Fix Asset Filtering**: Cập nhật `AssetPickerComponent` để loại bỏ các broken link khỏi danh sách chọn, chỉ hiển thị file vật lý thực tế.
+- [04:30] **Input Atom Enhancement**: Nâng cấp `InputComponent` hỗ trợ `leadingIcon` (icon bên trái) và áp dụng cho search bar trong Asset Picker.
+- [04:38] Session closed — archived to completed-session/
 
 ## ⚠️ Quyết định quan trọng
 - **Single Responsibility**: Tách logic chọn ảnh (`Picker`), xem trước (`Preview`), và thay thế (`Replacement`) thành các module riêng biệt để tránh ô nhiễm logic (`if/else` quá nhiều).
@@ -40,4 +43,6 @@ Khôi phục chức năng Inline Quick Command Palette và thực hiện tái c�
 
 ## 🔄 Đang dở / Session tiếp theo bắt đầu từ đây
 - **Tái cấu trúc Asset Management**: ✅ HOÀN THÀNH — [04:22 2026-05-17]
-- **Pivot sang Z-index Revamp**: Sẵn sàng triển khai theo Implementation Plan.
+- **Fix Duplicate Picker & Cleanup**: ✅ HOÀN THÀNH — [04:22 2026-05-17]
+- **Z-index System Revamp (v2.0)**: ✅ HOÀN THÀNH — [04:35 2026-05-17]
+- **Session Status**: ✅ TASK HOÀN THÀNH — [04:38 2026-05-17]

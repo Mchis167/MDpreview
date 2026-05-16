@@ -152,26 +152,10 @@ window.AssetPanel = (function() {
     },
 
     _handleToggleSelection(name, isShift) {
-      if (AssetPanelSelection) {
-        const items = this._getFilteredItems();
+      if (AssetPanelSelection && AssetPanelContent) {
+        const items = AssetPanelContent.getVisibleItems();
         AssetPanelSelection.toggleSelection(name, isShift, items);
       }
-    },
-
-    /**
-     * Lấy danh sách item sau khi filter (Proxy cho Content module logic).
-     */
-    _getFilteredItems() {
-      const { assets, orphans, broken } = _state.registry;
-      if (_state.filter === 'active') return assets.map(i => ({ ...i, type: 'active' }));
-      if (_state.filter === 'orphan') return orphans.map(i => ({ ...i, type: 'orphan' }));
-      if (_state.filter === 'broken') return broken.map(i => ({ ...i, type: 'broken' }));
-      
-      return [
-        ...broken.map(i => ({ ...i, type: 'broken' })),
-        ...assets.map(i => ({ ...i, type: 'active' })),
-        ...orphans.map(i => ({ ...i, type: 'orphan' }))
-      ];
     },
 
     _bindGlobalEvents() {
@@ -179,6 +163,12 @@ window.AssetPanel = (function() {
         if (e.key === 'Escape' && _isVisible) {
           this.close();
         }
+      });
+
+      // Fail-safe cleanup for drag state
+      window.addEventListener('dragend', () => {
+        const drawer = document.querySelector('.ds-asset-drawer');
+        if (drawer) drawer.classList.remove('is-dragging');
       });
     }
   };

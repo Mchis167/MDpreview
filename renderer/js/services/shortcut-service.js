@@ -91,6 +91,11 @@ const ShortcutService = (() => {
         if (item.isInformative) continue;
 
         if (_matches(e, mod, key, isShift, isAlt, item.keys, item.requireMod, ctrl)) {
+          // Guard: If shortcut requires a file but none is open, skip
+          if (item.requireFile && !window.AppState?.currentFile) {
+            continue;
+          }
+
           // Check if this shortcut is allowed in inputs
           if (inInput && !item.allowInInput) {
             // If no modifier is pressed, it's normal typing (or standard navigation keys), we skip

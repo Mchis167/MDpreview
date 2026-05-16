@@ -206,6 +206,10 @@ window.AssetPanelContent = (() => {
       }
     },
 
+    getVisibleItems() {
+      return _getFilteredItems();
+    },
+
     updateList() {
       _renderItems();
     }

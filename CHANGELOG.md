@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] — 2026-05-17
+
+### 🚀 Added
+- **Drag Asset vào Monaco Editor**: Kéo thả ảnh trực tiếp từ Asset Panel (Card & List view) vào Editor để chèn markdown image reference `![name](/assets/name)`.
+- **Smart Newline Detection**: Tự động xuống dòng khi drop asset vào vị trí đã có nội dung — kiểm tra text trước drop position thay vì dùng regex (an toàn với unicode, không backtrack).
+- **Visual Drop Feedback**: Editor hiển thị accent border và background khi đang kéo asset qua vùng soạn thảo (`#monaco-editor-container.is-drop-target`).
+
+### 🔧 Changed
+- **AttachmentService — Asset Path Fix**: Đường dẫn asset được chèn đổi từ `assets/name` thành `/assets/encodeURIComponent(name)` — fix missing leading slash và đảm bảo tên file đặc biệt được encode đúng.
+- **AttachmentService — Smart Insert**: Thêm `_insertLinkAtPositionSmart()` chuyên dùng cho drag-drop path; giữ nguyên `_insertLinkAtPosition()` cho các caller cũ (paste, pick dialog).
+
+### 🐞 Fixed
+- **Overlay Drawer Blockade khi Drag**: Asset Panel overlay không còn che phủ vùng editor trong lúc kéo (`visibility: hidden` thay vì chỉ `pointer-events: none`).
+- **Monaco Capture-Phase Interception**: Phát hiện và xử lý đúng luồng event — Monaco Service dùng `capture=true` + `stopPropagation()`, toàn bộ drag-drop phải đi qua `AttachmentService.handleDrop()`, không thể intercept từ container ngoài.
+
+---
+
 ## [2.6.0] — 2026-05-17 04:35
 
 ### 🎨 Design System

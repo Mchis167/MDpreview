@@ -163,6 +163,10 @@ const SearchService = (() => {
 
       sections.forEach(sec => {
         sec.items.forEach(item => {
+          // Filter out shortcuts that require a file if no file is open
+          if (item.requireFile && (!window.AppState || !window.AppState.currentFile)) {
+            return;
+          }
           allShortcuts.push({ ...item, group: sec.title, type: 'shortcut' });
         });
       });

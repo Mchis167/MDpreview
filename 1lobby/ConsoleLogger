@@ -1,1045 +1,742 @@
-installHook.js:1 [ScrollRestore] FIRE caller=direct attempts=0 pos=4625 scrollTop=0
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
 overrideMethod @ installHook.js:1
-tryScroll @ scroll.js:136
-restore @ scroll.js:148
-update @ markdown-viewer-component.js:1185
-setState @ markdown-viewer-component.js:81
-loadFile @ app.js:459
-await in loadFile
-switchWorkspace @ tabs.js:190
-_applyActive @ workspace.js:49
-await in _applyActive
-load @ workspace.js:25
-await in load
-init @ workspace.js:12
-(anonymous) @ app.js:829
-setTimeout
-(anonymous) @ app.js:827
-installHook.js:1 [setValue] scrollBefore=0 scrollAfter=0 len=0
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
 overrideMethod @ installHook.js:1
-setValue @ monaco-service.js:505
-setOriginalContent @ editor.js:419
-(anonymous) @ markdown-viewer-component.js:1222
-Promise.then
-render @ markdown-viewer-component.js:1220
-MarkdownEditor @ markdown-viewer-component.js:1201
-render @ markdown-viewer-component.js:141
-setState @ markdown-viewer-component.js:69
-loadFile @ app.js:421
-switchWorkspace @ tabs.js:190
-_applyActive @ workspace.js:49
-await in _applyActive
-load @ workspace.js:25
-await in load
-init @ workspace.js:12
-(anonymous) @ app.js:829
-setTimeout
-(anonymous) @ app.js:827
-installHook.js:1 [setValue] scrollBefore=0 scrollAfter=0 len=13251
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
 overrideMethod @ installHook.js:1
-setValue @ monaco-service.js:505
-setOriginalContent @ editor.js:419
-update @ markdown-viewer-component.js:1353
-setState @ markdown-viewer-component.js:77
-_proceedUpdateUI @ change-action-view-bar.js:263
-updateUI @ change-action-view-bar.js:183
-(anonymous) @ change-action-view-bar.js:87
-handleModeClick @ change-action-view-bar.js:103
-onChange @ change-action-view-bar.js:40
-(anonymous) @ segmented-control.js:41
-installHook.js:1 [setValue] scrollBefore=0 scrollAfter=0 len=13251
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
 overrideMethod @ installHook.js:1
-setValue @ monaco-service.js:505
-setOriginalContent @ editor.js:419
-run @ markdown-viewer-component.js:1242
-await in run
-activate @ markdown-viewer-component.js:1315
-_handleModeSwitch @ markdown-viewer-component.js:173
-setState @ markdown-viewer-component.js:74
-_proceedUpdateUI @ change-action-view-bar.js:263
-updateUI @ change-action-view-bar.js:183
-(anonymous) @ change-action-view-bar.js:87
-handleModeClick @ change-action-view-bar.js:103
-onChange @ change-action-view-bar.js:40
-(anonymous) @ segmented-control.js:41
-installHook.js:1 [SyncCursor:S0] srcStart=6426 → line=152 modelLines=324 scrollBefore=0
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
 overrideMethod @ installHook.js:1
-(anonymous) @ monaco-sync-service.js:37
-requestAnimationFrame
-syncCursor @ monaco-sync-service.js:32
-run @ markdown-viewer-component.js:1287
-await in run
-activate @ markdown-viewer-component.js:1315
-_handleModeSwitch @ markdown-viewer-component.js:173
-setState @ markdown-viewer-component.js:74
-_proceedUpdateUI @ change-action-view-bar.js:263
-updateUI @ change-action-view-bar.js:183
-(anonymous) @ change-action-view-bar.js:87
-handleModeClick @ change-action-view-bar.js:103
-onChange @ change-action-view-bar.js:40
-(anonymous) @ segmented-control.js:41
-installHook.js:1 [ScrollSpy] scrollTop=535
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
 overrideMethod @ installHook.js:1
-(anonymous) @ markdown-viewer-component.js:1279
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
 _deliver @ editor.api-CalNCsUg.js:7
 _deliverQueue @ editor.api-CalNCsUg.js:7
 fire @ editor.api-CalNCsUg.js:7
-(anonymous) @ editor.api-CalNCsUg.js:257
-_deliver @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
-emitOutgoingEvent @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:254
-_deliver @ editor.api-CalNCsUg.js:7
-_deliverQueue @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_setState @ editor.api-CalNCsUg.js:52
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
 (anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-Ny @ editor.api-CalNCsUg.js:8
-_scheduleRender @ editor.api-CalNCsUg.js:222
-scheduleCoordinatedRendering @ editor.api-CalNCsUg.js:222
-_scheduleRender @ editor.api-CalNCsUg.js:222
-handleEvents @ editor.api-CalNCsUg.js:222
-_doConsumeQueue @ editor.api-CalNCsUg.js:253
-_consumeViewEventQueue @ editor.api-CalNCsUg.js:253
-_emitMany @ editor.api-CalNCsUg.js:253
-endEmitViewEvents @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:255
-batchChanges @ editor.api-CalNCsUg.js:257
-_withViewEventsCollector @ editor.api-CalNCsUg.js:255
-setSelections @ editor.api-CalNCsUg.js:255
-_setSelectionImpl @ editor.api-CalNCsUg.js:257
-setSelection @ editor.api-CalNCsUg.js:257
-setSelection @ monaco-service.js:563
-(anonymous) @ monaco-sync-service.js:41
-requestAnimationFrame
-syncCursor @ monaco-sync-service.js:32
-run @ markdown-viewer-component.js:1287
-await in run
-activate @ markdown-viewer-component.js:1315
-_handleModeSwitch @ markdown-viewer-component.js:173
-setState @ markdown-viewer-component.js:74
-_proceedUpdateUI @ change-action-view-bar.js:263
-updateUI @ change-action-view-bar.js:183
-(anonymous) @ change-action-view-bar.js:87
-handleModeClick @ change-action-view-bar.js:103
-onChange @ change-action-view-bar.js:40
-(anonymous) @ segmented-control.js:41
-installHook.js:1 Error: scroll-spy-stack
-    at ER.value (markdown-viewer-component.js:1280:25)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
-    at A.fire (editor.api-CalNCsUg.js:7:3146)
-    at ER.value (editor.api-CalNCsUg.js:257:18060)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A.fire (editor.api-CalNCsUg.js:7:3039)
-    at xme._emitOutgoingEvents (editor.api-CalNCsUg.js:253:37133)
-    at xme.emitOutgoingEvent (editor.api-CalNCsUg.js:253:36696)
-    at ER.value (editor.api-CalNCsUg.js:254:68177)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
-    at A.fire (editor.api-CalNCsUg.js:7:3146)
-    at x_._setState (editor.api-CalNCsUg.js:52:38933)
-    at x_._performSmoothScrolling (editor.api-CalNCsUg.js:52:38537)
-    at vM._runner (editor.api-CalNCsUg.js:52:38310)
-    at vM.execute (editor.api-CalNCsUg.js:8:34260)
-    at n (editor.api-CalNCsUg.js:8:34507)
-    at editor.api-CalNCsUg.js:8:34677
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
 overrideMethod @ installHook.js:1
-(anonymous) @ markdown-viewer-component.js:1281
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
 _deliver @ editor.api-CalNCsUg.js:7
 _deliverQueue @ editor.api-CalNCsUg.js:7
 fire @ editor.api-CalNCsUg.js:7
-(anonymous) @ editor.api-CalNCsUg.js:257
-_deliver @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
-emitOutgoingEvent @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:254
-_deliver @ editor.api-CalNCsUg.js:7
-_deliverQueue @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_setState @ editor.api-CalNCsUg.js:52
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
 (anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-Ny @ editor.api-CalNCsUg.js:8
-_scheduleRender @ editor.api-CalNCsUg.js:222
-scheduleCoordinatedRendering @ editor.api-CalNCsUg.js:222
-_scheduleRender @ editor.api-CalNCsUg.js:222
-handleEvents @ editor.api-CalNCsUg.js:222
-_doConsumeQueue @ editor.api-CalNCsUg.js:253
-_consumeViewEventQueue @ editor.api-CalNCsUg.js:253
-_emitMany @ editor.api-CalNCsUg.js:253
-endEmitViewEvents @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:255
-batchChanges @ editor.api-CalNCsUg.js:257
-_withViewEventsCollector @ editor.api-CalNCsUg.js:255
-setSelections @ editor.api-CalNCsUg.js:255
-_setSelectionImpl @ editor.api-CalNCsUg.js:257
-setSelection @ editor.api-CalNCsUg.js:257
-setSelection @ monaco-service.js:563
-(anonymous) @ monaco-sync-service.js:41
-requestAnimationFrame
-syncCursor @ monaco-sync-service.js:32
-run @ markdown-viewer-component.js:1287
-await in run
-activate @ markdown-viewer-component.js:1315
-_handleModeSwitch @ markdown-viewer-component.js:173
-setState @ markdown-viewer-component.js:74
-_proceedUpdateUI @ change-action-view-bar.js:263
-updateUI @ change-action-view-bar.js:183
-(anonymous) @ change-action-view-bar.js:87
-handleModeClick @ change-action-view-bar.js:103
-onChange @ change-action-view-bar.js:40
-(anonymous) @ segmented-control.js:41
-installHook.js:1 [SyncCursor:S0] scrollAfter=535 callerHint=activate
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
 overrideMethod @ installHook.js:1
-(anonymous) @ monaco-sync-service.js:54
-requestAnimationFrame
-(anonymous) @ monaco-sync-service.js:53
-requestAnimationFrame
-syncCursor @ monaco-sync-service.js:32
-run @ markdown-viewer-component.js:1287
-await in run
-activate @ markdown-viewer-component.js:1315
-_handleModeSwitch @ markdown-viewer-component.js:173
-setState @ markdown-viewer-component.js:74
-_proceedUpdateUI @ change-action-view-bar.js:263
-updateUI @ change-action-view-bar.js:183
-(anonymous) @ change-action-view-bar.js:87
-handleModeClick @ change-action-view-bar.js:103
-onChange @ change-action-view-bar.js:40
-(anonymous) @ segmented-control.js:41
-installHook.js:1 [ScrollSpy] scrollTop=650
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
 overrideMethod @ installHook.js:1
-(anonymous) @ markdown-viewer-component.js:1279
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
 _deliver @ editor.api-CalNCsUg.js:7
 _deliverQueue @ editor.api-CalNCsUg.js:7
 fire @ editor.api-CalNCsUg.js:7
-(anonymous) @ editor.api-CalNCsUg.js:257
-_deliver @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
-emitOutgoingEvent @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:254
-_deliver @ editor.api-CalNCsUg.js:7
-_deliverQueue @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_setState @ editor.api-CalNCsUg.js:52
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
 (anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:257
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
-(anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-Ny @ editor.api-CalNCsUg.js:8
-_scheduleRender @ editor.api-CalNCsUg.js:222
-scheduleCoordinatedRendering @ editor.api-CalNCsUg.js:222
-_scheduleRender @ editor.api-CalNCsUg.js:222
-handleEvents @ editor.api-CalNCsUg.js:222
-_doConsumeQueue @ editor.api-CalNCsUg.js:253
-_consumeViewEventQueue @ editor.api-CalNCsUg.js:253
-_emitMany @ editor.api-CalNCsUg.js:253
-endEmitViewEvents @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:255
-batchChanges @ editor.api-CalNCsUg.js:257
-_withViewEventsCollector @ editor.api-CalNCsUg.js:255
-setSelections @ editor.api-CalNCsUg.js:255
-_setSelectionImpl @ editor.api-CalNCsUg.js:257
-setSelection @ editor.api-CalNCsUg.js:257
-setSelection @ monaco-service.js:563
-(anonymous) @ monaco-sync-service.js:41
-requestAnimationFrame
-syncCursor @ monaco-sync-service.js:32
-run @ markdown-viewer-component.js:1287
-await in run
-activate @ markdown-viewer-component.js:1315
-_handleModeSwitch @ markdown-viewer-component.js:173
-setState @ markdown-viewer-component.js:74
-_proceedUpdateUI @ change-action-view-bar.js:263
-updateUI @ change-action-view-bar.js:183
-(anonymous) @ change-action-view-bar.js:87
-handleModeClick @ change-action-view-bar.js:103
-onChange @ change-action-view-bar.js:40
-(anonymous) @ segmented-control.js:41
-installHook.js:1 Error: scroll-spy-stack
-    at ER.value (markdown-viewer-component.js:1280:25)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
-    at A.fire (editor.api-CalNCsUg.js:7:3146)
-    at ER.value (editor.api-CalNCsUg.js:257:18060)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A.fire (editor.api-CalNCsUg.js:7:3039)
-    at xme._emitOutgoingEvents (editor.api-CalNCsUg.js:253:37133)
-    at xme.emitOutgoingEvent (editor.api-CalNCsUg.js:253:36696)
-    at ER.value (editor.api-CalNCsUg.js:254:68177)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
-    at A.fire (editor.api-CalNCsUg.js:7:3146)
-    at x_._setState (editor.api-CalNCsUg.js:52:38933)
-    at x_._performSmoothScrolling (editor.api-CalNCsUg.js:52:38537)
-    at vM._runner (editor.api-CalNCsUg.js:52:38825)
-    at vM.execute (editor.api-CalNCsUg.js:8:34260)
-    at n (editor.api-CalNCsUg.js:8:34507)
-    at editor.api-CalNCsUg.js:8:34677
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
 overrideMethod @ installHook.js:1
-(anonymous) @ markdown-viewer-component.js:1281
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
 _deliver @ editor.api-CalNCsUg.js:7
 _deliverQueue @ editor.api-CalNCsUg.js:7
 fire @ editor.api-CalNCsUg.js:7
-(anonymous) @ editor.api-CalNCsUg.js:257
-_deliver @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
-emitOutgoingEvent @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:254
-_deliver @ editor.api-CalNCsUg.js:7
-_deliverQueue @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_setState @ editor.api-CalNCsUg.js:52
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
 (anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:257
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
-(anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-Ny @ editor.api-CalNCsUg.js:8
-_scheduleRender @ editor.api-CalNCsUg.js:222
-scheduleCoordinatedRendering @ editor.api-CalNCsUg.js:222
-_scheduleRender @ editor.api-CalNCsUg.js:222
-handleEvents @ editor.api-CalNCsUg.js:222
-_doConsumeQueue @ editor.api-CalNCsUg.js:253
-_consumeViewEventQueue @ editor.api-CalNCsUg.js:253
-_emitMany @ editor.api-CalNCsUg.js:253
-endEmitViewEvents @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:255
-batchChanges @ editor.api-CalNCsUg.js:257
-_withViewEventsCollector @ editor.api-CalNCsUg.js:255
-setSelections @ editor.api-CalNCsUg.js:255
-_setSelectionImpl @ editor.api-CalNCsUg.js:257
-setSelection @ editor.api-CalNCsUg.js:257
-setSelection @ monaco-service.js:563
-(anonymous) @ monaco-sync-service.js:41
-requestAnimationFrame
-syncCursor @ monaco-sync-service.js:32
-run @ markdown-viewer-component.js:1287
-await in run
-activate @ markdown-viewer-component.js:1315
-_handleModeSwitch @ markdown-viewer-component.js:173
-setState @ markdown-viewer-component.js:74
-_proceedUpdateUI @ change-action-view-bar.js:263
-updateUI @ change-action-view-bar.js:183
-(anonymous) @ change-action-view-bar.js:87
-handleModeClick @ change-action-view-bar.js:103
-onChange @ change-action-view-bar.js:40
-(anonymous) @ segmented-control.js:41
-installHook.js:1 [ScrollSpy] scrollTop=678
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
 overrideMethod @ installHook.js:1
-(anonymous) @ markdown-viewer-component.js:1279
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
 _deliver @ editor.api-CalNCsUg.js:7
 _deliverQueue @ editor.api-CalNCsUg.js:7
 fire @ editor.api-CalNCsUg.js:7
-(anonymous) @ editor.api-CalNCsUg.js:257
-_deliver @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
-emitOutgoingEvent @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:254
-_deliver @ editor.api-CalNCsUg.js:7
-_deliverQueue @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_setState @ editor.api-CalNCsUg.js:52
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
 (anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:257
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
-(anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:257
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
-(anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-Ny @ editor.api-CalNCsUg.js:8
-_scheduleRender @ editor.api-CalNCsUg.js:222
-scheduleCoordinatedRendering @ editor.api-CalNCsUg.js:222
-_scheduleRender @ editor.api-CalNCsUg.js:222
-handleEvents @ editor.api-CalNCsUg.js:222
-_doConsumeQueue @ editor.api-CalNCsUg.js:253
-_consumeViewEventQueue @ editor.api-CalNCsUg.js:253
-_emitMany @ editor.api-CalNCsUg.js:253
-endEmitViewEvents @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:255
-batchChanges @ editor.api-CalNCsUg.js:257
-_withViewEventsCollector @ editor.api-CalNCsUg.js:255
-setSelections @ editor.api-CalNCsUg.js:255
-_setSelectionImpl @ editor.api-CalNCsUg.js:257
-setSelection @ editor.api-CalNCsUg.js:257
-setSelection @ monaco-service.js:563
-(anonymous) @ monaco-sync-service.js:41
-requestAnimationFrame
-syncCursor @ monaco-sync-service.js:32
-run @ markdown-viewer-component.js:1287
-await in run
-activate @ markdown-viewer-component.js:1315
-_handleModeSwitch @ markdown-viewer-component.js:173
-setState @ markdown-viewer-component.js:74
-_proceedUpdateUI @ change-action-view-bar.js:263
-updateUI @ change-action-view-bar.js:183
-(anonymous) @ change-action-view-bar.js:87
-handleModeClick @ change-action-view-bar.js:103
-onChange @ change-action-view-bar.js:40
-(anonymous) @ segmented-control.js:41
-installHook.js:1 Error: scroll-spy-stack
-    at ER.value (markdown-viewer-component.js:1280:25)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
-    at A.fire (editor.api-CalNCsUg.js:7:3146)
-    at ER.value (editor.api-CalNCsUg.js:257:18060)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A.fire (editor.api-CalNCsUg.js:7:3039)
-    at xme._emitOutgoingEvents (editor.api-CalNCsUg.js:253:37133)
-    at xme.emitOutgoingEvent (editor.api-CalNCsUg.js:253:36696)
-    at ER.value (editor.api-CalNCsUg.js:254:68177)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
-    at A.fire (editor.api-CalNCsUg.js:7:3146)
-    at x_._setState (editor.api-CalNCsUg.js:52:38933)
-    at x_._performSmoothScrolling (editor.api-CalNCsUg.js:52:38537)
-    at vM._runner (editor.api-CalNCsUg.js:52:38825)
-    at vM.execute (editor.api-CalNCsUg.js:8:34260)
-    at n (editor.api-CalNCsUg.js:8:34507)
-    at editor.api-CalNCsUg.js:8:34677
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
 overrideMethod @ installHook.js:1
-(anonymous) @ markdown-viewer-component.js:1281
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
 _deliver @ editor.api-CalNCsUg.js:7
 _deliverQueue @ editor.api-CalNCsUg.js:7
 fire @ editor.api-CalNCsUg.js:7
-(anonymous) @ editor.api-CalNCsUg.js:257
-_deliver @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
-emitOutgoingEvent @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:254
-_deliver @ editor.api-CalNCsUg.js:7
-_deliverQueue @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_setState @ editor.api-CalNCsUg.js:52
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
 (anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:257
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
-(anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:257
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
-(anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-Ny @ editor.api-CalNCsUg.js:8
-_scheduleRender @ editor.api-CalNCsUg.js:222
-scheduleCoordinatedRendering @ editor.api-CalNCsUg.js:222
-_scheduleRender @ editor.api-CalNCsUg.js:222
-handleEvents @ editor.api-CalNCsUg.js:222
-_doConsumeQueue @ editor.api-CalNCsUg.js:253
-_consumeViewEventQueue @ editor.api-CalNCsUg.js:253
-_emitMany @ editor.api-CalNCsUg.js:253
-endEmitViewEvents @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:255
-batchChanges @ editor.api-CalNCsUg.js:257
-_withViewEventsCollector @ editor.api-CalNCsUg.js:255
-setSelections @ editor.api-CalNCsUg.js:255
-_setSelectionImpl @ editor.api-CalNCsUg.js:257
-setSelection @ editor.api-CalNCsUg.js:257
-setSelection @ monaco-service.js:563
-(anonymous) @ monaco-sync-service.js:41
-requestAnimationFrame
-syncCursor @ monaco-sync-service.js:32
-run @ markdown-viewer-component.js:1287
-await in run
-activate @ markdown-viewer-component.js:1315
-_handleModeSwitch @ markdown-viewer-component.js:173
-setState @ markdown-viewer-component.js:74
-_proceedUpdateUI @ change-action-view-bar.js:263
-updateUI @ change-action-view-bar.js:183
-(anonymous) @ change-action-view-bar.js:87
-handleModeClick @ change-action-view-bar.js:103
-onChange @ change-action-view-bar.js:40
-(anonymous) @ segmented-control.js:41
-installHook.js:1 [ScrollSpy] scrollTop=1842
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
 overrideMethod @ installHook.js:1
-(anonymous) @ markdown-viewer-component.js:1279
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
 _deliver @ editor.api-CalNCsUg.js:7
 _deliverQueue @ editor.api-CalNCsUg.js:7
 fire @ editor.api-CalNCsUg.js:7
-(anonymous) @ editor.api-CalNCsUg.js:257
-_deliver @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
-emitOutgoingEvent @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:254
-_deliver @ editor.api-CalNCsUg.js:7
-_deliverQueue @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_setState @ editor.api-CalNCsUg.js:52
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
 (anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:257
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
-(anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:257
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
-(anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:257
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
-(anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-Ny @ editor.api-CalNCsUg.js:8
-_scheduleRender @ editor.api-CalNCsUg.js:222
-scheduleCoordinatedRendering @ editor.api-CalNCsUg.js:222
-_scheduleRender @ editor.api-CalNCsUg.js:222
-handleEvents @ editor.api-CalNCsUg.js:222
-_doConsumeQueue @ editor.api-CalNCsUg.js:253
-_consumeViewEventQueue @ editor.api-CalNCsUg.js:253
-_emitMany @ editor.api-CalNCsUg.js:253
-endEmitViewEvents @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:255
-batchChanges @ editor.api-CalNCsUg.js:257
-_withViewEventsCollector @ editor.api-CalNCsUg.js:255
-setSelections @ editor.api-CalNCsUg.js:255
-_setSelectionImpl @ editor.api-CalNCsUg.js:257
-setSelection @ editor.api-CalNCsUg.js:257
-setSelection @ monaco-service.js:563
-(anonymous) @ monaco-sync-service.js:41
-requestAnimationFrame
-syncCursor @ monaco-sync-service.js:32
-run @ markdown-viewer-component.js:1287
-await in run
-activate @ markdown-viewer-component.js:1315
-_handleModeSwitch @ markdown-viewer-component.js:173
-setState @ markdown-viewer-component.js:74
-_proceedUpdateUI @ change-action-view-bar.js:263
-updateUI @ change-action-view-bar.js:183
-(anonymous) @ change-action-view-bar.js:87
-handleModeClick @ change-action-view-bar.js:103
-onChange @ change-action-view-bar.js:40
-(anonymous) @ segmented-control.js:41
-installHook.js:1 Error: scroll-spy-stack
-    at ER.value (markdown-viewer-component.js:1280:25)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
-    at A.fire (editor.api-CalNCsUg.js:7:3146)
-    at ER.value (editor.api-CalNCsUg.js:257:18060)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A.fire (editor.api-CalNCsUg.js:7:3039)
-    at xme._emitOutgoingEvents (editor.api-CalNCsUg.js:253:37133)
-    at xme.emitOutgoingEvent (editor.api-CalNCsUg.js:253:36696)
-    at ER.value (editor.api-CalNCsUg.js:254:68177)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
-    at A.fire (editor.api-CalNCsUg.js:7:3146)
-    at x_._setState (editor.api-CalNCsUg.js:52:38933)
-    at x_._performSmoothScrolling (editor.api-CalNCsUg.js:52:38537)
-    at vM._runner (editor.api-CalNCsUg.js:52:38825)
-    at vM.execute (editor.api-CalNCsUg.js:8:34260)
-    at n (editor.api-CalNCsUg.js:8:34507)
-    at editor.api-CalNCsUg.js:8:34677
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
 overrideMethod @ installHook.js:1
-(anonymous) @ markdown-viewer-component.js:1281
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
 _deliver @ editor.api-CalNCsUg.js:7
 _deliverQueue @ editor.api-CalNCsUg.js:7
 fire @ editor.api-CalNCsUg.js:7
-(anonymous) @ editor.api-CalNCsUg.js:257
-_deliver @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
-emitOutgoingEvent @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:254
-_deliver @ editor.api-CalNCsUg.js:7
-_deliverQueue @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_setState @ editor.api-CalNCsUg.js:52
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
 (anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:257
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
-(anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:257
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
-(anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:257
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
-(anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-Ny @ editor.api-CalNCsUg.js:8
-_scheduleRender @ editor.api-CalNCsUg.js:222
-scheduleCoordinatedRendering @ editor.api-CalNCsUg.js:222
-_scheduleRender @ editor.api-CalNCsUg.js:222
-handleEvents @ editor.api-CalNCsUg.js:222
-_doConsumeQueue @ editor.api-CalNCsUg.js:253
-_consumeViewEventQueue @ editor.api-CalNCsUg.js:253
-_emitMany @ editor.api-CalNCsUg.js:253
-endEmitViewEvents @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:255
-batchChanges @ editor.api-CalNCsUg.js:257
-_withViewEventsCollector @ editor.api-CalNCsUg.js:255
-setSelections @ editor.api-CalNCsUg.js:255
-_setSelectionImpl @ editor.api-CalNCsUg.js:257
-setSelection @ editor.api-CalNCsUg.js:257
-setSelection @ monaco-service.js:563
-(anonymous) @ monaco-sync-service.js:41
-requestAnimationFrame
-syncCursor @ monaco-sync-service.js:32
-run @ markdown-viewer-component.js:1287
-await in run
-activate @ markdown-viewer-component.js:1315
-_handleModeSwitch @ markdown-viewer-component.js:173
-setState @ markdown-viewer-component.js:74
-_proceedUpdateUI @ change-action-view-bar.js:263
-updateUI @ change-action-view-bar.js:183
-(anonymous) @ change-action-view-bar.js:87
-handleModeClick @ change-action-view-bar.js:103
-onChange @ change-action-view-bar.js:40
-(anonymous) @ segmented-control.js:41
-installHook.js:1 [ScrollSpy] scrollTop=2041
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
 overrideMethod @ installHook.js:1
-(anonymous) @ markdown-viewer-component.js:1279
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
 _deliver @ editor.api-CalNCsUg.js:7
 _deliverQueue @ editor.api-CalNCsUg.js:7
 fire @ editor.api-CalNCsUg.js:7
-(anonymous) @ editor.api-CalNCsUg.js:257
-_deliver @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
-emitOutgoingEvent @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:254
-_deliver @ editor.api-CalNCsUg.js:7
-_deliverQueue @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_setState @ editor.api-CalNCsUg.js:52
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
 (anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:257
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
-(anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:257
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
-(anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:257
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
-(anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:257
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
-(anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-Ny @ editor.api-CalNCsUg.js:8
-_scheduleRender @ editor.api-CalNCsUg.js:222
-scheduleCoordinatedRendering @ editor.api-CalNCsUg.js:222
-_scheduleRender @ editor.api-CalNCsUg.js:222
-handleEvents @ editor.api-CalNCsUg.js:222
-_doConsumeQueue @ editor.api-CalNCsUg.js:253
-_consumeViewEventQueue @ editor.api-CalNCsUg.js:253
-_emitMany @ editor.api-CalNCsUg.js:253
-endEmitViewEvents @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:255
-batchChanges @ editor.api-CalNCsUg.js:257
-_withViewEventsCollector @ editor.api-CalNCsUg.js:255
-setSelections @ editor.api-CalNCsUg.js:255
-_setSelectionImpl @ editor.api-CalNCsUg.js:257
-setSelection @ editor.api-CalNCsUg.js:257
-setSelection @ monaco-service.js:563
-(anonymous) @ monaco-sync-service.js:41
-requestAnimationFrame
-syncCursor @ monaco-sync-service.js:32
-run @ markdown-viewer-component.js:1287
-await in run
-activate @ markdown-viewer-component.js:1315
-_handleModeSwitch @ markdown-viewer-component.js:173
-setState @ markdown-viewer-component.js:74
-_proceedUpdateUI @ change-action-view-bar.js:263
-updateUI @ change-action-view-bar.js:183
-(anonymous) @ change-action-view-bar.js:87
-handleModeClick @ change-action-view-bar.js:103
-onChange @ change-action-view-bar.js:40
-(anonymous) @ segmented-control.js:41
-installHook.js:1 Error: scroll-spy-stack
-    at ER.value (markdown-viewer-component.js:1280:25)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
-    at A.fire (editor.api-CalNCsUg.js:7:3146)
-    at ER.value (editor.api-CalNCsUg.js:257:18060)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A.fire (editor.api-CalNCsUg.js:7:3039)
-    at xme._emitOutgoingEvents (editor.api-CalNCsUg.js:253:37133)
-    at xme.emitOutgoingEvent (editor.api-CalNCsUg.js:253:36696)
-    at ER.value (editor.api-CalNCsUg.js:254:68177)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
-    at A.fire (editor.api-CalNCsUg.js:7:3146)
-    at x_._setState (editor.api-CalNCsUg.js:52:38933)
-    at x_._performSmoothScrolling (editor.api-CalNCsUg.js:52:38537)
-    at vM._runner (editor.api-CalNCsUg.js:52:38825)
-    at vM.execute (editor.api-CalNCsUg.js:8:34260)
-    at n (editor.api-CalNCsUg.js:8:34507)
-    at editor.api-CalNCsUg.js:8:34677
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
 overrideMethod @ installHook.js:1
-(anonymous) @ markdown-viewer-component.js:1281
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
 _deliver @ editor.api-CalNCsUg.js:7
 _deliverQueue @ editor.api-CalNCsUg.js:7
 fire @ editor.api-CalNCsUg.js:7
-(anonymous) @ editor.api-CalNCsUg.js:257
-_deliver @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
-emitOutgoingEvent @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:254
-_deliver @ editor.api-CalNCsUg.js:7
-_deliverQueue @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_setState @ editor.api-CalNCsUg.js:52
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
 (anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:257
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
-(anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:257
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
-(anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:257
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
-(anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:257
-_performSmoothScrolling @ editor.api-CalNCsUg.js:52
-(anonymous) @ editor.api-CalNCsUg.js:52
-execute @ editor.api-CalNCsUg.js:8
-n @ editor.api-CalNCsUg.js:8
-(anonymous) @ editor.api-CalNCsUg.js:8
-requestAnimationFrame
-Vs @ editor.api-CalNCsUg.js:8
-Ny @ editor.api-CalNCsUg.js:8
-_scheduleRender @ editor.api-CalNCsUg.js:222
-scheduleCoordinatedRendering @ editor.api-CalNCsUg.js:222
-_scheduleRender @ editor.api-CalNCsUg.js:222
-handleEvents @ editor.api-CalNCsUg.js:222
-_doConsumeQueue @ editor.api-CalNCsUg.js:253
-_consumeViewEventQueue @ editor.api-CalNCsUg.js:253
-_emitMany @ editor.api-CalNCsUg.js:253
-endEmitViewEvents @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:255
-batchChanges @ editor.api-CalNCsUg.js:257
-_withViewEventsCollector @ editor.api-CalNCsUg.js:255
-setSelections @ editor.api-CalNCsUg.js:255
-_setSelectionImpl @ editor.api-CalNCsUg.js:257
-setSelection @ editor.api-CalNCsUg.js:257
-setSelection @ monaco-service.js:563
-(anonymous) @ monaco-sync-service.js:41
-requestAnimationFrame
-syncCursor @ monaco-sync-service.js:32
-run @ markdown-viewer-component.js:1287
-await in run
-activate @ markdown-viewer-component.js:1315
-_handleModeSwitch @ markdown-viewer-component.js:173
-setState @ markdown-viewer-component.js:74
-_proceedUpdateUI @ change-action-view-bar.js:263
-updateUI @ change-action-view-bar.js:183
-(anonymous) @ change-action-view-bar.js:87
-handleModeClick @ change-action-view-bar.js:103
-onChange @ change-action-view-bar.js:40
-(anonymous) @ segmented-control.js:41
-installHook.js:1 [SyncCursor:S0] srcStart=6426 → line=152 modelLines=324 scrollBefore=2041
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
 overrideMethod @ installHook.js:1
-(anonymous) @ monaco-sync-service.js:37
-requestAnimationFrame
-syncCursor @ monaco-sync-service.js:32
-focusWithContext @ editor.js:460
-_proceedUpdateUI @ change-action-view-bar.js:272
-await in _proceedUpdateUI
-updateUI @ change-action-view-bar.js:183
-(anonymous) @ change-action-view-bar.js:87
-handleModeClick @ change-action-view-bar.js:103
-onChange @ change-action-view-bar.js:40
-(anonymous) @ segmented-control.js:41
-installHook.js:1 [ScrollSpy] scrollTop=2041
-overrideMethod @ installHook.js:1
-(anonymous) @ markdown-viewer-component.js:1279
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
 _deliver @ editor.api-CalNCsUg.js:7
 _deliverQueue @ editor.api-CalNCsUg.js:7
 fire @ editor.api-CalNCsUg.js:7
-(anonymous) @ editor.api-CalNCsUg.js:257
-_deliver @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
-endEmitViewEvents @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:254
-_deliver @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_recomputeOptions @ editor.api-CalNCsUg.js:47
-(anonymous) @ editor.api-CalNCsUg.js:47
-_deliver @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-measureReferenceDomElement @ editor.api-CalNCsUg.js:44
-observe @ editor.api-CalNCsUg.js:44
-t @ editor.api-CalNCsUg.js:44
-s @ editor.api-CalNCsUg.js:44
-(anonymous) @ editor.api-CalNCsUg.js:44
-installHook.js:1 Error: scroll-spy-stack
-    at ER.value (markdown-viewer-component.js:1280:25)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
-    at A.fire (editor.api-CalNCsUg.js:7:3146)
-    at ER.value (editor.api-CalNCsUg.js:257:18060)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A.fire (editor.api-CalNCsUg.js:7:3039)
-    at xme._emitOutgoingEvents (editor.api-CalNCsUg.js:253:37133)
-    at xme.endEmitViewEvents (editor.api-CalNCsUg.js:253:37831)
-    at ER.value (editor.api-CalNCsUg.js:254:68745)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A.fire (editor.api-CalNCsUg.js:7:3039)
-    at C2._recomputeOptions (editor.api-CalNCsUg.js:47:79882)
-    at ER.value (editor.api-CalNCsUg.js:47:79411)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A.fire (editor.api-CalNCsUg.js:7:3039)
-    at jV.measureReferenceDomElement (editor.api-CalNCsUg.js:44:46594)
-    at jV.observe (editor.api-CalNCsUg.js:44:46262)
-    at t (editor.api-CalNCsUg.js:44:45767)
-    at s (editor.api-CalNCsUg.js:44:45874)
-    at ResizeObserver.<anonymous> (editor.api-CalNCsUg.js:44:46083)
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
 overrideMethod @ installHook.js:1
-(anonymous) @ markdown-viewer-component.js:1281
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
 _deliver @ editor.api-CalNCsUg.js:7
 _deliverQueue @ editor.api-CalNCsUg.js:7
 fire @ editor.api-CalNCsUg.js:7
-(anonymous) @ editor.api-CalNCsUg.js:257
-_deliver @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
-endEmitViewEvents @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:254
-_deliver @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_recomputeOptions @ editor.api-CalNCsUg.js:47
-(anonymous) @ editor.api-CalNCsUg.js:47
-_deliver @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-measureReferenceDomElement @ editor.api-CalNCsUg.js:44
-observe @ editor.api-CalNCsUg.js:44
-t @ editor.api-CalNCsUg.js:44
-s @ editor.api-CalNCsUg.js:44
-(anonymous) @ editor.api-CalNCsUg.js:44
-installHook.js:1 [SyncCursor:S0] scrollAfter=2041 callerHint=AssetManagement/assets-management-blueprint.md
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
 overrideMethod @ installHook.js:1
-(anonymous) @ monaco-sync-service.js:54
-requestAnimationFrame
-(anonymous) @ monaco-sync-service.js:53
-requestAnimationFrame
-syncCursor @ monaco-sync-service.js:32
-focusWithContext @ editor.js:460
-_proceedUpdateUI @ change-action-view-bar.js:272
-await in _proceedUpdateUI
-updateUI @ change-action-view-bar.js:183
-(anonymous) @ change-action-view-bar.js:87
-handleModeClick @ change-action-view-bar.js:103
-onChange @ change-action-view-bar.js:40
-(anonymous) @ segmented-control.js:41
-installHook.js:1 [ScrollSpy] scrollTop=2041
-overrideMethod @ installHook.js:1
-(anonymous) @ markdown-viewer-component.js:1279
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
 _deliver @ editor.api-CalNCsUg.js:7
 _deliverQueue @ editor.api-CalNCsUg.js:7
 fire @ editor.api-CalNCsUg.js:7
-(anonymous) @ editor.api-CalNCsUg.js:257
-_deliver @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
-endEmitViewEvents @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:254
-_deliver @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-_recomputeOptions @ editor.api-CalNCsUg.js:47
-(anonymous) @ editor.api-CalNCsUg.js:47
-_deliver @ editor.api-CalNCsUg.js:7
-fire @ editor.api-CalNCsUg.js:7
-measureReferenceDomElement @ editor.api-CalNCsUg.js:44
-observe @ editor.api-CalNCsUg.js:44
-t @ editor.api-CalNCsUg.js:44
-s @ editor.api-CalNCsUg.js:44
-(anonymous) @ editor.api-CalNCsUg.js:44
-installHook.js:1 Error: scroll-spy-stack
-    at ER.value (markdown-viewer-component.js:1280:25)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
-    at A.fire (editor.api-CalNCsUg.js:7:3146)
-    at ER.value (editor.api-CalNCsUg.js:257:18060)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A.fire (editor.api-CalNCsUg.js:7:3039)
-    at xme._emitOutgoingEvents (editor.api-CalNCsUg.js:253:37133)
-    at xme.endEmitViewEvents (editor.api-CalNCsUg.js:253:37831)
-    at ER.value (editor.api-CalNCsUg.js:254:68745)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A.fire (editor.api-CalNCsUg.js:7:3039)
-    at C2._recomputeOptions (editor.api-CalNCsUg.js:47:79882)
-    at ER.value (editor.api-CalNCsUg.js:47:79411)
-    at A._deliver (editor.api-CalNCsUg.js:7:2719)
-    at A.fire (editor.api-CalNCsUg.js:7:3039)
-    at jV.measureReferenceDomElement (editor.api-CalNCsUg.js:44:46594)
-    at jV.observe (editor.api-CalNCsUg.js:44:46262)
-    at t (editor.api-CalNCsUg.js:44:45767)
-    at s (editor.api-CalNCsUg.js:44:45874)
-    at ResizeObserver.<anonymous> (editor.api-CalNCsUg.js:44:46083)
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
 overrideMethod @ installHook.js:1
-(anonymous) @ markdown-viewer-component.js:1281
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
 _deliver @ editor.api-CalNCsUg.js:7
 _deliverQueue @ editor.api-CalNCsUg.js:7
 fire @ editor.api-CalNCsUg.js:7
-(anonymous) @ editor.api-CalNCsUg.js:257
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
 _deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
 fire @ editor.api-CalNCsUg.js:7
-_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
-endEmitViewEvents @ editor.api-CalNCsUg.js:253
-(anonymous) @ editor.api-CalNCsUg.js:254
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
 _deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
 fire @ editor.api-CalNCsUg.js:7
-_recomputeOptions @ editor.api-CalNCsUg.js:47
-(anonymous) @ editor.api-CalNCsUg.js:47
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
 _deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
 fire @ editor.api-CalNCsUg.js:7
-measureReferenceDomElement @ editor.api-CalNCsUg.js:44
-observe @ editor.api-CalNCsUg.js:44
-t @ editor.api-CalNCsUg.js:44
-s @ editor.api-CalNCsUg.js:44
-(anonymous) @ editor.api-CalNCsUg.js:44
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48
+installHook.js:1 [DIAG] Image link detected! {line: 2, col: 42, start: 1, end: 42, url: '/assets/anh-khong-ton-tai344.jpg'}
+overrideMethod @ installHook.js:1
+_handleMouseMove @ monaco-hover-service.js:96
+(anonymous) @ monaco-hover-service.js:136
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:257
+i.onMouseMove @ editor.api-CalNCsUg.js:257
+emitMouseMove @ editor.api-CalNCsUg.js:55
+emitMouseMove @ editor.api-CalNCsUg.js:55
+_onMouseMove @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:48

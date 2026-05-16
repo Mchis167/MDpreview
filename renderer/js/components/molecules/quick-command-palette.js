@@ -27,28 +27,29 @@ const QuickCommandPalette = (() => {
     { id: 'h6', label: 'Heading 6', icon: 'heading-6', hint: '/h6', tags: ['tieude6', 'h6'] },
 
     // ── Typography ──
-    { id: 'b',  label: 'Bold', icon: 'bold', hint: '/bold', tags: ['dam', 'indam'] },
-    { id: 'i',  label: 'Italic', icon: 'italic', hint: '/italic', tags: ['nghieng', 'innghieng'] },
+    { id: 'b', label: 'Bold', icon: 'bold', hint: '/bold', tags: ['dam', 'indam'] },
+    { id: 'i', label: 'Italic', icon: 'italic', hint: '/italic', tags: ['nghieng', 'innghieng'] },
     { id: 'bi', label: 'Bold Italic', icon: 'edit', hint: '/bi', tags: ['damnghieng'] },
-    { id: 's',  label: 'Strikethrough', icon: 'strikethrough', hint: '/s', tags: ['gach', 'gachngang'] },
-    { id: 'c',  label: 'Inline Code', icon: 'code', hint: '/code', tags: ['ma', 'inline'] },
+    { id: 's', label: 'Strikethrough', icon: 'strikethrough', hint: '/s', tags: ['gach', 'gachngang'] },
+    { id: 'c', label: 'Inline Code', icon: 'code', hint: '/code', tags: ['ma', 'inline'] },
 
     // ── Blocks ──
     { id: 'cb', label: 'Code Block', icon: 'terminal', hint: '/cb', tags: ['khoima', 'codeblock'] },
-    { id: 'q',  label: 'Quote', icon: 'quote', hint: '/quote', tags: ['trichdan', 'blockquote'] },
+    { id: 'q', label: 'Quote', icon: 'quote', hint: '/quote', tags: ['trichdan', 'blockquote'] },
     { id: 'ul', label: 'Bullet List', icon: 'list', hint: '/ul', tags: ['danhsach', 'bullet'] },
     { id: 'ol', label: 'Numbered List', icon: 'list-ordered', hint: '/ol', tags: ['danhsachso', 'numbered'] },
     { id: 'tl', label: 'Task List', icon: 'check-square', hint: '/tl', tags: ['congviec', 'checkbox', 'todo'] },
     { id: 'tl-checked', label: 'Task Done', icon: 'check-circle', hint: '/tldone', tags: ['xong', 'checked'] },
 
     // ── Insert ──
-    { id: 'l',  label: 'Link', icon: 'link', hint: '/link', tags: ['lienket'] },
-    { id: 'img',label: 'Image Link', icon: 'image', hint: '/img', tags: ['anh', 'hinh', 'image', 'img'] },
+    { id: 'l', label: 'Link', icon: 'link', hint: '/link', tags: ['lienket'] },
+    { id: 'img', label: 'Image Link', icon: 'image', hint: '/img', tags: ['anh', 'hinh', 'image', 'img'] },
     { id: 'img-asset', label: 'Pick from Assets', icon: 'images', hint: '/asset', tags: ['anh', 'hinh', 'vault', 'asset', 'image', 'img'] },
     { id: 'img-upload', label: 'Upload Image', icon: 'upload', hint: '/upload', tags: ['anh', 'hinh', 'upload', 'image', 'img'] },
     { id: 'tb', label: 'Table', icon: 'table', hint: '/table', tags: ['bang'] },
     { id: 'hr', label: 'Divider', icon: 'minus', hint: '/hr', tags: ['phancach', 'duongke'] },
     { id: 'fn', label: 'Footnote', icon: 'file-text', hint: '/fn', tags: ['chuthich'] },
+    { id: 'open-asset-panel', label: 'Open Asset Panel', icon: 'images', hint: '/panel', tags: ['asset', 'panel', 'management', 'quan ly', 'img', 'image'] },
     { id: 'global-shortcuts-search', label: 'Search App Shortcuts', icon: 'square-chevron-right', hint: '/shortcuts', tags: ['help', 'phim tat'] }
   ];
 
@@ -141,7 +142,7 @@ const QuickCommandPalette = (() => {
   function _renderResults(rebuild = true) {
     if (rebuild) {
       const query = _input.value.toLowerCase().trim().replace(/^\/+/, '');
-      
+
       if (!query) {
         _filteredCommands = [...COMMANDS];
       } else {
@@ -155,7 +156,7 @@ const QuickCommandPalette = (() => {
           // 1. Exact matches (Highest priority)
           if (id === query || hint === query) {
             score += 100;
-          } 
+          }
           // 2. Exact Tag match
           else if (tags.includes(query)) {
             score += 80;
@@ -181,12 +182,12 @@ const QuickCommandPalette = (() => {
 
           return { ...cmd, score };
         })
-        .filter(cmd => cmd.score > 0)
-        .sort((a, b) => {
-          if (b.score !== a.score) return b.score - a.score;
-          // Tie-break: Shorter labels first
-          return a.label.length - b.label.length;
-        });
+          .filter(cmd => cmd.score > 0)
+          .sort((a, b) => {
+            if (b.score !== a.score) return b.score - a.score;
+            // Tie-break: Shorter labels first
+            return a.label.length - b.label.length;
+          });
       }
 
       _selectedIndex = _filteredCommands.length > 0 ? 0 : -1;
@@ -234,18 +235,18 @@ const QuickCommandPalette = (() => {
     _init();
     _callback = callback;
     _isOpen = true;
-    
+
     // Header & Input visibility
     const header = _el.querySelector('.palette-header');
     _input.value = ''; // Always clear query on show
-    
+
     if (options.hideInput) {
       header.style.display = 'none';
     } else {
       header.style.display = 'block';
       setTimeout(() => _input.focus(), 50);
     }
-    
+
     _renderResults();
 
     if (window.MonacoService && window.MonacoService.isInitialized()) {
@@ -260,7 +261,7 @@ const QuickCommandPalette = (() => {
       // Fallback for legacy (if any)
       _el.style.display = 'flex';
       _el.style.visibility = 'hidden';
-      
+
       const rect = _el.getBoundingClientRect();
       let top = y + 20;
       let left = x;
@@ -272,7 +273,7 @@ const QuickCommandPalette = (() => {
 
       const spaceBelow = window.innerHeight - top;
       if (spaceBelow < rect.height + 20) {
-        top = y - rect.height - 40; 
+        top = y - rect.height - 40;
       }
       if (top < 10) top = 10;
 
@@ -286,7 +287,7 @@ const QuickCommandPalette = (() => {
     if (!_isOpen) return;
     _input.value = query.replace('/', ''); // Remove slash for filtering
     _renderResults();
-    
+
     // Notify Monaco to reposition if height changed
     if (window.MonacoService) {
       window.MonacoService.layoutContentWidget(QuickCommandPalette);
@@ -295,9 +296,9 @@ const QuickCommandPalette = (() => {
 
   // --- Monaco ContentWidget Interface ---
   function getId() { return 'editor.contrib.quickCommandPalette'; }
-  function getDomNode() { 
-    _init(); 
-    return _el; 
+  function getDomNode() {
+    _init();
+    return _el;
   }
   function getPosition() {
     if (!_isOpen || !window.MonacoService) return null;
@@ -328,11 +329,11 @@ const QuickCommandPalette = (() => {
 
   function hide() {
     if (!_el || !_isOpen) return;
-    
+
     if (window.MonacoService && window.MonacoService.isInitialized()) {
       window.MonacoService.removeContentWidget(QuickCommandPalette);
     }
-    
+
     _el.style.display = 'none';
     _isOpen = false;
     _selectedIndex = -1;
@@ -345,7 +346,7 @@ const QuickCommandPalette = (() => {
     getSelectedCommandId,
     navigate,
     isOpen: () => _isOpen,
-    
+
     // Monaco IContentWidget exports
     getId,
     getDomNode,

@@ -207,6 +207,53 @@ const AttachmentService = (() => {
    * @param {string} vaultPath 
    */
   async function handleDrop(e, pos, vaultPath) {
+    // 0. Guard: Don't allow drop if editor is read-only
+    if (window.MonacoService && window.MonacoService.isInitialized()) {
+      const editor = window.MonacoService.getInstance();
+      if (editor.getOption(monaco.editor.EditorOption.readOnly)) {
+        return;
+      }
+    }
+
+    // 1. Check for internal asset drag (application/mdpreview-assets)
+    const assetData = e.dataTransfer?.getData('application/mdpreview-assets');
+    if (assetData) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      try {
+        const assetNames = JSON.parse(assetData);
+        if (!Array.isArray(assetNames) || assetNames.length === 0) return;
+
+        // Verify assets exist in registry for safety
+        const registry = window.AssetManager?.getRegistry();
+        const allAssets = registry ? [...(registry.assets || []), ...(registry.orphans || []), ...(registry.broken || [])] : [];
+        const existingNames = new Set(allAssets.map(a => a.name));
+
+        const validAssets = assetNames.filter(name => existingNames.has(name));
+        if (validAssets.length === 0) {
+          if (window.showToast) window.showToast('Asset(s) no longer exist', 'warn');
+          return;
+        }
+
+        const links = validAssets.map(name => `![${name}](/assets/${encodeURIComponent(name)})`).join('\n');
+
+        if (pos) {
+          _insertLinkAtPositionSmart(links, pos);
+        } else {
+          _insertAtCursor(links);
+        }
+
+        if (window.showToast) {
+          window.showToast(validAssets.length === 1 ? 'Asset inserted' : `${validAssets.length} assets inserted`, 'success');
+        }
+      } catch (err) {
+        console.error('[AttachmentService] Internal drop failed:', err);
+      }
+      return;
+    }
+
+    // 2. Fallback to external files
     const files = e.dataTransfer?.files;
     if (!files || files.length === 0) return;
 
@@ -246,6 +293,32 @@ const AttachmentService = (() => {
     };
 
     MonacoService.executeEdit(range, text);
+    MonacoService.focus();
+  }
+
+  function _insertLinkAtPositionSmart(text, pos) {
+    if (!window.MonacoService || !MonacoService.isInitialized()) return;
+
+    const editor = MonacoService.getInstance();
+    const model = editor ? editor.getModel() : null;
+
+    let insertText = text;
+    if (model && pos.lineNumber <= model.getLineCount()) {
+      const lineContent = model.getLineContent(pos.lineNumber);
+      const textBeforeDrop = lineContent.substring(0, pos.column - 1);
+      if (textBeforeDrop.trim().length > 0) {
+        insertText = '\n' + text;
+      }
+    }
+
+    const range = {
+      startLineNumber: pos.lineNumber,
+      startColumn: pos.column,
+      endLineNumber: pos.lineNumber,
+      endColumn: pos.column
+    };
+
+    MonacoService.executeEdit(range, insertText);
     MonacoService.focus();
   }
 
@@ -587,12 +660,20 @@ const AttachmentService = (() => {
     AssetPickerComponent.show({
       title: 'Insert Image from Assets',
       confirmLabel: 'Insert Image',
-      onConfirm: async (selectedName) => {
-        const newPath = (selectedName.startsWith('assets/') || selectedName.startsWith('/assets/'))
-          ? selectedName
-          : `assets/${selectedName}`;
-        _insertAtCursor(`![image](${newPath})`);
-        if (window.showToast) window.showToast('Image inserted', 'success');
+      multiSelect: true,
+      onConfirm: async (selectedNames) => {
+        const names = Array.isArray(selectedNames) ? selectedNames : [selectedNames];
+        const links = names.map(name => {
+          const newPath = (name.startsWith('assets/') || name.startsWith('/assets/'))
+            ? name
+            : `assets/${name}`;
+          return `![image](${newPath})`;
+        }).join('\n');
+
+        _insertAtCursor(links);
+        if (window.showToast) {
+          window.showToast(names.length === 1 ? 'Image inserted' : `${names.length} images inserted`, 'success');
+        }
       }
     });
   }

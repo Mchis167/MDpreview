@@ -8,7 +8,7 @@
  *   renderer/css/shared/markdown-render.css
  *   cf-publish-worker/src/publish-styles.css
  * Regenerate: npm run build:publish-assets
- * Generated:  2026-05-16T17:38:59.645Z
+ * Generated:  2026-05-16T23:24:10.382Z
  */
 
 /* ============================================================
@@ -286,12 +286,26 @@
    --ds-blur-drawer: var(--ds-blur-max);
 
    /* ── Z-Index Scale ─────────────────────────────────────── */
+   /* base: local stacking nội bộ component                  */
+   /* elevated: card hover, floating in-context              */
+   /* toolbar: edit toolbar, sticky headers                  */
+   /* overlay: backdrop, dimming layer                       */
+   /* drawer: side panels (asset, wiki, backlinks)           */
+   /* modal: dialog boxes, focused comment form              */
+   /* popover: dropdowns, context menus, toc, tooltips       */
+   /* toast: notifications (reserved)                        */
+   /* drag: drag ghost element (reserved)                    */
+   /* max: emergency override (monaco, palette) — KHÔNG dùng > 9000 */
    --ds-z-index-base: 1;
+   --ds-z-index-elevated: 10;
    --ds-z-index-toolbar: 100;
    --ds-z-index-overlay: 1000;
    --ds-z-index-drawer: 2000;
-   --ds-z-index-popover: 2500;
-   --ds-z-index-max: 9999;
+   --ds-z-index-modal: 3000;
+   --ds-z-index-popover: 4000;
+   --ds-z-index-toast: 5000;
+   --ds-z-index-drag: 6000;
+   --ds-z-index-max: 9000;
 
 
    /* ── Transitions & Animations ────────────────────── */
@@ -337,7 +351,7 @@
   user-select: none;
   min-width: 0;
   position: relative;
-  z-index: 1100;
+  z-index: var(--ds-z-index-toolbar);
 }
 
 /* Vertical Divider */
@@ -653,7 +667,7 @@
 
 .is-dragging-vip {
   position: fixed !important;
-  z-index: 9999 !important;
+  z-index: var(--ds-z-index-drag);
   pointer-events: none !important;
   background: var(--ds-layer-subtle-hover) !important;
   border: 1px solid var(--ds-border-subtle) !important;

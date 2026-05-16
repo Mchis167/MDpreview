@@ -29,6 +29,8 @@
 | publish / image management / R2 upload / image compression / WASM / jSquash / WebP / content hash / image cache / quality / canvas bypass | `completed-session/session-log-publish-image-management-2026-05-16.md` |
 | Home Dashboard / Continue Edit / Pinned Documents / Context Menu / HomeCard / HomeSection / recently viewed | `completed-session/session-log-continue-edit-home-section-2026-05-17.md` |
 | Z-index / stacking / semantic tokens / drawer / tab-bar / modal / CSS design system | `completed-session/session-log-z-index-system-revamp-2026-05-17.md` |
+| Asset refactor / palette / asset picker / replacement dialog / input icon / atomic design | `completed-session/session-log-asset-refactor-palette-2026-05-17.md` |
+| Asset drag-drop / Monaco drop / overlay blockade / capture phase / smart newline / attachment service | `completed-session/session-log-asset-drag-drop-and-ux-refinement-2026-05-17.md` |
 
 ---
 
