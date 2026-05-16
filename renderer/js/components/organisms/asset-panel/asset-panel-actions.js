@@ -289,40 +289,13 @@ window.AssetPanelActions = (() => {
         }
       };
 
-      if (mode === 'upload') {
-        // Mở file picker hệ thống ngay lập tức
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.onchange = (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            const fileData = {
-              name: file.name,
-              size: file.size,
-              data: event.target.result.split(',')[1],
-              preview: event.target.result
-            };
-            // Sau khi chọn file, hiện Dialog để xác nhận việc đặt tên (Restore vs New)
-            window.AssetReplacementDialog.show(item, {
-              mode: 'upload',
-              file: fileData,
-              onConfirm: _onConfirm
-            });
-          };
-          reader.readAsDataURL(file);
-        };
-        input.click();
-      } else {
-        // Chế độ Existing: Hiện danh sách ảnh để chọn
-        window.AssetReplacementDialog.show(item, {
-          mode: 'existing',
-          onConfirm: _onConfirm
-        });
-      }
+      // Gọi Dialog và để nó tự xử lý việc chọn file hoặc hiện danh sách
+      window.AssetReplacementDialog.show(item, {
+        mode,
+        title: item.isBroken ? 'Fix Broken Asset' : 'Replace Asset',
+        confirmLabel: mode === 'upload' ? 'Upload & Replace' : 'Replace with Selected',
+        onConfirm: _onConfirm
+      });
     },
 
     /**

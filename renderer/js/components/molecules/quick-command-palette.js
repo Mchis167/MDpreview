@@ -43,8 +43,9 @@ const QuickCommandPalette = (() => {
 
     // ── Insert ──
     { id: 'l',  label: 'Link', icon: 'link', hint: '/link', tags: ['lienket'] },
-    { id: 'img',label: 'Image Link', icon: 'image', hint: '/img', tags: ['anh', 'hinh'] },
-    { id: 'img-upload', label: 'Upload Image', icon: 'upload', hint: '/upload', tags: ['anh', 'hinh', 'upload'] },
+    { id: 'img',label: 'Image Link', icon: 'image', hint: '/img', tags: ['anh', 'hinh', 'image', 'img'] },
+    { id: 'img-asset', label: 'Pick from Assets', icon: 'images', hint: '/asset', tags: ['anh', 'hinh', 'vault', 'asset', 'image', 'img'] },
+    { id: 'img-upload', label: 'Upload Image', icon: 'upload', hint: '/upload', tags: ['anh', 'hinh', 'upload', 'image', 'img'] },
     { id: 'tb', label: 'Table', icon: 'table', hint: '/table', tags: ['bang'] },
     { id: 'hr', label: 'Divider', icon: 'minus', hint: '/hr', tags: ['phancach', 'duongke'] },
     { id: 'fn', label: 'Footnote', icon: 'file-text', hint: '/fn', tags: ['chuthich'] },

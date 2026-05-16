@@ -126,7 +126,7 @@
 .ds-drop-safe-zone {
   position: absolute;
   inset: 0;
-  z-index: 9999;
+  z-index: var(--ds-z-index-max);
   background: transparent;
   pointer-events: auto;
 }

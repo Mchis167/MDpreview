@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Not Commited] — 2026-05-17 04:15
+
+### 🎨 Design System
+- **Z-Index System Revamp (v2.0)**: Toàn bộ z-index được refactor thành hệ thống token semantic với 10 layers:
+  - New tokens: `base` (1) → `elevated` (10) → `toolbar` (100) → `overlay` (1000) → `drawer` (2000) → `modal` (3000) → `popover` (4000) → `toast` (5000) → `drag` (6000) → `max` (9000)
+  - **CSS**: `renderer/css/design-system/tokens.css` — token definitions với comments semantic
+  - **JS**: `renderer/js/services/design-token-provider.js` — đồng bộ 100% với CSS (fix desync)
+  - **Atoms**: `tooltip` (100000→max), `textarea` (3000→modal)
+  - **Molecules**: `tab-preview` (2000→drawer)
+  - **Organisms**: 9 files cập nhật (comment-form, search-palette, tree-view, tab-bar, toc-panel, sidebar, modals, asset-panel, wiki-drawer)
+  - **Dynamic Stacking**: Thêm `isolation: isolate` vào asset-panel, wiki-drawer, backlinks-drawer để cho phép local z-index (1–10) không leak global
+  - **Documentation**: Chi tiết `docs/Z-INDEX-SYSTEM.md` (usage rules, debugging, common mistakes, migration guide)
+  - **Memory Rule**: `feedback_z_index_system.md` — quy tắc: dùng token, KHÔNG hardcode
+
+### 🚀 Added
+- **AssetPickerComponent**: Molecule chuyên biệt để duyệt và chọn ảnh hiện có từ `AssetPanelState`. Hỗ trợ tìm kiếm thời gian thực và render thumbnail qua API stream.
+- **AssetUploadPreviewComponent**: Molecule mới xử lý xem trước ảnh (`FileReader`) trước khi upload. Cung cấp giao diện "Hero Preview" và khả năng đổi tên file linh hoạt.
+- **Lệnh `/asset` & `/upload`**: Tách bạch luồng công việc trong Palette; hỗ trợ chèn ảnh từ thư viện hoặc tải lên trực tiếp với bước xác nhận Preview.
+
+### 🔧 Changed
+- **Asset Management Decoupling**: Tái cấu trúc toàn diện, tách biệt logic giữa Picker (Registry-based), Upload Preview (Memory-based) và Replacement Dialog (Workflow-based) để đạt chuẩn Single Responsibility.
+- **AttachmentService Pipeline**: Tích hợp cơ chế chặn (Interception) cho các thao tác đơn lẻ (Paste, Drop, Upload) để hiển thị Preview trước khi lưu file vào workspace.
+- **Atomic CSS Architecture**: Tách biệt file CSS cho từng molecule tương ứng và áp dụng hệ thống đặt tên class nhất quán (`ds-asset-picker-*`).
+
+### 🐞 Fixed
+- **Inline Quick Command Palette**: Khôi phục khả năng tương tác phím (Arrow keys, Enter, Space, Escape) vốn bị hỏng sau đợt refactor trước đó. Palette hiện đã có thể điều hướng, chọn lệnh và tự động hoàn thành (autocomplete) chính xác.
+- **Z-Index Stacking Conflicts**: 
+  - Asset drawer appearing below tab-bar (root had no z-index after isolation:isolate)
+  - Comment form JS using `style.zIndex = 'var(...)'` (doesn't work — fixed with `setProperty`)
+  - Magic number values (100000, 9999, 1100, 2100) → now semantic tokens
+  - Tab-bar formula `calc(overlay + 100)` → now `toolbar` token (clearer intent)
+
+---
+
 ## [2.5.0] — 2026-05-17 02:05
 
 ### 🚀 Added
@@ -17,7 +51,7 @@ All notable changes to this project will be documented in this file.
 ### 🔧 Changed
 - **Home Dashboard Orchestration**: Transitioned `HomeComponent` to an event-driven architecture sử dụng các sự kiện `pinned-changed` và `recent-changed` để cập nhật UI tức thì.
 - **Edit Activity Tracking**: Triển khai cơ chế theo dõi `last_edits` trong `AppState` và tích hợp hook cập nhật timestamp vào `EditorModule`/`DraftModule`.
-- **RecentlyViewedModule Enhancement**: Tích hợp cơ chế phát sự kiện (event dispatching) để thông báo cho hệ thống khi trạng thái lịch sử thay đổi.
+- **RecentlyViewedModule Enhancement**: Tích hợp cơ chế phát sự kiện (event dispatching) để thông báo cho hệk thống khi trạng thái lịch sử thay đổi.
 - **Atomic Design Refactoring**: Thay thế `ContinueEditCard` cũ bằng molecule `HomeCard` đa năng hơn, giúp đồng bộ hóa giao diện trên toàn bộ dashboard.
 
 ### 🐞 Fixed

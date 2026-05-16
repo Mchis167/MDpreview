@@ -165,7 +165,7 @@
 .standard-drag-proxy {
   position: fixed;
   pointer-events: none;
-  z-index: 10000;
+  z-index: var(--ds-z-index-drag);
   background: var(--ds-surface-overlay);
   color: var(--ds-text-primary);
   padding: 10px;

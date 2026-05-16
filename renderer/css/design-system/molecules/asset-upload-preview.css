@@ -1,0 +1,65 @@
+/* ============================================================
+   Asset Upload Preview Component
+   Styles for previewing an asset before upload.
+   ============================================================ */
+
+/* Reuses base dialog structure from picker or shared modal */
+.ds-asset-upload-preview-v2 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-md);
+  padding: 0 var(--ds-space-lg) var(--ds-space-lg) var(--ds-space-lg);
+}
+
+.ds-asset-upload-hero-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--ds-layer-subtle-default);
+  border: 1px solid var(--ds-border-subtle);
+  border-radius: var(--ds-radius-lg);
+  overflow: hidden;
+}
+
+.ds-asset-upload-img-wrapper {
+  background: var(--ds-bg-base);
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.ds-asset-upload-hero-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.ds-asset-upload-meta-bar {
+  padding: var(--ds-space-md) var(--ds-space-lg);
+  border-top: 1px solid var(--ds-border-subtle);
+}
+
+.ds-asset-upload-filename {
+  font-size: var(--ds-font-sm);
+  font-family: var(--ds-font-family-code);
+  color: var(--ds-text-primary);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ds-asset-upload-size {
+  font-size: var(--ds-font-xs);
+  color: var(--ds-text-tertiary);
+  font-family: var(--ds-font-family-code);
+}
+
+.ds-asset-picker-extra-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-sm);
+  padding: 0 var(--ds-space-xl) var(--ds-space-md) var(--ds-space-xl);
+}

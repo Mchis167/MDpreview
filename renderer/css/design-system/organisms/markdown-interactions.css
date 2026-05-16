@@ -119,7 +119,7 @@
   position: fixed;
   opacity: 0;
   pointer-events: none;
-  z-index: 1000;
+  z-index: var(--ds-z-index-overlay);
   background: var(--ds-white-a10) !important;
   backdrop-filter: blur(var(--ds-blur-md)) !important;
   -webkit-backdrop-filter: blur(var(--ds-blur-md)) !important;
@@ -157,7 +157,7 @@
   justify-content: center;
   color: var(--ds-text-primary);
   cursor: pointer;
-  z-index: 100;
+  z-index: var(--ds-z-index-toolbar);
   opacity: 0;
   transform: translateY(20px) scale(0.8);
   pointer-events: none;

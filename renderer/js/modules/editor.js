@@ -296,8 +296,8 @@ const EditorModule = (() => {
     // Listen to keydown
     const editor = MonacoService.getInstance();
     if (editor) {
-      _keyListener = editor.onKeyDown(() => {
-        _handleContentChange();
+      _keyListener = editor.onKeyDown((e) => {
+        _handleKeyDown(e);
       });
     }
 
@@ -440,6 +440,12 @@ const EditorModule = (() => {
       // Small delay to ensure palette is closed and focus is returned
       setTimeout(() => {
         if (window.AttachmentService) window.AttachmentService.pickAndInsertImage();
+      }, 10);
+      return;
+    }
+    if (action === 'img-asset') {
+      setTimeout(() => {
+        if (window.AttachmentService) window.AttachmentService.pickAndInsertAsset();
       }, 10);
       return;
     }

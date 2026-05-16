@@ -10,7 +10,7 @@
   border: 1px solid var(--ds-border-default);
   border-radius: var(--ds-radius-surface);
   box-shadow: var(--ds-shadow-lg);
-  z-index: 2000;
+  z-index: var(--ds-z-index-drawer);
   overflow: hidden;
   pointer-events: none;
   opacity: 0;

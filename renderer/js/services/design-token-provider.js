@@ -198,10 +198,15 @@ const DesignTokenProvider = (() => {
 
       // Z-Index
       '--ds-z-index-base': '1',
+      '--ds-z-index-elevated': '10',
       '--ds-z-index-toolbar': '100',
       '--ds-z-index-overlay': '1000',
-      '--ds-z-index-popover': '1100',
-      '--ds-z-index-max': '9999',
+      '--ds-z-index-drawer': '2000',
+      '--ds-z-index-modal': '3000',
+      '--ds-z-index-popover': '4000',
+      '--ds-z-index-toast': '5000',
+      '--ds-z-index-drag': '6000',
+      '--ds-z-index-max': '9000',
 
       // Transitions
       '--ds-transition-fast': '0.1s cubic-bezier(0.16, 1, 0.3, 1)',

@@ -158,7 +158,7 @@
   display: flex;
   align-items: center;
   gap: var(--ds-space-sm);
-  z-index: 9999; /* Ensure it's above everything including toolbars and masks */
+  z-index: var(--ds-z-index-popover);
   pointer-events: none;
 }
 

@@ -28,6 +28,7 @@
 | scroll sync / first load / Read Edit mode switch / smooth scroll / ScrollType.Immediate / setSelection / revealPositionInCenter | `completed-session/session-log-scroll-sync-first-load-fix-2026-05-16.md` |
 | publish / image management / R2 upload / image compression / WASM / jSquash / WebP / content hash / image cache / quality / canvas bypass | `completed-session/session-log-publish-image-management-2026-05-16.md` |
 | Home Dashboard / Continue Edit / Pinned Documents / Context Menu / HomeCard / HomeSection / recently viewed | `completed-session/session-log-continue-edit-home-section-2026-05-17.md` |
+| Z-index / stacking / semantic tokens / drawer / tab-bar / modal / CSS design system | `completed-session/session-log-z-index-system-revamp-2026-05-17.md` |
 
 ---
 

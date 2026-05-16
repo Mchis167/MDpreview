@@ -7,7 +7,7 @@
   width: 100vw;
   height: 100vh;
   background: var(--ds-black-a20);
-  z-index: 10000;
+  z-index: var(--ds-z-index-max);
   display: flex;
   /* Keep layout active for transitions */
   justify-content: center;

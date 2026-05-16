@@ -115,6 +115,33 @@
     background: var(--ds-white-a05);
 }
 
+/* ── Leading Icon ── */
+.ds-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.ds-input-leading-icon {
+    position: absolute;
+    left: var(--ds-space-lg);
+    color: var(--ds-text-tertiary);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+.ds-input-leading-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.has-leading-icon .ds-input {
+    padding-left: calc(var(--ds-space-lg) * 2 + var(--ds-space-sm));
+}
+
 /* ── Status Indicator ── */
 .ds-form-field-status {
     display: none;

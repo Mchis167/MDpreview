@@ -40,6 +40,8 @@
 @import 'design-system/molecules/combo-button.css';
 @import 'design-system/molecules/quick-command-palette.css';
 @import 'design-system/molecules/wiki-onboarding.css';
+@import 'design-system/molecules/asset-picker-component.css';
+@import 'design-system/molecules/asset-upload-preview.css';
 
 /* ── Organisms ──────────────────────────────────────────── */
 @import 'design-system/organisms/sidebar-left.css';

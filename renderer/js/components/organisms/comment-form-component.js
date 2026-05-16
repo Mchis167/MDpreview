@@ -117,7 +117,7 @@ const CommentFormComponent = (() => {
         initialY = rect.top;
         document.body.style.cursor = 'grabbing';
         document.body.style.userSelect = 'none';
-        this.el.style.zIndex = '3000';
+        this.el.style.setProperty('z-index', 'var(--ds-z-index-modal)');
       });
       window.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
@@ -129,7 +129,7 @@ const CommentFormComponent = (() => {
         isDragging = false;
         document.body.style.cursor = 'default';
         document.body.style.userSelect = 'auto';
-        this.el.style.zIndex = '2000';
+        this.el.style.setProperty('z-index', 'var(--ds-z-index-drawer)');
       });
     }
 

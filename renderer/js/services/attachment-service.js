@@ -4,7 +4,7 @@
  * Pattern: IIFE Singleton
  */
 
-/* global MonacoService, monaco */
+/* global MonacoService, monaco, AssetPickerComponent, AssetUploadPreviewComponent */
 
 const AttachmentService = (() => {
   'use strict';
@@ -13,14 +13,15 @@ const AttachmentService = (() => {
    * Process a file (image) and save it to the workspace.
    * @param {File|Blob} file 
    * @param {string} vaultPath 
+   * @param {string|null} customName - Optional custom filename
    * @returns {Promise<Object>} { success, relativePath, error }
    */
-  async function saveImage(file, vaultPath) {
+  async function saveImage(file, vaultPath, customName = null) {
     try {
       if (!vaultPath) throw new Error('No active workspace');
 
       const buffer = await file.arrayBuffer();
-      const originalName = file.name || 'pasted-image.png';
+      const originalName = customName || file.name || 'pasted-image.png';
 
       const result = await window.electronAPI.saveAttachment({
         buffer: buffer,
@@ -44,8 +45,44 @@ const AttachmentService = (() => {
   async function processImageFiles(imageFiles, pos, vaultPath) {
     if (imageFiles.length === 0) return;
 
+    // SINGLE FILE: Show Preview before upload
+    if (imageFiles.length === 1 && typeof AssetUploadPreviewComponent !== 'undefined') {
+      const file = imageFiles[0];
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        AssetUploadPreviewComponent.show({
+          title: 'Insert Image',
+          confirmLabel: 'Upload & Insert',
+          file: {
+            name: file.name,
+            size: file.size,
+            preview: e.target.result,
+            data: e.target.result.split(',')[1]
+          },
+          onConfirm: async (payload) => {
+            const result = await saveImage(file, vaultPath, payload.newName);
+            if (result.success) {
+              const link = `![image](${result.relativePath})`;
+              if (pos) _insertLinkAtPosition(link, pos);
+              else _insertAtCursor(link);
+              
+              if (window.AssetManager) window.AssetManager.refresh();
+              if (window.showToast) window.showToast('Image added', 'success');
+            } else {
+              if (window.showToast) window.showToast(`Failed: ${result.error}`, 'error');
+            }
+          }
+        });
+      };
+      
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    // BULK FILES: Direct upload (no preview for now to avoid modal spam)
     if (window.showToast) {
-      const msg = imageFiles.length === 1 ? 'Processing image...' : `Processing ${imageFiles.length} image(s)...`;
+      const msg = `Processing ${imageFiles.length} image(s)...`;
       window.showToast(msg, 'info', { duration: 2000 });
     }
 
@@ -415,42 +452,14 @@ const AttachmentService = (() => {
       }
     };
 
-    if (mode === 'upload') {
-      // 1. Trigger system file picker immediately
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const fileData = {
-            name: file.name,
-            size: file.size,
-            data: event.target.result.split(',')[1],
-            preview: event.target.result
-          };
-          // 2. Show confirmation dialog (mode: 'upload' will hide tabs)
-          window.AssetReplacementDialog.show({ name: fileName }, {
-            mode: 'upload',
-            file: fileData,
-            isBroken,
-            onConfirm: _onConfirm
-          });
-        };
-        reader.readAsDataURL(file);
-      };
-      input.click();
-    } else {
-      // Mode 'existing': Show picker list directly (mode: 'existing' will hide tabs)
-      window.AssetReplacementDialog.show({ name: fileName }, {
-        mode: 'existing',
-        isBroken,
-        onConfirm: _onConfirm
-      });
-    }
+    // Gọi Dialog và để nó tự xử lý việc chọn file hoặc hiện danh sách
+    window.AssetReplacementDialog.show({ name: fileName }, {
+      mode,
+      isBroken,
+      title: isBroken ? 'Fix Broken Asset' : 'Replace Asset',
+      confirmLabel: mode === 'upload' ? 'Upload & Replace' : 'Replace with Selected',
+      onConfirm: _onConfirm
+    });
   }
 
   /**
@@ -562,6 +571,32 @@ const AttachmentService = (() => {
     }
   }, true);
 
+  /**
+   * Open the asset picker to select an existing image or upload a new one,
+   * then insert it as a Markdown link at the current cursor.
+   */
+  async function pickAndInsertAsset() {
+    const vaultPath = window.AppState?.currentWorkspace?.path;
+    if (!vaultPath) {
+      if (window.showToast) window.showToast('No active workspace', 'error');
+      return;
+    }
+
+    if (!window.AssetPickerComponent) return;
+
+    AssetPickerComponent.show({
+      title: 'Insert Image from Assets',
+      confirmLabel: 'Insert Image',
+      onConfirm: async (selectedName) => {
+        const newPath = (selectedName.startsWith('assets/') || selectedName.startsWith('/assets/'))
+          ? selectedName
+          : `assets/${selectedName}`;
+        _insertAtCursor(`![image](${newPath})`);
+        if (window.showToast) window.showToast('Image inserted', 'success');
+      }
+    });
+  }
+
   return {
     saveImage,
     handlePaste,
@@ -569,6 +604,7 @@ const AttachmentService = (() => {
     processImageFiles,
     pickAndReplaceImage,
     pickAndInsertImage,
+    pickAndInsertAsset,
     revealAsset,
     downloadWebImage,
     viewAssetDetail,

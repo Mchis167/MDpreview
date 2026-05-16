@@ -19,7 +19,7 @@
   position: fixed;
   top: var(--ds-space-lg);
   right: var(--ds-space-lg);
-  z-index: 9999;
+  z-index: var(--ds-z-index-toast);
   opacity: 0;
   pointer-events: none;
   transition: all 0.4s var(--ds-ease-spring);

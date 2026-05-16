@@ -7,6 +7,7 @@
     position: fixed;
     inset: 0;
     z-index: var(--ds-z-index-drawer);
+    isolation: isolate;
     pointer-events: none;
     visibility: hidden;
     transition: visibility var(--ds-transition-main);

@@ -27,7 +27,8 @@ const InputComponent = (() => {
       onChange = null,
       disabled = false,
       readOnly = false,
-      description = null
+      description = null,
+      leadingIcon = null
     } = options;
 
     // 1. Create Container (Form Field)
@@ -54,6 +55,16 @@ const InputComponent = (() => {
 
     // 4. Actual Input
     const input = DesignSystem.createElement('input', 'ds-input');
+    
+    // Prepend Leading Icon if exists
+    if (leadingIcon) {
+      const iconEl = DesignSystem.createElement('span', 'ds-input-leading-icon', {
+        html: DesignSystem.getIcon(leadingIcon)
+      });
+      wrapper.appendChild(iconEl);
+      wrapper.classList.add('has-leading-icon');
+    }
+
     input.type = type;
     input.placeholder = placeholder;
     input.value = value;

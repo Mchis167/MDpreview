@@ -160,7 +160,7 @@
 #add-workspace-modal {
   position: fixed;
   inset: 0;
-  z-index: 2100;
+  z-index: var(--ds-z-index-modal);
   background: var(--ds-black-a80);
   backdrop-filter: blur(var(--ds-blur-lg));
   display: none;
