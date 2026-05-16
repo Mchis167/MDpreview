@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Not Commited] — 2026-05-17 04:15
+## [2.6.0] — 2026-05-17 04:35
 
 ### 🎨 Design System
 - **Z-Index System Revamp (v2.0)**: Toàn bộ z-index được refactor thành hệ thống token semantic với 10 layers:
