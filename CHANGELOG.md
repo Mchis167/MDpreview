@@ -49,7 +49,7 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [Not Commited] — 2026-05-16 15:51
+## [2.3.1] — 2026-05-16 15:51
 
 ### 🚀 Added
 - **Path Utilities**: Triển khai `server/utils/path-util.js` cung cấp hàm `resolvePath()` thống nhất cho toàn bộ file operations. Hỗ trợ:
