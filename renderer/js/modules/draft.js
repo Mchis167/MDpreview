@@ -230,6 +230,7 @@ const DraftModule = (() => {
     ensureDraftMeta(draftId);
     drafts[draftId].draftContent = val; 
     drafts[draftId].lastTouched = Date.now();
+    if (window.AppState && AppState.updateLastEdit) AppState.updateLastEdit(draftId);
     saveToStorage();
   }
 

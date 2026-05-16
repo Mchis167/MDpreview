@@ -94,7 +94,7 @@
   max-width: var(--_recent-width);
   display: flex;
   flex-direction: column;
-  margin-top: 72px;
+  margin-top: 40px;
 }
 
 .ds-home-section-title {
@@ -173,6 +173,103 @@
 /* Responsive */
 @media (width <=768px) {
   .ds-home-recent-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Home Section System (Reusable) ── */
+.ds-home-section {
+  width: 100%;
+  max-width: var(--_recent-width);
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--ds-space-2xl);
+}
+
+.ds-home-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--ds-space-md);
+  margin-top: var(--ds-space-lg);
+}
+
+.ds-home-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ds-space-sm);
+  padding: var(--ds-space-md);
+  background: var(--ds-layer-surface-default);
+  border: 1px solid var(--ds-border-subtle);
+  border-radius: var(--ds-radius-panel);
+  transition: all var(--_transition);
+  backdrop-filter: var(--ds-blur-xs);
+  -webkit-backdrop-filter: var(--ds-blur-xs);
+  cursor: pointer;
+  min-width: 0;
+}
+
+.ds-home-card:hover {
+  background: var(--ds-layer-surface-hover);
+  border-color: var(--ds-border-strong);
+  transform: translateY(-2px);
+}
+
+.ds-home-card-icon {
+  width: fit-content;
+  height: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  color: var(--ds-text-tertiary);
+  flex-shrink: 0;
+  margin-bottom: var(--ds-space-xs);
+}
+
+.ds-home-card-icon svg {
+  width: var(--ds-space-lg);
+  height: var(--ds-space-lg);
+}
+
+.ds-home-card-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: var(--ds-space-xs);
+  min-width: 0;
+}
+
+.ds-home-card-title {
+  font-size: var(--ds-font-sm);
+  font-weight: 600;
+  color: var(--ds-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.ds-home-card-subtitle {
+  font-size: var(--ds-font-xs);
+  color: var(--ds-text-tertiary);
+  font-family: var(--ds-font-family-code);
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+/* Responsive for Home Grid */
+@media (width <=1024px) {
+  .ds-home-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (width <=640px) {
+  .ds-home-grid {
     grid-template-columns: 1fr;
   }
 }

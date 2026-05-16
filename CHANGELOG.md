@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Not Commited] — 2026-05-17 02:05
+
+### 🚀 Added
+- **Pinned Documents System**: Implementation of a dedicated section for workspace-specific document pinning on the Home Dashboard.
+- **Continue Edit Section**: New dashboard area to resume editing recently active files with real-time activity tracking.
+- **PinnedService**: Centralized service for managing persistent pinned file states with synchronization across workspaces and devices.
+- **TimeUtil**: Utility module for formatting relative time (e.g., "5 mins ago").
+- **HomeSection & HomeCard Molecules**: Atomic Design refactoring of the home dashboard into reusable, component-based sections and cards.
+- **Pin Action Integration**: Added "Pin to Home" and "Unpin from Home" functionality to the Tree View context menu.
+- **Dashboard Context Menus**: Enabled right-click actions for Pinned, Continue Edit, and Recently Viewed items, supporting unpinning, history removal, and file system navigation.
+- **History Management UI**: Added "Remove from History" capability trực tiếp từ dashboard section Recently Viewed.
+
+### 🔧 Changed
+- **Home Dashboard Orchestration**: Transitioned `HomeComponent` to an event-driven architecture sử dụng các sự kiện `pinned-changed` và `recent-changed` để cập nhật UI tức thì.
+- **Edit Activity Tracking**: Triển khai cơ chế theo dõi `last_edits` trong `AppState` và tích hợp hook cập nhật timestamp vào `EditorModule`/`DraftModule`.
+- **RecentlyViewedModule Enhancement**: Tích hợp cơ chế phát sự kiện (event dispatching) để thông báo cho hệ thống khi trạng thái lịch sử thay đổi.
+- **Atomic Design Refactoring**: Thay thế `ContinueEditCard` cũ bằng molecule `HomeCard` đa năng hơn, giúp đồng bộ hóa giao diện trên toàn bộ dashboard.
+
+### 🐞 Fixed
+- **Dashboard UI Optimization**: Khắc phục hiện tượng nháy khi cập nhật timestamp bằng cách triển khai cơ chế **Auto-Refresh** (60s) với partial section re-rendering.
+- **Linting & Code Quality**: Giải quyết các cảnh báo biến không sử dụng và đảm bảo tuân thủ 0 lỗi linting trên các module mới.
+
+---
+
 ## [2.4.0] — 2026-05-17 01:00
 
 ### 🚀 Added
@@ -25,7 +49,7 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [2.3.3] — 2026-05-16 23:59
+## [2.3.4] — 2026-05-16 23:59
 
 ### 🐞 Fixed
 - **Monaco Scroll Sync — First-Load Bug**: Khắc phục triệt để bug scroll sai khi switch Read → Edit lần đầu tiên sau khi load file. Root cause: `setSelection()` trong `syncCursor` kích hoạt Monaco internal smooth scroll animation chạy async qua nhiều RAF frames (535→650→678→1842→2041px), liên tục override `revealPositionInCenter`. Fix: thêm `ScrollType.Immediate` (`=1`) vào `revealPositionInCenter` để snap đồng bộ và cancel toàn bộ queued smooth scroll animations. Lần đầu và mọi lần switch sau đều cuộn đúng vị trí.
@@ -36,7 +60,7 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [2.3.2] — 2026-05-16 17:30
+## [2.3.3] — 2026-05-16 17:30
 
 ### 🐞 Fixed
 - **Monaco Editor — Block Typing (Empty File)**: Khắc phục triệt để bug typing bị block khi tạo file mới (rỗng) và chuyển sang Edit mode. Root cause: Chrome deregisters textarea khỏi OS text input pipeline sau nhiều lần `setValue('')` trong quá trình init — `beforeinput`/`input` events không bao giờ fire dù `keydown` và DOM focus hoạt động bình thường. Fix: thêm `setTimeout(blur→focus, 150ms)` với guard `getValue() === ''` trong `activate()` để warm up browser text input pipeline. Guard tránh clobber cursor position của non-empty files.
@@ -49,7 +73,7 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [2.3.1] — 2026-05-16 15:51
+## [2.3.2] — 2026-05-16 15:51
 
 ### 🚀 Added
 - **Path Utilities**: Triển khai `server/utils/path-util.js` cung cấp hàm `resolvePath()` thống nhất cho toàn bộ file operations. Hỗ trợ:
@@ -79,7 +103,7 @@ All notable changes to this project will be documented in this file.
   - Strict separator check (`path.sep`) để prevent `/work` unintentionally matching `/work-secret`
 - **Workspace Compatibility**: Auto-migrate old workspaces không break existing setups. User không cần làm gì, fixes apply transparently.
 
-## [2.3.1 Not Commited] — 2026-05-16 13:02
+## [2.3.1] — 2026-05-16 13:02
 
 ### 🚀 Added
 - **AppState**: Triển khai `resetFileViewMode(path)` hỗ trợ xóa bỏ hoàn toàn trạng thái mode (Read/Edit) của file trong `localStorage`.

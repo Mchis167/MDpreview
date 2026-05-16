@@ -93,7 +93,14 @@ window.AppState = {
         });
       }
 
-      // 2c. Restore Drafts
+      // 2c. Restore Pinned Documents
+      if (data.allPinned) {
+        Object.keys(data.allPinned).forEach(wsId => {
+          localStorage.setItem(`mdpreview_pinned_${wsId}`, JSON.stringify(data.allPinned[wsId]));
+        });
+      }
+
+      // 2d. Restore Drafts
       if (data.allDrafts) {
         Object.keys(data.allDrafts).forEach(wsId => {
           localStorage.setItem(`drafts_v2_${wsId}`, JSON.stringify(data.allDrafts[wsId]));
@@ -105,6 +112,7 @@ window.AppState = {
       if (data.customOrders) localStorage.setItem('mdpreview_custom_orders', JSON.stringify(data.customOrders));
       if (data.expandedPaths) localStorage.setItem('mdpreview_expanded_paths', JSON.stringify(data.expandedPaths));
       if (data.scrollPositions) localStorage.setItem('md-scroll-positions', JSON.stringify(data.scrollPositions));
+      if (data.lastEdits) localStorage.setItem('mdpreview_last_edits', JSON.stringify(data.lastEdits));
 
       // 3. First-time sync: If server is empty but local has data, push to server
       if (!hasServerData) {
@@ -140,6 +148,7 @@ window.AppState = {
       try {
         const allTabs = {};
         const allRecent = {};
+        const allPinned = {};
         const allDrafts = {};
 
         for (let i = 0; i < localStorage.length; i++) {
@@ -153,6 +162,10 @@ window.AppState = {
             const wsId = key.replace('mdpreview_recent_', '');
             try { allRecent[wsId] = JSON.parse(localStorage.getItem(key)); } catch (_e) { }
           }
+          else if (key.startsWith('mdpreview_pinned_')) {
+            const wsId = key.replace('mdpreview_pinned_', '');
+            try { allPinned[wsId] = JSON.parse(localStorage.getItem(key)); } catch (_e) { }
+          }
           else if (key.startsWith('drafts_v2_')) {
             const wsId = key.replace('drafts_v2_', '');
             try { allDrafts[wsId] = JSON.parse(localStorage.getItem(key)); } catch (_e) { }
@@ -163,11 +176,13 @@ window.AppState = {
           settings: this.settings,
           allTabs,
           allRecent,
+          allPinned,
           allDrafts,
           sessionModes: JSON.parse(localStorage.getItem('mdpreview_session_modes') || '{}'),
           customOrders: JSON.parse(localStorage.getItem('mdpreview_custom_orders') || '{}'),
           expandedPaths: JSON.parse(localStorage.getItem('mdpreview_expanded_paths') || '[]'),
           scrollPositions: JSON.parse(localStorage.getItem('md-scroll-positions') || '{}'),
+          lastEdits: JSON.parse(localStorage.getItem('mdpreview_last_edits') || '{}'),
           lastUpdated: new Date().toISOString()
         };
 
@@ -226,6 +241,26 @@ window.AppState = {
         if (AppState.savePersistentState) AppState.savePersistentState();
       }
     } catch (_e) { }
+  },
+
+  updateLastEdit(path) {
+    if (!path) return;
+    try {
+      const edits = JSON.parse(localStorage.getItem('mdpreview_last_edits') || '{}');
+      edits[path] = Date.now();
+      localStorage.setItem('mdpreview_last_edits', JSON.stringify(edits));
+      if (AppState.savePersistentState) AppState.savePersistentState();
+    } catch (_e) { }
+  },
+
+  getLastEdit(path) {
+    if (!path) return 0;
+    try {
+      const edits = JSON.parse(localStorage.getItem('mdpreview_last_edits') || '{}');
+      return edits[path] || 0;
+    } catch (_e) {
+      return 0;
+    }
   },
 
   /**

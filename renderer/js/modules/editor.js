@@ -22,6 +22,7 @@ const EditorModule = (() => {
   function _handleContentChange() {
     if (typeof TabsModule !== 'undefined' && AppState.currentFile) {
       TabsModule.setDirty(AppState.currentFile, isDirty());
+      if (AppState.updateLastEdit) AppState.updateLastEdit(AppState.currentFile);
     }
 
     // ── Slash Command Logic (Hybrid with Monaco) ──
@@ -379,6 +380,7 @@ const EditorModule = (() => {
             DraftModule.setDraftContent(content, targetFile);
             await DraftModule.renderPreview(content, targetFile);
             _originalContent = content;
+            if (AppState.updateLastEdit) AppState.updateLastEdit(targetFile);
             if (!silent && typeof showToast === 'function') showToast('Draft updated');
             return true;
         }
@@ -391,6 +393,7 @@ const EditorModule = (() => {
     if (success) {
       if (!silent && typeof showToast === 'function') showToast('File saved successfully');
       _originalContent = content; 
+      if (AppState.updateLastEdit) AppState.updateLastEdit(targetFile);
       
       if (typeof TabsModule !== 'undefined' && targetFile) {
         TabsModule.setDirty(targetFile, false);

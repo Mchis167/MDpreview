@@ -1,4 +1,4 @@
-/* global DesignSystem, RecentlyViewedModule, SearchPalette */
+/* global DesignSystem, RecentlyViewedModule, SearchPalette, TabsModule, AppState, HomeSection, PinnedService, MarkdownViewer, ContextMenuComponent */
 /* ══════════════════════════════════════════════════
    HomeComponent.js — Workspace Dashboard
    Atomic Design System (Organism)
@@ -10,11 +10,21 @@ class HomeComponent {
     this.state = {
       recentFiles: []
     };
+    this._refreshTimer = null;
+    this._isRendering = false;
     this.init();
   }
 
   init() {
     if (!this.mount) return;
+    // Update pinned section when state changes
+    window.addEventListener('pinned-changed', () => {
+      this._updatePinnedSection();
+    });
+    // Update recent section when state changes
+    window.addEventListener('recent-changed', () => {
+      this._updateRecentSection();
+    });
   }
 
   show() {
@@ -22,9 +32,11 @@ class HomeComponent {
     this._isHiding = false;
     this.mount.style.display = 'flex';
     this.render();
+    this._startRefreshTimer();
   }
 
   hide() {
+    this._stopRefreshTimer();
     if (!this.mount) return;
     this._isHiding = true;
     this.mount.style.display = 'none';
@@ -33,13 +45,17 @@ class HomeComponent {
 
   async render() {
     if (!this.mount || this._isHiding) return;
+    this._isRendering = true;
     
     // Fetch recent files
     if (RecentlyViewedModule) {
       this.state.recentFiles = RecentlyViewedModule.getRecentFiles() || [];
     }
 
-    if (this._isHiding) return;
+    if (this._isHiding) {
+      this._isRendering = false;
+      return;
+    }
 
     this.mount.innerHTML = '';
     const container = DesignSystem.createElement('div', 'ds-home-container');
@@ -49,14 +65,26 @@ class HomeComponent {
 
     // 2. Quick Actions
     container.appendChild(this._renderQuickActions());
+    
+    // 2.1 Pinned Documents
+    const pinnedSection = this._renderPinnedSection();
+    if (pinnedSection) container.appendChild(pinnedSection);
+    
+    // 2.2 Continue Edit
+    const continueSection = this._renderContinueEditSection();
+    if (continueSection) container.appendChild(continueSection);
 
     // 3. Recent Files
     if (this.state.recentFiles.length > 0) {
       container.appendChild(this._renderRecentSection());
     }
 
-    if (this._isHiding) return;
+    if (this._isHiding) {
+      this._isRendering = false;
+      return;
+    }
     this.mount.appendChild(container);
+    this._isRendering = false;
   }
 
   _renderSearchSection() {
@@ -133,6 +161,137 @@ class HomeComponent {
     return group;
   }
 
+  _renderPinnedSection() {
+    if (typeof PinnedService === 'undefined' || typeof HomeSection === 'undefined') return null;
+    const pinnedFiles = PinnedService.getPinnedFiles() || [];
+    if (pinnedFiles.length === 0) return null;
+
+    const items = pinnedFiles.map(path => ({
+      path,
+      icon: 'pin',
+      subtitle: path,
+      onContextMenu: (e, p) => this._handleCardContextMenu(e, p)
+    }));
+
+    return HomeSection.create({
+      title: 'Pinned Documents',
+      items,
+      className: 'ds-home-pinned-section'
+    });
+  }
+
+  _renderContinueEditSection() {
+    if (typeof TabsModule === 'undefined' || typeof AppState === 'undefined' || typeof HomeSection === 'undefined') return null;
+
+    const openFiles = TabsModule.getOpenFiles() || [];
+    const editTabs = openFiles.filter(path => AppState.getFileViewMode(path) === 'edit');
+
+    if (editTabs.length === 0) return null;
+
+    // Sort by last edit time
+    const sorted = editTabs.sort((a, b) => {
+      return (AppState.getLastEdit(b) || 0) - (AppState.getLastEdit(a) || 0);
+    });
+
+    const items = sorted.slice(0, 8).map(path => ({
+      path,
+      timestamp: AppState.getLastEdit(path),
+      icon: 'file-edit',
+      onContextMenu: (e, p) => this._handleCardContextMenu(e, p)
+    }));
+
+    return HomeSection.create({
+      title: 'Continue Edit',
+      items,
+      className: 'ds-home-continue-section'
+    });
+  }
+
+  _updatePinnedSection() {
+    if (this._isRendering || this._isHiding) return;
+    
+    const existing = this.mount.querySelector('.ds-home-pinned-section');
+    const newSection = this._renderPinnedSection();
+
+    if (existing) {
+      if (newSection) {
+        existing.replaceWith(newSection);
+      } else {
+        existing.remove();
+      }
+    } else if (newSection) {
+      const quickActions = this.mount.querySelector('.ds-home-quick-actions');
+      if (quickActions) {
+        quickActions.after(newSection);
+      }
+    }
+  }
+
+  /**
+   * Partial re-render for Continue Edit section only.
+   */
+  _updateContinueEditSection() {
+    if (this._isRendering || this._isHiding) return;
+    
+    const existingSection = this.mount.querySelector('.ds-home-continue-section');
+    const newSection = this._renderContinueEditSection();
+
+    if (existingSection) {
+      if (newSection) {
+        existingSection.replaceWith(newSection);
+      } else {
+        existingSection.remove();
+      }
+    } else if (newSection) {
+      // Place after pinned section if it exists, otherwise after quick actions
+      const pinnedSection = this.mount.querySelector('.ds-home-pinned-section');
+      if (pinnedSection) {
+        pinnedSection.after(newSection);
+      } else {
+        const quickActions = this.mount.querySelector('.ds-home-quick-actions');
+        if (quickActions) {
+          quickActions.after(newSection);
+        }
+      }
+    }
+  }
+
+  _updateRecentSection() {
+    if (this._isRendering || this._isHiding) return;
+    
+    if (RecentlyViewedModule) {
+      this.state.recentFiles = RecentlyViewedModule.getRecentFiles() || [];
+    }
+
+    const existing = this.mount.querySelector('.ds-home-recent-section');
+    const newSection = this._renderRecentSection();
+
+    if (existing) {
+      if (newSection) {
+        existing.replaceWith(newSection);
+      } else {
+        existing.remove();
+      }
+    } else if (newSection) {
+      const container = this.mount.querySelector('.ds-home-container');
+      if (container) container.appendChild(newSection);
+    }
+  }
+
+  _startRefreshTimer() {
+    this._stopRefreshTimer();
+    this._refreshTimer = setInterval(() => {
+      this._updateContinueEditSection();
+    }, 60000); // Auto refresh every 1 minute
+  }
+
+  _stopRefreshTimer() {
+    if (this._refreshTimer) {
+      clearInterval(this._refreshTimer);
+      this._refreshTimer = null;
+    }
+  }
+
   _renderRecentSection() {
     const section = DesignSystem.createElement('div', 'ds-home-recent-section');
     
@@ -147,6 +306,9 @@ class HomeComponent {
       const item = DesignSystem.createElement('div', 'ds-home-recent-item');
       item.onclick = () => {
         if (window.loadFile) window.loadFile(path);
+      };
+      item.oncontextmenu = (e) => {
+        this._handleRecentContextMenu(e, path);
       };
 
       const name = DesignSystem.createElement('div', 'ds-home-recent-name');
@@ -170,6 +332,90 @@ class HomeComponent {
 
     section.appendChild(grid);
     return section;
+  }
+
+  _handleCardContextMenu(e, path) {
+    if (typeof ContextMenuComponent === 'undefined') return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const isPinned = window.PinnedService && window.PinnedService.isPinned(path);
+    const items = [
+      {
+        label: isPinned ? 'Unpin from Home' : 'Pin to Home',
+        icon: isPinned ? 'pin-off' : 'pin',
+        onClick: () => {
+          if (window.PinnedService) window.PinnedService.togglePin(path);
+        }
+      },
+      { divider: true },
+      {
+        label: 'Reveal in Finder',
+        icon: 'external-link',
+        onClick: () => {
+          if (window.electronBridge) window.electronBridge.revealInFinder(path);
+        }
+      },
+      {
+        label: 'Copy Path',
+        icon: 'clipboard',
+        onClick: () => {
+          navigator.clipboard.writeText(path);
+        }
+      }
+    ];
+
+    ContextMenuComponent.open({
+      event: e,
+      items
+    });
+  }
+
+  _handleRecentContextMenu(e, path) {
+    if (typeof ContextMenuComponent === 'undefined') return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const isPinned = window.PinnedService && window.PinnedService.isPinned(path);
+    const items = [
+      {
+        label: 'Remove from History',
+        icon: 'trash',
+        danger: true,
+        onClick: () => {
+          if (window.RecentlyViewedModule) {
+            window.RecentlyViewedModule.remove(path);
+          }
+        }
+      },
+      { divider: true },
+      {
+        label: isPinned ? 'Unpin from Home' : 'Pin to Home',
+        icon: isPinned ? 'pin-off' : 'pin',
+        onClick: () => {
+          if (window.PinnedService) window.PinnedService.togglePin(path);
+        }
+      },
+      {
+        label: 'Reveal in Finder',
+        icon: 'external-link',
+        onClick: () => {
+          if (window.electronBridge) window.electronBridge.revealInFinder(path);
+        }
+      },
+      {
+        label: 'Copy Path',
+        icon: 'clipboard',
+        onClick: () => {
+          navigator.clipboard.writeText(path);
+        }
+      }
+    ];
+
+    ContextMenuComponent.open({
+      event: e,
+      items
+    });
   }
 }
 

@@ -1,7 +1,11 @@
-# Sync scroll Fix
-
-## Vấn đề
-Hiện tại hệ thống sync cursor giữa read và edit mode đã tương đối hoàn chỉnh, nhưng nó vẫn có những điểm chưa ổn định. Về bản chất nó đã có thể sycn chuẩn chỉnh vị trí trong cacs case rồi, tuy nhiên trong một vài trường hợp, có sự sai lệch giữa cursor và thanh cuộn, tức là nó đã tìm đúng dòng rồi và để con trỏ ở đó rồi, nhưng thanh cuộn lại chưa cuộn đến dòng đó, hoặc không scroll đến vị trí dự kiến. Tôi đoán là có conflict nào đó trong lúc đang scroll gây ra lỗi. 
+# Continue Edit
 
 ## Mục tiêu
-Đưa scroll sync ổn đinh trong mọi trường hợp
+Tại home screen, chúng ta sẽ bổ xung thêm một section tên là "Continue Edit", mục đích của nó để hiển thị danh sách các tab đang mở với mode là edit trên tab bar. Các tab sẽ được sắp xếp theo thời gian chỉnh sửa giảm dần. Khi click vào một tab, nó sẽ chuyển sang tab đó để user tiếp tục edit.
+
+## Nội dung hiển thị
+Một section tại home vưới UI grid view 4 columns.
+Mỗi ô hiển thị thông tin của một tab:
+- Tên File: Limit line = 1 line, nếu tên file dài quá thì cắt ngắn và thêm dấu "...", tên file chỉ cần hiển thị file name, không cần hiển thị extension
+- Last edit: thể hiện theo dạng "x phút trước", "x giờ trước", "x ngày trước"
+  

@@ -590,6 +590,13 @@ const TreeModule = (() => {
         if (!isHidden) {
           items.push(
             { label: 'Duplicate', icon: 'copy', shortcut: '⌘D', onClick: () => _handleDuplicate(e, node) },
+          { 
+            label: window.PinnedService && window.PinnedService.isPinned(node.path) ? 'Unpin from Home' : 'Pin to Home', 
+            icon: window.PinnedService && window.PinnedService.isPinned(node.path) ? 'pin-off' : 'pin', 
+            onClick: () => {
+              if (window.PinnedService) window.PinnedService.togglePin(node.path);
+            }
+          },
             { divider: true },
             { label: 'New File', icon: 'file-plus', shortcut: '⌘N', onClick: () => _createNewItem(targetPath, 'file') },
             { label: 'New Folder', icon: 'folder-plus', shortcut: '⇧⌘N', onClick: () => _createNewItem(targetPath, 'directory') },

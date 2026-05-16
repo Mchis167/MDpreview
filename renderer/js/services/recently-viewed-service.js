@@ -21,6 +21,7 @@ const RecentlyViewedModule = (() => {
     localStorage.setItem(key, JSON.stringify(recent));
     if (typeof AppState !== 'undefined' && AppState.savePersistentState) AppState.savePersistentState();
     render();
+    window.dispatchEvent(new CustomEvent('recent-changed', { detail: { path: filePath, action: 'add' } }));
   }
 
   function remove(filePath) {
@@ -32,6 +33,7 @@ const RecentlyViewedModule = (() => {
     localStorage.setItem(key, JSON.stringify(recent));
     if (typeof AppState !== 'undefined' && AppState.savePersistentState) AppState.savePersistentState();
     render();
+    window.dispatchEvent(new CustomEvent('recent-changed', { detail: { path: filePath, action: 'remove' } }));
   }
 
   function swap(oldPath, newPath) {
@@ -45,6 +47,7 @@ const RecentlyViewedModule = (() => {
       localStorage.setItem(key, JSON.stringify(recent));
       if (typeof AppState !== 'undefined' && AppState.savePersistentState) AppState.savePersistentState();
       render();
+      window.dispatchEvent(new CustomEvent('recent-changed', { detail: { oldPath, newPath, action: 'swap' } }));
     }
   }
 
