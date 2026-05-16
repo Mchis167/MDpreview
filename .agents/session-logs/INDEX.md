@@ -26,6 +26,7 @@
 | Asset management / stale data / broken link count / tabs render / socket events / registry sync | `completed-session/session-log-asset-management-stale-data-fix-2026-05-16.md` |
 | Monaco / block typing / new file / empty editor / beforeinput / browser text input routing / setTimeout warm-up | `completed-session/session-log-block-typing-new-file-2026-05-16.md` |
 | scroll sync / first load / Read Edit mode switch / smooth scroll / ScrollType.Immediate / setSelection / revealPositionInCenter | `completed-session/session-log-scroll-sync-first-load-fix-2026-05-16.md` |
+| publish / image management / R2 upload / image compression / WASM / jSquash / WebP / content hash / image cache / quality / canvas bypass | `completed-session/session-log-publish-image-management-2026-05-16.md` |
 
 ---
 

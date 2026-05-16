@@ -1,4 +1,4 @@
-/* global RetryStrategy, PublishingErrorTypes, PublishUtils, ImageProcessorUtil */
+/* global RetryStrategy, PublishingErrorTypes, PublishUtils, ImageProcessorUtil, PublishImageCache */
 /**
  * WorkerPublishAdapter
  * Purpose: Handle Cloudflare Worker publishing strategy
@@ -78,15 +78,15 @@ const WorkerPublishAdapter = (() => {
     if (assetResult.resolved && Object.keys(assetResult.resolved).length > 0) {
       const totalAssets = Object.keys(assetResult.resolved).length;
       let uploadedCount = 0;
+      let cachedCount = 0;
+      let savedBytes = 0;
+
+      // Load image cache trước khi bắt đầu vòng lặp
+      await PublishImageCache.load();
 
       for (const [originalSrc, _assetInfo] of Object.entries(assetResult.resolved)) {
         try {
-          uploadedCount++;
-          if (window.showToast) {
-            window.showToast(`Optimizing & Uploading assets (${uploadedCount}/${totalAssets})...`, 'info', { id: 'publish' });
-          }
-
-          // 1. Fetch asset từ local server (Sử dụng đường dẫn gốc vì nó đang hiển thị được trong app)
+          // 1. Fetch asset từ local server
           // Đảm bảo không bị lặp lại /assets/assets/
           let assetFetchUrl = originalSrc;
           if (!assetFetchUrl.startsWith('/')) {
@@ -96,55 +96,128 @@ const WorkerPublishAdapter = (() => {
               assetFetchUrl = '/assets/' + assetFetchUrl;
             }
           }
-          
+
           _log('debug', `Fetching local asset: ${assetFetchUrl}`);
-          
+
           const assetBlobRes = await fetch(assetFetchUrl);
           if (!assetBlobRes.ok) throw new Error(`Could not fetch asset: ${assetFetchUrl} (HTTP ${assetBlobRes.status})`);
           const originalBlob = await assetBlobRes.blob();
 
-          let uploadPayload = {
-            assetName: originalSrc.split('/').pop(),
-            slug: slugValidation.normalized,
-            workerUrl,
-            secret: adminSecret
-          };
-
-          // 2. Nén nếu là ảnh (Sử dụng Canvas - Cross-platform)
+          // 2. Cache check (chỉ cho ảnh)
           if (originalBlob.type.startsWith('image/')) {
+            const hash = await PublishImageCache.computeHash(originalBlob);
+            const cached = PublishImageCache.get(hash);
+
+            if (cached) {
+              cachedCount++;
+              savedBytes += cached.originalSize || 0;
+              assetMapping[originalSrc] = cached.r2Url;
+              _log('debug', `Cache hit: ${originalSrc} → ${cached.r2Url}`);
+              if (window.showToast) {
+                window.showToast(`Processing assets (${uploadedCount + cachedCount}/${totalAssets})...`, 'info', { id: 'publish' });
+              }
+              continue;
+            }
+
+            // Cache miss — compress + upload
+            uploadedCount++;
+            if (window.showToast) {
+              window.showToast(`Uploading assets (${uploadedCount + cachedCount}/${totalAssets})...`, 'info', { id: 'publish' });
+            }
+
+            let compressedBlob = originalBlob;
+            let compressedMime = originalBlob.type;
             try {
               const processed = await ImageProcessorUtil.processForPublish(originalBlob);
-              const base64 = await _blobToBase64(processed.blob);
-              uploadPayload.base64Data = base64;
-              uploadPayload.mimeType = processed.mime;
+              compressedBlob = processed.blob;
+              compressedMime = processed.mime;
             } catch (pErr) {
-              _log('warn', `Frontend compression failed for ${originalSrc}, falling back to original: ${pErr.message}`);
-              // Nếu nén lỗi ở frontend, gửi base64 của bản gốc hoặc để backend tự xử lý
-              uploadPayload.base64Data = await _blobToBase64(originalBlob);
-              uploadPayload.mimeType = originalBlob.type;
+              _log('warn', `Compression failed for ${originalSrc}, using original: ${pErr.message}`);
             }
+
+            const uploadPayload = {
+              assetName: `img-${hash.slice(0, 12)}.${compressedMime.split('/')[1].replace('jpeg', 'jpg')}`,
+              contentHash: hash,
+              slug: slugValidation.normalized,
+              workerUrl,
+              secret: adminSecret,
+              base64Data: await _blobToBase64(compressedBlob),
+              mimeType: compressedMime
+            };
+
+            const assetRes = await fetch('/api/worker-publish-asset', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(uploadPayload)
+            });
+
+            if (!assetRes.ok) {
+              const err = await assetRes.json();
+              throw new Error(err.error || 'Asset upload failed');
+            }
+
+            const uploadResult = await assetRes.json();
+            const safeWorkerUrl = workerUrl.replace(/\/$/, '');
+            const remoteUrl = `${safeWorkerUrl}/${slugValidation.normalized}/assets/${uploadResult.remoteName}`;
+
+            // Lưu vào cache
+            PublishImageCache.set(hash, {
+              r2Url: remoteUrl,
+              slug: slugValidation.normalized,
+              originalSize: originalBlob.size,
+              compressedSize: compressedBlob.size
+            });
+
+            assetMapping[originalSrc] = remoteUrl;
+            _log('debug', `Asset uploaded: ${originalSrc} → ${remoteUrl}`);
+
+          } else {
+            // Non-image assets: upload trực tiếp, không cache
+            uploadedCount++;
+            if (window.showToast) {
+              window.showToast(`Uploading assets (${uploadedCount + cachedCount}/${totalAssets})...`, 'info', { id: 'publish' });
+            }
+
+            const uploadPayload = {
+              assetName: originalSrc.split('/').pop(),
+              slug: slugValidation.normalized,
+              workerUrl,
+              secret: adminSecret
+            };
+
+            const assetRes = await fetch('/api/worker-publish-asset', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(uploadPayload)
+            });
+
+            if (!assetRes.ok) {
+              const err = await assetRes.json();
+              throw new Error(err.error || 'Asset upload failed');
+            }
+
+            const uploadResult = await assetRes.json();
+            const safeWorkerUrl = workerUrl.replace(/\/$/, '');
+            assetMapping[originalSrc] = `${safeWorkerUrl}/${slugValidation.normalized}/assets/${uploadResult.remoteName}`;
+            _log('debug', `Asset uploaded: ${originalSrc}`);
           }
 
-          // 3. Gọi proxy server để upload lên R2
-          const assetRes = await fetch('/api/worker-publish-asset', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(uploadPayload)
-          });
-
-          if (!assetRes.ok) {
-            const err = await assetRes.json();
-            throw new Error(err.error || 'Asset upload failed');
-          }
-
-          const uploadResult = await assetRes.json();
-          const safeWorkerUrl = workerUrl.replace(/\/$/, '');
-          const remoteUrl = `${safeWorkerUrl}/${slugValidation.normalized}/assets/${uploadResult.remoteName}`;
-          
-          assetMapping[originalSrc] = remoteUrl;
-          _log('debug', `Asset uploaded: ${originalSrc} → ${remoteUrl}`);
         } catch (err) {
           _log('error', `Failed to process asset ${originalSrc}: ${err.message}`);
+        }
+      }
+
+      // Lưu cache sau khi hoàn thành vòng lặp
+      await PublishImageCache.save();
+
+      // Toast tổng kết với stats
+      if (window.showToast) {
+        const savedKB = Math.round(savedBytes / 1024);
+        const parts = [];
+        if (uploadedCount > 0) parts.push(`${uploadedCount} uploaded`);
+        if (cachedCount > 0) parts.push(`${cachedCount} from cache${savedKB > 0 ? ` (saved ~${savedKB}KB)` : ''}`);
+        if (parts.length > 0) {
+          window.showToast(`Assets: ${parts.join(', ')}`, 'success', { id: 'publish' });
         }
       }
 

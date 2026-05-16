@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Not Committed] — 2026-05-17 01:00
+
+### 🚀 Added
+- **Publish Image Cache System**: Triển khai cơ chế cache dựa trên content hash (SHA-256) để tránh re-compress và re-upload ảnh không thay đổi khi publish. Chỉ ảnh có nội dung thực sự thay đổi (kể cả replace cùng tên) mới được xử lý lại.
+  - `renderer/js/services/publishing/publish-image-cache.js` — Module mới: `computeHash()`, `load()`, `save()`, `get()`, `set()`
+  - `server/routes/publish-cache.js` — API mới: `GET/POST /api/publish-cache`, đọc/ghi `.mdpreview/publish-cache.json` trong workspace
+  - Hash-based R2 filename: `img-{hash12}.{ext}` → CDN cache lâu dài, dedup tự động
+  - Toast stats khi publish: "X uploaded, Y from cache (saved ~ZKB)"
+- **Automated Tests — Publish Image Cache**: 17 test cases, 17/17 passed (`tests/publish-image-cache.test.js`). Coverage: API GET/POST, computeHash determinism, cross-doc dedup, replace-same-name detection, filename format.
+
+### 🔧 Changed
+- **`renderer/js/services/publishing/worker-publish-adapter.js`**: Tích hợp cache check vào vòng lặp xử lý ảnh — HIT reuse r2Url, MISS compress+upload+cache. Non-image assets vẫn upload trực tiếp không qua cache.
+- **`server/routes/worker-publish.js`**: Nhận thêm field `contentHash` trong payload để giữ hash-based filename khi đã có từ frontend.
+- **`server/index.js`**: Đăng ký route `/api/publish-cache`.
+- **`renderer/index.html`**: Load `publish-image-cache.js` trước `worker-publish-adapter.js`.
+
+### 🐞 Fixed
+- **Image Quality Bug (WASM jSquash)**: jSquash WebP/JPEG encoders nhận `quality` theo thang 0–100, nhưng code đang truyền `0.82` (tức 0.82/100 ≈ chất lượng 0%). Fix: `Math.round(quality * 100)` trong `image-encoder.worker.js` trước khi truyền vào encoder. Ảnh giờ encode đúng ở 82–85% chất lượng.
+- **Canvas Bypass for Small Images**: Mọi ảnh (kể cả nhỏ ≤ 1920px) đều bị đẩy qua Canvas → `getImageData()` gây mất màu sắc và blur. Fix: thêm `_imageNeedsResize()` check — nếu không cần resize, bypass Canvas hoàn toàn, gửi raw blob thẳng vào WASM decoder → encoder.
+- **WASM Decoder Assets**: Copy `webp_dec.wasm` và `mozjpeg_dec.wasm` vào `renderer/js/lib/jsquash/wasm/` để serve được qua route `/js/`. Bundle rebuilt: 195KB → 295KB.
+
+---
+
 ## [Not Committed] — 2026-05-16 23:59
 
 ### 🐞 Fixed

@@ -77,7 +77,7 @@ router.post('/worker-publish', async (req, res) => {
  */
 router.post('/worker-publish-asset', async (req, res) => {
   try {
-    const { assetName, slug, workerUrl, secret, base64Data, mimeType } = req.body;
+    const { assetName, contentHash, slug, workerUrl, secret, base64Data, mimeType } = req.body;
     const watchDir = req.watchDir;
 
     if (!base64Data && !watchDir) return res.status(400).json({ error: 'Workspace not active and no data provided' });
@@ -86,16 +86,20 @@ router.post('/worker-publish-asset', async (req, res) => {
     }
 
     let processedBuffer;
-    let targetName = assetName;
+    // Dùng contentHash làm tên file nếu có → R2 filename là immutable by content
+    let targetName = contentHash ? assetName : assetName;
 
     // 1. Nếu có dữ liệu từ Frontend gửi lên (đã nén), dùng luôn
     if (base64Data) {
       processedBuffer = Buffer.from(base64Data, 'base64');
-      // Nếu là ảnh và đã đổi định dạng ở frontend
-      if (mimeType === 'image/webp' && !assetName.toLowerCase().endsWith('.webp')) {
-        targetName = assetName.substring(0, assetName.lastIndexOf('.')) + '.webp';
-      } else if (mimeType === 'image/jpeg' && !assetName.toLowerCase().endsWith('.jpg')) {
-        targetName = assetName.substring(0, assetName.lastIndexOf('.')) + '.jpg';
+      // assetName từ frontend đã được đặt đúng tên (img-{hash12}.{ext}) khi có contentHash
+      // Chỉ cần đổi extension nếu là legacy request không có contentHash
+      if (!contentHash) {
+        if (mimeType === 'image/webp' && !assetName.toLowerCase().endsWith('.webp')) {
+          targetName = assetName.substring(0, assetName.lastIndexOf('.')) + '.webp';
+        } else if (mimeType === 'image/jpeg' && !assetName.toLowerCase().endsWith('.jpg')) {
+          targetName = assetName.substring(0, assetName.lastIndexOf('.')) + '.jpg';
+        }
       }
     } else {
       // 2. Nếu không có dữ liệu, đọc từ disk (chế độ Electron truyền thống)
