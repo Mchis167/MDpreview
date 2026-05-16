@@ -7,7 +7,7 @@ class ChangeActionViewBarComponent {
   constructor(options = {}) {
     this.targetContainer = options.targetContainer || document.querySelector('.glass-main') || document.body;
     this.isStandalone = !!options.isStandalone; // If true, doesn't hook into global AppState
-    
+
     this.container = null;
     this.toolbarEl = null;
     this.segmentedControl = null;
@@ -30,10 +30,10 @@ class ChangeActionViewBarComponent {
     this.container = DesignSystem.createElement('div', className);
 
     this.toolbarEl = DesignSystem.createElement('div', 'ds-change-action-view-bar');
-    
+
     // 2. Segmented Control Group (Adaptive & Concentric)
     const leftSection = DesignSystem.createElement('div', 'ds-toolbar-section-left');
-    
+
     this.segmentedControlComponent = DesignSystem.createSegmentedControl({
       items: this.modes,
       activeId: AppState.currentMode || 'read',
@@ -53,7 +53,7 @@ class ChangeActionViewBarComponent {
 
     // 4. Draft Actions (Button Group)
     this.draftActions = DesignSystem.createElement('div', 'ds-toolbar-buttons');
-    
+
     const discardBtn = DesignSystem.createButton({
       label: 'Discard Draft',
       variant: 'ghost',
@@ -61,7 +61,7 @@ class ChangeActionViewBarComponent {
       onClick: () => this.handleDiscard(),
       tooltipPos: 'top'
     });
-    
+
     const saveBtn = DesignSystem.createButton({
       label: 'Save to Workspace',
       variant: 'primary',
@@ -83,21 +83,21 @@ class ChangeActionViewBarComponent {
 
     // Hook into AppState if not standalone
     if (!this.isStandalone && window.AppState) {
-        AppState.updateToolbarUI = async (mode) => {
-            await this.updateUI(mode);
-        };
+      AppState.updateToolbarUI = async (mode) => {
+        await this.updateUI(mode);
+      };
 
-        // Trigger initial state
-        this.updateUI(AppState.currentMode || 'read');
+      // Trigger initial state
+      this.updateUI(AppState.currentMode || 'read');
     }
   }
 
   handleModeClick(modeId) {
     if (this.isStandalone) {
-        this.updateUI(modeId);
-        return;
+      this.updateUI(modeId);
+      return;
     }
-    
+
     // Trigger global update (which hits our updateUI)
     if (window.AppState && AppState.updateToolbarUI) {
       AppState.updateToolbarUI(modeId);
@@ -105,20 +105,20 @@ class ChangeActionViewBarComponent {
   }
 
   // ── Mode Switch Logic (Migrated from toolbar.js) ────────────
-  
+
   async updateUI(modeId) {
     if (!this.toolbarEl) return;
     if (typeof AppState === 'undefined') return;
-    
+
     // Capture the file context at the start to prevent race conditions during async transitions
     const initialFile = AppState.currentFile;
 
     if (!this.isStandalone) {
-        const hasFile = !!AppState.currentFile;
-        this.container.style.display = hasFile ? 'flex' : 'none';
-        if (!hasFile) {
-          return; // Safe: _isSyncing not yet set
-        }
+      const hasFile = !!AppState.currentFile;
+      this.container.style.display = hasFile ? 'flex' : 'none';
+      if (!hasFile) {
+        return; // Safe: _isSyncing not yet set
+      }
     }
 
     // Strict Sync Guard to prevent loops
@@ -140,7 +140,7 @@ class ChangeActionViewBarComponent {
     // ── Sync Logic (Capture while still visible) ──────────
     const prevMode = AppState.currentMode;
     let syncData = AppState.forceSyncContext || null;
-    
+
     // Clear forced context after use
     if (AppState.forceSyncContext) delete AppState.forceSyncContext;
 
@@ -152,31 +152,31 @@ class ChangeActionViewBarComponent {
 
     // ── Dirty Check ───────────────────────────────────────
     if (prevMode === 'edit' && targetMode !== 'edit' && typeof EditorModule !== 'undefined' && EditorModule.isDirty()) {
-        const isDraft = AppState.currentFile && AppState.currentFile.startsWith('__DRAFT_');
-        const isFirstEdit = EditorModule.getOriginalContent() === '';
+      const isDraft = AppState.currentFile && AppState.currentFile.startsWith('__DRAFT_');
+      const isFirstEdit = EditorModule.getOriginalContent() === '';
 
-        if (isDraft || isFirstEdit) {
-            await EditorModule.save(true, 'updateUI:auto', true);
-        } else {
-            DesignSystem.showConfirm({
-                title: 'Unsaved Changes',
-                message: 'You have unsaved changes. Save them before switching?',
-                onConfirm: async () => {
-                    this._isSyncing = false;
-                    window._isGlobalSyncing = false;
-                    await EditorModule.save(true, 'updateUI:confirm');
-                    // Always proceed regardless of save result — the goal is to switch mode.
-                    // Blocking on save=false leaves currentMode stuck at 'edit' forever.
-                    this._proceedUpdateUI(targetMode, syncData, prevMode);
-                },
-                onCancel: () => {
-                    this._isSyncing = false;
-                    window._isGlobalSyncing = false;
-                    this.updateUI('edit');
-                }
-            });
-            return;
-        }
+      if (isDraft || isFirstEdit) {
+        await EditorModule.save(true, 'updateUI:auto', true);
+      } else {
+        DesignSystem.showConfirm({
+          title: 'Unsaved Changes',
+          message: 'You have unsaved changes. Save them before switching?',
+          onConfirm: async () => {
+            this._isSyncing = false;
+            window._isGlobalSyncing = false;
+            await EditorModule.save(true, 'updateUI:confirm');
+            // Always proceed regardless of save result — the goal is to switch mode.
+            // Blocking on save=false leaves currentMode stuck at 'edit' forever.
+            this._proceedUpdateUI(targetMode, syncData, prevMode);
+          },
+          onCancel: () => {
+            this._isSyncing = false;
+            window._isGlobalSyncing = false;
+            this.updateUI('edit');
+          }
+        });
+        return;
+      }
     }
 
     try {
@@ -194,7 +194,7 @@ class ChangeActionViewBarComponent {
     // This prevents "cross-file mode pollution" if tab A is closed and tab B is opened 
     // while this async updateUI for A is still in-flight.
     if (initialFile && AppState.currentFile === initialFile && typeof AppState.setFileViewMode === 'function') {
-        AppState.setFileViewMode(initialFile, targetMode);
+      AppState.setFileViewMode(initialFile, targetMode);
     }
   }
 
@@ -212,13 +212,13 @@ class ChangeActionViewBarComponent {
     if (targetMode === 'read' || targetMode === 'comment' || targetMode === 'collect') {
       const viewerComp = MarkdownViewer.getInstance();
       if (viewerComp) {
-        viewerComp.setState({ 
+        viewerComp.setState({
           mode: targetMode,
           file: AppState.currentFile
         });
       } else {
-        const mdContent   = document.getElementById('md-content');
-        const emptyState  = document.getElementById('empty-state');
+        const mdContent = document.getElementById('md-content');
+        const emptyState = document.getElementById('empty-state');
         if (mdContent) mdContent.style.display = 'block';
         if (emptyState) emptyState.style.display = 'none';
       }
@@ -248,7 +248,7 @@ class ChangeActionViewBarComponent {
       const viewerComp = MarkdownViewer.getInstance();
       const _currentSelection = window.getSelection().toString().trim();
       const mdContentMount = document.getElementById('md-content'); // Might not exist if we just switched
-      
+
       const viewerMount = document.getElementById('md-viewer-mount');
       const _currentScrollPct = (mdContentMount && viewerMount) ? (viewerMount.scrollTop / (viewerMount.scrollHeight - viewerMount.clientHeight || 1)) : 0;
 
@@ -272,7 +272,7 @@ class ChangeActionViewBarComponent {
           EditorModule.focusWithContext({ ..._activeCtx, _fileKey: AppState.currentFile || 'default' });
         }
       }
-      
+
       if (typeof CommentsModule !== 'undefined') CommentsModule.removeCommentMode();
       if (typeof CollectModule !== 'undefined') CollectModule.removeCollectMode();
     }
@@ -280,7 +280,7 @@ class ChangeActionViewBarComponent {
     // ── Apply Subtle Fade-In Animation (Only for Major Mode Swaps) ──
     const isMajorChange = (prevMode === 'edit' || targetMode === 'edit');
     const activeView = (targetMode === 'edit') ? document.getElementById('edit-viewer') : document.getElementById('md-content');
-    
+
     if (isMajorChange && activeView) {
       activeView.classList.remove('ds-sync-fade-in');
       void activeView.offsetWidth; // Force reflow
@@ -356,19 +356,19 @@ class ChangeActionViewBarComponent {
     if (!AppState.currentFile) return;
 
     if (AppState.currentFile && AppState.currentFile.startsWith('__DRAFT_')) {
-        if (typeof DraftModule !== 'undefined' && typeof EditorModule !== 'undefined') {
-            const content = DraftModule.getDraftContent();
-            EditorModule.setOriginalContent(content);
-        }
-        return;
+      if (typeof DraftModule !== 'undefined' && typeof EditorModule !== 'undefined') {
+        const content = DraftModule.getDraftContent();
+        EditorModule.setOriginalContent(content);
+      }
+      return;
     }
 
     const res = await fetch(`/api/file/raw?path=${encodeURIComponent(AppState.currentFile)}`);
     if (res.ok) {
-        const text = await res.text();
-        if (typeof EditorModule !== 'undefined') {
-            EditorModule.setOriginalContent(text);
-        }
+      const text = await res.text();
+      if (typeof EditorModule !== 'undefined') {
+        EditorModule.setOriginalContent(text);
+      }
     }
   }
 
@@ -444,7 +444,7 @@ class ChangeActionViewBarComponent {
         if (typeof showToast === 'function') showToast('Draft saved as file!');
         if (typeof EditorModule !== 'undefined') EditorModule.setDirty(false);
         if (typeof DraftModule !== 'undefined') DraftModule.clear();
-        
+
         if (typeof TabsModule !== 'undefined') {
           TabsModule.remove(AppState.currentFile, true);
           if (typeof loadFile === 'function') {
@@ -498,14 +498,14 @@ class ChangeActionViewBarComponent {
 
 // Singleton bridge for existing app logic
 const ChangeActionViewBar = (() => {
-    let instance = null;
-    return {
-        init: () => {
-            if (!instance) instance = new ChangeActionViewBarComponent();
-            return instance;
-        },
-        getInstance: () => instance
-    };
+  let instance = null;
+  return {
+    init: () => {
+      if (!instance) instance = new ChangeActionViewBarComponent();
+      return instance;
+    },
+    getInstance: () => instance
+  };
 })();
 // Export to window
 window.ChangeActionViewBar = ChangeActionViewBar;

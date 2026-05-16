@@ -2,19 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Not Commited] — 2026-05-16 04:55
+## [Not Commited] — 2026-05-16 13:02
 
 ### 🚀 Added
+- **AppState**: Triển khai `resetFileViewMode(path)` hỗ trợ xóa bỏ hoàn toàn trạng thái mode (Read/Edit) của file trong `localStorage`.
 - **Markdown Viewer**: Triển khai tính năng **"Right-click to Edit"**. Hỗ trợ chuột phải vào bất kỳ nội dung nào (văn bản, hình ảnh, placeholder ảnh lỗi) để chuyển sang chế độ Edit và tự động nhảy đến đúng dòng trong Monaco Editor.
 - **Renderer**: Hỗ trợ **Granular Inline Metadata**. Gắn thông tin dòng (`data-line`) cho từng thành phần inline (ảnh, link) giúp tăng độ chính xác tuyệt đối khi chuyển đổi ngữ cảnh, đặc biệt là trong các paragraph chứa nhiều ảnh.
 
 ### 🔧 Changed
+- **TabsModule**: Tích hợp cơ chế tự động reset mode khi đóng tab. Đảm bảo khi người dùng mở lại cùng một file, nó sẽ luôn khởi đầu ở chế độ mặc định (Read Mode) thay vì giữ lại mode cũ.
+- **ChangeActionViewBar**: Triển khai **Identity Guard** trong hàm `updateUI`. Cơ chế này chụp lại file context tại thời điểm bắt đầu và chỉ lưu mode mới nếu file hiện hành vẫn khớp sau khi các tác vụ async hoàn tất, triệt tiêu lỗi ghi đè mode sai file (cross-file pollution).
 - **Design System Icons**: Chuẩn hóa icon `image-off` sử dụng `stroke="currentColor"` giúp tự động đổi màu theo Dark/Light mode.
 - **MonacoValidationService**: Triển khai cơ chế **Full Content Tokenization** giúp nhận diện chính xác ngữ cảnh đa dòng (multi-line) cho broken link validation.
 - **Broken Link Validation**: Mở rộng danh sách loại trừ (`pre`, `code`, `script`, `style`, `metatag`) đồng bộ với logic backend của `AssetService`.
 - **Surgical Suppression**: Nâng cấp trải nghiệm người dùng bằng cách chỉ ẩn cảnh báo lỗi tại đúng vị trí link đang được gõ, bảo toàn các cảnh báo khác trong file.
 
 ### 🐞 Fixed
+- **Race Condition**: Khắc phục lỗi tiềm ẩn khiến mode của tab bị đóng có thể ghi đè lên tab mới mở nếu người dùng thao tác chuyển mode và đóng tab quá nhanh.
+- **Monaco Lifecycle Safety**: Đảm bảo luồng reset mode diễn ra đồng bộ, không gây xung đột với quá trình `dispose()` và `mount()` của Monaco Editor.
 - **Markdown Viewer**: Khắc phục lỗi tranh chấp dữ liệu (race condition) khiến `lastSyncContext` bị ghi đè bởi trình tự auto-capture trong quá trình chuyển đổi chế độ.
 - **Markdown Viewer**: Giải quyết lỗi nhảy dòng sai ("First image jump") khi click vào các ảnh khác nhau trong cùng một paragraph.
 - **MonacoValidationService**: Khắc phục triệt để lỗi "False Red" khi link ảnh hợp lệ nằm trong code blocks hoặc comments.

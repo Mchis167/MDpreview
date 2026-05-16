@@ -4,7 +4,7 @@
  * Pattern: IIFE Singleton
  */
 
-/* global MonacoService */
+/* global MonacoService, monaco */
 
 const AttachmentService = (() => {
   'use strict';
@@ -18,16 +18,16 @@ const AttachmentService = (() => {
   async function saveImage(file, vaultPath) {
     try {
       if (!vaultPath) throw new Error('No active workspace');
-      
+
       const buffer = await file.arrayBuffer();
       const originalName = file.name || 'pasted-image.png';
-      
+
       const result = await window.electronAPI.saveAttachment({
         buffer: buffer,
         originalName: originalName,
         vaultPath: vaultPath
       });
-      
+
       return result;
     } catch (error) {
       console.error('[AttachmentService] Save failed:', error);
@@ -61,7 +61,7 @@ const AttachmentService = (() => {
         const nVault = normalize(vaultPath);
         const nFile = normalize(file.path);
         const nAssetsBase = `${nVault}/assets`;
-        
+
         if (nFile.startsWith(nAssetsBase)) {
           alreadyExists = true;
           const originalVaultBase = vaultPath.replace(/\\/g, '/').replace(/\/+$/, '');
@@ -105,7 +105,7 @@ const AttachmentService = (() => {
         if (window.showToast) window.showToast(`Failed to save ${file.name || 'image'}: ${result.error}`, 'error');
       }
     }
-    
+
     if (uploadedPaths.length > 0) {
       const links = uploadedPaths.map(p => `![image](${p})`).join('\n');
       if (pos) {
@@ -187,10 +187,10 @@ const AttachmentService = (() => {
    */
   function _insertAtCursor(text) {
     if (!window.MonacoService || !MonacoService.isInitialized()) return;
-    
+
     const editor = MonacoService.getInstance();
     const selection = editor.getSelection();
-    
+
     MonacoService.executeEdit(selection, text);
     MonacoService.focus();
   }
@@ -200,16 +200,257 @@ const AttachmentService = (() => {
    */
   function _insertLinkAtPosition(text, pos) {
     if (!window.MonacoService || !MonacoService.isInitialized()) return;
-    
+
     const range = {
       startLineNumber: pos.lineNumber,
       startColumn: pos.column,
       endLineNumber: pos.lineNumber,
       endColumn: pos.column
     };
-    
+
     MonacoService.executeEdit(range, text);
     MonacoService.focus();
+  }
+
+  /**
+   * Download a web image to local assets and replace link in editor
+   */
+  async function downloadWebImage(url, range) {
+    const vaultPath = window.AppState?.currentWorkspace?.path;
+    if (!vaultPath) {
+      if (window.showToast) window.showToast('No active workspace', 'error');
+      return;
+    }
+
+    if (window.showToast) window.showToast('Downloading image...', 'info');
+
+    try {
+      const response = await fetch('/api/assets/download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, vaultPath })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        if (window.MonacoService) {
+          window.MonacoService.executeEdit(range, result.relativePath);
+        }
+        if (window.showToast) window.showToast('Downloaded to assets', 'success');
+      } else {
+        throw new Error(result.error || 'Failed to download');
+      }
+    } catch (err) {
+      console.error('[AttachmentService] Download failed:', err);
+      if (window.showToast) window.showToast(err.message, 'error');
+    }
+  }
+
+  /**
+   * Show details for a specific asset
+   */
+  function viewAssetDetail(url) {
+    const fileName = url.split(/[\\/]/).pop();
+    if (!window.AssetManager || !window.AssetDetailPanel) return;
+
+    const registry = window.AssetManager.getRegistry();
+    const allAssets = [...(registry.assets || []), ...(registry.orphans || []), ...(registry.broken || [])];
+    const assetItem = allAssets.find(a => a.name === fileName);
+
+    if (assetItem) {
+      window.AssetDetailPanel.show(assetItem);
+    } else {
+      if (window.showToast) window.showToast('Asset info not found', 'warn');
+    }
+  }
+
+  /**
+   * Replace all occurrences of a broken asset in editor buffer with a new asset
+   * Scans Monaco content directly (before save) to catch all unsaved broken links
+   * @param {string} oldName - broken asset name (e.g., 'missing.png')
+   * @param {string} newName - replacement asset name (e.g., 'fixed.png')
+   * @returns {number} - count of replacements made
+   */
+  function _replaceAllBrokenAssetOccurrences(oldName, newName) {
+    if (!window.MonacoService || !MonacoService.isInitialized()) return 0;
+
+    const editor = MonacoService.getInstance();
+    const model = editor?.getModel();
+    if (!model) return 0;
+
+    const content = model.getValue();
+
+    // Regex for Markdown ![alt](/assets/name) and HTML <img src="/assets/name">
+    const assetRegex = /(!\[.*?\]\s*\((\/?assets\/([^)]+))\))|(<img\s+[^>]*src=["'](\/?assets\/([^"']+))["'])/g;
+
+    const edits = [];
+    let match;
+    let count = 0;
+
+    while ((match = assetRegex.exec(content)) !== null) {
+      const assetPath = match[3] || match[6];
+      if (!assetPath) continue;
+
+      const assetName = assetPath.split('?')[0].split('#')[0];
+      const decodedName = decodeURIComponent(assetName);
+
+      // Only replace if matches the broken asset name
+      if (decodedName === oldName) {
+        const urlPartStartIndex = match[3]
+          ? match.index + match[1].indexOf(match[2])
+          : match.index + match[4].indexOf(match[5]);
+        const urlPartLength = (match[2] || match[5]).length;
+
+        const startPos = model.getPositionAt(urlPartStartIndex);
+        const endPos = model.getPositionAt(urlPartStartIndex + urlPartLength);
+
+        edits.push({
+          range: new monaco.Range(startPos.lineNumber, startPos.column, endPos.lineNumber, endPos.column),
+          text: `assets/${newName}`
+        });
+
+        count++;
+      }
+    }
+
+    if (edits.length > 0) {
+      MonacoService.applyEdits(edits);
+    }
+
+    return count;
+  }
+
+  /**
+   * Open the smart replacement dialog for an image
+   * @param {Object} imageInfo 
+   * @param {string} mode - 'existing' or 'upload'
+   * @param {boolean} isBroken - If true, performs a global project-wide replacement
+   */
+  async function openSmartReplace(imageInfo, mode = 'existing', isBroken = false) {
+    const { url, range } = imageInfo;
+    const fileName = url.split(/[\\/]/).pop();
+
+    if (!window.AssetReplacementDialog) return;
+
+    const _onConfirm = async (payload) => {
+      const vaultPath = window.AppState?.currentWorkspace?.path;
+      if (!vaultPath) return;
+
+      if (isBroken) {
+        // CASE: Broken Asset - Use Global Replacement (Sync all files in project)
+        try {
+          // Step 1: Replace all occurrences in Monaco buffer FIRST (catches unsaved changes)
+          const oldName = fileName;
+          const newNameRaw = payload.newName || '';
+          const newName = newNameRaw.split('/').pop(); // Extract basename
+          const editorReplacementCount = _replaceAllBrokenAssetOccurrences(oldName, newName);
+
+          // Step 2: Sync changes to disk via backend
+          const res = await window.electronAPI.assets.replace({
+            vaultPath,
+            ...payload
+          });
+
+          if (res.success) {
+            if (window.AssetManager) window.AssetManager.refresh();
+
+            const message = editorReplacementCount > 0
+              ? `Fixed ${editorReplacementCount} broken link(s) + synced project-wide`
+              : 'Broken links fixed project-wide';
+
+            if (window.showToast) window.showToast(message, 'success');
+          } else {
+            throw new Error(res.error || 'Global replacement failed');
+          }
+        } catch (err) {
+          console.error('[AttachmentService] Global replace failed:', err);
+          if (window.showToast) window.showToast(err.message, 'error');
+        }
+        return;
+      }
+
+      // CASE: Valid Asset - Use Local Replacement (Update only this link)
+      if (payload.isUpload) {
+        try {
+          // Convert base64 data to ArrayBuffer
+          const base64Data = payload.fileData || payload.data;
+          if (!base64Data) throw new Error('No image data received');
+
+          const binaryString = window.atob(base64Data);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+
+          const isOverwrite = payload.newName === fileName;
+          
+          const res = await window.electronAPI.saveAttachment({
+            buffer: bytes.buffer,
+            originalName: payload.newName,
+            vaultPath: vaultPath,
+            overwrite: isOverwrite
+          });
+
+          if (res.success) {
+            if (window.MonacoService) {
+              window.MonacoService.executeEdit(range, res.relativePath);
+            }
+            if (window.AssetManager) window.AssetManager.refresh();
+            if (window.showToast) window.showToast('Link replaced with new attachment', 'success');
+          } else {
+            throw new Error(res.error || 'Failed to save attachment');
+          }
+        } catch (err) {
+          console.error('[AttachmentService] Link replacement failed:', err);
+          if (window.showToast) window.showToast(err.message, 'error');
+        }
+      } else {
+        if (window.MonacoService) {
+          const newPath = (payload.newName.startsWith('assets/') || payload.newName.startsWith('/assets/'))
+            ? payload.newName
+            : `assets/${payload.newName}`;
+          window.MonacoService.executeEdit(range, newPath);
+          if (window.showToast) window.showToast('Link replaced with existing asset', 'success');
+        }
+      }
+    };
+
+    if (mode === 'upload') {
+      // 1. Trigger system file picker immediately
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const fileData = {
+            name: file.name,
+            size: file.size,
+            data: event.target.result.split(',')[1],
+            preview: event.target.result
+          };
+          // 2. Show confirmation dialog (mode: 'upload' will hide tabs)
+          window.AssetReplacementDialog.show({ name: fileName }, {
+            mode: 'upload',
+            file: fileData,
+            isBroken,
+            onConfirm: _onConfirm
+          });
+        };
+        reader.readAsDataURL(file);
+      };
+      input.click();
+    } else {
+      // Mode 'existing': Show picker list directly (mode: 'existing' will hide tabs)
+      window.AssetReplacementDialog.show({ name: fileName }, {
+        mode: 'existing',
+        isBroken,
+        onConfirm: _onConfirm
+      });
+    }
   }
 
   /**
@@ -231,7 +472,9 @@ const AttachmentService = (() => {
         const data = await window.electronAPI.readFile(filePath);
         if (data.success) {
           const blob = new Blob([data.content]);
-          const file = new File([blob], filePath.split(/[\\/]/).pop(), { type: 'image/png' });
+          const _ext = filePath.split('.').pop().toLowerCase();
+          const _mimeMap = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', webp: 'image/webp' };
+          const file = new File([blob], filePath.split(/[\\/]/).pop(), { type: _mimeMap[_ext] || 'image/png' });
           const result = await saveImage(file, vaultPath);
           if (result.success) {
             window.MonacoService.executeEdit(range, result.relativePath);
@@ -326,7 +569,10 @@ const AttachmentService = (() => {
     processImageFiles,
     pickAndReplaceImage,
     pickAndInsertImage,
-    revealAsset
+    revealAsset,
+    downloadWebImage,
+    viewAssetDetail,
+    openSmartReplace
   };
 })();
 

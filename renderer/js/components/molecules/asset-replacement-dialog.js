@@ -6,7 +6,7 @@ window.AssetReplacementDialog = (() => {
   'use strict';
 
   function show(brokenItem, options = {}) {
-    const { onConfirm, mode = null, file = null } = options;
+    const { onConfirm, mode = null, file = null, isBroken = false } = options;
     const registry = (window.AssetPanelState && window.AssetPanelState.registry) || { assets: [], orphans: [] };
     const assets = [...registry.assets, ...registry.orphans];
     
@@ -215,8 +215,9 @@ window.AssetReplacementDialog = (() => {
     footer.appendChild(cancelBtn);
     footer.appendChild(confirmBtn);
 
+    const modalTitle = isBroken ? 'Fix Broken Asset' : 'Replace Asset';
     const modal = ModalComponent.create({
-      title: 'Replace Broken Asset',
+      title: modalTitle,
       subtitle: brokenItem.name,
       content,
       footer,

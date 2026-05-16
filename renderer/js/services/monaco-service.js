@@ -282,11 +282,14 @@ const MonacoService = (() => {
           if (!model) return;
 
           const lineContent = model.getLineContent(pos.lineNumber);
-          const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
+          const markdownRegex = /!\[(.*?)\]\((.*?)\)/g;
+          const htmlRegex = /<img\s+[^>]*src=["'](.*?)["'][^>]*>/gi;
+          
           let match;
           let foundImage = null;
 
-          while ((match = imageRegex.exec(lineContent)) !== null) {
+          // 1. Try Markdown detection
+          while ((match = markdownRegex.exec(lineContent)) !== null) {
             const startColumn = match.index + 1;
             const endColumn = startColumn + match[0].length;
 
@@ -298,37 +301,114 @@ const MonacoService = (() => {
               foundImage = {
                 url: url,
                 range: new monaco.Range(pos.lineNumber, urlStartColumn, pos.lineNumber, urlEndColumn),
-                fullRange: new monaco.Range(pos.lineNumber, startColumn, pos.lineNumber, endColumn)
+                fullRange: new monaco.Range(pos.lineNumber, startColumn, pos.lineNumber, endColumn),
+                isHTML: false
               };
               break;
             }
           }
 
-          if (foundImage && window.ContextMenuComponent) {
+          // 2. Try HTML detection if not found
+          if (!foundImage) {
+            while ((match = htmlRegex.exec(lineContent)) !== null) {
+              const fullMatch = match[0];
+              const url = match[1];
+              const startColumn = match.index + 1;
+              const endColumn = startColumn + fullMatch.length;
+
+              if (pos.column >= startColumn && pos.column <= endColumn) {
+                const srcMatch = /src=["']/.exec(fullMatch);
+                if (srcMatch) {
+                  const urlStartInFull = srcMatch.index + srcMatch[0].length;
+                  const urlStartColumn = startColumn + urlStartInFull;
+                  const urlEndColumn = urlStartColumn + url.length;
+
+                  foundImage = {
+                    url: url,
+                    range: new monaco.Range(pos.lineNumber, urlStartColumn, pos.lineNumber, urlEndColumn),
+                    fullRange: new monaco.Range(pos.lineNumber, startColumn, pos.lineNumber, endColumn),
+                    isHTML: true
+                  };
+                }
+                break;
+              }
+            }
+          }
+
+          if (foundImage && window.ContextMenuComponent && window.AttachmentService) {
             e.preventDefault();
             e.stopPropagation();
 
-            const items = [
-              {
-                label: 'Upload from device',
-                icon: 'upload',
-                onClick: () => window.AttachmentService.pickAndReplaceImage(foundImage.range)
+            const url = foundImage.url;
+            const items = [];
+            const isWeb = url.startsWith('http') || url.startsWith('//');
+            const isEmpty = !url.trim();
+
+            const allMarkers = monaco.editor.getModelMarkers({ resource: model.uri });
+            const isBroken = allMarkers.some(m =>
+              m.source === 'Asset Validation' && monaco.Range.containsPosition(m, pos)
+            );
+
+            if (isEmpty) {
+              // Case 1: Empty URL
+              items.push({ 
+                label: 'Upload from device', 
+                icon: 'upload', 
+                onClick: () => window.AttachmentService.pickAndReplaceImage(foundImage.range) 
+              });
+              if (window.AssetManager) {
+                items.push({ 
+                  label: 'Browse existing assets', 
+                  icon: 'search', 
+                  onClick: () => window.AssetManager.openPanel() 
+                });
               }
-            ];
-
-            const isLocal = foundImage.url.startsWith('/assets/') ||
-              foundImage.url.startsWith('assets/') ||
-              (!foundImage.url.startsWith('http') && foundImage.url.length > 0);
-
-            if (isLocal) {
+            } else if (isWeb) {
+              // Case 4: Web URL
+              items.push({
+                label: 'Download to local image',
+                icon: 'download',
+                onClick: () => window.AttachmentService.downloadWebImage(url, foundImage.range)
+              });
               items.push({ divider: true });
-
-              // Open in Finder - Only for Electron
-              if (window.electronAPI.isElectron) {
+              items.push({
+                label: isBroken ? 'Fix all broken with existing asset' : 'Replace link with another asset',
+                icon: 'search',
+                onClick: () => window.AttachmentService.openSmartReplace(foundImage, 'existing', isBroken)
+              });
+              items.push({
+                label: isBroken ? 'Upload & fix all with new image' : 'Upload & replace with new image',
+                icon: 'upload',
+                onClick: () => window.AttachmentService.openSmartReplace(foundImage, 'upload', isBroken)
+              });
+            } else {
+              // Case 2 & 3: Local Asset (Valid or Broken)
+              if (!isBroken) {
                 items.push({
-                  label: 'Open in Finder',
-                  icon: 'external-link',
-                  onClick: () => window.AttachmentService.revealAsset(foundImage.url)
+                  label: 'View asset detail',
+                  icon: 'info',
+                  onClick: () => window.AttachmentService.viewAssetDetail(url)
+                });
+                items.push({ divider: true });
+              }
+
+              items.push({
+                label: isBroken ? 'Fix all broken with existing asset' : 'Replace link with another asset',
+                icon: 'search',
+                onClick: () => window.AttachmentService.openSmartReplace(foundImage, 'existing', isBroken)
+              });
+              items.push({
+                label: isBroken ? 'Upload & fix all with new image' : 'Upload & replace with new image',
+                icon: 'upload',
+                onClick: () => window.AttachmentService.openSmartReplace(foundImage, 'upload', isBroken)
+              });
+              
+              if (!isBroken && window.electronAPI.isElectron) {
+                items.push({ divider: true });
+                items.push({ 
+                  label: 'Open in Finder', 
+                  icon: 'external-link', 
+                  onClick: () => window.AttachmentService.revealAsset(url) 
                 });
               }
             }

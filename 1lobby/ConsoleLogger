@@ -1,0 +1,17 @@
+:3737/api/render?file=bug-report.md:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3737/api/render?file=wiki-reader%2Fimplement.md:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3737/api/render?file=wiki-reader%2Fimplement.md:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+(index):1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+(index):1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+(index):1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+(index):1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+:3737/api/render?file=bug-report.md:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3737/api/file-ops/create-file:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+electron-bridge.js:242 Uncaught (in promise) Error: Server error: 500
+    at Object.createFile (electron-bridge.js:242:26)
+    at async Object.createFile (file-service.js:26:21)
+    at async _createNewItem (tree.js:1064:13)
+app.js:434  GET http://localhost:3737/api/render?file=bug-report.md 403 (Forbidden)
+loadFile @ app.js:434
+_handleClick @ tree.js:525
+render.itemEl.onclick @ tree-item.js:119
