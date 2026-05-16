@@ -1,58 +1,47 @@
-installHook.js:1 [workspace._applyActive] currentWorkspace set to: {id: '16340c9c-e981-4de8-aba8-e0a5e840d7fa', name: 'MD', path: '/Users/mchisdo/Downloads/Markdown', createdAt: '2026-04-01T19:49:44.968Z', wikiScanner: {…}}
-overrideMethod @ installHook.js:1
-_applyActive @ workspace.js:31
-load @ workspace.js:25
-await in load
-init @ workspace.js:12
-(anonymous) @ app.js:829
-setTimeout
-(anonymous) @ app.js:827
-20251011_122951.jpg:1  GET http://localhost:3737/assets/20251011_122951.jpg?thumbnail=true 404 (Not Found)
-Image
-(anonymous) @ asset-panel-item.js:19
-_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
-anh-khong-ton-tai3.jpg:1  GET http://localhost:3737/assets/anh-khong-ton-tai3.jpg?thumbnail=true 404 (Not Found)
-Image
-(anonymous) @ asset-panel-item.js:19
-_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
-anh-khong-ton-tai344.jpg:1  GET http://localhost:3737/assets/anh-khong-ton-tai344.jpg?thumbnail=true 404 (Not Found)
-Image
-(anonymous) @ asset-panel-item.js:19
-_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
-image-1778839695564.png:1  GET http://localhost:3737/assets/image-1778839695564.png?thumbnail=true 404 (Not Found)
-Image
-(anonymous) @ asset-panel-item.js:19
-_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
-hinhanh1.jpg:1  GET http://localhost:3737/assets/hinhanh1.jpg?thumbnail=true 404 (Not Found)
-Image
-(anonymous) @ asset-panel-item.js:19
-_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
-image-1778839664989.png:1  GET http://localhost:3737/assets/image-1778839664989.png?thumbnail=true 404 (Not Found)
-Image
-(anonymous) @ asset-panel-item.js:19
-_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
-image-1778839673998.png:1  GET http://localhost:3737/assets/image-1778839673998.png?thumbnail=true 404 (Not Found)
-Image
-(anonymous) @ asset-panel-item.js:19
-_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
-image-1778839707137.png:1  GET http://localhost:3737/assets/image-1778839707137.png?thumbnail=true 404 (Not Found)
-Image
-(anonymous) @ asset-panel-item.js:19
-_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
-image-1778839716064.png:1  GET http://localhost:3737/assets/image-1778839716064.png?thumbnail=true 404 (Not Found)
-Image
-(anonymous) @ asset-panel-item.js:19
-_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
-image-1778839725035.png:1  GET http://localhost:3737/assets/image-1778839725035.png?thumbnail=true 404 (Not Found)
-Image
-(anonymous) @ asset-panel-item.js:19
-_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
-image-1778839739945.png:1  GET http://localhost:3737/assets/image-1778839739945.png?thumbnail=true 404 (Not Found)
-Image
-(anonymous) @ asset-panel-item.js:19
-_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
-image-1778839750174.png:1  GET http://localhost:3737/assets/image-1778839750174.png?thumbnail=true 404 (Not Found)
-Image
-(anonymous) @ asset-panel-item.js:19
-_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
-image-1778839757182.png:1  GET http://localhost:3737/assets/image-1778839757182.png?thumbnail=true 404 (Not Found)
+🐛 [BugLogger] [10:09:47.067] [setOriginalContent] called {textLen: 0, isInitialized: true, currentVal: '""', stack: '    at Object.setOriginalContent (http://localhost…ts/organisms/markdown-viewer-component.js:1222:22'}
+bug-logger.js:15 🐛 [BugLogger] [10:09:47.069] [setOriginalContent] → calling setValue() {textLen: 0}
+bug-logger.js:17 🐛 [BugLogger] [10:09:47.070] [setOriginalContent] → setValue() returned
+bug-logger.js:15 🐛 [BugLogger] [10:09:49.548] [setOriginalContent] called {textLen: 0, isInitialized: true, currentVal: '""', stack: '    at Object.setOriginalContent (http://localhost…nents/organisms/change-action-view-bar.js:263:22)'}
+bug-logger.js:15 🐛 [BugLogger] [10:09:49.548] [setOriginalContent] → calling setValue() {textLen: 0}
+bug-logger.js:17 🐛 [BugLogger] [10:09:49.550] [setOriginalContent] → setValue() returned
+bug-logger.js:15 🐛 [BugLogger] [10:09:49.550] [bind] START {fileId: 'untitled.md', prevBoundFileId: null, isNewFile: true, _originalContent: '""'}
+bug-logger.js:15 🐛 [BugLogger] [10:09:49.550] [bind] SYNC CHECK {_originalContent: '""', editorValue: '""'}
+bug-logger.js:17 🐛 [BugLogger] [10:09:49.550] [bind] → _originalContent empty, taking from Monaco
+bug-logger.js:17 🐛 [BugLogger] [10:09:49.550] [bind] attaching listeners
+bug-logger.js:15 🐛 [BugLogger] [10:09:49.550] [setOriginalContent] called {textLen: 0, isInitialized: true, currentVal: '""', stack: '    at Object.setOriginalContent (http://localhost…s/organisms/markdown-viewer-component.js:1242:24)'}
+bug-logger.js:15 🐛 [BugLogger] [10:09:49.550] [setOriginalContent] → calling setValue() {textLen: 0}
+bug-logger.js:17 🐛 [BugLogger] [10:09:49.552] [onContentChange] FIRED
+bug-logger.js:17 🐛 [BugLogger] [10:09:49.552] [setOriginalContent] → setValue() returned
+bug-logger.js:15 🐛 [BugLogger] [10:09:49.557] [activate] scheduling rAF focus {_destroyed: undefined}
+bug-logger.js:15 🐛 [BugLogger] [10:09:49.558] [activate] rAF fired {_destroyed: undefined, isInitialized: true}
+bug-logger.js:15 🐛 [BugLogger] [10:09:49.558] [activate] blur→focus {textareaFound: true, hasDocumentFocus: true}
+bug-logger.js:15 🐛 [BugLogger] [10:09:49.558] [activate] after blur {activeElement: 'BODY', textareaValue: '""'}
+bug-logger.js:15 🐛 [BugLogger] [10:09:49.566] [activate] focus() called {activeElement: 'TEXTAREA', isFocused: true, textareaValue: '""'}
+(index):1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+bug-logger.js:15 🐛 [BugLogger] [10:10:07.896] [setOriginalContent] called {textLen: 0, isInitialized: true, currentVal: '""', stack: '    at Object.setOriginalContent (http://localhost…t:3737/js/components/organisms/tab-bar.js:122:41)'}
+bug-logger.js:15 🐛 [BugLogger] [10:10:07.896] [setOriginalContent] → calling setValue() {textLen: 0}
+bug-logger.js:17 🐛 [BugLogger] [10:10:07.897] [onContentChange] FIRED
+bug-logger.js:17 🐛 [BugLogger] [10:10:07.897] [setOriginalContent] → setValue() returned
+bug-logger.js:15 🐛 [BugLogger] [10:10:07.906] [setOriginalContent] called {textLen: 0, isInitialized: false, currentVal: '"N/A"', stack: '    at Object.setOriginalContent (http://localhost…nents/organisms/change-action-view-bar.js:183:18)'}
+bug-logger.js:15 🐛 [BugLogger] [10:10:07.921] [setOriginalContent] called {textLen: 0, isInitialized: true, currentVal: '""', stack: '    at Object.setOriginalContent (http://localhost…ts/organisms/markdown-viewer-component.js:1222:22'}
+bug-logger.js:15 🐛 [BugLogger] [10:10:07.924] [setOriginalContent] → calling setValue() {textLen: 0}
+bug-logger.js:17 🐛 [BugLogger] [10:10:07.924] [setOriginalContent] → setValue() returned
+bug-logger.js:15 🐛 [BugLogger] [10:10:07.924] [bind] START {fileId: '__DRAFT_1778926207896__', prevBoundFileId: null, isNewFile: true, _originalContent: '""'}
+bug-logger.js:15 🐛 [BugLogger] [10:10:07.924] [bind] SYNC CHECK {_originalContent: '""', editorValue: '""'}
+bug-logger.js:17 🐛 [BugLogger] [10:10:07.924] [bind] → _originalContent empty, taking from Monaco
+bug-logger.js:17 🐛 [BugLogger] [10:10:07.924] [bind] attaching listeners
+bug-logger.js:15 🐛 [BugLogger] [10:10:07.925] [setOriginalContent] called {textLen: 0, isInitialized: true, currentVal: '""', stack: '    at Object.setOriginalContent (http://localhost…s/organisms/markdown-viewer-component.js:1242:24)'}
+bug-logger.js:15 🐛 [BugLogger] [10:10:07.925] [setOriginalContent] → calling setValue() {textLen: 0}
+bug-logger.js:17 🐛 [BugLogger] [10:10:07.925] [onContentChange] FIRED
+bug-logger.js:17 🐛 [BugLogger] [10:10:07.925] [setOriginalContent] → setValue() returned
+bug-logger.js:15 🐛 [BugLogger] [10:10:07.928] [activate] scheduling rAF focus {_destroyed: undefined}
+bug-logger.js:15 🐛 [BugLogger] [10:10:07.930] [activate] rAF fired {_destroyed: undefined, isInitialized: true}
+bug-logger.js:15 🐛 [BugLogger] [10:10:07.930] [activate] blur→focus {textareaFound: true, hasDocumentFocus: true}
+bug-logger.js:15 🐛 [BugLogger] [10:10:07.930] [activate] after blur {activeElement: 'BODY', textareaValue: '""'}
+bug-logger.js:15 🐛 [BugLogger] [10:10:07.931] [activate] focus() called {activeElement: 'TEXTAREA', isFocused: true, textareaValue: '""'}
+bug-logger.js:17 🐛 [BugLogger] [10:10:09.096] [onContentChange] FIRED
+bug-logger.js:17 🐛 [BugLogger] [10:10:09.193] [onContentChange] FIRED
+bug-logger.js:17 🐛 [BugLogger] [10:10:09.200] [onContentChange] FIRED
+bug-logger.js:17 🐛 [BugLogger] [10:10:09.302] [onContentChange] FIRED
+bug-logger.js:17 🐛 [BugLogger] [10:10:09.449] [onContentChange] FIRED
+bug-logger.js:17 🐛 [BugLogger] [10:10:09.493] [onContentChange] FIRED

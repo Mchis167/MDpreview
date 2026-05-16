@@ -358,7 +358,11 @@ class ChangeActionViewBarComponent {
     if (AppState.currentFile && AppState.currentFile.startsWith('__DRAFT_')) {
       if (typeof DraftModule !== 'undefined' && typeof EditorModule !== 'undefined') {
         const content = DraftModule.getDraftContent();
-        EditorModule.setOriginalContent(content);
+        // Guard: skip if Monaco already has this content.
+        // Calling setValue('') on a focused empty editor resets TextAreaHandler state → blocks typing.
+        if (!window.MonacoService || !MonacoService.isInitialized() || MonacoService.getValue() !== content) {
+          EditorModule.setOriginalContent(content);
+        }
       }
       return;
     }
@@ -367,7 +371,10 @@ class ChangeActionViewBarComponent {
     if (res.ok) {
       const text = await res.text();
       if (typeof EditorModule !== 'undefined') {
-        EditorModule.setOriginalContent(text);
+        // Guard: same reason — skip redundant setValue() after focus sequence completes.
+        if (!window.MonacoService || !MonacoService.isInitialized() || MonacoService.getValue() !== text) {
+          EditorModule.setOriginalContent(text);
+        }
       }
     }
   }

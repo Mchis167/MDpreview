@@ -1,4 +1,4 @@
-/* global AppState, TOCComponent, EditToolbarComponent, EditorModule, MarkdownHelperComponent, MarkdownLogicService, ScrollModule, DesignSystem, FileService, DraftModule, WikiService, WikiDrawer, BacklinksDrawer, MonacoService, MonacoSyncService, SyncService */
+/* global AppState, TOCComponent, EditToolbarComponent, EditorModule, MarkdownHelperComponent, MarkdownLogicService, ScrollModule, DesignSystem, FileService, DraftModule, WikiService, WikiDrawer, BacklinksDrawer, MonacoService, MonacoSyncService, SyncService, BugLogger */
 
 class MarkdownViewerComponent {
   constructor(options = {}) {
@@ -1270,19 +1270,19 @@ class MarkdownEditor {
       // dispose→create cycle. Without this, empty drafts (no model.setValue() call
       // to warm up TextAreaHandler) end up with Monaco's internal _focused=true but
       // TextAreaState un-synced — onKeyDown fires but onDidChangeContent stays silent.
+      BugLogger.log('[activate] scheduling rAF focus', { _destroyed: this._destroyed });
       if (!this._destroyed) {
         requestAnimationFrame(() => {
+          BugLogger.log('[activate] rAF fired', { _destroyed: this._destroyed, isInitialized: MonacoService.isInitialized() });
           if (!this._destroyed && MonacoService.isInitialized()) {
-            // layout() forces Monaco to recalculate its full view (incl. TextAreaHandler sync)
-            // before focus — fixes typing block on empty drafts after dispose→create cycle.
             MonacoService.layout();
-            // Blur textarea first to force a real focus event on re-focus.
-            // After dispose→create cycle Monaco may have auto-focused the new textarea,
-            // making a plain focus() call a no-op (no event → TextAreaHandler never syncs).
             const _domNode = MonacoService.getInstance()?.getDomNode();
             const _textarea = _domNode?.querySelector('textarea');
+            BugLogger.log('[activate] blur→focus', { textareaFound: !!_textarea, hasDocumentFocus: document.hasFocus() });
             if (_textarea) _textarea.blur();
+            BugLogger.log('[activate] after blur', { activeElement: document.activeElement?.tagName, textareaValue: JSON.stringify(_textarea?.value || '').slice(0, 40) });
             MonacoService.focus();
+            BugLogger.log('[activate] focus() called', { activeElement: document.activeElement?.tagName, isFocused: document.activeElement === _textarea, textareaValue: JSON.stringify(_textarea?.value || '').slice(0, 40) });
           }
         });
       }
