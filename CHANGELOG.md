@@ -10,10 +10,15 @@ All notable changes to this project will be documented in this file.
 
 ### 🔧 Changed
 - **Design System Icons**: Chuẩn hóa icon `image-off` sử dụng `stroke="currentColor"` giúp tự động đổi màu theo Dark/Light mode.
+- **MonacoValidationService**: Triển khai cơ chế **Full Content Tokenization** giúp nhận diện chính xác ngữ cảnh đa dòng (multi-line) cho broken link validation.
+- **Broken Link Validation**: Mở rộng danh sách loại trừ (`pre`, `code`, `script`, `style`, `metatag`) đồng bộ với logic backend của `AssetService`.
+- **Surgical Suppression**: Nâng cấp trải nghiệm người dùng bằng cách chỉ ẩn cảnh báo lỗi tại đúng vị trí link đang được gõ, bảo toàn các cảnh báo khác trong file.
 
 ### 🐞 Fixed
 - **Markdown Viewer**: Khắc phục lỗi tranh chấp dữ liệu (race condition) khiến `lastSyncContext` bị ghi đè bởi trình tự auto-capture trong quá trình chuyển đổi chế độ.
 - **Markdown Viewer**: Giải quyết lỗi nhảy dòng sai ("First image jump") khi click vào các ảnh khác nhau trong cùng một paragraph.
+- **MonacoValidationService**: Khắc phục triệt để lỗi "False Red" khi link ảnh hợp lệ nằm trong code blocks hoặc comments.
+- **Editor UX**: Giải quyết hiện tượng "flickering" (nháy) của các vệt đỏ báo lỗi khi người dùng đang typing tích cực vào vùng lỗi.
 
 ## [2.3.0] — 2026-05-16 03:43
 

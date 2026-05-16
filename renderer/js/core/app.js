@@ -216,6 +216,18 @@ window.AppState = {
     }
   },
 
+  resetFileViewMode(path) {
+    if (!path || path.startsWith('__DRAFT_')) return;
+    try {
+      const modes = JSON.parse(localStorage.getItem('mdpreview_session_modes') || '{}');
+      if (modes[path]) {
+        delete modes[path];
+        localStorage.setItem('mdpreview_session_modes', JSON.stringify(modes));
+        if (AppState.savePersistentState) AppState.savePersistentState();
+      }
+    } catch (_e) { }
+  },
+
   /**
    * Called when sidebar mode changes (Space <-> Draft)
    */

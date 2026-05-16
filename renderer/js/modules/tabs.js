@@ -473,6 +473,11 @@ const TabsModule = (function () {
       window.ScrollModule.remove(filePath);
     }
 
+    // Reset file view mode (read/edit) when closing tab to ensure fresh state on reopen
+    if (filePath && !filePath.startsWith("__DRAFT_") && typeof window.AppState !== "undefined" && AppState.resetFileViewMode) {
+      AppState.resetFileViewMode(filePath);
+    }
+
     if (!batch) {
       saveToStorage();
       render();

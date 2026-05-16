@@ -109,6 +109,9 @@ class ChangeActionViewBarComponent {
   async updateUI(modeId) {
     if (!this.toolbarEl) return;
     if (typeof AppState === 'undefined') return;
+    
+    // Capture the file context at the start to prevent race conditions during async transitions
+    const initialFile = AppState.currentFile;
 
     if (!this.isStandalone) {
         const hasFile = !!AppState.currentFile;
@@ -187,8 +190,11 @@ class ChangeActionViewBarComponent {
     }
 
     // Save mode preference
-    if (AppState.currentFile && typeof AppState.setFileViewMode === 'function') {
-        AppState.setFileViewMode(AppState.currentFile, targetMode);
+    // IDENTITY GUARD: Only save if we are still on the same file we started with.
+    // This prevents "cross-file mode pollution" if tab A is closed and tab B is opened 
+    // while this async updateUI for A is still in-flight.
+    if (initialFile && AppState.currentFile === initialFile && typeof AppState.setFileViewMode === 'function') {
+        AppState.setFileViewMode(initialFile, targetMode);
     }
   }
 

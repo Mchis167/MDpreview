@@ -2,7 +2,7 @@
 title: MDPreview Workflow System
 description: Comprehensive guide to all development workflows for MDPreview project
 version: 1.0.0
-last_updated: 2026-04-25
+last_updated: 2026-05-16
 ---
 
 # 📚 MDPreview Workflow System
@@ -15,11 +15,12 @@ Bộ quy trình chuẩn hoá toàn diện để phát triển tính năng, quả
 
 **Mục đích:** Làm cho mọi quy trình phát triển trở nên rõ ràng, lặp lại được, và dễ bảo trì.
 
-**3 Nguyên tắc chính:**
+**4 Nguyên tắc chính:**
 
 1. **Analysis-First** — Phân tích kỹ, lập kế hoạch trước khi viết code
 2. **Quality Gates** — Linting, testing, verification là bắt buộc (không bypass)
 3. **Minimal Diffs** — Chỉ thay đổi cần thiết, không cleanup hay reformat bừa bãi
+4. **Race Condition First** — Mọi logic async/timing/event phải phân tích race condition và stale data trước khi implement
 
 ---
 
@@ -397,6 +398,7 @@ Tham khảo: [test-cases.md](test-cases.md)
 **Cú pháp:**
 - `/session-log new`: Khởi tạo file log mới cho task (tự động link nếu có file cũ).
 - `/session-log update`: Cập nhật tiến độ vào file log của ngày hiện tại.
+- `/session-log close`: Finalize log → move sang `completed-session/` → tự update bảng trong `00.startup.md`.
 
 Tham khảo: [16.session-log.md](16.session-log.md)
 
@@ -570,6 +572,7 @@ Tham khảo: [16.session-log.md](16.session-log.md)
 - Luôn read file lại sau `/smart-edit` (verify)
 - Luôn dùng tokens trong CSS (không hardcode)
 - Luôn IIFE pattern trong JS modules (scope isolation)
+- **Luôn phân tích Race Condition trước khi implement logic async/timing/event**
 
 ### ❌ DON'T:
 - Không bypass linting gates
@@ -601,8 +604,8 @@ Nếu workflow không rõ:
 
 ---
 
-**Last Updated:** 2026-04-25  
-**Version:** 1.0.0 — Complete Workflow System  
+**Last Updated:** 2026-05-16  
+**Version:** 1.1.0 — Race Condition Rule + Session Log Table update  
 **Status:** Production Ready ✅
 
 ---
