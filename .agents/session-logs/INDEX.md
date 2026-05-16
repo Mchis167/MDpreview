@@ -24,7 +24,7 @@
 | Path normalization / asset routing / workspace path / file access / server path | `completed-session/session-log-path-normalization-and-asset-routing-fixes-2026-05-16.md` |
 | Context menu / image replacement / valid vs broken asset / global replacement / Monaco Editor / dialog title | `completed-session/session-log-smart-image-context-menu-2026-05-16.md` |
 | Asset management / stale data / broken link count / tabs render / socket events / registry sync | `completed-session/session-log-asset-management-stale-data-fix-2026-05-16.md` |
-| Monaco / block typing / new file / empty editor / TextAreaHandler / focus desync | `session-log-block-typing-new-file-2026-05-16.md` |
+| Monaco / block typing / new file / empty editor / beforeinput / browser text input routing / setTimeout warm-up | `completed-session/session-log-block-typing-new-file-2026-05-16.md` |
 
 ---
 

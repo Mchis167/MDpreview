@@ -1,47 +1,27 @@
-🐛 [BugLogger] [10:09:47.067] [setOriginalContent] called {textLen: 0, isInitialized: true, currentVal: '""', stack: '    at Object.setOriginalContent (http://localhost…ts/organisms/markdown-viewer-component.js:1222:22'}
-bug-logger.js:15 🐛 [BugLogger] [10:09:47.069] [setOriginalContent] → calling setValue() {textLen: 0}
-bug-logger.js:17 🐛 [BugLogger] [10:09:47.070] [setOriginalContent] → setValue() returned
-bug-logger.js:15 🐛 [BugLogger] [10:09:49.548] [setOriginalContent] called {textLen: 0, isInitialized: true, currentVal: '""', stack: '    at Object.setOriginalContent (http://localhost…nents/organisms/change-action-view-bar.js:263:22)'}
-bug-logger.js:15 🐛 [BugLogger] [10:09:49.548] [setOriginalContent] → calling setValue() {textLen: 0}
-bug-logger.js:17 🐛 [BugLogger] [10:09:49.550] [setOriginalContent] → setValue() returned
-bug-logger.js:15 🐛 [BugLogger] [10:09:49.550] [bind] START {fileId: 'untitled.md', prevBoundFileId: null, isNewFile: true, _originalContent: '""'}
-bug-logger.js:15 🐛 [BugLogger] [10:09:49.550] [bind] SYNC CHECK {_originalContent: '""', editorValue: '""'}
-bug-logger.js:17 🐛 [BugLogger] [10:09:49.550] [bind] → _originalContent empty, taking from Monaco
-bug-logger.js:17 🐛 [BugLogger] [10:09:49.550] [bind] attaching listeners
-bug-logger.js:15 🐛 [BugLogger] [10:09:49.550] [setOriginalContent] called {textLen: 0, isInitialized: true, currentVal: '""', stack: '    at Object.setOriginalContent (http://localhost…s/organisms/markdown-viewer-component.js:1242:24)'}
-bug-logger.js:15 🐛 [BugLogger] [10:09:49.550] [setOriginalContent] → calling setValue() {textLen: 0}
-bug-logger.js:17 🐛 [BugLogger] [10:09:49.552] [onContentChange] FIRED
-bug-logger.js:17 🐛 [BugLogger] [10:09:49.552] [setOriginalContent] → setValue() returned
-bug-logger.js:15 🐛 [BugLogger] [10:09:49.557] [activate] scheduling rAF focus {_destroyed: undefined}
-bug-logger.js:15 🐛 [BugLogger] [10:09:49.558] [activate] rAF fired {_destroyed: undefined, isInitialized: true}
-bug-logger.js:15 🐛 [BugLogger] [10:09:49.558] [activate] blur→focus {textareaFound: true, hasDocumentFocus: true}
-bug-logger.js:15 🐛 [BugLogger] [10:09:49.558] [activate] after blur {activeElement: 'BODY', textareaValue: '""'}
-bug-logger.js:15 🐛 [BugLogger] [10:09:49.566] [activate] focus() called {activeElement: 'TEXTAREA', isFocused: true, textareaValue: '""'}
+bug-logger.js:15 🐛 [BugLogger] [11:33:35.529] [setOriginalContent] called {textLen: 0, isInitialized: true, currentVal: '""', stack: '    at Object.setOriginalContent (http://localhost…ts/organisms/markdown-viewer-component.js:1222:22'}
+bug-logger.js:15 🐛 [BugLogger] [11:33:35.531] [setOriginalContent] → calling setValue() {textLen: 0}
+bug-logger.js:17 🐛 [BugLogger] [11:33:35.531] [setOriginalContent] → setValue() returned
+bug-logger.js:15 🐛 [BugLogger] [11:33:35.937] [setOriginalContent] called {textLen: 0, isInitialized: true, currentVal: '""', stack: '    at Object.setOriginalContent (http://localhost…nents/organisms/change-action-view-bar.js:263:22)'}
+bug-logger.js:15 🐛 [BugLogger] [11:33:35.937] [setOriginalContent] → calling setValue() {textLen: 0}
+bug-logger.js:17 🐛 [BugLogger] [11:33:35.938] [setOriginalContent] → setValue() returned
+bug-logger.js:15 🐛 [BugLogger] [11:33:35.938] [bind] START {fileId: 'Test 1121.md', prevBoundFileId: null, isNewFile: true, _originalContent: '""'}
+bug-logger.js:15 🐛 [BugLogger] [11:33:35.939] [bind] SYNC CHECK {_originalContent: '""', editorValue: '""'}
+bug-logger.js:17 🐛 [BugLogger] [11:33:35.939] [bind] → _originalContent empty, taking from Monaco
+bug-logger.js:17 🐛 [BugLogger] [11:33:35.939] [bind] attaching listeners
+bug-logger.js:15 🐛 [BugLogger] [11:33:35.939] [setOriginalContent] called {textLen: 0, isInitialized: true, currentVal: '""', stack: '    at Object.setOriginalContent (http://localhost…s/organisms/markdown-viewer-component.js:1242:24)'}
+bug-logger.js:15 🐛 [BugLogger] [11:33:35.939] [setOriginalContent] → calling setValue() {textLen: 0}
+bug-logger.js:17 🐛 [BugLogger] [11:33:35.939] [onContentChange] FIRED
+bug-logger.js:17 🐛 [BugLogger] [11:33:35.939] [setOriginalContent] → setValue() returned
+bug-logger.js:15 🐛 [BugLogger] [11:33:35.943] [activate] scheduling rAF focus {_destroyed: undefined}
+bug-logger.js:15 🐛 [BugLogger] [11:33:35.946] [activate] rAF fired {_destroyed: undefined, isInitialized: true}
+bug-logger.js:15 🐛 [BugLogger] [11:33:35.947] [activate] blur→focus {textareaFound: true, hasDocumentFocus: true}
+bug-logger.js:15 🐛 [BugLogger] [11:33:35.954] [activate] focus() called {activeElement: 'TEXTAREA', isFocused: true, textareaValue: '""'}
+bug-logger.js:15 🐛 [BugLogger] [11:33:35.954] [activate] post-focus state {textareaVal: '""', selStart: 0, selEnd: 0, readOnly: false, disabled: false, …}
+bug-logger.js:15 🐛 [BugLogger] [11:33:35.954] [monaco-internal] {isDoingComposition: undefined, textAreaStateVal: '"N/A"'}
+bug-logger.js:15 🐛 [BugLogger] [11:33:37.080] [onKeyDown] fired {keyCode: 31, modelVersion: 4}
+bug-logger.js:15 🐛 [BugLogger] [11:33:37.080] [textarea-keydown] bubble end {key: 'a', keyCode: 65, defaultPrevented: false}
+bug-logger.js:15 🐛 [BugLogger] [11:33:37.301] [onKeyDown] fired {keyCode: 34, modelVersion: 4}
+bug-logger.js:15 🐛 [BugLogger] [11:33:37.325] [onKeyDown] fired {keyCode: 49, modelVersion: 4}
+bug-logger.js:15 🐛 [BugLogger] [11:33:37.491] [onKeyDown] fired {keyCode: 36, modelVersion: 4}
 (index):1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
-bug-logger.js:15 🐛 [BugLogger] [10:10:07.896] [setOriginalContent] called {textLen: 0, isInitialized: true, currentVal: '""', stack: '    at Object.setOriginalContent (http://localhost…t:3737/js/components/organisms/tab-bar.js:122:41)'}
-bug-logger.js:15 🐛 [BugLogger] [10:10:07.896] [setOriginalContent] → calling setValue() {textLen: 0}
-bug-logger.js:17 🐛 [BugLogger] [10:10:07.897] [onContentChange] FIRED
-bug-logger.js:17 🐛 [BugLogger] [10:10:07.897] [setOriginalContent] → setValue() returned
-bug-logger.js:15 🐛 [BugLogger] [10:10:07.906] [setOriginalContent] called {textLen: 0, isInitialized: false, currentVal: '"N/A"', stack: '    at Object.setOriginalContent (http://localhost…nents/organisms/change-action-view-bar.js:183:18)'}
-bug-logger.js:15 🐛 [BugLogger] [10:10:07.921] [setOriginalContent] called {textLen: 0, isInitialized: true, currentVal: '""', stack: '    at Object.setOriginalContent (http://localhost…ts/organisms/markdown-viewer-component.js:1222:22'}
-bug-logger.js:15 🐛 [BugLogger] [10:10:07.924] [setOriginalContent] → calling setValue() {textLen: 0}
-bug-logger.js:17 🐛 [BugLogger] [10:10:07.924] [setOriginalContent] → setValue() returned
-bug-logger.js:15 🐛 [BugLogger] [10:10:07.924] [bind] START {fileId: '__DRAFT_1778926207896__', prevBoundFileId: null, isNewFile: true, _originalContent: '""'}
-bug-logger.js:15 🐛 [BugLogger] [10:10:07.924] [bind] SYNC CHECK {_originalContent: '""', editorValue: '""'}
-bug-logger.js:17 🐛 [BugLogger] [10:10:07.924] [bind] → _originalContent empty, taking from Monaco
-bug-logger.js:17 🐛 [BugLogger] [10:10:07.924] [bind] attaching listeners
-bug-logger.js:15 🐛 [BugLogger] [10:10:07.925] [setOriginalContent] called {textLen: 0, isInitialized: true, currentVal: '""', stack: '    at Object.setOriginalContent (http://localhost…s/organisms/markdown-viewer-component.js:1242:24)'}
-bug-logger.js:15 🐛 [BugLogger] [10:10:07.925] [setOriginalContent] → calling setValue() {textLen: 0}
-bug-logger.js:17 🐛 [BugLogger] [10:10:07.925] [onContentChange] FIRED
-bug-logger.js:17 🐛 [BugLogger] [10:10:07.925] [setOriginalContent] → setValue() returned
-bug-logger.js:15 🐛 [BugLogger] [10:10:07.928] [activate] scheduling rAF focus {_destroyed: undefined}
-bug-logger.js:15 🐛 [BugLogger] [10:10:07.930] [activate] rAF fired {_destroyed: undefined, isInitialized: true}
-bug-logger.js:15 🐛 [BugLogger] [10:10:07.930] [activate] blur→focus {textareaFound: true, hasDocumentFocus: true}
-bug-logger.js:15 🐛 [BugLogger] [10:10:07.930] [activate] after blur {activeElement: 'BODY', textareaValue: '""'}
-bug-logger.js:15 🐛 [BugLogger] [10:10:07.931] [activate] focus() called {activeElement: 'TEXTAREA', isFocused: true, textareaValue: '""'}
-bug-logger.js:17 🐛 [BugLogger] [10:10:09.096] [onContentChange] FIRED
-bug-logger.js:17 🐛 [BugLogger] [10:10:09.193] [onContentChange] FIRED
-bug-logger.js:17 🐛 [BugLogger] [10:10:09.200] [onContentChange] FIRED
-bug-logger.js:17 🐛 [BugLogger] [10:10:09.302] [onContentChange] FIRED
-bug-logger.js:17 🐛 [BugLogger] [10:10:09.449] [onContentChange] FIRED
-bug-logger.js:17 🐛 [BugLogger] [10:10:09.493] [onContentChange] FIRED
+(index):1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received

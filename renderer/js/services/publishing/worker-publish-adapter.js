@@ -1,3 +1,4 @@
+/* global RetryStrategy, PublishingErrorTypes, PublishUtils, ImageProcessorUtil */
 /**
  * WorkerPublishAdapter
  * Purpose: Handle Cloudflare Worker publishing strategy
@@ -69,18 +70,116 @@ const WorkerPublishAdapter = (() => {
     _log('info', `Publishing document: ${filePath} → ${slug}`);
 
     // ── Gather Assets ───────────────────────────
-
+    _log('info', 'Gathering and optimizing assets...');
     const assetResult = await PublishUtils.gatherAssets(html, { electronAPI });
+    let finalHtml = html;
+    const assetMapping = {};
+
+    if (assetResult.resolved && Object.keys(assetResult.resolved).length > 0) {
+      const totalAssets = Object.keys(assetResult.resolved).length;
+      let uploadedCount = 0;
+
+      for (const [originalSrc, _assetInfo] of Object.entries(assetResult.resolved)) {
+        try {
+          uploadedCount++;
+          if (window.showToast) {
+            window.showToast(`Optimizing & Uploading assets (${uploadedCount}/${totalAssets})...`, 'info', { id: 'publish' });
+          }
+
+          // 1. Fetch asset từ local server (Sử dụng đường dẫn gốc vì nó đang hiển thị được trong app)
+          // Đảm bảo không bị lặp lại /assets/assets/
+          let assetFetchUrl = originalSrc;
+          if (!assetFetchUrl.startsWith('/')) {
+            if (assetFetchUrl.startsWith('assets/')) {
+              assetFetchUrl = '/' + assetFetchUrl;
+            } else {
+              assetFetchUrl = '/assets/' + assetFetchUrl;
+            }
+          }
+          
+          _log('debug', `Fetching local asset: ${assetFetchUrl}`);
+          
+          const assetBlobRes = await fetch(assetFetchUrl);
+          if (!assetBlobRes.ok) throw new Error(`Could not fetch asset: ${assetFetchUrl} (HTTP ${assetBlobRes.status})`);
+          const originalBlob = await assetBlobRes.blob();
+
+          let uploadPayload = {
+            assetName: originalSrc.split('/').pop(),
+            slug: slugValidation.normalized,
+            workerUrl,
+            secret: adminSecret
+          };
+
+          // 2. Nén nếu là ảnh (Sử dụng Canvas - Cross-platform)
+          if (originalBlob.type.startsWith('image/')) {
+            try {
+              const processed = await ImageProcessorUtil.processForPublish(originalBlob);
+              const base64 = await _blobToBase64(processed.blob);
+              uploadPayload.base64Data = base64;
+              uploadPayload.mimeType = processed.mime;
+            } catch (pErr) {
+              _log('warn', `Frontend compression failed for ${originalSrc}, falling back to original: ${pErr.message}`);
+              // Nếu nén lỗi ở frontend, gửi base64 của bản gốc hoặc để backend tự xử lý
+              uploadPayload.base64Data = await _blobToBase64(originalBlob);
+              uploadPayload.mimeType = originalBlob.type;
+            }
+          }
+
+          // 3. Gọi proxy server để upload lên R2
+          const assetRes = await fetch('/api/worker-publish-asset', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(uploadPayload)
+          });
+
+          if (!assetRes.ok) {
+            const err = await assetRes.json();
+            throw new Error(err.error || 'Asset upload failed');
+          }
+
+          const uploadResult = await assetRes.json();
+          const safeWorkerUrl = workerUrl.replace(/\/$/, '');
+          const remoteUrl = `${safeWorkerUrl}/${slugValidation.normalized}/assets/${uploadResult.remoteName}`;
+          
+          assetMapping[originalSrc] = remoteUrl;
+          _log('debug', `Asset uploaded: ${originalSrc} → ${remoteUrl}`);
+        } catch (err) {
+          _log('error', `Failed to process asset ${originalSrc}: ${err.message}`);
+        }
+      }
+
+      // ── Replace Links (DOM-based - Much more robust) ────────────────
+      _log('info', `Replacing ${Object.keys(assetMapping).length} local asset links using DOM...`);
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = finalHtml;
+
+      // Update <img> tags
+      const imgs = tempDiv.querySelectorAll('img');
+      for (const img of imgs) {
+        const src = img.getAttribute('src');
+        if (assetMapping[src]) {
+          img.setAttribute('src', assetMapping[src]);
+        }
+      }
+
+      // Update <svg> <use> tags
+      const uses = tempDiv.querySelectorAll('svg use');
+      for (const use of uses) {
+        const href = use.getAttribute('xlink:href') || use.getAttribute('href');
+        if (assetMapping[href]) {
+          if (use.hasAttribute('xlink:href')) {
+            use.setAttribute('xlink:href', assetMapping[href]);
+          } else {
+            use.setAttribute('href', assetMapping[href]);
+          }
+        }
+      }
+
+      finalHtml = tempDiv.innerHTML;
+    }
 
     if (assetResult.errors && assetResult.errors.length > 0) {
       _log('warn', `Asset gathering encountered errors: ${assetResult.errors.length} issues`);
-      assetResult.errors.forEach(err => {
-        _log('warn', `  - ${err.path}: ${err.error}`);
-      });
-    }
-
-    if (assetResult.unresolved && assetResult.unresolved.length > 0) {
-      _log('warn', `${assetResult.unresolved.length} assets could not be resolved`);
     }
 
     // ── Build Payload ───────────────────────────
@@ -88,15 +187,13 @@ const WorkerPublishAdapter = (() => {
     const payload = {
       slug: slugValidation.normalized,
       title: PublishUtils.escapeHtml(title || 'Untitled'),
-      html,
+      html: finalHtml,
       password: password || null,
       filePath,
-      // Assets for future implementation
-      assets: assetResult.resolved,
-      assetWarnings: assetResult.unresolved.length > 0 ? assetResult.unresolved : null,
+      assets: assetMapping,
       metadata: {
         source: 'mdpreview',
-        version: '1.2.0',
+        version: '1.2.1', // Bump version for new asset pipeline
         timestamp: new Date().toISOString()
       }
     };
@@ -340,6 +437,22 @@ const WorkerPublishAdapter = (() => {
   // ============================================
   // PRIVATE FUNCTIONS
   // ============================================
+
+  /**
+   * Convert Blob to Base64 string
+   * @private
+   */
+  async function _blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
 
   /**
    * Send publish request to server proxy

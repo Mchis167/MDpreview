@@ -1,4 +1,4 @@
-/* global AppState, DesignSystem, MarkdownViewer, CommentsModule, CollectModule, EditorModule, TabsModule, loadFile, SyncService */
+/* global AppState, DesignSystem, MarkdownViewer, CommentsModule, CollectModule, EditorModule, TabsModule, loadFile, SyncService, MonacoService */
 /* ============================================================
    organisms/change-action-view-bar.js — Design System Component
    ============================================================ */

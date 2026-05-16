@@ -1,6 +1,7 @@
 import { handlePublish } from './handlers/publish.js';
 import { handleServe } from './handlers/serve.js';
 import { handleDelete } from './handlers/delete.js';
+import { handleAssetUpload, handleAssetServe } from './handlers/assets.js';
 import { checkAdminSecret } from './handlers/auth.js';
 
 export default {
@@ -23,6 +24,16 @@ export default {
       // API Routes
       if (request.method === 'POST' && path === '/publish') {
         const res = await handlePublish(request, env);
+        _addCors(res);
+        return res;
+      }
+
+      if (request.method === 'POST' && path === '/publish/assets') {
+        const slug = url.searchParams.get('slug');
+        if (!slug) return new Response(JSON.stringify({ error: 'Missing slug' }), { status: 400 });
+        if (!checkAdminSecret(request, env)) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+        
+        const res = await handleAssetUpload(request, env, slug);
         _addCors(res);
         return res;
       }
@@ -104,9 +115,17 @@ export default {
         }
       }
 
-      // Serve Published Documents (Slugs)
+      // Serve Published Documents (Slugs) or Assets
       if (request.method === 'GET' && path !== '/') {
-        const slug = path.slice(1);
+        const parts = path.slice(1).split('/');
+        const slug = parts[0];
+        
+        // Check if it's an asset request: /{slug}/assets/{filename}
+        if (parts[1] === 'assets' && parts[2]) {
+          const filename = parts.slice(2).join('/');
+          return handleAssetServe(request, env, slug, filename);
+        }
+        
         return handleServe(request, env, slug);
       }
 

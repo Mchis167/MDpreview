@@ -1,4 +1,4 @@
-/* global AppState, TabsModule, FileService, showToast, loadFile, DraftModule, MarkdownLogicService, MonacoService, monaco, MonacoActionService, MonacoSyncService, BugLogger */
+/* global AppState, TabsModule, FileService, showToast, loadFile, DraftModule, MarkdownLogicService, MonacoService, monaco, MonacoActionService, MonacoSyncService */
 
 const EditorModule = (() => {
   let _originalContent = '';
@@ -252,8 +252,6 @@ const EditorModule = (() => {
     const fileId = AppState.currentFile;
     const isNewFile = fileId !== _boundFileId;
 
-    BugLogger.log('[bind] START', { fileId, prevBoundFileId: _boundFileId, isNewFile, _originalContent: JSON.stringify(_originalContent).slice(0, 60) });
-
     // Unbind previous if exists
     unbind();
 
@@ -278,24 +276,15 @@ const EditorModule = (() => {
     if (MonacoService.isInitialized()) {
       const editorValue = MonacoService.getValue();
 
-      BugLogger.log('[bind] SYNC CHECK', { _originalContent: JSON.stringify(_originalContent).slice(0, 60), editorValue: JSON.stringify(editorValue).slice(0, 60) });
-
       if (_originalContent && editorValue !== _originalContent) {
-        // We have pending content (e.g. from loadFile), push it to Monaco
-        BugLogger.log('[bind] → pushing _originalContent to Monaco (setValue)');
         MonacoService.setValue(_originalContent);
       } else if (!_originalContent) {
-        // No pending content, take from Monaco
-        BugLogger.log('[bind] → _originalContent empty, taking from Monaco');
         _originalContent = editorValue;
       }
     }
 
-    BugLogger.log('[bind] attaching listeners');
-
     // Listen to content changes
     _changeListener = MonacoService.onContentChange(() => {
-      BugLogger.log('[onContentChange] FIRED');
       _handleContentChange();
     });
 
@@ -426,15 +415,8 @@ const EditorModule = (() => {
     // Always update the internal buffer so that bind() can pick it up
     _originalContent = text;
 
-    BugLogger.log('[setOriginalContent] called', { textLen: text.length, isInitialized: MonacoService.isInitialized(), currentVal: JSON.stringify(MonacoService.isInitialized() ? MonacoService.getValue() : 'N/A').slice(0, 60), stack: new Error().stack.split('\n').slice(1, 5).join(' | ') });
-
     if (MonacoService.isInitialized()) {
-      // Always call setValue() to ensure TextAreaHandler is warmed up.
-      // Without this, empty drafts switching from content tabs show typing block:
-      // onKeyDown fires but onDidChangeContent stays silent.
-      BugLogger.log('[setOriginalContent] → calling setValue()', { textLen: text.length });
       MonacoService.setValue(text);
-      BugLogger.log('[setOriginalContent] → setValue() returned');
     }
   }
 

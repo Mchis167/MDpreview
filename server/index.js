@@ -51,6 +51,7 @@ let watcher         = null;
 app.use('/css',    express.static(path.join(__dirname, '../renderer/css')));
 app.use('/js',     express.static(path.join(__dirname, '../renderer/js')));
 app.use('/monaco', express.static(path.join(__dirname, '../node_modules/monaco-editor')));
+app.use('/jsquash', express.static(path.join(__dirname, '../node_modules/@jsquash')));
 app.use('/testing', express.static(path.join(__dirname, '../renderer/testing')));
 app.use('/assets', (req, res, next) => {
   if (currentWatchDir) {

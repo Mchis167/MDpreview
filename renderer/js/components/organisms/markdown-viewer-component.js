@@ -1,4 +1,4 @@
-/* global AppState, TOCComponent, EditToolbarComponent, EditorModule, MarkdownHelperComponent, MarkdownLogicService, ScrollModule, DesignSystem, FileService, DraftModule, WikiService, WikiDrawer, BacklinksDrawer, MonacoService, MonacoSyncService, SyncService, BugLogger */
+/* global AppState, TOCComponent, EditToolbarComponent, EditorModule, MarkdownHelperComponent, MarkdownLogicService, ScrollModule, DesignSystem, FileService, DraftModule, WikiService, WikiDrawer, BacklinksDrawer, MonacoService, MonacoSyncService, SyncService */
 
 class MarkdownViewerComponent {
   constructor(options = {}) {
@@ -1265,26 +1265,24 @@ class MarkdownEditor {
         window.AppState.lastSyncContext = null;
       }
 
-      // Ensure focus after all async mounting and binding is done.
-      // Use rAF to give Monaco's global state 1 layout frame to settle after the
-      // dispose→create cycle. Without this, empty drafts (no model.setValue() call
-      // to warm up TextAreaHandler) end up with Monaco's internal _focused=true but
-      // TextAreaState un-synced — onKeyDown fires but onDidChangeContent stays silent.
-      BugLogger.log('[activate] scheduling rAF focus', { _destroyed: this._destroyed });
+      // Warm up browser text input pipeline for empty models.
+      // After multiple setValue('') calls, Chrome deregisters the textarea from its
+      // text input routing — keydown fires but beforeinput/input never fire.
+      // A delayed blur→focus cycle re-registers it. Guard on empty model only:
+      // non-empty files use focusWithContext for cursor sync, and blur() would
+      // clobber the cursor position set by that path.
       if (!this._destroyed) {
-        requestAnimationFrame(() => {
-          BugLogger.log('[activate] rAF fired', { _destroyed: this._destroyed, isInitialized: MonacoService.isInitialized() });
+        setTimeout(() => {
           if (!this._destroyed && MonacoService.isInitialized()) {
             MonacoService.layout();
-            const _domNode = MonacoService.getInstance()?.getDomNode();
-            const _textarea = _domNode?.querySelector('textarea');
-            BugLogger.log('[activate] blur→focus', { textareaFound: !!_textarea, hasDocumentFocus: document.hasFocus() });
-            if (_textarea) _textarea.blur();
-            BugLogger.log('[activate] after blur', { activeElement: document.activeElement?.tagName, textareaValue: JSON.stringify(_textarea?.value || '').slice(0, 40) });
-            MonacoService.focus();
-            BugLogger.log('[activate] focus() called', { activeElement: document.activeElement?.tagName, isFocused: document.activeElement === _textarea, textareaValue: JSON.stringify(_textarea?.value || '').slice(0, 40) });
+            const _inst = MonacoService.getInstance();
+            if ((_inst?.getModel()?.getValue() ?? 'x') === '') {
+              const _textarea = _inst?.getDomNode()?.querySelector('textarea');
+              if (_textarea) _textarea.blur();
+              MonacoService.focus();
+            }
           }
-        });
+        }, 150);
       }
     };
 

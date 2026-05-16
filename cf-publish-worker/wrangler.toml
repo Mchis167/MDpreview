@@ -9,6 +9,10 @@ compatibility_date = "2024-01-01"
 binding = "PUB_STORE"
 id = "7a0bbe734fa64dd7b292163a4c290abe"
 
+[[r2_buckets]]
+binding = "PUB_ASSETS"
+bucket_name = "mdpreview-publish-assets"
+
 [assets]
 directory = "./public"
 binding = "ASSETS"

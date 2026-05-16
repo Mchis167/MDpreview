@@ -193,12 +193,13 @@ Full registry: [command-router.md](../command-router.md) | [workflows/README.md]
 | `SegmentedControlComponent` | Dùng kết quả `.create()` như DOM Node | Phải dùng `.create().el` |
 | `ButtonComponent` | Set `.loading = true` | Phải dùng `.setLoading(true)` |
 
-### Monaco Editor — 4 Quy tắc Cứng
+### Monaco Editor — 5 Quy tắc Cứng
 
 1. **`dispose()` phải synchronous** — Không dùng `requestAnimationFrame`. Nếu old editor dispose chạy sau khi new editor đã focused, Monaco global focus registry bị xáo trộn → "The Focus Ghost" bug (typing block).
 2. **`MarkdownEditor` tồn tại trong 'read' mode là CỐ Ý** — Architecture cần cả 2 instance để mode switch nhanh (không remount). Đừng "tối ưu" xóa nó.
 3. **Sau dispose→create cycle: `blur()` TRƯỚC `focus()`** — Monaco auto-focus textarea khi mount, nên plain `focus()` là no-op → `TextAreaHandler` không sync → `onDidChangeContent` silent dù `onKeyDown` fires.
 4. **`_destroyed` flag bắt buộc trong mọi async coroutine** — `activate().run()` là async; nếu `render()` được gọi trong khi `run()` đang await, stale coroutine sẽ `bind()` lại listeners của new editor với state sai.
+5. **Empty model cần warm-up text input pipeline** — Sau nhiều `setValue('')` calls, Chrome deregisters textarea khỏi OS text input routing: `keydown` fires nhưng `beforeinput`/`input` hoàn toàn im lặng. Fix: `setTimeout(blur→focus, 150)` với guard `getValue() === ''` (KHÔNG chạy cho non-empty model — sẽ clobber cursor position từ `focusWithContext`). Đã implement tại `markdown-viewer-component.js activate()`. Xem: `session-log-block-typing-new-file-2026-05-16.md`
 
 ### Draft System Invariants
 
@@ -217,7 +218,7 @@ Các file này có race condition, async lifecycle, hoặc kiến trúc đặc t
 | `renderer/js/services/monaco-service.js` | `session-log-editor-block-typing-debug` | dispose() timing, global focus registry |
 | `renderer/js/components/organisms/markdown-viewer-component.js` | `session-log-editor-block-typing-debug` | MarkdownEditor lifecycle, async activate() |
 | `renderer/js/components/organisms/change-action-view-bar.js` | `session-log-draft-switch-bug`, `session-log-editor-block-typing-debug` | _isSyncing lock, 3 dirty checks |
-| `renderer/js/modules/editor.js` | `session-log-draft-switch-bug` | _originalContent sync, silent save param |
+| `renderer/js/modules/editor.js` | `session-log-draft-switch-bug`, `session-log-block-typing-new-file-2026-05-16` | _originalContent sync, silent save param |
 | `renderer/js/core/app.js` | `session-log-draft-management-fix` | loadFile dirty check, triple coordination |
 
 ---
@@ -246,6 +247,53 @@ Dùng khi bug không thể reproduce bằng code reading — cần trace runtime
 
 ---
 
+## 🌐 Browser Event Debugging — Layer Checklist
+
+Dùng khi DOM event (`input`, `beforeinput`, `click`...) không fire dù điều kiện tưởng đúng.
+
+### Nguyên tắc #1: Spy tại window TRƯỚC, element SAU
+```js
+// SAI — element-level spy có thể bị chặn bởi handler đăng ký trước
+textarea.addEventListener('beforeinput', spy, true);
+
+// ĐÚNG — window capture chạy trước MỌI handler khác
+window.addEventListener('beforeinput', (e) => {
+  if (e.target !== textarea) return;
+  console.warn('[SPY] beforeinput fired', { data: e.data, defaultPrevented: e.defaultPrevented });
+}, true);
+```
+
+Nếu `window`-level spy KHÔNG thấy event → vấn đề ở tầng browser/OS, không phải JS handler.  
+Nếu `window`-level spy THẤY event nhưng element-level không thấy → có handler gọi `stopImmediatePropagation()`.
+
+### Nguyên tắc #2: Checklist loại trừ theo tầng (từ ngoài vào trong)
+
+| Tầng | Kiểm tra | Cách verify |
+|------|----------|-------------|
+| **OS / Chromium** | Browser có generate event không | Window-level spy |
+| **DOM state** | `readOnly`, `disabled`, `editContext` | Log trực tiếp sau focus() |
+| **Event prevention** | `e.defaultPrevented` trên keydown | Bubble-end spy (phase: false) |
+| **JS handler** | Handler gọi `preventDefault()` / `stopImmediatePropagation()` | Window-level spy vs element-level spy |
+| **App logic** | Monaco internal state (`_isDoingComposition`) | Truy cập internal API nếu path đúng |
+
+### Nguyên tắc #3: `defaultPrevented: false` trên keydown ≠ event sẽ fire
+`keydown.preventDefault()` chặn `beforeinput`. Nhưng `defaultPrevented: false` chỉ confirm keydown không bị prevent — không đảm bảo `beforeinput` sẽ fire (vẫn có thể bị chặn bởi browser-level routing như EditContext hoặc OS deregistration).
+
+### Nguyên tắc #4: Loại trừ nhanh các nguyên nhân phổ biến
+```js
+// Sau editor.focus(), log ngay:
+const ta = editor.getDomNode().querySelector('textarea');
+console.warn('[CHECK]', {
+  activeElement: document.activeElement?.tagName,   // phải là TEXTAREA
+  readOnly: ta?.readOnly,                            // phải false
+  disabled: ta?.disabled,                           // phải false
+  editContext: ('editContext' in ta) ? String(ta.editContext) : 'unsupported',
+  value: JSON.stringify(ta?.value).slice(0, 20)
+});
+```
+
+---
+
 ## 🔗 References & Quick Links
 
 | File | Purpose |
@@ -267,4 +315,4 @@ Dùng khi bug không thể reproduce bằng code reading — cần trace runtime
 
 ---
 
-**Last Updated:** 2026-05-16 | **Version:** 2.2 | **Status:** Current ✅
+**Last Updated:** 2026-05-16 | **Version:** 2.3 | **Status:** Current ✅
