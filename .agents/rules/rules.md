@@ -247,6 +247,31 @@ Dùng khi bug không thể reproduce bằng code reading — cần trace runtime
 
 ---
 
+## 🧪 Quy tắc Vàng: Hypothesis → Confirm → Fix
+
+> **Tuyệt đối không fix dựa trên phỏng đoán chưa được xác nhận bằng log/evidence.**
+
+Quy trình bắt buộc khi debug:
+
+```
+1. Nghi ngờ hypothesis X là nguyên nhân
+2. Hỏi: "Tôi có thể đặt log ở đâu để confirm/deny X?"
+3. Đặt log tối thiểu, yêu cầu user chạy và paste kết quả
+4. Đọc log:
+   - Log CONFIRM X → Fix X
+   - Log DENY X   → Gạch bỏ X, tiếp tục điều tra. KHÔNG fix X.
+5. Chỉ fix sau khi có evidence rõ ràng
+```
+
+**Tại sao:** Nhiều vòng fix sai tốn thời gian hơn một vòng confirm đúng. Ví dụ thực tế từ session scroll sync:
+- Nghi observer còn sống → fix disconnect → log thấy `hasObserver=false` → fix vô ích (1 vòng lãng phí)
+- Nghi `setValue()` gây scroll → thêm log → confirm `scrollBefore=scrollAfter=0` → loại trừ đúng cách (0 fix lãng phí)
+- Nghi `setSelection` smooth scroll → thêm ScrollSpy → confirm stack trace → fix đúng ngay lần đầu
+
+**Phỏng đoán chỉ có giá trị để biết đặt log ở đâu — không phải để quyết định fix cái gì.**
+
+---
+
 ## 🌐 Browser Event Debugging — Layer Checklist
 
 Dùng khi DOM event (`input`, `beforeinput`, `click`...) không fire dù điều kiện tưởng đúng.

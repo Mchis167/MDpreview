@@ -30,7 +30,8 @@ const MonacoSyncService = (() => {
     // ── Stage 0: Absolute Character Offset Sync (Premium) ─────────────
     if (context.srcStart !== undefined) {
       requestAnimationFrame(() => {
-        const model = monacoService.getInstance().getModel();
+        const editor = monacoService.getInstance();
+        const model = editor.getModel();
         const startPos = model.getPositionAt(context.srcStart);
 
         if (context.isRealSelection && context.srcEnd !== undefined) {
@@ -44,8 +45,9 @@ const MonacoSyncService = (() => {
         } else {
           monacoService.setCursorPosition(startPos);
         }
-        // Monaco revealPosition handles centering logic
-        monacoService.getInstance().revealPositionInCenterIfOutsideViewport(startPos);
+        // ScrollType.Immediate (1) cancels any queued smooth-scroll animations
+        // (e.g. from setSelection) and snaps synchronously to startPos center.
+        editor.revealPositionInCenter(startPos, 1);
       });
       return;
     }

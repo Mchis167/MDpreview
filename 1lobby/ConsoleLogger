@@ -1,101 +1,1045 @@
-(async function() {
-  const script = document.createElement('script');
-  script.src = '/testing/test-image-wasm.js';
-  document.head.appendChild(script);
-})();
-
-Promise {<fulfilled>: undefined}
-test-image-wasm.js:6 🧪 Starting WASM Compression Test...
-test-image-wasm.js:24 Original size: 537.12 KB
-test-image-wasm.js:28 Processing WebP...
-installHook.js:1 [ImageProcessorUtil] Worker encoding failed, falling back to Canvas: Error: Failed to execute 'postMessage' on 'DedicatedWorkerGlobalScope': Failed to convert value to 'object'.
-    at Worker.onMessage (worker-pool.js:64:23)
+installHook.js:1 [ScrollRestore] FIRE caller=direct attempts=0 pos=4625 scrollTop=0
 overrideMethod @ installHook.js:1
-processForPublish @ image-processor-util.js:38
-await in processForPublish
-testWasmCompression @ test-image-wasm.js:29
-await in testWasmCompression
-(anonymous) @ test-image-wasm.js:58
-PendingScript
-(anonymous) @ VM611:4
-(anonymous) @ VM611:5
-test-image-wasm.js:30 ✓ WebP Processed: {size: '537.12 KB', mime: 'image/png', ext: 'png'}
-test-image-wasm.js:36 Processing JPEG...
-image-encoder.worker.bundle.js:3777 wasm streaming compile failed: TypeError: Failed to execute 'compile' on 'WebAssembly': HTTP status code is not ok
-(anonymous) @ image-encoder.worker.bundle.js:3777
-Promise.then
-(anonymous) @ image-encoder.worker.bundle.js:3776
-Promise.then
-instantiateAsync @ image-encoder.worker.bundle.js:3774
-createWasm @ image-encoder.worker.bundle.js:3808
-(anonymous) @ image-encoder.worker.bundle.js:4884
-initEmscriptenModule2 @ image-encoder.worker.bundle.js:4972
-init2 @ image-encoder.worker.bundle.js:4989
-self.onmessage @ image-encoder.worker.bundle.js:5062
-image-encoder.worker.bundle.js:3778 falling back to ArrayBuffer instantiation
-(anonymous) @ image-encoder.worker.bundle.js:3778
-Promise.then
-(anonymous) @ image-encoder.worker.bundle.js:3776
-Promise.then
-instantiateAsync @ image-encoder.worker.bundle.js:3774
-createWasm @ image-encoder.worker.bundle.js:3808
-(anonymous) @ image-encoder.worker.bundle.js:4884
-initEmscriptenModule2 @ image-encoder.worker.bundle.js:4972
-init2 @ image-encoder.worker.bundle.js:4989
-self.onmessage @ image-encoder.worker.bundle.js:5062
-image-encoder.worker.bundle.js:3768 failed to asynchronously prepare wasm: CompileError: WebAssembly.instantiate(): expected magic word 00 61 73 6d, found 3c 21 44 4f @+0
-(anonymous) @ image-encoder.worker.bundle.js:3768
-Promise.then
-instantiateArrayBuffer @ image-encoder.worker.bundle.js:3767
-(anonymous) @ image-encoder.worker.bundle.js:3779
-Promise.then
-(anonymous) @ image-encoder.worker.bundle.js:3776
-Promise.then
-instantiateAsync @ image-encoder.worker.bundle.js:3774
-createWasm @ image-encoder.worker.bundle.js:3808
-(anonymous) @ image-encoder.worker.bundle.js:4884
-initEmscriptenModule2 @ image-encoder.worker.bundle.js:4972
-init2 @ image-encoder.worker.bundle.js:4989
-self.onmessage @ image-encoder.worker.bundle.js:5062
-image-encoder.worker.bundle.js:3725 Aborted(CompileError: WebAssembly.instantiate(): expected magic word 00 61 73 6d, found 3c 21 44 4f @+0)
-abort @ image-encoder.worker.bundle.js:3725
-(anonymous) @ image-encoder.worker.bundle.js:3769
-Promise.then
-instantiateArrayBuffer @ image-encoder.worker.bundle.js:3767
-(anonymous) @ image-encoder.worker.bundle.js:3779
-Promise.then
-(anonymous) @ image-encoder.worker.bundle.js:3776
-Promise.then
-instantiateAsync @ image-encoder.worker.bundle.js:3774
-createWasm @ image-encoder.worker.bundle.js:3808
-(anonymous) @ image-encoder.worker.bundle.js:4884
-initEmscriptenModule2 @ image-encoder.worker.bundle.js:4972
-init2 @ image-encoder.worker.bundle.js:4989
-self.onmessage @ image-encoder.worker.bundle.js:5062
-installHook.js:1 [ImageProcessorUtil] Worker encoding failed, falling back to Canvas: Error: Aborted(CompileError: WebAssembly.instantiate(): expected magic word 00 61 73 6d, found 3c 21 44 4f @+0). Build with -sASSERTIONS for more info.
-    at Worker.onMessage (worker-pool.js:64:23)
+tryScroll @ scroll.js:136
+restore @ scroll.js:148
+update @ markdown-viewer-component.js:1185
+setState @ markdown-viewer-component.js:81
+loadFile @ app.js:459
+await in loadFile
+switchWorkspace @ tabs.js:190
+_applyActive @ workspace.js:49
+await in _applyActive
+load @ workspace.js:25
+await in load
+init @ workspace.js:12
+(anonymous) @ app.js:829
+setTimeout
+(anonymous) @ app.js:827
+installHook.js:1 [setValue] scrollBefore=0 scrollAfter=0 len=0
 overrideMethod @ installHook.js:1
-processForPublish @ image-processor-util.js:38
-await in processForPublish
-testWasmCompression @ test-image-wasm.js:37
-await in testWasmCompression
-(anonymous) @ test-image-wasm.js:58
-PendingScript
-(anonymous) @ VM611:4
-(anonymous) @ VM611:5
-test-image-wasm.js:38 ✓ JPEG Processed: {size: '24.69 KB', mime: 'image/jpeg', ext: 'jpg'}
-test-image-wasm.js:44 Processing OxiPNG...
-installHook.js:1 [ImageProcessorUtil] Worker encoding failed, falling back to Canvas: Error: Failed to execute 'postMessage' on 'DedicatedWorkerGlobalScope': Failed to convert value to 'object'.
-    at Worker.onMessage (worker-pool.js:64:23)
+setValue @ monaco-service.js:505
+setOriginalContent @ editor.js:419
+(anonymous) @ markdown-viewer-component.js:1222
+Promise.then
+render @ markdown-viewer-component.js:1220
+MarkdownEditor @ markdown-viewer-component.js:1201
+render @ markdown-viewer-component.js:141
+setState @ markdown-viewer-component.js:69
+loadFile @ app.js:421
+switchWorkspace @ tabs.js:190
+_applyActive @ workspace.js:49
+await in _applyActive
+load @ workspace.js:25
+await in load
+init @ workspace.js:12
+(anonymous) @ app.js:829
+setTimeout
+(anonymous) @ app.js:827
+installHook.js:1 [setValue] scrollBefore=0 scrollAfter=0 len=13251
 overrideMethod @ installHook.js:1
-processForPublish @ image-processor-util.js:38
-await in processForPublish
-testWasmCompression @ test-image-wasm.js:45
-await in testWasmCompression
-(anonymous) @ test-image-wasm.js:58
-PendingScript
-(anonymous) @ VM611:4
-(anonymous) @ VM611:5
-test-image-wasm.js:46 ✓ PNG Processed: {size: '537.12 KB', mime: 'image/png', ext: 'png'}
-test-image-wasm.js:52 🎉 ALL TESTS PASSED!
-(index):1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+setValue @ monaco-service.js:505
+setOriginalContent @ editor.js:419
+update @ markdown-viewer-component.js:1353
+setState @ markdown-viewer-component.js:77
+_proceedUpdateUI @ change-action-view-bar.js:263
+updateUI @ change-action-view-bar.js:183
+(anonymous) @ change-action-view-bar.js:87
+handleModeClick @ change-action-view-bar.js:103
+onChange @ change-action-view-bar.js:40
+(anonymous) @ segmented-control.js:41
+installHook.js:1 [setValue] scrollBefore=0 scrollAfter=0 len=13251
+overrideMethod @ installHook.js:1
+setValue @ monaco-service.js:505
+setOriginalContent @ editor.js:419
+run @ markdown-viewer-component.js:1242
+await in run
+activate @ markdown-viewer-component.js:1315
+_handleModeSwitch @ markdown-viewer-component.js:173
+setState @ markdown-viewer-component.js:74
+_proceedUpdateUI @ change-action-view-bar.js:263
+updateUI @ change-action-view-bar.js:183
+(anonymous) @ change-action-view-bar.js:87
+handleModeClick @ change-action-view-bar.js:103
+onChange @ change-action-view-bar.js:40
+(anonymous) @ segmented-control.js:41
+installHook.js:1 [SyncCursor:S0] srcStart=6426 → line=152 modelLines=324 scrollBefore=0
+overrideMethod @ installHook.js:1
+(anonymous) @ monaco-sync-service.js:37
+requestAnimationFrame
+syncCursor @ monaco-sync-service.js:32
+run @ markdown-viewer-component.js:1287
+await in run
+activate @ markdown-viewer-component.js:1315
+_handleModeSwitch @ markdown-viewer-component.js:173
+setState @ markdown-viewer-component.js:74
+_proceedUpdateUI @ change-action-view-bar.js:263
+updateUI @ change-action-view-bar.js:183
+(anonymous) @ change-action-view-bar.js:87
+handleModeClick @ change-action-view-bar.js:103
+onChange @ change-action-view-bar.js:40
+(anonymous) @ segmented-control.js:41
+installHook.js:1 [ScrollSpy] scrollTop=535
+overrideMethod @ installHook.js:1
+(anonymous) @ markdown-viewer-component.js:1279
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+(anonymous) @ editor.api-CalNCsUg.js:257
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
+emitOutgoingEvent @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:254
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_setState @ editor.api-CalNCsUg.js:52
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+Ny @ editor.api-CalNCsUg.js:8
+_scheduleRender @ editor.api-CalNCsUg.js:222
+scheduleCoordinatedRendering @ editor.api-CalNCsUg.js:222
+_scheduleRender @ editor.api-CalNCsUg.js:222
+handleEvents @ editor.api-CalNCsUg.js:222
+_doConsumeQueue @ editor.api-CalNCsUg.js:253
+_consumeViewEventQueue @ editor.api-CalNCsUg.js:253
+_emitMany @ editor.api-CalNCsUg.js:253
+endEmitViewEvents @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:255
+batchChanges @ editor.api-CalNCsUg.js:257
+_withViewEventsCollector @ editor.api-CalNCsUg.js:255
+setSelections @ editor.api-CalNCsUg.js:255
+_setSelectionImpl @ editor.api-CalNCsUg.js:257
+setSelection @ editor.api-CalNCsUg.js:257
+setSelection @ monaco-service.js:563
+(anonymous) @ monaco-sync-service.js:41
+requestAnimationFrame
+syncCursor @ monaco-sync-service.js:32
+run @ markdown-viewer-component.js:1287
+await in run
+activate @ markdown-viewer-component.js:1315
+_handleModeSwitch @ markdown-viewer-component.js:173
+setState @ markdown-viewer-component.js:74
+_proceedUpdateUI @ change-action-view-bar.js:263
+updateUI @ change-action-view-bar.js:183
+(anonymous) @ change-action-view-bar.js:87
+handleModeClick @ change-action-view-bar.js:103
+onChange @ change-action-view-bar.js:40
+(anonymous) @ segmented-control.js:41
+installHook.js:1 Error: scroll-spy-stack
+    at ER.value (markdown-viewer-component.js:1280:25)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
+    at A.fire (editor.api-CalNCsUg.js:7:3146)
+    at ER.value (editor.api-CalNCsUg.js:257:18060)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A.fire (editor.api-CalNCsUg.js:7:3039)
+    at xme._emitOutgoingEvents (editor.api-CalNCsUg.js:253:37133)
+    at xme.emitOutgoingEvent (editor.api-CalNCsUg.js:253:36696)
+    at ER.value (editor.api-CalNCsUg.js:254:68177)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
+    at A.fire (editor.api-CalNCsUg.js:7:3146)
+    at x_._setState (editor.api-CalNCsUg.js:52:38933)
+    at x_._performSmoothScrolling (editor.api-CalNCsUg.js:52:38537)
+    at vM._runner (editor.api-CalNCsUg.js:52:38310)
+    at vM.execute (editor.api-CalNCsUg.js:8:34260)
+    at n (editor.api-CalNCsUg.js:8:34507)
+    at editor.api-CalNCsUg.js:8:34677
+overrideMethod @ installHook.js:1
+(anonymous) @ markdown-viewer-component.js:1281
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+(anonymous) @ editor.api-CalNCsUg.js:257
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
+emitOutgoingEvent @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:254
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_setState @ editor.api-CalNCsUg.js:52
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+Ny @ editor.api-CalNCsUg.js:8
+_scheduleRender @ editor.api-CalNCsUg.js:222
+scheduleCoordinatedRendering @ editor.api-CalNCsUg.js:222
+_scheduleRender @ editor.api-CalNCsUg.js:222
+handleEvents @ editor.api-CalNCsUg.js:222
+_doConsumeQueue @ editor.api-CalNCsUg.js:253
+_consumeViewEventQueue @ editor.api-CalNCsUg.js:253
+_emitMany @ editor.api-CalNCsUg.js:253
+endEmitViewEvents @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:255
+batchChanges @ editor.api-CalNCsUg.js:257
+_withViewEventsCollector @ editor.api-CalNCsUg.js:255
+setSelections @ editor.api-CalNCsUg.js:255
+_setSelectionImpl @ editor.api-CalNCsUg.js:257
+setSelection @ editor.api-CalNCsUg.js:257
+setSelection @ monaco-service.js:563
+(anonymous) @ monaco-sync-service.js:41
+requestAnimationFrame
+syncCursor @ monaco-sync-service.js:32
+run @ markdown-viewer-component.js:1287
+await in run
+activate @ markdown-viewer-component.js:1315
+_handleModeSwitch @ markdown-viewer-component.js:173
+setState @ markdown-viewer-component.js:74
+_proceedUpdateUI @ change-action-view-bar.js:263
+updateUI @ change-action-view-bar.js:183
+(anonymous) @ change-action-view-bar.js:87
+handleModeClick @ change-action-view-bar.js:103
+onChange @ change-action-view-bar.js:40
+(anonymous) @ segmented-control.js:41
+installHook.js:1 [SyncCursor:S0] scrollAfter=535 callerHint=activate
+overrideMethod @ installHook.js:1
+(anonymous) @ monaco-sync-service.js:54
+requestAnimationFrame
+(anonymous) @ monaco-sync-service.js:53
+requestAnimationFrame
+syncCursor @ monaco-sync-service.js:32
+run @ markdown-viewer-component.js:1287
+await in run
+activate @ markdown-viewer-component.js:1315
+_handleModeSwitch @ markdown-viewer-component.js:173
+setState @ markdown-viewer-component.js:74
+_proceedUpdateUI @ change-action-view-bar.js:263
+updateUI @ change-action-view-bar.js:183
+(anonymous) @ change-action-view-bar.js:87
+handleModeClick @ change-action-view-bar.js:103
+onChange @ change-action-view-bar.js:40
+(anonymous) @ segmented-control.js:41
+installHook.js:1 [ScrollSpy] scrollTop=650
+overrideMethod @ installHook.js:1
+(anonymous) @ markdown-viewer-component.js:1279
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+(anonymous) @ editor.api-CalNCsUg.js:257
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
+emitOutgoingEvent @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:254
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_setState @ editor.api-CalNCsUg.js:52
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:257
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+Ny @ editor.api-CalNCsUg.js:8
+_scheduleRender @ editor.api-CalNCsUg.js:222
+scheduleCoordinatedRendering @ editor.api-CalNCsUg.js:222
+_scheduleRender @ editor.api-CalNCsUg.js:222
+handleEvents @ editor.api-CalNCsUg.js:222
+_doConsumeQueue @ editor.api-CalNCsUg.js:253
+_consumeViewEventQueue @ editor.api-CalNCsUg.js:253
+_emitMany @ editor.api-CalNCsUg.js:253
+endEmitViewEvents @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:255
+batchChanges @ editor.api-CalNCsUg.js:257
+_withViewEventsCollector @ editor.api-CalNCsUg.js:255
+setSelections @ editor.api-CalNCsUg.js:255
+_setSelectionImpl @ editor.api-CalNCsUg.js:257
+setSelection @ editor.api-CalNCsUg.js:257
+setSelection @ monaco-service.js:563
+(anonymous) @ monaco-sync-service.js:41
+requestAnimationFrame
+syncCursor @ monaco-sync-service.js:32
+run @ markdown-viewer-component.js:1287
+await in run
+activate @ markdown-viewer-component.js:1315
+_handleModeSwitch @ markdown-viewer-component.js:173
+setState @ markdown-viewer-component.js:74
+_proceedUpdateUI @ change-action-view-bar.js:263
+updateUI @ change-action-view-bar.js:183
+(anonymous) @ change-action-view-bar.js:87
+handleModeClick @ change-action-view-bar.js:103
+onChange @ change-action-view-bar.js:40
+(anonymous) @ segmented-control.js:41
+installHook.js:1 Error: scroll-spy-stack
+    at ER.value (markdown-viewer-component.js:1280:25)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
+    at A.fire (editor.api-CalNCsUg.js:7:3146)
+    at ER.value (editor.api-CalNCsUg.js:257:18060)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A.fire (editor.api-CalNCsUg.js:7:3039)
+    at xme._emitOutgoingEvents (editor.api-CalNCsUg.js:253:37133)
+    at xme.emitOutgoingEvent (editor.api-CalNCsUg.js:253:36696)
+    at ER.value (editor.api-CalNCsUg.js:254:68177)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
+    at A.fire (editor.api-CalNCsUg.js:7:3146)
+    at x_._setState (editor.api-CalNCsUg.js:52:38933)
+    at x_._performSmoothScrolling (editor.api-CalNCsUg.js:52:38537)
+    at vM._runner (editor.api-CalNCsUg.js:52:38825)
+    at vM.execute (editor.api-CalNCsUg.js:8:34260)
+    at n (editor.api-CalNCsUg.js:8:34507)
+    at editor.api-CalNCsUg.js:8:34677
+overrideMethod @ installHook.js:1
+(anonymous) @ markdown-viewer-component.js:1281
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+(anonymous) @ editor.api-CalNCsUg.js:257
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
+emitOutgoingEvent @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:254
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_setState @ editor.api-CalNCsUg.js:52
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:257
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+Ny @ editor.api-CalNCsUg.js:8
+_scheduleRender @ editor.api-CalNCsUg.js:222
+scheduleCoordinatedRendering @ editor.api-CalNCsUg.js:222
+_scheduleRender @ editor.api-CalNCsUg.js:222
+handleEvents @ editor.api-CalNCsUg.js:222
+_doConsumeQueue @ editor.api-CalNCsUg.js:253
+_consumeViewEventQueue @ editor.api-CalNCsUg.js:253
+_emitMany @ editor.api-CalNCsUg.js:253
+endEmitViewEvents @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:255
+batchChanges @ editor.api-CalNCsUg.js:257
+_withViewEventsCollector @ editor.api-CalNCsUg.js:255
+setSelections @ editor.api-CalNCsUg.js:255
+_setSelectionImpl @ editor.api-CalNCsUg.js:257
+setSelection @ editor.api-CalNCsUg.js:257
+setSelection @ monaco-service.js:563
+(anonymous) @ monaco-sync-service.js:41
+requestAnimationFrame
+syncCursor @ monaco-sync-service.js:32
+run @ markdown-viewer-component.js:1287
+await in run
+activate @ markdown-viewer-component.js:1315
+_handleModeSwitch @ markdown-viewer-component.js:173
+setState @ markdown-viewer-component.js:74
+_proceedUpdateUI @ change-action-view-bar.js:263
+updateUI @ change-action-view-bar.js:183
+(anonymous) @ change-action-view-bar.js:87
+handleModeClick @ change-action-view-bar.js:103
+onChange @ change-action-view-bar.js:40
+(anonymous) @ segmented-control.js:41
+installHook.js:1 [ScrollSpy] scrollTop=678
+overrideMethod @ installHook.js:1
+(anonymous) @ markdown-viewer-component.js:1279
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+(anonymous) @ editor.api-CalNCsUg.js:257
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
+emitOutgoingEvent @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:254
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_setState @ editor.api-CalNCsUg.js:52
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:257
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:257
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+Ny @ editor.api-CalNCsUg.js:8
+_scheduleRender @ editor.api-CalNCsUg.js:222
+scheduleCoordinatedRendering @ editor.api-CalNCsUg.js:222
+_scheduleRender @ editor.api-CalNCsUg.js:222
+handleEvents @ editor.api-CalNCsUg.js:222
+_doConsumeQueue @ editor.api-CalNCsUg.js:253
+_consumeViewEventQueue @ editor.api-CalNCsUg.js:253
+_emitMany @ editor.api-CalNCsUg.js:253
+endEmitViewEvents @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:255
+batchChanges @ editor.api-CalNCsUg.js:257
+_withViewEventsCollector @ editor.api-CalNCsUg.js:255
+setSelections @ editor.api-CalNCsUg.js:255
+_setSelectionImpl @ editor.api-CalNCsUg.js:257
+setSelection @ editor.api-CalNCsUg.js:257
+setSelection @ monaco-service.js:563
+(anonymous) @ monaco-sync-service.js:41
+requestAnimationFrame
+syncCursor @ monaco-sync-service.js:32
+run @ markdown-viewer-component.js:1287
+await in run
+activate @ markdown-viewer-component.js:1315
+_handleModeSwitch @ markdown-viewer-component.js:173
+setState @ markdown-viewer-component.js:74
+_proceedUpdateUI @ change-action-view-bar.js:263
+updateUI @ change-action-view-bar.js:183
+(anonymous) @ change-action-view-bar.js:87
+handleModeClick @ change-action-view-bar.js:103
+onChange @ change-action-view-bar.js:40
+(anonymous) @ segmented-control.js:41
+installHook.js:1 Error: scroll-spy-stack
+    at ER.value (markdown-viewer-component.js:1280:25)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
+    at A.fire (editor.api-CalNCsUg.js:7:3146)
+    at ER.value (editor.api-CalNCsUg.js:257:18060)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A.fire (editor.api-CalNCsUg.js:7:3039)
+    at xme._emitOutgoingEvents (editor.api-CalNCsUg.js:253:37133)
+    at xme.emitOutgoingEvent (editor.api-CalNCsUg.js:253:36696)
+    at ER.value (editor.api-CalNCsUg.js:254:68177)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
+    at A.fire (editor.api-CalNCsUg.js:7:3146)
+    at x_._setState (editor.api-CalNCsUg.js:52:38933)
+    at x_._performSmoothScrolling (editor.api-CalNCsUg.js:52:38537)
+    at vM._runner (editor.api-CalNCsUg.js:52:38825)
+    at vM.execute (editor.api-CalNCsUg.js:8:34260)
+    at n (editor.api-CalNCsUg.js:8:34507)
+    at editor.api-CalNCsUg.js:8:34677
+overrideMethod @ installHook.js:1
+(anonymous) @ markdown-viewer-component.js:1281
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+(anonymous) @ editor.api-CalNCsUg.js:257
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
+emitOutgoingEvent @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:254
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_setState @ editor.api-CalNCsUg.js:52
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:257
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:257
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+Ny @ editor.api-CalNCsUg.js:8
+_scheduleRender @ editor.api-CalNCsUg.js:222
+scheduleCoordinatedRendering @ editor.api-CalNCsUg.js:222
+_scheduleRender @ editor.api-CalNCsUg.js:222
+handleEvents @ editor.api-CalNCsUg.js:222
+_doConsumeQueue @ editor.api-CalNCsUg.js:253
+_consumeViewEventQueue @ editor.api-CalNCsUg.js:253
+_emitMany @ editor.api-CalNCsUg.js:253
+endEmitViewEvents @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:255
+batchChanges @ editor.api-CalNCsUg.js:257
+_withViewEventsCollector @ editor.api-CalNCsUg.js:255
+setSelections @ editor.api-CalNCsUg.js:255
+_setSelectionImpl @ editor.api-CalNCsUg.js:257
+setSelection @ editor.api-CalNCsUg.js:257
+setSelection @ monaco-service.js:563
+(anonymous) @ monaco-sync-service.js:41
+requestAnimationFrame
+syncCursor @ monaco-sync-service.js:32
+run @ markdown-viewer-component.js:1287
+await in run
+activate @ markdown-viewer-component.js:1315
+_handleModeSwitch @ markdown-viewer-component.js:173
+setState @ markdown-viewer-component.js:74
+_proceedUpdateUI @ change-action-view-bar.js:263
+updateUI @ change-action-view-bar.js:183
+(anonymous) @ change-action-view-bar.js:87
+handleModeClick @ change-action-view-bar.js:103
+onChange @ change-action-view-bar.js:40
+(anonymous) @ segmented-control.js:41
+installHook.js:1 [ScrollSpy] scrollTop=1842
+overrideMethod @ installHook.js:1
+(anonymous) @ markdown-viewer-component.js:1279
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+(anonymous) @ editor.api-CalNCsUg.js:257
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
+emitOutgoingEvent @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:254
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_setState @ editor.api-CalNCsUg.js:52
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:257
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:257
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:257
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+Ny @ editor.api-CalNCsUg.js:8
+_scheduleRender @ editor.api-CalNCsUg.js:222
+scheduleCoordinatedRendering @ editor.api-CalNCsUg.js:222
+_scheduleRender @ editor.api-CalNCsUg.js:222
+handleEvents @ editor.api-CalNCsUg.js:222
+_doConsumeQueue @ editor.api-CalNCsUg.js:253
+_consumeViewEventQueue @ editor.api-CalNCsUg.js:253
+_emitMany @ editor.api-CalNCsUg.js:253
+endEmitViewEvents @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:255
+batchChanges @ editor.api-CalNCsUg.js:257
+_withViewEventsCollector @ editor.api-CalNCsUg.js:255
+setSelections @ editor.api-CalNCsUg.js:255
+_setSelectionImpl @ editor.api-CalNCsUg.js:257
+setSelection @ editor.api-CalNCsUg.js:257
+setSelection @ monaco-service.js:563
+(anonymous) @ monaco-sync-service.js:41
+requestAnimationFrame
+syncCursor @ monaco-sync-service.js:32
+run @ markdown-viewer-component.js:1287
+await in run
+activate @ markdown-viewer-component.js:1315
+_handleModeSwitch @ markdown-viewer-component.js:173
+setState @ markdown-viewer-component.js:74
+_proceedUpdateUI @ change-action-view-bar.js:263
+updateUI @ change-action-view-bar.js:183
+(anonymous) @ change-action-view-bar.js:87
+handleModeClick @ change-action-view-bar.js:103
+onChange @ change-action-view-bar.js:40
+(anonymous) @ segmented-control.js:41
+installHook.js:1 Error: scroll-spy-stack
+    at ER.value (markdown-viewer-component.js:1280:25)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
+    at A.fire (editor.api-CalNCsUg.js:7:3146)
+    at ER.value (editor.api-CalNCsUg.js:257:18060)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A.fire (editor.api-CalNCsUg.js:7:3039)
+    at xme._emitOutgoingEvents (editor.api-CalNCsUg.js:253:37133)
+    at xme.emitOutgoingEvent (editor.api-CalNCsUg.js:253:36696)
+    at ER.value (editor.api-CalNCsUg.js:254:68177)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
+    at A.fire (editor.api-CalNCsUg.js:7:3146)
+    at x_._setState (editor.api-CalNCsUg.js:52:38933)
+    at x_._performSmoothScrolling (editor.api-CalNCsUg.js:52:38537)
+    at vM._runner (editor.api-CalNCsUg.js:52:38825)
+    at vM.execute (editor.api-CalNCsUg.js:8:34260)
+    at n (editor.api-CalNCsUg.js:8:34507)
+    at editor.api-CalNCsUg.js:8:34677
+overrideMethod @ installHook.js:1
+(anonymous) @ markdown-viewer-component.js:1281
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+(anonymous) @ editor.api-CalNCsUg.js:257
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
+emitOutgoingEvent @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:254
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_setState @ editor.api-CalNCsUg.js:52
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:257
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:257
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:257
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+Ny @ editor.api-CalNCsUg.js:8
+_scheduleRender @ editor.api-CalNCsUg.js:222
+scheduleCoordinatedRendering @ editor.api-CalNCsUg.js:222
+_scheduleRender @ editor.api-CalNCsUg.js:222
+handleEvents @ editor.api-CalNCsUg.js:222
+_doConsumeQueue @ editor.api-CalNCsUg.js:253
+_consumeViewEventQueue @ editor.api-CalNCsUg.js:253
+_emitMany @ editor.api-CalNCsUg.js:253
+endEmitViewEvents @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:255
+batchChanges @ editor.api-CalNCsUg.js:257
+_withViewEventsCollector @ editor.api-CalNCsUg.js:255
+setSelections @ editor.api-CalNCsUg.js:255
+_setSelectionImpl @ editor.api-CalNCsUg.js:257
+setSelection @ editor.api-CalNCsUg.js:257
+setSelection @ monaco-service.js:563
+(anonymous) @ monaco-sync-service.js:41
+requestAnimationFrame
+syncCursor @ monaco-sync-service.js:32
+run @ markdown-viewer-component.js:1287
+await in run
+activate @ markdown-viewer-component.js:1315
+_handleModeSwitch @ markdown-viewer-component.js:173
+setState @ markdown-viewer-component.js:74
+_proceedUpdateUI @ change-action-view-bar.js:263
+updateUI @ change-action-view-bar.js:183
+(anonymous) @ change-action-view-bar.js:87
+handleModeClick @ change-action-view-bar.js:103
+onChange @ change-action-view-bar.js:40
+(anonymous) @ segmented-control.js:41
+installHook.js:1 [ScrollSpy] scrollTop=2041
+overrideMethod @ installHook.js:1
+(anonymous) @ markdown-viewer-component.js:1279
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+(anonymous) @ editor.api-CalNCsUg.js:257
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
+emitOutgoingEvent @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:254
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_setState @ editor.api-CalNCsUg.js:52
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:257
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:257
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:257
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:257
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+Ny @ editor.api-CalNCsUg.js:8
+_scheduleRender @ editor.api-CalNCsUg.js:222
+scheduleCoordinatedRendering @ editor.api-CalNCsUg.js:222
+_scheduleRender @ editor.api-CalNCsUg.js:222
+handleEvents @ editor.api-CalNCsUg.js:222
+_doConsumeQueue @ editor.api-CalNCsUg.js:253
+_consumeViewEventQueue @ editor.api-CalNCsUg.js:253
+_emitMany @ editor.api-CalNCsUg.js:253
+endEmitViewEvents @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:255
+batchChanges @ editor.api-CalNCsUg.js:257
+_withViewEventsCollector @ editor.api-CalNCsUg.js:255
+setSelections @ editor.api-CalNCsUg.js:255
+_setSelectionImpl @ editor.api-CalNCsUg.js:257
+setSelection @ editor.api-CalNCsUg.js:257
+setSelection @ monaco-service.js:563
+(anonymous) @ monaco-sync-service.js:41
+requestAnimationFrame
+syncCursor @ monaco-sync-service.js:32
+run @ markdown-viewer-component.js:1287
+await in run
+activate @ markdown-viewer-component.js:1315
+_handleModeSwitch @ markdown-viewer-component.js:173
+setState @ markdown-viewer-component.js:74
+_proceedUpdateUI @ change-action-view-bar.js:263
+updateUI @ change-action-view-bar.js:183
+(anonymous) @ change-action-view-bar.js:87
+handleModeClick @ change-action-view-bar.js:103
+onChange @ change-action-view-bar.js:40
+(anonymous) @ segmented-control.js:41
+installHook.js:1 Error: scroll-spy-stack
+    at ER.value (markdown-viewer-component.js:1280:25)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
+    at A.fire (editor.api-CalNCsUg.js:7:3146)
+    at ER.value (editor.api-CalNCsUg.js:257:18060)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A.fire (editor.api-CalNCsUg.js:7:3039)
+    at xme._emitOutgoingEvents (editor.api-CalNCsUg.js:253:37133)
+    at xme.emitOutgoingEvent (editor.api-CalNCsUg.js:253:36696)
+    at ER.value (editor.api-CalNCsUg.js:254:68177)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
+    at A.fire (editor.api-CalNCsUg.js:7:3146)
+    at x_._setState (editor.api-CalNCsUg.js:52:38933)
+    at x_._performSmoothScrolling (editor.api-CalNCsUg.js:52:38537)
+    at vM._runner (editor.api-CalNCsUg.js:52:38825)
+    at vM.execute (editor.api-CalNCsUg.js:8:34260)
+    at n (editor.api-CalNCsUg.js:8:34507)
+    at editor.api-CalNCsUg.js:8:34677
+overrideMethod @ installHook.js:1
+(anonymous) @ markdown-viewer-component.js:1281
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+(anonymous) @ editor.api-CalNCsUg.js:257
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
+emitOutgoingEvent @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:254
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_setState @ editor.api-CalNCsUg.js:52
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:257
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:257
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:257
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:257
+_performSmoothScrolling @ editor.api-CalNCsUg.js:52
+(anonymous) @ editor.api-CalNCsUg.js:52
+execute @ editor.api-CalNCsUg.js:8
+n @ editor.api-CalNCsUg.js:8
+(anonymous) @ editor.api-CalNCsUg.js:8
+requestAnimationFrame
+Vs @ editor.api-CalNCsUg.js:8
+Ny @ editor.api-CalNCsUg.js:8
+_scheduleRender @ editor.api-CalNCsUg.js:222
+scheduleCoordinatedRendering @ editor.api-CalNCsUg.js:222
+_scheduleRender @ editor.api-CalNCsUg.js:222
+handleEvents @ editor.api-CalNCsUg.js:222
+_doConsumeQueue @ editor.api-CalNCsUg.js:253
+_consumeViewEventQueue @ editor.api-CalNCsUg.js:253
+_emitMany @ editor.api-CalNCsUg.js:253
+endEmitViewEvents @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:255
+batchChanges @ editor.api-CalNCsUg.js:257
+_withViewEventsCollector @ editor.api-CalNCsUg.js:255
+setSelections @ editor.api-CalNCsUg.js:255
+_setSelectionImpl @ editor.api-CalNCsUg.js:257
+setSelection @ editor.api-CalNCsUg.js:257
+setSelection @ monaco-service.js:563
+(anonymous) @ monaco-sync-service.js:41
+requestAnimationFrame
+syncCursor @ monaco-sync-service.js:32
+run @ markdown-viewer-component.js:1287
+await in run
+activate @ markdown-viewer-component.js:1315
+_handleModeSwitch @ markdown-viewer-component.js:173
+setState @ markdown-viewer-component.js:74
+_proceedUpdateUI @ change-action-view-bar.js:263
+updateUI @ change-action-view-bar.js:183
+(anonymous) @ change-action-view-bar.js:87
+handleModeClick @ change-action-view-bar.js:103
+onChange @ change-action-view-bar.js:40
+(anonymous) @ segmented-control.js:41
+installHook.js:1 [SyncCursor:S0] srcStart=6426 → line=152 modelLines=324 scrollBefore=2041
+overrideMethod @ installHook.js:1
+(anonymous) @ monaco-sync-service.js:37
+requestAnimationFrame
+syncCursor @ monaco-sync-service.js:32
+focusWithContext @ editor.js:460
+_proceedUpdateUI @ change-action-view-bar.js:272
+await in _proceedUpdateUI
+updateUI @ change-action-view-bar.js:183
+(anonymous) @ change-action-view-bar.js:87
+handleModeClick @ change-action-view-bar.js:103
+onChange @ change-action-view-bar.js:40
+(anonymous) @ segmented-control.js:41
+installHook.js:1 [ScrollSpy] scrollTop=2041
+overrideMethod @ installHook.js:1
+(anonymous) @ markdown-viewer-component.js:1279
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+(anonymous) @ editor.api-CalNCsUg.js:257
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
+endEmitViewEvents @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:254
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_recomputeOptions @ editor.api-CalNCsUg.js:47
+(anonymous) @ editor.api-CalNCsUg.js:47
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+measureReferenceDomElement @ editor.api-CalNCsUg.js:44
+observe @ editor.api-CalNCsUg.js:44
+t @ editor.api-CalNCsUg.js:44
+s @ editor.api-CalNCsUg.js:44
+(anonymous) @ editor.api-CalNCsUg.js:44
+installHook.js:1 Error: scroll-spy-stack
+    at ER.value (markdown-viewer-component.js:1280:25)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
+    at A.fire (editor.api-CalNCsUg.js:7:3146)
+    at ER.value (editor.api-CalNCsUg.js:257:18060)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A.fire (editor.api-CalNCsUg.js:7:3039)
+    at xme._emitOutgoingEvents (editor.api-CalNCsUg.js:253:37133)
+    at xme.endEmitViewEvents (editor.api-CalNCsUg.js:253:37831)
+    at ER.value (editor.api-CalNCsUg.js:254:68745)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A.fire (editor.api-CalNCsUg.js:7:3039)
+    at C2._recomputeOptions (editor.api-CalNCsUg.js:47:79882)
+    at ER.value (editor.api-CalNCsUg.js:47:79411)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A.fire (editor.api-CalNCsUg.js:7:3039)
+    at jV.measureReferenceDomElement (editor.api-CalNCsUg.js:44:46594)
+    at jV.observe (editor.api-CalNCsUg.js:44:46262)
+    at t (editor.api-CalNCsUg.js:44:45767)
+    at s (editor.api-CalNCsUg.js:44:45874)
+    at ResizeObserver.<anonymous> (editor.api-CalNCsUg.js:44:46083)
+overrideMethod @ installHook.js:1
+(anonymous) @ markdown-viewer-component.js:1281
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+(anonymous) @ editor.api-CalNCsUg.js:257
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
+endEmitViewEvents @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:254
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_recomputeOptions @ editor.api-CalNCsUg.js:47
+(anonymous) @ editor.api-CalNCsUg.js:47
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+measureReferenceDomElement @ editor.api-CalNCsUg.js:44
+observe @ editor.api-CalNCsUg.js:44
+t @ editor.api-CalNCsUg.js:44
+s @ editor.api-CalNCsUg.js:44
+(anonymous) @ editor.api-CalNCsUg.js:44
+installHook.js:1 [SyncCursor:S0] scrollAfter=2041 callerHint=AssetManagement/assets-management-blueprint.md
+overrideMethod @ installHook.js:1
+(anonymous) @ monaco-sync-service.js:54
+requestAnimationFrame
+(anonymous) @ monaco-sync-service.js:53
+requestAnimationFrame
+syncCursor @ monaco-sync-service.js:32
+focusWithContext @ editor.js:460
+_proceedUpdateUI @ change-action-view-bar.js:272
+await in _proceedUpdateUI
+updateUI @ change-action-view-bar.js:183
+(anonymous) @ change-action-view-bar.js:87
+handleModeClick @ change-action-view-bar.js:103
+onChange @ change-action-view-bar.js:40
+(anonymous) @ segmented-control.js:41
+installHook.js:1 [ScrollSpy] scrollTop=2041
+overrideMethod @ installHook.js:1
+(anonymous) @ markdown-viewer-component.js:1279
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+(anonymous) @ editor.api-CalNCsUg.js:257
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
+endEmitViewEvents @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:254
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_recomputeOptions @ editor.api-CalNCsUg.js:47
+(anonymous) @ editor.api-CalNCsUg.js:47
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+measureReferenceDomElement @ editor.api-CalNCsUg.js:44
+observe @ editor.api-CalNCsUg.js:44
+t @ editor.api-CalNCsUg.js:44
+s @ editor.api-CalNCsUg.js:44
+(anonymous) @ editor.api-CalNCsUg.js:44
+installHook.js:1 Error: scroll-spy-stack
+    at ER.value (markdown-viewer-component.js:1280:25)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A._deliverQueue (editor.api-CalNCsUg.js:7:2810)
+    at A.fire (editor.api-CalNCsUg.js:7:3146)
+    at ER.value (editor.api-CalNCsUg.js:257:18060)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A.fire (editor.api-CalNCsUg.js:7:3039)
+    at xme._emitOutgoingEvents (editor.api-CalNCsUg.js:253:37133)
+    at xme.endEmitViewEvents (editor.api-CalNCsUg.js:253:37831)
+    at ER.value (editor.api-CalNCsUg.js:254:68745)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A.fire (editor.api-CalNCsUg.js:7:3039)
+    at C2._recomputeOptions (editor.api-CalNCsUg.js:47:79882)
+    at ER.value (editor.api-CalNCsUg.js:47:79411)
+    at A._deliver (editor.api-CalNCsUg.js:7:2719)
+    at A.fire (editor.api-CalNCsUg.js:7:3039)
+    at jV.measureReferenceDomElement (editor.api-CalNCsUg.js:44:46594)
+    at jV.observe (editor.api-CalNCsUg.js:44:46262)
+    at t (editor.api-CalNCsUg.js:44:45767)
+    at s (editor.api-CalNCsUg.js:44:45874)
+    at ResizeObserver.<anonymous> (editor.api-CalNCsUg.js:44:46083)
+overrideMethod @ installHook.js:1
+(anonymous) @ markdown-viewer-component.js:1281
+_deliver @ editor.api-CalNCsUg.js:7
+_deliverQueue @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+(anonymous) @ editor.api-CalNCsUg.js:257
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_emitOutgoingEvents @ editor.api-CalNCsUg.js:253
+endEmitViewEvents @ editor.api-CalNCsUg.js:253
+(anonymous) @ editor.api-CalNCsUg.js:254
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+_recomputeOptions @ editor.api-CalNCsUg.js:47
+(anonymous) @ editor.api-CalNCsUg.js:47
+_deliver @ editor.api-CalNCsUg.js:7
+fire @ editor.api-CalNCsUg.js:7
+measureReferenceDomElement @ editor.api-CalNCsUg.js:44
+observe @ editor.api-CalNCsUg.js:44
+t @ editor.api-CalNCsUg.js:44
+s @ editor.api-CalNCsUg.js:44
+(anonymous) @ editor.api-CalNCsUg.js:44

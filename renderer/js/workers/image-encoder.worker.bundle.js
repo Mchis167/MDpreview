@@ -5051,7 +5051,8 @@ self.onmessage = async (event) => {
     if (type === "image/webp") {
       if (!_isWebpInit && wasmUrls?.webp) {
         const res = await fetch(wasmUrls.webp);
-        await init(await res.arrayBuffer());
+        const module = await WebAssembly.compile(await res.arrayBuffer());
+        await init(module);
         _isWebpInit = true;
       }
       resultBuffer = await encode(imageData, { quality: options.quality || 0.82 });
@@ -5059,7 +5060,8 @@ self.onmessage = async (event) => {
     } else if (type === "image/jpeg") {
       if (!_isJpegInit && wasmUrls?.jpeg) {
         const res = await fetch(wasmUrls.jpeg);
-        await init2(await res.arrayBuffer());
+        const module = await WebAssembly.compile(await res.arrayBuffer());
+        await init2(module);
         _isJpegInit = true;
       }
       resultBuffer = await encode2(imageData, { quality: options.quality || 0.82 });
@@ -5067,7 +5069,8 @@ self.onmessage = async (event) => {
     } else if (type === "image/png") {
       if (!_isOxipngInit && wasmUrls?.oxipng) {
         const res = await fetch(wasmUrls.oxipng);
-        await init3(await res.arrayBuffer());
+        const module = await WebAssembly.compile(await res.arrayBuffer());
+        await init3(module);
         _isOxipngInit = true;
       }
       if (options.pngBuffer) {

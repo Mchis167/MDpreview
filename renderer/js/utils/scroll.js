@@ -131,7 +131,7 @@ const ScrollModule = (() => {
       const tryScroll = () => {
         if (!container) return true;
         const canScrollToTarget = container.scrollHeight >= pos + container.clientHeight - 5;
-        
+
         if (canScrollToTarget || attempts >= maxAttempts) {
           container.scrollTop = pos;
           if (container._scrollObserver) {
@@ -150,7 +150,7 @@ const ScrollModule = (() => {
         if (tryScroll()) return;
       });
       container._scrollObserver.observe(container);
-      
+
       const fallback = () => {
          if (!tryScroll() && attempts < maxAttempts) {
            requestAnimationFrame(fallback);

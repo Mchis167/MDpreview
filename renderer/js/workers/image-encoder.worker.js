@@ -24,7 +24,8 @@ self.onmessage = async (event) => {
     if (type === 'image/webp') {
       if (!_isWebpInit && wasmUrls?.webp) {
         const res = await fetch(wasmUrls.webp);
-        await initWebp(await res.arrayBuffer());
+        const module = await WebAssembly.compile(await res.arrayBuffer());
+        await initWebp(module);
         _isWebpInit = true;
       }
       resultBuffer = await encodeWebp(imageData, { quality: options.quality || 0.82 });
@@ -33,7 +34,8 @@ self.onmessage = async (event) => {
     else if (type === 'image/jpeg') {
       if (!_isJpegInit && wasmUrls?.jpeg) {
         const res = await fetch(wasmUrls.jpeg);
-        await initJpeg(await res.arrayBuffer());
+        const module = await WebAssembly.compile(await res.arrayBuffer());
+        await initJpeg(module);
         _isJpegInit = true;
       }
       resultBuffer = await encodeJpeg(imageData, { quality: options.quality || 0.82 });
@@ -42,7 +44,9 @@ self.onmessage = async (event) => {
     else if (type === 'image/png') {
       if (!_isOxipngInit && wasmUrls?.oxipng) {
         const res = await fetch(wasmUrls.oxipng);
-        await initOxipng(await res.arrayBuffer());
+        // OxiPNG init is more flexible, but we can compile for consistency
+        const module = await WebAssembly.compile(await res.arrayBuffer());
+        await initOxipng(module);
         _isOxipngInit = true;
       }
       if (options.pngBuffer) {

@@ -478,7 +478,9 @@ const MonacoService = (() => {
      * Trigger layout recalculation
      */
     layout() {
-      if (_editor) _editor.layout();
+      if (_editor) {
+        _editor.layout();
+      }
     },
 
     /**
@@ -518,7 +520,7 @@ const MonacoService = (() => {
     setCursorPosition(pos) {
       if (_editor) {
         _editor.setPosition(pos);
-        _editor.revealPositionInCenterIfOutsideViewport(pos);
+        _editor.revealPositionInCenter(pos, 1);
       }
     },
 

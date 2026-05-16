@@ -1247,16 +1247,30 @@ class MarkdownEditor {
 
       MonacoService.layout();
 
+      // Restore cursor if context exists in AppState (prioritize sync over restore)
+      const ctx = window.AppState && window.AppState.lastSyncContext;
+      const hasSyncContext = ctx && (ctx.line || ctx.scrollPct || ctx.srcStart !== undefined);
+
       // Tell ScrollModule to watch the editor
       if (ScrollModule) {
         const scrollEl = MonacoService.getScrollContainer();
         ScrollModule.setContainer(scrollEl, this.file);
-        ScrollModule.restore(this.file);
+        // RACE CONDITION FIX: Skip restore() when switching modes (has sync context)
+        // restore() sets up ResizeObserver that runs for 7+ seconds, can override syncCursor
+        if (!hasSyncContext) {
+          ScrollModule.restore(this.file);
+        }
       }
 
-      // Restore cursor if context exists in AppState
-      const ctx = window.AppState && window.AppState.lastSyncContext;
-      if (ctx && (ctx.line || ctx.scrollPct)) {
+      if (hasSyncContext) {
+        // Disconnect any ResizeObserver from earlier restore() calls (e.g. previewComp.update())
+        // that may have been set up before activate() finished awaiting _mountPromise
+        const scrollEl = MonacoService.getScrollContainer();
+        if (scrollEl && scrollEl._scrollObserver) {
+          scrollEl._scrollObserver.disconnect();
+          scrollEl._scrollObserver = null;
+        }
+
         if (typeof MonacoSyncService !== 'undefined') {
           MonacoSyncService.syncCursor(MonacoService, ctx);
         } else if (typeof MarkdownLogicService !== 'undefined') {

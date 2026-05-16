@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Not Committed] — 2026-05-16 23:59
+
+### 🐞 Fixed
+- **Monaco Scroll Sync — First-Load Bug**: Khắc phục triệt để bug scroll sai khi switch Read → Edit lần đầu tiên sau khi load file. Root cause: `setSelection()` trong `syncCursor` kích hoạt Monaco internal smooth scroll animation chạy async qua nhiều RAF frames (535→650→678→1842→2041px), liên tục override `revealPositionInCenter`. Fix: thêm `ScrollType.Immediate` (`=1`) vào `revealPositionInCenter` để snap đồng bộ và cancel toàn bộ queued smooth scroll animations. Lần đầu và mọi lần switch sau đều cuộn đúng vị trí.
+
+### 🔧 Changed
+- **`renderer/js/services/monaco-sync-service.js`**: `revealPositionInCenter(startPos)` → `revealPositionInCenter(startPos, 1)` (ScrollType.Immediate) trong Stage 0 RAF block.
+- **`renderer/js/services/monaco-service.js`**: `revealPositionInCenter(pos)` → `revealPositionInCenter(pos, 1)` trong `setCursorPosition()`.
+
+---
+
 ## [Not Committed] — 2026-05-16 17:30
 
 ### 🐞 Fixed
