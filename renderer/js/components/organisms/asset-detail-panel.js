@@ -27,6 +27,13 @@ window.AssetDetailPanel = (function() {
         } else {
           document.body.appendChild(_mount);
         }
+        _mount.classList.add('ds-asset-detail-mask');
+      }
+
+      // Initialize persistent panel container for smooth transitions
+      if (!_panel) {
+        _panel = DesignSystem.createElement('div', 'ds-asset-detail-panel');
+        _mount.appendChild(_panel);
       }
     },
 
@@ -56,13 +63,36 @@ window.AssetDetailPanel = (function() {
     },
 
     /**
+     * Trả về trạng thái hiển thị.
+     */
+    isVisible() {
+      return _isVisible;
+    },
+
+    /**
      * Render nội dung panel.
      */
     render() {
-      if (!_mount) return;
-      _mount.innerHTML = '';
+      if (!_panel) return;
 
-      const container = DesignSystem.createElement('div', `ds-asset-detail-panel ${_isVisible ? 'is-open' : ''}`);
+      const isPanelOpen = window.AssetPanel && window.AssetPanel.isOpen();
+      
+      // Update mask and panel classes
+      _mount.classList.toggle('has-panel', isPanelOpen);
+      
+      // Delayed animation for is-open to ensure DOM state is ready
+      if (_isVisible) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            if (_panel) _panel.classList.add('is-open');
+          });
+        });
+      } else {
+        _panel.classList.remove('is-open');
+      }
+      
+      // Clear previous content
+      _panel.innerHTML = '';
       
       if (!_currentItem) return;
 
@@ -150,11 +180,9 @@ window.AssetDetailPanel = (function() {
       content.appendChild(divider);
       content.appendChild(usage);
 
-      container.appendChild(header);
-      container.appendChild(preview);
-      container.appendChild(content);
-
-      _mount.appendChild(container);
+      _panel.appendChild(header);
+      _panel.appendChild(preview);
+      _panel.appendChild(content);
     },
 
     /**

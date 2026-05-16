@@ -2,30 +2,8 @@ const express = require('express');
 const router  = express.Router();
 const fs      = require('fs');
 const path    = require('path');
+const { resolvePath } = require('../utils/path-util');
 
-// Helper to resolve absolute path from watchDir and relative path
-// Helper to resolve absolute path safely within watchDir
-function resolvePath(watchDir, filePath) {
-  // Always resolve to absolute path to handle ../ and other tricks
-  const fullPath = path.isAbsolute(filePath) ? path.normalize(filePath) : path.resolve(watchDir, filePath);
-  
-  // Ensure the resolved path STARTS with the watchDir
-  const normalizedWatchDir = path.normalize(watchDir);
-  
-  // Case-insensitive check for Mac and Windows
-  const isCaseInsensitive = process.platform === 'win32' || process.platform === 'darwin';
-  const checkFullPath = isCaseInsensitive ? fullPath.toLowerCase() : fullPath;
-  const checkWatchDir = isCaseInsensitive ? normalizedWatchDir.toLowerCase() : normalizedWatchDir;
-
-  // Add trailing separator to watchDir check to avoid partial folder name matches (e.g., /work vs /work-files)
-  const sep = path.sep;
-  const checkWatchDirWithSep = checkWatchDir.endsWith(sep) ? checkWatchDir : checkWatchDir + sep;
-
-  if (!checkFullPath.startsWith(checkWatchDirWithSep) && checkFullPath !== checkWatchDir) {
-    throw new Error('Security Error: Path traversal detected.');
-  }
-  return fullPath;
-}
 
 // DELETE file or folder
 router.delete('/file-ops', (req, res) => {
@@ -39,11 +17,14 @@ router.delete('/file-ops', (req, res) => {
     if (!fs.existsSync(fullPath)) {
       return res.status(404).json({ success: false, error: 'File not found' });
     }
-    
+
     // Use rmSync to handle both files and directories recursively
     fs.rmSync(fullPath, { recursive: true, force: true });
     res.json({ success: true });
   } catch (e) {
+    if (e.message.includes('Security Error')) {
+      return res.status(403).json({ success: false, error: e.message });
+    }
     res.status(500).json({ success: false, error: e.message });
   }
 });
@@ -54,14 +35,14 @@ router.post('/file-ops/duplicate', (req, res) => {
   const watchDir = req.watchDir;
   if (!watchDir || !filePath) return res.status(400).json({ error: 'Missing path' });
 
-  const fullPath = resolvePath(watchDir, filePath);
   try {
+    const fullPath = resolvePath(watchDir, filePath);
     if (!fs.existsSync(fullPath)) return res.status(404).json({ success: false, error: 'Source file not found' });
-    
+
     const dir = path.dirname(fullPath);
     const ext = path.extname(fullPath);
     const name = path.basename(fullPath, ext);
-    
+
     let copyPath;
     let counter = 1;
     do {
@@ -71,6 +52,9 @@ router.post('/file-ops/duplicate', (req, res) => {
     fs.copyFileSync(fullPath, copyPath);
     res.json({ success: true, path: copyPath });
   } catch (e) {
+    if (e.message.includes('Security Error')) {
+      return res.status(403).json({ success: false, error: e.message });
+    }
     res.status(500).json({ success: false, error: e.message });
   }
 });
@@ -81,16 +65,19 @@ router.post('/file-ops/rename', (req, res) => {
   const watchDir = req.watchDir;
   if (!watchDir || !oldPath || !newPath) return res.status(400).json({ error: 'Missing path' });
 
-  const fullOld = resolvePath(watchDir, oldPath);
-  const fullNew = resolvePath(watchDir, newPath);
-
   try {
+    const fullOld = resolvePath(watchDir, oldPath);
+    const fullNew = resolvePath(watchDir, newPath);
+
     if (!fs.existsSync(fullOld)) return res.status(404).json({ success: false, error: 'Source file not found' });
     if (fs.existsSync(fullNew)) return res.status(400).json({ success: false, error: 'Target file already exists' });
-    
+
     fs.renameSync(fullOld, fullNew);
     res.json({ success: true });
   } catch (e) {
+    if (e.message.includes('Security Error')) {
+      return res.status(403).json({ success: false, error: e.message });
+    }
     res.status(500).json({ success: false, error: e.message });
   }
 });
@@ -105,10 +92,13 @@ router.post('/file-ops/move', (req, res) => {
     const fullOld = resolvePath(watchDir, oldPath);
     const fullNew = resolvePath(watchDir, newPath);
     if (!fs.existsSync(fullOld)) return res.status(404).json({ success: false, error: 'Source not found' });
-    
+
     fs.renameSync(fullOld, fullNew);
     res.json({ success: true });
   } catch (e) {
+    if (e.message.includes('Security Error')) {
+      return res.status(403).json({ success: false, error: e.message });
+    }
     res.status(500).json({ success: false, error: e.message });
   }
 });
@@ -141,6 +131,9 @@ router.post('/file-ops/copy', (req, res) => {
     }
     res.json({ success: true });
   } catch (e) {
+    if (e.message.includes('Security Error')) {
+      return res.status(403).json({ success: false, error: e.message });
+    }
     res.status(500).json({ success: false, error: e.message });
   }
 });
@@ -151,17 +144,24 @@ router.post('/file-ops/create-file', (req, res) => {
   const watchDir = req.watchDir;
   if (!watchDir || !filePath) return res.status(400).json({ error: 'Missing path' });
 
+  console.log('[file-ops/create-file] Request:', { filePath, watchDir });
+
   try {
     const fullPath = resolvePath(watchDir, filePath);
+    console.log('[file-ops/create-file] Resolved:', { fullPath });
     if (fs.existsSync(fullPath)) return res.status(400).json({ success: false, error: 'File already exists' });
-    
+
     // Ensure parent directory exists
     const parentDir = path.dirname(fullPath);
+    console.log('[file-ops/create-file] Parent dir:', { parentDir, exists: fs.existsSync(parentDir) });
     if (!fs.existsSync(parentDir)) fs.mkdirSync(parentDir, { recursive: true });
 
     fs.writeFileSync(fullPath, content);
     res.json({ success: true, path: filePath });
   } catch (e) {
+    if (e.message.includes('Security Error')) {
+      return res.status(403).json({ success: false, error: e.message });
+    }
     res.status(500).json({ success: false, error: e.message });
   }
 });
@@ -175,10 +175,13 @@ router.post('/file-ops/create-folder', (req, res) => {
   try {
     const fullPath = resolvePath(watchDir, folderPath);
     if (fs.existsSync(fullPath)) return res.status(400).json({ success: false, error: 'Folder already exists' });
-    
+
     fs.mkdirSync(fullPath, { recursive: true });
     res.json({ success: true, path: folderPath });
   } catch (e) {
+    if (e.message.includes('Security Error')) {
+      return res.status(403).json({ success: false, error: e.message });
+    }
     res.status(500).json({ success: false, error: e.message });
   }
 });

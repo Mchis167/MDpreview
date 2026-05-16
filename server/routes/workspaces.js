@@ -14,7 +14,25 @@ function loadWorkspaces(dataDir) {
   try {
     const file = getWorkspacesFile(dataDir);
     if (!fs.existsSync(file)) return { workspaces: [], activeWorkspaceId: null };
-    return JSON.parse(fs.readFileSync(file, 'utf8'));
+    const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+
+    // Migration: Convert relative paths to absolute for existing workspaces
+    if (data.workspaces && Array.isArray(data.workspaces)) {
+      let needsSave = false;
+      data.workspaces = data.workspaces.map(ws => {
+        if (ws.path && !path.isAbsolute(ws.path)) {
+          const absPath = path.resolve(process.cwd(), ws.path);
+          needsSave = true;
+          return { ...ws, path: absPath };
+        }
+        return ws;
+      });
+      if (needsSave) {
+        saveWorkspaces(dataDir, data);
+      }
+    }
+
+    return data;
   } catch (_e) {
     return { workspaces: [], activeWorkspaceId: null };
   }
@@ -31,7 +49,20 @@ router.get('/workspaces', (req, res) => {
 
 // POST new workspace
 router.post('/workspaces', (req, res) => {
-  const { name, path: folderPath } = req.body;
+  const { name, path: rawPath } = req.body;
+  
+  let folderPath = rawPath;
+  try {
+    const absPath = path.isAbsolute(rawPath) ? rawPath : path.resolve(process.cwd(), rawPath);
+    if (fs.existsSync(absPath)) {
+      folderPath = fs.realpathSync(absPath);
+    } else {
+      folderPath = absPath;
+    }
+  } catch (_e) {
+    // Keep rawPath if normalization fails
+  }
+
   const data = loadWorkspaces(req.dataDir);
   const ws = {
     id: uuidv4(),

@@ -2,6 +2,7 @@ const express = require('express');
 const router  = express.Router();
 const fs      = require('fs');
 const path    = require('path');
+const { resolvePath } = require('../utils/path-util');
 
 router.get('/files', async (req, res) => {
   const watchDir = req.watchDir;
@@ -91,15 +92,6 @@ router.get('/files', async (req, res) => {
   }
 });
 
-// Helper to resolve absolute path safely within watchDir
-function resolvePath(watchDir, filePath) {
-  const fullPath = path.isAbsolute(filePath) ? path.normalize(filePath) : path.resolve(watchDir, filePath);
-  const normalizedWatchDir = path.normalize(watchDir);
-  if (!fullPath.startsWith(normalizedWatchDir)) {
-    throw new Error('Security Error: Path traversal detected.');
-  }
-  return fullPath;
-}
 
 router.get('/file/raw', (req, res) => {
   const { path: filePath } = req.query;
@@ -111,6 +103,9 @@ router.get('/file/raw', (req, res) => {
     const content = fs.readFileSync(fullPath, 'utf8');
     res.send(content);
   } catch (e) {
+    if (e.message.includes('Security Error')) {
+      return res.status(403).send(e.message);
+    }
     res.status(500).send(e.message);
   }
 });
@@ -125,6 +120,9 @@ router.post('/file/save', (req, res) => {
     fs.writeFileSync(fullPath, content, 'utf8');
     res.json({ success: true });
   } catch (e) {
+    if (e.message.includes('Security Error')) {
+      return res.status(403).json({ success: false, error: e.message });
+    }
     res.status(500).send(e.message);
   }
 });
@@ -139,7 +137,10 @@ router.get('/file/exists', (req, res) => {
     const fullPath = resolvePath(watchDir, filePath);
     const exists = fs.existsSync(fullPath);
     res.json({ exists });
-  } catch (_err) {
+  } catch (err) {
+    if (err.message.includes('Security Error')) {
+      return res.status(403).json({ error: err.message });
+    }
     res.json({ exists: false });
   }
 });
@@ -161,6 +162,9 @@ router.get('/file/meta', (req, res) => {
       birthtime: stat.birthtimeMs
     });
   } catch (e) {
+    if (e.message.includes('Security Error')) {
+      return res.status(403).json({ error: e.message });
+    }
     res.status(500).json({ error: e.message });
   }
 });

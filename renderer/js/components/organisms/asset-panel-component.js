@@ -37,6 +37,11 @@ window.AssetPanel = (function() {
       _state.isOpening = true;
       this._updateUIState();
       this.render();
+      
+      // Update Detail panel offset if it's open
+      if (window.AssetDetailPanel && window.AssetDetailPanel.isVisible()) {
+        window.AssetDetailPanel.render();
+      }
     },
 
     /**

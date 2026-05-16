@@ -2,14 +2,53 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Not Commited] — 2026-05-16 13:02
+## [Not Commited] — 2026-05-16 15:51
+
+### 🚀 Added
+- **Path Utilities**: Triển khai `server/utils/path-util.js` cung cấp hàm `resolvePath()` thống nhất cho toàn bộ file operations. Hỗ trợ:
+  - Case-insensitive path matching trên macOS/Windows
+  - Strict path traversal security checks với separator validation
+  - Consistent error handling ("Security Error" vs file system errors)
+- **Workspace Path Migration**: Tự động normalize toàn bộ existing workspace paths từ relative → absolute khi load. Transparent cho user, tự động fix khi server restart.
+- **Security Error Handling**: Explicit 403 Forbidden responses cho path traversal attempts, riêng biệt từ 404/500 file errors.
+
+### 🔧 Changed
+- **Workspace Routes** (`server/routes/workspaces.js`): 
+  - Normalize workspace paths ở 2 điểm: (1) khi save mới, (2) khi load migration
+  - POST `/workspaces` giờ convert relative paths → absolute trước save
+  - `loadWorkspaces()` auto-migrate existing relative paths
+- **Assets Route** (`server/index.js`):
+  - Remove leading slash từ `req.path` trước pass vào `resolvePath()`
+  - Đảm bảo consistency với security model của path resolution
+- **File Operations** (`server/routes/file-ops.js`, `server/routes/files.js`, `server/routes/render.js`):
+  - Unify path validation logic qua `resolvePath()` utility
+  - Move path resolution vào try-catch blocks để catch exceptions đúng cách
+
+### 🐞 Fixed
+- **File Creation Path Duplication**: Khắc phục lỗi khi workspace path được lưu ở dạng relative (`'1lobby'`) khiến paths bị duplicate: `/Users/work/1lobby/1lobby/file.md`. Giờ toàn bộ workspace paths được store dưới dạng absolute.
+- **Asset Manager 404**: Khắc phục lỗi tất cả asset images returning 404 do `/assets` route handler gửi absolute-looking paths vào `resolvePath()`. Fix: remove leading slash trước security check.
+- **Path Traversal Security**: Strengthen security checks trong `resolvePath()`:
+  - Case-insensitive validation trên Darwin/Win32 để tránh false-positives từ path casing
+  - Strict separator check (`path.sep`) để prevent `/work` unintentionally matching `/work-secret`
+- **Workspace Compatibility**: Auto-migrate old workspaces không break existing setups. User không cần làm gì, fixes apply transparently.
+
+## [2.3.1 Not Commited] — 2026-05-16 13:02
 
 ### 🚀 Added
 - **AppState**: Triển khai `resetFileViewMode(path)` hỗ trợ xóa bỏ hoàn toàn trạng thái mode (Read/Edit) của file trong `localStorage`.
 - **Markdown Viewer**: Triển khai tính năng **"Right-click to Edit"**. Hỗ trợ chuột phải vào bất kỳ nội dung nào (văn bản, hình ảnh, placeholder ảnh lỗi) để chuyển sang chế độ Edit và tự động nhảy đến đúng dòng trong Monaco Editor.
 - **Renderer**: Hỗ trợ **Granular Inline Metadata**. Gắn thông tin dòng (`data-line`) cho từng thành phần inline (ảnh, link) giúp tăng độ chính xác tuyệt đối khi chuyển đổi ngữ cảnh, đặc biệt là trong các paragraph chứa nhiều ảnh.
+- **Smart Context Menu for Images**: Nâng cấp hệ thống context menu cho image links trong Monaco Editor:
+    - Hỗ trợ cả **Markdown** (`![](assets/...)`) và **HTML** (`<img src="/assets/...">`).
+    - **Intelligent action selection** dựa trên asset health state: "View Asset Detail" + "Replace link..." cho valid assets, hoặc "Fix all broken..." cho broken assets.
+    - **Global vs Local scoping**: Tự động phân biệt scope tác động (fixing toàn bộ broken references vs replacing một link cụ thể).
+    - **Real-time asset state sync** giữa visual broken marks (Monaco Markers) và context menu options, đảm bảo consistency.
 
 ### 🔧 Changed
+- **Context Menu Labels**: Cập nhật labels để rõ ràng phân biệt giữa valid vs broken asset contexts:
+    - **Valid asset**: "Replace link with another asset" (thay đổi reference URL) và "Upload & replace with new image" (upload ảnh mới, không overwrite asset cũ).
+    - **Broken asset**: "Fix all broken with existing asset" (global replacement) và "Upload & fix all with new image" (global fix).
+    - Sử dụng consistent "with" pattern để giảm nhầm lẫn về scope (local vs global) và impact.
 - **TabsModule**: Tích hợp cơ chế tự động reset mode khi đóng tab. Đảm bảo khi người dùng mở lại cùng một file, nó sẽ luôn khởi đầu ở chế độ mặc định (Read Mode) thay vì giữ lại mode cũ.
 - **ChangeActionViewBar**: Triển khai **Identity Guard** trong hàm `updateUI`. Cơ chế này chụp lại file context tại thời điểm bắt đầu và chỉ lưu mode mới nếu file hiện hành vẫn khớp sau khi các tác vụ async hoàn tất, triệt tiêu lỗi ghi đè mode sai file (cross-file pollution).
 - **Design System Icons**: Chuẩn hóa icon `image-off` sử dụng `stroke="currentColor"` giúp tự động đổi màu theo Dark/Light mode.
@@ -24,6 +63,8 @@ All notable changes to this project will be documented in this file.
 - **Markdown Viewer**: Giải quyết lỗi nhảy dòng sai ("First image jump") khi click vào các ảnh khác nhau trong cùng một paragraph.
 - **MonacoValidationService**: Khắc phục triệt để lỗi "False Red" khi link ảnh hợp lệ nằm trong code blocks hoặc comments.
 - **Editor UX**: Giải quyết hiện tượng "flickering" (nháy) của các vệt đỏ báo lỗi khi người dùng đang typing tích cực vào vùng lỗi.
+- **Global Broken Asset Replacement**: Khắc phục vấn đề khi thay thế broken link chỉ cập nhật dòng hiện tại. Giờ hệ thống quét Monaco buffer trực tiếp để tìm tất cả occurrences của broken asset (bao gồm các thay đổi chưa save), đảm bảo toàn bộ broken links cùng tên được fix cùng lúc. Toast message cập nhật để show số replacements thực tế (ví dụ: "Fixed 3 broken link(s) + synced project-wide").
+- **Asset Replacement Dialog**: Khắc phục tiêu đề modal bị cố định là "Replace Broken Asset" ngay cả khi thay thế valid link. Title giờ thay đổi động: "Fix Broken Asset" cho broken links, "Replace Asset" cho valid links.
 
 ## [2.3.0] — 2026-05-16 03:43
 

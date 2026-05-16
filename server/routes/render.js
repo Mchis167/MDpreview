@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const fs = require('fs');
-const path = require('path');
+const { resolvePath } = require('../utils/path-util');
 const { marked } = require('marked');
 const matter = require('gray-matter');
 const { sanitizeHtml, renderMermaidBlock, highlightCodeBlock, wrapInTableWrapper } = require('../../renderer/js/services/md-renderer-core.js');
@@ -402,15 +402,6 @@ function renderWithLineNumbers(content) {
   return sanitizeHtml(html);
 }
 
-// Helper to resolve absolute path safely within watchDir
-function resolvePath(watchDir, filePath) {
-  const fullPath = path.isAbsolute(filePath) ? path.normalize(filePath) : path.resolve(watchDir, filePath);
-  const normalizedWatchDir = path.normalize(watchDir);
-  if (!fullPath.startsWith(normalizedWatchDir)) {
-    throw new Error('Security Error: Path traversal detected.');
-  }
-  return fullPath;
-}
 
 router.get('/render', (req, res) => {
   const watchDir = req.watchDir;

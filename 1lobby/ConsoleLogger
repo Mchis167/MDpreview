@@ -1,17 +1,58 @@
-:3737/api/render?file=bug-report.md:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
-:3737/api/render?file=wiki-reader%2Fimplement.md:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
-:3737/api/render?file=wiki-reader%2Fimplement.md:1  Failed to load resource: the server responded with a status of 404 (Not Found)
-(index):1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
-(index):1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
-(index):1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
-(index):1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
-:3737/api/render?file=bug-report.md:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
-:3737/api/file-ops/create-file:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
-electron-bridge.js:242 Uncaught (in promise) Error: Server error: 500
-    at Object.createFile (electron-bridge.js:242:26)
-    at async Object.createFile (file-service.js:26:21)
-    at async _createNewItem (tree.js:1064:13)
-app.js:434  GET http://localhost:3737/api/render?file=bug-report.md 403 (Forbidden)
-loadFile @ app.js:434
-_handleClick @ tree.js:525
-render.itemEl.onclick @ tree-item.js:119
+installHook.js:1 [workspace._applyActive] currentWorkspace set to: {id: '16340c9c-e981-4de8-aba8-e0a5e840d7fa', name: 'MD', path: '/Users/mchisdo/Downloads/Markdown', createdAt: '2026-04-01T19:49:44.968Z', wikiScanner: {…}}
+overrideMethod @ installHook.js:1
+_applyActive @ workspace.js:31
+load @ workspace.js:25
+await in load
+init @ workspace.js:12
+(anonymous) @ app.js:829
+setTimeout
+(anonymous) @ app.js:827
+20251011_122951.jpg:1  GET http://localhost:3737/assets/20251011_122951.jpg?thumbnail=true 404 (Not Found)
+Image
+(anonymous) @ asset-panel-item.js:19
+_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
+anh-khong-ton-tai3.jpg:1  GET http://localhost:3737/assets/anh-khong-ton-tai3.jpg?thumbnail=true 404 (Not Found)
+Image
+(anonymous) @ asset-panel-item.js:19
+_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
+anh-khong-ton-tai344.jpg:1  GET http://localhost:3737/assets/anh-khong-ton-tai344.jpg?thumbnail=true 404 (Not Found)
+Image
+(anonymous) @ asset-panel-item.js:19
+_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
+image-1778839695564.png:1  GET http://localhost:3737/assets/image-1778839695564.png?thumbnail=true 404 (Not Found)
+Image
+(anonymous) @ asset-panel-item.js:19
+_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
+hinhanh1.jpg:1  GET http://localhost:3737/assets/hinhanh1.jpg?thumbnail=true 404 (Not Found)
+Image
+(anonymous) @ asset-panel-item.js:19
+_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
+image-1778839664989.png:1  GET http://localhost:3737/assets/image-1778839664989.png?thumbnail=true 404 (Not Found)
+Image
+(anonymous) @ asset-panel-item.js:19
+_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
+image-1778839673998.png:1  GET http://localhost:3737/assets/image-1778839673998.png?thumbnail=true 404 (Not Found)
+Image
+(anonymous) @ asset-panel-item.js:19
+_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
+image-1778839707137.png:1  GET http://localhost:3737/assets/image-1778839707137.png?thumbnail=true 404 (Not Found)
+Image
+(anonymous) @ asset-panel-item.js:19
+_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
+image-1778839716064.png:1  GET http://localhost:3737/assets/image-1778839716064.png?thumbnail=true 404 (Not Found)
+Image
+(anonymous) @ asset-panel-item.js:19
+_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
+image-1778839725035.png:1  GET http://localhost:3737/assets/image-1778839725035.png?thumbnail=true 404 (Not Found)
+Image
+(anonymous) @ asset-panel-item.js:19
+_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
+image-1778839739945.png:1  GET http://localhost:3737/assets/image-1778839739945.png?thumbnail=true 404 (Not Found)
+Image
+(anonymous) @ asset-panel-item.js:19
+_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
+image-1778839750174.png:1  GET http://localhost:3737/assets/image-1778839750174.png?thumbnail=true 404 (Not Found)
+Image
+(anonymous) @ asset-panel-item.js:19
+_state.observer.IntersectionObserver.root @ asset-panel-item.js:16
+image-1778839757182.png:1  GET http://localhost:3737/assets/image-1778839757182.png?thumbnail=true 404 (Not Found)

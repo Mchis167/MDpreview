@@ -6,7 +6,6 @@
 .ds-asset-drawer {
   position: fixed;
   inset: 0;
-  z-index: var(--ds-z-index-drawer);
   pointer-events: none;
   visibility: hidden;
   transition: visibility var(--ds-transition-main);
@@ -23,6 +22,7 @@
   opacity: 0;
   pointer-events: auto;
   transition: opacity var(--ds-transition-main);
+  z-index: var(--ds-z-index-drawer);
 }
 
 .ds-asset-drawer.is-open .ds-asset-drawer-overlay {
@@ -45,6 +45,7 @@
   pointer-events: auto;
   transform: translateX(100%);
   transition: transform var(--ds-transition-main);
+  z-index: calc(var(--ds-z-index-drawer) + 2);
 }
 
 .ds-asset-drawer.is-open .ds-asset-drawer-panel {

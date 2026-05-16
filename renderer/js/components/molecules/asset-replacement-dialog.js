@@ -13,7 +13,7 @@ window.AssetReplacementDialog = (() => {
     let selectedExisting = null;
     let uploadedFile = file;
     let currentTab = mode || 'existing'; // 'existing' | 'upload'
-    let restoreOriginalName = true;
+    let restoreOriginalName = false;
 
     const content = DesignSystem.createElement('div', 'ds-asset-replace-dialog');
     
@@ -142,8 +142,10 @@ window.AssetReplacementDialog = (() => {
         container.appendChild(card);
 
         // Restore name option using standard Checkbox component
+        const baseName = brokenItem.name.replace(/\.[^.]*$/, '');
+        const newExt = uploadedFile.name.match(/\.[^.]*$/)?.[0] || '';
         const option = Checkbox.create({
-          label: `Save as original name (${brokenItem.name})`,
+          label: `Keep original filename (${baseName}${newExt})`,
           checked: restoreOriginalName,
           className: 'ds-asset-replace-option',
           onChange: (e, val) => {
@@ -242,7 +244,13 @@ window.AssetReplacementDialog = (() => {
         if (currentTab === 'existing') {
           payload.newName = selectedExisting;
         } else {
-          payload.newName = restoreOriginalName ? brokenItem.name : uploadedFile.name;
+          if (restoreOriginalName) {
+            const newExt = uploadedFile.name.match(/\.[^.]*$/)?.[0] || '';
+            const baseName = brokenItem.name.replace(/\.[^.]*$/, '');
+            payload.newName = baseName + newExt;
+          } else {
+            payload.newName = uploadedFile.name;
+          }
           payload.fileData = uploadedFile.data;
         }
 

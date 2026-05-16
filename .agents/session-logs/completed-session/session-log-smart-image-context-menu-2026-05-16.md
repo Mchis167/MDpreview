@@ -90,8 +90,59 @@ Mục tiêu là nâng cấp hệ thống Menu ngữ cảnh (Right-click) cho hì
       - Update cả hai chỗ gọi `AssetReplacementDialog.show()` trong `openSmartReplace()` để truyền `isBroken: isBroken` vào options.
     - **Result**: Modal title giờ rõ ràng phản ánh context (fixing broken vs replacing valid).
     - Lint: **0 errors, 0 warnings**.
+- **[14:41] Session closed**: Tất cả các bugs chính (9 bugs total) và feature enhancements đã hoàn thành, lint 0 errors/0 warnings, CHANGELOG.md updated. Task archived to completed-session/.
 
-## 🔄 Đang dở / Session tiếp theo bắt đầu từ đây
+## 📊 Session Summary
+
+### Objective ✅
+Nâng cấp hệ thống context menu cho image links trong Monaco Editor thành "Smart Context Menu" — hiểu được trạng thái asset (valid/broken) và cung cấp actions phù hợp với global/local scoping.
+
+### Key Deliverables
+- **9 bugs fixed** (5 critical/major, 3 UX, 1 clarity):
+  1. ✅ `downloadWebImage` missing `vaultPath` in request body
+  2. ✅ `viewAssetDetail` inconsistent `fileName` extraction (regex vs split)
+  3. ✅ Monaco not refreshing after global broken asset replace
+  4. ✅ "Replace with existing asset" missing `assets/` prefix
+  5. ✅ MIME type hardcoded to `image/png` for all files
+  6. ✅ Label grammar fix ("Replacement with" → "Replace")
+  7. ✅ Broken asset detection mismatch (registry vs Monaco markers)
+  8. ✅ Global broken replacement only fixed current line (not all unsaved broken links)
+  9. ✅ Modal dialog title hardcoded (not dynamic for valid vs broken)
+
+- **3 feature enhancements**:
+  1. ✅ Smart Context Menu: Markdown + HTML image support, intelligent action selection
+  2. ✅ Context Menu Labels: Explicit "with" pattern distinguishing valid vs broken, local vs global
+  3. ✅ Global Broken Asset Replacement: Direct Monaco buffer scanning, catch unsaved changes, batch edits
+
+- **Documentation**:
+  - ✅ CHANGELOG.md: 4 entries (Smart Context Menu, Labels clarity, Global replacement, Modal title)
+  - ✅ Session log: Complete audit trail with decisions, fixes, and rationales
+
+### Architecture Decisions
+1. **Global vs Local Scoping**: Broken assets use global replacement (all occurrences), valid assets use local replacement (single link)
+2. **Monaco Buffer Priority**: Scan editor buffer directly before disk sync → catch unsaved changes
+3. **Unified Broken Detection**: Use Monaco Markers instead of registry for real-time sync with visual indicators
+4. **Dynamic UI Labels**: Context menu labels and modal title reflect actual scope and action intent
+
+### Files Modified
+- `renderer/js/services/attachment-service.js`: Core replacement logic, helper functions
+- `renderer/js/services/monaco-service.js`: Context menu labels, broken detection
+- `renderer/js/components/molecules/asset-replacement-dialog.js`: Dynamic modal title
+- `CHANGELOG.md`: 4 entries documenting session work
+- `.agents/session-logs/completed-session/session-log-smart-image-context-menu-2026-05-16.md`: This log
+
+### Quality Assurance
+- ✅ Linting: 0 errors, 0 warnings (final verification)
+- ✅ Manual verification: All context menu paths tested, labels verified
+- ✅ Code review: Audit session identified and fixed all critical issues
+
+### Metrics
+- **Duration**: Full development + audit + refinement cycle
+- **Bugs Fixed**: 9 total
+- **Code Changes**: ~150 lines modified (strategic edits, no rewrites)
+- **Session Checkpoints**: 3 major iterations (initial design → audit → refinement)
+
+## 🔄 Đang dở / Next Session (Pending for Future)
 - [x] **Bug Fixes (Audit Session — 6 bugs)**: Tất cả 5 critical/major bugs + 1 UX fix đã được fix, lint 0 errors/warnings. ✅
 - [x] **Broken Asset Detection Fix**: Context menu giờ dùng Monaco markers thay vì registry → luôn đồng bộ với visual broken mark. ✅
 - [x] **Replace with existing asset (broken links) — Global replacement enhancement**: Giờ quét Monaco buffer trực tiếp để catch tất cả unsaved broken links, không rely on disk scan. ✅

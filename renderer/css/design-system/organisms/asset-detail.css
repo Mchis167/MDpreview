@@ -3,26 +3,41 @@
    Atomic Design System (High-Fidelity)
    ════════════════════════════════════════════════════ */
 
+/* ── Mask Container (Clipping Area) ── */
+.ds-asset-detail-mask {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 600px; /* Panel width + enough space for shadow */
+  max-width: 80vw;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: calc(var(--ds-z-index-drawer) + 1);
+  /* NO transition on mask to allow it to jump to the new clipping zone instantly */
+}
+
+.ds-asset-detail-mask.has-panel {
+  right: 640px;
+}
+
+/* ── Panel (Animated Content) ── */
 .ds-asset-detail-panel {
   position: absolute;
   top: 0;
-  right: 640px;
-  /* Sát mép trái của Asset Drawer chính */
+  right: 0;
   bottom: 0;
   width: 480px;
-  max-width: 80vw;
   background: var(--ds-glass-drawer);
   backdrop-filter: blur(var(--ds-blur-drawer));
   border-left: 1px solid var(--ds-border-default);
   display: flex;
   flex-direction: column;
   pointer-events: auto;
-  transform: translateX(20%);
-  /* Trượt nhẹ từ phải sang trái */
+  transform: translateX(100%);
   opacity: 0;
   visibility: hidden;
   transition: transform var(--ds-transition-main), opacity var(--ds-transition-main), visibility var(--ds-transition-main);
-  z-index: calc(var(--ds-z-index-drawer) + 1);
   box-shadow: -20px 0 40px rgba(0, 0, 0, 0.4);
 }
 
