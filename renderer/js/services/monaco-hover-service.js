@@ -1,7 +1,6 @@
 /**
  * MonacoHoverService
- * Purpose: Provides image preview on hover for Markdown and HTML image links.
- * Position: Strictly BELOW the cursor/link.
+ * Purpose: Image preview on hover for Markdown/HTML image links in Monaco Editor.
  * Pattern: IIFE Singleton
  */
 
@@ -11,160 +10,171 @@ const MonacoHoverService = (() => {
   'use strict';
 
   let _editor = null;
-  let _mouseMoveListener = null;
+  const _listeners = [];
+  let _domMouseLeaveListener = null;
+
+  // Regex compiled once
+  const MD_IMG_RE = /!\[(?:[^\]]*)\]\(([^)]+)\)/g;
+  const HTML_IMG_RE = /<img\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi;
 
   /**
-   * Resolves a potentially relative asset URL to a full server URL
+   * Resolve relative asset path → absolute server URL.
+   * Encodes each path segment individually to preserve slashes.
    */
-  function _resolveImageUrl(url) {
-    if (!url) return null;
-    if (url.startsWith('http') || url.startsWith('//') || url.startsWith('data:')) {
-      return url;
+  function _resolveUrl(raw) {
+    if (!raw) return null;
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('http') || trimmed.startsWith('//') || trimmed.startsWith('data:')) {
+      return trimmed;
     }
 
-    let cleanPath = url;
-    if (url.startsWith('/assets/')) {
-      cleanPath = url.substring(8);
-    } else if (url.startsWith('assets/')) {
-      cleanPath = url.substring(7);
-    } else if (url.startsWith('/')) {
-      cleanPath = url.substring(1);
-    }
+    // Strip leading /assets/, assets/, or /
+    let path = trimmed;
+    if (path.startsWith('/assets/')) path = path.slice(8);
+    else if (path.startsWith('assets/')) path = path.slice(7);
+    else if (path.startsWith('/')) path = path.slice(1);
 
-    cleanPath = cleanPath.split('?')[0].split('#')[0];
-    return `/assets/${encodeURIComponent(decodeURIComponent(cleanPath))}`;
+    // Remove query / fragment
+    path = path.split('?')[0].split('#')[0];
+
+    // Encode each segment individually
+    const encoded = path.split('/').map(seg => encodeURIComponent(decodeURIComponent(seg))).join('/');
+    return `/assets/${encoded}`;
   }
 
-  function _handleMouseMove(e) {
-    if (!_editor || !window.MonacoImagePreviewComponent) return;
-    
-    // Use browser event for most reliable coordinates
-    const browserEvent = e.event && e.event.browserEvent ? e.event.browserEvent : null;
-    if (!browserEvent) return;
+  /**
+   * Check if any UI overlay is open (menu shield, search palette, modals)
+   */
+  function _isOverlayOpen() {
+    // Menu shield (context menu, popovers, etc.)
+    if (window.MenuShield?.active) return true;
 
-    const target = _editor.getTargetAtClientPoint(browserEvent.clientX, browserEvent.clientY);
+    // Search palette
+    if (window.SearchPalette?.isOpen?.()) return true;
+
+    // Modals/dialogs with 'show' class
+    if (document.querySelector('.modal.show, .base-form-modal.show')) return true;
+
+    return false;
+  }
+
+  /**
+   * Find an image URL on a line at a given column (1-based).
+   * Returns { url, startCol, endCol } or null.
+   */
+  function _detectImage(line, col) {
+    MD_IMG_RE.lastIndex = 0;
+    HTML_IMG_RE.lastIndex = 0;
+
+    let m;
+    while ((m = MD_IMG_RE.exec(line)) !== null) {
+      const start = m.index + 1;        // 1-based
+      const end = start + m[0].length - 1;
+      if (col >= start && col <= end) return { url: m[1], startCol: start };
+    }
+
+    HTML_IMG_RE.lastIndex = 0;
+    while ((m = HTML_IMG_RE.exec(line)) !== null) {
+      const start = m.index + 1;
+      const end = start + m[0].length - 1;
+      if (col >= start && col <= end) return { url: m[1], startCol: start };
+    }
+
+    return null;
+  }
+
+  function _onMouseMove(e) {
+    const preview = window.MonacoImagePreviewComponent;
+    if (!_editor || !preview) return;
+
+    const be = e.event && e.event.browserEvent;
+    if (!be) return;
+
+    const target = _editor.getTargetAtClientPoint(be.clientX, be.clientY);
+
     if (!target || !target.position) {
-      MonacoImagePreviewComponent.hide();
+      preview.hide();
       return;
     }
 
-    // Only trigger on actual content areas
-    // 3: CONTENT_TEXT, 4: CONTENT_WIDGET, 6: CONTENT_EMPTY, 7: CONTENT_VIEW_ZONE
-    if (target.type !== 3 && target.type !== 6 && target.type !== 7) {
-      MonacoImagePreviewComponent.hide();
+    // Hide preview if any UI overlay is open
+    if (_isOverlayOpen()) {
+      preview.hide();
       return;
     }
 
-    const pos = target.position;
+    const { lineNumber, column } = target.position;
     const model = _editor.getModel();
-    if (!model) return;
+    if (!model) { preview.hide(); return; }
 
-    const lineContent = model.getLineContent(pos.lineNumber);
-    if (!lineContent || (!lineContent.includes('![') && !lineContent.toLowerCase().includes('<img'))) {
-      MonacoImagePreviewComponent.hide();
+    const line = model.getLineContent(lineNumber);
+
+    // Quick bail-out before regex
+    if (!line.includes('![') && !line.toLowerCase().includes('<img')) {
+      preview.hide();
       return;
     }
-    
-    // Regex
-    const markdownRegex = /!\[(.*?)\]\s*\((.*?)\)/g;
-    const htmlRegex = /<img\s+[^>]*src=["'](.*?)["'][^>]*>/gi;
 
-    let match;
-    let foundImage = null;
+    const found = _detectImage(line, column);
+    if (!found) { preview.hide(); return; }
 
-    // 1. Markdown detection
-    while ((match = markdownRegex.exec(lineContent)) !== null) {
-      const startCol = match.index + 1;
-      const endCol = startCol + match[0].length;
-      
-      if (pos.column >= startCol && pos.column <= endCol) {
-        foundImage = { url: match[2], range: new monaco.Range(pos.lineNumber, startCol, pos.lineNumber, endCol) };
-        break;
-      }
-    }
+    const resolved = _resolveUrl(found.url);
+    if (!resolved) { preview.hide(); return; }
 
-    // 2. HTML detection
-    if (!foundImage) {
-      htmlRegex.lastIndex = 0;
-      while ((match = htmlRegex.exec(lineContent)) !== null) {
-        const startCol = match.index + 1;
-        const endCol = startCol + match[0].length;
-        if (pos.column >= startCol && pos.column <= endCol) {
-          foundImage = { url: match[1], range: new monaco.Range(pos.lineNumber, startCol, pos.lineNumber, endCol) };
-          break;
-        }
-      }
-    }
+    // Use cursor column for live-tracking position, fallback to link start for top/bottom
+    const pixelPos = _editor.getScrolledVisiblePosition({ lineNumber, column });
+    if (!pixelPos) { preview.hide(); return; }
 
-    if (foundImage) {
-      const resolvedUrl = _resolveImageUrl(foundImage.url);
-      if (resolvedUrl) {
-        console.warn('[DIAG] Image link detected!', { 
-          line: pos.lineNumber, 
-          col: pos.column, 
-          url: resolvedUrl 
-        });
+    const editorRect = _editor.getDomNode().getBoundingClientRect();
+    const lineHeight = _editor.getOption(monaco.editor.EditorOption.lineHeight);
 
-        const editorNode = _editor.getDomNode();
-        const editorRect = editorNode.getBoundingClientRect();
-        
-        // Get pixel position of the start of the match
-        const pixelPos = _editor.getScrolledVisiblePosition(foundImage.range.getStartPosition());
-        const lineHeight = _editor.getOption(monaco.editor.EditorOption.lineHeight);
+    const anchorX = editorRect.left + pixelPos.left;
+    const anchorTop = editorRect.top + pixelPos.top;
+    const anchorBottom = anchorTop + lineHeight;
 
-        const rect = {
-          left: editorRect.left + pixelPos.left,
-          top: editorRect.top + pixelPos.top,
-          right: editorRect.left + pixelPos.left + 20,
-          bottom: editorRect.top + pixelPos.top + lineHeight
-        };
+    preview.show(resolved, anchorX, anchorBottom, anchorTop);
+  }
 
-        MonacoImagePreviewComponent.show(resolvedUrl, rect);
-        return;
-      }
-    }
-
-    MonacoImagePreviewComponent.hide();
+  function _addListener(disposable) {
+    _listeners.push(disposable);
   }
 
   return {
-    /**
-     * Activate the service for a specific editor instance
-     * @param {Object} editor - Monaco Editor instance
-     */
     activate(editor) {
-      this.deactivate(); // Cleanup previous if any
+      this.deactivate();
+      if (!editor) return;
+
       _editor = editor;
-      
-      if (_editor) {
-        _mouseMoveListener = _editor.onMouseMove((e) => _handleMouseMove(e));
-      }
-      
-      // Also hide on scroll or focus loss
-      if (_editor) {
-        _editor.onDidScrollChange(() => MonacoImagePreviewComponent.hide());
-        _editor.onDidBlurEditorWidget(() => MonacoImagePreviewComponent.hide());
+      _addListener(_editor.onMouseMove(_onMouseMove));
+      _addListener(_editor.onDidScrollChange(() => MonacoImagePreviewComponent && MonacoImagePreviewComponent.hide()));
+      _addListener(_editor.onDidBlurEditorWidget(() => MonacoImagePreviewComponent && MonacoImagePreviewComponent.hide()));
+
+      // Hide preview when mouse leaves editor
+      const editorNode = _editor.getDomNode();
+      if (editorNode) {
+        _domMouseLeaveListener = () => {
+          if (window.MonacoImagePreviewComponent) MonacoImagePreviewComponent.hide();
+        };
+        editorNode.addEventListener('mouseleave', _domMouseLeaveListener);
       }
     },
 
-    /**
-     * Disable the service
-     */
     deactivate() {
-      if (_mouseMoveListener) {
-        _mouseMoveListener.dispose();
-        _mouseMoveListener = null;
+      _listeners.forEach(l => l.dispose());
+      _listeners.length = 0;
+
+      if (_domMouseLeaveListener && _editor) {
+        const editorNode = _editor.getDomNode();
+        if (editorNode) editorNode.removeEventListener('mouseleave', _domMouseLeaveListener);
       }
+      _domMouseLeaveListener = null;
+
       _editor = null;
       if (window.MonacoImagePreviewComponent) MonacoImagePreviewComponent.hide();
     },
 
-    /**
-     * Legacy Init (optional now, but kept for compatibility)
-     */
-    init() {
-      // Logic moved to activate(editor)
-    }
+    // kept for app.js compatibility
+    init() {},
   };
 })();
 

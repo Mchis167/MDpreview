@@ -113,6 +113,27 @@ const MonacoService = (() => {
     });
   }
 
+  /**
+   * Resolve relative asset path → absolute server URL.
+   */
+  function _resolveUrl(raw) {
+    if (!raw) return null;
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('http') || trimmed.startsWith('//') || trimmed.startsWith('data:')) {
+      return trimmed;
+    }
+
+    let path = trimmed;
+    if (path.startsWith('/assets/')) path = path.slice(8);
+    else if (path.startsWith('assets/')) path = path.slice(7);
+    else if (path.startsWith('/')) path = path.slice(1);
+
+    path = path.split('?')[0].split('#')[0];
+
+    const encoded = path.split('/').map(seg => encodeURIComponent(decodeURIComponent(seg))).join('/');
+    return `/assets/${encoded}`;
+  }
+
   return {
     /**
      * Ensure Monaco is loaded
@@ -374,6 +395,19 @@ const MonacoService = (() => {
               }
             } else if (isWeb) {
               // Case 4: Web URL
+              if (!isBroken) {
+                items.push({
+                  label: 'Zoom image',
+                  icon: 'maximize-2',
+                  onClick: () => {
+                    const resolved = _resolveUrl(url);
+                    if (resolved && window.ZoomSystem) {
+                      window.ZoomSystem.open(resolved, 'image');
+                    }
+                  }
+                });
+                items.push({ divider: true });
+              }
               items.push({
                 label: 'Download to local image',
                 icon: 'download',
@@ -394,8 +428,18 @@ const MonacoService = (() => {
               // Case 2 & 3: Local Asset (Valid or Broken)
               if (!isBroken) {
                 items.push({
+                  label: 'Zoom image',
+                  icon: 'maximize-2',
+                  onClick: () => {
+                    const resolved = _resolveUrl(url);
+                    if (resolved && window.ZoomSystem) {
+                      window.ZoomSystem.open(resolved, 'image');
+                    }
+                  }
+                });
+                items.push({
                   label: 'View asset detail',
-                  icon: 'info',
+                  icon: 'images',
                   onClick: () => window.AttachmentService.viewAssetDetail(url)
                 });
                 items.push({ divider: true });
