@@ -106,12 +106,14 @@ dist-native/
 ai-bundles/
 ImplementPlan/
 GraphPreview/
-.agents/session-logs/
+.agents/
 
 # --- Development Scratch & Temp ---
 scratch/
 tokens.tmp
 server.log
+.wrangler/
+cf-publish-worker/.wrangler/
 
 # --- Local Workspace & User Data ---
 # These contain personal content and local configuration
