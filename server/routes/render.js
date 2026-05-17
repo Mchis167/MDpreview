@@ -34,11 +34,25 @@ renderer.listitem = (text, task, checked) => {
 
 // Pre-processing is now handled during token rendering to preserve character offsets.
 
+const carouselExtension = {
+  name: 'carousel',
+  level: 'block',
+  start(src) { return src.indexOf(':::carousel'); },
+  tokenizer(src) {
+    const match = src.match(/^:::carousel\n([\s\S]*?)\n:::/);
+    if (match) {
+      return { type: 'carousel', raw: match[0], text: match[1] };
+    }
+  },
+  renderer() { return ''; }
+};
+
 marked.use({
   renderer: renderer,
   langPrefix: 'hljs language-',
   gfm: true,
-  breaks: true
+  breaks: true,
+  extensions: [carouselExtension]
 });
 
 /**
@@ -291,6 +305,30 @@ function renderTokens(tokens, originalSource, baseOffset, lineStart, isTopLevel 
         return `<tr data-line="${line}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">`;
       });
       tokenHtml = `<div class="md-line" data-line="${tokenStartLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${tableHtml}</div>`;
+      html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${tokenHtml}</div>\n`;
+      currentLine = tokenEndLine;
+      continue;
+    }
+
+    // ── Carousel Blocks ──
+    if (token.type === 'carousel') {
+      const headerLen = ':::carousel\n'.length;
+      let charOffset = tokenStartOffset + headerLen;
+      let slideLineNum = tokenStartLine + 1;
+
+      const slidesHtml = token.text.split('\n').map(line => {
+        const slideStart = charOffset;
+        const slideEnd = charOffset + line.length;
+        charOffset += line.length + 1;
+        slideLineNum++;
+
+        const imgMatch = line.match(/!\[([^\]]*)\]\(([^)]+)\)/);
+        if (!imgMatch) return '';
+        const [, alt, src] = imgMatch;
+        return `<div class="md-carousel-slide" data-line="${slideLineNum - 1}" data-src-start="${slideStart}" data-src-end="${slideEnd}"><img src="${src}" alt="${alt}"></div>`;
+      }).join('');
+
+      tokenHtml = `<div class="md-carousel" data-line="${tokenStartLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}"><div class="md-carousel-track">${slidesHtml}</div></div>`;
       html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${tokenHtml}</div>\n`;
       currentLine = tokenEndLine;
       continue;

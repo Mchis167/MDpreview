@@ -1,0 +1,143 @@
+/* ============================================================
+   mockup-frames.css — Browser & Phone Mockup Frame Styles
+   Used by: MockupImageModule (renderer/js/utils/mockup-images.js)
+   ============================================================ */
+
+/* ── Browser Frame ── */
+
+.mockup-browser-frame {
+  display: block;
+  width: 100%;
+  border-radius: var(--ds-radius-shell);
+  overflow: hidden;
+  box-shadow: var(--ds-shadow-lg);
+  border: 1px solid var(--ds-white-a10);
+  margin: var(--ds-space-xl) 0;
+  background: var(--ds-bg-surface);
+}
+
+.mockup-browser-chrome {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-xs);
+  padding: 0 var(--ds-space-md);
+  height: 36px;
+  background: var(--ds-bg-surface);
+  border-bottom: 1px solid var(--ds-white-a10);
+  flex-shrink: 0;
+}
+
+.mockup-browser-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-white-a20);
+  flex-shrink: 0;
+}
+
+.mockup-browser-dot:nth-child(1) {
+  background: #ff5f57;
+}
+
+.mockup-browser-dot:nth-child(2) {
+  background: #febc2e;
+}
+
+.mockup-browser-dot:nth-child(3) {
+  background: #28c840;
+}
+
+.mockup-browser-addressbar {
+  flex: 1;
+  height: 20px;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-white-a05);
+  margin-left: var(--ds-space-sm);
+}
+
+.mockup-browser-content {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.mockup-browser-content.is-scrollable {
+  aspect-ratio: 16 / 10;
+  overflow-y: auto;
+  overflow-x: hidden;
+  cursor: grab;
+}
+
+.mockup-browser-content.is-scrollable.is-dragging {
+  cursor: grabbing;
+}
+
+.mockup-browser-content img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0;
+  margin: 0;
+}
+
+/* ── Phone Frame ── */
+
+.mockup-phone-frame {
+  display: block;
+  width: 100%;
+  max-width: 390px;
+  margin: var(--ds-space-xl) auto;
+}
+
+.mockup-phone-device {
+  padding: var(--ds-space-sm);
+  position: relative;
+  width: 100%;
+  border-radius: 48px;
+  border: 2px solid var(--ds-border-strong);
+  box-shadow:
+    0 0 0 1px var(--ds-white-a10),
+    0 24px 64px var(--ds-black-a50);
+  background: var(--ds-surface-card);
+  overflow: hidden;
+}
+
+.mockup-phone-notch {
+  position: absolute;
+  top: var(--ds-space-lg);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 32px;
+  background: var(--ds-bg-base);
+  border-radius: var(--ds-radius-full);
+  z-index: 2;
+}
+
+.mockup-phone-content {
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.mockup-phone-content.is-scrollable {
+  aspect-ratio: 393 / 852;
+  overflow-y: auto;
+  overflow-x: hidden;
+  cursor: grab;
+  scrollbar-width: none;
+  border-radius: calc(48px - var(--ds-space-sm));
+}
+
+.mockup-phone-content.is-scrollable.is-dragging {
+  cursor: grabbing;
+}
+
+.mockup-phone-content img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0;
+  margin: 0;
+}

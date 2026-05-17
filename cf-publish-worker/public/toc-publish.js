@@ -158,4 +158,49 @@
 
   // Run once on load
   setTimeout(updateActive, 320);
+
+  // --- Global Smooth Wheel Scroll Physics ---
+  function initSmoothWheel() {
+    let targetScrollTop = window.scrollY || document.documentElement.scrollTop;
+    let isAnimating = false;
+    const friction = 0.08;
+
+    window.addEventListener('wheel', (e) => {
+      // 💡 Only intercept con lăn chuột vật lý (integer deltaY)
+      // Keep trackpad natural swipes (fractional deltaY) untouched
+      if (Math.abs(e.deltaY) % 1 !== 0) {
+        targetScrollTop = window.scrollY || document.documentElement.scrollTop;
+        return;
+      }
+
+      e.preventDefault();
+
+      targetScrollTop += e.deltaY;
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      targetScrollTop = Math.max(0, Math.min(targetScrollTop, maxScroll));
+
+      if (!isAnimating) {
+        _animate();
+      }
+    }, { passive: false });
+
+    function _animate() {
+      isAnimating = true;
+      const current = window.scrollY || document.documentElement.scrollTop;
+      const diff = targetScrollTop - current;
+
+      if (Math.abs(diff) < 0.5) {
+        window.scrollTo(0, targetScrollTop);
+        isAnimating = false;
+        return;
+      }
+
+      window.scrollTo(0, current + diff * friction);
+      requestAnimationFrame(_animate);
+    }
+  }
+
+  if (!isMobile()) {
+    initSmoothWheel();
+  }
 })();

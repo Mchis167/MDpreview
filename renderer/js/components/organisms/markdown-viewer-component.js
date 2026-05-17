@@ -1034,7 +1034,12 @@ class MarkdownPreview {
       try {
         if (window.CodeBlockModule) window.CodeBlockModule.process(inner);
       } catch (_e) { /* CodeBlock error - gracefully skip */ }
-
+      try {
+        if (window.MockupImageModule) window.MockupImageModule.process(inner);
+      } catch (_e) { /* MockupImage error - gracefully skip */ }
+      try {
+        if (window.CarouselModule) window.CarouselModule.process(inner);
+      } catch (_e) { /* Carousel error - gracefully skip */ }
 
       // Bind checkbox events for task lists
       this._bindCheckboxEvents(inner);
@@ -1170,6 +1175,8 @@ class MarkdownPreview {
         window.processMermaid(inner).catch(_e => { /* Mermaid error - gracefully skip */ });
       }
       if (window.CodeBlockModule) window.CodeBlockModule.process(inner);
+      if (window.MockupImageModule) window.MockupImageModule.process(inner);
+      if (window.CarouselModule) window.CarouselModule.process(inner);
 
       // Re-bind checkbox events
       this._bindCheckboxEvents(inner);

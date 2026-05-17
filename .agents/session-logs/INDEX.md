@@ -31,6 +31,7 @@
 | Z-index / stacking / semantic tokens / drawer / tab-bar / modal / CSS design system | `completed-session/session-log-z-index-system-revamp-2026-05-17.md` |
 | Asset refactor / palette / asset picker / replacement dialog / input icon / atomic design | `completed-session/session-log-asset-refactor-palette-2026-05-17.md` |
 | Asset drag-drop / Monaco drop / overlay blockade / capture phase / smart newline / attachment service | `completed-session/session-log-asset-drag-drop-and-ux-refinement-2026-05-17.md` |
+| mockup / image frame / browser frame / phone frame / hash fragment / #browser / #phone / scroll modifier / carousel / publish pipeline / mirror sync / project map / tab preview | `completed-session/session-log-image-mockup-wrapping-2026-05-18.md` |
 
 ---
 

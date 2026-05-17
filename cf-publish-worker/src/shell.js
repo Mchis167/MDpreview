@@ -114,6 +114,10 @@ export function buildShell({ slug, html, title = 'Document', assetsUrl = '/publi
   <link rel="stylesheet" href="${assetsUrl}">
   <script src="/code-blocks.js"></script>
   <script src="/zoom.js"></script>
+  <script src="/design-system.js"></script>
+  <script src="/design-system-icons.js"></script>
+  <script src="/mockup-images.js"></script>
+  <script src="/carousel.js"></script>
   <script src="/toc-publish.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 </head>
@@ -163,6 +167,11 @@ export function buildShell({ slug, html, title = 'Document', assetsUrl = '/publi
         const container = document.getElementById('md-content');
         window.CodeBlockModule.process(container);
       }
+
+      // 1b. Wrap mockup frames, then init carousel (carousel type-detection needs frames first)
+      const _mdContent = document.getElementById('md-content');
+      if (window.MockupImageModule) window.MockupImageModule.process(_mdContent);
+      if (window.CarouselModule) window.CarouselModule.process(_mdContent);
 
       // 2. Initialize Mermaid
       mermaid.initialize(mermaidConfig);

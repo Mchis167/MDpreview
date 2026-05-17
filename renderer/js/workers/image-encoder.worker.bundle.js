@@ -7817,11 +7817,11 @@ async function _decodeRaw(buffer, mime, wasmUrls) {
 }
 self.onmessage = async (event) => {
   const { id, type, imageData: inputImageData, rawInput, rawBuffer, rawMime, options, wasmUrls } = event.data;
-  let imageData = inputImageData;
-  if (rawInput && rawBuffer) {
-    imageData = await _decodeRaw(rawBuffer, rawMime, wasmUrls);
-  }
   try {
+    let imageData = inputImageData;
+    if (rawInput && rawBuffer) {
+      imageData = await _decodeRaw(rawBuffer, rawMime, wasmUrls);
+    }
     let resultBuffer;
     let mimeType;
     if (type === "image/webp") {

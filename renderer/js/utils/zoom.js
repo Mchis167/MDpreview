@@ -120,6 +120,8 @@ window.ZoomSystem = (() => {
       // Image support
       const img = new Image();
       img.src = content;
+      img.draggable = false;
+      img.addEventListener('dragstart', e => e.preventDefault());
       await new Promise((resolve) => {
         img.onload = () => {
           _state.naturalW = img.naturalWidth;

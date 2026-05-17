@@ -134,6 +134,28 @@ const MonacoService = (() => {
     return `/assets/${encoded}`;
   }
 
+  function _registerLanguageProviders() {
+    monaco.languages.registerCompletionItemProvider('markdown', {
+      triggerCharacters: [':'],
+      provideCompletionItems(model, position) {
+        const line = model.getLineContent(position.lineNumber);
+        const before = line.substring(0, position.column - 1);
+if (!/(#browser|#phone):$/.test(before)) return { suggestions: [] };
+        return {
+          suggestions: [
+            {
+              label: 'scroll',
+              kind: monaco.languages.CompletionItemKind.Value,
+              detail: 'Scroll inside frame (16:10 browser / iPhone 16 phone)',
+              insertText: 'scroll',
+              range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column),
+            }
+          ]
+        };
+      }
+    });
+  }
+
   return {
     /**
      * Ensure Monaco is loaded
@@ -142,11 +164,13 @@ const MonacoService = (() => {
       if (_loadPromise) return _loadPromise;
       _loadPromise = new Promise((resolve) => {
         if (typeof monaco !== 'undefined') {
+          _registerLanguageProviders();
           resolve();
           return;
         }
         if (typeof require !== 'undefined') {
           require(['vs/editor/editor.main'], () => {
+            _registerLanguageProviders();
             resolve();
           });
         } else {
@@ -217,11 +241,11 @@ const MonacoService = (() => {
           horizontalScrollbarSize: 4,
           useShadows: false
         },
-        fixedOverflowWidgets: true,
+        fixedOverflowWidgets: false,
 
         // Disable suggestions/IntelliSense
         quickSuggestions: false,
-        suggestOnTriggerCharacters: false,
+        suggestOnTriggerCharacters: true,
         wordBasedSuggestions: false,
         parameterHints: { enabled: false },
         snippetSuggestions: 'none',
@@ -365,14 +389,49 @@ const MonacoService = (() => {
             }
           }
 
-          if (foundImage && window.ContextMenuComponent && window.AttachmentService) {
+          // Check if selection spans one or more image links (for carousel wrap)
+          const editorSel = _editor.getSelection();
+          let carouselRange = null;
+          let carouselImageCount = 0;
+          if (editorSel && !editorSel.isEmpty()) {
+            const sl = editorSel.startLineNumber;
+            const el = editorSel.endLineNumber;
+            carouselRange = new monaco.Range(sl, 1, el, model.getLineMaxColumn(el));
+            const selText = model.getValueInRange(carouselRange);
+            carouselImageCount = selText.split('\n').filter(l => /!\[[^\]]*\]\([^)]+\)/.test(l)).length;
+          }
+
+          const shouldShowMenu = foundImage || carouselImageCount >= 1;
+
+          if (shouldShowMenu && window.ContextMenuComponent && window.AttachmentService) {
             e.preventDefault();
             e.stopPropagation();
 
-            const url = foundImage.url;
+            const url = foundImage ? foundImage.url : '';
             const items = [];
             const isWeb = url.startsWith('http') || url.startsWith('//');
             const isEmpty = !url.trim();
+
+            if (carouselImageCount >= 1) {
+              items.push({
+                label: 'Wrap in carousel',
+                icon: 'images',
+                onClick: () => {
+                  const selText = model.getValueInRange(carouselRange);
+                  _editor.executeEdits('mdpreview', [{
+                    range: carouselRange,
+                    text: `:::carousel\n${selText}\n:::`,
+                    forceMoveMarkers: true
+                  }]);
+                }
+              });
+              if (foundImage) items.push({ divider: true });
+            }
+
+            if (!foundImage) {
+              window.ContextMenuComponent.open({ event: e, items });
+              return;
+            }
 
             const allMarkers = monaco.editor.getModelMarkers({ resource: model.uri });
             const isBroken = allMarkers.some(m =>
@@ -476,7 +535,6 @@ const MonacoService = (() => {
 
       // Also ensure Alt+Left/Right behaves like Xcode (Move by word) - Monaco does this by default on Mac
       // but we can enforce it if needed.
-
 
       _isInitialized = true;
 

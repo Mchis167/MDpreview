@@ -13,6 +13,35 @@
     box-sizing: border-box;
 }
 
+/* ── Custom Scrollbar (Premium Ultra-Thin with Padding Trick) ── */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--ds-white-a10);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--ds-white-a20);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+/* Firefox standard scrollbars */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--ds-white-a10) transparent;
+}
+
 body {
     margin: 0;
     padding: 0;

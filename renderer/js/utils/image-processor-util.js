@@ -137,6 +137,14 @@ const ImageProcessorUtil = (() => {
       wasmUrls
     };
 
+    // PNG is optimized by oxipng which reads a raw PNG buffer directly —
+    // no decode-to-ImageData step needed (and _decodeRaw has no PNG decoder).
+    if (mimeType === 'image/png') {
+      taskData.rawInput = false;
+      taskData.options.pngBuffer = rawBuffer;
+      delete taskData.rawBuffer;
+    }
+
     const response = await WorkerPool.runTask(taskData, [rawBuffer]);
     return {
       blob: new Blob([response.buffer], { type: response.mimeType }),

@@ -100,8 +100,7 @@
   box-shadow: none !important;
 }
 
-/* 5. Widgets (Suggest, Hover, etc.) */
-.monaco-editor .suggest-widget,
+/* 5. Widgets (Hover only — suggest-widget uses Monaco default theme) */
 .monaco-editor .hover-widget {
   border: 1px solid var(--ds-border-default) !important;
   border-radius: var(--ds-radius-panel) !important;

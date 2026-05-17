@@ -14,6 +14,7 @@ const QuickCommandPalette = (() => {
   let _selectedIndex = -1;
   let _filteredCommands = [];
   let _callback = null;
+  let _activeCommands = null;
   let _usageCounts = {};
   const USAGE_KEY = 'mdpreview_slash_usage';
 
@@ -47,6 +48,7 @@ const QuickCommandPalette = (() => {
     { id: 'img-asset', label: 'Pick from Assets', icon: 'images', hint: '/asset', tags: ['anh', 'hinh', 'vault', 'asset', 'image', 'img'] },
     { id: 'img-upload', label: 'Upload Image', icon: 'upload', hint: '/upload', tags: ['anh', 'hinh', 'upload', 'image', 'img'] },
     { id: 'tb', label: 'Table', icon: 'table', hint: '/table', tags: ['bang'] },
+    { id: 'carousel', label: 'Carousel', icon: 'layout-panel-left', hint: '/carousel', tags: ['carousel', 'slider', 'anh', 'gallery'] },
     { id: 'hr', label: 'Divider', icon: 'minus', hint: '/hr', tags: ['phancach', 'duongke'] },
     { id: 'fn', label: 'Footnote', icon: 'file-text', hint: '/fn', tags: ['chuthich'] },
     { id: 'open-asset-panel', label: 'Open Asset Panel', icon: 'images', hint: '/panel', tags: ['asset', 'panel', 'management', 'quan ly', 'img', 'image'] },
@@ -144,9 +146,9 @@ const QuickCommandPalette = (() => {
       const query = _input.value.toLowerCase().trim().replace(/^\/+/, '');
 
       if (!query) {
-        _filteredCommands = [...COMMANDS];
+        _filteredCommands = [..._activeCommands];
       } else {
-        _filteredCommands = COMMANDS.map(cmd => {
+        _filteredCommands = _activeCommands.map(cmd => {
           let score = 0;
           const label = cmd.label.toLowerCase();
           const hint = cmd.hint.toLowerCase().replace(/^\/+/, '');
@@ -238,6 +240,7 @@ const QuickCommandPalette = (() => {
 
     // Header & Input visibility
     const header = _el.querySelector('.palette-header');
+    _activeCommands = options.commands || COMMANDS;
     _input.value = ''; // Always clear query on show
 
     if (options.hideInput) {

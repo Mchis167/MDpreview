@@ -5,7 +5,14 @@ const EditorModule = (() => {
 
   let _isSlashMode = false;
   let _slashStartPos = -1;
+  let _isHashMode = false;
+  let _hashStartPos = -1;
   let _changeListener = null;
+
+  const MOCKUP_HASH_COMMANDS = [
+    { id: 'browser', label: 'Browser Frame', icon: 'monitor', hint: '#browser', tags: ['frame', 'web', 'browser', 'desktop'] },
+    { id: 'phone', label: 'Phone Frame', icon: 'smartphone', hint: '#phone', tags: ['mobile', 'ios', 'android', 'phone'] },
+  ];
   let _cursorListener = null;
   let _keyListener = null;
   let _boundFileId = null; // ID locking to prevent saving to wrong file during transitions
@@ -27,20 +34,29 @@ const EditorModule = (() => {
 
     // ── Slash Command Logic (Hybrid with Monaco) ──
     if (!MonacoService.isInitialized()) return;
-    
+
     // Trigger Broken Link Validation
     if (window.MonacoValidationService) window.MonacoValidationService.trigger();
-    
+
     const pos = MonacoService.getCursorPosition();
     const model = MonacoService.getInstance().getModel();
     if (!model || pos.lineNumber > model.getLineCount()) return;
-    
+
     const lineContent = model.getLineContent(pos.lineNumber);
 
-    if (_isSlashMode) {
+    if (_isHashMode) {
+      // Validate: still inside image URL with hash
+      if (lineContent.charAt(_hashStartPos) !== '#' || pos.column <= _hashStartPos + 1) {
+        _isHashMode = false;
+        if (window.QuickCommandPalette) window.QuickCommandPalette.hide();
+      } else {
+        const textAfterHash = lineContent.substring(_hashStartPos + 1, pos.column - 1);
+        if (window.QuickCommandPalette) window.QuickCommandPalette.updateQuery(textAfterHash);
+      }
+    } else if (_isSlashMode) {
       // Validate session: Is the cursor still on the same line and after _slashStartPos?
       const textAfterSlash = lineContent.substring(_slashStartPos + 1, pos.column - 1);
-      
+
       // If user typed space (handled in KeyDown now) or moved cursor before/at slash, or character at start is no longer /
       if (lineContent.charAt(_slashStartPos) !== '/' || pos.column <= _slashStartPos + 1) {
         _isSlashMode = false;
@@ -53,7 +69,7 @@ const EditorModule = (() => {
       // Detect start of slash command
       const charAtCursor = lineContent.charAt(pos.column - 1);
       const charBeforeCursor = lineContent.charAt(pos.column - 2);
-      
+
       let slashIdx = -1;
       if (charBeforeCursor === '/') {
         slashIdx = pos.column - 2;
@@ -64,17 +80,34 @@ const EditorModule = (() => {
       if (slashIdx !== -1) {
         const charAfterSlash = lineContent.charAt(slashIdx + 1);
         const beforeSlash = lineContent.substring(0, slashIdx);
-        
+
         // Trigger ONLY if not followed by space (allows `/` alone or `/cmd`)
         // Trigger ONLY if not followed by space (allows `/` alone or `/cmd`)
         if ((slashIdx === 0 || /[\s\n]$/.test(beforeSlash)) && charAfterSlash !== ' ') {
           _isSlashMode = true;
-          _slashStartPos = slashIdx; 
+          _slashStartPos = slashIdx;
           _showQuickCommand(true, true);
-          
+
           // Calculate query immediately from current cursor position
           const currentQuery = lineContent.substring(slashIdx + 1, pos.column - 1);
           if (window.QuickCommandPalette) window.QuickCommandPalette.updateQuery(currentQuery);
+        }
+      }
+
+      // Detect start of hash mockup command (only inside image URL context)
+      const charBeforeHash = lineContent.charAt(pos.column - 2);
+      const charAtHash = lineContent.charAt(pos.column - 1);
+      let hashIdx = -1;
+      if (charBeforeHash === '#') hashIdx = pos.column - 2;
+      else if (charAtHash === '#') hashIdx = pos.column - 1;
+
+      if (hashIdx !== -1 && !_isSlashMode) {
+        const beforeHash = lineContent.substring(0, hashIdx);
+        // Only trigger inside markdown image URL: ![alt](path#
+        if (/!\[[^\]]*\]\([^)]*$/.test(beforeHash)) {
+          _isHashMode = true;
+          _hashStartPos = hashIdx;
+          _showHashPalette();
         }
       }
     }
@@ -91,11 +124,45 @@ const EditorModule = (() => {
       const K_Z = 56;
       const K_PERIOD = 46; // "." key
 
+      if (_isHashMode && window.QuickCommandPalette) {
+        if (e.keyCode === monaco.KeyCode.Enter) {
+          e.preventDefault();
+          e.stopPropagation();
+          const cmdId = window.QuickCommandPalette.getSelectedCommandId();
+          if (cmdId) _applyHashCommand(cmdId);
+          else { _isHashMode = false; window.QuickCommandPalette.hide(); }
+          return;
+        } else if (e.keyCode === monaco.KeyCode.Space) {
+          // Close palette, suppress the space character
+          e.preventDefault();
+          e.stopPropagation();
+          _isHashMode = false;
+          window.QuickCommandPalette.hide();
+          return;
+        } else if (e.keyCode === monaco.KeyCode.DownArrow) {
+          e.preventDefault();
+          e.stopPropagation();
+          window.QuickCommandPalette.navigate('down');
+          return;
+        } else if (e.keyCode === monaco.KeyCode.UpArrow) {
+          e.preventDefault();
+          e.stopPropagation();
+          window.QuickCommandPalette.navigate('up');
+          return;
+        } else if (e.keyCode === monaco.KeyCode.Escape) {
+          e.preventDefault();
+          e.stopPropagation();
+          _isHashMode = false;
+          window.QuickCommandPalette.hide();
+          return;
+        }
+      }
+
       if (_isSlashMode && window.QuickCommandPalette) {
         if (e.keyCode === monaco.KeyCode.Enter || e.keyCode === monaco.KeyCode.Space) {
           const query = _getCurrentSlashQuery();
           const cmdId = window.QuickCommandPalette.getSelectedCommandId();
-          
+
           if (e.keyCode === monaco.KeyCode.Space) {
             if (query.length > 0 && cmdId) {
               e.preventDefault();
@@ -171,7 +238,7 @@ const EditorModule = (() => {
           return;
         }
       }
-      
+
       // Trigger on plain '/' key (immediate)
       if (e.keyCode === monaco.KeyCode.Slash && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
         // We let the character be typed (no preventDefault)
@@ -184,7 +251,7 @@ const EditorModule = (() => {
           const model = MonacoService.getInstance().getModel();
           const pos = MonacoService.getCursorPosition();
           const offset = model.getOffsetAt(pos);
-          
+
           const res = MarkdownLogicService.computeSmartEnter(MonacoService.getValue(), offset, offset);
           if (res) {
             e.preventDefault();
@@ -290,7 +357,7 @@ const EditorModule = (() => {
     });
 
     _cursorListener = MonacoService.onCursorChange(() => {
-      if (_isSlashMode) _handleContentChange();
+      if (_isSlashMode || _isHashMode) _handleContentChange();
     });
 
     // Listen to keydown
@@ -313,12 +380,12 @@ const EditorModule = (() => {
    */
   function _applySlashCommand(cmdId) {
     if (!MonacoService.isInitialized()) return;
-    
+
     const pos = MonacoService.getCursorPosition();
 
     // Calculate the range to remove: from _slashStartPos (column on current line) to current column
     const range = new monaco.Range(pos.lineNumber, _slashStartPos + 1, pos.lineNumber, pos.column);
-    
+
     MonacoService.executeEdit(range, '');
     _isSlashMode = false;
     window.QuickCommandPalette.hide();
@@ -326,15 +393,39 @@ const EditorModule = (() => {
   }
 
   /**
+   * Replaces the text after # with the selected mockup type.
+   */
+  function _applyHashCommand(typeId) {
+    if (!MonacoService.isInitialized()) return;
+    const pos = MonacoService.getCursorPosition();
+    // Keep the # character, replace only text after it up to cursor
+    const range = new monaco.Range(pos.lineNumber, _hashStartPos + 2, pos.lineNumber, pos.column);
+    MonacoService.executeEdit(range, typeId);
+    _isHashMode = false;
+    window.QuickCommandPalette.hide();
+  }
+
+  /**
+   * Shows the QuickCommandPalette populated with mockup hash types.
+   */
+  function _showHashPalette() {
+    if (!window.QuickCommandPalette || !MonacoService.isInitialized()) return;
+    const coords = MonacoService.getCursorPixelPosition();
+    window.QuickCommandPalette.show(coords.left, coords.top + 20, (typeId) => {
+      _applyHashCommand(typeId);
+    }, { commands: MOCKUP_HASH_COMMANDS, hideInput: true });
+  }
+
+  /**
    * Shows the QuickCommandPalette at the current cursor position.
-   * @param {boolean} isSlashTrigger 
+   * @param {boolean} isSlashTrigger
    * @param {boolean} hideInput
    */
   function _showQuickCommand(isSlashTrigger = false, hideInput = false) {
     if (!window.QuickCommandPalette || !MonacoService.isInitialized()) return;
 
     const coords = MonacoService.getCursorPixelPosition();
-    
+
     window.QuickCommandPalette.show(coords.left, coords.top + 20, (actionId) => {
       if (isSlashTrigger) {
         _applySlashCommand(actionId);
@@ -361,6 +452,7 @@ const EditorModule = (() => {
       _keyListener = null;
     }
     _isSlashMode = false;
+    _isHashMode = false;
     _boundFileId = null;
     if (typeof MonacoHoverService !== 'undefined') MonacoHoverService.deactivate();
   }
@@ -380,29 +472,29 @@ const EditorModule = (() => {
     }
 
     if (targetFile && targetFile.startsWith('__DRAFT_')) {
-        if (typeof DraftModule !== 'undefined') {
-            DraftModule.setDraftContent(content, targetFile);
-            await DraftModule.renderPreview(content, targetFile);
-            _originalContent = content;
-            if (AppState.updateLastEdit) AppState.updateLastEdit(targetFile);
-            if (!silent && typeof showToast === 'function') showToast('Draft updated');
-            return true;
-        }
-        return false;
+      if (typeof DraftModule !== 'undefined') {
+        DraftModule.setDraftContent(content, targetFile);
+        await DraftModule.renderPreview(content, targetFile);
+        _originalContent = content;
+        if (AppState.updateLastEdit) AppState.updateLastEdit(targetFile);
+        if (!silent && typeof showToast === 'function') showToast('Draft updated');
+        return true;
+      }
+      return false;
     }
 
     if (typeof FileService === 'undefined' || !FileService.saveFile) return false;
     const success = await FileService.saveFile(targetFile, content);
-    
+
     if (success) {
       if (!silent && typeof showToast === 'function') showToast('File saved successfully');
-      _originalContent = content; 
+      _originalContent = content;
       if (AppState.updateLastEdit) AppState.updateLastEdit(targetFile);
-      
+
       if (typeof TabsModule !== 'undefined' && targetFile) {
         TabsModule.setDirty(targetFile, false);
       }
-      
+
       // Return to read mode if requested
       if (returnToRead) {
         if (window.AppState && AppState.updateToolbarUI) {
@@ -457,7 +549,7 @@ const EditorModule = (() => {
       }, 10);
       return;
     }
-    
+
     // 2. Use the dedicated action service for formatting
     if (typeof MonacoActionService !== 'undefined') {
       MonacoActionService.applyAction(MonacoService, action);
@@ -469,7 +561,7 @@ const EditorModule = (() => {
 
   function focusWithContext(context = {}) {
     if (!MonacoService.isInitialized()) return;
-    
+
     MonacoService.focus();
 
     // Use the dedicated sync service for cursor & scroll synchronization
@@ -507,42 +599,42 @@ const EditorModule = (() => {
     MonacoService.focus();
   }
 
-  return { 
-      bind, unbind, save, isDirty, setOriginalContent, undo, redo, 
-      applyAction,
-      setDirty: (isDirty) => {
-        if (isDirty) {
-          _originalContent = _originalContent + ' '; // Force dirty
-        } else {
-          if (MonacoService.isInitialized()) {
-            _originalContent = MonacoService.getValue();
-          }
-        }
-      },
-      focusWithContext,
-      getOriginalContent: () => _originalContent,
-      insertContent,
-      triggerQuickCommand: () => _showQuickCommand(),
-      takeSnapshot: () => {}, // No-op now
-      revert,
-      revealLine: (line) => {
+  return {
+    bind, unbind, save, isDirty, setOriginalContent, undo, redo,
+    applyAction,
+    setDirty: (isDirty) => {
+      if (isDirty) {
+        _originalContent = _originalContent + ' '; // Force dirty
+      } else {
         if (MonacoService.isInitialized()) {
-          MonacoService.revealLine(line);
-          // Highlight and select the line
-          const editor = MonacoService.getInstance();
-          const model = editor.getModel();
-          if (model) {
-            const lineLength = model.getLineMaxColumn(line);
-            MonacoService.setSelection({
-              startLineNumber: line,
-              startColumn: 1,
-              endLineNumber: line,
-              endColumn: lineLength
-            });
-          }
-          MonacoService.focus();
+          _originalContent = MonacoService.getValue();
         }
       }
+    },
+    focusWithContext,
+    getOriginalContent: () => _originalContent,
+    insertContent,
+    triggerQuickCommand: () => _showQuickCommand(),
+    takeSnapshot: () => { }, // No-op now
+    revert,
+    revealLine: (line) => {
+      if (MonacoService.isInitialized()) {
+        MonacoService.revealLine(line);
+        // Highlight and select the line
+        const editor = MonacoService.getInstance();
+        const model = editor.getModel();
+        if (model) {
+          const lineLength = model.getLineMaxColumn(line);
+          MonacoService.setSelection({
+            startLineNumber: line,
+            startColumn: 1,
+            endLineNumber: line,
+            endColumn: lineLength
+          });
+        }
+        MonacoService.focus();
+      }
+    }
   };
 })();
 

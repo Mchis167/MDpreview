@@ -72,6 +72,8 @@ const ScrollModule = (() => {
       }, 150));
       el._scrollListenerAttached = true;
     }
+
+    _enableSmoothWheel(el);
   }
 
   /**
@@ -160,6 +162,63 @@ const ScrollModule = (() => {
     } else {
       if (container) container.scrollTop = 0;
     }
+  }
+
+  /**
+   * Enables smooth wheel physics for the preview viewport.
+   * Intercepts con lăn chuột ticks, but delegates natural smooth trackpad swipes.
+   */
+  function _enableSmoothWheel(el) {
+    if (!el || !el.classList.contains('md-viewer-viewport')) return;
+    if (el._smoothWheelAttached) return;
+
+    let targetScrollTop = el.scrollTop;
+    let isAnimating = false;
+    const friction = 0.08;
+
+    el.addEventListener('wheel', (e) => {
+      // 💡 Only intercept con lăn chuột vật lý (integer deltaY)
+      // Keep trackpad natural swipes (fractional deltaY) untouched
+      if (Math.abs(e.deltaY) % 1 !== 0) {
+        targetScrollTop = el.scrollTop;
+        return;
+      }
+
+      e.preventDefault();
+
+      // Temporarily suppress scroll sync during active inertia phase to avoid jank
+      window._suppressScrollSync = true;
+
+      targetScrollTop += e.deltaY;
+      targetScrollTop = Math.max(0, Math.min(targetScrollTop, el.scrollHeight - el.clientHeight));
+
+      if (!isAnimating) {
+        _animate();
+      }
+    }, { passive: false });
+
+    function _animate() {
+      if (!el) {
+        isAnimating = false;
+        window._suppressScrollSync = false;
+        return;
+      }
+      isAnimating = true;
+      const current = el.scrollTop;
+      const diff = targetScrollTop - current;
+
+      if (Math.abs(diff) < 0.5) {
+        el.scrollTop = targetScrollTop;
+        isAnimating = false;
+        window._suppressScrollSync = false;
+        return;
+      }
+
+      el.scrollTop = current + diff * friction;
+      requestAnimationFrame(_animate);
+    }
+
+    el._smoothWheelAttached = true;
   }
 
   function _persist() {

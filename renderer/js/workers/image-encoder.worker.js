@@ -43,13 +43,12 @@ async function _decodeRaw(buffer, mime, wasmUrls) {
 self.onmessage = async (event) => {
   const { id, type, imageData: inputImageData, rawInput, rawBuffer, rawMime, options, wasmUrls } = event.data;
 
-  // Decode raw blob to ImageData if needed (no-resize path)
-  let imageData = inputImageData;
-  if (rawInput && rawBuffer) {
-    imageData = await _decodeRaw(rawBuffer, rawMime, wasmUrls);
-  }
-
   try {
+    // Decode raw blob to ImageData if needed (no-resize path)
+    let imageData = inputImageData;
+    if (rawInput && rawBuffer) {
+      imageData = await _decodeRaw(rawBuffer, rawMime, wasmUrls);
+    }
     let resultBuffer;
     let mimeType;
 

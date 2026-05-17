@@ -2,19 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] — 2026-05-17
+## [Unreleased] — 2026-05-18
 
 ### 🚀 Added
+- **Image Mockup Wrapping** (`#browser`, `#phone`): Wrap ảnh Markdown trong UI frame trình duyệt hoặc điện thoại bằng hash fragment syntax — `![alt](img.png#browser)` / `![alt](img.png#phone)`. Client-side post-processing, không cần thay đổi server-side renderer.
+- **Scroll Modifier cho Mockup** (`#browser:scroll`, `#phone:scroll`): Frame chuyển sang chế độ cuộn với `aspect-ratio` cố định (browser: 16/10, phone: 393/852 — iPhone 16). Drag-to-scroll bên trong frame; click không di chuyển → zoom ảnh.
+- **Hash Palette Trigger trong Monaco**: Gõ `#` trong `![...](path#` → palette gợi ý `#browser`, `#phone`. Palette không có input box — user tiếp tục gõ trong Monaco, palette filter realtime.
+- **Monaco IntelliSense cho `:` modifier**: Gõ `:` sau `#browser` / `#phone` → gợi ý `scroll`. One-time registration trong `init()`, không stack khi remount.
+- **Carousel Block** (`:::carousel ... :::`): Fenced block syntax cho slideshow. Mỗi dòng `![alt](src)` = một slide. Arrow trái/phải, keyboard `←/→`, tap-to-zoom. Tích hợp với mockup hash.
+- **Carousel — Mockup-aware Peek Layout**: Slide active ở center, peek slides lộ 2 bên với gradient fade mask. Phone: `max-content` width, mask động; Browser/default: `80%` width, mask 10%. ResizeObserver tự recalc khi container resize.
+- **Context Menu "Wrap in carousel"**: Bôi đen ≥1 `![alt](src)` → context menu hiện action "Wrap in carousel" đầu tiên. Expand selection về full lines trước khi wrap.
+- **Quick Command Palette `/carousel`**: Slash command `/carousel` → wrap selection hoặc insert template `:::carousel\n![Image 1]()\n![Image 2]()\n:::`.
+- **Publish Pipeline — Mockup + Carousel trên Published Site**: Bundle `mockup-frames.css`, `carousel.css`, `design-system.js`, `design-system-icons.js`, `mockup-images.js`, `carousel.js` vào Cloudflare Worker public assets. Init `MockupImageModule` + `CarouselModule` trong `shell.js` inline script.
 - **Drag Asset vào Monaco Editor**: Kéo thả ảnh trực tiếp từ Asset Panel (Card & List view) vào Editor để chèn markdown image reference `![name](/assets/name)`.
 - **Smart Newline Detection**: Tự động xuống dòng khi drop asset vào vị trí đã có nội dung — kiểm tra text trước drop position thay vì dùng regex (an toàn với unicode, không backtrack).
 - **Visual Drop Feedback**: Editor hiển thị accent border và background khi đang kéo asset qua vùng soạn thảo (`#monaco-editor-container.is-drop-target`).
 - **Monaco Image Context Menu — Zoom Action**: Thêm hành động `"Zoom image"` vào context menu (chuột phải) khi click lên thẻ ảnh Markdown hoặc HTML trong Monaco editor. Sử dụng [ZoomSystem](file:///Users/mchisdo/MDpreview/renderer/js/utils/zoom.js) để mang lại trải nghiệm phóng to, thu nhỏ, pan và pinch mượt mà.
 
 ### 🔧 Changed
+- **Project Map Mirror — High-Fidelity Sync**: `MockupImageModule` và `CarouselModule` được thêm vào post-processing pipeline của Project Map mirror và Tab Preview. Mirror hiện render đúng mockup frames và carousel, đồng bộ height với live preview.
 - **AttachmentService — Asset Path Fix**: Đường dẫn asset được chèn đổi từ `assets/name` thành `/assets/encodeURIComponent(name)` — fix missing leading slash và đảm bảo tên file đặc biệt được encode đúng.
 - **AttachmentService — Smart Insert**: Thêm `_insertLinkAtPositionSmart()` chuyên dùng cho drag-drop path; giữ nguyên `_insertLinkAtPosition()` cho các caller cũ (paste, pick dialog).
 
 ### 🐞 Fixed
+- **Publish Pipeline — Hash Fragment bị mất**: Asset URL replacement trong `worker-publish-adapter.js` strip mất `#phone`/`#browser` khi thay thế CDN URL → `MockupImageModule` không nhận ra type → không wrap. Fix: extract và re-append hash sau CDN URL.
+- **Publish Pipeline — PNG Decoder Crash**: `image-encoder.worker.js` throw uncaught error khi nhận PNG qua `rawInput` path (không có PNG decoder trong `_decodeRaw`). Fix: PNG dùng `pngBuffer` path trực tiếp cho oxipng; `_decodeRaw` được move vào `try` block.
+- **Publish Page — Script Load Order**: `design-system-icons.js` fail với `DesignSystem is not defined` khi load trước `design-system.js`. Fix: thêm `design-system.js` vào sync list và shell, đặt trước icons script.
+- **Project Map — Mockup Frame Height Desync**: Mirror không gọi `MockupImageModule.process()` → `<img>` trần, height sai → scroll indicator lệch. Fix: thêm vào post-processing RAF block (MockupImage → Carousel → CodeBlock). ResizeObserver hiện có sẵn tự recalc khi `img.onload` async fires.
+- **Stale Publish Cache → 404**: `publish-cache.json` cached `r2Url` trỏ tới R2 objects không còn tồn tại sau khi reset. Workaround: xóa `{workspace}/.mdpreview/publish-cache.json` → publish lại.
 - **Overlay Drawer Blockade khi Drag**: Asset Panel overlay không còn che phủ vùng editor trong lúc kéo (`visibility: hidden` thay vì chỉ `pointer-events: none`).
 - **Monaco Capture-Phase Interception**: Phát hiện và xử lý đúng luồng event — Monaco Service dùng `capture=true` + `stopPropagation()`, toàn bộ drag-drop phải đi qua `AttachmentService.handleDrop()`, không thể intercept từ container ngoài.
 - **Monaco Image Hover Preview**: Rewrite toàn bộ để fix 5 bugs core (null-check `getScrolledVisiblePosition()`, wrong `target.type` enum value, URL encode slashes, listener leaks). Thêm real-time position tracking (preview follows cursor), overlay detection (hide khi menu/modal mở), mouseleave dismiss. UI cleanup: bỏ header/footer text, giữ glass frame. Lint 0 errors.

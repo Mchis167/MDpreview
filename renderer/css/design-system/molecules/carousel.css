@@ -1,0 +1,83 @@
+/* ============================================================
+   carousel.css — Carousel Block Styles
+   Used by: CarouselModule (renderer/js/utils/carousel.js)
+   ============================================================ */
+
+.md-carousel {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+  margin: var(--ds-space-xl) 0;
+  outline: none;
+  --md-carousel-gap: var(--ds-space-2xl);
+}
+
+.md-carousel-clip {
+  overflow: hidden;
+  width: 100%;
+}
+
+.md-carousel-track {
+  display: flex;
+  gap: var(--md-carousel-gap);
+  transition: transform 0.3s ease;
+  align-items: flex-start;
+}
+
+.md-carousel-slide {
+  flex-shrink: 0;
+  width: 100%;
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+
+.md-carousel-slide.is-active {
+  opacity: 1;
+}
+
+.md-carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: var(--ds-z-index-elevated);
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--ds-radius-full);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+
+  background: var(--ds-layer-surface-default);
+  color: var(--ds-text-secondary);
+  backdrop-filter: var(--ds-blur-md);
+  -webkit-backdrop-filter: var(--ds-blur-md);
+}
+
+.md-carousel-btn:hover {
+  background: var(--ds-layer-surface-hover);
+  color: var(--ds-text-primary);
+}
+
+.md-carousel:hover .md-carousel-btn,
+.md-carousel:focus-within .md-carousel-btn {
+  opacity: 1;
+}
+
+.md-carousel-btn.is-prev {
+  left: var(--ds-space-sm);
+}
+
+.md-carousel-btn.is-next {
+  right: var(--ds-space-sm);
+}
+
+.md-carousel-btn[disabled] {
+  opacity: 0 !important;
+  pointer-events: none;
+}

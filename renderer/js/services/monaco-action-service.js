@@ -271,6 +271,12 @@ const MonacoActionService = (() => {
         break;
       }
       case 'hr': monacoService.executeEdit(selection, '\n---\n'); break;
+      case 'carousel': {
+        const selectedText = model.getValueInRange(selection);
+        const inner = selectedText.trim() || '![Image 1]()\n![Image 2]()';
+        monacoService.executeEdit(selection, `:::carousel\n${inner}\n:::`);
+        break;
+      }
       case 'cb': {
         const selectedText = model.getValueInRange(selection);
         const content = selectedText || 'code block';

@@ -112,7 +112,6 @@ const WorkerPublishAdapter = (() => {
               cachedCount++;
               savedBytes += cached.originalSize || 0;
               assetMapping[originalSrc] = cached.r2Url;
-              _log('debug', `Cache hit: ${originalSrc} → ${cached.r2Url}`);
               if (window.showToast) {
                 window.showToast(`Processing assets (${uploadedCount + cachedCount}/${totalAssets})...`, 'info', { id: 'publish' });
               }
@@ -231,7 +230,11 @@ const WorkerPublishAdapter = (() => {
       for (const img of imgs) {
         const src = img.getAttribute('src');
         if (assetMapping[src]) {
-          img.setAttribute('src', assetMapping[src]);
+          // Re-append hash fragment (e.g. #phone, #browser) so MockupImageModule
+          // can read the mockup type on the published page.
+          const hashIdx = src.indexOf('#');
+          const hash = hashIdx !== -1 ? src.slice(hashIdx) : '';
+          img.setAttribute('src', assetMapping[src] + hash);
         }
       }
 

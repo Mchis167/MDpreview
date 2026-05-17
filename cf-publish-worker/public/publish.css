@@ -1,14 +1,17 @@
 /* AUTO-GENERATED — DO NOT EDIT MANUALLY
  * Sources:
  *   renderer/css/design-system/tokens.css
+ *   renderer/css/design-system/atoms/icon-action-button.css
  *   renderer/css/design-system/organisms/tab-bar.css
  *   renderer/css/design-system/organisms/zoom-modal.css
  *   renderer/css/shared/toc-core.css
  *   cf-publish-worker/src/toc-publish.css
  *   renderer/css/shared/markdown-render.css
  *   cf-publish-worker/src/publish-styles.css
+ *   renderer/css/design-system/molecules/mockup-frames.css
+ *   renderer/css/design-system/molecules/carousel.css
  * Regenerate: npm run build:publish-assets
- * Generated:  2026-05-16T23:44:15.093Z
+ * Generated:  2026-05-17T21:33:45.145Z
  */
 
 /* ============================================================
@@ -338,6 +341,72 @@
   --ds-transition-smooth: var(--ds-transition-main);
 }
 
+/* ============================================================
+   design-system/atoms/icon-action-button.css
+   Uses --_ local variables so variants override props, not rules.
+   ============================================================ */
+
+.ds-icon-action-btn {
+  /* ── Local Variables ── */
+  --_size: 24px;
+  --_radius: var(--ds-radius-widget);
+  --_bg: transparent;
+  --_color: var(--ds-text-tertiary);
+  --_bg-hover: var(--ds-layer-subtle-hover);
+  --_color-hover: var(--ds-text-secondary);
+
+  width: var(--_size);
+  height: var(--_size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--_radius);
+  background: var(--_bg);
+  color: var(--_color);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: all var(--ds-transition-fast);
+}
+
+.ds-icon-action-btn:hover {
+  background: var(--_bg-hover);
+  color: var(--_color-hover);
+}
+
+.ds-icon-action-btn svg {
+  width: 16px !important;
+  height: 16px !important;
+  stroke-width: 2.2px;
+}
+
+/* ── Variants (only override changed props) ─────────────── */
+.ds-icon-action-btn.is-danger {
+  --_bg-hover: var(--ds-layer-danger-hover);
+  --_color-hover: var(--ds-accent-red);
+}
+
+.ds-icon-action-btn.is-primary {
+  --_bg: var(--ds-layer-accent-default);
+  --_color: var(--ds-text-on-accent);
+  --_bg-hover: var(--ds-layer-accent-hover);
+  --_color-hover: var(--ds-text-on-accent);
+}
+
+.ds-icon-action-btn.is-primary:hover {
+  transform: scale(1.1);
+}
+
+.ds-icon-action-btn.is-large {
+  --_size: 32px;
+  --_radius: var(--ds-radius-widget);
+}
+
+.ds-icon-action-btn.is-large svg {
+  width: 18px !important;
+  height: 18px !important;
+}
 /* ══════════════════════════════════════════════════
    tab-bar.css — Organism
    ══════════════════════════════════════════════════ */
@@ -1389,6 +1458,35 @@
     box-sizing: border-box;
 }
 
+/* ── Custom Scrollbar (Premium Ultra-Thin with Padding Trick) ── */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--ds-white-a10);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--ds-white-a20);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+/* Firefox standard scrollbars */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--ds-white-a10) transparent;
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -1568,6 +1666,232 @@ body.no-scroll {
 .ds-publish-loading-text strong {
     color: var(--ds-accent);
     font-weight: 600;
+}
+/* ============================================================
+   mockup-frames.css — Browser & Phone Mockup Frame Styles
+   Used by: MockupImageModule (renderer/js/utils/mockup-images.js)
+   ============================================================ */
+
+/* ── Browser Frame ── */
+
+.mockup-browser-frame {
+  display: block;
+  width: 100%;
+  border-radius: var(--ds-radius-shell);
+  overflow: hidden;
+  box-shadow: var(--ds-shadow-lg);
+  border: 1px solid var(--ds-white-a10);
+  margin: var(--ds-space-xl) 0;
+  background: var(--ds-bg-surface);
+}
+
+.mockup-browser-chrome {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-xs);
+  padding: 0 var(--ds-space-md);
+  height: 36px;
+  background: var(--ds-bg-surface);
+  border-bottom: 1px solid var(--ds-white-a10);
+  flex-shrink: 0;
+}
+
+.mockup-browser-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-white-a20);
+  flex-shrink: 0;
+}
+
+.mockup-browser-dot:nth-child(1) {
+  background: #ff5f57;
+}
+
+.mockup-browser-dot:nth-child(2) {
+  background: #febc2e;
+}
+
+.mockup-browser-dot:nth-child(3) {
+  background: #28c840;
+}
+
+.mockup-browser-addressbar {
+  flex: 1;
+  height: 20px;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-white-a05);
+  margin-left: var(--ds-space-sm);
+}
+
+.mockup-browser-content {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.mockup-browser-content.is-scrollable {
+  aspect-ratio: 16 / 10;
+  overflow-y: auto;
+  overflow-x: hidden;
+  cursor: grab;
+}
+
+.mockup-browser-content.is-scrollable.is-dragging {
+  cursor: grabbing;
+}
+
+.mockup-browser-content img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0;
+  margin: 0;
+}
+
+/* ── Phone Frame ── */
+
+.mockup-phone-frame {
+  display: block;
+  width: 100%;
+  max-width: 390px;
+  margin: var(--ds-space-xl) auto;
+}
+
+.mockup-phone-device {
+  padding: var(--ds-space-sm);
+  position: relative;
+  width: 100%;
+  border-radius: 48px;
+  border: 2px solid var(--ds-border-strong);
+  box-shadow:
+    0 0 0 1px var(--ds-white-a10),
+    0 24px 64px var(--ds-black-a50);
+  background: var(--ds-surface-card);
+  overflow: hidden;
+}
+
+.mockup-phone-notch {
+  position: absolute;
+  top: var(--ds-space-lg);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 32px;
+  background: var(--ds-bg-base);
+  border-radius: var(--ds-radius-full);
+  z-index: 2;
+}
+
+.mockup-phone-content {
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.mockup-phone-content.is-scrollable {
+  aspect-ratio: 393 / 852;
+  overflow-y: auto;
+  overflow-x: hidden;
+  cursor: grab;
+  scrollbar-width: none;
+  border-radius: calc(48px - var(--ds-space-sm));
+}
+
+.mockup-phone-content.is-scrollable.is-dragging {
+  cursor: grabbing;
+}
+
+.mockup-phone-content img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0;
+  margin: 0;
+}
+/* ============================================================
+   carousel.css — Carousel Block Styles
+   Used by: CarouselModule (renderer/js/utils/carousel.js)
+   ============================================================ */
+
+.md-carousel {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+  margin: var(--ds-space-xl) 0;
+  outline: none;
+  --md-carousel-gap: var(--ds-space-2xl);
+}
+
+.md-carousel-clip {
+  overflow: hidden;
+  width: 100%;
+}
+
+.md-carousel-track {
+  display: flex;
+  gap: var(--md-carousel-gap);
+  transition: transform 0.3s ease;
+  align-items: flex-start;
+}
+
+.md-carousel-slide {
+  flex-shrink: 0;
+  width: 100%;
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+
+.md-carousel-slide.is-active {
+  opacity: 1;
+}
+
+.md-carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: var(--ds-z-index-elevated);
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--ds-radius-full);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+
+  background: var(--ds-layer-surface-default);
+  color: var(--ds-text-secondary);
+  backdrop-filter: var(--ds-blur-md);
+  -webkit-backdrop-filter: var(--ds-blur-md);
+}
+
+.md-carousel-btn:hover {
+  background: var(--ds-layer-surface-hover);
+  color: var(--ds-text-primary);
+}
+
+.md-carousel:hover .md-carousel-btn,
+.md-carousel:focus-within .md-carousel-btn {
+  opacity: 1;
+}
+
+.md-carousel-btn.is-prev {
+  left: var(--ds-space-sm);
+}
+
+.md-carousel-btn.is-next {
+  right: var(--ds-space-sm);
+}
+
+.md-carousel-btn[disabled] {
+  opacity: 0 !important;
+  pointer-events: none;
 }
 /* toc-core.css — Shared TOC item styles
    Used by: web app (toc-panel.css) + publish (toc-publish.css) */
