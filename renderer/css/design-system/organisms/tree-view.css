@@ -235,4 +235,20 @@
   font-family: inherit;
   margin-left: 2px;
   box-shadow: 0 0 0 4px rgba(var(--ds-accent-rgb), 0.1);
+  transition: border-color var(--ds-transition-fast), box-shadow var(--ds-transition-fast);
+}
+
+.inline-rename-input.is-invalid {
+  border-color: var(--ds-accent-red);
+  box-shadow: 0 0 0 4px var(--ds-red-a15);
+}
+
+.inline-rename-input.shake {
+  animation: ds-shake 0.3s var(--ds-ease-out);
+}
+
+@keyframes ds-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
 }

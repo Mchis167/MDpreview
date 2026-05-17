@@ -67,6 +67,13 @@ class ContextMenuComponent {
         itemEl.appendChild(shortcutWrap);
       }
 
+      // Active indicator (check icon at trailing end)
+      if (item.active) {
+        const activeWrap = DesignSystem.createElement('div', 'ctx-active-check');
+        activeWrap.innerHTML = DesignSystem.getIcon('check');
+        itemEl.appendChild(activeWrap);
+      }
+
       // Click Event
       itemEl.onclick = (e) => {
         e.stopPropagation();

@@ -96,6 +96,16 @@ const ShortcutService = (() => {
             continue;
           }
 
+          // Guard: If shortcut requires editor but we are not in edit mode, skip
+          if (item.requireEditor && (!window.AppState || window.AppState.currentMode !== 'edit')) {
+            continue;
+          }
+
+          // Guard: If shortcut requires non-editor but we are in edit mode, skip
+          if (item.requireNonEditor && (window.AppState && window.AppState.currentMode === 'edit')) {
+            continue;
+          }
+
           // Check if this shortcut is allowed in inputs
           if (inInput && !item.allowInInput) {
             // If no modifier is pressed, it's normal typing (or standard navigation keys), we skip

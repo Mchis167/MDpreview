@@ -63,12 +63,51 @@ class TreeViewComponent {
         const fragment = document.createDocumentFragment();
         let globalIdx = 0;
 
+        const checkDuplicate = (node, newName) => {
+            if (!newName) return false;
+            
+            // Normalize name
+            let checkName = newName.trim();
+            if (node.type === 'file' && !checkName.toLowerCase().endsWith('.md')) {
+                checkName += '.md';
+            }
+            
+            if (checkName.toLowerCase() === node.name.toLowerCase()) return false;
+            
+            const oldPath = node.path;
+            const lastSlashIdx = oldPath.lastIndexOf('/');
+            const dirPrefix = lastSlashIdx !== -1 ? oldPath.substring(0, lastSlashIdx + 1) : '';
+            
+            const getSiblings = (nodes) => {
+                if (lastSlashIdx === -1) {
+                    return nodes;
+                }
+                
+                const parentPath = dirPrefix.slice(0, -1);
+                const findParent = (list) => {
+                    for (const n of list) {
+                        if (n.path === parentPath) return n.children || [];
+                        if (n.children) {
+                            const found = findParent(n.children);
+                            if (found) return found;
+                        }
+                    }
+                    return null;
+                };
+                return findParent(nodes) || [];
+            };
+            
+            const siblings = getSiblings(this.state.treeData);
+            return siblings.some(s => s.path !== oldPath && s.name.toLowerCase() === checkName.toLowerCase());
+        };
+
         const renderNodes = (nodes, parentEl) => {
             nodes.forEach(node => {
                 const itemComp = new TreeItemComponent(node, this.options, {
                     selectedPaths: this.state.selectedPaths,
                     currentFile: this.state.activePath,
-                    renamingPath: this.state.renamingPath
+                    renamingPath: this.state.renamingPath,
+                    checkDuplicate: (newName, targetNode) => checkDuplicate(targetNode || node, newName)
                 });
                 const el = itemComp.render(globalIdx++);
                 parentEl.appendChild(el);

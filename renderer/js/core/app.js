@@ -810,6 +810,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       'global-shortcuts-search': () => {
         window.SearchPalette?.show('shortcut');
       },
+      'global-shortcuts-search-fallback': () => {
+        window.SearchPalette?.show('shortcut');
+      },
       'open-settings': () => window.SettingsComponent?.toggle(),
       'close-cancel': () => {
         // Close Search

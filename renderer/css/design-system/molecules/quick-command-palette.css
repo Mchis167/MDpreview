@@ -145,6 +145,23 @@
   font-weight: 500;
 }
 
+.ds-quick-command-palette .palette-group-divider {
+  height: 1px;
+  background: var(--ds-border-subtle);
+  margin: var(--ds-space-2xs) var(--ds-space-md);
+}
+
+.ds-quick-command-palette .palette-group-header {
+  padding: var(--ds-space-xs) var(--ds-space-md);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ds-text-tertiary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  user-select: none;
+  margin-top: var(--ds-space-xs);
+}
+
 .ds-quick-command-palette .palette-empty {
   padding: var(--ds-space-md) var(--ds-space-md);
   text-align: center;

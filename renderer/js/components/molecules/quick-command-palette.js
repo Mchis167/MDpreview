@@ -20,39 +20,39 @@ const QuickCommandPalette = (() => {
 
   const COMMANDS = [
     // ── Headings ──
-    { id: 'h1', label: 'Heading 1', icon: 'heading-1', hint: '/h1', tags: ['tieude1', 'h1'] },
-    { id: 'h2', label: 'Heading 2', icon: 'heading-2', hint: '/h2', tags: ['tieude2', 'h2'] },
-    { id: 'h3', label: 'Heading 3', icon: 'heading-3', hint: '/h3', tags: ['tieude3', 'h3'] },
-    { id: 'h4', label: 'Heading 4', icon: 'heading-4', hint: '/h4', tags: ['tieude4', 'h4'] },
-    { id: 'h5', label: 'Heading 5', icon: 'heading-5', hint: '/h5', tags: ['tieude5', 'h5'] },
-    { id: 'h6', label: 'Heading 6', icon: 'heading-6', hint: '/h6', tags: ['tieude6', 'h6'] },
+    { id: 'h1', label: 'Heading 1', icon: 'heading-1', hint: '/h1', tags: ['tieude1', 'h1'], category: 'text' },
+    { id: 'h2', label: 'Heading 2', icon: 'heading-2', hint: '/h2', tags: ['tieude2', 'h2'], category: 'text' },
+    { id: 'h3', label: 'Heading 3', icon: 'heading-3', hint: '/h3', tags: ['tieude3', 'h3'], category: 'text' },
+    { id: 'h4', label: 'Heading 4', icon: 'heading-4', hint: '/h4', tags: ['tieude4', 'h4'], category: 'text' },
+    { id: 'h5', label: 'Heading 5', icon: 'heading-5', hint: '/h5', tags: ['tieude5', 'h5'], category: 'text' },
+    { id: 'h6', label: 'Heading 6', icon: 'heading-6', hint: '/h6', tags: ['tieude6', 'h6'], category: 'text' },
 
     // ── Typography ──
-    { id: 'b', label: 'Bold', icon: 'bold', hint: '/bold', tags: ['dam', 'indam'] },
-    { id: 'i', label: 'Italic', icon: 'italic', hint: '/italic', tags: ['nghieng', 'innghieng'] },
-    { id: 'bi', label: 'Bold Italic', icon: 'edit', hint: '/bi', tags: ['damnghieng'] },
-    { id: 's', label: 'Strikethrough', icon: 'strikethrough', hint: '/s', tags: ['gach', 'gachngang'] },
-    { id: 'c', label: 'Inline Code', icon: 'code', hint: '/code', tags: ['ma', 'inline'] },
+    { id: 'b', label: 'Bold', icon: 'bold', hint: '/bold', tags: ['dam', 'indam'], category: 'text' },
+    { id: 'i', label: 'Italic', icon: 'italic', hint: '/italic', tags: ['nghieng', 'innghieng'], category: 'text' },
+    { id: 'bi', label: 'Bold Italic', icon: 'edit', hint: '/bi', tags: ['damnghieng'], category: 'text' },
+    { id: 's', label: 'Strikethrough', icon: 'strikethrough', hint: '/s', tags: ['gach', 'gachngang'], category: 'text' },
+    { id: 'c', label: 'Inline Code', icon: 'code', hint: '/code', tags: ['ma', 'inline'], category: 'text' },
 
     // ── Blocks ──
-    { id: 'cb', label: 'Code Block', icon: 'terminal', hint: '/cb', tags: ['khoima', 'codeblock'] },
-    { id: 'q', label: 'Quote', icon: 'quote', hint: '/quote', tags: ['trichdan', 'blockquote'] },
-    { id: 'ul', label: 'Bullet List', icon: 'list', hint: '/ul', tags: ['danhsach', 'bullet'] },
-    { id: 'ol', label: 'Numbered List', icon: 'list-ordered', hint: '/ol', tags: ['danhsachso', 'numbered'] },
-    { id: 'tl', label: 'Task List', icon: 'check-square', hint: '/tl', tags: ['congviec', 'checkbox', 'todo'] },
-    { id: 'tl-checked', label: 'Task Done', icon: 'check-circle', hint: '/tldone', tags: ['xong', 'checked'] },
+    { id: 'cb', label: 'Code Block', icon: 'terminal', hint: '/cb', tags: ['khoima', 'codeblock'], category: 'block' },
+    { id: 'q', label: 'Quote', icon: 'quote', hint: '/quote', tags: ['trichdan', 'blockquote'], category: 'block' },
+    { id: 'ul', label: 'Bullet List', icon: 'list', hint: '/ul', tags: ['danhsach', 'bullet'], category: 'block' },
+    { id: 'ol', label: 'Numbered List', icon: 'list-ordered', hint: '/ol', tags: ['danhsachso', 'numbered'], category: 'block' },
+    { id: 'tl', label: 'Task List', icon: 'check-square', hint: '/tl', tags: ['congviec', 'checkbox', 'todo'], category: 'block' },
+    { id: 'tl-checked', label: 'Task Done', icon: 'check-circle', hint: '/tldone', tags: ['xong', 'checked'], category: 'block' },
 
     // ── Insert ──
-    { id: 'l', label: 'Link', icon: 'link', hint: '/link', tags: ['lienket'] },
-    { id: 'img', label: 'Image Link', icon: 'image', hint: '/img', tags: ['anh', 'hinh', 'image', 'img'] },
-    { id: 'img-asset', label: 'Pick from Assets', icon: 'images', hint: '/asset', tags: ['anh', 'hinh', 'vault', 'asset', 'image', 'img'] },
-    { id: 'img-upload', label: 'Upload Image', icon: 'upload', hint: '/upload', tags: ['anh', 'hinh', 'upload', 'image', 'img'] },
-    { id: 'tb', label: 'Table', icon: 'table', hint: '/table', tags: ['bang'] },
-    { id: 'carousel', label: 'Carousel', icon: 'layout-panel-left', hint: '/carousel', tags: ['carousel', 'slider', 'anh', 'gallery'] },
-    { id: 'hr', label: 'Divider', icon: 'minus', hint: '/hr', tags: ['phancach', 'duongke'] },
-    { id: 'fn', label: 'Footnote', icon: 'file-text', hint: '/fn', tags: ['chuthich'] },
-    { id: 'open-asset-panel', label: 'Open Asset Panel', icon: 'images', hint: '/panel', tags: ['asset', 'panel', 'management', 'quan ly', 'img', 'image'] },
-    { id: 'global-shortcuts-search', label: 'Search App Shortcuts', icon: 'square-chevron-right', hint: '/shortcuts', tags: ['help', 'phim tat'] }
+    { id: 'l', label: 'Link', icon: 'link', hint: '/link', tags: ['lienket'], category: 'insert' },
+    { id: 'img', label: 'Image Link', icon: 'image', hint: '/img', tags: ['anh', 'hinh', 'image', 'img'], category: 'insert' },
+    { id: 'img-asset', label: 'Pick from Assets', icon: 'images', hint: '/asset', tags: ['anh', 'hinh', 'vault', 'asset', 'image', 'img'], category: 'insert' },
+    { id: 'img-upload', label: 'Upload Image', icon: 'upload', hint: '/upload', tags: ['anh', 'hinh', 'upload', 'image', 'img'], category: 'insert' },
+    { id: 'tb', label: 'Table', icon: 'table', hint: '/table', tags: ['bang'], category: 'insert' },
+    { id: 'carousel', label: 'Carousel', icon: 'gallery-horizontal', hint: '/carousel', tags: ['carousel', 'slider', 'anh', 'gallery', 'img', 'image', 'hinhanh', 'slide', 'album'], category: 'insert' },
+    { id: 'hr', label: 'Divider', icon: 'minus', hint: '/hr', tags: ['phancach', 'duongke'], category: 'insert' },
+    { id: 'fn', label: 'Footnote', icon: 'file-text', hint: '/fn', tags: ['chuthich'], category: 'insert' },
+    { id: 'open-asset-panel', label: 'Open Asset Panel', icon: 'images', hint: '/panel', tags: ['asset', 'panel', 'management', 'quan ly', 'img', 'image'], category: 'utility' },
+    { id: 'global-shortcuts-search', label: 'Search App Shortcuts', icon: 'keyboard', hint: '/shortcuts', tags: ['help', 'phim tat'], category: 'utility' }
   ];
 
   function _init() {
@@ -141,13 +141,51 @@ const QuickCommandPalette = (() => {
     });
   }
 
+  function _detectCursorContext() {
+    if (!window.MonacoService || !window.MonacoService.isInitialized()) {
+      return 'default';
+    }
+    const editor = window.MonacoService.getInstance();
+    if (!editor) return 'default';
+
+    const selection = editor.getSelection();
+    if (selection && !selection.isEmpty()) {
+      return 'selection';
+    }
+
+    const pos = editor.getPosition();
+    if (!pos) return 'default';
+
+    const model = editor.getModel();
+    if (!model) return 'default';
+
+    const lineText = model.getLineContent(pos.lineNumber);
+    const beforeCursor = lineText.substring(0, pos.column - 1).trim();
+
+    if (beforeCursor === '' || beforeCursor === '/') {
+      return 'startOfLine';
+    }
+
+    return 'midSentence';
+  }
+
   function _renderResults(rebuild = true) {
     if (rebuild) {
       const query = _input.value.toLowerCase().trim().replace(/^\/+/, '');
 
       if (!query) {
-        _filteredCommands = [..._activeCommands];
+        // Find top 3 frequently used items
+        const frequent = [..._activeCommands]
+          .filter(cmd => _usageCounts[cmd.id] > 0)
+          .sort((a, b) => _usageCounts[b.id] - _usageCounts[a.id])
+          .slice(0, 3);
+
+        _filteredCommands = [
+          ...frequent.map(cmd => ({ ...cmd, isFrequent: true })),
+          ..._activeCommands
+        ];
       } else {
+        const context = _detectCursorContext();
         _filteredCommands = _activeCommands.map(cmd => {
           let score = 0;
           const label = cmd.label.toLowerCase();
@@ -176,9 +214,16 @@ const QuickCommandPalette = (() => {
             score += 5;
           }
 
-          // 6. Usage-based boost (Max 30 points)
+          // 6. Context-based boost
+          if (score > 0) {
+            if (context === 'selection' && cmd.category === 'text') score += 15;
+            else if (context === 'startOfLine' && cmd.category === 'block') score += 15;
+            else if (context === 'midSentence' && cmd.category === 'insert') score += 15;
+          }
+
+          // 7. Usage-based boost (Max 30 points)
           const usageCount = _usageCounts[cmd.id] || 0;
-          if (score > 0 || !query) {
+          if (score > 0) {
             score += Math.min(usageCount * 1.5, 30);
           }
 
@@ -204,7 +249,33 @@ const QuickCommandPalette = (() => {
       return;
     }
 
+    const query = _input.value.toLowerCase().trim().replace(/^\/+/, '');
+    let lastGroup = null;
+
     _filteredCommands.forEach((cmd, index) => {
+      // Interperse group headers only if query is empty
+      if (!query) {
+        const currentGroup = cmd.isFrequent ? 'frequent' : cmd.category;
+        if (currentGroup !== lastGroup) {
+          lastGroup = currentGroup;
+          const groupLabels = {
+            frequent: 'Frequently Used',
+            text: 'Text Formatting',
+            block: 'Blocks & Layout',
+            insert: 'Insert Content',
+            utility: 'Utilities'
+          };
+
+          if (_resultsContainer.children.length > 0) {
+            const dividerEl = DesignSystem.createElement('div', 'palette-group-divider');
+            _resultsContainer.appendChild(dividerEl);
+          }
+
+          const headerEl = DesignSystem.createElement('div', 'palette-group-header', { text: groupLabels[currentGroup] });
+          _resultsContainer.appendChild(headerEl);
+        }
+      }
+
       const item = DesignSystem.createElement('div', 'palette-item' + (index === _selectedIndex ? ' is-selected' : ''));
       item.innerHTML = `
         <div class="palette-item-icon">${DesignSystem.getIcon(cmd.icon)}</div>
@@ -219,7 +290,8 @@ const QuickCommandPalette = (() => {
     });
 
     if (_selectedIndex !== -1) {
-      const selected = _resultsContainer.children[_selectedIndex];
+      const itemElements = _resultsContainer.querySelectorAll('.palette-item');
+      const selected = itemElements[_selectedIndex];
       if (selected) selected.scrollIntoView({ block: 'nearest' });
     }
   }

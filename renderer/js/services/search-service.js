@@ -167,6 +167,14 @@ const SearchService = (() => {
           if (item.requireFile && (!window.AppState || !window.AppState.currentFile)) {
             return;
           }
+          // Filter out shortcuts that require editor mode if not in edit mode
+          if (item.requireEditor && (!window.AppState || window.AppState.currentMode !== 'edit')) {
+            return;
+          }
+          // Filter out shortcuts that require non-editor mode if in edit mode
+          if (item.requireNonEditor && (window.AppState && window.AppState.currentMode === 'edit')) {
+            return;
+          }
           allShortcuts.push({ ...item, group: sec.title, type: 'shortcut' });
         });
       });

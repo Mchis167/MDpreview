@@ -4,340 +4,178 @@ trigger: always_on
 
 # MDpreview — AI Rules & Architecture Guide
 
-**Single source of truth** for AI agents. Reference: [ARCHITECTURE.md](../../ARCHITECTURE.md), [Workflows README](../workflows/README.md)
+Reference: [ARCHITECTURE.md](../../ARCHITECTURE.md) | [Workflows README](../workflows/README.md)
 
 ---
 
-## 🎯 Agent Workflow (5 Steps)
+## 🎯 Agent Workflow
 
-1. **Research** — Check GitHub project: `gh project item-list 3 --owner Mchis167 --format json`
-2. **Plan** — Create implementation_plan artifact using `/plan` workflow → STOP
-3. **Wait** — Do NOT proceed without user approval ("proceed", "approve", or feedback)
-4. **Execute** — Use `/smart-edit` workflow with surgical edits
-5. **Verify & Document** — Test, update `/changelog`, run `npm run lint`
+**Default (chat / small task):**
+1. Phân tích → trả lời hoặc đề xuất
+2. **STOP — chờ user cho phép trước khi edit bất kỳ file nào**
+3. Khi được cho phép → `/smart-edit` → lint
+
+**Complex / new feature** (khi user dùng `/plan`):
+1. Tạo implementation plan → STOP, chờ approval
+2. Khi approved → Execute → lint → done
 
 **Anti-patterns:**
-- ❌ Auto-proceed after plan (wait for approval)
-- ❌ Guessing CSS tokens: Always check `tokens.css` first
-- ❌ Leave task "In progress" after code changes (move to "In review")
-- ❌ Auto-update CHANGELOG (only when explicitly requested)
+- ❌ Tự edit code khi chưa được phép
+- ❌ Viết code trong chat khi không được yêu cầu — nếu cần đề xuất, tóm tắt phương án bằng lời, không viết full code
+- ❌ Tự tạo plan (chỉ plan khi dùng `/plan`)
+- ❌ Guess CSS tokens — luôn check `tokens.css` trước
+- ❌ Auto-update CHANGELOG (chỉ khi được yêu cầu)
 - ❌ Bypass linting gates
-- ❌ Hardcode colors/spacing in CSS
-- ❌ Create global variables in JS
+- ❌ Hardcode colors/spacing trong CSS
+- ❌ Global variables trong JS
 
 ---
 
-## 🏗️ Project Architecture
+## 🏗️ Architecture
 
 ```
-Electron App (MDpreview)
-├── main.js           ← Electron main process
-├── server.js         ← Express server (file API, socket.io)
-└── renderer/         ← UI (Vanilla JS + CSS)
-    ├── index.html    ← Single entry point (no fragments)
-    ├── css/
-    │   ├── design-system.css  ← Component imports
-    │   └── design-system/
-    │       ├── tokens.css     ← 3-tier tokens
-    │       ├── atoms/         ← Atomic components
-    │       ├── molecules/     ← Molecule components
-    │       └── organisms/     ← Organism components
-    └── js/
-        ├── core/       ← app.js, electron-bridge.js
-        ├── components/ ← atoms, molecules, organisms (IIFE modules)
-        ├── services/   ← Business logic (IIFE modules)
-        ├── modules/    ← Feature controllers (IIFE modules)
-        └── utils/      ← Pure functions (IIFE modules)
+renderer/
+├── css/design-system/
+│   ├── tokens.css       ← 3-tier tokens (check trước khi viết CSS)
+│   ├── atoms/molecules/organisms/
+└── js/
+    ├── core/            ← app.js, electron-bridge.js
+    ├── components/      ← IIFE: window.[Name]Component
+    ├── services/        ← IIFE: window.[Name]Service
+    ├── modules/         ← IIFE: window.[Name]Module
+    └── utils/           ← IIFE: window.[Name]Util
 ```
+
+**Script load order:** Core → Atoms → Molecules → Organisms → Services → Utilities → Modules → Boot
 
 ---
 
-## 📐 CSS: 3-Tier Token System
+## ⚡ Pre-Code Checklist (bắt buộc trước khi viết code)
 
-| Tier | Purpose | Format | Example |
-|------|---------|--------|---------|
-| **1: Primitives** | Raw values | `--ds-primitive-*` | `--ds-primitive-orange: #ffbf48` |
-| **2: Alpha Palette** | Opacity variants | `--ds-*-a[10-90]` | `--ds-white-a30: rgba(255,255,255,0.30)` |
-| **3: Semantic** | Purpose-named | `--ds-[category]-*` | `--ds-accent: var(--ds-primitive-orange)` |
-
-### CSS Component Pattern
-
-```css
-.ds-button {
-  --_bg: var(--ds-bg-base);      /* Local variable for variants */
-  --_color: var(--ds-text-primary);
-  
-  display: flex;
-  background: var(--_bg);        /* Use tokens only, never hardcode */
-  color: var(--_color);
-  transition: all var(--ds-transition-smooth);
-}
-
-.ds-button.ds-button--primary {
-  --_bg: var(--ds-accent);       /* Variant: override only what changes */
-  --_color: var(--ds-text-on-accent);
-}
-```
-
-### CSS Rules (Enforced)
-- ✅ Always use tokens: `var(--ds-...)`
-- ✅ **Mandatory**: Check `renderer/css/design-system/tokens.css` before writing any CSS to ensure correct token usage (No guessing).
-- ✅ Use local variables for variants: `--_varname`
-- ✅ Semantic naming: `--ds-[category]-[value]-[variant]`
-- ✅ Run `npm run lint:css` (0 errors mandatory)
-- ❌ No hardcoded colors/spacing
-- ❌ No CSS in styles.css (use `@import` only)
+| Task | Làm trước |
+|------|-----------|
+| Viết/sửa CSS | Mở `tokens.css` xác nhận token → đọc [css-patterns.md](../docs/css-patterns.md) |
+| Có z-index | Đọc [z-index-system.md](../docs/z-index-system.md), chọn token từ decision tree |
+| Dùng icon | Check `design-system-icons.js` trước — nếu chưa có thì thêm vào cả 2 file |
+| Tạo/sửa JS module | Đọc [js-patterns.md](../docs/js-patterns.md) |
+| Sửa high-risk file | Đọc session log tương ứng + [monaco-guide.md](../docs/monaco-guide.md) |
+| Debug bug | Đọc [debug-guide.md](../docs/debug-guide.md), đặt log trước khi fix |
 
 ---
 
-## 🔌 JavaScript: IIFE Module System
+## 📐 CSS Rules
 
-### 5 Module Categories
+> **Trước khi viết CSS: đọc [css-patterns.md](../docs/css-patterns.md)**
 
-| Type | Path | Export | Example |
-|------|------|--------|---------|
-| **Components** | `renderer/js/components/[level]/[name].js` | `window.[Name]Component` | `IconActionButton` |
-| **Services** | `renderer/js/services/[name]-service.js` | `window.[Name]Service` | `FileService` |
-| **Modules** | `renderer/js/modules/[name].js` | `window.[Name]Module` | `TabsModule` |
-| **Utilities** | `renderer/js/utils/[name].js` | `window.[Name]Util` | `ZoomUtil` |
-| **Core** | `renderer/js/core/[name].js` | `window.[Name]` | `AppState` |
+**Naming:** `.ds-[component]` → `.ds-[component]-[element]` → `.ds-[component]--[modifier]` → `.is-[state]`
 
-### IIFE Pattern (Mandatory)
+- ✅ Prefix `ds-` cho mọi class design system
+- ✅ Check `tokens.css` trước — không guess token
+- ✅ Local vars cho variants: `--_varname`
+- ❌ Không dùng prefix khác (`md-`, `app-`, `ui-`...)
+- ❌ Không hardcode màu, spacing, transition, shadow, z-index
+- ❌ Không dùng BEM `__` (double underscore)
+- ❌ Không CSS trong `styles.css` (chỉ `@import`)
+- Run: `npm run lint:css` (0 errors)
 
-```javascript
-const ModuleName = (() => {
-  'use strict';
-  let _state = {};
-  function _helper() { /* ... */ }
-  return { init() { /* ... */ } };
-})();
-window.ModuleName = ModuleName;  // Explicit export
-```
+---
 
-### Script Pipeline (Correct Load Order)
-```
-Core (app.js)
-  ↓
-Atoms → Molecules → Organisms
-  ↓
-Services → Utilities
-  ↓
-Modules → Boot sequence
-```
+## 🎨 Icon System
 
-### JS Rules (Enforced)
-- ✅ IIFE pattern mandatory
-- ✅ Explicit `window.*` exports
-- ✅ Private functions prefix `_`: `function _helper() {}`
-- ✅ `const`/`let` only (no `var`)
-- ✅ Strict equality: `===` (never `==`)
-- ✅ `console.warn`/`console.error` only (no `console.log`)
-- ✅ Run `npm run lint:js` (0 errors mandatory)
-- ❌ No global state outside IIFE
-- ❌ No duplicated state (use `AppState`)
+**Nguồn duy nhất:** `renderer/js/components/design-system-icons.js` (được sync sang `cf-publish-worker/public/design-system-icons.js` khi build)
+
+- ✅ Dùng `DesignSystem.getIcon('icon-name')` để render icon
+- ✅ Nếu icon chưa có → thêm SVG vào **cả 2 file** trên rồi dùng
+- ❌ Không tự vẽ SVG inline trong CSS hoặc JS
+- ❌ Không hardcode `<svg>` trực tiếp trong component HTML
+- ❌ Không dùng icon từ nguồn khác ngoài registry
+
+---
+
+## 🔌 JavaScript Rules
+
+> **Trước khi viết JS module: đọc [js-patterns.md](../docs/js-patterns.md)**
+
+- ✅ IIFE pattern + `window.*` export bắt buộc
+- ✅ `const`/`let`, `===`, `console.warn`/`error` only
+- ✅ Private prefix `_`
+- ❌ Không inline style tĩnh trong JS (dùng classList)
+- ❌ Inline style `el.style.*` chỉ cho dynamic pixel values (top/left/width)
+- ❌ No global state outside IIFE, no duplicated state (use `AppState`)
+- Run: `npm run lint:js` (0 errors)
 
 ---
 
 ## 📚 Workflows
 
-Full registry: [command-router.md](../command-router.md) | [workflows/README.md](../workflows/README.md)
-
 | Flow | Commands |
 |------|---------|
-| **Bug fix** | `/discuss` → `/smart-edit` → `/linting-gates` → `/changelog` |
+| **Bug fix** | chat → `/smart-edit` → `/linting-gates` |
 | **New feature** | `/discuss` → `/plan` → `/atomic-gen` → `/smart-edit` → `/linting-gates` → `/changelog` |
-| **Release** | `/changelog` → `/linting-gates` → `/github` |
-| **Refactor** | `/discuss` → `/plan` → `/refactor-to-atomic` → `/linting-gates` |
+| **Refactor** | `/plan` → `/refactor-to-atomic` → `/linting-gates` |
+| **Release** | `/changelog` → `/linting-gates` |
 
 ---
 
-## ✅ Feature Checklist
+## ⚠️ Known Gotchas
 
-**New component** (`/atomic-gen`): CSS file (tokens only) → JS file (IIFE) → register in design-system.css + index.html + app.js → `npm run lint` → `/changelog`
+> Chi tiết đầy đủ: [monaco-guide.md](../docs/monaco-guide.md) | [debug-guide.md](../docs/debug-guide.md)
 
-**New module** (`/module-creation`): IIFE + `window.*` export → register in index.html (correct order) + app.js → `npm run lint` → `/changelog`
+### Component API
 
-**Bug fix** (`/smart-edit`): surgical edit → `npm run lint` → `/console-test` if interactive → `/changelog`
+| Component | ❌ Sai | ✅ Đúng |
+|-----------|--------|---------|
+| `SegmentedControlComponent` | `.create()` như DOM Node | `.create().el` |
+| `ButtonComponent` | `.loading = true` | `.setLoading(true)` |
 
----
+### Monaco — Tóm tắt (đọc [monaco-guide.md](../docs/monaco-guide.md) trước khi sửa)
+- `dispose()` synchronous — không wrap bằng `requestAnimationFrame`
+- `MarkdownEditor` tồn tại trong 'read' mode là **cố ý** — không xóa
+- Sau dispose→create: `blur()` TRƯỚC `focus()`
+- `_destroyed` flag bắt buộc trong mọi async coroutine
+- Empty model cần `setTimeout(blur→focus, 150)` với guard `getValue() === ''`
 
-## 🛡️ Linting Gates (Zero-Error Policy)
+### Mirror Post-Processing Pipeline
 
-### CSS Linting (`npm run lint:css`)
-**Enforced rules:**
-- `color-no-invalid-hex` — Valid hex only
-- `no-duplicate-selectors` — No duplication
-- `length-zero-no-unit` — Use `0` not `0px`
-- `function-calc-no-unspaced-operator` — Space in `calc()`
-- `import-notation` — Use string form `@import "..."`
+Bất kỳ client-side DOM post-processor nào (VD: `MockupImageModule`, `CarouselModule`) **phải được replicate ở 4 nơi**:
 
-### JavaScript Linting (`npm run lint:js`)
-**Enforced rules:**
-- `no-unused-vars` — Prefix unused with `_` (e.g., `_unused`, `_err`)
-- `no-undef` — Variables must be defined
-- `eqeqeq` — Use `===` never `==`
-- `no-console` — Only `warn`/`error` allowed
-- `no-var` — Use `const`/`let` only
+| Context | File | Vị trí |
+|---------|------|--------|
+| Live preview | `markdown-viewer-component.js` | `render()` và `update()` |
+| Project map | `project-map.js` | RAF block sau innerHTML |
+| Tab preview | `tab-preview.js` | `_showPreview()` |
+| Published page | `cf-publish-worker/src/shell.js` | inline init script |
 
----
+**Thứ tự bắt buộc:** MockupImageModule → CarouselModule → CodeBlockModule
 
+> Nếu thêm post-processor mới mà thiếu 1 trong 4 nơi → mirror hiển thị sai, scroll indicator lệch, published page broken.
 
-## ⚠️ Known Gotchas & Architecture Decisions
+### High-Risk Files
+`monaco-service.js` · `markdown-viewer-component.js` · `change-action-view-bar.js` · `modules/editor.js` · `core/app.js`
 
-> Kiến thức này không suy ra được từ code — được trích xuất từ session logs sau khi debug thực tế. Đọc trước khi sửa các file liên quan.
-
-### Component API Pitfalls
-
-| Component | Sai phổ biến | Đúng |
-|-----------|-------------|------|
-| `SegmentedControlComponent` | Dùng kết quả `.create()` như DOM Node | Phải dùng `.create().el` |
-| `ButtonComponent` | Set `.loading = true` | Phải dùng `.setLoading(true)` |
-
-### Monaco Editor — 5 Quy tắc Cứng
-
-1. **`dispose()` phải synchronous** — Không dùng `requestAnimationFrame`. Nếu old editor dispose chạy sau khi new editor đã focused, Monaco global focus registry bị xáo trộn → "The Focus Ghost" bug (typing block).
-2. **`MarkdownEditor` tồn tại trong 'read' mode là CỐ Ý** — Architecture cần cả 2 instance để mode switch nhanh (không remount). Đừng "tối ưu" xóa nó.
-3. **Sau dispose→create cycle: `blur()` TRƯỚC `focus()`** — Monaco auto-focus textarea khi mount, nên plain `focus()` là no-op → `TextAreaHandler` không sync → `onDidChangeContent` silent dù `onKeyDown` fires.
-4. **`_destroyed` flag bắt buộc trong mọi async coroutine** — `activate().run()` là async; nếu `render()` được gọi trong khi `run()` đang await, stale coroutine sẽ `bind()` lại listeners của new editor với state sai.
-5. **Empty model cần warm-up text input pipeline** — Sau nhiều `setValue('')` calls, Chrome deregisters textarea khỏi OS text input routing: `keydown` fires nhưng `beforeinput`/`input` hoàn toàn im lặng. Fix: `setTimeout(blur→focus, 150)` với guard `getValue() === ''` (KHÔNG chạy cho non-empty model — sẽ clobber cursor position từ `focusWithContext`). Đã implement tại `markdown-viewer-component.js activate()`. Xem: `session-log-block-typing-new-file-2026-05-16.md`
-
-### Draft System Invariants
-
-1. **"Draft đi đôi với Tab"** — Draft không có tab tương ứng = orphan, bị `DraftModule.pruneOrphans()` xóa tự động. Không tạo draft standalone.
-2. **`_isSyncing` DROP (không queue)** — `ChangeActionViewBar.updateUI()` trong 400ms lock window bị DROP hoàn toàn (không retry). `AppState.currentMode` có thể lệch với UI nếu call bị drop. Long-term nên refactor thành queue.
-3. **Triple dirty check là độc lập** — `loadFile`, `onModeChange`, `updateUI` là 3 dirty check riêng biệt. Risk double-modal nếu 2 cùng fire trên 1 action. Chưa được refactor về 1 entry point.
+→ Đọc session log tương ứng trong `.agents/session-logs/` trước khi sửa.
 
 ---
 
-## 🔴 High-Risk Files (đọc session logs trước khi sửa)
+## 🔬 Debug
 
-Các file này có race condition, async lifecycle, hoặc kiến trúc đặc thù. Đọc session log tương ứng trước khi đề xuất thay đổi.
+> Chi tiết: [debug-guide.md](../docs/debug-guide.md)
 
-| File | Session Log liên quan | Vì sao nguy hiểm |
-|------|-----------------------|-----------------|
-| `renderer/js/services/monaco-service.js` | `session-log-editor-block-typing-debug` | dispose() timing, global focus registry |
-| `renderer/js/components/organisms/markdown-viewer-component.js` | `session-log-editor-block-typing-debug` | MarkdownEditor lifecycle, async activate() |
-| `renderer/js/components/organisms/change-action-view-bar.js` | `session-log-draft-switch-bug`, `session-log-editor-block-typing-debug` | _isSyncing lock, 3 dirty checks |
-| `renderer/js/modules/editor.js` | `session-log-draft-switch-bug`, `session-log-block-typing-new-file-2026-05-16` | _originalContent sync, silent save param |
-| `renderer/js/core/app.js` | `session-log-draft-management-fix` | loadFile dirty check, triple coordination |
+- **Hypothesis → Confirm → Fix** — không fix dựa trên guess, đặt log để xác nhận trước
+- **DIAG:** `console.warn('[DIAG]...')` — xóa TẤT CẢ trước lint
+- **Events không fire:** spy `window` (capture) trước, element sau
 
 ---
 
-## 🔬 DIAG Debug Pattern (khi bug phức tạp)
+## 🎓 Core Principles
 
-Dùng khi bug không thể reproduce bằng code reading — cần trace runtime behavior.
-
-```
-1. Cài logger tại 5-6 điểm quan trọng:
-   console.warn('[DIAG][Module.method] label', { key: value });
-
-2. Để trace caller của unexpected call:
-   console.warn('[DIAG] caller:', new Error().stack.split('\n')[2]);
-
-3. Yêu cầu user reproduce và paste log vào chat.
-
-4. Phân tích call stack từ log → xác định root cause.
-
-5. Fix → verify với user → CLEANUP BẮT BUỘC:
-   Xóa TẤT CẢ console.warn [DIAG] trước khi chạy lint.
-   (npm run lint:js sẽ fail nếu còn console.warn không phải error path)
-```
-
-> ⚠️ Không commit code khi còn [DIAG] loggers. Lint sẽ báo `no-console` violation.
+1. **Wait for permission** — Không tự edit khi chưa được phép
+2. **Context-Aware** — Check session-logs trước khi sửa high-risk files
+3. **Quality Gates** — `npm run lint` = 0 errors mandatory
+4. **Minimal Diffs** — Surgical edits only
 
 ---
 
-## 🧪 Quy tắc Vàng: Hypothesis → Confirm → Fix
+**Docs:** [css-patterns.md](../docs/css-patterns.md) | [js-patterns.md](../docs/js-patterns.md) | [debug-guide.md](../docs/debug-guide.md) | [monaco-guide.md](../docs/monaco-guide.md) | [z-index-system.md](../docs/z-index-system.md)
 
-> **Tuyệt đối không fix dựa trên phỏng đoán chưa được xác nhận bằng log/evidence.**
-
-Quy trình bắt buộc khi debug:
-
-```
-1. Nghi ngờ hypothesis X là nguyên nhân
-2. Hỏi: "Tôi có thể đặt log ở đâu để confirm/deny X?"
-3. Đặt log tối thiểu, yêu cầu user chạy và paste kết quả
-4. Đọc log:
-   - Log CONFIRM X → Fix X
-   - Log DENY X   → Gạch bỏ X, tiếp tục điều tra. KHÔNG fix X.
-5. Chỉ fix sau khi có evidence rõ ràng
-```
-
-**Tại sao:** Nhiều vòng fix sai tốn thời gian hơn một vòng confirm đúng. Ví dụ thực tế từ session scroll sync:
-- Nghi observer còn sống → fix disconnect → log thấy `hasObserver=false` → fix vô ích (1 vòng lãng phí)
-- Nghi `setValue()` gây scroll → thêm log → confirm `scrollBefore=scrollAfter=0` → loại trừ đúng cách (0 fix lãng phí)
-- Nghi `setSelection` smooth scroll → thêm ScrollSpy → confirm stack trace → fix đúng ngay lần đầu
-
-**Phỏng đoán chỉ có giá trị để biết đặt log ở đâu — không phải để quyết định fix cái gì.**
-
----
-
-## 🌐 Browser Event Debugging — Layer Checklist
-
-Dùng khi DOM event (`input`, `beforeinput`, `click`...) không fire dù điều kiện tưởng đúng.
-
-### Nguyên tắc #1: Spy tại window TRƯỚC, element SAU
-```js
-// SAI — element-level spy có thể bị chặn bởi handler đăng ký trước
-textarea.addEventListener('beforeinput', spy, true);
-
-// ĐÚNG — window capture chạy trước MỌI handler khác
-window.addEventListener('beforeinput', (e) => {
-  if (e.target !== textarea) return;
-  console.warn('[SPY] beforeinput fired', { data: e.data, defaultPrevented: e.defaultPrevented });
-}, true);
-```
-
-Nếu `window`-level spy KHÔNG thấy event → vấn đề ở tầng browser/OS, không phải JS handler.  
-Nếu `window`-level spy THẤY event nhưng element-level không thấy → có handler gọi `stopImmediatePropagation()`.
-
-### Nguyên tắc #2: Checklist loại trừ theo tầng (từ ngoài vào trong)
-
-| Tầng | Kiểm tra | Cách verify |
-|------|----------|-------------|
-| **OS / Chromium** | Browser có generate event không | Window-level spy |
-| **DOM state** | `readOnly`, `disabled`, `editContext` | Log trực tiếp sau focus() |
-| **Event prevention** | `e.defaultPrevented` trên keydown | Bubble-end spy (phase: false) |
-| **JS handler** | Handler gọi `preventDefault()` / `stopImmediatePropagation()` | Window-level spy vs element-level spy |
-| **App logic** | Monaco internal state (`_isDoingComposition`) | Truy cập internal API nếu path đúng |
-
-### Nguyên tắc #3: `defaultPrevented: false` trên keydown ≠ event sẽ fire
-`keydown.preventDefault()` chặn `beforeinput`. Nhưng `defaultPrevented: false` chỉ confirm keydown không bị prevent — không đảm bảo `beforeinput` sẽ fire (vẫn có thể bị chặn bởi browser-level routing như EditContext hoặc OS deregistration).
-
-### Nguyên tắc #4: Loại trừ nhanh các nguyên nhân phổ biến
-```js
-// Sau editor.focus(), log ngay:
-const ta = editor.getDomNode().querySelector('textarea');
-console.warn('[CHECK]', {
-  activeElement: document.activeElement?.tagName,   // phải là TEXTAREA
-  readOnly: ta?.readOnly,                            // phải false
-  disabled: ta?.disabled,                           // phải false
-  editContext: ('editContext' in ta) ? String(ta.editContext) : 'unsupported',
-  value: JSON.stringify(ta?.value).slice(0, 20)
-});
-```
-
----
-
-## 🔗 References & Quick Links
-
-| File | Purpose |
-|------|---------|
-| [ARCHITECTURE.md](../../ARCHITECTURE.md) | Complete system documentation |
-| [Workflows README](../workflows/README.md) | All 13 workflows explained |
-| [.stylelintrc.json](../../.stylelintrc.json) | CSS linting rules (documented) |
-| [eslint.config.mjs](../../eslint.config.mjs) | JS linting rules (documented) |
-| [package.json](../../package.json) | npm scripts: `lint`, `lint:css`, `lint:js` |
-
----
-
-## 🎓 4 Core Principles
-
-1. **Context-Aware** — Check `.agents/session-logs/` before touching high-risk files
-2. **Analysis-First** — `/discuss` → `/plan` → wait approval → `/smart-edit`
-3. **Quality Gates** — `npm run lint` = 0 errors + 0 warnings, mandatory
-4. **Minimal Diffs** — Surgical edits only, no cleanup/reformat
-
----
-
-**Last Updated:** 2026-05-16 | **Version:** 2.3 | **Status:** Current ✅
+**Version:** 2.5 | **Updated:** 2026-05-18

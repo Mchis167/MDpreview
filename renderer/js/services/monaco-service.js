@@ -399,6 +399,11 @@ if (!/(#browser|#phone):$/.test(before)) return { suggestions: [] };
             carouselRange = new monaco.Range(sl, 1, el, model.getLineMaxColumn(el));
             const selText = model.getValueInRange(carouselRange);
             carouselImageCount = selText.split('\n').filter(l => /!\[[^\]]*\]\([^)]+\)/.test(l)).length;
+
+            // If selection contains image links, skip single image actions by nullifying foundImage
+            if (carouselImageCount >= 1) {
+              foundImage = null;
+            }
           }
 
           const shouldShowMenu = foundImage || carouselImageCount >= 1;
@@ -413,18 +418,104 @@ if (!/(#browser|#phone):$/.test(before)) return { suggestions: [] };
             const isEmpty = !url.trim();
 
             if (carouselImageCount >= 1) {
+              const sl = editorSel.startLineNumber;
+              const el = editorSel.endLineNumber;
+              const selText = model.getValueInRange(carouselRange);
+              const cleanText = selText.trim();
+              const isWrappedInCarousel = cleanText.startsWith(':::carousel') && cleanText.endsWith(':::');
+
+              let isCarouselWrapperOutside = false;
+              if (sl > 1 && el < model.getLineCount()) {
+                const prevLine = model.getLineContent(sl - 1).trim();
+                const nextLine = model.getLineContent(el + 1).trim();
+                if (prevLine === ':::carousel' && nextLine === ':::') {
+                  isCarouselWrapperOutside = true;
+                }
+              }
+
+              const hasCarousel = isWrappedInCarousel || isCarouselWrapperOutside;
+
+              if (hasCarousel) {
+                items.push({
+                  label: 'Remove carousel',
+                  icon: 'gallery-horizontal',
+                  onClick: () => {
+                    if (isWrappedInCarousel) {
+                      const lines = cleanText.split('\n');
+                      const innerLines = lines.slice(1, lines.length - 1).join('\n');
+                      _editor.executeEdits('mdpreview', [{
+                        range: carouselRange,
+                        text: innerLines,
+                        forceMoveMarkers: true
+                      }]);
+                    } else if (isCarouselWrapperOutside) {
+                      const outerRange = new monaco.Range(sl - 1, 1, el + 1, model.getLineMaxColumn(el + 1));
+                      _editor.executeEdits('mdpreview', [{
+                        range: outerRange,
+                        text: selText,
+                        forceMoveMarkers: true
+                      }]);
+                    }
+                  }
+                });
+              } else {
+                items.push({
+                  label: 'Wrap in carousel',
+                  icon: 'gallery-horizontal',
+                  onClick: () => {
+                    _editor.executeEdits('mdpreview', [{
+                      range: carouselRange,
+                      text: `:::carousel\n${selText}\n:::`,
+                      forceMoveMarkers: true
+                    }]);
+                  }
+                });
+              }
+
+              items.push({ divider: true });
+
               items.push({
-                label: 'Wrap in carousel',
-                icon: 'images',
+                label: 'Wrap all in Browser (Scroll)',
+                icon: 'panel-top',
                 onClick: () => {
                   const selText = model.getValueInRange(carouselRange);
+                  const newText = selText.replace(/(!\[.*?\]\()([^)#]+)(?:#[^)]*)?(\))/g, '$1$2#browser:scroll$3');
                   _editor.executeEdits('mdpreview', [{
                     range: carouselRange,
-                    text: `:::carousel\n${selText}\n:::`,
+                    text: newText,
                     forceMoveMarkers: true
                   }]);
                 }
               });
+
+              items.push({
+                label: 'Wrap all in Phone (Scroll)',
+                icon: 'phone',
+                onClick: () => {
+                  const selText = model.getValueInRange(carouselRange);
+                  const newText = selText.replace(/(!\[.*?\]\()([^)#]+)(?:#[^)]*)?(\))/g, '$1$2#phone:scroll$3');
+                  _editor.executeEdits('mdpreview', [{
+                    range: carouselRange,
+                    text: newText,
+                    forceMoveMarkers: true
+                  }]);
+                }
+              });
+
+              items.push({
+                label: 'Remove Mockup Frames',
+                icon: 'frame',
+                onClick: () => {
+                  const selText = model.getValueInRange(carouselRange);
+                  const newText = selText.replace(/(!\[.*?\]\()([^)#]+)(?:#[^)]*)?(\))/g, '$1$2$3');
+                  _editor.executeEdits('mdpreview', [{
+                    range: carouselRange,
+                    text: newText,
+                    forceMoveMarkers: true
+                  }]);
+                }
+              });
+
               if (foundImage) items.push({ divider: true });
             }
 
@@ -521,6 +612,71 @@ if (!/(#browser|#phone):$/.test(before)) return { suggestions: [] };
                   label: 'Open in Finder', 
                   icon: 'external-link', 
                   onClick: () => window.AttachmentService.revealAsset(url) 
+                });
+              }
+            }
+
+            // Single image mockup options (for any foundImage)
+            if (foundImage) {
+              const hashIndex = url.indexOf('#');
+              const hash = hashIndex !== -1 ? url.slice(hashIndex).toLowerCase() : '';
+              const baseUrl = hashIndex !== -1 ? url.slice(0, hashIndex) : url;
+
+              const isBrowserScroll = hash === '#browser:scroll';
+              const isBrowserStatic = hash === '#browser';
+              const isPhoneScroll = hash === '#phone:scroll';
+              const isPhoneStatic = hash === '#phone';
+              const hasMockup = isBrowserScroll || isBrowserStatic || isPhoneScroll || isPhoneStatic;
+
+              items.push({ divider: true });
+
+              items.push({
+                label: 'Browser Frame (Scrollable)',
+                icon: 'panel-top',
+                active: isBrowserScroll,
+                onClick: () => {
+                  const newText = isBrowserScroll ? baseUrl : baseUrl + '#browser:scroll';
+                  _editor.executeEdits('mdpreview', [{ range: foundImage.range, text: newText, forceMoveMarkers: true }]);
+                }
+              });
+
+              items.push({
+                label: 'Browser Frame (Static)',
+                icon: 'panel-top',
+                active: isBrowserStatic,
+                onClick: () => {
+                  const newText = isBrowserStatic ? baseUrl : baseUrl + '#browser';
+                  _editor.executeEdits('mdpreview', [{ range: foundImage.range, text: newText, forceMoveMarkers: true }]);
+                }
+              });
+
+              items.push({
+                label: 'Phone Frame (Scrollable)',
+                icon: 'phone',
+                active: isPhoneScroll,
+                onClick: () => {
+                  const newText = isPhoneScroll ? baseUrl : baseUrl + '#phone:scroll';
+                  _editor.executeEdits('mdpreview', [{ range: foundImage.range, text: newText, forceMoveMarkers: true }]);
+                }
+              });
+
+              items.push({
+                label: 'Phone Frame (Static)',
+                icon: 'phone',
+                active: isPhoneStatic,
+                onClick: () => {
+                  const newText = isPhoneStatic ? baseUrl : baseUrl + '#phone';
+                  _editor.executeEdits('mdpreview', [{ range: foundImage.range, text: newText, forceMoveMarkers: true }]);
+                }
+              });
+
+              if (hasMockup) {
+                items.push({
+                  label: 'Remove Mockup Frame',
+                  icon: 'frame',
+                  onClick: () => {
+                    _editor.executeEdits('mdpreview', [{ range: foundImage.range, text: baseUrl, forceMoveMarkers: true }]);
+                  }
                 });
               }
             }

@@ -60,10 +60,31 @@ class TreeItemComponent {
                 }
             }, 50);
 
+            const checkDuplicate = (val) => {
+                const name = val.trim();
+                return this.state.checkDuplicate ? this.state.checkDuplicate(name, this.node) : false;
+            };
+
             const finish = (save) => {
                 if (input._done) return;
-                input._done = true;
                 let newName = input.value.trim();
+
+                if (save) {
+                    if (checkDuplicate(newName)) {
+                        if (typeof showToast === 'function') {
+                            showToast(`A file or folder named "${newName}" already exists.`, 'error');
+                        }
+                        input.classList.add('is-invalid');
+                        input.classList.remove('shake');
+                        void input.offsetWidth; // Trigger reflow to restart shake animation
+                        input.classList.add('shake');
+                        input.focus();
+                        input.select();
+                        return; // Block save, keep renaming active
+                    }
+                }
+
+                input._done = true;
 
                 // Automatically append .md for files if missing
                 if (save && node.type === 'file' && newName && !newName.toLowerCase().endsWith('.md')) {
@@ -73,9 +94,24 @@ class TreeItemComponent {
                 this.options.onFinishRename(node, newName, save);
             };
 
+            input.oninput = () => {
+                if (checkDuplicate(input.value)) {
+                    input.classList.add('is-invalid');
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            };
+
             input.onblur = () => {
                 if (document.contains(input)) {
-                    finish(true);
+                    if (checkDuplicate(input.value)) {
+                        if (typeof showToast === 'function') {
+                            showToast(`"${input.value.trim()}" already exists. Reverted.`, 'warning');
+                        }
+                        finish(false);
+                    } else {
+                        finish(true);
+                    }
                 }
             };
             input.onkeydown = (e) => {

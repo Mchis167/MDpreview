@@ -44,8 +44,7 @@
 }
 
 .ctx-item.active {
-  background: var(--ds-layer-subtle-active);
-  color: var(--ds-accent);
+  color: var(--ds-text-primary);
   font-weight: 600;
 }
 
@@ -77,8 +76,10 @@
   flex-shrink: 0;
 }
 
-.ctx-item.active svg {
-  color: var(--ds-accent);
+.ctx-item .ctx-active-check svg {
+  width: 12px;
+  height: 12px;
+  color: var(--ds-text-primary);
 }
 
 .ctx-item.danger svg {

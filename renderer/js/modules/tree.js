@@ -216,6 +216,7 @@ const TreeModule = (() => {
 
   async function load() {
     if (TreeDragManager.getIsDragging()) return; // Block loading while dragging
+    if (state.renamingPath) return; // Block loading while renaming to prevent destroying input
 
     // Show professional skeleton state
     const mountPoint = document.getElementById('file-tree-mount');
@@ -1040,6 +1041,9 @@ const TreeModule = (() => {
   }
 
   async function _createNewItem(parentPath, type) {
+    // Immediately blur active element (e.g., Monaco) to prevent key leakage while loading
+    if (document.activeElement) document.activeElement.blur();
+
     const isRoot = parentPath === 'root';
     const parentData = isRoot ? treeData : _findNodeByPath(treeData, parentPath);
 
