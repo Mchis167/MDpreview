@@ -106,6 +106,7 @@ dist-native/
 ai-bundles/
 ImplementPlan/
 GraphPreview/
+.agents/session-logs/
 
 # --- Development Scratch & Temp ---
 scratch/
@@ -116,3 +117,4 @@ server.log
 # These contain personal content and local configuration
 data/
 workspaces/
+1lobby/
