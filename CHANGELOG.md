@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] — 2026-05-18
+## [2.7.0] — 2026-05-18 14:52
 
 ### 🚀 Added
 - **Image Mockup Wrapping** (`#browser`, `#phone`): Wrap ảnh Markdown trong UI frame trình duyệt hoặc điện thoại bằng hash fragment syntax — `![alt](img.png#browser)` / `![alt](img.png#phone)`. Client-side post-processing, không cần thay đổi server-side renderer.
