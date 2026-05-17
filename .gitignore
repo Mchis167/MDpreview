@@ -107,6 +107,10 @@ ai-bundles/
 ImplementPlan/
 GraphPreview/
 .agents/
+.aiignore
+AGENTS.md
+bundle.command
+scripts/bundle-for-ai.js
 
 # --- Development Scratch & Temp ---
 scratch/
