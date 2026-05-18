@@ -40,12 +40,6 @@ function register(ipcMain) {
     // In Phase 1, this will delete the .wiki-index.json file
     return { success: true, status: 'off' };
   });
-
-  // wiki:rescan(workspaceId)
-  ipcMain.handle('wiki:rescan', async (event, workspaceId) => {
-    console.log(`[Wiki] Rescanning workspace: ${workspaceId}`);
-    return { success: true, status: 'scanning' };
-  });
 }
 
 module.exports = { register };

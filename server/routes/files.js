@@ -12,7 +12,7 @@ router.get('/files', async (req, res) => {
   const hideEmpty  = req.query.hideEmpty  === 'true';
   const isFlat      = req.query.flat       === 'true';
 
-  const EXCLUDE_DIRS = ['node_modules', '.git', 'dist', 'build', '.next'];
+  const EXCLUDE_DIRS = ['node_modules', '.git', 'dist', 'build', '.next', '_md-workspace-assets', 'assets'];
 
   async function buildTree(dir, relativePath = '') {
     const node = {

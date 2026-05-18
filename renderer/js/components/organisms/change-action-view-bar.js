@@ -223,17 +223,6 @@ class ChangeActionViewBarComponent {
         if (emptyState) emptyState.style.display = 'none';
       }
 
-      if (typeof CommentsModule !== 'undefined') CommentsModule.removeCommentMode();
-      if (typeof CollectModule !== 'undefined') CollectModule.removeCollectMode();
-
-      if (targetMode === 'comment') {
-        if (typeof CommentsModule !== 'undefined') CommentsModule.applyCommentMode();
-      } else if (targetMode === 'collect') {
-        if (typeof CollectModule !== 'undefined') {
-          CollectModule.loadForFile(AppState.currentFile);
-          CollectModule.applyCollectMode();
-        }
-      }
 
       if (AppState.currentFile && AppState.currentFile.startsWith('__DRAFT_')) {
         if (typeof DraftModule !== 'undefined') DraftModule.syncPreview();

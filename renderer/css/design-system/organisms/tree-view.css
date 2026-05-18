@@ -34,6 +34,10 @@
   opacity: 0.5;
 }
 
+.tree-item.is-empty {
+  opacity: 0.5;
+}
+
 .tree-item .item-icon-wrap {
   width: 14px;
   height: 14px;

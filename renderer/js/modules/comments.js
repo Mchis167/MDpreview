@@ -79,7 +79,12 @@ const CommentsModule = (() => {
     const count = comments.length;
     
     const lines = [
-        `Dưới đây là [${count}] feedback cho tài liệu "${file}". Với mỗi block, hãy định vị ANCHOR bằng CONTEXT và POSITION, sau đó thực hiện FEEDBACK. Trả lời theo thứ tự comment.`,
+        `# 💬 Feedback & Discussion Report: ${file}`,
+        ``,
+        `> 📊 **Summary:** Có **[${count}]** bình luận và phản hồi được ghi nhận.`,
+        `> Hãy tham khảo vị trí và ngữ cảnh chi tiết bên dưới.`,
+        ``,
+        `---`,
         ``
     ];
     
@@ -87,11 +92,10 @@ const CommentsModule = (() => {
     if (file && file.startsWith('__DRAFT_')) {
       const extra = document.getElementById('ai-extra-input')?.value.trim();
       if (extra) {
-        lines.push(`================================================================`);
-        lines.push(`[ADDITIONAL CONTENT / USER CONTEXT]`);
-        lines.push(`----------------------------------------------------------------`);
-        lines.push(extra);
-        lines.push(`================================================================`);
+        lines.push(`### 💡 **Thông tin bổ sung / Ngữ cảnh người dùng (User Context)**`);
+        lines.push(`> ${extra.replace(/\n/g, '\n> ')}`);
+        lines.push(``);
+        lines.push(`---`);
         lines.push(``);
       }
     }
@@ -105,18 +109,19 @@ const CommentsModule = (() => {
 
       const position = c.headingPath || "General";
 
-      lines.push(`================================================================`);
-      lines.push(`[COMMENT #${index + 1}]`);
-      lines.push(`----------------------------------------------------------------`);
-      lines.push(`ANCHOR: "${anchor}"`);
+      lines.push(`### 📝 [COMMENT #${index + 1}]`);
       lines.push(``);
-      lines.push(`CONTEXT: "...${before} [${anchor}] ${after}..."`);
+      lines.push(`* 📍 **Vị trí (Position):** \`${position}\` *(${lineRef})*`);
+      lines.push(`* 🎯 **Mục tiêu (Anchor):** \`${anchor}\``);
+      if (before || after) {
+        lines.push(`* 📖 **Ngữ cảnh (Context):**`);
+        lines.push(`  > ... ${before} [**${anchor}**] ${after} ...`);
+      }
       lines.push(``);
-      lines.push(`POSITION: ${position} (${lineRef})`);
+      lines.push(`💬 **Nội dung bình luận (Comment):**`);
+      lines.push(`> **"${c.text}"**`);
       lines.push(``);
-      lines.push(`FEEDBACK:`);
-      lines.push(c.text);
-      lines.push(`================================================================`);
+      lines.push(`---`);
       lines.push(``);
     });
 
@@ -251,16 +256,22 @@ const CommentsModule = (() => {
     if (relevantHeadings.length === 0) return "General";
     let current = relevantHeadings[relevantHeadings.length - 1];
     let level = parseInt(current.tagName[1], 10);
-    const path = [current.textContent.trim()];
+    const pathNodes = [current];
     for (let i = relevantHeadings.length - 2; i >= 0; i--) {
       const h = relevantHeadings[i];
       const hLevel = parseInt(h.tagName[1], 10);
       if (hLevel < level) {
-        path.unshift(h.textContent.trim());
+        pathNodes.unshift(h);
         level = hLevel;
       }
     }
-    return path.join(' > ');
+    
+    // Loại bỏ H1 ở đầu đường dẫn nếu có các cấp đề mục con sâu hơn
+    if (pathNodes.length > 1 && pathNodes[0].tagName.toUpperCase() === 'H1') {
+      pathNodes.shift();
+    }
+    
+    return pathNodes.map(n => n.textContent.trim()).join(' > ');
   }
 
   function _clearHighlights() {
@@ -280,18 +291,90 @@ const CommentsModule = (() => {
     });
     document.querySelectorAll('.md-line').forEach(b => b.classList.remove('has-comment'));
 
-    const linesWithComments = new Set(comments.map(c => c.lineStart));
+    // ── Drift Compensation (Kháng sửa file) ──
     comments.forEach(c => {
-        if (c.lineEnd) {
-            for (let i = c.lineStart; i <= c.lineEnd; i++) linesWithComments.add(i);
+      if (!c.selectedText) return;
+
+      const currentLineEl = document.querySelector(`.md-line[data-line="${c.lineStart}"]`);
+      // Nếu dòng hiện tại không tồn tại hoặc không chứa selectedText, ta tiến hành Fuzzy Re-Sync
+      const needsResync = !currentLineEl || !currentLineEl.textContent.includes(c.selectedText);
+
+      if (needsResync) {
+        let bestLineNum = -1;
+        let bestScore = -1;
+        const RADIUS = 30; // Quét trong bán kính 30 dòng xung quanh
+        const startScan = Math.max(1, c.lineStart - RADIUS);
+        const endScan = c.lineStart + RADIUS;
+
+        for (let i = startScan; i <= endScan; i++) {
+          const scanEl = document.querySelector(`.md-line[data-line="${i}"]`);
+          if (!scanEl) continue;
+
+          const textContent = scanEl.textContent;
+          let matchIdx = 0;
+
+          while ((matchIdx = textContent.indexOf(c.selectedText, matchIdx)) !== -1) {
+            let score = 0;
+            if (c.context) {
+              const cleanBefore = (c.context.before || '').replace(/^\.\.\./, '').trim();
+              const cleanAfter  = (c.context.after || '').replace(/\.\.\.$/, '').trim();
+              
+              const actualBefore = textContent.substring(Math.max(0, matchIdx - 60), matchIdx).trim();
+              const actualAfter  = textContent.substring(matchIdx + c.selectedText.length, matchIdx + c.selectedText.length + 60).trim();
+              
+              let beforeMatchLen = 0;
+              const minBeforeLen = Math.min(cleanBefore.length, actualBefore.length);
+              for (let k = 1; k <= minBeforeLen; k++) {
+                if (cleanBefore[cleanBefore.length - k] === actualBefore[actualBefore.length - k]) {
+                  beforeMatchLen++;
+                } else {
+                  break;
+                }
+              }
+              
+              let afterMatchLen = 0;
+              const minAfterLen = Math.min(cleanAfter.length, actualAfter.length);
+              for (let k = 0; k < minAfterLen; k++) {
+                if (cleanAfter[k] === actualAfter[k]) {
+                  afterMatchLen++;
+                } else {
+                  break;
+                }
+              }
+              score = beforeMatchLen + afterMatchLen;
+            }
+
+            if (score > bestScore) {
+              bestScore = score;
+              bestLineNum = i;
+            }
+            matchIdx += c.selectedText.length || 1;
+          }
         }
+
+        // Nếu tìm thấy dòng mới khớp tốt hơn, cập nhật lại tọa độ dòng của comment
+        if (bestLineNum !== -1) {
+          const delta = bestLineNum - c.lineStart;
+          c.lineStart = bestLineNum;
+          if (c.lineEnd) c.lineEnd += delta;
+        }
+      }
+    });
+
+    const linesWithComments = new Set();
+    comments.forEach(c => {
+      linesWithComments.add(c.lineStart);
+      if (c.lineEnd) {
+        for (let i = c.lineStart; i <= c.lineEnd; i++) linesWithComments.add(i);
+      }
     });
 
     linesWithComments.forEach(lineNum => {
-      const lineEl = document.querySelector(`.md-line[data-line="${lineNum}"]`);
-      if (!lineEl) return;
-      lineEl.classList.add('has-comment');
-      const lineComments = comments.filter(c => 
+      const lineEls = document.querySelectorAll(`.md-line[data-line="${lineNum}"]`);
+      if (!lineEls.length) return;
+      // Use innermost element to avoid wrapping block elements (e.g. <li> wrapping inner div)
+      const lineEl = lineEls[lineEls.length - 1];
+      const lineComments = comments.filter(c =>
         lineNum >= c.lineStart && lineNum <= (c.lineEnd || c.lineStart)
       );
       _applyRobustHighlights(lineEl, lineComments);
@@ -318,36 +401,68 @@ const CommentsModule = (() => {
       currentOffset += node.textContent.length;
     }
 
-    // 2. Tìm vị trí Global của từng comment
+    // 2. Tìm vị trí Global của từng comment bằng thuật toán so khớp điểm ngữ cảnh thông minh
     const globalMatches = [];
     textComments.forEach(c => {
       let globalStartIdx = -1;
-      
-      // Search with Context
-      if (c.context) {
-        const cleanBefore = (c.context.before || '').replace(/^\.\.\./, '');
-        const cleanAfter  = (c.context.after || '').replace(/\.\.\.$/, '');
-        const fingerprint = cleanBefore + c.selectedText + cleanAfter;
-        
-        const matchIdx = fullContent.indexOf(fingerprint);
-        if (matchIdx !== -1) {
-          globalStartIdx = matchIdx + cleanBefore.length;
+      let bestScore = -1;
+      const cleanText = c.selectedText;
+
+      if (cleanText) {
+        let searchIdx = 0;
+        while ((searchIdx = fullContent.indexOf(cleanText, searchIdx)) !== -1) {
+          let score = 0;
+          if (c.context) {
+            const cleanBefore = (c.context.before || '').replace(/^\.\.\./, '').trim();
+            const cleanAfter  = (c.context.after || '').replace(/\.\.\.$/, '').trim();
+            
+            // Lấy ngữ cảnh thực tế xung quanh vị trí searchIdx này trong DOM
+            const actualBefore = fullContent.substring(Math.max(0, searchIdx - 60), searchIdx).trim();
+            const actualAfter  = fullContent.substring(searchIdx + cleanText.length, searchIdx + cleanText.length + 60).trim();
+            
+            // Tính số ký tự khớp từ cuối của Before
+            let beforeMatchLen = 0;
+            const minBeforeLen = Math.min(cleanBefore.length, actualBefore.length);
+            for (let k = 1; k <= minBeforeLen; k++) {
+              if (cleanBefore[cleanBefore.length - k] === actualBefore[actualBefore.length - k]) {
+                beforeMatchLen++;
+              } else {
+                break;
+              }
+            }
+            
+            // Tính số ký tự khớp từ đầu của After
+            let afterMatchLen = 0;
+            const minAfterLen = Math.min(cleanAfter.length, actualAfter.length);
+            for (let k = 0; k < minAfterLen; k++) {
+              if (cleanAfter[k] === actualAfter[k]) {
+                afterMatchLen++;
+              } else {
+                break;
+              }
+            }
+            
+            score = beforeMatchLen + afterMatchLen;
+          }
+          
+          if (score > bestScore) {
+            bestScore = score;
+            globalStartIdx = searchIdx;
+          }
+          
+          searchIdx += cleanText.length || 1;
         }
       }
 
-      // Fallback: Search for selected text alone if fingerprint fails
-      if (globalStartIdx === -1) {
-        const cleanText = c.selectedText.trim();
-        // Try exact match first
-        globalStartIdx = fullContent.indexOf(c.selectedText);
+      // Fallback: Nếu so khớp điểm ngữ cảnh không tìm thấy, thử exact match đầu tiên hoặc normalized match
+      if (globalStartIdx === -1 && cleanText) {
+        globalStartIdx = fullContent.indexOf(cleanText);
         
-        // Try normalized whitespace match if exact fails
         if (globalStartIdx === -1) {
           const normalizedContent = fullContent.replace(/\s+/g, ' ');
           const normalizedSelected = cleanText.replace(/\s+/g, ' ');
           const normIdx = normalizedContent.indexOf(normalizedSelected);
           if (normIdx !== -1) {
-             // This is a rough estimation, but better than no highlight
              globalStartIdx = normIdx; 
           }
         }
@@ -439,9 +554,11 @@ const CommentsModule = (() => {
         className: 'comment-trigger',
         onClick: (e) => _onTriggerClick(e)
       });
-      
+
       floatingTrigger = triggerBtn.render();
       document.body.appendChild(floatingTrigger);
+    } else {
+      floatingTrigger.style.display = 'flex';
     }
     
     document.addEventListener('mouseup', _handleSelection);
@@ -515,15 +632,16 @@ const CommentsModule = (() => {
     const lineStart = parseInt(selectedLines[0].dataset.line, 10);
     const lineEnd   = parseInt(selectedLines[selectedLines.length - 1].dataset.line, 10);
     const context = _getSelectionContext(range);
-    formTarget = { 
-      lineStart, 
-      lineEnd, 
-      startLineContent: _getLineText(selectedLines[0]), 
+    formTarget = {
+      lineStart,
+      lineEnd,
+      startLineContent: _getLineText(selectedLines[0]),
       endLineContent: _getLineText(selectedLines[selectedLines.length - 1]),
       selectedText,
       context,
       headingPath: _getHeadingPath(lineStart)
     };
+    _highlightPendingLines(lineStart, lineEnd, selectedText, context);
     _showForm(floatingTrigger);
   }
 
@@ -559,6 +677,82 @@ const CommentsModule = (() => {
 
   // ── Show / hide form ─────────────────────────────────────────
 
+  function _highlightPendingLines(lineStart, lineEnd, selectedText, context) {
+    if (!selectedText) return;
+    const end = lineEnd || lineStart;
+    for (let i = lineStart; i <= end; i++) {
+      const lineEls = document.querySelectorAll(`.md-line[data-line="${i}"]`);
+      const lineEl = lineEls[lineEls.length - 1] || null;
+      if (!lineEl) continue;
+
+      const fullContent = lineEl.textContent;
+      const walker = document.createTreeWalker(lineEl, NodeFilter.SHOW_TEXT, null, false);
+      const textNodes = [];
+      let currentOffset = 0;
+      let node;
+      while (node = walker.nextNode()) {
+        textNodes.push({ node, start: currentOffset, end: currentOffset + node.textContent.length, content: node.textContent });
+        currentOffset += node.textContent.length;
+      }
+
+      // Find best match position using context scoring
+      let globalStartIdx = -1;
+      let bestScore = -1;
+      let searchIdx = 0;
+      while ((searchIdx = fullContent.indexOf(selectedText, searchIdx)) !== -1) {
+        let score = 0;
+        if (context) {
+          const cleanBefore = (context.before || '').replace(/^\.\.\./, '').trim();
+          const cleanAfter  = (context.after  || '').replace(/\.\.\.$/, '').trim();
+          const actualBefore = fullContent.substring(Math.max(0, searchIdx - 60), searchIdx).trim();
+          const actualAfter  = fullContent.substring(searchIdx + selectedText.length, searchIdx + selectedText.length + 60).trim();
+          let bm = 0;
+          for (let k = 1; k <= Math.min(cleanBefore.length, actualBefore.length); k++) {
+            if (cleanBefore[cleanBefore.length - k] === actualBefore[actualBefore.length - k]) bm++; else break;
+          }
+          let am = 0;
+          for (let k = 0; k < Math.min(cleanAfter.length, actualAfter.length); k++) {
+            if (cleanAfter[k] === actualAfter[k]) am++; else break;
+          }
+          score = bm + am;
+        }
+        if (score > bestScore) { bestScore = score; globalStartIdx = searchIdx; }
+        searchIdx += selectedText.length || 1;
+      }
+      if (globalStartIdx === -1) globalStartIdx = fullContent.indexOf(selectedText);
+      if (globalStartIdx === -1) continue;
+
+      const globalEndIdx = globalStartIdx + selectedText.length;
+
+      for (let ti = textNodes.length - 1; ti >= 0; ti--) {
+        const ni = textNodes[ti];
+        const iStart = Math.max(ni.start, globalStartIdx);
+        const iEnd   = Math.min(ni.end, globalEndIdx);
+        if (iStart >= iEnd) continue;
+        const lStart = iStart - ni.start;
+        const lEnd   = iEnd - ni.start;
+        const frag = document.createDocumentFragment();
+        if (lStart > 0) frag.appendChild(document.createTextNode(ni.content.substring(0, lStart)));
+        const mark = document.createElement('mark');
+        mark.className = 'comment-pending-range';
+        mark.textContent = ni.content.substring(lStart, lEnd);
+        frag.appendChild(mark);
+        if (lEnd < ni.content.length) frag.appendChild(document.createTextNode(ni.content.substring(lEnd)));
+        ni.node.parentNode.replaceChild(frag, ni.node);
+      }
+    }
+  }
+
+  function _clearPendingLines() {
+    document.querySelectorAll('mark.comment-pending-range').forEach(mark => {
+      const parent = mark.parentNode;
+      if (parent) {
+        parent.replaceChild(document.createTextNode(mark.textContent), mark);
+        parent.normalize();
+      }
+    });
+  }
+
   function _showForm(anchorBtn, mode = 'empty', initialText = '') {
     const formComp = CommentFormComponent.getInstance();
     formComp.show(anchorBtn, mode, initialText);
@@ -567,6 +761,7 @@ const CommentsModule = (() => {
   function _hideForm() {
     const formComp = CommentFormComponent.getInstance();
     formComp.hide();
+    _clearPendingLines();
     formTarget = null;
     activeCommentId = null;
     _renderList();
@@ -574,11 +769,12 @@ const CommentsModule = (() => {
 
   async function _submitForm(text) {
     if (!text || !formTarget) return;
+    _clearPendingLines(); // Must run before save() inserts comment-range marks into DOM
     await save(
-      formTarget.lineStart, 
-      formTarget.lineEnd, 
-      formTarget.startLineContent, 
-      formTarget.endLineContent, 
+      formTarget.lineStart,
+      formTarget.lineEnd,
+      formTarget.startLineContent,
+      formTarget.endLineContent,
       text,
       formTarget.selectedText,
       formTarget.context,
@@ -704,7 +900,7 @@ const CommentsModule = (() => {
     if (!data) return;
     formTarget = data;
     const targetLine = document.querySelector(`.md-line[data-line="${data.lineStart}"]`);
-
+    if (data.lineStart) _highlightPendingLines(data.lineStart, data.lineEnd, data.selectedText, data.context);
     _showForm(targetLine || document.body);
   }
 

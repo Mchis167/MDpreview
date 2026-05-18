@@ -253,6 +253,8 @@ const CollectModule = (() => {
       });
       trigger = triggerBtn.render();
       document.body.appendChild(trigger);
+    } else {
+      trigger.style.display = 'flex';
     }
     
     document.addEventListener('mouseup', _handleSelection);
@@ -338,12 +340,35 @@ const CollectModule = (() => {
     // UI is handled by RightSidebar organism
   }
 
+  function captureSelectionData() {
+    const selection = window.getSelection();
+    if (selection.isCollapsed || selection.toString().trim() === '') {
+      return null;
+    }
+    const text = selection.toString().trim();
+    const allLines = Array.from(document.querySelectorAll('.md-line'));
+    const selectedLines = allLines.filter(el => selection.containsNode(el, true));
+    let lineStart = null;
+    let lineEnd = null;
+    if (selectedLines.length > 0) {
+      lineStart = parseInt(selectedLines[0].dataset.line, 10);
+      lineEnd   = parseInt(selectedLines[selectedLines.length - 1].dataset.line, 10);
+    }
+    return {
+      text,
+      lineStart,
+      lineEnd,
+      selectedText: text
+    };
+  }
+
   return {
     init,
     loadForFile,
     applyCollectMode,
     removeCollectMode,
-    addIdea
+    addIdea,
+    captureSelectionData
   };
 })();
 window.CollectModule = CollectModule;

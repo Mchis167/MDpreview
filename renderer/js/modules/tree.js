@@ -304,7 +304,9 @@ const TreeModule = (() => {
     const filterVisible = (nodes) => {
       return nodes.reduce((acc, node) => {
         // Filter out system assets folder
-        if (node.type === 'directory' && node.name === 'assets' && node.path === 'assets') return acc;
+        if (node.type === 'directory' && 
+            (node.name === '_md-workspace-assets' || node.name === 'assets') && 
+            (node.path === '_md-workspace-assets' || node.path === 'assets')) return acc;
         
         if (hiddenPaths.has(node.path)) return acc;
         const newNode = { ...node };

@@ -4,10 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Not Committed] — 2026-05-18 17:30
 
+### 🚀 Added
+- **Empty Folder Indicator** — Thêm chỉ báo trực quan cho các thư mục rỗng (không chứa bất kỳ file `.md` nào trực tiếp hoặc gián tiếp) bằng cách làm mờ thư mục (`opacity: 0.5` / `.is-empty` class) và thay thế mũi tên chevron bằng khoảng trống thẳng hàng để tránh các click dư thừa từ người dùng.
+
 ### 🔧 Changed
 - **Asset Folder Rename** — Đổi tên folder chứa asset workspace từ `assets/` sang `_md-workspace-assets/` để tránh xung đột với folder code của project người dùng (Vue, React, v.v.).
 - **Asset URL Path** — Server route đổi từ `/assets` sang `/_md-workspace-assets`; URL trong markdown và `relativePath` trả về từ server/IPC đồng nhất dùng `/_md-workspace-assets/filename` — không còn mapping ngầm.
-- **Files thay đổi**: `server/services/asset-service.js`, `server/index.js`, `server/routes/assets.js`, `server/routes/file-ops.js`, `server/routes/worker-publish.js`, `electron/ipc/assets.js`, `electron/ipc/attachments.js`, `renderer/js/services/monaco-hover-service.js`, `renderer/js/services/monaco-service.js`, `renderer/js/services/monaco-validation-service.js`, `renderer/js/services/attachment-service.js`, `renderer/js/services/publishing/worker-publish-adapter.js`, `renderer/js/components/organisms/asset-panel/asset-panel-item.js`, `renderer/js/components/organisms/asset-detail-panel.js`.
+- **Auto-hide Assets Folder** — Tự động ẩn hoàn toàn thư mục tài nguyên `_md-workspace-assets` (và legacy `assets`) khỏi cây thư mục Tree View ở cả phía backend (`EXCLUDE_DIRS` trong `files.js`) và frontend (`filterVisible` trong `tree.js`) để tối ưu hóa quét file và làm sạch giao diện.
+- **Files thay đổi**: `server/services/asset-service.js`, `server/index.js`, `server/routes/assets.js`, `server/routes/file-ops.js`, `server/routes/worker-publish.js`, `electron/ipc/assets.js`, `electron/ipc/attachments.js`, `renderer/js/services/monaco-hover-service.js`, `renderer/js/services/monaco-service.js`, `renderer/js/services/monaco-validation-service.js`, `renderer/js/services/attachment-service.js`, `renderer/js/services/publishing/worker-publish-adapter.js`, `renderer/js/components/organisms/asset-panel/asset-panel-item.js`, `renderer/js/components/organisms/asset-detail-panel.js`, `renderer/js/components/molecules/tree-item.js`, `renderer/css/design-system/organisms/tree-view.css`, `renderer/js/modules/tree.js`, `server/routes/files.js`.
 - **Không thay đổi**: CF Worker remote URL `/{slug}/assets/{filename}` và KV key `pub/{slug}/assets/{filename}` giữ nguyên — public API đã deploy.
 
 ---

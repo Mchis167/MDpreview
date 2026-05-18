@@ -34,14 +34,15 @@ class TreeItemComponent {
         const isActive = node.path === this.state.currentFile;
         const isSelected = this.state.selectedPaths.includes(node.path) && !isActive;
         const isRenaming = node.path === this.state.renamingPath;
+        const isEmptyDir = node.type === 'directory' && !this._hasMdFiles(node);
 
         const itemEl = document.createElement('div');
-        itemEl.className = `tree-item ${node.type === 'directory' ? 'tree-item-directory' : ''} ${isActive ? 'active' : ''} ${isSelected ? 'selected' : ''} ${isRenaming ? 'renaming' : ''} ${node.isHidden ? 'is-hidden' : ''}`.trim();
+        itemEl.className = `tree-item ${node.type === 'directory' ? 'tree-item-directory' : ''} ${isActive ? 'active' : ''} ${isSelected ? 'selected' : ''} ${isRenaming ? 'renaming' : ''} ${node.isHidden ? 'is-hidden' : ''} ${isEmptyDir ? 'is-empty' : ''}`.trim();
         itemEl.style.setProperty('--stagger', idx);
         itemEl.dataset.path = node.path;
 
         const icon = node.type === 'directory' ? this.svgs.folder : this.svgs.file;
-        const chevron = node.type === 'directory' ? this.svgs.chevron : '<div class="tree-item-spacer"></div>';
+        const chevron = (node.type === 'directory' && !isEmptyDir) ? this.svgs.chevron : '<div class="tree-item-spacer"></div>';
 
         if (isRenaming) {
             const displayValue = this._formatName(node.name, node.type);
@@ -185,6 +186,12 @@ class TreeItemComponent {
         }
 
         return wrapper;
+    }
+
+    _hasMdFiles(node) {
+        if (node.type === 'file') return true;
+        if (!node.children || node.children.length === 0) return false;
+        return node.children.some(child => this._hasMdFiles(child));
     }
 
     _formatName(name, type) {

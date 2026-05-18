@@ -451,7 +451,7 @@ const DraftModule = (() => {
     const viewer = MarkdownViewer.getInstance();
     if (viewer) {
       viewer.setState({
-        mode: AppState.currentMode === 'edit' ? 'edit' : 'read',
+        mode: ['edit', 'comment', 'collect'].includes(AppState.currentMode) ? AppState.currentMode : 'read',
         file: draftId,
         content: data.draftContent,
         html: data.renderedHtml,

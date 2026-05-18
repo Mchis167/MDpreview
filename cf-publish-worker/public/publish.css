@@ -11,7 +11,7 @@
  *   renderer/css/design-system/molecules/mockup-frames.css
  *   renderer/css/design-system/molecules/carousel.css
  * Regenerate: npm run build:publish-assets
- * Generated:  2026-05-18T00:38:15.244Z
+ * Generated:  2026-05-18T07:20:17.670Z
  */
 
 /* ============================================================
@@ -1791,7 +1791,7 @@ body.no-scroll {
 }
 
 .mockup-phone-content.is-scrollable {
-  aspect-ratio: 393 / 852;
+  aspect-ratio: 393 / 844;
   overflow-y: auto;
   overflow-x: hidden;
   cursor: grab;

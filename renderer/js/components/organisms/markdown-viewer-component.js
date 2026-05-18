@@ -163,6 +163,12 @@ class MarkdownViewerComponent {
   _handleModeSwitch(oldMode, newMode) {
     if (!this.mount) return;
 
+    // Đồng bộ trạng thái mode toàn cục
+    if (window.AppState) {
+      AppState.currentMode = newMode;
+      AppState.commentMode = (newMode === 'comment');
+    }
+
     if (this.viewport) {
       const previewEl = this.viewport.querySelector('#md-content');
       const editorEl = this.viewport.querySelector('#edit-viewer');
@@ -195,8 +201,13 @@ class MarkdownViewerComponent {
     if ((oldMode === 'comment' || newMode === 'empty') && window.CommentsModule) window.CommentsModule.removeCommentMode();
     if ((oldMode === 'collect' || newMode === 'empty') && window.CollectModule) window.CollectModule.removeCollectMode();
 
-    if (newMode === 'comment' && window.CommentsModule) window.CommentsModule.applyCommentMode();
-    if (newMode === 'collect' && window.CollectModule) window.CollectModule.applyCollectMode();
+    if (newMode === 'comment' && window.CommentsModule) {
+      window.CommentsModule.applyCommentMode();
+    }
+    if (newMode === 'collect' && window.CollectModule) {
+      window.CollectModule.loadForFile(this.state.file || AppState.currentFile);
+      window.CollectModule.applyCollectMode();
+    }
 
     this._updateFloatingButtons();
 
@@ -541,53 +552,57 @@ class MarkdownViewerComponent {
     // IMPORTANT: Capture selection data NOW while it still exists.
     // Clicking on context menu items often clears the selection.
     let capturedData = null;
+    let capturedCommentData = null;
+    let capturedCollectData = null;
     if (hasSelection) {
       capturedData = window.SyncService ? window.SyncService.captureReadViewSyncData() : null;
+      capturedCommentData = window.CommentsModule && window.CommentsModule.captureSelectionData ? window.CommentsModule.captureSelectionData() : null;
+      capturedCollectData = window.CollectModule && window.CollectModule.captureSelectionData ? window.CollectModule.captureSelectionData() : null;
     }
 
     // 1. Selection Actions
-    if (hasSelection && capturedData) {
-
-      items.push({
-        label: 'Add Comment',
-        icon: 'message-circle-plus',
-        onClick: () => {
-
-          if (window.CommentsModule) {
-
-            this._switchToMode('comment');
-            // Wait for DOM to switch and module to activate
-            setTimeout(() => {
-
-              window.CommentsModule.externalTrigger(capturedData);
-            }, 150);
+    if (hasSelection) {
+      if (capturedCommentData) {
+        items.push({
+          label: 'Add Comment',
+          icon: 'message-circle-plus',
+          onClick: () => {
+            if (window.CommentsModule) {
+              this._switchToMode('comment');
+              // Wait for DOM to switch and module to activate
+              setTimeout(() => {
+                window.CommentsModule.externalTrigger(capturedCommentData);
+              }, 150);
+            }
           }
-        }
-      });
-      items.push({
-        label: 'Add to Collect',
-        icon: 'bookmark',
-        onClick: () => {
-
-          if (window.CollectModule) {
-
-            this._switchToMode('collect');
-            window.CollectModule.addIdea(
-              capturedData.selectedText,
-              capturedData.lineStart,
-              capturedData.lineEnd,
-              capturedData.selectedText
-            );
+        });
+      }
+      if (capturedCollectData) {
+        items.push({
+          label: 'Add to Collect',
+          icon: 'bookmark',
+          onClick: () => {
+            if (window.CollectModule) {
+              this._switchToMode('collect');
+              window.CollectModule.addIdea(
+                capturedCollectData.text,
+                capturedCollectData.lineStart,
+                capturedCollectData.lineEnd,
+                capturedCollectData.selectedText
+              );
+            }
           }
-        }
-      });
-      items.push({
-        label: 'Edit Selection',
-        icon: 'pen-line',
-        onClick: () => {
-          this._switchToMode('edit', capturedData);
-        }
-      });
+        });
+      }
+      if (capturedData) {
+        items.push({
+          label: 'Edit Selection',
+          icon: 'pen-line',
+          onClick: () => {
+            this._switchToMode('edit', capturedData);
+          }
+        });
+      }
       items.push({ divider: true });
     } else if (hasSelection) {
       items.push({
