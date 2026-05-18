@@ -64,7 +64,7 @@ window.AssetPanelItem = (() => {
         icon: 'maximize',
         disabled: type === 'broken',
         onClick: () => {
-          const src = `/assets/${encodeURIComponent(item.name)}`;
+          const src = `/_md-workspace-assets/${encodeURIComponent(item.name)}`;
           if (window.ZoomSystem) window.ZoomSystem.open(src, 'image');
         }
       },
@@ -157,7 +157,7 @@ window.AssetPanelItem = (() => {
         preview.appendChild(banIcon);
       } else {
         const img = document.createElement('img');
-        const src = `/assets/${encodeURIComponent(item.name)}?thumbnail=true`;
+        const src = `/_md-workspace-assets/${encodeURIComponent(item.name)}?thumbnail=true`;
         img.className = 'ds-asset-image-lazy';
         img.setAttribute('data-src', src);
         preview.appendChild(img);
@@ -275,7 +275,7 @@ window.AssetPanelItem = (() => {
       } else {
         const img = document.createElement('img');
         img.className = 'ds-asset-image-lazy';
-        img.setAttribute('data-src', `/assets/${encodeURIComponent(item.name)}?thumbnail=true`);
+        img.setAttribute('data-src', `/_md-workspace-assets/${encodeURIComponent(item.name)}?thumbnail=true`);
         thumb.appendChild(img);
         _observeImage(img, contentArea);
       }

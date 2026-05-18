@@ -122,7 +122,7 @@
 }
 
 .mockup-phone-content.is-scrollable {
-  aspect-ratio: 393 / 852;
+  aspect-ratio: 393 / 844;
   overflow-y: auto;
   overflow-x: hidden;
   cursor: grab;

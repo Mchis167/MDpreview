@@ -87,13 +87,12 @@ const WorkerPublishAdapter = (() => {
       for (const [originalSrc, _assetInfo] of Object.entries(assetResult.resolved)) {
         try {
           // 1. Fetch asset từ local server
-          // Đảm bảo không bị lặp lại /assets/assets/
           let assetFetchUrl = originalSrc;
           if (!assetFetchUrl.startsWith('/')) {
-            if (assetFetchUrl.startsWith('assets/')) {
+            if (assetFetchUrl.startsWith('_md-workspace-assets/')) {
               assetFetchUrl = '/' + assetFetchUrl;
             } else {
-              assetFetchUrl = '/assets/' + assetFetchUrl;
+              assetFetchUrl = '/_md-workspace-assets/' + assetFetchUrl;
             }
           }
 

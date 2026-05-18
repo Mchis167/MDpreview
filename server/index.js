@@ -54,11 +54,11 @@ app.use('/wasm-assets', express.static(path.join(__dirname, '../assets/wasm')));
 app.use('/monaco', express.static(path.join(__dirname, '../node_modules/monaco-editor')));
 app.use('/jsquash', express.static(path.join(__dirname, '../node_modules/@jsquash')));
 app.use('/testing', express.static(path.join(__dirname, '../renderer/testing')));
-app.use('/assets', (req, res, next) => {
+app.use('/_md-workspace-assets', (req, res, next) => {
   if (currentWatchDir) {
     try {
       const decodedPath = decodeURIComponent(req.path).replace(/^\//, '');
-      const assetsDir = path.join(currentWatchDir, 'assets');
+      const assetsDir = path.join(currentWatchDir, '_md-workspace-assets');
       const workspaceAssetPath = resolvePath(assetsDir, decodedPath);
 
       if (fs.existsSync(workspaceAssetPath)) {
@@ -152,7 +152,7 @@ function startWatcher(dir) {
         triggerReindex(dir);
         io.emit('assets-changed');
       }
-      if (fp.includes(path.sep + 'assets' + path.sep)) {
+      if (fp.includes(path.sep + '_md-workspace-assets' + path.sep)) {
         io.emit('assets-changed');
       }
     })
@@ -162,7 +162,7 @@ function startWatcher(dir) {
         triggerReindex(dir);
         io.emit('assets-changed');
       }
-      if (fp.includes(path.sep + 'assets' + path.sep)) {
+      if (fp.includes(path.sep + '_md-workspace-assets' + path.sep)) {
         io.emit('assets-changed');
       }
     })
@@ -173,19 +173,19 @@ function startWatcher(dir) {
         triggerReindex(dir);
         io.emit('assets-changed');
       }
-      if (fp.includes(path.sep + 'assets' + path.sep)) {
+      if (fp.includes(path.sep + '_md-workspace-assets' + path.sep)) {
         io.emit('assets-changed');
       }
     })
     .on('addDir',    (dp) => {
       io.emit('tree-changed');
-      if (dp.endsWith(path.sep + 'assets')) {
+      if (dp.endsWith(path.sep + '_md-workspace-assets')) {
         io.emit('assets-changed');
       }
     })
     .on('unlinkDir', (dp) => {
       io.emit('tree-changed');
-      if (dp.endsWith(path.sep + 'assets')) {
+      if (dp.endsWith(path.sep + '_md-workspace-assets')) {
         io.emit('assets-changed');
       }
     });

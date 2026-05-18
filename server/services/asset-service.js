@@ -13,7 +13,7 @@ class AssetService {
    */
   constructor(vaultRoot) {
     this.vaultRoot = vaultRoot;
-    this.assetsDir = path.join(vaultRoot, 'assets');
+    this.assetsDir = path.join(vaultRoot, '_md-workspace-assets');
   }
 
   /**
@@ -117,7 +117,7 @@ class AssetService {
    */
   _extractAssetRefsFromTokens(tokens, relativePath, startLine, refsMap) {
     let currentLine = startLine;
-    const imgRegex = /(!\[.*?\]\s*\((\/?assets\/([^)]+))\))|(<img\s+[^>]*src=["'](\/?assets\/([^"']+))["'])/g;
+    const imgRegex = /(!\[.*?\]\s*\((\/?_md-workspace-assets\/([^)]+))\))|(<img\s+[^>]*src=["'](\/?_md-workspace-assets\/([^"']+))["'])/g;
 
     for (const token of tokens) {
       const newlines = (token.raw.match(/\n/g) || []).length;
@@ -134,7 +134,7 @@ class AssetService {
           // Skip
         } else if (token.type === 'image') {
           // marked tách riêng image token
-          const assetName = token.href.replace(/^(\/)?assets\//, '');
+          const assetName = token.href.replace(/^(\/)?_md-workspace-assets\//, '');
           this._addRef(assetName, relativePath, currentLine, token.raw, refsMap);
         } else if (token.type === 'html') {
           // Chỉ xử lý HTML nếu không phải comment và không nằm trong các thẻ cấm hiển thị image
@@ -227,7 +227,7 @@ class AssetService {
       
       if (stat.isDirectory()) {
         // Bỏ qua các thư mục không cần thiết và chính thư mục assets
-        if (file !== 'node_modules' && file !== '.git' && file !== 'assets') {
+        if (file !== 'node_modules' && file !== '.git' && file !== '_md-workspace-assets') {
           await this._getAllMdFiles(filePath, fileList);
         }
       } else if (file.endsWith('.md')) {
@@ -304,8 +304,8 @@ class AssetService {
     const escapedOldName = escapeRegExp(oldName);
     const escapedOldNameEncoded = escapeRegExp(encodeURIComponent(oldName));
 
-    const mdRegex = new RegExp(`(!\\[.*?\\]\\s*\\(\\/?assets\\/)(${escapedOldName}|${escapedOldNameEncoded})(\\))`, 'g');
-    const htmlRegex = new RegExp(`(<img\\s+[^>]*src=["']\\/?assets\\/)(${escapedOldName}|${escapedOldNameEncoded})(["'])`, 'g');
+    const mdRegex = new RegExp(`(!\\[.*?\\]\\s*\\(\\/?_md-workspace-assets\\/)(${escapedOldName}|${escapedOldNameEncoded})(\\))`, 'g');
+    const htmlRegex = new RegExp(`(<img\\s+[^>]*src=["']\\/?_md-workspace-assets\\/)(${escapedOldName}|${escapedOldNameEncoded})(["'])`, 'g');
 
     for (const file of allMdFiles) {
       try {
@@ -371,8 +371,8 @@ class AssetService {
       const escapedNameEncoded = escapeRegExp(encodeURIComponent(name));
 
       // Regex để xóa toàn bộ tag ![]() hoặc <img>
-      const mdRegex = new RegExp(`!\\[.*?\\]\\s*\\(\\/?assets\\/(${escapedName}|${escapedNameEncoded})\\)`, 'g');
-      const htmlRegex = new RegExp(`<img\\s+[^>]*src=["']\\/?assets\\/(${escapedName}|${escapedNameEncoded})["'][^>]*\\/?>`, 'g');
+      const mdRegex = new RegExp(`!\\[.*?\\]\\s*\\(\\/?_md-workspace-assets\\/(${escapedName}|${escapedNameEncoded})\\)`, 'g');
+      const htmlRegex = new RegExp(`<img\\s+[^>]*src=["']\\/?_md-workspace-assets\\/(${escapedName}|${escapedNameEncoded})["'][^>]*\\/?>`, 'g');
 
       for (const file of allMdFiles) {
         try {
@@ -455,8 +455,8 @@ class AssetService {
       const escapedName = escapeRegExp(b.name);
       const escapedNameEncoded = escapeRegExp(encodeURIComponent(b.name));
       return {
-        md: new RegExp(`!\\[.*?\\]\\s*\\(\\/?assets\\/(${escapedName}|${escapedNameEncoded})\\)`, 'g'),
-        html: new RegExp(`<img\\s+[^>]*src=["']\\/?assets\\/(${escapedName}|${escapedNameEncoded})["'][^>]*\\/?>`, 'g')
+        md: new RegExp(`!\\[.*?\\]\\s*\\(\\/?_md-workspace-assets\\/(${escapedName}|${escapedNameEncoded})\\)`, 'g'),
+        html: new RegExp(`<img\\s+[^>]*src=["']\\/?_md-workspace-assets\\/(${escapedName}|${escapedNameEncoded})["'][^>]*\\/?>`, 'g')
       };
     });
 

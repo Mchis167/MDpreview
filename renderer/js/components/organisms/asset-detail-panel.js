@@ -118,7 +118,7 @@ window.AssetDetailPanel = (function() {
         preview.appendChild(banIcon);
       } else {
         const img = document.createElement('img');
-        img.src = `/assets/${encodeURIComponent(_currentItem.name)}`;
+        img.src = `/_md-workspace-assets/${encodeURIComponent(_currentItem.name)}`;
         img.onclick = () => {
           if (window.ZoomSystem) window.ZoomSystem.open(img.src, 'image');
         };

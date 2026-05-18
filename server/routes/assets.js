@@ -33,10 +33,10 @@ router.delete('/assets/:name', async (req, res) => {
 
   if (!watchDir) return res.status(400).json({ error: 'No workspace set' });
 
-  const assetPath = path.join(watchDir, 'assets', name);
+  const assetPath = path.join(watchDir, '_md-workspace-assets', name);
 
   // Security: Ngăn chặn directory traversal
-  const relative = path.relative(path.join(watchDir, 'assets'), assetPath);
+  const relative = path.relative(path.join(watchDir, '_md-workspace-assets'), assetPath);
   if (relative.includes('..') || path.isAbsolute(relative)) {
     return res.status(403).json({ error: 'Forbidden path' });
   }
@@ -80,7 +80,7 @@ router.post('/assets/upload', async (req, res) => {
   if (!watchDir) return res.status(400).json({ error: 'No workspace set' });
   if (!files || !Array.isArray(files)) return res.status(400).json({ error: 'No files provided' });
 
-  const assetsDir = path.join(watchDir, 'assets');
+  const assetsDir = path.join(watchDir, '_md-workspace-assets');
   if (!fs.existsSync(assetsDir)) {
     fs.mkdirSync(assetsDir, { recursive: true });
   }

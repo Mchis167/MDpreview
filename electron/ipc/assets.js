@@ -9,7 +9,7 @@ function register(ipcMain, dialog) {
 
 
       
-      const assetsDir = path.join(vaultPath, 'assets');
+      const assetsDir = path.join(vaultPath, '_md-workspace-assets');
       if (!fs.existsSync(assetsDir)) {
         fs.mkdirSync(assetsDir, { recursive: true });
       }
@@ -115,7 +115,7 @@ function _getAllMdFiles(dir, fileList = []) {
     const filePath = path.join(dir, file);
     const stat = fs.statSync(filePath);
     if (stat.isDirectory()) {
-      if (file !== 'node_modules' && file !== '.git' && file !== 'assets') {
+      if (file !== 'node_modules' && file !== '.git' && file !== '_md-workspace-assets') {
         _getAllMdFiles(filePath, fileList);
       }
     } else if (file.endsWith('.md')) {

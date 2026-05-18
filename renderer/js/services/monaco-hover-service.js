@@ -28,10 +28,10 @@ const MonacoHoverService = (() => {
       return trimmed;
     }
 
-    // Strip leading /assets/, assets/, or /
+    // Strip leading /_md-workspace-assets/, _md-workspace-assets/, or /
     let path = trimmed;
-    if (path.startsWith('/assets/')) path = path.slice(8);
-    else if (path.startsWith('assets/')) path = path.slice(7);
+    if (path.startsWith('/_md-workspace-assets/')) path = path.slice(22);
+    else if (path.startsWith('_md-workspace-assets/')) path = path.slice(21);
     else if (path.startsWith('/')) path = path.slice(1);
 
     // Remove query / fragment
@@ -39,7 +39,7 @@ const MonacoHoverService = (() => {
 
     // Encode each segment individually
     const encoded = path.split('/').map(seg => encodeURIComponent(decodeURIComponent(seg))).join('/');
-    return `/assets/${encoded}`;
+    return `/_md-workspace-assets/${encoded}`;
   }
 
   /**

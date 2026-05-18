@@ -103,7 +103,7 @@ router.post('/worker-publish-asset', async (req, res) => {
       }
     } else {
       // 2. Nếu không có dữ liệu, đọc từ disk (chế độ Electron truyền thống)
-      const assetPath = path.join(watchDir, 'assets', assetName);
+      const assetPath = path.join(watchDir, '_md-workspace-assets', assetName);
       if (!fs.existsSync(assetPath)) {
         return res.status(404).json({ error: `Asset not found: ${assetName}` });
       }

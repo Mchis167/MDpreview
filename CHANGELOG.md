@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Not Committed] — 2026-05-18 17:30
+
+### 🔧 Changed
+- **Asset Folder Rename** — Đổi tên folder chứa asset workspace từ `assets/` sang `_md-workspace-assets/` để tránh xung đột với folder code của project người dùng (Vue, React, v.v.).
+- **Asset URL Path** — Server route đổi từ `/assets` sang `/_md-workspace-assets`; URL trong markdown và `relativePath` trả về từ server/IPC đồng nhất dùng `/_md-workspace-assets/filename` — không còn mapping ngầm.
+- **Files thay đổi**: `server/services/asset-service.js`, `server/index.js`, `server/routes/assets.js`, `server/routes/file-ops.js`, `server/routes/worker-publish.js`, `electron/ipc/assets.js`, `electron/ipc/attachments.js`, `renderer/js/services/monaco-hover-service.js`, `renderer/js/services/monaco-service.js`, `renderer/js/services/monaco-validation-service.js`, `renderer/js/services/attachment-service.js`, `renderer/js/services/publishing/worker-publish-adapter.js`, `renderer/js/components/organisms/asset-panel/asset-panel-item.js`, `renderer/js/components/organisms/asset-detail-panel.js`.
+- **Không thay đổi**: CF Worker remote URL `/{slug}/assets/{filename}` và KV key `pub/{slug}/assets/{filename}` giữ nguyên — public API đã deploy.
+
+---
+
 ## [2.7.0] — 2026-05-18 14:52
 
 ### 🚀 Added

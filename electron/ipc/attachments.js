@@ -16,7 +16,7 @@ function register(ipcMain) {
       if (!buffer) throw new Error('Image buffer is required');
 
       // 1. Setup Assets Directory
-      const assetsDir = path.join(vaultPath, 'assets');
+      const assetsDir = path.join(vaultPath, '_md-workspace-assets');
       if (!fs.existsSync(assetsDir)) {
         fs.mkdirSync(assetsDir, { recursive: true });
       }
@@ -54,7 +54,7 @@ function register(ipcMain) {
       // Return relative path starting with /assets/ as per plan
       return { 
         success: true, 
-        relativePath: `/assets/${fileName}`,
+        relativePath: `/_md-workspace-assets/${fileName}`,
         fileName: fileName
       };
 

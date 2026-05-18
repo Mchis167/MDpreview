@@ -236,7 +236,7 @@ const AttachmentService = (() => {
           return;
         }
 
-        const links = validAssets.map(name => `![${name}](/assets/${encodeURIComponent(name)})`).join('\n');
+        const links = validAssets.map(name => `![${name}](/_md-workspace-assets/${encodeURIComponent(name)})`).join('\n');
 
         if (pos) {
           _insertLinkAtPositionSmart(links, pos);
@@ -390,8 +390,8 @@ const AttachmentService = (() => {
 
     const content = model.getValue();
 
-    // Regex for Markdown ![alt](/assets/name) and HTML <img src="/assets/name">
-    const assetRegex = /(!\[.*?\]\s*\((\/?assets\/([^)]+))\))|(<img\s+[^>]*src=["'](\/?assets\/([^"']+))["'])/g;
+    // Regex for Markdown ![alt](/_md-workspace-assets/name) and HTML <img src="/_md-workspace-assets/name">
+    const assetRegex = /(!\[.*?\]\s*\(\/?_md-workspace-assets\/([^)]+)\))|(<img\s+[^>]*src=["']\/?_md-workspace-assets\/([^"']+)["'])/g;
 
     const edits = [];
     let match;
@@ -416,7 +416,7 @@ const AttachmentService = (() => {
 
         edits.push({
           range: new monaco.Range(startPos.lineNumber, startPos.column, endPos.lineNumber, endPos.column),
-          text: `assets/${newName}`
+          text: `_md-workspace-assets/${newName}`
         });
 
         count++;
@@ -516,9 +516,9 @@ const AttachmentService = (() => {
         }
       } else {
         if (window.MonacoService) {
-          const newPath = (payload.newName.startsWith('assets/') || payload.newName.startsWith('/assets/'))
+          const newPath = (payload.newName.startsWith('_md-workspace-assets/') || payload.newName.startsWith('/_md-workspace-assets/'))
             ? payload.newName
-            : `assets/${payload.newName}`;
+            : `_md-workspace-assets/${payload.newName}`;
           window.MonacoService.executeEdit(range, newPath);
           if (window.showToast) window.showToast('Link replaced with existing asset', 'success');
         }
@@ -625,7 +625,7 @@ const AttachmentService = (() => {
    * Reveal the asset in OS file explorer
    */
   async function revealAsset(url) {
-    if (!url.startsWith('/assets/') && !url.startsWith('assets/')) return;
+    if (!url.startsWith('/_md-workspace-assets/') && !url.startsWith('_md-workspace-assets/')) return;
     if (window.electronAPI.isElectron) {
       const absPath = await window.electronAPI.getAbsolutePath(url);
       window.electronAPI.revealInFinder(absPath);
@@ -664,9 +664,9 @@ const AttachmentService = (() => {
       onConfirm: async (selectedNames) => {
         const names = Array.isArray(selectedNames) ? selectedNames : [selectedNames];
         const links = names.map(name => {
-          const newPath = (name.startsWith('assets/') || name.startsWith('/assets/'))
+          const newPath = (name.startsWith('_md-workspace-assets/') || name.startsWith('/_md-workspace-assets/'))
             ? name
-            : `assets/${name}`;
+            : `_md-workspace-assets/${name}`;
           return `![image](${newPath})`;
         }).join('\n');
 

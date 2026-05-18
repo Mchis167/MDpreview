@@ -194,7 +194,7 @@ router.post('/file-ops/save-attachment', express.raw({ type: 'application/octet-
   if (!watchDir) return res.status(400).json({ error: 'No workspace set' });
 
   try {
-    const assetsDir = path.join(watchDir, 'assets');
+    const assetsDir = path.join(watchDir, '_md-workspace-assets');
     if (!fs.existsSync(assetsDir)) {
       fs.mkdirSync(assetsDir, { recursive: true });
     }
@@ -206,9 +206,9 @@ router.post('/file-ops/save-attachment', express.raw({ type: 'application/octet-
 
     fs.writeFileSync(fullPath, req.body);
 
-    res.json({ 
-      success: true, 
-      relativePath: `/assets/${fileName}`,
+    res.json({
+      success: true,
+      relativePath: `/_md-workspace-assets/${fileName}`,
       fileName: fileName
     });
   } catch (e) {
@@ -221,7 +221,7 @@ router.post('/file-ops/check-asset', (req, res) => {
   const { name, size, lastModified, watchDir } = req.body;
   if (!watchDir || !name) return res.status(400).json({ error: 'Missing info' });
 
-  const assetsDir = path.join(watchDir, 'assets');
+  const assetsDir = path.join(watchDir, '_md-workspace-assets');
   if (!fs.existsSync(assetsDir)) return res.json({ exists: false });
 
   // Look for a file with the same name
@@ -233,9 +233,9 @@ router.post('/file-ops/check-asset', (req, res) => {
     const timeMatch = Math.abs(stats.mtimeMs - lastModified) < 2000;
 
     if (sizeMatch && timeMatch) {
-      return res.json({ 
-        exists: true, 
-        relativePath: `/assets/${name}` 
+      return res.json({
+        exists: true,
+        relativePath: `/_md-workspace-assets/${name}`
       });
     }
   }

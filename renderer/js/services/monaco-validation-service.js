@@ -105,7 +105,7 @@ window.MonacoValidationService = (() => {
     
     // Regex for Markdown links: ![alt](/assets/name.ext)
     // and HTML tags: <img src="/assets/name.ext">
-    const ASSET_REGEX = /(!\[.*?\]\s*\((\/?assets\/([^)]+))\))|(<img\s+[^>]*src=["'](\/?assets\/([^"']+))["'])/g;
+    const ASSET_REGEX = /(!\[.*?\]\s*\(\/?_md-workspace-assets\/([^)]+)\))|(<img\s+[^>]*src=["']\/?_md-workspace-assets\/([^"']+)["'])/g;
     
     let match;
     while ((match = ASSET_REGEX.exec(content)) !== null) {
