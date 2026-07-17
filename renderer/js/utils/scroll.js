@@ -174,7 +174,7 @@ const ScrollModule = (() => {
 
     let targetScrollTop = el.scrollTop;
     let isAnimating = false;
-    const friction = 0.08;
+    const friction = 0.18;
 
     el.addEventListener('wheel', (e) => {
       // 💡 Only intercept con lăn chuột vật lý (integer deltaY)
@@ -185,6 +185,11 @@ const ScrollModule = (() => {
       }
 
       e.preventDefault();
+
+      // Sync targetScrollTop nếu animation đã dừng (e.g. sau file switch + restore)
+      if (!isAnimating) {
+        targetScrollTop = el.scrollTop;
+      }
 
       // Temporarily suppress scroll sync during active inertia phase to avoid jank
       window._suppressScrollSync = true;

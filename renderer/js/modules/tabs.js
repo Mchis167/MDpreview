@@ -64,7 +64,9 @@ const TabsModule = (function () {
           title: 'Fullscreen',
           icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`,
           onClick: () => {
-            if (!document.fullscreenElement) {
+            if (window.electronAPI?.toggleFullscreen) {
+              window.electronAPI.toggleFullscreen();
+            } else if (!document.fullscreenElement) {
               document.documentElement.requestFullscreen();
             } else {
               document.exitFullscreen();
@@ -79,11 +81,18 @@ const TabsModule = (function () {
       switchWorkspace(AppState.currentWorkspace.id);
     }
 
-    // Handle full-screen icon sync
-    document.addEventListener('fullscreenchange', () => {
-      const isFS = !!document.fullscreenElement;
-      document.body.classList.toggle('is-fullscreen', isFS);
-    });
+    // Handle full-screen icon sync.
+    // Native (Electron) fullscreen reports via IPC; web uses the HTML5 event.
+    if (window.electronAPI?.onFullscreenChange) {
+      window.electronAPI.onFullscreenChange((isFS) => {
+        document.body.classList.toggle('is-fullscreen', isFS);
+      });
+    } else {
+      document.addEventListener('fullscreenchange', () => {
+        const isFS = !!document.fullscreenElement;
+        document.body.classList.toggle('is-fullscreen', isFS);
+      });
+    }
 
     // Handle Sidebar toggle icon initial state (already handled by TabBar init via localStorage in TabBarComponent)
 
@@ -127,6 +136,18 @@ const TabsModule = (function () {
 
   // Exposed global for toolbar.js to call if needed (fallback)
   window.toggleSidebar = toggleSidebar;
+
+  // Ensures the sidebar is expanded, then reveals/expands the given folder in the tree.
+  // Used by Home's "Pinned Folder" cards, which can't be opened like documents.
+  window.revealSidebarFolder = function (folderPath) {
+    const sidebarWrap = document.getElementById('sidebar-left-wrap');
+    if (sidebarWrap && sidebarWrap.classList.contains('sidebar-collapsed')) {
+      toggleSidebar();
+    }
+    if (window.TreeModule) {
+      requestAnimationFrame(() => window.TreeModule.revealFolder(folderPath));
+    }
+  };
 
   function saveToStorage() {
     if (typeof AppState === 'undefined' || !AppState.currentWorkspace) return;

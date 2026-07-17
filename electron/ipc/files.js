@@ -6,8 +6,14 @@ const clipboardEx = require('electron-clipboard-ex');
 function register(ipcMain) {
   ipcMain.handle('read-file', async (event, filePath) => {
     try {
-      if (!fs.existsSync(filePath)) throw new Error('File not found');
-      return { success: true, content: fs.readFileSync(filePath, 'utf8') };
+      // File tree paths are relative to the workspace; resolve against watchDir.
+      // File tree paths are relative to the workspace; resolve against watchDir.
+      const { getWatchDir } = require('../main');
+      const fullPath = path.isAbsolute(filePath)
+        ? filePath
+        : path.resolve(getWatchDir() || '', filePath);
+      if (!fs.existsSync(fullPath)) throw new Error('File not found');
+      return { success: true, content: fs.readFileSync(fullPath, 'utf8') };
     } catch (error) {
       return { success: false, error: error.message };
     }

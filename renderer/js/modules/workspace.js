@@ -43,6 +43,10 @@ const WorkspaceModule = (() => {
 
     if (ws) {
       if (window.electronAPI) {
+        // Mark this watch-dir change as self-initiated so our own socket
+        // 'workspace-changed' handler does NOT call setNoFile() and race
+        // against the active-file restoration done by TabsModule below.
+        window.__wsChangeSelfInitiated = true;
         await window.electronAPI.setWatchDir(ws.path);
       }
       TreeModule.load();

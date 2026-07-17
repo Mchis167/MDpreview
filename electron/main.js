@@ -37,7 +37,27 @@ async function createWindow() {
   mainWindow.loadURL(`http://localhost:${port}`);
 
   mainWindow.on('closed', () => { mainWindow = null; });
+
+  // Forward native fullscreen state changes to the renderer so the UI can sync.
+  // Native fullscreen (unlike the HTML5 Fullscreen API) does NOT exit on Esc,
+  // which keeps the app's own Esc-based shortcuts intact.
+  mainWindow.on('enter-full-screen', () => {
+    mainWindow.webContents.send('fullscreen-changed', true);
+  });
+  mainWindow.on('leave-full-screen', () => {
+    mainWindow.webContents.send('fullscreen-changed', false);
+  });
 }
+
+// --- IPC: Native fullscreen control ---
+ipcMain.handle('toggle-fullscreen', () => {
+  if (!mainWindow) return false;
+  const next = !mainWindow.isFullScreen();
+  mainWindow.setFullScreen(next);
+  return next;
+});
+
+ipcMain.handle('is-fullscreen', () => mainWindow ? mainWindow.isFullScreen() : false);
 
 // --- Dock menu (macOS) ---
 if (process.platform === 'darwin') {
@@ -138,7 +158,7 @@ require('./ipc/worker-publish').register(ipcMain);
 require('./ipc/workspace').register(ipcMain);
 require('./ipc/comments').register(ipcMain);
 require('./ipc/files').register(ipcMain);
-require('./ipc/wiki').register(ipcMain);
+require('./ipc/wiki').register(ipcMain, () => serverModule);
 require('./ipc/attachments').register(ipcMain);
 require('./ipc/assets').register(ipcMain, dialog);
 

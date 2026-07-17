@@ -24,6 +24,7 @@ window.AppState = {
     bgImage: localStorage.getItem('md-bg-image') || '',
     textZoom: parseInt(localStorage.getItem('md-text-zoom') || '100', 10),
     codeZoom: parseInt(localStorage.getItem('md-code-zoom') || '100', 10),
+    editorFontScale: parseInt(localStorage.getItem('md-editor-font-scale') || '100', 10),
     showHidden: localStorage.getItem('md-show-hidden') === 'true',
     hideEmptyFolders: localStorage.getItem('md-hide-empty') === 'true',
     flatView: localStorage.getItem('md-flat-view') === 'true',
@@ -379,6 +380,17 @@ function initSocket() {
   });
 
   AppState.socket.on('workspace-changed', () => {
+    if (window.__wsChangeSelfInitiated) {
+      // This event was emitted by our own setWatchDir (startup restore or
+      // in-app workspace switch). The active file is being restored by
+      // TabsModule.switchWorkspace; calling setNoFile() here would race
+      // against it and leave the Home view showing while a tab is active.
+      window.__wsChangeSelfInitiated = false;
+      if (typeof TreeModule !== 'undefined') TreeModule.load();
+      if (typeof RecentlyViewedModule !== 'undefined') RecentlyViewedModule.render();
+      if (typeof WikiService !== 'undefined') WikiService.init();
+      return;
+    }
     TreeModule.load();
     setNoFile();
     RecentlyViewedModule.render();
@@ -499,6 +511,12 @@ async function loadFile(filePath, options = {}) {
       html: data.html,
       _source: 'loadFile'
     });
+    // Clear the skeleton state. When the file is unchanged, setState goes
+    // through the lightweight update() branch (no full re-render), so the
+    // 'is-loading' class added above is never recreated/cleared and would
+    // otherwise render the skeleton shimmer on top of the real content.
+    const freshInner = document.querySelector('#md-content .md-content-inner');
+    if (freshInner) freshInner.classList.remove('is-loading');
   } else if (mdContent && inner) {
     // Legacy fallback
     inner.innerHTML = data.html;
@@ -667,8 +685,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (scrollEl) scrollEl.scrollTo({ top: scrollEl.scrollHeight, behavior: 'smooth' });
       },
       'toggle-fullscreen': () => {
-        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-        else document.exitFullscreen();
+        // Prefer native Electron fullscreen: it does NOT exit on Esc, so the
+        // app's own Esc shortcuts keep working. Fall back to HTML5 API on web.
+        if (window.electronAPI?.toggleFullscreen) {
+          window.electronAPI.toggleFullscreen();
+        } else if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          document.exitFullscreen();
+        }
       },
       'save-file': () => window.EditorModule?.save(),
       'copy-markdown': () => {
