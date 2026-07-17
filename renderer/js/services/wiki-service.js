@@ -59,7 +59,12 @@
 
       // 3. Smart Path Resolution (Ưu tiên xử lý đường dẫn tương đối trước khi check Index)
       if (pathPart.startsWith('./') || pathPart.startsWith('../') || pathPart.endsWith('.md')) {
-        const resolvedPath = this._resolvePath(currentRelativePath, pathPart);
+        const isRootRelative = !pathPart.startsWith('./') && !pathPart.startsWith('../') && index && (
+          (index.all_paths && index.all_paths.includes(pathPart)) ||
+          (index.path_to_id && index.path_to_id[pathPart] !== undefined)
+        );
+
+        const resolvedPath = isRootRelative ? pathPart : this._resolvePath(currentRelativePath, pathPart);
         const id = index ? index.path_to_id[resolvedPath] : null;
 
         return {

@@ -92,6 +92,32 @@
     text-decoration: underline;
 }
 
+.md-render-body a.wiki-codespan-link {
+    text-decoration: none;
+}
+
+.md-render-body a.wiki-codespan-link code {
+    border-bottom: 1px dashed var(--ds-accent);
+}
+
+.md-render-body a.wiki-codespan-link:hover code {
+    border-bottom-style: solid;
+}
+
+.md-render-body a.wiki-wikilink-link {
+    border-bottom: 1px dashed var(--ds-accent);
+    text-decoration: none;
+}
+
+.md-render-body a.wiki-wikilink-link:hover {
+    border-bottom-style: solid;
+}
+
+.md-render-body .wiki-wikilink-unresolved {
+    color: var(--ds-text-muted);
+    opacity: 0.5;
+}
+
 .md-render-body code {
     font-family: var(--ds-font-family-code);
     font-size: 0.85em;

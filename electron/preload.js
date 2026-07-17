@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   deleteWorkspace:    (id)             => ipcRenderer.invoke('delete-workspace', id),
   setActiveWorkspace: (id)             => ipcRenderer.invoke('set-active-workspace', id),
   renameWorkspace:    (id, name)       => ipcRenderer.invoke('rename-workspace', { id, name }),
+  updateWorkspaceWiki: (id, wikiScanner) => ipcRenderer.invoke('update-workspace-wiki', { id, wikiScanner }),
 
   // Comments
   getComments:    (wsId, file)             => ipcRenderer.invoke('get-comments', wsId, file),
@@ -52,9 +53,25 @@ contextBridge.exposeInMainWorld('electronAPI', {
     purgeBroken: (vaultPath) => ipcRenderer.invoke('assets:purge-broken', vaultPath),
   },
   
+  wikiAPI: {
+    getStatus: (workspaceId)        => ipcRenderer.invoke('wiki:get-status', workspaceId),
+    enable:    (workspaceId, path)  => ipcRenderer.invoke('wiki:enable',     workspaceId, path),
+    disable:   (workspaceId)        => ipcRenderer.invoke('wiki:disable',    workspaceId),
+    rescan:    (workspaceId, path)  => ipcRenderer.invoke('wiki:rescan',     workspaceId, path),
+    remove:    (workspaceId, path)  => ipcRenderer.invoke('wiki:remove',     workspaceId, path),
+  },
+  
   isElectron: true,
 
-  
+  // Native fullscreen (does not exit on Esc, preserving app shortcuts)
+  toggleFullscreen: () => ipcRenderer.invoke('toggle-fullscreen'),
+  isFullscreen:     () => ipcRenderer.invoke('is-fullscreen'),
+  onFullscreenChange: (cb) => {
+    const handler = (_event, isFS) => cb(isFS);
+    ipcRenderer.on('fullscreen-changed', handler);
+    return () => ipcRenderer.removeListener('fullscreen-changed', handler);
+  },
+
   // Custom
   rebuildApp: () => ipcRenderer.send('rebuild-app'),
   openExternal: (url) => ipcRenderer.invoke('open-external', url)

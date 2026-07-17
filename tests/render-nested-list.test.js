@@ -21,6 +21,7 @@ const script = new Function('require', 'module', 'exports', '__dirname', renderC
 const mockModule = { exports: {} };
 const mockRequire = (id) => {
     if (id.includes('md-renderer-core')) return require('../renderer/js/services/md-renderer-core.js');
+    if (id.startsWith('.')) return require(path.resolve(path.dirname(renderPath), id));
     return require(id);
 };
 

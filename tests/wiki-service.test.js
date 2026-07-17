@@ -41,6 +41,15 @@ describe('WikiService - Renderer Side', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     
+    // Mock AppState workspace config to enable wiki scanner in test
+    global.AppState = {
+      currentWorkspace: {
+        wikiScanner: {
+          enabled: true
+        }
+      }
+    };
+    
     // Mock successful index fetch
     global.fetch.mockResolvedValue({
       ok: true,
@@ -89,6 +98,13 @@ describe('WikiService - Renderer Side', () => {
       expect(result.type).toBe('internal');
       expect(result.resolvedPath).toBe('fileA.md');
       expect(result.id).toBe('doc-a');
+    });
+
+    it('should classify root-relative internal links ending in .md without resolving them relatively', () => {
+      const result = global.WikiService.classifyLink('dir1/fileB.md', 'some/other/subfolder/fileC.md');
+      expect(result.type).toBe('internal');
+      expect(result.resolvedPath).toBe('dir1/fileB.md');
+      expect(result.id).toBe('doc-b');
     });
 
     it('should return unknown for non-existent paths/IDs', () => {

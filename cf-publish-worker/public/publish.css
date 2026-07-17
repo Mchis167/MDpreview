@@ -11,7 +11,7 @@
  *   renderer/css/design-system/molecules/mockup-frames.css
  *   renderer/css/design-system/molecules/carousel.css
  * Regenerate: npm run build:publish-assets
- * Generated:  2026-05-18T07:20:17.670Z
+ * Generated:  2026-07-11T17:57:51.431Z
  */
 
 /* ============================================================
@@ -938,6 +938,32 @@
 
 .md-render-body a:hover {
     text-decoration: underline;
+}
+
+.md-render-body a.wiki-codespan-link {
+    text-decoration: none;
+}
+
+.md-render-body a.wiki-codespan-link code {
+    border-bottom: 1px dashed var(--ds-accent);
+}
+
+.md-render-body a.wiki-codespan-link:hover code {
+    border-bottom-style: solid;
+}
+
+.md-render-body a.wiki-wikilink-link {
+    border-bottom: 1px dashed var(--ds-accent);
+    text-decoration: none;
+}
+
+.md-render-body a.wiki-wikilink-link:hover {
+    border-bottom-style: solid;
+}
+
+.md-render-body .wiki-wikilink-unresolved {
+    color: var(--ds-text-muted);
+    opacity: 0.5;
 }
 
 .md-render-body code {

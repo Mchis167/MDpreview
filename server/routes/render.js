@@ -1,10 +1,87 @@
 const express = require('express');
 const router = express.Router();
 const fs = require('fs');
+const path = require('path');
 const { resolvePath } = require('../utils/path-util');
 const { marked } = require('marked');
 const matter = require('gray-matter');
 const { sanitizeHtml, renderMermaidBlock, highlightCodeBlock, wrapInTableWrapper } = require('../../renderer/js/services/md-renderer-core.js');
+
+function loadWikiIndex(watchDir) {
+  try {
+    const indexPath = path.join(watchDir, '.wiki-index.json');
+    if (!fs.existsSync(indexPath)) {
+      return null;
+    }
+    return JSON.parse(fs.readFileSync(indexPath, 'utf8'));
+  } catch (err) {
+    console.error(`[WikiIndex] Failed to load index: ${err.message}`);
+    return null;
+  }
+}
+
+function commonPrefixDepth(pathA, pathB) {
+  const partsA = pathA.split('/');
+  const partsB = pathB.split('/');
+  let depth = 0;
+  for (let i = 0; i < Math.min(partsA.length, partsB.length); i++) {
+    if (partsA[i] === partsB[i]) depth++;
+    else break;
+  }
+  return depth;
+}
+
+function resolveWikiTarget(text, currentFilePath, wikiIndex) {
+  if (!wikiIndex) return null;
+  if (text.includes('{') || text.includes('}')) return null;
+
+  // 1. Exact relative path match (any indexed file)
+  if (wikiIndex.all_paths && wikiIndex.all_paths.includes(text)) return text;
+  // fallback cho index cũ chưa có all_paths
+  if (wikiIndex.path_to_id[text]) return text;
+
+  // 2. ID match
+  if (!text.includes('/') && !text.includes('.') && wikiIndex.id_to_path[text]) {
+    return wikiIndex.id_to_path[text];
+  }
+
+  // 3. Alias match
+  if (wikiIndex.alias_to_path && wikiIndex.alias_to_path[text]) {
+    return wikiIndex.alias_to_path[text];
+  }
+
+  // 4. Relative path resolution from current file
+  if (text.startsWith('./') || text.startsWith('../')) {
+    const dir = currentFilePath ? currentFilePath.replace(/\/[^/]+$/, '') : '';
+    const normalized = path.posix.normalize(dir + '/' + text);
+    const allPaths = wikiIndex.all_paths || Object.keys(wikiIndex.path_to_id);
+    if (allPaths.includes(normalized)) return normalized;
+  }
+
+  // 5. Filename-only nearest-first — scan all_paths (kể cả file không có id)
+  const allPaths = wikiIndex.all_paths || Object.keys(wikiIndex.path_to_id);
+  const suffix = '/' + text;
+  const candidates = allPaths.filter(p => p === text || p.endsWith(suffix));
+
+  if (candidates.length === 1) return candidates[0];
+  if (candidates.length > 1 && currentFilePath) {
+    const currentDir = currentFilePath.replace(/\/[^/]+$/, '');
+    return candidates.reduce((best, candidate) => {
+      const candidateDir = candidate.replace(/\/[^/]+$/, '');
+      const bestDir = best.replace(/\/[^/]+$/, '');
+      const scoreC = commonPrefixDepth(currentDir, candidateDir);
+      const scoreBest = commonPrefixDepth(currentDir, bestDir);
+      if (scoreC !== scoreBest) return scoreC > scoreBest ? candidate : best;
+      return candidateDir.split('/').length <= bestDir.split('/').length ? candidate : best;
+    });
+  }
+
+  return null;
+}
+
+function resolveCodespan(text, currentFilePath, wikiIndex) {
+  return resolveWikiTarget(text, currentFilePath, wikiIndex);
+}
 
 // Configure marked with custom renderer for premium blocks
 const renderer = new marked.Renderer();
@@ -34,6 +111,25 @@ renderer.listitem = (text, task, checked) => {
 
 // Pre-processing is now handled during token rendering to preserve character offsets.
 
+const wikilinkExtension = {
+  name: 'wikilink',
+  level: 'inline',
+  start(src) { return src.indexOf('[['); },
+  tokenizer(src) {
+    const match = src.match(/^\[\[([^\]]+)\]\]/);
+    if (match) {
+      const parts = match[1].split('|');
+      return {
+        type: 'wikilink',
+        raw: match[0],
+        target: parts[0].trim(),
+        display: parts[1] ? parts[1].trim() : parts[0].trim()
+      };
+    }
+  },
+  renderer() { return ''; }
+};
+
 const carouselExtension = {
   name: 'carousel',
   level: 'block',
@@ -52,7 +148,7 @@ marked.use({
   langPrefix: 'hljs language-',
   gfm: true,
   breaks: true,
-  extensions: [carouselExtension]
+  extensions: [wikilinkExtension, carouselExtension]
 });
 
 /**
@@ -75,7 +171,7 @@ function slugify(text) {
 /**
  * Helper to render inline tokens with character offset metadata.
  */
-function renderInlineTokens(tokens, originalSource, baseOffset) {
+function renderInlineTokens(tokens, originalSource, baseOffset, wikiIndex = null, currentFilePath = null) {
   let html = '';
   let lastOffset = baseOffset;
   let currentLine = originalSource.substring(0, baseOffset).split('\n').length;
@@ -109,23 +205,37 @@ function renderInlineTokens(tokens, originalSource, baseOffset) {
         // Find the inner content offset: skip the opening delimiter (**text** or __text__)
         const strongDelimLen = token.raw.startsWith('***') ? 3 : 2;
         const strongInnerStart = start + strongDelimLen;
-        html += `<strong ${data}>${renderInlineTokens(token.tokens, originalSource, strongInnerStart)}</strong>`;
+        html += `<strong ${data}>${renderInlineTokens(token.tokens, originalSource, strongInnerStart, wikiIndex, currentFilePath)}</strong>`;
         break;
       }
       case 'em': {
         // Find the inner content offset: skip the opening delimiter (*text* or _text_)
         const emDelimLen = token.raw.startsWith('**') ? 2 : 1;
         const emInnerStart = start + emDelimLen;
-        html += `<em ${data}>${renderInlineTokens(token.tokens, originalSource, emInnerStart)}</em>`;
+        html += `<em ${data}>${renderInlineTokens(token.tokens, originalSource, emInnerStart, wikiIndex, currentFilePath)}</em>`;
         break;
       }
-      case 'codespan':
-        // token.text is already escaped by marked
-        html += `<code class="hljs" ${data}>${token.text}</code>`;
+      case 'wikilink': {
+        const wikilinkPath = resolveWikiTarget(token.target, currentFilePath, wikiIndex);
+        if (wikilinkPath) {
+          html += `<a href="${wikilinkPath}" class="wiki-wikilink-link" ${data}>${token.display}</a>`;
+        } else {
+          html += `<span class="wiki-wikilink-unresolved" ${data}>[[${token.target}]]</span>`;
+        }
         break;
+      }
+      case 'codespan': {
+        const resolvedPath = resolveCodespan(token.text, currentFilePath, wikiIndex);
+        if (resolvedPath) {
+          html += `<a href="${resolvedPath}" class="wiki-codespan-link" ${data}><code class="hljs">${token.text}</code></a>`;
+        } else {
+          html += `<code class="hljs" ${data}>${token.text}</code>`;
+        }
+        break;
+      }
       case 'link': {
         const linkInnerStart = start + 1; // skip '['
-        html += `<a href="${token.href}" title="${token.title || ''}" ${data}>${renderInlineTokens(token.tokens, originalSource, linkInnerStart)}</a>`;
+        html += `<a href="${token.href}" title="${token.title || ''}" ${data}>${renderInlineTokens(token.tokens, originalSource, linkInnerStart, wikiIndex, currentFilePath)}</a>`;
         break;
       }
       case 'br':
@@ -133,7 +243,7 @@ function renderInlineTokens(tokens, originalSource, baseOffset) {
         break;
       case 'del': {
         const delInnerStart = start + 2; // skip '~~'
-        html += `<del ${data}>${renderInlineTokens(token.tokens, originalSource, delInnerStart)}</del>`;
+        html += `<del ${data}>${renderInlineTokens(token.tokens, originalSource, delInnerStart, wikiIndex, currentFilePath)}</del>`;
         break;
       }
       case 'image':
@@ -162,7 +272,7 @@ function renderInlineTokens(tokens, originalSource, baseOffset) {
  * @param {number} baseOffset - The character offset where this token set begins.
  * @param {boolean} isTopLevel - If true, wraps output in .md-block.
  */
-function renderTokens(tokens, originalSource, baseOffset, lineStart, isTopLevel = true) {
+function renderTokens(tokens, originalSource, baseOffset, lineStart, isTopLevel = true, wikiIndex = null, currentFilePath = null) {
   let html = '';
   let currentLine = lineStart;
   let lastOffset = baseOffset;
@@ -207,14 +317,15 @@ function renderTokens(tokens, originalSource, baseOffset, lineStart, isTopLevel 
           .replace(/<\/details>/i, '')
           .replace(/<summary>[\s\S]*?<\/summary>/i, '');
 
-        const renderedSummary = marked.parseInline(summaryRaw);
+        const summaryInlineTokens = marked.Lexer.lexInline(summaryRaw);
+        const renderedSummary = renderInlineTokens(summaryInlineTokens, summaryRaw, 0, wikiIndex, currentFilePath);
 
         // Render inner content with proper block wrappers and line numbering support
         // We calculate the inner content's start offset relative to the full raw string
   const innerContentIndex = entireRaw.indexOf(contentRaw);
         const innerBaseOffset = tokenStartOffset + (innerContentIndex !== -1 ? innerContentIndex : 0);
         const innerTokens = marked.lexer(contentRaw);
-        const renderedContent = renderTokens(innerTokens, originalSource, innerBaseOffset, tokenStartLine, true); 
+        const renderedContent = renderTokens(innerTokens, originalSource, innerBaseOffset, tokenStartLine, true, wikiIndex, currentFilePath);
 
         tokenHtml = `<details><summary>${renderedSummary}</summary><div class="md-details-content">${renderedContent}</div></details>`;
         tokenHtml = `<div class="md-line" data-line="${tokenStartLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${tokenHtml}</div>`;
@@ -262,7 +373,7 @@ function renderTokens(tokens, originalSource, baseOffset, lineStart, isTopLevel 
         }
 
         // Inside LI, we set isTopLevel = false to avoid extra <div> wrappers
-        let itemContent = renderTokens(item.tokens || [], originalSource, itemStartOffset, absoluteItemLine, false);
+        let itemContent = renderTokens(item.tokens || [], originalSource, itemStartOffset, absoluteItemLine, false, wikiIndex, currentFilePath);
 
         // Inject visual marker prefix if detected
         if (markerPrefix && !itemContent.includes('md-custom-marker')) {
@@ -294,16 +405,23 @@ function renderTokens(tokens, originalSource, baseOffset, lineStart, isTopLevel 
     // Each <tr> gets its own data-line so scroll sync can target specific rows,
     // not just the first line of the entire table block.
     if (token.type === 'table') {
-      let tableHtml = marked.parser([token]);
-      let trCount = 0;
-      tableHtml = tableHtml.replace(/<tr>/gi, () => {
-        // Header row → tokenStartLine
-        // Separator row is not rendered as <tr> by marked
-        // Data rows → tokenStartLine + 1 (separator) + trCount
-        const line = trCount === 0 ? tokenStartLine : tokenStartLine + 1 + trCount;
-        trCount++;
-        return `<tr data-line="${line}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">`;
-      });
+      const renderCell = (cell) => renderInlineTokens(cell.tokens || [], originalSource, tokenStartOffset, wikiIndex, currentFilePath);
+      const align = (a) => a ? ` style="text-align:${a}"` : '';
+
+      const headerCells = token.header.map((cell, ci) =>
+        `<th${align(token.align[ci])}>${renderCell(cell)}</th>`
+      ).join('');
+      const headerRow = `<tr data-line="${tokenStartLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${headerCells}</tr>`;
+
+      const bodyRows = token.rows.map((row, ri) => {
+        const rowLine = tokenStartLine + 2 + ri; // +1 header +1 separator
+        const cells = row.map((cell, ci) =>
+          `<td${align(token.align[ci])}>${renderCell(cell)}</td>`
+        ).join('');
+        return `<tr data-line="${rowLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${cells}</tr>`;
+      }).join('');
+
+      const tableHtml = wrapInTableWrapper(`<table>\n<thead>\n${headerRow}\n</thead>\n<tbody>\n${bodyRows}\n</tbody>\n</table>`);
       tokenHtml = `<div class="md-line" data-line="${tokenStartLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${tableHtml}</div>`;
       html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${tokenHtml}</div>\n`;
       currentLine = tokenEndLine;
@@ -370,7 +488,7 @@ function renderTokens(tokens, originalSource, baseOffset, lineStart, isTopLevel 
       // Find exact position of heading text after the '#' markers and spaces
       // e.g. "## My Heading" -> level=2, text starts at index 3 ("## " = 3 chars)
       const headingPrefixEnd = tokenStartOffset + level + (originalSource[tokenStartOffset + level] === ' ' ? 1 : 0);
-      const headingContent = token.tokens ? renderInlineTokens(token.tokens, originalSource, headingPrefixEnd) : token.text;
+      const headingContent = token.tokens ? renderInlineTokens(token.tokens, originalSource, headingPrefixEnd, wikiIndex, currentFilePath) : token.text;
       const headingHtml = `<h${level} id="${id}">${headingContent}</h${level}>`;
       tokenHtml = `<div class="md-line" data-line="${tokenStartLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${headingHtml}</div>`;
       html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${tokenHtml}</div>\n`;
@@ -379,7 +497,15 @@ function renderTokens(tokens, originalSource, baseOffset, lineStart, isTopLevel 
     }
 
     // ── Atomic Blocks ──
-    const isAtomic = ['blockquote', 'html'].includes(token.type);
+    if (token.type === 'blockquote') {
+      const innerHtml = renderTokens(token.tokens || [], originalSource, tokenStartOffset, tokenStartLine, false, wikiIndex, currentFilePath);
+      tokenHtml = `<div class="md-line" data-line="${tokenStartLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}"><blockquote>${innerHtml}</blockquote></div>`;
+      html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${tokenHtml}</div>\n`;
+      currentLine = tokenEndLine;
+      continue;
+    }
+
+    const isAtomic = ['html'].includes(token.type);
     if (isAtomic) {
       const atomicHtml = marked.parser([token]);
       tokenHtml = `<div class="md-line" data-line="${tokenStartLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${atomicHtml}</div>`;
@@ -391,8 +517,8 @@ function renderTokens(tokens, originalSource, baseOffset, lineStart, isTopLevel 
 
     // ── Default Paragraphs/Text ──
     let rawHtml = '';
-    if (token.tokens && token.type === 'paragraph') {
-      rawHtml = renderInlineTokens(token.tokens, originalSource, tokenStartOffset);
+    if (token.tokens && (token.type === 'paragraph' || token.type === 'text')) {
+      rawHtml = renderInlineTokens(token.tokens, originalSource, tokenStartOffset, wikiIndex, currentFilePath);
     } else {
       rawHtml = marked.parser([token]);
       if (!isTopLevel) {
@@ -422,7 +548,7 @@ function renderTokens(tokens, originalSource, baseOffset, lineStart, isTopLevel 
 /**
  * Main entry point for rendering markdown with line annotations.
  */
-function renderWithLineNumbers(content) {
+function renderWithLineNumbers(content, wikiIndex = null, currentFilePath = null) {
   // Use gray-matter to cleanly separate frontmatter and body content
   const parsed = matter(content);
   const processedContent = parsed.content;
@@ -436,7 +562,7 @@ function renderWithLineNumbers(content) {
   // CRITICAL: Pass full 'content' (not just body) as originalSource.
   // Monaco receives the full file including frontmatter, so data-src-* offsets
   // must be absolute positions within the FULL file for getPositionAt() to work correctly.
-  const html = renderTokens(tokens, content, bodyStartOffset, 1 + frontmatterLines, true);
+  const html = renderTokens(tokens, content, bodyStartOffset, 1 + frontmatterLines, true, wikiIndex, currentFilePath);
   return sanitizeHtml(html);
 }
 
@@ -451,7 +577,8 @@ router.get('/render', (req, res) => {
   try {
     const fullPath = resolvePath(watchDir, file);
     const content = fs.readFileSync(fullPath, 'utf8');
-    const html = renderWithLineNumbers(content);
+    const wikiIndex = loadWikiIndex(watchDir);
+    const html = renderWithLineNumbers(content, wikiIndex, file);
     const totalLines = content.split('\n').length;
     res.json({ html, file, totalLines, raw: content });
   } catch (err) {

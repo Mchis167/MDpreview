@@ -1,43 +1,102 @@
-function register(ipcMain) {
-  // wiki:getStatus(workspaceId)
-  ipcMain.handle('wiki:get-status', async (_event, _workspaceId) => {
-    // This will be expanded when we have a global state manager for wiki scanners
-    // For now, it's just a placeholder or it reads from the workspace config
-    return { status: 'off' }; 
+const path = require('path');
+const fs = require('fs');
+const WikiIndexer = require('../../server/services/wiki-indexer');
+
+function updateWikiSettings(dataDir, workspaceId, settings) {
+  const workspacesFile = path.join(dataDir, 'workspaces.json');
+  if (!fs.existsSync(workspacesFile)) return;
+  try {
+    const data = JSON.parse(fs.readFileSync(workspacesFile, 'utf8'));
+    const ws = data.workspaces.find(w => w.id === workspaceId);
+    if (ws) {
+      ws.wikiScanner = { ...ws.wikiScanner, ...settings };
+      fs.writeFileSync(workspacesFile, JSON.stringify(data, null, 2), 'utf8');
+    }
+  } catch (err) {
+    console.error('[WikiIPC] Failed to update workspace settings:', err);
+  }
+}
+
+function runScan(getServerModule, workspaceId, wsPath) {
+  const sm = getServerModule();
+  const dataDir = sm ? sm.getDataDir() : null;
+  const indexer = new WikiIndexer(wsPath);
+  indexer.build()
+    .then(() => indexer.buildAgentIndex())
+    .then(() => {
+      if (dataDir) updateWikiSettings(dataDir, workspaceId, {
+        status: 'active',
+        lastScanned: new Date().toISOString(),
+        errorMessage: null
+      });
+    })
+    .catch((err) => {
+      console.error('[WikiIPC] Scan failed:', err);
+      if (dataDir) updateWikiSettings(dataDir, workspaceId, {
+        status: 'error',
+        errorMessage: err.message
+      });
+    });
+}
+
+function register(ipcMain, getServerModule) {
+  ipcMain.handle('wiki:get-status', async (_event, workspaceId) => {
+    const sm = getServerModule();
+    const dataDir = sm ? sm.getDataDir() : null;
+    if (!dataDir) return { status: 'off' };
+    const workspacesFile = path.join(dataDir, 'workspaces.json');
+    try {
+      const data = JSON.parse(fs.readFileSync(workspacesFile, 'utf8'));
+      const ws = data.workspaces.find(w => w.id === workspaceId);
+      return ws?.wikiScanner || { status: 'off' };
+    } catch (_err) {
+      return { status: 'off' };
+    }
   });
 
-  // wiki:enable(workspaceId)
-  ipcMain.handle('wiki:enable', async (event, workspaceId) => {
-    console.log(`[Wiki] Enabling for workspace: ${workspaceId}`);
-    // In Phase 1, this will trigger the actual indexer
-    return { success: true, status: 'active' };
-  });
-
-  // wiki:rescan(workspaceId)
-  ipcMain.handle('wiki:rescan', async (_event, _workspaceId) => {
-    console.log(`[IPC] Rescanning Wiki for workspace: ${_workspaceId}`);
-    
-    // Phase 0 Mock: Wait 3 seconds then notify UI to become active
-    // In Phase 1, this will trigger the real indexer
-    setTimeout(async () => {
-      // In a real scenario, we would emit an event or update the DB
-      // For now, let's just simulate the process
-      console.log(`[IPC] Mock Scan Complete for ${_workspaceId}`);
-    }, 3000);
-
+  ipcMain.handle('wiki:enable', async (_event, workspaceId, wsPath) => {
+    const sm = getServerModule();
+    const dataDir = sm ? sm.getDataDir() : null;
+    if (dataDir) updateWikiSettings(dataDir, workspaceId, { status: 'scanning', enabled: true });
+    runScan(getServerModule, workspaceId, wsPath);
     return { success: true, status: 'scanning' };
   });
 
-  // wiki:disable(workspaceId)
-  ipcMain.handle('wiki:disable', async (event, workspaceId) => {
-    console.log(`[Wiki] Disabling for workspace: ${workspaceId}`);
+  ipcMain.handle('wiki:rescan', async (_event, workspaceId, wsPath) => {
+    const sm = getServerModule();
+    const dataDir = sm ? sm.getDataDir() : null;
+    if (dataDir) updateWikiSettings(dataDir, workspaceId, { status: 'scanning' });
+    runScan(getServerModule, workspaceId, wsPath);
+    return { success: true, status: 'scanning' };
+  });
+
+  ipcMain.handle('wiki:disable', async (_event, workspaceId) => {
+    const sm = getServerModule();
+    const dataDir = sm ? sm.getDataDir() : null;
+    if (dataDir) updateWikiSettings(dataDir, workspaceId, { status: 'inactive', enabled: false });
     return { success: true, status: 'inactive' };
   });
 
-  // wiki:remove(workspaceId)
-  ipcMain.handle('wiki:remove', async (event, workspaceId) => {
-    console.log(`[Wiki] Removing data for workspace: ${workspaceId}`);
-    // In Phase 1, this will delete the .wiki-index.json file
+  ipcMain.handle('wiki:remove', async (_event, workspaceId, wsPath) => {
+    const sm = getServerModule();
+    const dataDir = sm ? sm.getDataDir() : null;
+
+    const toRemove = [
+      path.join(wsPath, '.wiki-index.json'),
+      path.join(wsPath, '.wiki-index.json.bak'),
+      path.join(wsPath, '.wiki-agent-index.json'),
+      path.join(wsPath, '.wiki-agent-index.json.bak'),
+    ];
+    for (const f of toRemove) {
+      try { if (fs.existsSync(f)) fs.unlinkSync(f); } catch (_e) { /* ignore */ }
+    }
+
+    if (dataDir) updateWikiSettings(dataDir, workspaceId, {
+      status: 'off',
+      enabled: false,
+      lastScanned: null,
+      errorMessage: null
+    });
     return { success: true, status: 'off' };
   });
 }
