@@ -154,6 +154,8 @@ if (!/(#browser|#phone):$/.test(before)) return { suggestions: [] };
         };
       }
     });
+
+    if (window.WikiCompletionService) window.WikiCompletionService.register();
   }
 
   return {

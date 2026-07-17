@@ -36,6 +36,13 @@
     },
 
     /**
+     * Trả về wiki index đã cache (null nếu chưa init / wiki tắt).
+     */
+    getIndex() {
+      return index;
+    },
+
+    /**
      * Phân loại một liên kết (href) dựa trên ngữ cảnh file hiện tại.
      * @param {string} href - Giá trị href của link.
      * @param {string} currentRelativePath - Path của file đang hiển thị (relative to vault root).
