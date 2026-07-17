@@ -43,7 +43,8 @@ class ShortcutsComponent {
           { id: 'toggle-publish', label: 'Publish Configuration', keys: ['Mod', 'Alt', 'P'], icon: 'globe', requireFile: true, tags: ['live', 'deploy', 'xuất bản'] },
           { id: 'view-live', label: 'View Live Page', keys: ['Mod', 'Alt', 'L'], icon: 'external-link', requireFile: true, tags: ['browser', 'public', 'xem bản live'] },
           { id: 'export-pdf', label: 'Export as PDF', keys: ['Mod', 'Alt', 'D'], icon: 'download', requireFile: true, tags: ['export', 'print', 'xuất pdf'] },
-          { id: 'export-html', label: 'Export as HTML', keys: ['Mod', 'Alt', 'H'], icon: 'download', requireFile: true, tags: ['export', 'standalone', 'xuất html'] }
+          { id: 'export-html', label: 'Export as HTML', keys: ['Mod', 'Alt', 'H'], icon: 'download', requireFile: true, tags: ['export', 'standalone', 'xuất html'] },
+          { id: 'version-history', label: 'Version History', keys: ['Mod', 'Alt', 'Y'], icon: 'history', requireFile: true, tags: ['snapshots', 'restore', 'lịch sử phiên bản'] }
         ]
       },
       {

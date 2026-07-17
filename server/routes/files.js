@@ -117,6 +117,8 @@ router.post('/file/save', (req, res) => {
 
   try {
     const fullPath = resolvePath(watchDir, filePath);
+    // Snapshot the previous version before overwriting (debounced, never throws)
+    require('../services/history-service').snapshot(watchDir, filePath, fullPath);
     fs.writeFileSync(fullPath, content, 'utf8');
     res.json({ success: true });
   } catch (e) {

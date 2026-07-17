@@ -842,6 +842,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           window.showToast(result.success ? `HTML saved: ${result.path}` : `Export failed: ${result.error}`, result.success ? 'success' : 'error');
         }
       },
+      'version-history': () => {
+        const file = window.AppState?.currentFile;
+        if (file && window.VersionHistoryComponent) window.VersionHistoryComponent.show(file);
+      },
       'keyboard-shortcuts': () => {
         if (window.AppState?.currentMode === 'edit' && window.EditorModule) {
           window.EditorModule.triggerQuickCommand();

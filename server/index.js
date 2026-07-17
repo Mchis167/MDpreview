@@ -139,6 +139,7 @@ app.use('/api', require('./routes/handoff'));
 app.use('/api', require('./routes/worker-publish'));
 app.use('/api', require('./routes/publish-cache'));
 app.use('/api', require('./routes/search'));
+app.use('/api', require('./routes/history'));
 
 // --- File watcher ---
 function startWatcher(dir) {

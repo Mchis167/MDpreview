@@ -137,7 +137,7 @@ class WikiIndexer {
       const filePath = path.join(dir, file);
       const stat = await fs.promises.stat(filePath);
       if (stat.isDirectory()) {
-        if (file !== 'node_modules' && file !== '.git') {
+        if (file !== 'node_modules' && file !== '.git' && file !== '_md-workspace-assets') {
           await this._getAllMdFiles(filePath, fileList);
         }
       } else if (file.endsWith('.md')) {
