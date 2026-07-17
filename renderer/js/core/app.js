@@ -825,6 +825,23 @@ document.addEventListener('DOMContentLoaded', async () => {
           window.showToast('Document not published yet', 'info');
         }
       },
+      'export-pdf': async () => {
+        const file = window.AppState?.currentFile;
+        if (!file || !window.electronAPI?.exportAPI) return;
+        if (window.showToast) window.showToast('Exporting PDF…', 'info');
+        const result = await window.electronAPI.exportAPI.pdf(file);
+        if (window.showToast && !result.canceled) {
+          window.showToast(result.success ? `PDF saved: ${result.path}` : `Export failed: ${result.error}`, result.success ? 'success' : 'error');
+        }
+      },
+      'export-html': async () => {
+        const file = window.AppState?.currentFile;
+        if (!file || !window.electronAPI?.exportAPI) return;
+        const result = await window.electronAPI.exportAPI.html(file);
+        if (window.showToast && !result.canceled) {
+          window.showToast(result.success ? `HTML saved: ${result.path}` : `Export failed: ${result.error}`, result.success ? 'success' : 'error');
+        }
+      },
       'keyboard-shortcuts': () => {
         if (window.AppState?.currentMode === 'edit' && window.EditorModule) {
           window.EditorModule.triggerQuickCommand();

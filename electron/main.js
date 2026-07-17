@@ -3,6 +3,7 @@ const path = require('path');
 
 let mainWindow;
 let serverModule;
+let serverPort = null;
 
 const gotTheLock = app.requestSingleInstanceLock();
 
@@ -33,6 +34,7 @@ async function createWindow() {
 
   serverModule = require('../server/index');
   const port = await serverModule.start(app.getPath('userData'));
+  serverPort = port;
 
   mainWindow.loadURL(`http://localhost:${port}`);
 
@@ -160,6 +162,7 @@ require('./ipc/comments').register(ipcMain);
 require('./ipc/files').register(ipcMain);
 require('./ipc/wiki').register(ipcMain, () => serverModule);
 require('./ipc/attachments').register(ipcMain);
+require('./ipc/export').register(ipcMain, () => serverPort);
 require('./ipc/assets').register(ipcMain, dialog);
 
 

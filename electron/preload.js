@@ -53,6 +53,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     purgeBroken: (vaultPath) => ipcRenderer.invoke('assets:purge-broken', vaultPath),
   },
   
+  exportAPI: {
+    pdf:  (file) => ipcRenderer.invoke('export:pdf',  { file }),
+    html: (file) => ipcRenderer.invoke('export:html', { file }),
+  },
   wikiAPI: {
     getStatus: (workspaceId)        => ipcRenderer.invoke('wiki:get-status', workspaceId),
     enable:    (workspaceId, path)  => ipcRenderer.invoke('wiki:enable',     workspaceId, path),
