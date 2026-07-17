@@ -252,7 +252,7 @@ function stop() {
   server.close();
 }
 
-module.exports = { start, stop, setWatchDir, getWatchDir: () => currentWatchDir };
+module.exports = { start, stop, setWatchDir, getWatchDir: () => currentWatchDir, getDataDir: () => currentDataDir };
 
 if (require.main === module) {
   start();
