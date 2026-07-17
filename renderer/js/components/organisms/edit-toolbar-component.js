@@ -118,6 +118,11 @@ const EditToolbarComponent = (() => {
       // 2. Spacer to push action group to the right
       toolbar.appendChild(DesignSystem.createElement('div', 'ds-edit-toolbar-spacer'));
 
+      // 2a. Font Scale Control
+      const fontScaleBtn = new window.FontScaleControl().render();
+      toolbar.appendChild(fontScaleBtn);
+      toolbar.appendChild(DesignSystem.createElement('div', 'ds-edit-toolbar-divider'));
+
       // 2. Action Group (Cancel/Save)
       const actionGroup = DesignSystem.createElement('div', 'ds-edit-button-group');
       const cancelBtn = DesignSystem.createButton({

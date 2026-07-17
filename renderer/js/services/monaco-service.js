@@ -4,7 +4,7 @@
  * Pattern: IIFE Singleton
  */
 
-/* global monaco, require */
+/* global monaco, require, AppState */
 
 const MonacoService = (() => {
   'use strict';
@@ -261,7 +261,12 @@ if (!/(#browser|#phone):$/.test(before)) return { suggestions: [] };
         experimentalEditContextEnabled: false
       });
       _model = _editor.getModel();
-      
+
+      // Apply persisted editor font scale, if any
+      if (typeof AppState !== 'undefined' && AppState.settings && AppState.settings.editorFontScale) {
+        this.setFontScale(AppState.settings.editorFontScale);
+      }
+
       // Force layout after a small delay
       setTimeout(() => {
         if (_editor) _editor.layout();
@@ -748,6 +753,25 @@ if (!/(#browser|#phone):$/.test(before)) return { suggestions: [] };
       if (_editor) {
         _editor.layout();
       }
+    },
+
+    /**
+     * Scale the editor font size relative to the design system base size.
+     * lineHeight stays as a multiplier (<=8), so Monaco keeps it proportional
+     * to fontSize automatically; we pass it explicitly for clarity.
+     * @param {number} percent - Scale percentage (e.g. 100 = base size)
+     */
+    setFontScale(percent) {
+      if (!_editor) return;
+      const style = getComputedStyle(document.documentElement);
+      const baseFontSize = parseInt(style.getPropertyValue('--ds-font-sm')) || 12;
+      const scale = (percent || 100) / 100;
+
+      _editor.updateOptions({
+        fontSize: baseFontSize * scale,
+        lineHeight: 1.6
+      });
+      _editor.layout();
     },
 
     /**

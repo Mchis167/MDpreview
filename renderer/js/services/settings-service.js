@@ -1,4 +1,4 @@
-/* global AppState */
+/* global AppState, MonacoService */
 /**
  * SettingsService
  * Centralized logic for managing application settings, theme application,
@@ -16,6 +16,7 @@ const SettingsService = (() => {
     accentColor: { storageKey: 'md-accent-color', type: 'theme' },
     textZoom: { storageKey: 'md-text-zoom', type: 'theme' },
     codeZoom: { storageKey: 'md-code-zoom', type: 'theme' },
+    editorFontScale: { storageKey: 'md-editor-font-scale', type: 'editorFont' },
     fontText: { storageKey: 'md-font-text', type: 'theme' },
     fontCode: { storageKey: 'md-font-code', type: 'theme' },
     bgEnabled: { storageKey: 'md-bg-enabled', type: 'theme' },
@@ -111,6 +112,8 @@ const SettingsService = (() => {
       applyTheme();
     } else if (config.type === 'explorer') {
       if (typeof TreeModule !== 'undefined') TreeModule.load();
+    } else if (config.type === 'editorFont') {
+      if (typeof MonacoService !== 'undefined') MonacoService.setFontScale(value);
     }
 
     // 4. Sync to Server

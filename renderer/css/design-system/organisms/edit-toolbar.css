@@ -39,3 +39,22 @@
   gap: var(--ds-space-sm);
   margin-left: var(--ds-space-2xs);
 }
+
+.ds-font-scale-btn {
+  height: 28px;
+  padding: 0 var(--ds-space-md);
+  border-radius: var(--ds-radius-widget);
+  background: transparent;
+  color: var(--ds-text-secondary);
+  font-size: var(--ds-font-sm);
+  font-weight: 600;
+  font-family: var(--ds-font-family-code);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.ds-font-scale-btn:hover {
+  background: var(--ds-white-a08);
+  color: var(--ds-text-primary);
+  border-color: var(--ds-accent);
+}
