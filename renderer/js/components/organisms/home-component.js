@@ -66,10 +66,14 @@ class HomeComponent {
     // 2. Quick Actions
     container.appendChild(this._renderQuickActions());
     
-    // 2.1 Pinned Documents
+    // 2.1 Pinned Folders (above Pinned Documents)
+    const pinnedFoldersSection = this._renderPinnedFoldersSection();
+    if (pinnedFoldersSection) container.appendChild(pinnedFoldersSection);
+
+    // 2.1.1 Pinned Documents
     const pinnedSection = this._renderPinnedSection();
     if (pinnedSection) container.appendChild(pinnedSection);
-    
+
     // 2.2 Continue Edit
     const continueSection = this._renderContinueEditSection();
     if (continueSection) container.appendChild(continueSection);
@@ -161,15 +165,35 @@ class HomeComponent {
     return group;
   }
 
+  _renderPinnedFoldersSection() {
+    if (typeof PinnedService === 'undefined' || typeof HomeSection === 'undefined') return null;
+    const pinnedFolders = (PinnedService.getPinnedFiles() || []).filter(entry => entry.type === 'folder');
+    if (pinnedFolders.length === 0) return null;
+
+    const items = pinnedFolders.map(entry => ({
+      path: entry.path,
+      type: 'folder',
+      icon: 'folder',
+      subtitle: entry.path,
+      onContextMenu: (e, p) => this._handleCardContextMenu(e, p)
+    }));
+
+    return HomeSection.create({
+      title: 'Pinned Folders',
+      items,
+      className: 'ds-home-pinned-folders-section'
+    });
+  }
+
   _renderPinnedSection() {
     if (typeof PinnedService === 'undefined' || typeof HomeSection === 'undefined') return null;
-    const pinnedFiles = PinnedService.getPinnedFiles() || [];
+    const pinnedFiles = (PinnedService.getPinnedFiles() || []).filter(entry => entry.type !== 'folder');
     if (pinnedFiles.length === 0) return null;
 
-    const items = pinnedFiles.map(path => ({
-      path,
+    const items = pinnedFiles.map(entry => ({
+      path: entry.path,
       icon: 'pin',
-      subtitle: path,
+      subtitle: entry.path,
       onContextMenu: (e, p) => this._handleCardContextMenu(e, p)
     }));
 
@@ -209,7 +233,22 @@ class HomeComponent {
 
   _updatePinnedSection() {
     if (this._isRendering || this._isHiding) return;
-    
+
+    // Pinned Folders (placed right after Quick Actions, above Pinned Documents)
+    const existingFolders = this.mount.querySelector('.ds-home-pinned-folders-section');
+    const newFoldersSection = this._renderPinnedFoldersSection();
+    if (existingFolders) {
+      if (newFoldersSection) {
+        existingFolders.replaceWith(newFoldersSection);
+      } else {
+        existingFolders.remove();
+      }
+    } else if (newFoldersSection) {
+      const quickActions = this.mount.querySelector('.ds-home-quick-actions');
+      if (quickActions) quickActions.after(newFoldersSection);
+    }
+
+    // Pinned Documents (placed after Pinned Folders)
     const existing = this.mount.querySelector('.ds-home-pinned-section');
     const newSection = this._renderPinnedSection();
 
@@ -220,9 +259,12 @@ class HomeComponent {
         existing.remove();
       }
     } else if (newSection) {
-      const quickActions = this.mount.querySelector('.ds-home-quick-actions');
-      if (quickActions) {
-        quickActions.after(newSection);
+      const foldersSection = this.mount.querySelector('.ds-home-pinned-folders-section');
+      if (foldersSection) {
+        foldersSection.after(newSection);
+      } else {
+        const quickActions = this.mount.querySelector('.ds-home-quick-actions');
+        if (quickActions) quickActions.after(newSection);
       }
     }
   }

@@ -597,7 +597,7 @@ const TreeModule = (() => {
             label: window.PinnedService && window.PinnedService.isPinned(node.path) ? 'Unpin from Home' : 'Pin to Home', 
             icon: window.PinnedService && window.PinnedService.isPinned(node.path) ? 'pin-off' : 'pin', 
             onClick: () => {
-              if (window.PinnedService) window.PinnedService.togglePin(node.path);
+              if (window.PinnedService) window.PinnedService.togglePin(node.path, isFolder ? 'folder' : 'file');
             }
           },
             { divider: true },
@@ -878,6 +878,36 @@ const TreeModule = (() => {
         current.classList.add('active');
         
         // 3. Ensure it's scrolled into view
+        requestAnimationFrame(() => {
+          current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+      }
+    });
+  }
+
+  /**
+   * Expand a folder itself (plus all its parents), select it, and scroll it into view.
+   * Used by Home "Pinned Folder" section since folders can't be opened via loadFile.
+   */
+  function revealFolder(folderPath) {
+    if (!folderPath) return;
+
+    // Expand all parents, plus the folder itself (append a fake segment so
+    // _revealPath's "up to segments.length - 1" loop covers folderPath too)
+    const changed = _revealPath(folderPath + '/__self__');
+    if (changed) {
+      localStorage.setItem('mdpreview_expanded_paths', JSON.stringify(state.expandedPaths));
+      render(true);
+    }
+
+    state.selectedPaths = [folderPath];
+    state.lastSelectedPath = folderPath;
+    _syncSelectionUI();
+
+    const trees = document.querySelectorAll('.ds-tree-view');
+    trees.forEach(container => {
+      const current = container.querySelector(`.tree-item[data-path="${folderPath.replace(/"/g, '\\"')}"]`);
+      if (current) {
         requestAnimationFrame(() => {
           current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
@@ -1177,6 +1207,7 @@ const TreeModule = (() => {
       if (node) _handleClick(null, node);
     },
     setActiveFile,
+    revealFolder,
     clear,
     deselectAll,
     syncSelectionFromTabs,

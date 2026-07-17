@@ -14,14 +14,24 @@ const HomeCard = (() => {
    * @param {number} [options.timestamp]
    * @param {string} [options.icon] - Icon name (default: file-text)
    * @param {string} [options.subtitle] - Custom subtitle text
+   * @param {string} [options.type] - 'file' (default) or 'folder'
    * @returns {HTMLElement}
    */
   function create(options = {}) {
-    const { path, timestamp, icon, subtitle, onContextMenu } = options;
+    const { path, timestamp, icon, subtitle, onContextMenu, type } = options;
     if (!path) return null;
+
+    const isFolder = type === 'folder';
 
     const el = DesignSystem.createElement('div', 'ds-home-card');
     el.onclick = () => {
+      if (isFolder) {
+        // Folders have no "open" behavior — just expand/scroll to it in the
+        // sidebar tree and stay on Home (navigating away leaves a blank screen).
+        if (window.revealSidebarFolder) window.revealSidebarFolder(path);
+        else if (window.TreeModule) window.TreeModule.revealFolder(path);
+        return;
+      }
       if (window.loadFile) window.loadFile(path);
     };
 
@@ -33,7 +43,7 @@ const HomeCard = (() => {
 
     // Icon
     const isDraft = path.startsWith('__DRAFT_');
-    const iconName = icon || (isDraft ? 'file-edit' : 'file-text');
+    const iconName = icon || (isFolder ? 'folder' : (isDraft ? 'file-edit' : 'file-text'));
     const iconEl = DesignSystem.createElement('div', 'ds-home-card-icon', {
       html: DesignSystem.getIcon(iconName, { width: 20, height: 20 })
     });

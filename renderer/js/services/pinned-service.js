@@ -1,7 +1,7 @@
 /**
- * PinnedService.js — Logic for managing pinned documents per workspace.
- * 
- * Target: Home screen "Pinned Document" section.
+ * PinnedService.js — Logic for managing pinned documents and folders per workspace.
+ *
+ * Target: Home screen "Pinned Document" / "Pinned Folder" sections.
  * Standard: Atomic Design V2 (Service).
  */
 const PinnedService = (() => {
@@ -15,12 +15,15 @@ const PinnedService = (() => {
     return STORAGE_KEY_PREFIX + ws.id;
   }
 
+  // Normalizes stored entries to { path, type }. Older versions stored a flat
+  // array of path strings (always documents), so plain strings are migrated on read.
   function _getPinnedArray() {
     const key = _getStorageKey();
     if (!key) return [];
     try {
       const data = localStorage.getItem(key);
-      return data ? JSON.parse(data) : [];
+      const raw = data ? JSON.parse(data) : [];
+      return raw.map(entry => (typeof entry === 'string' ? { path: entry, type: 'file' } : entry));
     } catch (_e) {
       return [];
     }
@@ -33,25 +36,25 @@ const PinnedService = (() => {
   function isPinned(path) {
     if (!path) return false;
     const pinned = _getPinnedArray();
-    return pinned.includes(path);
+    return pinned.some(entry => entry.path === path);
   }
 
-  function togglePin(path) {
+  function togglePin(path, type = 'file') {
     if (!path) return;
     const key = _getStorageKey();
     if (!key) return;
 
     let pinned = _getPinnedArray();
-    const index = pinned.indexOf(path);
+    const index = pinned.findIndex(entry => entry.path === path);
 
     if (index > -1) {
       pinned.splice(index, 1);
     } else {
-      pinned.unshift(path); // Newest pins at the top
+      pinned.unshift({ path, type }); // Newest pins at the top
     }
 
     localStorage.setItem(key, JSON.stringify(pinned));
-    
+
     // Notify AppState to save persistent state (server sync)
     if (window.AppState && window.AppState.savePersistentState) {
       window.AppState.savePersistentState();
@@ -67,7 +70,7 @@ const PinnedService = (() => {
     if (!key) return;
 
     let pinned = _getPinnedArray();
-    const index = pinned.indexOf(path);
+    const index = pinned.findIndex(entry => entry.path === path);
     if (index > -1) {
       pinned.splice(index, 1);
       localStorage.setItem(key, JSON.stringify(pinned));
