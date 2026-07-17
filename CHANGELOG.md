@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0] — 2026-07-17
+
+### 🚀 Added
+- **Wikilink Autocomplete**: Gõ `[[` trong Monaco → gợi ý file paths, IDs và aliases từ wiki index (`wiki-completion-service.js`), tự chèn `]]`.
+- **Full-text Content Search**: Mode mới `/5 Content` trong Search Palette — tìm chuỗi trong nội dung mọi file `.md` của workspace qua `/api/search/content` (excerpt theo dòng, chống stale-response).
+- **Export PDF / HTML** (`⌘⌥D` / `⌘⌥H`): Xuất file hiện tại thành PDF (hidden window + `printToPDF`, chờ mermaid render) hoặc HTML standalone (inline tokens + markdown-render CSS). IPC mới `electron/ipc/export.js`.
+- **Version History** (`⌘⌥Y`): Tự động snapshot phiên bản cũ mỗi lần save (debounce 60s, tối đa 30 bản/file, atomic write) vào `_md-workspace-assets/.history`; modal xem danh sách + Restore.
+
+### 🔒 Security
+- **Content-Security-Policy** cho renderer — chặn inline/eval script (lớp phòng thủ XSS chính cho markdown do người dùng nạp).
+- **sanitizeHtml hardened**: Trước đây chỉ strip `on*="…"` nháy kép — bổ sung strip handler nháy đơn/không nháy và `javascript:` URLs trong `href`/`src`.
+
+### 🔧 Changed
+- **Electron 28 → 42**, electron-builder 24 → 26, @electron/rebuild 4.2 (Electron 28 đã EOL; 43 bị chặn bởi node-abi).
+- **marked đồng bộ v12** giữa app và `cf-publish-worker` (trước đó worker dùng v4 — nguy cơ render lệch giữa preview và trang publish); highlight.js đồng bộ 11.11.
+- **Wiki indexer** bỏ qua `_md-workspace-assets` khi quét; gỡ toàn bộ debug `console.log` trong wiki-indexer/render/wiki routes.
+
+### 📎 Plan
+- `ImplementPlan/app-upgrade-master-2026-07-17.md`
+
 ## [Not Committed] — 2026-05-18 17:30
 
 ### 🚀 Added
