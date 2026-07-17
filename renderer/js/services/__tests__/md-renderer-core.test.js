@@ -65,6 +65,18 @@ describe('md-renderer-core', () => {
       expect(result).not.toContain('onload');
     });
 
+    it('should remove unquoted and single-quoted event handlers', () => {
+      expect(sanitizeHtml('<img src=x onerror=alert(1)>')).not.toContain('onerror');
+      expect(sanitizeHtml("<img src=x onerror='alert(1)'>")).not.toContain('onerror');
+      expect(sanitizeHtml('<div onClick = "attack()">x</div>')).not.toContain('onClick');
+    });
+
+    it('should remove javascript: URLs in href/src', () => {
+      expect(sanitizeHtml('<a href="javascript:alert(1)">x</a>')).not.toContain('javascript:');
+      expect(sanitizeHtml("<a href='javascript:alert(1)'>x</a>")).not.toContain('javascript:');
+      expect(sanitizeHtml('<img src=javascript:alert(1)>')).not.toContain('javascript:');
+    });
+
     it('should preserve safe HTML', () => {
       const html = '<h1>Title</h1><p>Safe content</p>';
       const result = sanitizeHtml(html);
@@ -120,16 +132,16 @@ describe('md-renderer-core', () => {
     it('should wrap text in mermaid div', () => {
       const text = 'graph LR\n  A --> B';
       const result = renderMermaidBlock(text);
-      expect(result).toContain('<div class="mermaid">');
+      expect(result).toContain('class="mermaid"');
       expect(result).toContain('</div>');
-      expect(result).toContain('A --> B');
+      expect(result).toContain('A --&gt; B');
     });
 
-    it('should preserve diagram syntax', () => {
+    it('should preserve diagram syntax (HTML-escaped)', () => {
       const text = 'flowchart TD\n  Start --> End';
       const result = renderMermaidBlock(text);
       expect(result).toContain('flowchart TD');
-      expect(result).toContain('Start --> End');
+      expect(result).toContain('Start --&gt; End');
     });
 
     it('should handle empty diagram', () => {
@@ -137,10 +149,10 @@ describe('md-renderer-core', () => {
       expect(result).toContain('class="mermaid"');
     });
 
-    it('should not escape diagram content', () => {
+    it('should escape HTML entities so tags cannot break out', () => {
       const text = 'graph LR\n  A[">"]';
       const result = renderMermaidBlock(text);
-      expect(result).toContain('A[">"]');
+      expect(result).toContain('A["&gt;"]');
     });
   });
 
