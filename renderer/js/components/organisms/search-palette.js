@@ -14,7 +14,8 @@ const SearchPalette = (() => {
   let _results = [];
   let _selectedIndex = -1;
   let _searchTimeout = null;
-  let _searchMode = 'all'; // all, file, directory, shortcut
+  let _searchMode = 'all'; // all, file, directory, shortcut, content
+  let _contentSearchSeq = 0; // discards stale async content-search responses
   const RECENT_SHORTCUTS_KEY = 'mdpreview_recent_shortcuts';
 
   /**
@@ -80,7 +81,10 @@ const SearchPalette = (() => {
     const btnShortcuts = DesignSystem.createButton({ label: '/4  Shortcuts', variant: 'subtitle' });
     btnShortcuts.dataset.mode = 'shortcut';
 
-    options.append(btnAll, btnFiles, btnFolders, btnShortcuts);
+    const btnContent = DesignSystem.createButton({ label: '/5  Content', variant: 'subtitle' });
+    btnContent.dataset.mode = 'content';
+
+    options.append(btnAll, btnFiles, btnFolders, btnShortcuts, btnContent);
 
     // ── Results & Footer ──
     _resultsContainer = DesignSystem.createElement('div', 'palette-results');
@@ -115,7 +119,7 @@ const SearchPalette = (() => {
       const value = e.target.value;
 
       // Slash Command Check
-      const commands = { '/1 ': 'all', '/2 ': 'file', '/3 ': 'directory', '/4 ': 'shortcut' };
+      const commands = { '/1 ': 'all', '/2 ': 'file', '/3 ': 'directory', '/4 ': 'shortcut', '/5 ': 'content' };
       for (const cmd in commands) {
         if (value.startsWith(cmd)) {
           _setSearchMode(commands[cmd]);
@@ -175,7 +179,7 @@ const SearchPalette = (() => {
     if (mode === 'all') {
       badgeContainer.innerHTML = '';
     } else {
-      const labels = { 'file': 'Files', 'directory': 'Folders', 'shortcut': 'Shortcuts' };
+      const labels = { 'file': 'Files', 'directory': 'Folders', 'shortcut': 'Shortcuts', 'content': 'Content' };
       badgeContainer.innerHTML = `<div class="palette-badge">${labels[mode] || mode}</div>`;
     }
 
@@ -195,7 +199,8 @@ const SearchPalette = (() => {
       'all': 'Search files and folders...',
       'file': 'Search files by name...',
       'directory': 'Search folders by name...',
-      'shortcut': 'Search keyboard shortcuts...'
+      'shortcut': 'Search keyboard shortcuts...',
+      'content': 'Search inside file contents...'
     };
     _input.placeholder = placeholders[mode] || 'Search...';
 
@@ -205,7 +210,42 @@ const SearchPalette = (() => {
   /**
    * Handle searching logic
    */
+  async function _onContentSearch(query) {
+    const seq = ++_contentSearchSeq;
+    if (!query || query.trim().length < 2) {
+      _results = [];
+      _selectedIndex = -1;
+      _renderResults(query);
+      return;
+    }
+    try {
+      const resp = await fetch(`/api/search/content?q=${encodeURIComponent(query)}`);
+      if (seq !== _contentSearchSeq) return; // stale response — a newer query is in flight
+      const data = resp.ok ? await resp.json() : { results: [] };
+      if (seq !== _contentSearchSeq) return;
+      _results = (data.results || []).map(r => ({
+        path: r.path,
+        name: r.name,
+        type: 'file',
+        isContent: true,
+        excerpt: r.matches[0] ? `${r.matches[0].line}: ${r.matches[0].excerpt}` : '',
+        matchCount: r.matches.length
+      }));
+      _selectedIndex = _results.length > 0 ? 0 : -1;
+      _renderResults(query);
+    } catch (_err) {
+      if (seq !== _contentSearchSeq) return;
+      _results = [];
+      _selectedIndex = -1;
+      _renderResults(query);
+    }
+  }
+
   function _onSearch(query) {
+    if (_searchMode === 'content') {
+      _onContentSearch(query);
+      return;
+    }
     if (!query) {
       if (_searchMode === 'shortcut') {
         _results = SearchService.searchShortcuts('');
@@ -405,13 +445,15 @@ const SearchPalette = (() => {
 
       const highlightedName = query ? _getHighlightedText(itemData.name, itemData.matchedIndices) : itemData.name;
       const icon = DesignSystem.getIcon(itemData.type === 'directory' ? 'folder' : 'file');
-      const smartPath = _formatSmartPath(itemData.path);
+      const subline = itemData.isContent
+        ? _escapeHtml(itemData.excerpt) + (itemData.matchCount > 1 ? ` (+${itemData.matchCount - 1} more)` : '')
+        : _formatSmartPath(itemData.path);
 
       item.innerHTML = `
         <div class="palette-icon">${icon}</div>
         <div class="palette-item-info">
-          <div class="palette-item-name">${highlightedName}</div>
-          <div class="palette-item-path">${smartPath}</div>
+          <div class="palette-item-name">${itemData.isContent ? _escapeHtml(itemData.name) : highlightedName}</div>
+          <div class="palette-item-path">${subline}</div>
         </div>
       `;
 
@@ -491,6 +533,11 @@ const SearchPalette = (() => {
     };
 
     return item;
+  }
+
+  /** Escape HTML special chars (excerpts contain raw user content). */
+  function _escapeHtml(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
   /**
