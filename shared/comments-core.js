@@ -77,13 +77,6 @@ function createCommentsCore({ storage, context, notify }) {
     return comments;
   }
 
-  function buildRef(commentFilter) {
-    const wsId = context.workspaceId();
-    const file = context.currentFile();
-    if (!wsId || !file) return null;
-    return `mdp://${wsId}/${encodeURIComponent(file)}?c=${commentFilter}`;
-  }
-
   function onChange(cb) {
     listeners.push(cb);
     return () => {
@@ -92,7 +85,7 @@ function createCommentsCore({ storage, context, notify }) {
     };
   }
 
-  return { list, load, save, remove, clear, buildRef, onChange };
+  return { list, load, save, remove, clear, onChange };
 }
 
 const exportsObj = { createCommentsCore };

@@ -182,20 +182,3 @@ describe('comments-core: onChange', () => {
     expect(cb).toHaveBeenCalledTimes(1);
   });
 });
-
-describe('comments-core: buildRef', () => {
-  it('builds an mdp:// ref from workspace + current file', () => {
-    const { storage, context } = fakeAdapter();
-    const core = createCommentsCore({ storage, context });
-
-    expect(core.buildRef('pending')).toBe('mdp://ws-1/docs%2Fplan.md?c=pending');
-  });
-
-  it('returns null when there is no workspace or file', () => {
-    const { storage, context } = fakeAdapter();
-    context.setWorkspaceId(null);
-    const core = createCommentsCore({ storage, context });
-
-    expect(core.buildRef('pending')).toBeNull();
-  });
-});
