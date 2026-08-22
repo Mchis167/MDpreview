@@ -120,22 +120,34 @@
 
 /* Chỉ hiện khi rê chuột lên ảnh của chính mình — preset do host cấp
    thì không có nút này. */
+/* Flex-centred rather than centred by line-height: the ✕ glyph does not sit
+   on the middle of its line box, so it came out riding high in the circle.
+   Dark rather than red — the tile it sits on is already the loud thing, and
+   red is saved for the hover, where the button is about to be pressed. */
 .bg-image-remove {
   position: absolute;
   top: 4px;
   right: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 18px;
   height: 18px;
   padding: 0;
   border: none;
   border-radius: var(--ds-radius-pill);
-  background: var(--ds-accent-red);
-  color: var(--ds-text-inverse);
+  background: var(--ds-black-a80);
+  color: var(--ds-text-primary);
   cursor: pointer;
   font-size: 10px;
-  line-height: 18px;
+  line-height: 1;
   opacity: 0;
-  transition: opacity var(--ds-transition-fast);
+  transition: opacity var(--ds-transition-fast), background var(--ds-transition-fast);
+}
+
+.bg-image-remove:hover {
+  background: var(--ds-black-a90);
+  color: var(--ds-accent-red);
 }
 
 .bg-image-item:hover .bg-image-remove,

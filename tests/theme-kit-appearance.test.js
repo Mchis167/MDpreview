@@ -183,6 +183,19 @@ describe('background group', () => {
     expect(el.querySelector('.bg-image-item[data-src="stored://img-1"]')).toBeTruthy();
   });
 
+  it('owns state.backgrounds itself — one tile per file, however the host stores it', async () => {
+    // The bridge returns a url and nothing else: appending is this module's
+    // job. A host that also pushed onto state.backgrounds made every image
+    // appear twice, which is what this pins down.
+    const { el, state } = mountBackground();
+
+    await pickFiles(el, [fakeFile('a.png')]);
+    await pickFiles(el, [fakeFile('b.png')]);
+
+    expect(state.backgrounds).toEqual(['stored://img-1', 'stored://img-2']);
+    expect(el.querySelectorAll('.bg-image-item[data-src]')).toHaveLength(2);
+  });
+
   it('accepts several files in one pick', async () => {
     const { el, state } = mountBackground();
 

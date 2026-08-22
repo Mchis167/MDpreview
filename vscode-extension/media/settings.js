@@ -106,18 +106,25 @@
   // anything that has to outlive the page. Applying the result is ours:
   // the host stores, the webview paints.
 
+  // theme-kit owns `backgrounds` — it is the state object it renders from,
+  // and it appends and filters that array itself. The bridge must not touch
+  // it: doing both is what made every added image appear twice.
   const theme = {
     accent: null,
     bgEnabled: false,
     bgImage: null,      // webview url of the image in use
     bgImageName: null,  // the name the host knows it by
-    backgrounds: [],    // webview urls, index-aligned with names
-    names: []
+    backgrounds: []     // webview urls
   };
+
+  // The host stores files by name, the page renders them by url. Keeping the
+  // mapping here rather than in a second array avoids the two staying in
+  // step by index, which they only ever did by accident.
+  const nameByUrl = new Map();
 
   const backgroundLayer = () => document.getElementById('app-background');
 
-  const nameForUrl = (url) => theme.names[theme.backgrounds.indexOf(url)] || null;
+  const nameForUrl = (url) => nameByUrl.get(url) || null;
 
   function paintBackground() {
     ThemeKit.applyBackground(backgroundLayer(), theme.bgEnabled, theme.bgImage);
@@ -151,8 +158,7 @@
       const res = await request('backgroundAdd', { dataUrl }).catch(() => null);
       if (!res || res.error || !res.url) return null;
 
-      theme.names.push(res.name);
-      theme.backgrounds.push(res.url);
+      nameByUrl.set(res.url, res.name);
       return res.url;
     },
 
@@ -160,9 +166,7 @@
       const name = nameForUrl(url);
       if (!name) return;
 
-      const idx = theme.backgrounds.indexOf(url);
-      theme.backgrounds.splice(idx, 1);
-      theme.names.splice(idx, 1);
+      nameByUrl.delete(url);
       await request('backgroundRemove', { name }).catch(() => {});
     }
   };
@@ -371,8 +375,9 @@
     if (message.type === 'themeRestore') {
       const bg = message.background || {};
       theme.bgEnabled = !!bg.enabled;
-      theme.names = bg.names || [];
       theme.backgrounds = bg.images || [];
+      nameByUrl.clear();
+      (bg.images || []).forEach((url, i) => nameByUrl.set(url, (bg.names || [])[i]));
       theme.bgImage = bg.image || null;
       theme.bgImageName = bg.imageName || null;
 
