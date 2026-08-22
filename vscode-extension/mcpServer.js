@@ -15,17 +15,41 @@ const MAX_PORT = 43119;
 // getWorkspaceFolders: () => [{ name, fsPath }]  — injected so this module
 // stays free of the vscode API and testable outside the extension host.
 function createMcpBridge({ getWorkspaceFolders }) {
+  function locFor(folder, abs) {
+    const rel = path.relative(folder.fsPath, abs);
+    return {
+      root: folder.fsPath,
+      rel,
+      commentsPath: path.join(folder.fsPath, '.mdpreview', 'comments', `${rel}.json`),
+      archivePath: path.join(folder.fsPath, '.mdpreview', 'comments', '.archive', `${rel}.json`)
+    };
+  }
+
+  // Một bridge có thể nhìn thấy nhiều workspace folder (multi-root), và một
+  // đường dẫn tương đối thì khớp prefix của MỌI folder. Bản đầu return ngay
+  // folder đầu tiên — Claude chạy trong repo B vẫn đọc (và TIÊU) comment của
+  // repo A trùng tên file. Giờ một đường dẫn tương đối chỉ khớp folder mà
+  // file .md đó thực sự tồn tại; nhiều folder cùng có → bắt nói rõ, không đoán.
   function resolveCommentsFile(file) {
-    for (const folder of getWorkspaceFolders()) {
-      const abs = path.isAbsolute(file) ? file : path.join(folder.fsPath, file);
-      if (!abs.startsWith(folder.fsPath + path.sep)) continue;
-      const rel = path.relative(folder.fsPath, abs);
-      return {
-        root: folder.fsPath,
-        rel,
-        commentsPath: path.join(folder.fsPath, '.mdpreview', 'comments', `${rel}.json`),
-        archivePath: path.join(folder.fsPath, '.mdpreview', 'comments', '.archive', `${rel}.json`)
-      };
+    const folders = getWorkspaceFolders();
+
+    if (path.isAbsolute(file)) {
+      for (const folder of folders) {
+        if (file.startsWith(folder.fsPath + path.sep)) return locFor(folder, file);
+      }
+      return null;
+    }
+
+    const matches = folders.filter((folder) => {
+      const abs = path.join(folder.fsPath, file);
+      // Vẫn phải nằm trong folder sau khi join — chặn "../" trèo ra ngoài.
+      if (!abs.startsWith(folder.fsPath + path.sep)) return false;
+      return fs.existsSync(abs) || fs.existsSync(path.join(folder.fsPath, '.mdpreview', 'comments', `${file}.json`));
+    });
+
+    if (matches.length === 1) return locFor(matches[0], path.join(matches[0].fsPath, file));
+    if (matches.length > 1) {
+      return { ambiguous: matches.map((f) => path.join(f.fsPath, file)) };
     }
     return null;
   }
@@ -57,6 +81,18 @@ function createMcpBridge({ getWorkspaceFolders }) {
         if (!loc) {
           return {
             content: [{ type: 'text', text: `File "${file}" is not inside any open workspace folder.` }],
+            isError: true
+          };
+        }
+        if (loc.ambiguous) {
+          return {
+            content: [{
+              type: 'text',
+              text:
+                `"${file}" exists in more than one open workspace folder. ` +
+                `Pass the absolute path instead:\n` +
+                loc.ambiguous.map((p) => `  ${p}`).join('\n')
+            }],
             isError: true
           };
         }
@@ -151,7 +187,8 @@ function createMcpBridge({ getWorkspaceFolders }) {
     throw new Error(`MDpreview MCP: no free port in ${BASE_PORT}-${MAX_PORT}`);
   }
 
-  return { start };
+  // resolveCommentsFile lộ ra để test khoá được hành vi chống rò chéo repo.
+  return { start, resolveCommentsFile };
 }
 
 module.exports = { createMcpBridge, BASE_PORT };
