@@ -1,67 +1,60 @@
 (function () {
   const vscode = window.__mdpVscode;
+  const mount = document.getElementById('md-viewer-mount');
   const content = document.getElementById('md-content');
-  const panel = document.getElementById('mdp-comments-panel');
+
+  const sidebar = RightSidebar.init({
+    mount: document.getElementById('right-sidebar-wrap'),
+    storageKey: 'mdpreview_vscode_sidebar_right_width'
+  });
 
   let comments = [];
   let archivedComments = [];
   let activeTab = 'inbox';
-  let pendingSelection = null;
   let commentModeOn = false;
+  let formTarget = null;
+  let activeCommentId = null;
 
   // ---- comment mode toggle ----
+  // Mirrors renderer/js/modules/comments.js's applyCommentMode/removeCommentMode:
+  // outside comment mode, selecting text is just selecting text.
 
-  const modeToggle = document.createElement('button');
-  modeToggle.className = 'mdp-comment-mode-toggle';
-  modeToggle.title = 'Bật/tắt Comment Mode';
-  modeToggle.textContent = '💬';
-  document.body.appendChild(modeToggle);
+  const modeToggle = new IconActionButton({
+    iconName: 'message-circle',
+    title: 'Toggle Comment Mode',
+    isLarge: true,
+    className: 'mdp-comment-mode-toggle',
+    onClick: () => setCommentMode(!commentModeOn)
+  }).render();
+  document.querySelector('main').appendChild(modeToggle);
 
-  modeToggle.addEventListener('click', () => {
-    commentModeOn = !commentModeOn;
-    modeToggle.classList.toggle('mdp-comment-mode-toggle--active', commentModeOn);
-    if (!commentModeOn) {
-      hideTrigger();
-      hideForm();
+  function setCommentMode(on) {
+    commentModeOn = on;
+    modeToggle.classList.toggle('is-primary', on);
+    if (on) mount.setAttribute('data-active-mode', 'comment');
+    else mount.removeAttribute('data-active-mode');
+
+    if (!on) {
+      trigger.classList.remove('show');
+      CommentFormComponent.getInstance().hide();
+      clearPendingHighlight();
+      formTarget = null;
       window.getSelection().removeAllRanges();
     }
     renderPanel();
-  });
+  }
 
-  // ---- floating "+" trigger + inline form ----
+  // ---- floating "+" trigger (real IconActionButton, real .comment-trigger CSS) ----
 
-  const trigger = document.createElement('button');
-  trigger.className = 'mdp-comment-trigger';
-  trigger.textContent = '+';
-  trigger.style.display = 'none';
+  const trigger = new IconActionButton({
+    iconName: 'message-circle-plus',
+    title: 'Add comment to selection',
+    isPrimary: true,
+    isLarge: true,
+    className: 'comment-trigger',
+    onClick: onTriggerClick
+  }).render();
   document.body.appendChild(trigger);
-
-  const form = document.createElement('div');
-  form.className = 'mdp-comment-form';
-  form.style.display = 'none';
-  form.innerHTML = `
-    <textarea class="mdp-comment-form-input" placeholder="Viết nhận xét..."></textarea>
-    <div class="mdp-comment-form-actions">
-      <button class="mdp-comment-form-cancel" type="button">Huỷ</button>
-      <button class="mdp-comment-form-submit" type="button">Lưu</button>
-    </div>`;
-  document.body.appendChild(form);
-  const formInput = form.querySelector('.mdp-comment-form-input');
-
-  function hideTrigger() {
-    trigger.style.display = 'none';
-    pendingSelection = null;
-  }
-
-  function hideForm() {
-    form.style.display = 'none';
-    formInput.value = '';
-  }
-
-  function positionNear(el, rect) {
-    el.style.left = `${Math.min(rect.right, window.innerWidth - 220)}px`;
-    el.style.top = `${window.scrollY + rect.bottom + 6}px`;
-  }
 
   function getLineNumber(node) {
     const el = node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
@@ -69,186 +62,324 @@
     return lineEl ? parseInt(lineEl.dataset.line, 10) : null;
   }
 
+  // Positioning copied from the app's _handleSelection: trigger follows the
+  // selection end (or start, if the drag went backwards), clamped to the
+  // viewport.
   function handleSelection() {
     if (!commentModeOn) return;
     const selection = window.getSelection();
-    if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
-      hideTrigger();
+    if (!selection || selection.isCollapsed || selection.toString().trim() === '') {
+      trigger.classList.remove('show');
       return;
     }
     const range = selection.getRangeAt(0);
     if (!content.contains(range.commonAncestorContainer)) {
-      hideTrigger();
+      trigger.classList.remove('show');
       return;
     }
-    const selectedText = selection.toString();
-    if (!selectedText.trim()) {
-      hideTrigger();
+    const rects = range.getClientRects();
+    if (rects.length === 0) {
+      trigger.classList.remove('show');
       return;
     }
+    const lastRect = rects[rects.length - 1];
+    const firstRect = rects[0];
+    const isForward = range.startContainer === selection.anchorNode && range.startOffset === selection.anchorOffset;
+    let left = isForward ? lastRect.right + 5 : firstRect.left - 40;
+    let top = isForward ? lastRect.bottom + 5 : firstRect.top - 40;
+    if (left + 40 > window.innerWidth) left = window.innerWidth - 45;
+    if (left < 5) left = 5;
+    if (top < 5) top = 5;
+    if (top + 40 > window.innerHeight) top = window.innerHeight - 45;
 
-    const lineStart = getLineNumber(range.startContainer);
-    const lineEnd = getLineNumber(range.endContainer);
-    if (!lineStart || !lineEnd) {
-      hideTrigger();
-      return;
-    }
-
-    const startLineEl = range.startContainer.nodeType === Node.TEXT_NODE
-      ? range.startContainer.parentElement.closest('.md-line')
-      : range.startContainer.closest('.md-line');
-    const startLineContent = startLineEl ? startLineEl.textContent : '';
-    const offsetInLine = startLineContent.indexOf(selectedText.split('\n')[0]);
-    const context = window.CommentAnchor.buildContext(
-      startLineContent,
-      offsetInLine === -1 ? 0 : offsetInLine,
-      selectedText.split('\n')[0]
-    );
-
-    pendingSelection = { selectedText, lineStart, lineEnd, context, startLineContent };
-
-    const rect = range.getBoundingClientRect();
     trigger.style.display = 'flex';
-    positionNear(trigger, rect);
+    trigger.style.left = `${left}px`;
+    trigger.style.top = `${top}px`;
+    trigger.classList.add('show');
   }
 
-  document.addEventListener('mouseup', (e) => {
-    if (e.target === trigger || form.contains(e.target)) return;
-    handleSelection();
-  });
+  document.addEventListener('mouseup', handleSelection);
+  document.addEventListener('keyup', handleSelection);
 
-  trigger.addEventListener('click', () => {
-    if (!pendingSelection) return;
-    const rect = trigger.getBoundingClientRect();
-    trigger.style.display = 'none';
-    form.style.display = 'block';
-    positionNear(form, rect);
-    formInput.focus();
-  });
+  function onTriggerClick() {
+    const selection = window.getSelection();
+    if (selection.isCollapsed) return;
+    const range = selection.getRangeAt(0);
+    const selectedText = selection.toString().trim();
+    if (!selectedText) return;
 
-  form.querySelector('.mdp-comment-form-cancel').addEventListener('click', () => {
-    hideForm();
-    hideTrigger();
-  });
+    const allLines = Array.from(content.querySelectorAll('.md-line'));
+    const selectedLines = allLines.filter((el) => selection.containsNode(el, true));
+    if (selectedLines.length === 0) return;
 
-  form.querySelector('.mdp-comment-form-submit').addEventListener('click', submitComment);
-  formInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submitComment();
-    if (e.key === 'Escape') { hideForm(); hideTrigger(); }
-  });
+    const lineStart = parseInt(selectedLines[0].dataset.line, 10);
+    const lineEnd = parseInt(selectedLines[selectedLines.length - 1].dataset.line, 10);
+    const context = getSelectionContext(range);
 
-  function submitComment() {
-    const text = formInput.value.trim();
-    if (!text || !pendingSelection) return;
-    vscode.postMessage({ type: 'saveComment', data: { ...pendingSelection, text } });
-    window.getSelection().removeAllRanges();
-    hideForm();
-    hideTrigger();
+    formTarget = { lineStart, lineEnd, selectedText, context };
+    highlightPending(lineStart, lineEnd, selectedText, context);
+
+    const formComp = CommentFormComponent.getInstance();
+    formComp.onSave((text) => {
+      if (!text || !formTarget) return;
+      clearPendingHighlight();
+      vscode.postMessage({ type: 'saveComment', data: { ...formTarget, text } });
+      formComp.hide();
+      window.getSelection().removeAllRanges();
+      formTarget = null;
+    });
+    formComp.onCancel(() => {
+      clearPendingHighlight();
+      formTarget = null;
+    });
+    formComp.show(trigger, 'empty');
   }
 
-  // ---- sidebar list (Inbox / Archive tabs) ----
+  function getSelectionContext(range) {
+    let container = range.commonAncestorContainer;
+    if (container.nodeType === Node.TEXT_NODE) container = container.parentElement;
+    const lineEl = container.closest('.md-line');
+    if (!lineEl) return { before: '', after: '' };
+
+    const fullLineText = lineEl.textContent;
+    const preRange = document.createRange();
+    preRange.setStart(lineEl, 0);
+    preRange.setEnd(range.startContainer, range.startOffset);
+    const offsetStart = preRange.toString().length;
+    return window.CommentAnchor.buildContext(fullLineText, offsetStart, range.toString());
+  }
+
+  // ---- pending-selection highlight (while the form is open) ----
+
+  function highlightPending(lineStart, lineEnd, selectedText, context) {
+    if (!selectedText) return;
+    for (let i = lineStart; i <= lineEnd; i++) {
+      const lineEls = content.querySelectorAll(`.md-line[data-line="${i}"]`);
+      const lineEl = lineEls[lineEls.length - 1];
+      if (!lineEl) continue;
+
+      const fullContent = lineEl.textContent;
+      const globalStartIdx = window.CommentAnchor.findAnchor(fullContent, selectedText, context);
+      if (globalStartIdx === -1) continue;
+      const globalEndIdx = globalStartIdx + selectedText.length;
+
+      const walker = document.createTreeWalker(lineEl, NodeFilter.SHOW_TEXT);
+      const textNodes = [];
+      let offset = 0;
+      let node;
+      while ((node = walker.nextNode())) {
+        textNodes.push({ node, start: offset, end: offset + node.textContent.length, content: node.textContent });
+        offset += node.textContent.length;
+      }
+
+      for (let ti = textNodes.length - 1; ti >= 0; ti--) {
+        const ni = textNodes[ti];
+        const iStart = Math.max(ni.start, globalStartIdx);
+        const iEnd = Math.min(ni.end, globalEndIdx);
+        if (iStart >= iEnd) continue;
+        const lStart = iStart - ni.start;
+        const lEnd = iEnd - ni.start;
+        const frag = document.createDocumentFragment();
+        if (lStart > 0) frag.appendChild(document.createTextNode(ni.content.substring(0, lStart)));
+        const mark = document.createElement('mark');
+        mark.className = 'comment-pending-range';
+        mark.textContent = ni.content.substring(lStart, lEnd);
+        frag.appendChild(mark);
+        if (lEnd < ni.content.length) frag.appendChild(document.createTextNode(ni.content.substring(lEnd)));
+        ni.node.parentNode.replaceChild(frag, ni.node);
+      }
+    }
+  }
+
+  function clearPendingHighlight() {
+    content.querySelectorAll('mark.comment-pending-range').forEach((mark) => {
+      const parent = mark.parentNode;
+      if (parent) {
+        parent.replaceChild(document.createTextNode(mark.textContent), mark);
+        parent.normalize();
+      }
+    });
+  }
+
+  // ---- sidebar list ----
+  // Ported from renderer/js/modules/comments.js's _renderList: same
+  // RightSidebar module config, same item markup (line-ref label, context
+  // snippet with the selection highlighted, body, delete action), same
+  // hover-to-highlight and click-to-open-form behaviour. The Inbox/Archive
+  // switch is the only addition — archive doesn't exist in the app.
+
+  function esc(str) {
+    const div = document.createElement('div');
+    div.textContent = str == null ? '' : str;
+    return div.innerHTML;
+  }
 
   function renderPanel() {
-    const hasAnything = comments.length || archivedComments.length;
-    if (!hasAnything && !commentModeOn) {
-      panel.innerHTML = '';
-      panel.classList.remove('mdp-comments-panel--open');
+    if (!commentModeOn) {
+      sidebar.close();
       return;
     }
-    panel.classList.add('mdp-comments-panel--open');
 
-    const tabs = `
-      <div class="mdp-comments-tabs">
-        <button class="mdp-comments-tab${activeTab === 'inbox' ? ' mdp-comments-tab--active' : ''}" data-tab="inbox">
-          Inbox${comments.length ? ` (${comments.length})` : ''}
-        </button>
-        <button class="mdp-comments-tab${activeTab === 'archive' ? ' mdp-comments-tab--active' : ''}" data-tab="archive">
-          Archive${archivedComments.length ? ` (${archivedComments.length})` : ''}
-        </button>
-      </div>`;
+    const isArchive = activeTab === 'archive';
+    const items = isArchive ? archivedComments : comments;
 
-    let body;
-    if (activeTab === 'inbox') {
-      body = comments.length
-        ? comments
-            .map(
-              (c) => `
-        <div class="mdp-comment-item" data-id="${c.id}" data-line="${c.lineStart}">
-          <div class="mdp-comment-item-quote">${escapeHtml(c.selectedText || '')}</div>
-          <div class="mdp-comment-item-body">${escapeHtml(c.text || '')}</div>
-          <button class="mdp-comment-item-delete" data-id="${c.id}" title="Xoá">×</button>
-        </div>`
-            )
-            .join('')
-        : '<div class="mdp-comments-panel-empty">Bôi đen văn bản rồi bấm nút + để thêm nhận xét.</div>';
-    } else {
-      body = archivedComments.length
-        ? archivedComments
-            .map(
-              (c) => `
-        <div class="mdp-comment-item mdp-comment-item--archived" data-id="${c.id}">
-          <div class="mdp-comment-item-quote">${escapeHtml(c.selectedText || '')}</div>
-          <div class="mdp-comment-item-body">${escapeHtml(c.text || '')}</div>
-          <div class="mdp-comment-item-actions">
-            <button class="mdp-comment-item-restore" data-id="${c.id}">Khôi phục</button>
-            <button class="mdp-comment-item-forget" data-id="${c.id}">Xoá vĩnh viễn</button>
-          </div>
-        </div>`
-            )
-            .join('')
-        : '<div class="mdp-comments-panel-empty">Chưa có comment nào được Claude đọc.</div>';
-    }
-
-    panel.innerHTML = tabs + `<div class="mdp-comments-list">${body}</div>`;
-
-    panel.querySelectorAll('.mdp-comments-tab').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        activeTab = btn.dataset.tab;
-        renderPanel();
-      });
+    sidebar.setupModule({
+      title: isArchive ? 'Archive' : 'Comment',
+      actions: [
+        {
+          id: 'tab-inbox',
+          icon: 'message',
+          title: `Inbox (${comments.length})`,
+          onClick: () => {
+            activeTab = 'inbox';
+            renderPanel();
+          }
+        },
+        {
+          id: 'tab-archive',
+          icon: 'check-circle',
+          title: `Archive (${archivedComments.length})`,
+          onClick: () => {
+            activeTab = 'archive';
+            renderPanel();
+          }
+        },
+        ...(isArchive
+          ? []
+          : [{ id: 'clear', icon: 'trash', title: 'Clear all comments', onClick: () => vscode.postMessage({ type: 'clearComments' }) }])
+      ],
+      items,
+      emptyState: {
+        icon: 'message',
+        text: isArchive ? 'Nothing archived yet' : 'No Comment yet'
+      },
+      renderItem: (c) => buildItem(c, isArchive)
     });
 
-    panel.querySelectorAll('.mdp-comment-item-delete').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        vscode.postMessage({ type: 'deleteComment', id: btn.dataset.id });
-      });
-    });
-    panel.querySelectorAll('.mdp-comment-item-restore').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        vscode.postMessage({ type: 'restoreComment', id: btn.dataset.id });
-      });
-    });
-    panel.querySelectorAll('.mdp-comment-item-forget').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        vscode.postMessage({ type: 'deleteArchivedComment', id: btn.dataset.id });
-      });
-    });
-    panel.querySelectorAll('.mdp-comment-item[data-line]').forEach((item) => {
-      item.addEventListener('click', () => {
-        const lineEl = content.querySelector(`.md-line[data-line="${item.dataset.line}"]`);
-        if (lineEl) lineEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      });
-    });
+    // Mark which tab is showing — ds-header-action has no active state of its
+    // own, so reuse the accent colour the app uses elsewhere.
+    const activeBtn = sidebar.mount.querySelector(`[data-action-id="tab-${activeTab}"]`);
+    if (activeBtn) activeBtn.classList.add('is-active');
   }
 
-  function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
+  function buildItem(c, archived) {
+    const isRange = c.lineEnd && c.lineEnd > c.lineStart;
+    const lineRef = isRange ? `L${c.lineStart}–L${c.lineEnd}` : `Line ${c.lineStart}`;
+    const isSelected = activeCommentId && c.id && c.id === activeCommentId;
+
+    const item = DesignSystem.createElement('div', 'ds-sidebar-item' + (isSelected ? ' is-selected' : ''));
+    item.dataset.id = c.id;
+
+    let snippet;
+    if (c.selectedText) {
+      const b = c.context?.before ? '...' + c.context.before.slice(-15) : '';
+      const a = c.context?.after ? c.context.after.slice(0, 15) + '...' : '';
+      snippet = `${esc(b)} <span class="highlight-selection">${esc(c.selectedText)}</span> ${esc(a)}`;
+    } else {
+      snippet = esc(c.startLineContent || '');
+    }
+
+    const header = DesignSystem.createElement('div', 'ds-item-header');
+    const headerGroup = DesignSystem.createElement('div', 'ds-item-header-group');
+    headerGroup.appendChild(DesignSystem.createElement('div', 'ds-item-label', { text: lineRef.toUpperCase() }));
+    headerGroup.appendChild(DesignSystem.createElement('div', 'ds-item-snippet', { html: snippet }));
+
+    const actionsGroup = DesignSystem.createElement('div', 'ds-item-actions-group');
+    if (archived) {
+      actionsGroup.appendChild(
+        new IconActionButton({
+          iconName: 'undo',
+          title: 'Restore to Inbox',
+          className: 'ds-item-delete-btn',
+          onClick: () => vscode.postMessage({ type: 'restoreComment', id: c.id })
+        }).render()
+      );
+      actionsGroup.appendChild(
+        new IconActionButton({
+          iconName: 'x',
+          title: 'Delete permanently',
+          isDanger: true,
+          className: 'ds-item-delete-btn',
+          onClick: () => vscode.postMessage({ type: 'deleteArchivedComment', id: c.id })
+        }).render()
+      );
+    } else {
+      actionsGroup.appendChild(
+        new IconActionButton({
+          iconName: 'x',
+          title: 'Delete',
+          isDanger: true,
+          className: 'ds-item-delete-btn',
+          onClick: () => vscode.postMessage({ type: 'deleteComment', id: c.id })
+        }).render()
+      );
+    }
+
+    header.appendChild(headerGroup);
+    header.appendChild(actionsGroup);
+
+    const body = DesignSystem.createElement('div', 'ds-item-body', { html: esc(c.text) });
+
+    item.appendChild(header);
+    item.appendChild(body);
+
+    if (!archived) {
+      item.onmouseenter = () => highlightLines(c.lineStart, c.lineEnd);
+      item.onmouseleave = () => clearLineHighlights();
+      item.onclick = () => onItemClick(c);
+    }
+
+    return item;
+  }
+
+  function highlightLines(start, end) {
+    clearLineHighlights();
+    const targetEnd = end || start;
+    for (let i = start; i <= targetEnd; i++) {
+      const line = content.querySelector(`.md-line[data-line="${i}"]`);
+      if (line) line.classList.add('highlight-temp');
+    }
+  }
+
+  function clearLineHighlights() {
+    content.querySelectorAll('.md-line').forEach((l) => l.classList.remove('highlight-temp'));
+  }
+
+  function onItemClick(c) {
+    activeCommentId = c.id;
+    renderPanel();
+
+    const targetLine = content.querySelector(`.md-line[data-line="${c.lineStart}"]`);
+    if (!targetLine) return;
+
+    targetLine.scrollIntoView({ behavior: 'auto', block: 'center' });
+    targetLine.classList.add('pulse-highlight');
+    setTimeout(() => targetLine.classList.remove('pulse-highlight'), 2000);
+
+    formTarget = { ...c };
+    const formComp = CommentFormComponent.getInstance();
+    formComp.onEdit((text) => {
+      formComp.show(targetLine, 'filled', text);
+      formComp.onSave((newText) => {
+        if (!newText) return;
+        vscode.postMessage({ type: 'saveComment', data: { ...formTarget, text: newText } });
+        formComp.hide();
+        formTarget = null;
+      });
+    });
+    formComp.show(targetLine, 'view', c.text);
   }
 
   // ---- inline highlights ----
   // Ported from renderer/js/modules/comments.js (_markLinesWithComments +
-  // _applyRobustHighlights) so highlighting behaves identically to the
-  // Electron app: drift compensation when the file has been edited since
-  // the comment was created, and correct handling of selections that span
-  // multiple DOM text nodes (e.g. crossing a <strong> boundary).
+  // _applyRobustHighlights): drift compensation when the file was edited
+  // since the comment was created, and correct handling of selections that
+  // span multiple DOM text nodes. Uses the real .comment-range class, which
+  // the vendored CSS only tints while #md-viewer-mount is in comment mode —
+  // same as the desktop app.
 
   function applyHighlights() {
-    content.querySelectorAll('.mdp-comment-mark').forEach((mark) => {
+    content.querySelectorAll('.comment-range').forEach((mark) => {
       const parent = mark.parentNode;
       if (parent) {
         parent.replaceChild(document.createTextNode(mark.textContent), mark);
@@ -366,18 +497,15 @@
 
         if (segmentComments && segmentComments.size > 0) {
           const mark = document.createElement('mark');
-          mark.className = 'mdp-comment-mark';
+          mark.className = 'comment-range';
           mark.textContent = segmentText;
           const firstComment = Array.from(segmentComments)[0];
-          mark.dataset.commentId = firstComment.id;
-          if (segmentComments.size > 1) {
-            mark.classList.add('mdp-comment-mark--multi');
-            mark.title = `${segmentComments.size} comments`;
-          }
+          mark.dataset.id = firstComment.id;
+          if (segmentComments.size > 1) mark.title = `${segmentComments.size} comments`;
           mark.addEventListener('click', (e) => {
             e.stopPropagation();
-            const item = panel.querySelector(`.mdp-comment-item[data-id="${firstComment.id}"]`);
-            if (item) item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const el = listEl.querySelector(`.ds-sidebar-item[data-id="${firstComment.id}"]`);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
           });
           fragment.appendChild(mark);
         } else {

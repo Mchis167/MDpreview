@@ -63,7 +63,22 @@ const FILES = [
   ['renderer/css/design-system/molecules/setting-row.css', 'vendor/renderer/css/setting-row.css'],
   ['renderer/css/design-system/molecules/segmented-control.css', 'vendor/renderer/css/segmented-control.css'],
   ['renderer/css/design-system/atoms/tooltip.css', 'vendor/renderer/css/tooltip.css'],
-  ['renderer/css/design-system/organisms/settings-panel.css', 'vendor/renderer/css/settings-panel.css']
+  ['renderer/css/design-system/organisms/settings-panel.css', 'vendor/renderer/css/settings-panel.css'],
+
+  // ── Comment UI ──
+  // Reuse the app's own comment components verbatim instead of a
+  // hand-rolled lookalike: the floating "+" trigger, the popup form, and
+  // the right sidebar list are all real design-system organisms/atoms.
+  ['renderer/js/components/atoms/icon-action-button.js', 'vendor/renderer/js/components/atoms/icon-action-button.js'],
+  ['renderer/js/components/organisms/comment-form-component.js', 'vendor/renderer/js/components/organisms/comment-form-component.js'],
+  ['renderer/js/components/organisms/right-sidebar.js', 'vendor/renderer/js/components/organisms/right-sidebar.js'],
+  ['renderer/css/design-system/atoms/button.css', 'vendor/renderer/css/button.css'],
+  ['renderer/css/design-system/atoms/icon-action-button.css', 'vendor/renderer/css/icon-action-button.css'],
+  ['renderer/css/design-system/organisms/comment-form.css', 'vendor/renderer/css/comment-form.css'],
+  ['renderer/css/design-system/organisms/right-sidebar.css', 'vendor/renderer/css/right-sidebar.css'],
+  ['renderer/css/design-system/molecules/sidebar-base.css', 'vendor/renderer/css/sidebar-base.css'],
+  // ds-header-action (the sidebar header's action buttons) lives here.
+  ['renderer/css/design-system/organisms/tab-bar.css', 'vendor/renderer/css/tab-bar.css']
 ];
 
 const MERMAID_BUNDLE = [

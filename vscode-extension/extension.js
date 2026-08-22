@@ -256,7 +256,14 @@ class MdPreviewEditorProvider {
       webview.asWebviewUri(dsDir('segmented-control.css')),
       webview.asWebviewUri(dsDir('tooltip.css')),
       webview.asWebviewUri(dsDir('settings-panel.css')),
-      webview.asWebviewUri(vscode.Uri.joinPath(sharedRoot, 'font-kit', 'picker.css'))
+      webview.asWebviewUri(vscode.Uri.joinPath(sharedRoot, 'font-kit', 'picker.css')),
+      // Comment UI: the real trigger/form/sidebar organisms, not a lookalike.
+      webview.asWebviewUri(dsDir('button.css')),
+      webview.asWebviewUri(dsDir('icon-action-button.css')),
+      webview.asWebviewUri(dsDir('comment-form.css')),
+      webview.asWebviewUri(dsDir('sidebar-base.css')),
+      webview.asWebviewUri(dsDir('right-sidebar.css')),
+      webview.asWebviewUri(dsDir('tab-bar.css'))
     ];
     const mermaidConfigUri = webview.asWebviewUri(
       vscode.Uri.joinPath(rendererRoot, 'js', 'services', 'mermaid-config.js')
@@ -275,7 +282,10 @@ class MdPreviewEditorProvider {
       componentDir('atoms', 'modal.js'),
       componentDir('atoms', 'select.js'),
       componentDir('atoms', 'segmented-control.js'),
+      componentDir('atoms', 'icon-action-button.js'),
       componentDir('molecules', 'setting-row.js'),
+      componentDir('organisms', 'comment-form-component.js'),
+      componentDir('organisms', 'right-sidebar.js'),
       componentDir('design-system.js')
     ];
     const fontKitUris = [
@@ -292,6 +302,8 @@ class MdPreviewEditorProvider {
     const carouselUri = webview.asWebviewUri(vscode.Uri.joinPath(rendererRoot, 'js', 'utils', 'carousel.js'));
     const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'webview.js'));
     const commentAnchorUri = webview.asWebviewUri(vscode.Uri.joinPath(sharedRoot, 'comment-anchor.js'));
+    // Layout glue only (flex split between content and the right sidebar) —
+    // the comment UI itself is styled entirely by the vendored DS CSS above.
     const commentsCssUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'comments.css'));
     const commentsScriptUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'comments.js'));
     const diffCssUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'diff.css'));
@@ -321,10 +333,38 @@ class MdPreviewEditorProvider {
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; font-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
 ${cssLinks}
   <style>
+    /* Layout glue only, mirroring the app's #app-layout / main split so the
+       vendored .ds-right-sidebar-wrap takes real flex width instead of
+       covering the content. Everything inside is styled by vendored DS CSS. */
     body {
       background: var(--ds-bg-base);
-      padding: 2rem 3rem;
       margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #app-layout {
+      display: flex;
+      height: 100vh;
+      padding: var(--ds-space-sm);
+      gap: var(--ds-space-sm);
+      box-sizing: border-box;
+    }
+
+    main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      overflow: hidden;
+      position: relative; /* anchors the comment-mode toggle */
+    }
+
+    #md-viewer-mount {
+      flex: 1;
+      min-width: 0;
+      overflow-y: auto;
+      padding: 2rem 3rem;
     }
 
     /* The host injects, into every webview, a rule inside the cascade layer
@@ -343,11 +383,63 @@ ${cssLinks}
       border-radius: 0;
       font-family: inherit;
     }
+
+    /* Same story for form controls: the host's layered defaults paint every
+       BUTTON with var(--vscode-button-background) (a light fill) plus its own
+       padding/radius/font. The design system's buttons are transparent icon
+       targets — .ds-header-action in particular never declares a background,
+       so without this reset it renders as a white box. Class selectors in the
+       vendored CSS out-specify these bare element rules, so the ones that do
+       declare a background (.ds-icon-action-btn, .ds-btn-primary) still win. */
+    button,
+    textarea,
+    input {
+      background: none;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      color: inherit;
+      font: inherit;
+      text-align: inherit;
+      outline: none;
+    }
+
+    /* Scrollbars, copied from the app's renderer/css/layout.css — the host's
+       own webview scrollbar is wider and paints a track. layout.css itself
+       isn't vendored: the rest of it is app-shell layout this webview has no
+       use for. */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--ds-white-a10);
+      border-radius: 99px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--ds-white-a20);
+    }
   </style>
 </head>
 <body>
-  <div id="md-content" class="md-render-body"></div>
-  <div id="mdp-comments-panel"></div>
+  <!-- Same shape as the app's index.html: a flex layout with the viewer on
+       the left and the right sidebar as its sibling, so the panel takes real
+       width instead of covering the content. -->
+  <div id="app-layout">
+    <main>
+      <div id="md-viewer-mount">
+        <div id="md-content" class="md-render-body"></div>
+      </div>
+    </main>
+    <!-- RightSidebarComponent builds everything inside this mount itself. -->
+    <div id="right-sidebar-wrap" class="ds-right-sidebar-wrap"></div>
+  </div>
   <script nonce="${nonce}" src="${mermaidConfigUri}"></script>
   <script nonce="${nonce}" src="${mermaidLibUri}"></script>
   <script nonce="${nonce}" src="${codeBlocksUri}"></script>
