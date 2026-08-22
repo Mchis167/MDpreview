@@ -1,0 +1,63 @@
+/* Diff mode — tints for blocks that exist only in this pane. */
+
+/* Colours come from the host theme's diff editor so the two panes read the same
+   way a normal VSCode diff does; the fallbacks cover themes that omit them. */
+.mdp-diff-changed {
+  position: relative;
+  border-radius: 4px;
+  /* Bleed into the body padding so the tint reads as a full-width band. */
+  margin-inline: -1rem;
+  padding-inline: 1rem;
+}
+
+.mdp-diff-added {
+  background: var(--vscode-diffEditor-insertedLineBackground, rgba(63, 185, 80, 0.15));
+  box-shadow: inset 3px 0 0 var(--vscode-gitDecoration-addedResourceForeground, #3fb950);
+}
+
+.mdp-diff-removed {
+  background: var(--vscode-diffEditor-removedLineBackground, rgba(248, 81, 73, 0.15));
+  box-shadow: inset 3px 0 0 var(--vscode-gitDecoration-deletedResourceForeground, #f85149);
+}
+
+#mdp-diff-bar {
+  position: fixed;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.35));
+  border-radius: 999px;
+  background: var(--vscode-editorWidget-background, rgba(30, 30, 30, 0.9));
+  color: var(--vscode-editorWidget-foreground, inherit);
+  font-size: 0.75rem;
+  font-family: var(--vscode-font-family, sans-serif);
+}
+
+#mdp-diff-bar[hidden] {
+  display: none;
+}
+
+.mdp-diff-bar-label {
+  opacity: 0.85;
+}
+
+.mdp-diff-bar-nav {
+  border: 0;
+  border-radius: 50%;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  color: inherit;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.mdp-diff-bar-nav:hover {
+  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
+}

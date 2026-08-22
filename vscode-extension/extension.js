@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const { renderWithLineNumbers } = require('./vendor/shared/md-render');
 const { createCommentsCore } = require('./vendor/shared/comments-core');
 const { createCommentStorage } = require('./commentStorage');
+const { computeDiffInfo, registerPane, getPane } = require('./diffMode');
 
 function getNonce() {
   return crypto.randomBytes(16).toString('base64');
@@ -80,13 +81,36 @@ class MdPreviewEditorProvider {
       archiveWatcher.onDidDelete(sendArchive);
     }
 
+    // ── Diff mode ──
+    // When this pane is one half of a diff tab, tell the webview which of its
+    // lines are unique to it so it can highlight the changed blocks.
+    const diffState = { info: null };
+    const pushDiff = async () => {
+      const info = await computeDiffInfo(document);
+      diffState.info = info;
+      webviewPanel.webview.postMessage({ type: 'diff', info });
+    };
+    const paneReg = registerPane(document.uri.toString(), {
+      scrollToLine: (line) => webviewPanel.webview.postMessage({ type: 'diffScrollTo', line })
+    });
+    // The diff tab may not exist yet when the custom editor resolves, and the
+    // peer pane's content can arrive later still — recheck on tab changes.
+    const tabSub = vscode.window.tabGroups.onDidChangeTabs(() => pushDiff());
+
     const changeSub = vscode.workspace.onDidChangeTextDocument((e) => {
-      if (e.document.uri.toString() === document.uri.toString()) render();
+      const changedUri = e.document.uri.toString();
+      if (changedUri === document.uri.toString()) {
+        render();
+        pushDiff();
+      } else if (diffState.info && changedUri === diffState.info.peerUri) {
+        pushDiff();
+      }
     });
     const messageSub = webviewPanel.webview.onDidReceiveMessage(async (message) => {
       if (message.type === 'ready') {
         // The webview is listening now — (re)send everything it renders from.
         render();
+        pushDiff();
         if (commentsCore) {
           sendComments();
           sendArchive();
@@ -95,6 +119,7 @@ class MdPreviewEditorProvider {
       }
       if (message.type === 'openLink') return this._openLink(message.href, document);
       if (message.type === 'toggleTask') return this._toggleTask(message.line, message.checked, document);
+      if (message.type === 'diffScroll') return this._syncPeerScroll(diffState.info, message.line);
       if (!commentsCore) return;
       if (message.type === 'saveComment') return commentsCore.save(message.data);
       if (message.type === 'deleteComment') return commentsCore.remove(message.id);
@@ -112,13 +137,33 @@ class MdPreviewEditorProvider {
     webviewPanel.onDidDispose(() => {
       changeSub.dispose();
       messageSub.dispose();
+      tabSub.dispose();
+      paneReg.dispose();
       if (unsubscribeComments) unsubscribeComments();
       if (archiveWatcher) archiveWatcher.dispose();
       if (storeWatcher) storeWatcher.dispose();
     });
 
     render();
+    pushDiff();
     if (commentsCore) await commentsCore.load(relPath);
+  }
+
+  /**
+   * Translate a line from this pane into the peer pane's coordinates and ask it
+   * to scroll there. Lines that were inserted/deleted have no counterpart, so we
+   * fall back to the nearest preceding matched line.
+   */
+  _syncPeerScroll(info, line) {
+    if (!info) return;
+    const peer = getPane(info.peerUri);
+    if (!peer) return;
+
+    let candidate = line;
+    while (candidate > 0 && info.lineMap[candidate] === undefined) candidate--;
+    const peerLine = info.lineMap[candidate];
+    if (peerLine === undefined) return;
+    peer.scrollToLine(peerLine);
   }
 
   async _openLink(href, document) {
@@ -185,9 +230,11 @@ class MdPreviewEditorProvider {
     const commentAnchorUri = webview.asWebviewUri(vscode.Uri.joinPath(sharedRoot, 'comment-anchor.js'));
     const commentsCssUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'comments.css'));
     const commentsScriptUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'comments.js'));
+    const diffCssUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'diff.css'));
+    const diffScriptUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'diff.js'));
     const nonce = getNonce();
 
-    const cssLinks = [...cssUris, commentsCssUri]
+    const cssLinks = [...cssUris, commentsCssUri, diffCssUri]
       .map((uri) => `  <link rel="stylesheet" href="${uri}">`)
       .join('\n');
 
@@ -240,6 +287,7 @@ ${cssLinks}
   <script nonce="${nonce}" src="${commentAnchorUri}"></script>
   <script nonce="${nonce}" src="${scriptUri}"></script>
   <script nonce="${nonce}" src="${commentsScriptUri}"></script>
+  <script nonce="${nonce}" src="${diffScriptUri}"></script>
 </body>
 </html>`;
   }
