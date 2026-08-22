@@ -573,10 +573,17 @@
           const firstComment = Array.from(segmentComments)[0];
           mark.dataset.id = firstComment.id;
           if (segmentComments.size > 1) mark.title = `${segmentComments.size} comments`;
+          // Same as clicking the comment in the panel — scrolls the document
+          // to it, selects it in the list and opens its form. Matches what
+          // renderer/js/modules/comments.js does for a highlight click.
+          //
+          // Guarded by the mode: these marks stay in the DOM once applied,
+          // but the vendored CSS only tints them in comment mode, so outside
+          // it the user would be clicking something they cannot see.
           mark.addEventListener('click', (e) => {
+            if (!commentModeOn) return;
             e.stopPropagation();
-            const el = listEl.querySelector(`.ds-sidebar-item[data-id="${firstComment.id}"]`);
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            onItemClick(firstComment);
           });
           fragment.appendChild(mark);
         } else {
