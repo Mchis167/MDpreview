@@ -91,7 +91,8 @@ class MdPreviewEditorProvider {
       webview.asWebviewUri(mdRenderDir('markdown-blocks.css')),
       webview.asWebviewUri(mdRenderDir('markdown-interactions.css')),
       webview.asWebviewUri(mdRenderDir('mockup-frames.css')),
-      webview.asWebviewUri(mdRenderDir('carousel.css'))
+      webview.asWebviewUri(mdRenderDir('carousel.css')),
+      webview.asWebviewUri(mdRenderDir('checkbox.css'))
     ];
     const mermaidConfigUri = webview.asWebviewUri(
       vscode.Uri.joinPath(rendererRoot, 'js', 'services', 'mermaid-config.js')
