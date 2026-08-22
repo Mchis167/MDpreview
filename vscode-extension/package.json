@@ -1,0 +1,27 @@
+{
+  "name": "mdpreview-vscode",
+  "displayName": "MDpreview",
+  "description": "Rendered markdown preview with line-anchored comments, right inside VSCode.",
+  "version": "0.0.1",
+  "private": true,
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [
+    "onCustomEditor:mdpreview.preview"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "mdpreview.preview",
+        "displayName": "MDpreview",
+        "selector": [
+          { "filenamePattern": "*.md" }
+        ],
+        "priority": "default"
+      }
+    ]
+  }
+}
