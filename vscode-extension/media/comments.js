@@ -141,8 +141,11 @@
   // Positioning copied from the app's _handleSelection: trigger follows the
   // selection end (or start, if the drag went backwards), clamped to the
   // viewport.
+  // Deliberately NOT gated on commentModeOn: the habit is read → select →
+  // only then remember the mode is off, reopen it, select again. Showing the
+  // trigger on any selection removes that round trip; the mode itself is
+  // entered automatically when the comment is submitted.
   function handleSelection() {
-    if (!commentModeOn) return;
     const selection = window.getSelection();
     if (!selection || selection.isCollapsed || selection.toString().trim() === '') {
       trigger.classList.remove('show');
@@ -207,6 +210,9 @@
       formComp.hide();
       window.getSelection().removeAllRanges();
       formTarget = null;
+      // Submitting from outside comment mode drops you into it, so the panel
+      // opens with the comment you just left — no extra toggle to remember.
+      if (!commentModeOn) setCommentMode(true);
     });
     formComp.onCancel(() => {
       clearPendingHighlight();
