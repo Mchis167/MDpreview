@@ -4,10 +4,11 @@ const util = require('../vscode-extension/commentStoreUtil.js');
 const { normalizeTag, decodeDataUrl, assetRelPath, imagePathsOf, pruneDirs, ensureIgnoreLine } = util;
 
 describe('normalizeTag', () => {
-  it('accepts the three known tags, case-insensitively', () => {
+  it('accepts the four known tags, case-insensitively', () => {
     expect(normalizeTag('bug')).toBe('bug');
     expect(normalizeTag('Enhancement')).toBe('enhancement');
     expect(normalizeTag('  COMMENT ')).toBe('comment');
+    expect(normalizeTag('Question')).toBe('question');
   });
 
   it('rejects anything else', () => {

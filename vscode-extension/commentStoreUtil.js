@@ -18,7 +18,7 @@ const STORE_ROOT = '.mdpreview';
 // stored path means the same thing regardless of how deep the .md file was.
 const ASSETS_DIR = 'assets';
 
-const TAGS = ['bug', 'enhancement', 'comment'];
+const TAGS = ['bug', 'enhancement', 'comment', 'question'];
 
 /** @returns {string|null} the tag if it is one we know, else null. */
 function normalizeTag(tag) {

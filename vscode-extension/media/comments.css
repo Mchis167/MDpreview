@@ -32,66 +32,154 @@
    design system's. They still borrow its tokens so the additions sit in
    the form as if they had always been part of it. */
 
+/* Sizing/spacing below matches Figma node 411:195 (Frame 63) exactly: a
+   24x24 icon chip, a 4px gap to the badge, both 24px tall. Lives inside
+   .ds-comment-form__input-wrap now (see comment-form.css), so its 20px
+   inset and 16px inter-row gap come from there, matching Figma's single
+   InputContainer rather than sitting outside it with its own padding. */
 .mdp-tag-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mdp-tag-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: var(--ds-radius-sm);
+  background: var(--ds-white-a10);
+  color: var(--ds-text-tertiary);
+  cursor: pointer;
+  transition: color 0.12s ease, background 0.12s ease;
+}
+
+.mdp-tag-trigger svg {
+  width: 12px;
+  height: 12px;
+}
+
+.mdp-tag-trigger:hover,
+.mdp-tag-row.is-open .mdp-tag-trigger {
+  color: var(--ds-text-primary);
+}
+
+/* Hovering the trigger reveals this instead of the row keeping every
+   option visible at once — the badge next to it is the only persistent
+   sign of which tag (if any) is set. */
+.mdp-tag-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 20;
+  display: none;
+  flex-direction: column;
+  min-width: 132px;
+  margin-top: 4px;
+  padding: 4px;
+  border: 1px solid var(--ds-border-default);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-surface-overlay);
+  box-shadow: var(--ds-shadow-md);
+}
+
+.mdp-tag-row.is-open .mdp-tag-dropdown {
+  display: flex;
+}
+
+.mdp-tag-option {
   display: flex;
   align-items: center;
   gap: var(--ds-space-xs);
-  padding: 0 var(--ds-space-xs) var(--ds-space-sm);
-}
-
-.mdp-tag-row__icon {
-  display: inline-flex;
-  color: var(--ds-text-tertiary);
-}
-
-.mdp-tag-row__icon svg {
-  width: 14px;
-  height: 14px;
-}
-
-.mdp-tag-chip {
-  border: 1px solid var(--ds-border-subtle);
-  border-radius: var(--ds-radius-pill);
+  border: none;
+  border-radius: var(--ds-radius-sm);
   background: transparent;
   color: var(--ds-text-secondary);
   cursor: pointer;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  padding: 3px 10px;
-  transition: color 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+  font-size: 12px;
+  padding: 5px 8px;
+  text-align: left;
+  transition: color 0.12s ease, background 0.12s ease;
 }
 
-.mdp-tag-chip:hover {
-  border-color: var(--ds-border-strong);
+.mdp-tag-option:hover,
+.mdp-tag-option.is-active {
+  background: var(--ds-white-a08);
   color: var(--ds-text-primary);
 }
 
-/* Each tag keeps the same hue everywhere it appears — chip here, badge in
-   the sidebar list — so the colour, not the word, is what gets recognised. */
-.mdp-tag-chip[data-tag="bug"].is-active {
-  background: color-mix(in sRGB, var(--ds-accent-red) 22%, transparent);
-  border-color: var(--ds-accent-red);
-  color: var(--ds-accent-red);
+.mdp-tag-option__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--ds-radius-pill);
+  flex-shrink: 0;
 }
 
-.mdp-tag-chip[data-tag="enhancement"].is-active {
-  background: color-mix(in sRGB, var(--ds-accent-green) 22%, transparent);
-  border-color: var(--ds-accent-green);
+.mdp-tag-option[data-tag="bug"] .mdp-tag-option__dot {
+  background: var(--ds-accent-red);
+}
+
+.mdp-tag-option[data-tag="enhancement"] .mdp-tag-option__dot {
+  background: var(--ds-accent-green);
+}
+
+.mdp-tag-option[data-tag="comment"] .mdp-tag-option__dot {
+  background: var(--ds-text-tertiary);
+}
+
+.mdp-tag-option[data-tag="question"] .mdp-tag-option__dot {
+  background: var(--ds-accent-blue);
+}
+
+/* The badge next to the trigger has no place in a comment's rendered
+   content, unlike .mdp-tag-badge in the sidebar list — undo that layout.
+   Chained with .mdp-tag-badge so it wins on specificity regardless of
+   source order, rather than depending on which rule comes second. */
+.mdp-tag-badge.mdp-tag-badge--inline {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  margin-top: 0;
+  padding: 6px 10px;
+  border-radius: var(--ds-radius-sm);
+  font-family: var(--ds-font-family-code);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Figma's exact pair for "bug" (node 411:223/411:224) — a fixed dark tint
+   rather than the sidebar badge's translucent accent-on-transparent, so it
+   reads solid against the comment box's own background. */
+.mdp-tag-badge.mdp-tag-badge--inline.mdp-tag-badge--bug {
+  background: #420800;
+  color: #c53522;
+}
+
+.mdp-tag-badge.mdp-tag-badge--inline.mdp-tag-badge--enhancement {
+  background: color-mix(in sRGB, var(--ds-accent-green) 20%, black);
   color: var(--ds-accent-green);
 }
 
-.mdp-tag-chip[data-tag="comment"].is-active {
-  background: var(--ds-white-a08);
-  border-color: var(--ds-border-selected-subtle);
-  color: var(--ds-text-primary);
+.mdp-tag-badge.mdp-tag-badge--inline.mdp-tag-badge--question {
+  background: color-mix(in sRGB, var(--ds-accent-blue) 20%, black);
+  color: var(--ds-accent-blue);
 }
 
 .mdp-attach-strip {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--ds-space-xs);
-  padding: var(--ds-space-sm) var(--ds-space-xs) 0;
+  gap: var(--ds-space-sm);
+  /* Redundant with input-wrap's own 16px gap when attached there, but the
+     read-view strip lives in plain block flow (.ds-comment-form__read-body)
+     and needs this to not sit flush under the comment text. */
+  margin-top: var(--ds-space-sm);
 }
 
 .mdp-attach-strip.is-empty {
@@ -100,14 +188,14 @@
 
 .mdp-attach-thumb {
   position: relative;
-  width: 56px;
-  height: 56px;
+  width: 32px;
+  height: 32px;
 }
 
 .mdp-attach-thumb img {
   width: 100%;
   height: 100%;
-  border: 1px solid var(--ds-border-subtle);
+  border: 1px solid #282828;
   border-radius: var(--ds-radius-widget);
   cursor: zoom-in;
   object-fit: cover;
@@ -167,6 +255,11 @@
 .mdp-tag-badge--comment {
   background: var(--ds-white-a08);
   color: var(--ds-text-secondary);
+}
+
+.mdp-tag-badge--question {
+  background: color-mix(in sRGB, var(--ds-accent-blue) 22%, transparent);
+  color: var(--ds-accent-blue);
 }
 
 .mdp-item-attachments {

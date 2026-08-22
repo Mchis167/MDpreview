@@ -23,7 +23,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 const NAME = 'mdpreview';
-const VERSION = '2.2.0';
+const VERSION = '2.2.1';
 const PROTOCOL_VERSION = '2024-11-05';
 
 const ROOT_DIR = '.mdpreview';
@@ -38,7 +38,8 @@ const READ_TOOL = {
     'mdp_resolve_comments, so after applying a requested change, resolve that comment ' +
     'by its "id" — and leave open any comment that still needs the user\'s decision. ' +
     'A comment may carry a "tag" saying what kind of feedback it is (bug, enhancement, ' +
-    'or comment) and an "images" list of absolute paths to screenshots the user pasted in — ' +
+    'comment, or question) and an "images" list of absolute paths to screenshots the user ' +
+    'pasted in — ' +
     'read those image files, they usually show the problem more directly than the text does. ' +
     'Pass the path to the markdown file, relative to the project root (e.g. "docs/plan.md") ' +
     'or absolute.',

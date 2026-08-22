@@ -24,7 +24,8 @@
   const TAGS = [
     { id: 'bug', label: 'Bug' },
     { id: 'enhancement', label: 'Enhancement' },
-    { id: 'comment', label: 'Comment' }
+    { id: 'comment', label: 'Comment' },
+    { id: 'question', label: 'Question' }
   ];
 
   let tag = null;
@@ -35,7 +36,15 @@
 
   let form = null;
   let tagRow = null;
+  let badgeEl = null;
   let strip = null;
+  let closeTimer = null;
+
+  /** The read-only counterpart shown while the form is in 'view' mode —
+   *  the edit-view (and its tag row/attach strip) is hidden entirely then,
+   *  so an existing comment's tag and images would otherwise vanish. */
+  let readBadge = null;
+  let readStrip = null;
 
   function isImageFile(file) {
     return !!file && typeof file.type === 'string' && file.type.startsWith('image/');
@@ -52,24 +61,53 @@
 
   // ── DOM ───────────────────────────────────────────────────
 
+  function openDropdown(row) {
+    clearTimeout(closeTimer);
+    row.classList.add('is-open');
+  }
+
+  // A short grace period so the pointer can travel from the trigger down
+  // into the dropdown without it closing under the cursor.
+  function scheduleClose(row) {
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(() => row.classList.remove('is-open'), 150);
+  }
+
   function buildTagRow() {
     const row = document.createElement('div');
     row.className = 'mdp-tag-row';
 
-    const icon = document.createElement('span');
-    icon.className = 'mdp-tag-row__icon';
-    icon.innerHTML = DesignSystem.getIcon ? DesignSystem.getIcon('tag') || '' : '';
-    row.appendChild(icon);
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'mdp-tag-trigger';
+    trigger.innerHTML = DesignSystem.getIcon ? DesignSystem.getIcon('tag') || '' : '';
+    row.appendChild(trigger);
 
+    badgeEl = document.createElement('span');
+    badgeEl.className = 'mdp-tag-badge mdp-tag-badge--inline';
+    badgeEl.hidden = true;
+    row.appendChild(badgeEl);
+
+    const dropdown = document.createElement('div');
+    dropdown.className = 'mdp-tag-dropdown';
     TAGS.forEach((t) => {
-      const chip = document.createElement('button');
-      chip.type = 'button';
-      chip.className = 'mdp-tag-chip';
-      chip.dataset.tag = t.id;
-      chip.textContent = t.label;
-      // A tag is optional, so a second click on the active chip clears it.
-      chip.addEventListener('click', () => setTag(tag === t.id ? null : t.id));
-      row.appendChild(chip);
+      const option = document.createElement('button');
+      option.type = 'button';
+      option.className = 'mdp-tag-option';
+      option.dataset.tag = t.id;
+      option.innerHTML = `<span class="mdp-tag-option__dot"></span>${t.label}`;
+      // A tag is optional, so picking the active one again clears it.
+      option.addEventListener('click', () => {
+        setTag(tag === t.id ? null : t.id);
+        row.classList.remove('is-open');
+      });
+      dropdown.appendChild(option);
+    });
+    row.appendChild(dropdown);
+
+    [trigger, dropdown].forEach((el) => {
+      el.addEventListener('mouseenter', () => openDropdown(row));
+      el.addEventListener('mouseleave', () => scheduleClose(row));
     });
 
     return row;
@@ -81,12 +119,53 @@
     return el;
   }
 
+  function renderBadgeInto(el, tagId) {
+    if (!el) return;
+    const found = TAGS.find((t) => t.id === tagId);
+    el.hidden = !found;
+    el.textContent = found ? found.label : '';
+    el.className = `mdp-tag-badge mdp-tag-badge--inline${found ? ` mdp-tag-badge--${found.id}` : ''}`;
+  }
+
   function renderTagRow() {
     if (!tagRow) return;
-    tagRow.querySelectorAll('.mdp-tag-chip').forEach((chip) => {
-      chip.classList.toggle('is-active', chip.dataset.tag === tag);
+    tagRow.querySelectorAll('.mdp-tag-option').forEach((option) => {
+      option.classList.toggle('is-active', option.dataset.tag === tag);
     });
     tagRow.dataset.tag = tag || '';
+    renderBadgeInto(badgeEl, tag);
+  }
+
+  /** Builds one thumbnail; `onRemove` omitted renders it read-only. */
+  function buildThumb(src, onRemove) {
+    const thumb = document.createElement('div');
+    thumb.className = 'mdp-attach-thumb';
+
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = '';
+    thumb.appendChild(img);
+
+    if (onRemove) {
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'mdp-attach-remove';
+      remove.title = 'Remove image';
+      remove.textContent = '✕';
+      remove.addEventListener('click', (e) => {
+        e.stopPropagation();
+        onRemove();
+      });
+      thumb.appendChild(remove);
+    }
+
+    // Clicking a thumbnail opens it in the same pan/zoom overlay the
+    // markdown images use, so a screenshot is readable at full size.
+    if (window.ZoomSystem && typeof window.ZoomSystem.open === 'function') {
+      img.addEventListener('click', () => window.ZoomSystem.open(src, 'image'));
+    }
+
+    return thumb;
   }
 
   function renderStrip() {
@@ -100,34 +179,13 @@
     strip.classList.toggle('is-empty', entries.length === 0);
 
     entries.forEach((entry) => {
-      const thumb = document.createElement('div');
-      thumb.className = 'mdp-attach-thumb';
-
-      const img = document.createElement('img');
-      img.src = entry.src;
-      img.alt = '';
-      thumb.appendChild(img);
-
-      const remove = document.createElement('button');
-      remove.type = 'button';
-      remove.className = 'mdp-attach-remove';
-      remove.title = 'Remove image';
-      remove.textContent = '✕';
-      remove.addEventListener('click', (e) => {
-        e.stopPropagation();
-        entry.remove();
-        renderStrip();
-        syncSaveButton();
-      });
-      thumb.appendChild(remove);
-
-      // Clicking a thumbnail opens it in the same pan/zoom overlay the
-      // markdown images use, so a screenshot is readable at full size.
-      if (window.ZoomSystem && typeof window.ZoomSystem.open === 'function') {
-        img.addEventListener('click', () => window.ZoomSystem.open(entry.src, 'image'));
-      }
-
-      strip.appendChild(thumb);
+      strip.appendChild(
+        buildThumb(entry.src, () => {
+          entry.remove();
+          renderStrip();
+          syncSaveButton();
+        })
+      );
     });
   }
 
@@ -192,10 +250,29 @@
       const inputWrap = form.el.querySelector('.ds-comment-form__input-wrap');
       if (!editView || !inputWrap) return MdpCompose;
 
+      // Inside input-wrap, not as siblings before/after it: Figma's
+      // InputContainer is one bordered/padded box holding the tag row, the
+      // text, and the image row together — putting these two outside it
+      // orphaned them without its 20px inset or 16px inter-row gap.
       tagRow = buildTagRow();
       strip = buildStrip();
-      editView.insertBefore(tagRow, inputWrap);
-      editView.insertBefore(strip, inputWrap.nextSibling);
+      inputWrap.insertBefore(tagRow, form.input);
+      inputWrap.insertBefore(strip, form.input.nextSibling);
+
+      // The read-only counterpart: edit-view (and everything just inserted
+      // into it) is hidden outright while the form is in 'view' mode, so an
+      // existing comment's tag/images need their own home in read-view.
+      const readHeaderLeft = form.el.querySelector('.ds-comment-form__read-header-left');
+      const readBody = form.el.querySelector('.ds-comment-form__read-body');
+      if (readHeaderLeft && readBody) {
+        readBadge = document.createElement('span');
+        readBadge.className = 'mdp-tag-badge mdp-tag-badge--inline';
+        readBadge.hidden = true;
+        readHeaderLeft.appendChild(readBadge);
+
+        readStrip = buildStrip();
+        readBody.appendChild(readStrip);
+      }
 
       form.input.addEventListener('paste', onPaste);
       form.input.addEventListener('input', syncSaveButton);
@@ -234,6 +311,35 @@
 
     hasAttachments() {
       return kept.length + pending.length > 0;
+    },
+
+    /** Raw DOM nodes — the expand-to-full-editor modal (comments.js) is
+     *  built outside this module, and relocates these into itself rather
+     *  than keeping a second, separately-synced copy of the same state. */
+    elements() {
+      return { tagRow, strip };
+    },
+
+    /** Puts the tag row/strip back in their home spot inside the small
+     *  popup's input-wrap, e.g. after the expand modal is done borrowing them. */
+    returnHome() {
+      if (!form || !tagRow || !strip) return;
+      const inputWrap = form.el.querySelector('.ds-comment-form__input-wrap');
+      if (!inputWrap) return;
+      inputWrap.insertBefore(tagRow, form.input);
+      inputWrap.insertBefore(strip, form.input.nextSibling);
+    },
+
+    /** Populate the read-only tag badge + thumbnails for an existing
+     *  comment shown in 'view' mode. Independent of reset()'s editable
+     *  state — nothing here is ever saved back. */
+    showView(comment) {
+      renderBadgeInto(readBadge, comment && comment.tag);
+      if (!readStrip) return;
+      readStrip.innerHTML = '';
+      const uris = (comment && comment.imageUris) || [];
+      readStrip.classList.toggle('is-empty', uris.length === 0);
+      uris.forEach((src) => readStrip.appendChild(buildThumb(src)));
     }
   };
 
