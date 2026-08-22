@@ -37,11 +37,15 @@
 }
 
 /* Danh sách font sống trong modal riêng của nó, mở đè lên panel Settings,
-   nên nó lo phần đệm quanh mình thay vì mượn của .ds-popover-group. */
+   nên nó lo phần đệm quanh mình thay vì mượn của .ds-popover-group.
+   .ds-popover-body tự nó không có đệm ngang — mọi nội dung bên trong đều
+   trông cậy vào .ds-popover-group để có đệm đó. Không bọc trong group thì
+   phải bù lại đúng con số group đã cho, nếu không ô tìm và danh sách sẽ
+   dán sát mép trong khi tiêu đề vẫn có đệm riêng của nó. */
 .fk-catalog {
   display: flex;
   flex-direction: column;
-  gap: var(--ds-space-sm);
+  padding: var(--ds-space-xl) var(--ds-space-xl) var(--ds-space-sm) var(--ds-space-xl);
 }
 
 /* ── Font hiện tại ── */
