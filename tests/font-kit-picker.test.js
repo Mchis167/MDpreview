@@ -36,7 +36,8 @@ function loadDesignSystem() {
     heading: '<svg data-icon="heading"></svg>',
     'file-text': '<svg data-icon="file-text"></svg>',
     code: '<svg data-icon="code"></svg>',
-    x: '<svg data-icon="x"></svg>'
+    x: '<svg data-icon="x"></svg>',
+    'refresh-cw': '<svg data-icon="refresh-cw"></svg>'
   });
 
   return window.FontKitUiMDpreview.createUi(window.DesignSystem, window.SettingRow);
@@ -49,11 +50,18 @@ const CATALOG = [
 
 function mountPicker(overrides = {}) {
   const ui = loadDesignSystem();
-  const state = { title: null, body: 'Inter', code: null, ...(overrides.state || {}) };
+  const state = {
+    title: null,
+    body: 'Inter',
+    code: null,
+    zoom: { title: 100, body: 100, code: 100 },
+    ...(overrides.state || {})
+  };
 
   const bridge = {
     search: overrides.search || vi.fn(async () => CATALOG.map((f) => ({ ...f }))),
-    apply: overrides.apply || vi.fn(async () => {})
+    apply: overrides.apply || vi.fn(async () => {}),
+    setZoom: overrides.setZoom || vi.fn()
   };
 
   const picker = window.FontKitPicker.createPicker({
@@ -85,12 +93,12 @@ describe('font panel structure', () => {
     expect(el.querySelectorAll('.ds-popover-group')).toHaveLength(2);
   });
 
-  it('uses real setting rows for the role switch and the current font', async () => {
+  it('uses real setting rows for the role switch, the current font and zoom', async () => {
     const { el } = mountPicker();
     await flush();
 
     const labels = [...el.querySelectorAll('.ds-setting-row-label')].map((n) => n.textContent);
-    expect(labels).toEqual(['Applies to', 'Current font']);
+    expect(labels).toEqual(['Applies to', 'Current font', 'Zoom']);
   });
 
   it('renders a segmented control with one icon segment per role', async () => {
@@ -108,8 +116,8 @@ describe('font panel popover shell', () => {
     const ui = loadDesignSystem();
     window.FontKitPicker.openPicker({
       ui,
-      bridge: { search: async () => [], apply: async () => {} },
-      state: { title: null, body: null, code: null }
+      bridge: { search: async () => [], apply: async () => {}, setZoom: () => {} },
+      state: { title: null, body: null, code: null, zoom: {} }
     });
     await flush();
 
@@ -129,8 +137,8 @@ describe('font panel popover shell', () => {
     const onClose = vi.fn();
     window.FontKitPicker.openPicker({
       ui,
-      bridge: { search: async () => [], apply: async () => {} },
-      state: { title: null, body: null, code: null },
+      bridge: { search: async () => [], apply: async () => {}, setZoom: () => {} },
+      state: { title: null, body: null, code: null, zoom: {} },
       onClose
     });
     await flush();
@@ -144,22 +152,40 @@ describe('font panel popover shell', () => {
 });
 
 describe('font panel current-font row', () => {
-  it('shows the system default and hides Reset when no font is set', async () => {
+  it('keeps Reset in place but disabled when the font is the system default', async () => {
+    // Hiding it outright leaves the row half empty and reading as forgotten.
     const { el } = mountPicker({ initialRole: 'title' });
     await flush();
 
-    expect(el.querySelector('.fk-current-value').textContent).toBe('System default');
-    expect(el.querySelector('.fk-reset').style.visibility).toBe('hidden');
+    const value = el.querySelector('.fk-current-value');
+    expect(value.textContent).toBe('System default');
+    expect(value.classList).toContain('fk-current-default');
+
+    const reset = el.querySelector('.fk-reset');
+    expect(reset).toBeTruthy();
+    expect(reset.disabled).toBe(true);
+    expect(reset.innerHTML).toContain('data-icon="refresh-cw"');
   });
 
-  it('shows the chosen family, previewed in its own face, with Reset available', async () => {
+  it('does nothing when the disabled Reset is clicked', async () => {
+    const { el, bridge } = mountPicker({ initialRole: 'title' });
+    await flush();
+
+    el.querySelector('.fk-reset').click();
+    await flush();
+
+    expect(bridge.apply).not.toHaveBeenCalled();
+  });
+
+  it('shows the chosen family, previewed in its own face, with Reset enabled', async () => {
     const { el } = mountPicker({ initialRole: 'body' });
     await flush();
 
     const value = el.querySelector('.fk-current-value');
     expect(value.textContent).toBe('Inter');
     expect(value.style.fontFamily).toContain('Inter');
-    expect(el.querySelector('.fk-reset').style.visibility).toBe('visible');
+    expect(value.classList).not.toContain('fk-current-default');
+    expect(el.querySelector('.fk-reset').disabled).toBe(false);
   });
 
   it('clears the role through the bridge when Reset is clicked', async () => {
@@ -251,6 +277,96 @@ describe('font panel search', () => {
     const status = el.querySelector('.fk-status');
     expect(status.textContent).toContain('Could not reach Google Fonts');
     expect(status.className).toContain('fk-status-error');
+  });
+});
+
+describe('font panel zoom row', () => {
+  const slider = (el) => el.querySelector('.zoom-slider');
+  const label = (el) => el.querySelector('.zoom-val-label');
+
+  it('reuses the app\'s own zoom control markup and range', async () => {
+    const { el } = mountPicker();
+    await flush();
+
+    const input = slider(el);
+    expect(input.getAttribute('type')).toBe('range');
+    expect([input.min, input.max, input.step]).toEqual(['50', '200', '5']);
+    expect(el.querySelector('.setting-control-col')).toBeTruthy();
+  });
+
+  it('starts at 100% when nothing was saved', async () => {
+    const { el } = mountPicker({ state: { zoom: {} } });
+    await flush();
+
+    expect(slider(el).value).toBe('100');
+    expect(label(el).textContent).toBe('100%');
+  });
+
+  it('shows the saved zoom of the role it opened on', async () => {
+    const { el } = mountPicker({
+      initialRole: 'code',
+      state: { zoom: { title: 130, body: 90, code: 115 } }
+    });
+    await flush();
+
+    expect(slider(el).value).toBe('115');
+    expect(label(el).textContent).toBe('115%');
+  });
+
+  it('follows the segmented control — one slider, three axes', async () => {
+    // This is what makes three zoom axes fit in the panel without three
+    // stacked sliders: the row is scoped by "Applies to", like the font row.
+    const { el } = mountPicker({
+      initialRole: 'title',
+      state: { zoom: { title: 130, body: 90, code: 115 } }
+    });
+    await flush();
+    expect(slider(el).value).toBe('130');
+
+    el.querySelector('.ds-segment-item[data-id="body"]').click();
+    await flush();
+    expect(slider(el).value).toBe('90');
+    expect(label(el).textContent).toBe('90%');
+  });
+
+  it('reports a drag to the bridge against the selected role', async () => {
+    const { el, bridge } = mountPicker({ initialRole: 'code' });
+    await flush();
+
+    const input = slider(el);
+    input.value = '145';
+    input.dispatchEvent(new window.Event('input'));
+
+    expect(bridge.setZoom).toHaveBeenCalledWith('code', 145);
+    expect(label(el).textContent).toBe('145%');
+  });
+
+  it('keeps each axis separate when several are changed', async () => {
+    const { el, state } = mountPicker({ initialRole: 'title' });
+    await flush();
+
+    const input = slider(el);
+    input.value = '150';
+    input.dispatchEvent(new window.Event('input'));
+
+    el.querySelector('.ds-segment-item[data-id="code"]').click();
+    await flush();
+    slider(el).value = '80';
+    slider(el).dispatchEvent(new window.Event('input'));
+
+    expect(state.zoom).toMatchObject({ title: 150, code: 80, body: 100 });
+  });
+
+  it('does not disturb zoom when the font is reset', async () => {
+    const { el, state } = mountPicker({ initialRole: 'body', state: { zoom: { body: 120 } } });
+    await flush();
+
+    el.querySelector('.fk-reset').click();
+    await flush();
+
+    expect(state.body).toBeNull();
+    expect(state.zoom.body).toBe(120);
+    expect(slider(el).value).toBe('120');
   });
 });
 

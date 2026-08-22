@@ -20,6 +20,10 @@ const ROLES = [
 const SEARCH_DEBOUNCE_MS = 120;
 const RESULT_LIMIT = 60;
 
+// Cùng thang với slider zoom của app Electron, để hai bên cho ra cùng
+// một cỡ chữ khi đặt cùng một con số.
+const ZOOM = { min: 50, max: 200, step: 5, default: 100 };
+
 function createPicker(options) {
   const { ui, bridge, state } = options;
   let role = options.initialRole || 'title';
@@ -43,8 +47,16 @@ function createPicker(options) {
 
     el.segmented = segmented;
     el.currentValue = ui.createElement('span', 'fk-current-value');
-    el.resetBtn = ui.createElement('button', 'fk-reset', { text: 'Reset' });
+
+    el.resetBtn = ui.createElement('button', 'fk-reset', {
+      html: ui.getIcon('refresh-cw'),
+      'data-ds-tooltip': 'Back to the system font',
+      'aria-label': 'Reset font'
+    });
+    // Đang dùng font hệ thống thì nút vẫn ở đó, chỉ mờ và bấm không được —
+    // ẩn hẳn sẽ làm dòng này rỗng một nửa và trông như bị bỏ quên.
     el.resetBtn.addEventListener('click', () => {
+      if (el.resetBtn.disabled) return;
       bridge.apply(role, null);
       state[role] = null;
       renderCurrent();
@@ -58,15 +70,53 @@ function createPicker(options) {
     return ui.createGroup('Typography', [
       ui.createSettingRow({ label: 'Applies to', control: segmented.el }),
       ui.createDivider(),
-      ui.createSettingRow({ label: 'Current font', control: controls })
+      ui.createSettingRow({ label: 'Current font', control: controls }),
+      ui.createDivider(),
+      ui.createSettingRow({ label: 'Zoom', control: buildZoomControl() })
     ]);
+  }
+
+  // Cùng cấu trúc DOM với SettingsComponent._createZoomControl bên app:
+  // .setting-control-col > input.zoom-slider + span.zoom-val-label.
+  function buildZoomControl() {
+    const ctrl = ui.createElement('div', 'setting-control-col');
+
+    el.zoomSlider = ui.createElement('input', 'zoom-slider', {
+      type: 'range',
+      min: String(ZOOM.min),
+      max: String(ZOOM.max),
+      step: String(ZOOM.step)
+    });
+    el.zoomLabel = ui.createElement('span', 'zoom-val-label');
+
+    el.zoomSlider.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value, 10);
+      el.zoomLabel.textContent = `${value}%`;
+      zoomState()[role] = value;
+      bridge.setZoom(role, value);
+    });
+
+    ctrl.appendChild(el.zoomSlider);
+    ctrl.appendChild(el.zoomLabel);
+    return ctrl;
+  }
+
+  function zoomState() {
+    if (!state.zoom) state.zoom = {};
+    return state.zoom;
   }
 
   function renderCurrent() {
     const family = state[role];
     el.currentValue.textContent = family || 'System default';
     el.currentValue.style.fontFamily = family ? `'${family}'` : '';
-    el.resetBtn.style.visibility = family ? 'visible' : 'hidden';
+    el.currentValue.classList.toggle('fk-current-default', !family);
+    el.resetBtn.disabled = !family;
+
+    const zoom = zoomState()[role] || ZOOM.default;
+    el.zoomSlider.value = String(zoom);
+    el.zoomLabel.textContent = `${zoom}%`;
+
     if (el.segmented) el.segmented.updateActive(role);
   }
 
@@ -203,6 +253,10 @@ function openPicker(options) {
     subtitle: 'Search, download and apply any Google Font',
     content: picker.render(),
     className: 'fk-popover',
+    // Panel mọc ra từ chính nút mở nó. `position` do host tính từ vị trí
+    // thật của nút, nên nút nằm bên nào thì panel nở ra bên đó.
+    alignment: 'custom',
+    position: options.position,
     onClose: options.onClose
   });
 }

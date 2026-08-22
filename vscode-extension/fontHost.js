@@ -24,7 +24,9 @@ const BROWSER_UA =
   '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
 const STATE_KEY = 'mdpreview.fonts';
+const ZOOM_KEY = 'mdpreview.zoom';
 const ROLES = ['title', 'body', 'code'];
+const DEFAULT_ZOOM = 100;
 
 // Khớp với bộ weight app Electron nạp sẵn từ Google Fonts.
 const WEIGHTS = {
@@ -38,6 +40,15 @@ const CSS_VAR = {
   title: '--font-title',
   body: '--font-text',
   code: '--font-code'
+};
+
+// Biến zoom mỗi trục điều khiển. --preview-zoom và --code-zoom là API sẵn
+// có của app (markdown-content.css / markdown-blocks.css, đều đã vendor);
+// --title-zoom là trục mới, mặc định rơi về --preview-zoom.
+const ZOOM_VAR = {
+  title: '--title-zoom',
+  body: '--preview-zoom',
+  code: '--code-zoom'
 };
 
 async function fetchText(url) {
@@ -89,6 +100,21 @@ function createFontHost(context) {
     await context.globalState.update(STATE_KEY, { ...getState(), [role]: family });
   }
 
+  function getZoom() {
+    const saved = context.globalState.get(ZOOM_KEY) || {};
+    const zoom = {};
+    // Một giá trị hỏng trong storage không được phép làm chữ biến mất.
+    ROLES.forEach((role) => {
+      const value = Number(saved[role]);
+      zoom[role] = Number.isFinite(value) && value > 0 ? value : DEFAULT_ZOOM;
+    });
+    return zoom;
+  }
+
+  async function setZoom(zoom) {
+    await context.globalState.update(ZOOM_KEY, { ...getZoom(), ...(zoom || {}) });
+  }
+
   function installerWith(toUrl) {
     return createInstaller({ fs: nodeFs, fetchText, fetchBinary, cacheDir, join: path.join, toUrl });
   }
@@ -127,7 +153,7 @@ function createFontHost(context) {
       else state[role] = null;
     }
 
-    return { fonts: state, faces, vars: CSS_VAR };
+    return { fonts: state, faces, vars: CSS_VAR, zoom: getZoom(), zoomVars: ZOOM_VAR };
   }
 
   async function search(query, role, limit) {
@@ -163,7 +189,7 @@ function createFontHost(context) {
     return { role, family, css: result.css, varName: CSS_VAR[role] };
   }
 
-  return { getState, restore, search, apply, resourceRoot, cacheDir };
+  return { getState, getZoom, setZoom, restore, search, apply, resourceRoot, cacheDir };
 }
 
-module.exports = { createFontHost, CSS_VAR, WEIGHTS, ROLES };
+module.exports = { createFontHost, CSS_VAR, ZOOM_VAR, WEIGHTS, ROLES };

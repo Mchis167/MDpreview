@@ -7,6 +7,28 @@
 
 .fk-popover.ds-popover-card {
   width: 460px;
+  max-height: calc(100vh - 88px);
+}
+
+/* Header của popover dùng --ds-space-xl cả trên lẫn dưới, hợp lý cho một
+   modal 640px giữa màn hình nhưng thừa hẳn một khoảng ở panel nhỏ neo
+   vào nút. Siết lại và để tiêu đề cân với nút đóng. */
+.fk-popover .ds-popover-header {
+  padding: var(--ds-space-lg) var(--ds-space-md) var(--ds-space-md) var(--ds-space-xl);
+  align-items: flex-start;
+}
+
+.fk-popover .ds-popover-title {
+  font-size: var(--ds-font-lg);
+  line-height: 1.4;
+}
+
+/* Card là flex column có max-height, nên body phải được co lại thay vì
+   giữ nguyên 80vh — nếu không, phần cuối danh sách bị cắt mất. */
+.fk-popover .ds-popover-body {
+  max-height: none;
+  flex: 1;
+  min-height: 0;
 }
 
 .fk-panel {
@@ -32,23 +54,43 @@
   max-width: 160px;
 }
 
+/* Font đang là mặc định hệ thống thì giá trị hiện chữ mờ, không phải màu
+   accent — accent nghĩa là "bạn đã chọn cái này". */
+.fk-current-default {
+  color: var(--ds-text-tertiary);
+  font-weight: 400;
+}
+
 .fk-reset {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: var(--ds-space-2xs) var(--ds-space-sm);
+  padding: 0;
   border-radius: var(--ds-radius-widget);
-  font-family: var(--ds-font-family-code);
-  font-size: var(--ds-font-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   color: var(--ds-text-tertiary);
   transition: all var(--ds-transition-fast);
 }
 
-.fk-reset:hover {
+.fk-reset svg {
+  width: 14px;
+  height: 14px;
+}
+
+.fk-reset:hover:not(:disabled) {
   background: var(--ds-layer-subtle-hover);
   color: var(--ds-text-primary);
+}
+
+/* Vẫn chiếm chỗ khi không dùng được, để dòng này không hụt mất một nửa. */
+.fk-reset:disabled {
+  cursor: default;
+  opacity: 0.25;
 }
 
 /* ── Ô tìm kiếm ── */

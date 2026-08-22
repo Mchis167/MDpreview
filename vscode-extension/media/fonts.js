@@ -11,8 +11,9 @@
 (function () {
   const vscode = window.__mdpVscode;
 
-  const state = { title: null, body: null, code: null };
+  const state = { title: null, body: null, code: null, zoom: { title: 100, body: 100, code: 100 } };
   let cssVars = { title: '--font-title', body: '--font-text', code: '--font-code' };
+  let zoomVars = { title: '--title-zoom', body: '--preview-zoom', code: '--code-zoom' };
   let popover = null;
 
   // ── Request/response qua postMessage ─────────────────────
@@ -56,7 +57,17 @@
     else document.documentElement.style.removeProperty(name);
   }
 
+  function setZoomVar(role, value) {
+    const name = zoomVars[role];
+    if (name) document.documentElement.style.setProperty(name, String(value));
+  }
+
   // ── Cầu nối cho picker ────────────────────────────────────
+  // Zoom khác font ở một điểm: nó chỉ là một biến CSS, không phải thứ
+  // phải tải về. Nên áp ngay tại webview để kéo slider thấy đổi tức thì,
+  // còn extension host chỉ cần biết để ghi nhớ — và biết muộn cũng được.
+  let zoomSaveTimer = null;
+
   const bridge = {
     async search(query, role, limit) {
       const res = await request('fontSearch', { query, role, limit });
@@ -68,6 +79,17 @@
       setVar(role, res.family);
       state[role] = res.family;
       return res;
+    },
+    setZoom(role, value) {
+      setZoomVar(role, value);
+      state.zoom[role] = value;
+
+      // Kéo slider bắn ra hàng trăm sự kiện; ghi globalState từng cái một
+      // là ghi đĩa vô ích. Chỉ lưu khi tay đã dừng.
+      clearTimeout(zoomSaveTimer);
+      zoomSaveTimer = setTimeout(() => {
+        vscode.postMessage({ type: 'zoomSet', zoom: state.zoom });
+      }, 200);
     }
   };
 
@@ -89,10 +111,17 @@
         popover = null;
         return;
       }
+      // Panel nở ra từ chính nút này: mép phải thẳng mép phải nút, đáy
+      // ngay trên nút. Nút nằm góc phải nên panel cũng ở góc phải.
+      const rect = btn.getBoundingClientRect();
       popover = FontKitPicker.openPicker({
         ui: FontKitUiMDpreview.createUi(DesignSystem, SettingRow),
         bridge,
         state,
+        position: {
+          right: `${Math.round(window.innerWidth - rect.right)}px`,
+          bottom: `${Math.round(window.innerHeight - rect.top + 8)}px`
+        },
         onClose: () => {
           popover = null;
         }
@@ -124,10 +153,15 @@
 
     if (message.type === 'fontRestore') {
       cssVars = message.vars || cssVars;
-      Object.keys(state).forEach((role) => {
+      zoomVars = message.zoomVars || zoomVars;
+      Object.keys(cssVars).forEach((role) => {
         state[role] = message.fonts[role] || null;
         setFace(role, (message.faces || {})[role]);
         setVar(role, state[role]);
+
+        const zoom = (message.zoom || {})[role] || 100;
+        state.zoom[role] = zoom;
+        setZoomVar(role, zoom);
       });
       return;
     }

@@ -146,6 +146,7 @@ class MdPreviewEditorProvider {
           results: await this.fonts.search(message.query, message.role, message.limit)
         }));
       }
+      if (message.type === 'zoomSet') return this.fonts.setZoom(message.zoom);
       if (message.type === 'fontApply') {
         return replyFont(message, () =>
           this.fonts.apply(message.role, message.family, webviewPanel.webview)

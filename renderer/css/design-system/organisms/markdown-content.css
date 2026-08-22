@@ -3,33 +3,36 @@
    Base styles imported from shared/markdown-render.css
    ============================================================ */
 
-/* ── Text Zoom Support (App-only feature) ─────────────────── */
+/* ── Text Zoom Support ────────────────────────────────────────
+   Ba trục: --preview-zoom cho thân bài, --title-zoom cho tiêu đề,
+   --code-zoom cho code. --title-zoom mặc định rơi về --preview-zoom,
+   nên app Electron (chỉ có 2 slider) giữ nguyên hành vi cũ. */
 .md-render-body {
   font-size: calc(15px * (var(--preview-zoom, 100) / 100));
 }
 
 .md-render-body h1 {
-  font-size: calc(32px * (var(--preview-zoom, 100) / 100));
+  font-size: calc(32px * (var(--title-zoom, var(--preview-zoom, 100)) / 100));
 }
 
 .md-render-body h2 {
-  font-size: calc(24px * (var(--preview-zoom, 100) / 100));
+  font-size: calc(24px * (var(--title-zoom, var(--preview-zoom, 100)) / 100));
 }
 
 .md-render-body h3 {
-  font-size: calc(18px * (var(--preview-zoom, 100) / 100));
+  font-size: calc(18px * (var(--title-zoom, var(--preview-zoom, 100)) / 100));
 }
 
 .md-render-body h4 {
-  font-size: calc(16px * (var(--preview-zoom, 100) / 100));
+  font-size: calc(16px * (var(--title-zoom, var(--preview-zoom, 100)) / 100));
 }
 
 .md-render-body h5 {
-  font-size: calc(14px * (var(--preview-zoom, 100) / 100));
+  font-size: calc(14px * (var(--title-zoom, var(--preview-zoom, 100)) / 100));
 }
 
 .md-render-body h6 {
-  font-size: calc(12px * (var(--preview-zoom, 100) / 100));
+  font-size: calc(12px * (var(--title-zoom, var(--preview-zoom, 100)) / 100));
 }
 
 .md-render-body pre code {
