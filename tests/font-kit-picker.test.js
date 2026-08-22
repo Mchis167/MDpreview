@@ -58,17 +58,26 @@ function makeBridge(overrides = {}) {
   return {
     search: overrides.search || vi.fn(async () => CATALOG.map((f) => ({ ...f }))),
     apply: overrides.apply || vi.fn(async () => {}),
-    setZoom: overrides.setZoom || vi.fn()
+    setZoom: overrides.setZoom || vi.fn(),
+    setWeight: overrides.setWeight || vi.fn()
   };
 }
 
 function makeState(overrides = {}) {
+  const defaultWeights = {
+    title: { available: [], selected: null },
+    body: { available: ['400', '600', '700'], selected: null },
+    code: { available: [], selected: null }
+  };
+  // Merged rather than replaced: a test overriding just one role's weights
+  // should not silently blank out the other two.
   return {
     title: null,
     body: 'Inter',
     code: null,
     zoom: { title: 100, body: 100, code: 100 },
-    ...overrides
+    ...overrides,
+    weights: { ...defaultWeights, ...(overrides.weights || {}) }
   };
 }
 
@@ -131,12 +140,12 @@ describe('typography group structure', () => {
     expect(el.querySelector('.fk-search-input')).toBeNull();
   });
 
-  it('uses real setting rows for the role switch, the current font and zoom', async () => {
+  it('uses real setting rows for the role switch, the current font, weight and zoom', async () => {
     const { el } = mountTypography();
     await flush();
 
     const labels = [...el.querySelectorAll('.ds-setting-row-label')].map((n) => n.textContent);
-    expect(labels).toEqual(['Applies to', 'Current font', 'Zoom']);
+    expect(labels).toEqual(['Applies to', 'Current font', 'Font Weight', 'Zoom']);
   });
 
   it('renders a segmented control with one icon segment per role', async () => {
@@ -253,6 +262,130 @@ describe('typography current-font row', () => {
     typography.refresh();
 
     expect(el.querySelector('.fk-current-value').textContent).toBe('Lexend');
+  });
+});
+
+describe('typography weight row', () => {
+  it('offers only the weights actually installed for the role, labelled', async () => {
+    const { el } = mountTypography({ initialRole: 'body' });
+    await flush();
+
+    const select = el.querySelector('.fk-weight-wrap select');
+    const opts = [...select.options].map((o) => ({ value: o.value, label: o.textContent }));
+    expect(opts).toEqual([
+      { value: '', label: 'Default' },
+      { value: '400', label: '400 · Regular' },
+      { value: '600', label: '600 · SemiBold' },
+      { value: '700', label: '700 · Bold' }
+    ]);
+  });
+
+  it('shows an unnamed weight by its number alone', async () => {
+    const { el } = mountTypography({
+      initialRole: 'body',
+      state: { weights: { body: { available: ['350'], selected: null } } }
+    });
+    await flush();
+
+    const opts = [...el.querySelector('.fk-weight-wrap select').options].map((o) => o.textContent);
+    expect(opts).toEqual(['Default', '350']);
+  });
+
+  it('starts on Default when no weight has been chosen', async () => {
+    const { el } = mountTypography({ initialRole: 'body' });
+    await flush();
+    expect(el.querySelector('.fk-weight-wrap select').value).toBe('');
+  });
+
+  it('selects the weight already stored for this role', async () => {
+    const { el } = mountTypography({
+      initialRole: 'body',
+      state: { weights: { body: { available: ['400', '600'], selected: '600' } } }
+    });
+    await flush();
+    expect(el.querySelector('.fk-weight-wrap select').value).toBe('600');
+  });
+
+  it('stays in place but disabled with nothing to choose, on the system default', async () => {
+    // Same treatment as Reset: an empty row reads as forgotten, not absent.
+    const { el } = mountTypography({ initialRole: 'title' });
+    await flush();
+
+    const select = el.querySelector('.fk-weight-wrap select');
+    expect(select.disabled).toBe(true);
+    expect([...select.options].map((o) => o.textContent)).toEqual(['Default']);
+  });
+
+  it('tells the bridge and updates the CSS-facing state when a weight is picked', async () => {
+    const { el, bridge, state } = mountTypography({ initialRole: 'body' });
+    await flush();
+
+    const select = el.querySelector('.fk-weight-wrap select');
+    select.value = '700';
+    select.dispatchEvent(new window.Event('change'));
+
+    expect(bridge.setWeight).toHaveBeenCalledWith('body', '700');
+    expect(state.weights.body.selected).toBe('700');
+  });
+
+  it('reports null — not an empty string — when reverted to Default', async () => {
+    const { el, bridge } = mountTypography({
+      initialRole: 'body',
+      state: { weights: { body: { available: ['400', '700'], selected: '700' } } }
+    });
+    await flush();
+
+    const select = el.querySelector('.fk-weight-wrap select');
+    select.value = '';
+    select.dispatchEvent(new window.Event('change'));
+
+    expect(bridge.setWeight).toHaveBeenCalledWith('body', null);
+  });
+
+  it('follows the role switch, each axis keeping its own choice', async () => {
+    const { el, state } = mountTypography({
+      initialRole: 'body',
+      state: makeState({
+        weights: {
+          title: { available: [], selected: null },
+          body: { available: ['400', '700'], selected: '700' },
+          code: { available: ['400', '500'], selected: '500' }
+        }
+      })
+    });
+    await flush();
+    expect(el.querySelector('.fk-weight-wrap select').value).toBe('700');
+
+    el.querySelector('.ds-segment-item[data-id="code"]').click();
+    await flush();
+    expect(el.querySelector('.fk-weight-wrap select').value).toBe('500');
+    expect(state.weights.body.selected).toBe('700'); // untouched by looking at code
+  });
+
+  it('clears to Default and disables when the font is reset', async () => {
+    const { el } = mountTypography({
+      initialRole: 'body',
+      state: { weights: { body: { available: ['400', '700'], selected: '700' } } }
+    });
+    await flush();
+
+    el.querySelector('.fk-reset').click();
+    await flush();
+
+    const select = el.querySelector('.fk-weight-wrap select');
+    expect(select.value).toBe('');
+    expect(select.disabled).toBe(true);
+  });
+
+  it('picks up a fresh weight list after refresh(), as after installing a new font', async () => {
+    const { el, typography, state } = mountTypography({ initialRole: 'body' });
+    await flush();
+
+    state.weights.body = { available: ['400', '900'], selected: null };
+    typography.refresh();
+
+    const opts = [...el.querySelector('.fk-weight-wrap select').options].map((o) => o.value);
+    expect(opts).toEqual(['', '400', '900']);
   });
 });
 

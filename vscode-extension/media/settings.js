@@ -14,9 +14,22 @@
 (function () {
   const vscode = window.__mdpVscode;
 
-  const state = { title: null, body: null, code: null, zoom: { title: 100, body: 100, code: 100 } };
+  const emptyWeights = () => ({
+    title: { available: [], selected: null },
+    body: { available: [], selected: null },
+    code: { available: [], selected: null }
+  });
+
+  const state = {
+    title: null,
+    body: null,
+    code: null,
+    zoom: { title: 100, body: 100, code: 100 },
+    weights: emptyWeights()
+  };
   let cssVars = { title: '--font-title', body: '--font-text', code: '--font-code' };
   let zoomVars = { title: '--title-zoom', body: '--preview-zoom', code: '--code-zoom' };
+  let weightVars = { title: '--font-title-weight', body: '--font-text-weight', code: '--font-code-weight' };
 
   let popover = null;
   let typography = null;
@@ -68,6 +81,13 @@
     if (name) document.documentElement.style.setProperty(name, String(value));
   }
 
+  function setWeightVar(role, value) {
+    const name = weightVars[role];
+    if (!name) return;
+    if (value) document.documentElement.style.setProperty(name, String(value));
+    else document.documentElement.style.removeProperty(name);
+  }
+
   // ── Cầu nối cho font-kit ──────────────────────────────────
   // Zoom khác font ở một điểm: nó chỉ là một biến CSS, không phải thứ
   // phải tải về. Nên áp ngay tại webview để kéo slider thấy đổi tức thì,
@@ -84,7 +104,18 @@
       setFace(role, res.css);
       setVar(role, res.family);
       state[role] = res.family;
+      // A new font (or none) for this role — any weight override chosen for
+      // the previous one no longer applies.
+      state.weights[role] = { available: res.weights || [], selected: null };
+      setWeightVar(role, null);
       return res;
+    },
+    // Fire-and-forget like setZoom: every weight in `available` already has
+    // its @font-face installed, so this is a variable flip, not a download.
+    setWeight(role, weight) {
+      setWeightVar(role, weight);
+      state.weights[role] = { ...(state.weights[role] || { available: [] }), selected: weight };
+      vscode.postMessage({ type: 'fontWeightSet', role, weight });
     },
     setZoom(role, value) {
       setZoomVar(role, value);
@@ -359,6 +390,7 @@
     if (message.type === 'fontRestore') {
       cssVars = message.vars || cssVars;
       zoomVars = message.zoomVars || zoomVars;
+      weightVars = message.weightVars || weightVars;
       Object.keys(cssVars).forEach((role) => {
         state[role] = message.fonts[role] || null;
         setFace(role, (message.faces || {})[role]);
@@ -367,6 +399,10 @@
         const zoom = (message.zoom || {})[role] || 100;
         state.zoom[role] = zoom;
         setZoomVar(role, zoom);
+
+        const weight = (message.weights || {})[role] || { available: [], selected: null };
+        state.weights[role] = weight;
+        setWeightVar(role, weight.selected);
       });
       if (typography) typography.refresh();
       return;

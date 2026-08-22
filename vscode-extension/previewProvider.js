@@ -126,6 +126,9 @@ class MdPreviewEditorProvider {
         }));
       }
       if (message.type === 'zoomSet') return this.fonts.setZoom(message.zoom);
+      // Fire-and-forget like zoomSet: the weight is already applied locally
+      // in the webview, this call is only so it survives a reload.
+      if (message.type === 'fontWeightSet') return this.fonts.setWeight(message.role, message.weight);
       if (message.type === 'fontApply') {
         return replyFont(message, () =>
           this.fonts.apply(message.role, message.family, webviewPanel.webview)

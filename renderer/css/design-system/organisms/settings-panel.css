@@ -83,3 +83,8 @@
 .ds-select:hover {
   opacity: 0.8;
 }
+
+.ds-select:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

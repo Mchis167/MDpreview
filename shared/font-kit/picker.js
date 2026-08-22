@@ -4,9 +4,9 @@
    Two pieces that a host composes as it likes:
 
      createTypography  the settings rows — which role you are
-                       styling, the font it currently uses, and
-                       its zoom. Small enough to live inside a
-                       larger Settings panel.
+                       styling, the font it currently uses, its
+                       weight, and its zoom. Small enough to live
+                       inside a larger Settings panel.
      createFontList    the Google Fonts catalogue — search,
                        download, apply. Big enough to want a
                        surface of its own, so the host decides
@@ -85,6 +85,8 @@ function createTypography(options) {
       if (el.resetBtn.disabled) return;
       bridge.apply(role, null);
       state[role] = null;
+      // No font installed for this role any more, so no weight to offer.
+      weightState()[role] = { available: [], selected: null };
       renderCurrent();
     });
 
@@ -93,6 +95,48 @@ function createTypography(options) {
     controls.appendChild(ui.createElement('span', 'fk-current-divider'));
     controls.appendChild(el.resetBtn);
     return controls;
+  }
+
+  // ── Dòng "Font Weight" ──────────────────────────────────────
+  // Chỉ cho chọn trong số weight đã tải thật cho font đang dùng — không
+  // gọi mạng thêm, và không bao giờ hiện một weight font đó không có.
+  // "Default" (giá trị rỗng) trả về đúng phân cấp gốc: h1/h2 đậm hơn
+  // h3-h6. Chọn một con số cụ thể thì đồng nhất cả cụm về weight đó.
+  const WEIGHT_LABELS = { 400: 'Regular', 500: 'Medium', 600: 'SemiBold', 700: 'Bold' };
+
+  function weightState() {
+    if (!state.weights) state.weights = {};
+    return state.weights;
+  }
+
+  function weightInfo(r) {
+    const info = weightState()[r];
+    return info && Array.isArray(info.available) ? info : { available: [], selected: null };
+  }
+
+  function buildWeightControl() {
+    el.weightWrap = ui.createElement('div', 'fk-weight-wrap');
+    return el.weightWrap;
+  }
+
+  function renderWeightSelect() {
+    if (!el.weightWrap) return;
+    el.weightWrap.innerHTML = '';
+
+    const info = weightInfo(role);
+    const options = [{ value: '', label: 'Default' }].concat(
+      info.available.map((w) => ({ value: String(w), label: WEIGHT_LABELS[w] ? `${w} · ${WEIGHT_LABELS[w]}` : String(w) }))
+    );
+
+    const select = ui.createSelect(options, info.selected || '', (val) => {
+      const weight = val || null;
+      weightInfo(role).selected = weight;
+      bridge.setWeight(role, weight);
+    });
+    // No font chosen yet, or nothing beyond "Default" to offer — same
+    // stays-in-place-but-disabled treatment as Reset gets above.
+    select.disabled = !state[role] || !info.available.length;
+    el.weightWrap.appendChild(select);
   }
 
   // Cùng cấu trúc DOM với SettingsComponent._createZoomControl bên app:
@@ -135,6 +179,8 @@ function createTypography(options) {
     const zoom = zoomState()[role] || ZOOM.default;
     el.zoomSlider.value = String(zoom);
     el.zoomLabel.textContent = `${zoom}%`;
+
+    renderWeightSelect();
   }
 
   function render() {
@@ -148,6 +194,8 @@ function createTypography(options) {
       ui.createSettingRow({ label: 'Applies to', control: el.segmented.el }),
       ui.createDivider(),
       ui.createSettingRow({ label: 'Current font', control: buildFontControl() }),
+      ui.createDivider(),
+      ui.createSettingRow({ label: 'Font Weight', control: buildWeightControl() }),
       ui.createDivider(),
       ui.createSettingRow({ label: 'Zoom', control: buildZoomControl() })
     ]);

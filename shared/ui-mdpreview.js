@@ -21,6 +21,8 @@ function createUi(ds, settingRow, switchToggle) {
 
     createSettingRow: (options) => settingRow.create(options),
 
+    createSelect: (options, currentVal, onChange) => ds.createSelect(options, currentVal, onChange),
+
     createSegmented: (options) => ds.createSegmentedControl(options),
 
     createDivider: () => ds.createElement('div', 'setting-divider'),
