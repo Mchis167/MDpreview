@@ -22,9 +22,10 @@ const fs = require('fs');
 const path = require('path');
 
 const NAME = 'mdpreview';
-const VERSION = '2.0.0';
+const VERSION = '2.1.0';
 const PROTOCOL_VERSION = '2024-11-05';
 
+const ROOT_DIR = '.mdpreview';
 const STORE_DIR = path.join('.mdpreview', 'comments');
 const ARCHIVE_DIR = path.join('.mdpreview', 'comments', '.archive');
 
@@ -34,6 +35,9 @@ const TOOL = {
     'Read all pending review comments the user left on a markdown file in MDpreview. ' +
     'Reading consumes them: the tool archives the comments in the same operation, so ' +
     'there is nothing to delete or resolve afterwards — just apply the requested changes. ' +
+    'A comment may carry a "tag" saying what kind of feedback it is (bug, enhancement, ' +
+    'or comment) and an "images" list of absolute paths to screenshots the user pasted in — ' +
+    'read those image files, they usually show the problem more directly than the text does. ' +
     'Pass the path to the markdown file, relative to the project root (e.g. "docs/plan.md") ' +
     'or absolute.',
   inputSchema: {
@@ -132,8 +136,44 @@ function readJsonArray(p) {
 }
 
 /**
+ * Delete `filePath`, then remove every directory it leaves empty, walking up
+ * and stopping at `<root>/.mdpreview` inclusive. The first directory that is
+ * still occupied ends the walk, so nothing outside the store is ever touched.
+ *
+ * commentStoreUtil.js states the same rule for the extension host. The logic
+ * is duplicated rather than shared because this file has to stay a
+ * zero-dependency single file — it is copied to ~/.mdpreview/mcp-server.js
+ * and run from there, with no node_modules behind it.
+ */
+function removeAndPrune(root, filePath) {
+  try {
+    fs.unlinkSync(filePath);
+  } catch {
+    return; // already gone; nothing to prune on its behalf
+  }
+
+  const stopAt = path.resolve(root, ROOT_DIR);
+  let dir = path.dirname(path.resolve(filePath));
+
+  while (dir === stopAt || dir.startsWith(stopAt + path.sep)) {
+    try {
+      fs.rmdirSync(dir); // throws while the directory still holds anything
+    } catch {
+      return;
+    }
+    if (dir === stopAt) return;
+    dir = path.dirname(dir);
+  }
+}
+
+/**
  * Read the pending comments and archive them in the same operation.
  * Nothing pending means nothing is written — no empty archive files.
+ *
+ * The emptied store file is deleted rather than rewritten as `[]`, so a file
+ * with no outstanding comments leaves no trace in the tree. Pasted images
+ * stay put: the archived copies still reference them, and the agent that has
+ * just read these comments may still need to open them.
  */
 function readAndConsume(loc) {
   const comments = readJsonArray(loc.commentsPath);
@@ -145,9 +185,21 @@ function readAndConsume(loc) {
 
   fs.mkdirSync(path.dirname(loc.archivePath), { recursive: true });
   fs.writeFileSync(loc.archivePath, JSON.stringify(archive, null, 2));
-  fs.writeFileSync(loc.commentsPath, '[]');
+  removeAndPrune(loc.root, loc.commentsPath);
 
   return { comments, consumedAt };
+}
+
+/**
+ * Absolute paths to the images a comment carries, for the agent to read.
+ * Entries that aren't a plain `assets/<name>` are dropped — the array comes
+ * from a file on disk and its paths get handed to whoever reads them.
+ */
+function imagePaths(comment, root) {
+  if (!Array.isArray(comment.images)) return [];
+  return comment.images
+    .filter((rel) => typeof rel === 'string' && /^assets\/[^/\\]+$/.test(rel) && !rel.includes('..'))
+    .map((rel) => path.join(root, STORE_DIR, rel));
 }
 
 function callTool(name, args, cwd) {
@@ -159,14 +211,22 @@ function callTool(name, args, cwd) {
   const { comments } = readAndConsume(loc);
   if (!comments.length) return toolText(`No pending comments on ${loc.rel}.`);
 
-  const payload = comments.map((c) => ({
-    text: c.text,
-    selectedText: c.selectedText,
-    lineStart: c.lineStart,
-    lineEnd: c.lineEnd,
-    context: c.context,
-    createdAt: c.createdAt
-  }));
+  const payload = comments.map((c) => {
+    const entry = {
+      text: c.text,
+      selectedText: c.selectedText,
+      lineStart: c.lineStart,
+      lineEnd: c.lineEnd,
+      context: c.context,
+      createdAt: c.createdAt
+    };
+    // Both are optional on a comment; omit them entirely rather than
+    // reporting nulls the model would have to read past.
+    if (c.tag) entry.tag = c.tag;
+    const images = imagePaths(c, loc.root);
+    if (images.length) entry.images = images;
+    return entry;
+  });
 
   return toolText(
     `${comments.length} comment(s) on ${loc.rel} (now consumed — no cleanup needed):\n` +
@@ -267,4 +327,4 @@ function write(obj) {
 
 if (require.main === module) main();
 
-module.exports = { findRoot, resolveTarget, readAndConsume, handleMessage, TOOL, VERSION };
+module.exports = { findRoot, resolveTarget, readAndConsume, removeAndPrune, callTool, handleMessage, TOOL, VERSION };

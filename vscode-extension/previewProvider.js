@@ -23,11 +23,18 @@ class MdPreviewEditorProvider {
     const rendererRoot = vscode.Uri.joinPath(this.context.extensionUri, 'vendor', 'renderer');
     const mediaRoot = vscode.Uri.joinPath(this.context.extensionUri, 'media');
 
+    // Ảnh dán vào comment nằm trong .mdpreview/ của workspace — cùng lý do
+    // với font: ngoài danh sách này thì webview chặn.
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
+    const commentAssetRoots = workspaceFolder
+      ? [vscode.Uri.joinPath(workspaceFolder.uri, '.mdpreview')]
+      : [];
+
     webviewPanel.webview.options = {
       enableScripts: true,
       // Font tải về nằm ngoài extension, trong globalStorage — không có
       // nó trong danh sách này thì mọi .woff2 bị webview chặn.
-      localResourceRoots: [sharedRoot, rendererRoot, mediaRoot, this.fonts.resourceRoot()]
+      localResourceRoots: [sharedRoot, rendererRoot, mediaRoot, this.fonts.resourceRoot(), ...commentAssetRoots]
     };
     webviewPanel.webview.html = buildHtml(webviewPanel.webview, sharedRoot, rendererRoot, mediaRoot);
 

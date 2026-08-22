@@ -128,10 +128,15 @@
     highlightPending(lineStart, lineEnd, selectedText, context);
 
     const formComp = CommentFormComponent.getInstance();
+    MdpCompose.attach(formComp);
     formComp.onSave((text) => {
-      if (!text || !formTarget) return;
+      if (!formTarget) return;
+      const compose = MdpCompose.getState();
+      // A pasted screenshot on its own is a comment; text is only required
+      // when nothing is attached.
+      if (!text && !MdpCompose.hasAttachments()) return;
       clearPendingHighlight();
-      vscode.postMessage({ type: 'saveComment', data: { ...formTarget, text } });
+      vscode.postMessage({ type: 'saveComment', data: { ...formTarget, text, ...compose } });
       formComp.hide();
       window.getSelection().removeAllRanges();
       formTarget = null;
@@ -141,6 +146,7 @@
       formTarget = null;
     });
     formComp.show(trigger, 'empty');
+    MdpCompose.reset(); // after show(), which resets the form's own fields
   }
 
   function getSelectionContext(range) {
@@ -357,10 +363,33 @@
     header.appendChild(headerGroup);
     header.appendChild(actionsGroup);
 
-    const body = DesignSystem.createElement('div', 'ds-item-body', { html: esc(c.text) });
-
     item.appendChild(header);
-    item.appendChild(body);
+
+    if (c.tag) {
+      const badge = DesignSystem.createElement('div', `mdp-tag-badge mdp-tag-badge--${c.tag}`, {
+        text: c.tag.toUpperCase()
+      });
+      item.appendChild(badge);
+    }
+
+    if (c.text) {
+      item.appendChild(DesignSystem.createElement('div', 'ds-item-body', { html: esc(c.text) }));
+    }
+
+    if (Array.isArray(c.imageUris) && c.imageUris.length) {
+      const strip = DesignSystem.createElement('div', 'mdp-item-attachments');
+      c.imageUris.forEach((uri) => {
+        const img = document.createElement('img');
+        img.src = uri;
+        img.alt = '';
+        img.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (window.ZoomSystem) window.ZoomSystem.open(uri, 'image');
+        });
+        strip.appendChild(img);
+      });
+      item.appendChild(strip);
+    }
 
     if (!archived) {
       item.onmouseenter = () => highlightLines(c.lineStart, c.lineEnd);
@@ -397,11 +426,14 @@
 
     formTarget = { ...c };
     const formComp = CommentFormComponent.getInstance();
+    MdpCompose.attach(formComp);
     formComp.onEdit((text) => {
       formComp.show(targetLine, 'filled', text);
+      MdpCompose.reset(c); // seed the chips and thumbnails from the comment
       formComp.onSave((newText) => {
-        if (!newText) return;
-        vscode.postMessage({ type: 'saveComment', data: { ...formTarget, text: newText } });
+        const compose = MdpCompose.getState();
+        if (!newText && !MdpCompose.hasAttachments()) return;
+        vscode.postMessage({ type: 'saveComment', data: { ...formTarget, text: newText, ...compose } });
         formComp.hide();
         formTarget = null;
       });

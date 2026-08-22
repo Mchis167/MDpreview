@@ -116,11 +116,13 @@ describe('readAndConsume', () => {
     expect(result.comments[0]).toMatchObject({ text: 'sửa chỗ này', selectedText: 'System Overview' });
   });
 
-  it('moves them into the archive, stamped, and empties the queue', () => {
+  it('moves them into the archive, stamped, and deletes the emptied store file', () => {
     const loc = withComments([COMMENT]);
     readAndConsume(loc);
 
-    expect(JSON.parse(fs.readFileSync(loc.commentsPath, 'utf8'))).toEqual([]);
+    // Deleted rather than rewritten as `[]`: a file with nothing outstanding
+    // should leave no trace in the tree.
+    expect(fs.existsSync(loc.commentsPath)).toBe(false);
     const archived = JSON.parse(fs.readFileSync(loc.archivePath, 'utf8'));
     expect(archived).toHaveLength(1);
     expect(archived[0].id).toBe('c1');
@@ -154,6 +156,102 @@ describe('readAndConsume', () => {
     const loc = withComments([]);
     fs.writeFileSync(loc.commentsPath, 'not json{');
     expect(readAndConsume(loc).comments).toHaveLength(0);
+  });
+
+  it('prunes the directories the deleted store file leaves empty', () => {
+    tree({
+      'repo/.git/HEAD': 'x',
+      'repo/docs/deep/plan.md': '# p',
+      'repo/.mdpreview/comments/docs/deep/plan.md.json': JSON.stringify([COMMENT])
+    });
+    const loc = resolveTarget('docs/deep/plan.md', path.join(tmp, 'repo'));
+    readAndConsume(loc);
+
+    expect(fs.existsSync(path.join(tmp, 'repo/.mdpreview/comments/docs'))).toBe(false);
+    // The archive it just wrote keeps these two alive.
+    expect(fs.existsSync(path.join(tmp, 'repo/.mdpreview/comments'))).toBe(true);
+    expect(fs.existsSync(path.join(tmp, 'repo/.mdpreview'))).toBe(true);
+  });
+
+  it('leaves sibling files and the images the archive still references alone', () => {
+    tree({
+      'repo/.git/HEAD': 'x',
+      'repo/docs/plan.md': '# p',
+      'repo/.mdpreview/comments/docs/plan.md.json': JSON.stringify([COMMENT]),
+      'repo/.mdpreview/comments/docs/other.md.json': JSON.stringify([{ id: 'x' }]),
+      'repo/.mdpreview/comments/assets/c1-1.png': 'png-bytes'
+    });
+    const loc = resolveTarget('docs/plan.md', path.join(tmp, 'repo'));
+    readAndConsume(loc);
+
+    expect(fs.existsSync(path.join(tmp, 'repo/.mdpreview/comments/docs/other.md.json'))).toBe(true);
+    expect(fs.existsSync(path.join(tmp, 'repo/.mdpreview/comments/assets/c1-1.png'))).toBe(true);
+  });
+});
+
+describe('removeAndPrune', () => {
+  const { removeAndPrune } = server;
+
+  it('stops at .mdpreview and never climbs into the repo itself', () => {
+    tree({ 'repo/.mdpreview/comments/a.json': '[]' });
+    removeAndPrune(path.join(tmp, 'repo'), path.join(tmp, 'repo/.mdpreview/comments/a.json'));
+
+    expect(fs.existsSync(path.join(tmp, 'repo/.mdpreview'))).toBe(false);
+    expect(fs.existsSync(path.join(tmp, 'repo'))).toBe(true);
+  });
+
+  it('is a no-op when the file is already gone', () => {
+    tree({ 'repo/.mdpreview/comments/a.json': '[]' });
+    const missing = path.join(tmp, 'repo/.mdpreview/comments/nope.json');
+    removeAndPrune(path.join(tmp, 'repo'), missing);
+    expect(fs.existsSync(path.join(tmp, 'repo/.mdpreview/comments/a.json'))).toBe(true);
+  });
+});
+
+describe('comment payload', () => {
+  const { callTool } = server;
+
+  it('passes the tag and absolute image paths through to the agent', () => {
+    tree({
+      'repo/.git/HEAD': 'x',
+      'repo/plan.md': '# p',
+      'repo/.mdpreview/comments/assets/c1-1.png': 'png',
+      'repo/.mdpreview/comments/plan.md.json': JSON.stringify([
+        { id: 'c1', text: 'nút này vỡ', tag: 'bug', images: ['assets/c1-1.png'] }
+      ])
+    });
+    const res = callTool('mdp_read_comments', { file: 'plan.md' }, path.join(tmp, 'repo'));
+    const payload = JSON.parse(res.content[0].text.split('\n').slice(1).join('\n'));
+
+    expect(payload[0].tag).toBe('bug');
+    expect(payload[0].images).toEqual([path.join(tmp, 'repo/.mdpreview/comments/assets/c1-1.png')]);
+  });
+
+  it('omits tag and images when the comment has neither', () => {
+    tree({
+      'repo/.git/HEAD': 'x',
+      'repo/plan.md': '# p',
+      'repo/.mdpreview/comments/plan.md.json': JSON.stringify([{ id: 'c1', text: 'ok' }])
+    });
+    const res = callTool('mdp_read_comments', { file: 'plan.md' }, path.join(tmp, 'repo'));
+    const payload = JSON.parse(res.content[0].text.split('\n').slice(1).join('\n'));
+
+    expect(payload[0]).not.toHaveProperty('tag');
+    expect(payload[0]).not.toHaveProperty('images');
+  });
+
+  it('drops image entries that point outside the assets directory', () => {
+    tree({
+      'repo/.git/HEAD': 'x',
+      'repo/plan.md': '# p',
+      'repo/.mdpreview/comments/plan.md.json': JSON.stringify([
+        { id: 'c1', text: 'x', images: ['../../../etc/passwd', 'assets/../secret', 'assets/ok.png'] }
+      ])
+    });
+    const res = callTool('mdp_read_comments', { file: 'plan.md' }, path.join(tmp, 'repo'));
+    const payload = JSON.parse(res.content[0].text.split('\n').slice(1).join('\n'));
+
+    expect(payload[0].images).toEqual([path.join(tmp, 'repo/.mdpreview/comments/assets/ok.png')]);
   });
 });
 

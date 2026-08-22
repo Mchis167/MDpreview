@@ -99,6 +99,9 @@ function buildHtml(webview, sharedRoot, rendererRoot, mediaRoot) {
   // the comment UI itself is styled entirely by the vendored DS CSS above.
   const commentsCssUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'comments.css'));
   const commentsScriptUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'comments.js'));
+  // Tag chips and pasted-image attachments, added onto the vendored comment
+  // form from the outside so re-vendoring never has to carry them.
+  const commentComposeUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'commentCompose.js'));
   const diffCssUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'diff.css'));
   const diffScriptUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'diff.js'));
   const nonce = getNonce();
@@ -126,7 +129,10 @@ function buildHtml(webview, sharedRoot, rendererRoot, mediaRoot) {
        extension's globalStorage, which asWebviewUri maps onto cspSource.
        Nothing is loaded from fonts.gstatic.com at render time — the page
        never talks to Google; only the extension host does, at download time. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; font-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
+  <!-- img-src: cspSource covers images stored under .mdpreview/ (comment
+       attachments) and anything else asWebviewUri maps in; data: is what a
+       clipboard paste produces, shown as a thumbnail before it is saved. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; font-src ${webview.cspSource}; img-src ${webview.cspSource} data:; script-src 'nonce-${nonce}';">
 ${cssLinks}
   <style>
     /* Layout glue only, mirroring the app's #app-layout / main split so the
@@ -275,6 +281,7 @@ ${dsScripts}
   <script nonce="${nonce}" src="${carouselUri}"></script>
   <script nonce="${nonce}" src="${commentAnchorUri}"></script>
   <script nonce="${nonce}" src="${scriptUri}"></script>
+  <script nonce="${nonce}" src="${commentComposeUri}"></script>
   <script nonce="${nonce}" src="${commentsScriptUri}"></script>
   <script nonce="${nonce}" src="${diffScriptUri}"></script>
   <script nonce="${nonce}" src="${fontsScriptUri}"></script>

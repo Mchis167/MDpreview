@@ -22,9 +22,24 @@ function createCommentSession(document, webviewPanel) {
   });
 
   const post = (message) => webviewPanel.webview.postMessage(message);
-  const sendComments = () => post({ type: 'comments', list: core.list() });
+
+  // A webview can't read a workspace file by path. Each comment therefore
+  // travels with an `imageUris` list for display, alongside the stored
+  // `images` paths, which stay untouched so an edit can send them back.
+  const withImageUris = (comment) => {
+    if (!Array.isArray(comment.images) || !comment.images.length) return comment;
+    return {
+      ...comment,
+      imageUris: comment.images.map((rel) =>
+        webviewPanel.webview.asWebviewUri(storage.imageUri(rel)).toString()
+      )
+    };
+  };
+
+  const sendComments = () => post({ type: 'comments', list: core.list().map(withImageUris) });
   const sendArchive = async () => {
-    post({ type: 'archivedComments', list: await storage.getArchive(relPath) });
+    const list = await storage.getArchive(relPath);
+    post({ type: 'archivedComments', list: list.map(withImageUris) });
   };
   const unsubscribe = core.onChange(sendComments);
 

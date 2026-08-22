@@ -95,8 +95,12 @@ File: `vscode-extension/mcpStdioServer.js`
   `.mdpreview/` (kể cả `comments/`, `.archive/`, `assets/`).
   Nếu `.mdpreview/` rỗng hoàn toàn thì xoá luôn — sạch tuyệt đối,
   lần comment sau extension tự tạo lại.
-- Logic prune là **một hàm dùng chung**, có unit test riêng.
-  Bất biến: **không bao giờ leo ra ngoài `.mdpreview`**.
+- Quy tắc prune có unit test riêng. Bất biến: **không bao giờ leo ra ngoài `.mdpreview`**.
+- Logic được **viết hai lần** thay vì dùng chung: `mcpStdioServer.js` phải giữ
+  nguyên tắc zero-dependency single-file (nó được copy sang
+  `~/.mdpreview/mcp-server.js` và chạy độc lập, không có `node_modules`),
+  nên không thể `require` module chung. Bản cho extension host nằm ở
+  `commentStoreUtil.js`, bản node-fs nằm trong chính `mcpStdioServer.js`.
 
 ---
 
@@ -110,26 +114,41 @@ File: `vscode-extension/mcpStdioServer.js`
 
 ---
 
-## 8. File sẽ chạm
+## 8. File đã chạm
+
+Đường dẫn tính từ `vscode-extension/`.
 
 | File | Thay đổi |
 |---|---|
-| `vscode-extension/media/comments.js` | Paste handler, thumbnail strip, chip tag, badge trong sidebar item |
-| Form component vendored trong extension | UI thumbnail + tag chips |
-| CSS của form (vendored) | Style thumbnail strip, chips, badges |
-| `vscode-extension/commentStorage.js` | Ghi/xoá ảnh, xoá JSON rỗng, prune folder |
-| `vscode-extension/previewProvider.js` / `commentSession.js` | Nhận ảnh base64, chuyển path → webview URI, auto-gitignore |
-| `vscode-extension/mcpStdioServer.js` | Payload thêm `tag` + `images`, xoá JSON rỗng + prune, VERSION 2.1.0 |
+| `media/commentCompose.js` *(mới)* | Tag chips + attachment strip + paste handler, gắn vào form từ bên ngoài |
+| `media/comments.js` | Gọi composer khi mở form, gửi `tag`/`images` khi save, badge + thumbnail trong sidebar item |
+| `media/comments.css` | Style cho chips, thumbnail strip, badges |
+| `commentStoreUtil.js` *(mới)* | Logic thuần: validate tag, decode data URL, đặt tên asset, prune dirs, gitignore |
+| `commentStorage.js` | Ghi/xoá ảnh, xoá JSON rỗng, prune folder, auto-gitignore |
+| `commentSession.js` | Kèm `imageUris` khi gửi comment sang webview |
+| `previewProvider.js` | Thêm `.mdpreview/` vào `localResourceRoots` |
+| `webviewHtml.js` | Nạp `commentCompose.js`; CSP thêm `img-src` (cspSource + `data:`) |
+| `mcpStdioServer.js` | Payload thêm `tag` + `images`, xoá JSON rỗng + prune, VERSION 2.1.0 |
+
+**Không sửa file vendored.** `comment-form-component.js` và `comment-form.css`
+được `scripts/vendor-shared.js` copy từ app desktop, nên mọi thay đổi trong đó
+sẽ mất khi chạy lại `npm run vendor`. Tag chips và thumbnail strip vì thế được
+chèn vào form từ bên ngoài (`commentCompose.js`) — cùng cách `comments.js` đăng
+ký icon qua `DesignSystem.registerIcons` thay vì sửa registry vendored.
 
 ---
 
 ## 9. Test
 
-- **Unit test:**
-  - Storage: lưu comment kèm ảnh + tag; xoá comment xoá ảnh; clear xoá ảnh.
-  - Prune: xoá JSON rỗng, prune folder rỗng, không leo ra ngoài `.mdpreview`.
-  - MCP: payload mới có `tag` + `images` (đường dẫn tuyệt đối); consume không xoá ảnh.
-  - Gitignore: append đúng, không trùng lặp, bỏ qua repo không git.
+- **`tests/comment-store-util.test.js`** (17 test) — validate tag, decode data
+  URL, đặt tên asset, lọc đường dẫn ảnh độc hại, prune dirs, gitignore.
+- **`tests/comment-storage.test.js`** (18 test) — lưu comment kèm ảnh + tag,
+  thêm/bớt ảnh khi sửa, xoá comment xoá ảnh, clear, archive/restore, prune cây,
+  auto-gitignore. Chạy được nhờ `tests/stubs/vscode.cjs` — một bản `vscode`
+  tối giản chạy trên fs thật, cắm vào bằng cách patch `Module._resolveFilename`.
+- **`tests/mdp-mcp-stdio.test.js`** (+8 test) — payload có `tag` + `images`
+  tuyệt đối, bỏ qua ảnh trỏ ra ngoài `assets/`, xoá store file thay vì ghi `[]`,
+  prune dừng ở `.mdpreview`, consume không xoá ảnh.
 - **Test tay:** paste ảnh trong extension (screenshot → Cmd+V), chọn tag, save,
   xem thumbnail trong sidebar, agent đọc comment và mở được ảnh.
 - **Baseline:** test suite hiện có 63 test fail sẵn (16 file) không liên quan —
