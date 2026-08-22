@@ -1,0 +1,115 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renderWithLineNumbers: baseline snapshots > accounts for YAML frontmatter in data-line offsets 1`] = `
+"<div class="md-block" data-line-start="6" data-line-end="8" data-src-start="34" data-src-end="63"><div class="md-line" data-line="6" data-src-start="34" data-src-end="63"><h1 id="heading-after-frontmatter"><span data-src-start="36" data-src-end="61" data-line="6">Heading After Frontmatter</span></h1></div></div>
+<div class="md-block" data-line-start="8" data-line-end="9" data-src-start="63" data-src-end="74"><div class="md-line" data-line="8" data-src-start="63" data-src-end="74"><span data-src-start="63" data-src-end="73" data-line="8">Body line.</span></div>
+</div>
+"
+`;
+
+exports[`renderWithLineNumbers: baseline snapshots > escapes HTML-significant characters in plain text 1`] = `
+"<div class="md-block" data-line-start="1" data-line-end="2" data-src-start="0" data-src-end="65"><div class="md-line" data-line="1" data-src-start="0" data-src-end="65"><span data-src-start="0" data-src-end="34" data-line="1">Less-than &lt; and ampersand &amp; and a </span><span data-src-start="34" data-src-end="42" data-line="1"></span><span data-src-start="59" data-src-end="64" data-line="1"> tag.</span></div>
+</div>
+"
+`;
+
+exports[`renderWithLineNumbers: baseline snapshots > renders a blockquote 1`] = `
+"<div class="md-block" data-line-start="1" data-line-end="3" data-src-start="0" data-src-end="36"><div class="md-line" data-line="1" data-src-start="0" data-src-end="36"><blockquote><div class="md-block" data-line-start="1" data-line-end="2" data-src-start="-1" data-src-end="30"><div class="md-line" data-line="1" data-src-start="-1" data-src-end="30"><span data-src-start="2" data-src-end="17" data-line="1">quoted line one</span><br><span data-src-start="20" data-src-end="35" data-line="2">quoted line two</span></div>
+</div>
+</blockquote></div></div>
+"
+`;
+
+exports[`renderWithLineNumbers: baseline snapshots > renders a carousel block 1`] = `
+"<div class="md-block" data-line-start="1" data-line-end="5" data-src-start="0" data-src-end="40"><div class="md-carousel" data-line="1" data-src-start="0" data-src-end="40"><div class="md-carousel-track"><div class="md-carousel-slide" data-line="2" data-src-start="12" data-src-end="23"><img src="a.png" alt="a"></div><div class="md-carousel-slide" data-line="3" data-src-start="24" data-src-end="35"><img src="b.png" alt="b"></div></div></div></div>
+"
+`;
+
+exports[`renderWithLineNumbers: baseline snapshots > renders a mermaid code block 1`] = `
+"<div class="md-block" data-line-start="1" data-line-end="5" data-src-start="0" data-src-end="32"><div class="mermaid" data-line-start="1" data-line-end="5" data-src-start="0" data-src-end="32">graph TD;
+A--&gt;B;</div></div>
+"
+`;
+
+exports[`renderWithLineNumbers: baseline snapshots > renders a table 1`] = `
+"<div class="md-block" data-line-start="1" data-line-end="5" data-src-start="0" data-src-end="72"><div class="md-line" data-line="1" data-src-start="0" data-src-end="72"><div class="md-table-wrapper"><table>
+<thead>
+<tr data-line="1" data-src-start="0" data-src-end="72"><th><span data-src-start="2" data-src-end="7" data-line="1">Col A</span></th><th><span data-src-start="10" data-src-end="15" data-line="1">Col B</span></th></tr>
+</thead>
+<tbody>
+<tr data-line="3" data-src-start="0" data-src-end="72"><td><span data-src-start="38" data-src-end="39" data-line="3">1</span></td><td><span data-src-start="46" data-src-end="47" data-line="3">2</span></td></tr><tr data-line="4" data-src-start="0" data-src-end="72"><td><span data-src-start="56" data-src-end="57" data-line="4">3</span></td><td><span data-src-start="64" data-src-end="65" data-line="4">4</span></td></tr>
+</tbody>
+</table></div></div></div>
+"
+`;
+
+exports[`renderWithLineNumbers: baseline snapshots > renders a task list 1`] = `
+"<div class="md-block" data-line-start="1" data-line-end="4" data-src-start="0" data-src-end="45"><ul><li class="task-list-item md-line" data-line="1" data-src-start="0" data-src-end="15"><input type="checkbox" class="ds-checkbox" > <div class="md-list-item-content"><div class="md-block" data-line-start="1" data-line-end="1" data-src-start="6" data-src-end="14"><div class="md-line" data-line="1" data-src-start="6" data-src-end="14"><span data-src-start="6" data-src-end="14" data-line="1">todo one</span></div>
+</div></div></li>
+<li class="task-list-item md-line" data-line="2" data-src-start="15" data-src-end="30"><input type="checkbox" class="ds-checkbox" checked> <div class="md-list-item-content"><div class="md-block" data-line-start="2" data-line-end="2" data-src-start="21" data-src-end="29"><div class="md-line" data-line="2" data-src-start="21" data-src-end="29"><span data-src-start="21" data-src-end="29" data-line="2">done one</span></div>
+</div></div></li>
+<li class="task-list-item md-line" data-line="3" data-src-start="30" data-src-end="44"><input type="checkbox" class="ds-checkbox" > <div class="md-list-item-content"><div class="md-block" data-line-start="3" data-line-end="3" data-src-start="36" data-src-end="44"><div class="md-line" data-line="3" data-src-start="36" data-src-end="44"><span data-src-start="36" data-src-end="44" data-line="3">todo two</span></div>
+</div></div></li>
+</ul></div>
+"
+`;
+
+exports[`renderWithLineNumbers: baseline snapshots > renders an image 1`] = `
+"<div class="md-block" data-line-start="1" data-line-end="2" data-src-start="0" data-src-end="40"><div class="md-line" data-line="1" data-src-start="0" data-src-end="40"><img src="./assets/pic.png" alt="alt text" title="a title" data-src-start="0" data-src-end="39" data-line="1"></div>
+</div>
+"
+`;
+
+exports[`renderWithLineNumbers: baseline snapshots > renders fenced code blocks with and without a language 1`] = `
+"<div class="md-block" data-line-start="1" data-line-end="3" data-src-start="0" data-src-end="22"><div class="md-line" data-line="1" data-src-start="0" data-src-end="22"><pre data-line-start="1" data-line-end="3" data-src-start="0" data-src-end="22"><code class="hljs language-js"><span class="hljs-keyword">const</span> x = <span class="hljs-number">1</span>;</code></pre></div></div>
+<div class="md-block" data-line-start="5" data-line-end="8" data-src-start="24" data-src-end="49"><div class="md-line" data-line="5" data-src-start="24" data-src-end="49"><pre data-line-start="5" data-line-end="8" data-src-start="24" data-src-end="49"><code class="hljs language-">plain <span class="hljs-literal">text</span> <span class="hljs-keyword">block</span></code></pre></div></div>
+"
+`;
+
+exports[`renderWithLineNumbers: baseline snapshots > renders headings with anchors and slugified ids 1`] = `
+"<div class="md-block" data-line-start="1" data-line-end="3" data-src-start="0" data-src-end="13"><div class="md-line" data-line="1" data-src-start="0" data-src-end="13"><h1 id="title-one"><span data-src-start="2" data-src-end="11" data-line="1">Title One</span></h1></div></div>
+<div class="md-block" data-line-start="3" data-line-end="5" data-src-start="13" data-src-end="33"><div class="md-line" data-line="3" data-src-start="13" data-src-end="33"><h2 id="sub-heading-two"><span data-src-start="16" data-src-end="31" data-line="3">Sub Heading Two</span></h2></div></div>
+<div class="md-block" data-line-start="5" data-line-end="6" data-src-start="33" data-src-end="60"><div class="md-line" data-line="5" data-src-start="33" data-src-end="60"><h3 id="third-level-tieng-viet"><span data-src-start="37" data-src-end="59" data-line="5">Third Lệvel Tiếng Việt</span></h3></div></div>
+"
+`;
+
+exports[`renderWithLineNumbers: baseline snapshots > renders nested inline formatting 1`] = `
+"<div class="md-block" data-line-start="1" data-line-end="2" data-src-start="0" data-src-end="86"><div class="md-line" data-line="1" data-src-start="0" data-src-end="86"><span data-src-start="0" data-src-end="5" data-line="1">Some </span><strong data-src-start="5" data-src-end="31" data-line="1"><span data-src-start="7" data-src-end="12" data-line="1">bold </span><em data-src-start="12" data-src-end="24" data-line="1"><span data-src-start="13" data-src-end="23" data-line="1">and italic</span></em><span data-src-start="24" data-src-end="29" data-line="1"> text</span></strong><span data-src-start="31" data-src-end="37" data-line="1"> plus </span><code class="hljs" data-src-start="37" data-src-end="50" data-line="1">inline code</code><span data-src-start="50" data-src-end="57" data-line="1"> and a </span><a href="https://example.com" title="" data-src-start="57" data-src-end="84" data-line="1"><span data-src-start="58" data-src-end="62" data-line="1">link</span></a><span data-src-start="84" data-src-end="85" data-line="1">.</span></div>
+</div>
+"
+`;
+
+exports[`renderWithLineNumbers: baseline snapshots > renders nested lists (ordered + unordered) 1`] = `
+"<div class="md-block" data-line-start="1" data-line-end="4" data-src-start="0" data-src-end="47"><ul><li class="md-line" data-line="1" data-src-start="0" data-src-end="37"><div class="md-list-item-content"><div class="md-block" data-line-start="1" data-line-end="2" data-src-start="2" data-src-end="11"><div class="md-line" data-line="1" data-src-start="2" data-src-end="11"><span data-src-start="2" data-src-end="10" data-line="1">item one</span></div>
+</div>
+<div class="md-block" data-line-start="2" data-line-end="3" data-src-start="-1" data-src-end="20"><ul><li class="md-line" data-line="2" data-src-start="-1" data-src-end="10"><div class="md-list-item-content"><div class="md-block" data-line-start="2" data-line-end="2" data-src-start="15" data-src-end="23"><div class="md-line" data-line="2" data-src-start="15" data-src-end="23"><span data-src-start="15" data-src-end="23" data-line="2">nested a</span></div>
+</div></div></li>
+<li class="md-line" data-line="3" data-src-start="10" data-src-end="20"><div class="md-list-item-content"><div class="md-block" data-line-start="3" data-line-end="3" data-src-start="28" data-src-end="36"><div class="md-line" data-line="3" data-src-start="28" data-src-end="36"><span data-src-start="28" data-src-end="36" data-line="3">nested b</span></div>
+</div></div></li>
+</ul></div></div></li>
+<li class="md-line" data-line="4" data-src-start="37" data-src-end="47"><div class="md-list-item-content"><div class="md-block" data-line-start="4" data-line-end="4" data-src-start="39" data-src-end="47"><div class="md-line" data-line="4" data-src-start="39" data-src-end="47"><span data-src-start="39" data-src-end="47" data-line="4">item two</span></div>
+</div></div></li>
+</ul></div>
+<div class="md-block" data-line-start="6" data-line-end="9" data-src-start="49" data-src-end="87"><ol start="1"><li class="md-line" data-line="6" data-src-start="49" data-src-end="58"><div class="md-list-item-content"><div class="md-block" data-line-start="6" data-line-end="6" data-src-start="52" data-src-end="57"><div class="md-line" data-line="6" data-src-start="52" data-src-end="57"><span data-src-start="52" data-src-end="57" data-line="6">first</span></div>
+</div></div></li>
+<li class="md-line" data-line="7" data-src-start="58" data-src-end="86"><div class="md-list-item-content"><div class="md-block" data-line-start="7" data-line-end="8" data-src-start="61" data-src-end="68"><div class="md-line" data-line="7" data-src-start="61" data-src-end="68"><span data-src-start="61" data-src-end="67" data-line="7">second</span></div>
+</div>
+<div class="md-block" data-line-start="8" data-line-end="8" data-src-start="71" data-src-end="86"><ol start="1"><li class="md-line" data-line="8" data-src-start="71" data-src-end="86"><div class="md-list-item-content"><div class="md-block" data-line-start="8" data-line-end="8" data-src-start="74" data-src-end="86"><div class="md-line" data-line="8" data-src-start="74" data-src-end="86"><span data-src-start="74" data-src-end="86" data-line="8">nested first</span></div>
+</div></div></li>
+</ol></div></div></li>
+</ol></div>
+"
+`;
+
+exports[`renderWithLineNumbers: baseline snapshots > renders without any wikiIndex/currentFilePath (generic-lib boundary check) 1`] = `
+"<div class="md-block" data-line-start="1" data-line-end="3" data-src-start="0" data-src-end="9"><div class="md-line" data-line="1" data-src-start="0" data-src-end="9"><h1 id="plain"><span data-src-start="2" data-src-end="7" data-line="1">Plain</span></h1></div></div>
+<div class="md-block" data-line-start="3" data-line-end="4" data-src-start="9" data-src-end="45"><div class="md-line" data-line="3" data-src-start="9" data-src-end="45"><span data-src-start="9" data-src-end="44" data-line="3">Just a paragraph, no wiki, no path.</span></div>
+</div>
+"
+`;
+
+exports[`renderWithLineNumbers: baseline snapshots > resolves a wikilink against a supplied wikiIndex 1`] = `
+"<div class="md-block" data-line-start="1" data-line-end="2" data-src-start="0" data-src-end="45"><div class="md-line" data-line="1" data-src-start="0" data-src-end="45"><span data-src-start="0" data-src-end="4" data-line="1">See </span><a href="docs/other.md" class="wiki-wikilink-link" data-src-start="4" data-src-end="31" data-line="1">Other Doc</a><span data-src-start="31" data-src-end="44" data-line="1"> for details.</span></div>
+</div>
+"
+`;
