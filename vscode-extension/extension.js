@@ -105,6 +105,23 @@ ${cssLinks}
       padding: 2rem;
       margin: 0;
     }
+
+    /* The host injects, into every webview, a rule inside the cascade layer
+       "vscode-default" that gives bare CODE elements a background-color of
+       var(--vscode-textPreformat-background) plus colour/padding/border-radius.
+       Because it targets bare CODE it hit both inline code and code inside PRE,
+       painting a grey chip the desktop app never has — md-render.css
+       deliberately gives inline code an accent colour and no background at all.
+       Unlayered rules always beat layered ones regardless of specificity, so
+       this plain reset neutralises it; md-render.css's own .md-render-body code
+       rule (higher specificity) then styles it as designed. */
+    code {
+      background-color: transparent;
+      color: inherit;
+      padding: 0;
+      border-radius: 0;
+      font-family: inherit;
+    }
   </style>
 </head>
 <body>
