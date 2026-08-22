@@ -83,6 +83,12 @@
   cursor: default;
 }
 
+/* Slot for caller-injected actions: lays its children out as if they were
+   direct children of the bar, and takes up nothing when empty. */
+#zoom-actions {
+  display: contents;
+}
+
 .zoom-ctrl-divider {
   width: 1px;
   height: 18px;

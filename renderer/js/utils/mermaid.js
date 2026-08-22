@@ -74,11 +74,27 @@ async function processMermaid(container) {
   }
 }
 
+// "Copy SVG code" thuộc về sơ đồ Mermaid, không phải ZoomSystem — nên nó được
+// tiêm vào lúc mở, và những host không cần nó (ví dụ VSCode extension) chỉ việc
+// không tiêm.
+const COPY_SVG_ACTION = {
+  id: 'copy-svg',
+  icon: 'copy',
+  title: 'Copy SVG code',
+  onClick: ({ container }) => {
+    const svg = container.querySelector('svg');
+    if (!svg) return;
+    navigator.clipboard.writeText(svg.outerHTML).then(() => {
+      if (typeof window.showToast === 'function') window.showToast('SVG copied to clipboard');
+    });
+  }
+};
+
 function setupMermaidClicks(container) {
   container.querySelectorAll('.mermaid').forEach(div => {
     div.onclick = () => {
       if (window.ZoomSystem) {
-        window.ZoomSystem.open(div, 'svg');
+        window.ZoomSystem.open(div, 'svg', { actions: [COPY_SVG_ACTION] });
       }
     };
   });
