@@ -8,9 +8,27 @@
    ============================================================ */
 
 /* ── Accent swatches ── */
+/* Nine in one row needs 316px, but .ds-setting-row-control-col caps at 240px,
+   so the row overflowed and ran back under its own label. Three by three fits
+   in 100px and reads as a palette rather than a strip. */
 .color-selector {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, auto);
   gap: var(--ds-space-sm);
+  justify-content: end;
+}
+
+/* .ds-setting-row is a fixed 56px, which one row of swatches fits and three
+   do not. Only this row opts out. */
+.ds-setting-row:has(.color-selector) {
+  height: auto;
+  min-height: 56px;
+  padding: var(--ds-space-md) 0;
+  align-items: flex-start;
+}
+
+.ds-setting-row:has(.color-selector) .ds-setting-row-label-col {
+  padding-top: var(--ds-space-xs);
 }
 
 .color-item {

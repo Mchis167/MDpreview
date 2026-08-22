@@ -147,6 +147,18 @@ function buildHtml(webview, sharedRoot, rendererRoot, mediaRoot) {
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; font-src ${webview.cspSource}; img-src ${webview.cspSource} data:; script-src 'nonce-${nonce}';">
 ${cssLinks}
   <style>
+    /* The app sets this globally in layout.css, which is not vendored — but
+       every design-system component that was is sized against it. Without it
+       a fixed width/height gains its padding and border on top: the Background
+       switch, declared 52x32, came out 58x38 with the knob off-centre.
+       Only box-sizing is taken; the app also zeroes margin/padding globally,
+       and the markdown content here relies on the browser defaults. */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
     /* Layout glue only, mirroring the app's #app-layout / main split so the
        vendored .ds-right-sidebar-wrap takes real flex width instead of
        covering the content. Everything inside is styled by vendored DS CSS. */
