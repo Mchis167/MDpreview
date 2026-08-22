@@ -4,6 +4,8 @@
    the VSCode extension can share this logic with different backends.
    ============================================================ */
 
+(function () {
+
 function createCommentsCore({ storage, context, notify }) {
   let comments = [];
   const listeners = [];
@@ -101,3 +103,5 @@ if (typeof module !== 'undefined' && module.exports) {
 if (typeof window !== 'undefined') {
   window.CommentsCore = exportsObj;
 }
+
+})();

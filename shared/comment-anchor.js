@@ -4,6 +4,8 @@
    today, and by the VSCode extension's webview later.
    ============================================================ */
 
+(function () {
+
 const CONTEXT_RADIUS = 60;
 
 // Sinh context (before/after) quanh đoạn văn bản được chọn trong một dòng.
@@ -102,3 +104,5 @@ if (typeof module !== 'undefined' && module.exports) {
 if (typeof window !== 'undefined') {
   window.CommentAnchor = exportsObj;
 }
+
+})();
