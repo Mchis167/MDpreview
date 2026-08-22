@@ -65,6 +65,9 @@ dist/
 
 # Stores VS Code state
 .vscode/
+# ...except the extension subproject's own launch config (needed for F5 to work)
+!vscode-extension/.vscode/
+!vscode-extension/.vscode/launch.json
 
 # IDE files
 .idea/
