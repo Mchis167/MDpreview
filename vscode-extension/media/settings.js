@@ -123,7 +123,6 @@
 
     catalogModal = ModalComponent.create({
       title: 'Fonts',
-      subtitle: 'Search, download and apply any Google Font',
       content: list.render(),
       className: 'fk-popover',
       width: '460px',
@@ -235,7 +234,6 @@
 
     popover = adapter.createPopover({
       title: 'Settings',
-      subtitle: 'Typography and stored data',
       content: panel,
       className: 'fk-popover',
       alignment: 'center',
