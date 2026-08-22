@@ -85,15 +85,10 @@ function sameEntry(a, b) {
  * it may be running right now — letting it write its own file is safer than
  * racing it. Direct editing is the fallback for machines without the CLI.
  */
-function registerMcp(homeDir, { exec = defaultExec } = {}) {
+function registerMcp(homeDir, { exec = defaultExec, homedir = os.homedir } = {}) {
   const entry = mcpEntry(homeDir);
-
-  const cli = exec(
-    `claude mcp add ${MCP_NAME} --scope user -- node ${JSON.stringify(entry.args[0])}`
-  );
-  if (cli && cli.ok) return { via: 'cli', entry };
-
   const configPath = path.join(homeDir, '.claude.json');
+
   let config = {};
   if (fs.existsSync(configPath)) {
     try {
@@ -104,8 +99,20 @@ function registerMcp(homeDir, { exec = defaultExec } = {}) {
     }
   }
 
+  // Checked before anything else, because `claude mcp add` fails on a name
+  // that already exists — trying it first would make every activate after
+  // the first fall through to a needless rewrite.
   if (sameEntry(config.mcpServers && config.mcpServers[MCP_NAME], entry)) {
     return { via: 'already-registered', entry };
+  }
+
+  // `claude mcp add --scope user` always writes the real user's home, whatever
+  // homeDir says, so it is only correct when the two are the same place.
+  if (homeDir === homedir()) {
+    const cli = exec(
+      `claude mcp add ${MCP_NAME} --scope user -- node ${JSON.stringify(entry.args[0])}`
+    );
+    if (cli && cli.ok) return { via: 'cli', entry };
   }
 
   writeAtomic(configPath, JSON.stringify(mergeMcpServers(config, MCP_NAME, entry), null, 2) + '\n');

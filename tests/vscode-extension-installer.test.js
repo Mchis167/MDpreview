@@ -91,9 +91,12 @@ describe('mergeMcpServers', () => {
 describe('registerMcp', () => {
   const configPath = () => path.join(home, '.claude.json');
 
+  // homedir is injected so "this really is the user's home" can be simulated.
+  const realHome = { homedir: () => home };
+
   it('prefers the claude CLI when it is available', () => {
     const exec = vi.fn(() => ({ ok: true }));
-    const res = registerMcp(home, { exec });
+    const res = registerMcp(home, { ...realHome, exec });
 
     expect(res.via).toBe('cli');
     expect(exec.mock.calls[0][0]).toContain('claude mcp add');
@@ -102,9 +105,40 @@ describe('registerMcp', () => {
     expect(fs.existsSync(configPath())).toBe(false);
   });
 
+  it('never runs the CLI against a home that is not the real one', () => {
+    // `claude mcp add --scope user` writes the real user's home whatever we
+    // pass it, so running it here would edit a config we were not aiming at.
+    const exec = vi.fn(() => ({ ok: true }));
+    const res = registerMcp(home, { exec, homedir: () => '/some/other/home' });
+
+    expect(exec).not.toHaveBeenCalled();
+    expect(res.via).toBe('file');
+  });
+
+  it('does not call the CLI again once the entry is already there', () => {
+    // `claude mcp add` fails on a duplicate name, which used to drop every
+    // later activate into a pointless rewrite of the config.
+    registerMcp(home, { ...realHome, exec: () => ({ ok: false }) });
+    const exec = vi.fn(() => ({ ok: true }));
+
+    expect(registerMcp(home, { ...realHome, exec }).via).toBe('already-registered');
+    expect(exec).not.toHaveBeenCalled();
+  });
+
+  it('treats the CLI\'s own entry shape as already registered', () => {
+    // The CLI writes {type:'stdio', command, args, env}; ours writes
+    // {command, args}. Same server — must not be rewritten every activate.
+    fs.writeFileSync(configPath(), JSON.stringify({
+      mcpServers: {
+        mdpreview: { type: 'stdio', command: 'node', args: [path.join(home, '.mdpreview', 'mcp-server.js')], env: {} }
+      }
+    }));
+    expect(registerMcp(home, { ...realHome, exec: () => ({ ok: true }) }).via).toBe('already-registered');
+  });
+
   it('falls back to editing ~/.claude.json when the CLI is missing', () => {
     fs.writeFileSync(configPath(), JSON.stringify({ numStartups: 3, mcpServers: { figma: { command: 'f' } } }, null, 2));
-    const res = registerMcp(home, { exec: () => ({ ok: false }) });
+    const res = registerMcp(home, { ...realHome, exec: () => ({ ok: false }) });
 
     expect(res.via).toBe('file');
     const cfg = readJson(configPath());
@@ -114,24 +148,24 @@ describe('registerMcp', () => {
   });
 
   it('creates ~/.claude.json when there is none', () => {
-    registerMcp(home, { exec: () => ({ ok: false }) });
+    registerMcp(home, { ...realHome, exec: () => ({ ok: false }) });
     expect(readJson(configPath()).mcpServers.mdpreview).toBeTruthy();
   });
 
   it('refuses to touch a ~/.claude.json it cannot parse', () => {
     // Clobbering a corrupt config would lose every other server the user has.
     fs.writeFileSync(configPath(), '{ broken');
-    const res = registerMcp(home, { exec: () => ({ ok: false }) });
+    const res = registerMcp(home, { ...realHome, exec: () => ({ ok: false }) });
 
     expect(res.via).toBe('skipped');
     expect(fs.readFileSync(configPath(), 'utf8')).toBe('{ broken');
   });
 
   it('is a no-op when the entry is already correct', () => {
-    registerMcp(home, { exec: () => ({ ok: false }) });
+    registerMcp(home, { ...realHome, exec: () => ({ ok: false }) });
     const before = fs.statSync(configPath()).mtimeMs;
 
-    const res = registerMcp(home, { exec: () => ({ ok: false }) });
+    const res = registerMcp(home, { ...realHome, exec: () => ({ ok: false }) });
     expect(res.via).toBe('already-registered');
     expect(fs.statSync(configPath()).mtimeMs).toBe(before);
   });
@@ -141,7 +175,7 @@ describe('registerMcp', () => {
       configPath(),
       JSON.stringify({ mcpServers: { mdpreview: { type: 'http', url: 'http://127.0.0.1:43111/mcp' } } })
     );
-    registerMcp(home, { exec: () => ({ ok: false }) });
+    registerMcp(home, { ...realHome, exec: () => ({ ok: false }) });
 
     const entry = readJson(configPath()).mcpServers.mdpreview;
     expect(entry.type).toBeUndefined();
