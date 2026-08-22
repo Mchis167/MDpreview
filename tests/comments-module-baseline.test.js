@@ -27,11 +27,13 @@ global.AppState = { currentWorkspace: { id: 'ws-1' }, currentFile: 'docs/plan.md
 global.showToast = vi.fn();
 global.navigator.clipboard = { writeText: vi.fn(() => Promise.resolve()) };
 
+global.window.CommentAnchor = require('../shared/comment-anchor.js');
+
 const componentPath = path.resolve(__dirname, '../renderer/js/modules/comments.js');
 const componentCode = fs.readFileSync(componentPath, 'utf8');
 // eslint-disable-next-line no-new-func
-const script = new Function('window', 'document', 'navigator', componentCode);
-script(global.window, global.document, global.navigator);
+const script = new Function('window', 'document', 'navigator', 'CommentAnchor', componentCode);
+script(global.window, global.document, global.navigator, global.window.CommentAnchor);
 const CommentsModule = global.window.CommentsModule;
 
 function fakeStore(initial = []) {

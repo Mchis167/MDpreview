@@ -50,6 +50,7 @@ let watcher         = null;
 // --- Static renderer assets ---
 app.use('/css',    express.static(path.join(__dirname, '../renderer/css')));
 app.use('/js',     express.static(path.join(__dirname, '../renderer/js')));
+app.use('/shared', express.static(path.join(__dirname, '../shared')));
 app.use('/wasm-assets', express.static(path.join(__dirname, '../assets/wasm')));
 app.use('/monaco', express.static(path.join(__dirname, '../node_modules/monaco-editor')));
 app.use('/jsquash', express.static(path.join(__dirname, '../node_modules/@jsquash')));
@@ -105,6 +106,7 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.use('/api', (req, res, next) => {
   req.watchDir = currentWatchDir;
   req.dataDir  = currentDataDir;
+  req.io       = io;
   next();
 });
 
@@ -140,6 +142,7 @@ app.use('/api', require('./routes/worker-publish'));
 app.use('/api', require('./routes/publish-cache'));
 app.use('/api', require('./routes/search'));
 app.use('/api', require('./routes/history'));
+app.use('/api', require('./routes/mcp'));
 
 // --- File watcher ---
 function startWatcher(dir) {
@@ -222,6 +225,29 @@ function setWatchDir(dir) {
   io.emit('workspace-changed');
 }
 
+function getRuntimeFile() {
+  return path.join(currentDataDir, 'runtime.json');
+}
+
+function writeRuntimeFile(port) {
+  try {
+    if (!fs.existsSync(currentDataDir)) fs.mkdirSync(currentDataDir, { recursive: true });
+    const runtime = { port, pid: process.pid, startedAt: new Date().toISOString() };
+    fs.writeFileSync(getRuntimeFile(), JSON.stringify(runtime, null, 2), 'utf8');
+  } catch (err) {
+    console.error('[Server] Failed to write runtime.json:', err.message);
+  }
+}
+
+function removeRuntimeFile() {
+  try {
+    const file = getRuntimeFile();
+    if (fs.existsSync(file)) fs.unlinkSync(file);
+  } catch (err) {
+    console.error('[Server] Failed to remove runtime.json:', err.message);
+  }
+}
+
 function start(userDataPath) {
   if (userDataPath) {
     currentDataDir = userDataPath;
@@ -244,6 +270,7 @@ function start(userDataPath) {
       server.removeListener('error', onError);
       const actualPort = server.address().port;
       console.log(`MDpreview running at http://localhost:${actualPort}`);
+      writeRuntimeFile(actualPort);
       resolve(actualPort);
     });
   });
@@ -251,10 +278,18 @@ function start(userDataPath) {
 
 function stop() {
   if (watcher) { watcher.close(); watcher = null; }
+  removeRuntimeFile();
   server.close();
 }
 
-module.exports = { start, stop, setWatchDir, getWatchDir: () => currentWatchDir, getDataDir: () => currentDataDir };
+module.exports = {
+  start,
+  stop,
+  setWatchDir,
+  getWatchDir: () => currentWatchDir,
+  getDataDir: () => currentDataDir,
+  getRuntimeFile
+};
 
 if (require.main === module) {
   start();

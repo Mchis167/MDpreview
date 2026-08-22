@@ -72,6 +72,25 @@ const CommentsModule = (() => {
     _markLinesWithComments();
   }
 
+  // ── Claude bridge: ref helpers ────────────────────────────────
+  function _buildRef(commentFilter) {
+    const ws   = AppState.currentWorkspace;
+    const file = AppState.currentFile;
+    if (!ws || !file) return null;
+    return `mdp://${ws.id}/${encodeURIComponent(file)}?c=${commentFilter}`;
+  }
+
+  function _copyRefToClipboard(commentFilter, count) {
+    const ref = _buildRef(commentFilter);
+    if (!ref) return;
+    const file = AppState.currentFile || 'unknown';
+    const countLabel = (typeof count === 'number') ? `${count} comment${count !== 1 ? 's' : ''}` : 'comment';
+    const line = `@mdpreview ${file} — ${countLabel}  ·  ${ref}`;
+    navigator.clipboard.writeText(line).then(() => {
+      if (typeof showToast === 'function') showToast('Copied ref for Claude');
+    });
+  }
+
   // ── Copy all comments to clipboard ───────────────────────────
   function copyAll() {
     if (!comments.length) return;
@@ -155,7 +174,16 @@ const CommentsModule = (() => {
       title: 'Comment',
       actions: [
         { id: 'clear', icon: 'trash', title: 'Clear all comments', onClick: () => clear() },
-        { id: 'copy', icon: 'copy', title: 'Copy all comments', onClick: copyAll }
+        { id: 'copy', icon: 'copy', title: 'Copy all comments', onClick: copyAll },
+        {
+          id: 'copy-for-claude',
+          icon: 'bot',
+          title: 'Copy for Claude (all unresolved)',
+          onClick: () => {
+            const pendingCount = comments.filter(c => (c.claude?.status || 'none') !== 'resolved').length;
+            _copyRefToClipboard('pending', pendingCount);
+          }
+        }
       ],
       items: comments,
       emptyState: {
@@ -166,9 +194,12 @@ const CommentsModule = (() => {
         const isRange = c.lineEnd && c.lineEnd > c.lineStart;
         const lineRef = isRange ? `L${c.lineStart}–L${c.lineEnd}` : `Line ${c.lineStart}`;
         const isSelected = activeCommentId && c.id && c.id === activeCommentId;
-        
-        const item = DesignSystem.createElement('div', 'ds-sidebar-item' + (isSelected ? ' is-selected' : ''));
+        const claudeStatus = c.claude?.status || 'none';
+        const isResolved = claudeStatus === 'resolved';
+
+        const item = DesignSystem.createElement('div', 'ds-sidebar-item' + (isSelected ? ' is-selected' : '') + (isResolved ? ' is-claude-resolved' : ''));
         item.dataset.id = c.id;
+        if (isResolved) item.style.opacity = '0.55';
 
         let snippet = '';
         if (c.selectedText) {
@@ -185,6 +216,8 @@ const CommentsModule = (() => {
         headerGroup.appendChild(DesignSystem.createElement('div', 'ds-item-label', { text: lineRef.toUpperCase() }));
         headerGroup.appendChild(DesignSystem.createElement('div', 'ds-item-snippet', { html: snippet }));
 
+        const actionsGroup = DesignSystem.createElement('div', 'ds-item-actions-group');
+
         const deleteBtn = new IconActionButton({
           iconName: 'x',
           title: 'Delete',
@@ -193,13 +226,33 @@ const CommentsModule = (() => {
           onClick: () => remove(c.id)
         });
 
+        actionsGroup.appendChild(deleteBtn.render());
+
         header.appendChild(headerGroup);
-        header.appendChild(deleteBtn.render());
+        header.appendChild(actionsGroup);
 
         const body = DesignSystem.createElement('div', 'ds-item-body', { html: _esc(c.text) });
 
         item.appendChild(header);
         item.appendChild(body);
+
+        if (isResolved) {
+          const resolvedTag = DesignSystem.createElement('div', 'ds-item-claude-tag', { text: 'Resolved by Claude' });
+          item.appendChild(resolvedTag);
+        }
+
+        const replies = c.claude?.replies || [];
+        if (replies.length) {
+          const repliesWrap = DesignSystem.createElement('div', 'ds-item-claude-replies');
+          replies.forEach(r => {
+            const replyEl = DesignSystem.createElement('div', 'ds-item-claude-reply');
+            const badge = DesignSystem.createElement('span', 'ds-item-claude-badge', { text: 'Claude' });
+            replyEl.appendChild(badge);
+            replyEl.appendChild(DesignSystem.createElement('span', 'ds-item-claude-reply-text', { html: _esc(r.text) }));
+            repliesWrap.appendChild(replyEl);
+          });
+          item.appendChild(repliesWrap);
+        }
 
         item.onmouseenter = () => _highlightLines(c.lineStart, c.lineEnd);
         item.onmouseleave = () => _clearHighlights();
@@ -314,35 +367,7 @@ const CommentsModule = (() => {
           let matchIdx = 0;
 
           while ((matchIdx = textContent.indexOf(c.selectedText, matchIdx)) !== -1) {
-            let score = 0;
-            if (c.context) {
-              const cleanBefore = (c.context.before || '').replace(/^\.\.\./, '').trim();
-              const cleanAfter  = (c.context.after || '').replace(/\.\.\.$/, '').trim();
-              
-              const actualBefore = textContent.substring(Math.max(0, matchIdx - 60), matchIdx).trim();
-              const actualAfter  = textContent.substring(matchIdx + c.selectedText.length, matchIdx + c.selectedText.length + 60).trim();
-              
-              let beforeMatchLen = 0;
-              const minBeforeLen = Math.min(cleanBefore.length, actualBefore.length);
-              for (let k = 1; k <= minBeforeLen; k++) {
-                if (cleanBefore[cleanBefore.length - k] === actualBefore[actualBefore.length - k]) {
-                  beforeMatchLen++;
-                } else {
-                  break;
-                }
-              }
-              
-              let afterMatchLen = 0;
-              const minAfterLen = Math.min(cleanAfter.length, actualAfter.length);
-              for (let k = 0; k < minAfterLen; k++) {
-                if (cleanAfter[k] === actualAfter[k]) {
-                  afterMatchLen++;
-                } else {
-                  break;
-                }
-              }
-              score = beforeMatchLen + afterMatchLen;
-            }
+            const score = CommentAnchor.scoreContextMatch(textContent, matchIdx, c.selectedText.length, c.context);
 
             if (score > bestScore) {
               bestScore = score;
@@ -404,69 +429,7 @@ const CommentsModule = (() => {
     // 2. Tìm vị trí Global của từng comment bằng thuật toán so khớp điểm ngữ cảnh thông minh
     const globalMatches = [];
     textComments.forEach(c => {
-      let globalStartIdx = -1;
-      let bestScore = -1;
-      const cleanText = c.selectedText;
-
-      if (cleanText) {
-        let searchIdx = 0;
-        while ((searchIdx = fullContent.indexOf(cleanText, searchIdx)) !== -1) {
-          let score = 0;
-          if (c.context) {
-            const cleanBefore = (c.context.before || '').replace(/^\.\.\./, '').trim();
-            const cleanAfter  = (c.context.after || '').replace(/\.\.\.$/, '').trim();
-            
-            // Lấy ngữ cảnh thực tế xung quanh vị trí searchIdx này trong DOM
-            const actualBefore = fullContent.substring(Math.max(0, searchIdx - 60), searchIdx).trim();
-            const actualAfter  = fullContent.substring(searchIdx + cleanText.length, searchIdx + cleanText.length + 60).trim();
-            
-            // Tính số ký tự khớp từ cuối của Before
-            let beforeMatchLen = 0;
-            const minBeforeLen = Math.min(cleanBefore.length, actualBefore.length);
-            for (let k = 1; k <= minBeforeLen; k++) {
-              if (cleanBefore[cleanBefore.length - k] === actualBefore[actualBefore.length - k]) {
-                beforeMatchLen++;
-              } else {
-                break;
-              }
-            }
-            
-            // Tính số ký tự khớp từ đầu của After
-            let afterMatchLen = 0;
-            const minAfterLen = Math.min(cleanAfter.length, actualAfter.length);
-            for (let k = 0; k < minAfterLen; k++) {
-              if (cleanAfter[k] === actualAfter[k]) {
-                afterMatchLen++;
-              } else {
-                break;
-              }
-            }
-            
-            score = beforeMatchLen + afterMatchLen;
-          }
-          
-          if (score > bestScore) {
-            bestScore = score;
-            globalStartIdx = searchIdx;
-          }
-          
-          searchIdx += cleanText.length || 1;
-        }
-      }
-
-      // Fallback: Nếu so khớp điểm ngữ cảnh không tìm thấy, thử exact match đầu tiên hoặc normalized match
-      if (globalStartIdx === -1 && cleanText) {
-        globalStartIdx = fullContent.indexOf(cleanText);
-        
-        if (globalStartIdx === -1) {
-          const normalizedContent = fullContent.replace(/\s+/g, ' ');
-          const normalizedSelected = cleanText.replace(/\s+/g, ' ');
-          const normIdx = normalizedContent.indexOf(normalizedSelected);
-          if (normIdx !== -1) {
-             globalStartIdx = normIdx; 
-          }
-        }
-      }
+      const globalStartIdx = CommentAnchor.findAnchor(fullContent, c.selectedText, c.context);
 
       if (globalStartIdx !== -1) {
         globalMatches.push({
@@ -654,7 +617,7 @@ const CommentsModule = (() => {
 
 
     const fullLineText = lineEl.textContent;
-    
+
     // Tính toán offset của selection so với textContent của toàn bộ dòng
     const preRange = document.createRange();
     preRange.setStart(lineEl, 0);
@@ -662,16 +625,7 @@ const CommentsModule = (() => {
     const offsetStart = preRange.toString().length;
     const selectedText = range.toString();
 
-    const RADIUS = 60;
-    const before = fullLineText.substring(Math.max(0, offsetStart - RADIUS), offsetStart);
-    const after  = fullLineText.substring(offsetStart + selectedText.length, offsetStart + selectedText.length + RADIUS);
-
-    return { 
-      before: before.length < RADIUS ? before : '...' + before, 
-      after: after.length < RADIUS ? after : after + '...' 
-    };
-
-
+    return CommentAnchor.buildContext(fullLineText, offsetStart, selectedText);
   }
 
 
@@ -696,30 +650,7 @@ const CommentsModule = (() => {
       }
 
       // Find best match position using context scoring
-      let globalStartIdx = -1;
-      let bestScore = -1;
-      let searchIdx = 0;
-      while ((searchIdx = fullContent.indexOf(selectedText, searchIdx)) !== -1) {
-        let score = 0;
-        if (context) {
-          const cleanBefore = (context.before || '').replace(/^\.\.\./, '').trim();
-          const cleanAfter  = (context.after  || '').replace(/\.\.\.$/, '').trim();
-          const actualBefore = fullContent.substring(Math.max(0, searchIdx - 60), searchIdx).trim();
-          const actualAfter  = fullContent.substring(searchIdx + selectedText.length, searchIdx + selectedText.length + 60).trim();
-          let bm = 0;
-          for (let k = 1; k <= Math.min(cleanBefore.length, actualBefore.length); k++) {
-            if (cleanBefore[cleanBefore.length - k] === actualBefore[actualBefore.length - k]) bm++; else break;
-          }
-          let am = 0;
-          for (let k = 0; k < Math.min(cleanAfter.length, actualAfter.length); k++) {
-            if (cleanAfter[k] === actualAfter[k]) am++; else break;
-          }
-          score = bm + am;
-        }
-        if (score > bestScore) { bestScore = score; globalStartIdx = searchIdx; }
-        searchIdx += selectedText.length || 1;
-      }
-      if (globalStartIdx === -1) globalStartIdx = fullContent.indexOf(selectedText);
+      const globalStartIdx = CommentAnchor.findAnchor(fullContent, selectedText, context);
       if (globalStartIdx === -1) continue;
 
       const globalEndIdx = globalStartIdx + selectedText.length;
