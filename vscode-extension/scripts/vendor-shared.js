@@ -38,7 +38,9 @@ const FILES = [
   ['renderer/js/utils/code-blocks.js', 'vendor/renderer/js/utils/code-blocks.js'],
   ['renderer/js/utils/mockup-images.js', 'vendor/renderer/js/utils/mockup-images.js'],
   ['renderer/js/utils/carousel.js', 'vendor/renderer/js/utils/carousel.js'],
-  ['renderer/js/components/design-system-icons.js', 'vendor/renderer/js/components/design-system-icons.js']
+  ['renderer/js/components/design-system-icons.js', 'vendor/renderer/js/components/design-system-icons.js'],
+  ['shared/comments-core.js', 'vendor/shared/comments-core.js'],
+  ['shared/comment-anchor.js', 'vendor/shared/comment-anchor.js']
 ];
 
 const MERMAID_BUNDLE = [

@@ -122,15 +122,15 @@ hành vi "tool tự xoá". Không phải Claude xoá, không phải người xo�
 Nếu file không có comment nào: trả về mảng rỗng kèm thông báo rõ ràng, không
 báo lỗi.
 
-**`mdp_open(file)`** — mở file .md trong custom editor của MDpreview, để
-Claude chủ động mời người dùng review sau khi viết xong tài liệu.
-
+Không có tool nào khác — `mdp_open` bị loại vì file đã mở ngay trong IDE
+bằng custom editor, không cần Claude "triệu hồi" app như thời Electron.
 Không có tool xoá riêng, không có tool resolve — vì "đọc" đã là "xong".
 
-**Lưới đỡ:** nếu Claude nhận comment xong nhưng làm dở chừng (người dùng
-ngắt, lỗi), comment đã rời store chính. Webview có nút "Khôi phục lượt vừa
-rồi" kéo lượt gần nhất từ `.archive/` về. Với người dùng, hành vi nhìn thấy
-vẫn y hệt xoá tự động; ngăn archive chỉ hiện ra khi cần cứu.
+**Panel 2 tab, không giấu gì cả:** webview có tab **Inbox** (comment đang chờ)
+và tab **Archive** (comment đã bị `mdp_read_comments` tiêu thụ). Archive
+không phải cơ chế ẩn chỉ dùng khi có sự cố — người dùng luôn thấy được và tự
+quyết: **Khôi phục** (đẩy comment trở lại Inbox, kể cả khi Claude đã xử lý
+xong và người dùng đổi ý) hoặc **Xoá vĩnh viễn** (dọn khỏi archive hẳn).
 
 ### 4. Skill tự nạp
 
@@ -163,16 +163,13 @@ Luồng chính:
 4. Tool trả comment kèm ngữ cảnh, đồng thời chuyển sang archive.
 5. Highlight trên webview biến mất ngay. Claude sửa bài.
 
-Luồng phụ: Claude viết xong tài liệu → gọi `mdp_open` → tab preview mở ra để
-người dùng review ngay.
-
 ## Phần cần viết mới
 
 - `vscode-extension/extension.js`: hiện mới 174 dòng, thuần render, chưa biết
   gì về comment. Cần tách file khi thêm các phần dưới.
 - Storage adapter cho `.mdpreview/comments/` (+ archive).
 - UI comment trong webview: bôi đen → tạo, danh sách, xoá, nút khôi phục.
-- MCP server + 2 tool.
+- MCP server + tool `mdp_read_comments`.
 - Bộ ghi skill khi activate.
 - Đề nghị ghi `.mcp.json` cho workspace mới.
 

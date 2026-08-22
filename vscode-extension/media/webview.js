@@ -1,5 +1,6 @@
 (function () {
   const vscode = acquireVsCodeApi();
+  window.__mdpVscode = vscode;
   const content = document.getElementById('md-content');
 
   if (typeof mermaid !== 'undefined' && typeof mermaidConfig !== 'undefined') {
@@ -60,6 +61,16 @@
     vscode.postMessage({ type: 'openLink', href });
   });
 
+  // Handshake. A message posted to a webview whose document hasn't run its
+  // scripts yet is dropped, not queued — and on window reload VSCode resolves
+  // the restored editor before this page loads, so the initial render would be
+  // lost and the tab would come back empty. Every script in this page is a
+  // parser-blocking <script> in <body>, so by DOMContentLoaded all three
+  // message listeners (this one, comments.js, diff.js) are installed.
+  window.addEventListener('DOMContentLoaded', () => {
+    vscode.postMessage({ type: 'ready' });
+  });
+
   window.addEventListener('message', (event) => {
     const message = event.data;
     if (message.type === 'render') {
@@ -70,6 +81,7 @@
       processCarousels();
       processSummaries();
       bindCheckboxes();
+      document.dispatchEvent(new CustomEvent('mdp:content-rendered'));
     }
   });
 })();

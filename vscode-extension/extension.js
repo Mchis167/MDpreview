@@ -1,6 +1,8 @@
 const vscode = require('vscode');
 const crypto = require('crypto');
 const { renderWithLineNumbers } = require('./vendor/shared/md-render');
+const { createCommentsCore } = require('./vendor/shared/comments-core');
+const { createCommentStorage } = require('./commentStorage');
 
 function getNonce() {
   return crypto.randomBytes(16).toString('base64');
@@ -34,19 +36,89 @@ class MdPreviewEditorProvider {
       webviewPanel.webview.postMessage({ type: 'render', html });
     };
 
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
+    const relPath = workspaceFolder
+      ? vscode.workspace.asRelativePath(document.uri, false)
+      : document.uri.fsPath;
+    const commentStorage = workspaceFolder ? createCommentStorage(workspaceFolder) : null;
+    const commentsCore = commentStorage
+      ? createCommentsCore({
+          storage: commentStorage,
+          context: { workspaceId: () => workspaceFolder.uri.toString(), currentFile: () => relPath }
+        })
+      : null;
+
+    const sendComments = () => {
+      webviewPanel.webview.postMessage({ type: 'comments', list: commentsCore.list() });
+    };
+    const unsubscribeComments = commentsCore ? commentsCore.onChange(sendComments) : null;
+
+    const sendArchive = async () => {
+      const archived = await commentStorage.getArchive(relPath);
+      webviewPanel.webview.postMessage({ type: 'archivedComments', list: archived });
+    };
+
+    // Reload when either file changes outside this editor — e.g. the MCP
+    // tool consuming comments (moves active -> archive), a restore/delete
+    // from another panel of the same file, or another panel saving a comment.
+    let storeWatcher = null;
+    let archiveWatcher = null;
+    if (commentsCore) {
+      storeWatcher = vscode.workspace.createFileSystemWatcher(
+        new vscode.RelativePattern(workspaceFolder, `.mdpreview/comments/${relPath}.json`)
+      );
+      const reloadActive = () => commentsCore.load(relPath);
+      storeWatcher.onDidChange(reloadActive);
+      storeWatcher.onDidCreate(reloadActive);
+      storeWatcher.onDidDelete(reloadActive);
+
+      archiveWatcher = vscode.workspace.createFileSystemWatcher(
+        new vscode.RelativePattern(workspaceFolder, `.mdpreview/comments/.archive/${relPath}.json`)
+      );
+      archiveWatcher.onDidChange(sendArchive);
+      archiveWatcher.onDidCreate(sendArchive);
+      archiveWatcher.onDidDelete(sendArchive);
+    }
+
     const changeSub = vscode.workspace.onDidChangeTextDocument((e) => {
       if (e.document.uri.toString() === document.uri.toString()) render();
     });
-    const messageSub = webviewPanel.webview.onDidReceiveMessage((message) => {
-      if (message.type === 'openLink') this._openLink(message.href, document);
-      if (message.type === 'toggleTask') this._toggleTask(message.line, message.checked, document);
+    const messageSub = webviewPanel.webview.onDidReceiveMessage(async (message) => {
+      if (message.type === 'ready') {
+        // The webview is listening now — (re)send everything it renders from.
+        render();
+        if (commentsCore) {
+          sendComments();
+          sendArchive();
+        }
+        return;
+      }
+      if (message.type === 'openLink') return this._openLink(message.href, document);
+      if (message.type === 'toggleTask') return this._toggleTask(message.line, message.checked, document);
+      if (!commentsCore) return;
+      if (message.type === 'saveComment') return commentsCore.save(message.data);
+      if (message.type === 'deleteComment') return commentsCore.remove(message.id);
+      if (message.type === 'clearComments') return commentsCore.clear();
+      if (message.type === 'restoreComment') {
+        await commentStorage.restore(relPath, message.id);
+        await commentsCore.load(relPath);
+        return sendArchive();
+      }
+      if (message.type === 'deleteArchivedComment') {
+        await commentStorage.deleteArchived(relPath, message.id);
+        return sendArchive();
+      }
     });
     webviewPanel.onDidDispose(() => {
       changeSub.dispose();
       messageSub.dispose();
+      if (unsubscribeComments) unsubscribeComments();
+      if (archiveWatcher) archiveWatcher.dispose();
+      if (storeWatcher) storeWatcher.dispose();
     });
 
     render();
+    if (commentsCore) await commentsCore.load(relPath);
   }
 
   async _openLink(href, document) {
@@ -110,9 +182,14 @@ class MdPreviewEditorProvider {
     );
     const carouselUri = webview.asWebviewUri(vscode.Uri.joinPath(rendererRoot, 'js', 'utils', 'carousel.js'));
     const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'webview.js'));
+    const commentAnchorUri = webview.asWebviewUri(vscode.Uri.joinPath(sharedRoot, 'comment-anchor.js'));
+    const commentsCssUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'comments.css'));
+    const commentsScriptUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'comments.js'));
     const nonce = getNonce();
 
-    const cssLinks = cssUris.map((uri) => `  <link rel="stylesheet" href="${uri}">`).join('\n');
+    const cssLinks = [...cssUris, commentsCssUri]
+      .map((uri) => `  <link rel="stylesheet" href="${uri}">`)
+      .join('\n');
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -152,6 +229,7 @@ ${cssLinks}
 </head>
 <body>
   <div id="md-content" class="md-render-body"></div>
+  <div id="mdp-comments-panel"></div>
   <script nonce="${nonce}" src="${mermaidConfigUri}"></script>
   <script nonce="${nonce}" src="${mermaidLibUri}"></script>
   <script nonce="${nonce}" src="${codeBlocksUri}"></script>
@@ -159,7 +237,9 @@ ${cssLinks}
   <script nonce="${nonce}" src="${designSystemIconsUri}"></script>
   <script nonce="${nonce}" src="${mockupImagesUri}"></script>
   <script nonce="${nonce}" src="${carouselUri}"></script>
+  <script nonce="${nonce}" src="${commentAnchorUri}"></script>
   <script nonce="${nonce}" src="${scriptUri}"></script>
+  <script nonce="${nonce}" src="${commentsScriptUri}"></script>
 </body>
 </html>`;
   }
