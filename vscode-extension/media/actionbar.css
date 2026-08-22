@@ -24,13 +24,19 @@
   display: none;
 }
 
-/* The font panel opens centred inside the viewer rather than anchored to its
-   button, so the shield reserves the bar's strip at the bottom — the card
-   settles above the bar instead of over it. The shield is the panel's own
+/* The font panel opens centred horizontally inside the viewer rather than
+   anchored to its button, but it rises from the bar rather than floating in
+   the middle: the shield reserves the bar's strip plus a small gap at the
+   bottom and settles the card against it. The shield is the panel's own
    scroll frame, so the card is capped to what is left. */
 #md-viewer-mount > .ds-popover-floating,
 #md-viewer-mount > .ds-popover-shield {
-  padding-bottom: var(--mdp-bar-clearance);
+  padding-bottom: calc(var(--mdp-bar-clearance) + var(--ds-space-md));
+}
+
+#md-viewer-mount > .ds-popover-floating.ds-popover-center,
+#md-viewer-mount > .ds-popover-shield.ds-popover-center {
+  align-items: flex-end;
 }
 
 /* The card's own cap is written against the window (100vh - 88px); inside the

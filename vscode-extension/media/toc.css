@@ -3,17 +3,20 @@
 
    What changes here is where it opens. The app anchors it under a floating
    button in the top-right corner and slides it in from off-screen; this
-   webview opens it from the bottom action bar, so it is centred in the viewer
-   and simply fades in. The centre is lifted by half the bar's clearance and
-   the height capped by all of it, so a long outline stops above the bar
-   instead of running underneath it. */
+   webview opens it from the bottom action bar, so it is centred horizontally
+   in the viewer, anchored just above the bar, and simply fades in. It sits on
+   the bar's clearance plus a small gap, and its height is capped by whatever
+   is left, so a long outline grows upwards instead of running under the bar. */
 
 #md-viewer-mount .ds-toc-panel,
 #md-viewer-mount .ds-toc-panel.show {
-  top: 50%;
+  top: auto;
+  bottom: calc(var(--mdp-bar-clearance) + var(--ds-space-md));
   left: 50%;
   right: auto;
-  transform: translate(-50%, calc(-50% - var(--mdp-bar-clearance) / 2));
-  max-height: calc(100% - var(--mdp-bar-clearance) - var(--ds-space-lg) * 2);
+  transform: translateX(-50%);
+  max-height: calc(
+    100% - var(--mdp-bar-clearance) - var(--ds-space-md) - var(--ds-space-lg)
+  );
   transition: opacity var(--ds-transition-main);
 }
