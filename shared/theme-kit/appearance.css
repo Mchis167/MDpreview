@@ -9,11 +9,11 @@
 
 /* ── Accent swatches ── */
 /* Nine in one row needs 316px, but .ds-setting-row-control-col caps at 240px,
-   so the row overflowed and ran back under its own label. Three by three fits
-   in 100px and reads as a palette rather than a strip. */
+   so the row overflowed and ran back under its own label. Five per row (5+4)
+   fits in 172px and reads as two balanced rows rather than a 3x3 block. */
 .color-selector {
   display: grid;
-  grid-template-columns: repeat(3, auto);
+  grid-template-columns: repeat(5, auto);
   gap: var(--ds-space-sm);
   justify-content: end;
 }
