@@ -10,74 +10,53 @@ const CommentsModule = (() => {
 
   // SVG constants removed in favor of Lucide icon names in RightSidebar setup
 
-  // ── Load comments for a file ─────────────────────────────────
-  async function loadForFile(filePath) {
-    const ws = AppState.currentWorkspace;
-    if (!ws || !filePath) { comments = []; _renderList(); return; }
-    comments = await window.electronAPI.getComments(ws.id, filePath);
+  const core = CommentsCore.createCommentsCore({
+    storage: {
+      get:    (wsId, file)             => window.electronAPI.getComments(wsId, file),
+      save:   (wsId, file, data)       => window.electronAPI.saveComment(wsId, file, data),
+      remove: (wsId, file, commentId)  => window.electronAPI.deleteComment(wsId, file, commentId),
+      clear:  (wsId, file)             => window.electronAPI.clearComments(wsId, file)
+    },
+    context: {
+      workspaceId: () => AppState.currentWorkspace && AppState.currentWorkspace.id,
+      currentFile: () => AppState.currentFile
+    },
+    notify: (message) => { if (typeof showToast === 'function') showToast(message); }
+  });
+
+  core.onChange((list) => {
+    comments = list;
     _renderList();
     _markLinesWithComments();
+  });
+
+  // ── Load comments for a file ─────────────────────────────────
+  async function loadForFile(filePath) {
+    await core.load(filePath);
   }
 
   // ── Save a new or existing comment ──────────────────────────
   async function save(lineStart, lineEnd, startLineContent, endLineContent, text, selectedText, context, id = null, headingPath = null) {
-    const ws   = AppState.currentWorkspace;
-    const file = AppState.currentFile;
-    if (!ws || !file) return;
-    const comment = await window.electronAPI.saveComment(ws.id, file, {
+    await core.save({
       id, lineStart, lineEnd, startLineContent, endLineContent, text, selectedText, context, headingPath
     });
-
-    if (id) {
-      // Update local list
-      const idx = comments.findIndex(c => c.id === id);
-      if (idx !== -1) {
-        comments[idx] = comment;
-      } else {
-        // Fallback: search by new ID if the old one wasn't found
-        const idxNew = comments.findIndex(c => c.id === comment.id);
-        if (idxNew !== -1) comments[idxNew] = comment;
-        else comments.push(comment);
-      }
-    } else {
-      comments.push(comment);
-    }
-
-    comments.sort((a, b) => a.lineStart - b.lineStart);
-    _renderList();
-    _markLinesWithComments();
   }
 
   // ── Delete a comment ─────────────────────────────────────────
   async function remove(commentId) {
-    const ws   = AppState.currentWorkspace;
-    const file = AppState.currentFile;
-    if (!ws || !file) return;
-
-    comments = await window.electronAPI.deleteComment(ws.id, file, commentId);
+    await core.remove(commentId);
     _clearHighlights();
-    _renderList();
-    _markLinesWithComments();
-    if (typeof showToast === 'function') showToast('Comment removed');
   }
 
   // ── Clear all comments for current file ──────────────────────
   async function clear() {
-    const ws   = AppState.currentWorkspace;
-    const file = AppState.currentFile;
-    if (!ws || !file) return;
-    comments = await window.electronAPI.clearComments(ws.id, file);
+    await core.clear();
     _clearHighlights();
-    _renderList();
-    _markLinesWithComments();
   }
 
   // ── Claude bridge: ref helpers ────────────────────────────────
   function _buildRef(commentFilter) {
-    const ws   = AppState.currentWorkspace;
-    const file = AppState.currentFile;
-    if (!ws || !file) return null;
-    return `mdp://${ws.id}/${encodeURIComponent(file)}?c=${commentFilter}`;
+    return core.buildRef(commentFilter);
   }
 
   function _copyRefToClipboard(commentFilter, count) {

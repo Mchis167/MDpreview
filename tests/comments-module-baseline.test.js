@@ -28,12 +28,13 @@ global.showToast = vi.fn();
 global.navigator.clipboard = { writeText: vi.fn(() => Promise.resolve()) };
 
 global.window.CommentAnchor = require('../shared/comment-anchor.js');
+global.window.CommentsCore = require('../shared/comments-core.js');
 
 const componentPath = path.resolve(__dirname, '../renderer/js/modules/comments.js');
 const componentCode = fs.readFileSync(componentPath, 'utf8');
 // eslint-disable-next-line no-new-func
-const script = new Function('window', 'document', 'navigator', 'CommentAnchor', componentCode);
-script(global.window, global.document, global.navigator, global.window.CommentAnchor);
+const script = new Function('window', 'document', 'navigator', 'CommentAnchor', 'CommentsCore', componentCode);
+script(global.window, global.document, global.navigator, global.window.CommentAnchor, global.window.CommentsCore);
 const CommentsModule = global.window.CommentsModule;
 
 function fakeStore(initial = []) {
