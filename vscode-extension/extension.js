@@ -64,9 +64,14 @@ class MdPreviewEditorProvider {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'nonce-${nonce}'; script-src 'nonce-${nonce}';">
+  <!-- style-src needs 'unsafe-inline': mermaid injects its own <style> at runtime
+       (createElement("style"), no nonce) and that stylesheet is what sets
+       .flowchart-link { fill: none } — without it every edge renders as a solid
+       black blob. Note a nonce in style-src would make 'unsafe-inline' be ignored,
+       so it is deliberately absent here. The main app's CSP does the same. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}';">
 ${cssLinks}
-  <style nonce="${nonce}">
+  <style>
     body {
       background: var(--ds-bg-base);
       padding: 2rem;
