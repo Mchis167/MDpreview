@@ -25,7 +25,7 @@ const TAB_BAR_SRC       = path.join(ROOT, 'renderer/css/design-system/organisms/
 const ZOOM_MODAL_SRC    = path.join(ROOT, 'renderer/css/design-system/organisms/zoom-modal.css');
 const TOC_CORE_SRC      = path.join(ROOT, 'renderer/css/shared/toc-core.css');
 const TOC_PUBLISH_SRC   = path.join(ROOT, 'cf-publish-worker/src/toc-publish.css');
-const SHARED_SRC        = path.join(ROOT, 'renderer/css/shared/markdown-render.css');
+const SHARED_SRC        = path.join(ROOT, 'shared/md-render/md-render.css');
 const STYLES_SRC        = path.join(ROOT, 'cf-publish-worker/src/publish-styles.css');
 const MOCKUP_FRAMES_SRC = path.join(ROOT, 'renderer/css/design-system/molecules/mockup-frames.css');
 const CAROUSEL_SRC      = path.join(ROOT, 'renderer/css/design-system/molecules/carousel.css');
@@ -99,7 +99,7 @@ function build() {
     ' *   renderer/css/design-system/organisms/zoom-modal.css',
     ' *   renderer/css/shared/toc-core.css',
     ' *   cf-publish-worker/src/toc-publish.css',
-    ' *   renderer/css/shared/markdown-render.css',
+    ' *   shared/md-render/md-render.css',
     ' *   cf-publish-worker/src/publish-styles.css',
     ' *   renderer/css/design-system/molecules/mockup-frames.css',
     ' *   renderer/css/design-system/molecules/carousel.css',

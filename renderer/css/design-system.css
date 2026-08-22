@@ -7,7 +7,7 @@
 @import 'design-system/tokens.css';
 
 /* ── Shared Modules ────────────────────────────────────────── */
-@import 'shared/markdown-render.css';
+@import '../../shared/md-render/md-render.css';
 
 /* ── Atoms ──────────────────────────────────────────────── */
 @import 'design-system/atoms/utilities.css';
