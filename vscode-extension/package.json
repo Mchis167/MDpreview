@@ -11,6 +11,10 @@
     "Other"
   ],
   "main": "./extension.js",
+  "//activationEvents": "onStartupFinished is required by takeover.js: it has to be watching tab changes BEFORE something opens a .md as plain text, and the customEditors contribution alone only activates us once our own editor opens.",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "scripts": {
     "vendor": "node scripts/vendor-shared.js",
     "package": "npm run vendor && vsce package --allow-missing-repository",
@@ -34,7 +38,40 @@
         ],
         "priority": "default"
       }
-    ]
+    ],
+    "commands": [
+      {
+        "command": "mdpreview.openAsText",
+        "title": "MDpreview: Mở file này dưới dạng văn bản thô"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "mdpreview.openAsText",
+          "when": "resourceExtname == .md",
+          "group": "navigation@99"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "MDpreview",
+      "properties": {
+        "mdpreview.takeoverTextEditors": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "off"
+          ],
+          "default": "auto",
+          "enumDescriptions": [
+            "Mở lại mọi tab .md dạng text editor bằng MDpreview.",
+            "Không can thiệp — tôn trọng editor mà VSCode chọn."
+          ],
+          "description": "Tự giành lại tab khi một extension khác (ví dụ Claude Code) mở file .md bằng text editor."
+        }
+      }
+    }
   },
   "devDependencies": {
     "@vscode/vsce": "^3.9.2"

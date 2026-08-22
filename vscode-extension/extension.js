@@ -4,6 +4,7 @@ const { renderWithLineNumbers } = require('./vendor/shared/md-render');
 const { createCommentsCore } = require('./vendor/shared/comments-core');
 const { createCommentStorage } = require('./commentStorage');
 const { computeDiffInfo, registerPane, getPane } = require('./diffMode');
+const takeover = require('./takeover');
 
 function getNonce() {
   return crypto.randomBytes(16).toString('base64');
@@ -295,6 +296,7 @@ ${cssLinks}
 
 function activate(context) {
   context.subscriptions.push(MdPreviewEditorProvider.register(context));
+  takeover.activate(context);
 }
 
 function deactivate() {}
