@@ -40,7 +40,30 @@ const FILES = [
   ['renderer/js/utils/carousel.js', 'vendor/renderer/js/utils/carousel.js'],
   ['renderer/js/components/design-system-icons.js', 'vendor/renderer/js/components/design-system-icons.js'],
   ['shared/comments-core.js', 'vendor/shared/comments-core.js'],
-  ['shared/comment-anchor.js', 'vendor/shared/comment-anchor.js']
+  ['shared/comment-anchor.js', 'vendor/shared/comment-anchor.js'],
+
+  // ── Font panel ──
+  // font-kit itself: catalog/installer run in the extension host,
+  // picker/ui/css run in the webview.
+  ['shared/font-kit/css2.js', 'vendor/shared/font-kit/css2.js'],
+  ['shared/font-kit/catalog.js', 'vendor/shared/font-kit/catalog.js'],
+  ['shared/font-kit/installer.js', 'vendor/shared/font-kit/installer.js'],
+  ['shared/font-kit/picker.js', 'vendor/shared/font-kit/picker.js'],
+  ['shared/font-kit/ui-mdpreview.js', 'vendor/shared/font-kit/ui-mdpreview.js'],
+  ['shared/font-kit/picker.css', 'vendor/shared/font-kit/picker.css'],
+
+  // The design system components the panel is built from, so it looks
+  // exactly like the app's own Settings popover rather than an imitation.
+  ['renderer/js/components/design-system.js', 'vendor/renderer/js/components/design-system.js'],
+  ['renderer/js/components/atoms/modal.js', 'vendor/renderer/js/components/atoms/modal.js'],
+  ['renderer/js/components/atoms/select.js', 'vendor/renderer/js/components/atoms/select.js'],
+  ['renderer/js/components/atoms/segmented-control.js', 'vendor/renderer/js/components/atoms/segmented-control.js'],
+  ['renderer/js/components/molecules/setting-row.js', 'vendor/renderer/js/components/molecules/setting-row.js'],
+  ['renderer/css/design-system/molecules/popover-shield.css', 'vendor/renderer/css/popover-shield.css'],
+  ['renderer/css/design-system/molecules/setting-row.css', 'vendor/renderer/css/setting-row.css'],
+  ['renderer/css/design-system/molecules/segmented-control.css', 'vendor/renderer/css/segmented-control.css'],
+  ['renderer/css/design-system/atoms/tooltip.css', 'vendor/renderer/css/tooltip.css'],
+  ['renderer/css/design-system/organisms/settings-panel.css', 'vendor/renderer/css/settings-panel.css']
 ];
 
 const MERMAID_BUNDLE = [

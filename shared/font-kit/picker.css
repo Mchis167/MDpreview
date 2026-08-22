@@ -1,0 +1,251 @@
+/* ============================================================
+   font-kit/picker.css — the font panel.
+   Only design-system tokens, no literal colours, so the panel
+   inherits the accent colour and surfaces of whatever host it
+   is dropped into.
+   ============================================================ */
+
+.fk-popover.ds-popover-card {
+  width: 460px;
+}
+
+.fk-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Font hiện tại ── */
+.fk-current-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-md);
+  justify-content: flex-end;
+}
+
+.fk-current-value {
+  font-size: var(--ds-font-base);
+  font-weight: 600;
+  color: var(--ds-accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.fk-reset {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: var(--ds-space-2xs) var(--ds-space-sm);
+  border-radius: var(--ds-radius-widget);
+  font-family: var(--ds-font-family-code);
+  font-size: var(--ds-font-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ds-text-tertiary);
+  transition: all var(--ds-transition-fast);
+}
+
+.fk-reset:hover {
+  background: var(--ds-layer-subtle-hover);
+  color: var(--ds-text-primary);
+}
+
+/* ── Ô tìm kiếm ── */
+.fk-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--ds-space-md);
+}
+
+.fk-search-icon {
+  position: absolute;
+  left: var(--ds-space-md);
+  display: flex;
+  align-items: center;
+  color: var(--ds-text-tertiary);
+  pointer-events: none;
+}
+
+.fk-search-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.fk-search-input {
+  width: 100%;
+  height: 40px;
+  background: var(--ds-layer-control-default);
+  border: 1px solid var(--ds-border-default);
+  border-radius: var(--ds-radius-widget);
+  padding: 0 var(--ds-space-md) 0 40px;
+  color: var(--ds-text-primary);
+  font-family: var(--ds-font-family-text);
+  font-size: var(--ds-font-base);
+  transition: all var(--ds-transition-fast);
+}
+
+.fk-search-input:focus {
+  outline: none;
+  border-color: var(--ds-accent);
+  background: var(--ds-layer-control-hover);
+}
+
+.fk-search-input::placeholder {
+  color: var(--ds-text-tertiary);
+}
+
+/* ── Trạng thái ── */
+.fk-status {
+  display: none;
+  padding: var(--ds-space-sm) 0 var(--ds-space-md) 0;
+  font-size: var(--ds-font-sm);
+  color: var(--ds-text-tertiary);
+}
+
+.fk-status-error {
+  color: var(--ds-accent-red);
+}
+
+/* ── Danh sách font ── */
+.fk-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 320px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  margin: 0 calc(var(--ds-space-sm) * -1);
+}
+
+.fk-list::-webkit-scrollbar {
+  display: none;
+}
+
+.fk-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-md);
+  height: 44px;
+  flex-shrink: 0;
+  padding: 0 var(--ds-space-sm);
+  border-radius: var(--ds-radius-widget);
+  cursor: pointer;
+  transition: background var(--ds-transition-fast);
+}
+
+.fk-item:hover {
+  background: var(--ds-layer-subtle-hover);
+}
+
+.fk-item.active {
+  background: var(--ds-layer-control-default);
+}
+
+.fk-item-name {
+  flex: 1;
+  font-size: var(--ds-font-lg);
+  color: var(--ds-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fk-item.active .fk-item-name {
+  color: var(--ds-accent);
+  font-weight: 600;
+}
+
+.fk-item-meta {
+  font-family: var(--ds-font-family-code);
+  font-size: var(--ds-font-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ds-text-tertiary);
+  opacity: 0;
+  transition: opacity var(--ds-transition-fast);
+}
+
+.fk-item:hover .fk-item-meta {
+  opacity: 0.7;
+}
+
+.fk-item-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--ds-accent);
+}
+
+.fk-item-mark svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Font chưa tải: mũi tên tải mờ, rõ dần khi rê chuột. */
+.fk-item-mark-download {
+  color: var(--ds-text-tertiary);
+  opacity: 0.35;
+}
+
+.fk-item:hover .fk-item-mark-download {
+  opacity: 1;
+  color: var(--ds-accent);
+}
+
+.fk-item.is-loading {
+  cursor: progress;
+}
+
+.fk-item.is-loading .fk-item-mark {
+  color: var(--ds-accent);
+  animation: fk-spin 0.9s linear infinite;
+}
+
+@keyframes fk-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.fk-empty {
+  padding: var(--ds-space-lg) var(--ds-space-sm);
+  font-size: var(--ds-font-sm);
+  color: var(--ds-text-tertiary);
+}
+
+/* ── Nút mở panel, nổi ở góc preview ── */
+.fk-trigger {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ds-border-default);
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-surface-overlay);
+  color: var(--ds-text-secondary);
+  cursor: pointer;
+  opacity: 0.35;
+  transition: all var(--ds-transition-fast);
+  z-index: var(--ds-z-index-popover);
+}
+
+.fk-trigger:hover {
+  opacity: 1;
+  color: var(--ds-accent);
+  border-color: var(--ds-accent);
+}
+
+.fk-trigger svg {
+  width: 16px;
+  height: 16px;
+}

@@ -4,6 +4,7 @@ const { renderWithLineNumbers } = require('./vendor/shared/md-render');
 const { createCommentsCore } = require('./vendor/shared/comments-core');
 const { createCommentStorage } = require('./commentStorage');
 const { computeDiffInfo, registerPane, getPane } = require('./diffMode');
+const { createFontHost } = require('./fontHost');
 const takeover = require('./takeover');
 const { createMcpBridge } = require('./mcpServer');
 const { installSkill } = require('./skillInstaller');
@@ -23,6 +24,7 @@ class MdPreviewEditorProvider {
 
   constructor(context) {
     this.context = context;
+    this.fonts = createFontHost(context);
   }
 
   async resolveCustomTextEditor(document, webviewPanel) {
@@ -32,7 +34,9 @@ class MdPreviewEditorProvider {
 
     webviewPanel.webview.options = {
       enableScripts: true,
-      localResourceRoots: [sharedRoot, rendererRoot, mediaRoot]
+      // Font tải về nằm ngoài extension, trong globalStorage — không có
+      // nó trong danh sách này thì mọi .woff2 bị webview chặn.
+      localResourceRoots: [sharedRoot, rendererRoot, mediaRoot, this.fonts.resourceRoot()]
     };
     webviewPanel.webview.html = this._getHtml(webviewPanel.webview, sharedRoot, rendererRoot, mediaRoot);
 
@@ -110,16 +114,42 @@ class MdPreviewEditorProvider {
         pushDiff();
       }
     });
+    const sendFonts = async () => {
+      const restored = await this.fonts.restore(webviewPanel.webview);
+      webviewPanel.webview.postMessage({ type: 'fontRestore', ...restored });
+    };
+
+    // Panel font trả lời bằng một loại message duy nhất; `seq` khớp yêu cầu
+    // với lời hứa bên webview, `error` là chuỗi để hiện ngay trong panel.
+    const replyFont = async (message, work) => {
+      try {
+        webviewPanel.webview.postMessage({ type: 'fontResult', seq: message.seq, ...(await work()) });
+      } catch (err) {
+        webviewPanel.webview.postMessage({ type: 'fontResult', seq: message.seq, error: err.message });
+      }
+    };
+
     const messageSub = webviewPanel.webview.onDidReceiveMessage(async (message) => {
       if (message.type === 'ready') {
         // The webview is listening now — (re)send everything it renders from.
         render();
         pushDiff();
+        sendFonts();
         if (commentsCore) {
           sendComments();
           sendArchive();
         }
         return;
+      }
+      if (message.type === 'fontSearch') {
+        return replyFont(message, async () => ({
+          results: await this.fonts.search(message.query, message.role, message.limit)
+        }));
+      }
+      if (message.type === 'fontApply') {
+        return replyFont(message, () =>
+          this.fonts.apply(message.role, message.family, webviewPanel.webview)
+        );
       }
       if (message.type === 'openLink') return this._openLink(message.href, document);
       if (message.type === 'toggleTask') return this._toggleTask(message.line, message.checked, document);
@@ -215,6 +245,18 @@ class MdPreviewEditorProvider {
       webview.asWebviewUri(mdRenderDir('carousel.css')),
       webview.asWebviewUri(mdRenderDir('checkbox.css'))
     ];
+    // The design system pieces the font panel is built from — the same
+    // popover card, group cards, setting rows and segmented control the
+    // app's own Settings popover uses.
+    const dsDir = (name) => vscode.Uri.joinPath(rendererRoot, 'css', name);
+    const dsCssUris = [
+      webview.asWebviewUri(dsDir('popover-shield.css')),
+      webview.asWebviewUri(dsDir('setting-row.css')),
+      webview.asWebviewUri(dsDir('segmented-control.css')),
+      webview.asWebviewUri(dsDir('tooltip.css')),
+      webview.asWebviewUri(dsDir('settings-panel.css')),
+      webview.asWebviewUri(vscode.Uri.joinPath(sharedRoot, 'font-kit', 'picker.css'))
+    ];
     const mermaidConfigUri = webview.asWebviewUri(
       vscode.Uri.joinPath(rendererRoot, 'js', 'services', 'mermaid-config.js')
     );
@@ -222,7 +264,24 @@ class MdPreviewEditorProvider {
     const codeBlocksUri = webview.asWebviewUri(
       vscode.Uri.joinPath(rendererRoot, 'js', 'utils', 'code-blocks.js')
     );
-    const designSystemShimUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'design-system-shim.js'));
+    const componentDir = (...parts) =>
+      webview.asWebviewUri(vscode.Uri.joinPath(rendererRoot, 'js', 'components', ...parts));
+    // The real design-system.js, not the old shim: the font panel needs its
+    // popover/select/segmented factories. Every component it delegates to is
+    // behind a `typeof X !== 'undefined'` guard, so the ones not vendored
+    // here simply return null rather than throwing.
+    const designSystemUris = [
+      componentDir('atoms', 'modal.js'),
+      componentDir('atoms', 'select.js'),
+      componentDir('atoms', 'segmented-control.js'),
+      componentDir('molecules', 'setting-row.js'),
+      componentDir('design-system.js')
+    ];
+    const fontKitUris = [
+      webview.asWebviewUri(vscode.Uri.joinPath(sharedRoot, 'font-kit', 'picker.js')),
+      webview.asWebviewUri(vscode.Uri.joinPath(sharedRoot, 'font-kit', 'ui-mdpreview.js'))
+    ];
+    const fontsScriptUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'fonts.js'));
     const designSystemIconsUri = webview.asWebviewUri(
       vscode.Uri.joinPath(rendererRoot, 'js', 'components', 'design-system-icons.js')
     );
@@ -238,8 +297,11 @@ class MdPreviewEditorProvider {
     const diffScriptUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'diff.js'));
     const nonce = getNonce();
 
-    const cssLinks = [...cssUris, commentsCssUri, diffCssUri]
+    const cssLinks = [...cssUris, ...dsCssUris, commentsCssUri, diffCssUri]
       .map((uri) => `  <link rel="stylesheet" href="${uri}">`)
+      .join('\n');
+    const dsScripts = [...designSystemUris, ...fontKitUris]
+      .map((uri) => `  <script nonce="${nonce}" src="${uri}"></script>`)
       .join('\n');
 
     return `<!DOCTYPE html>
@@ -251,7 +313,11 @@ class MdPreviewEditorProvider {
        .flowchart-link { fill: none } — without it every edge renders as a solid
        black blob. Note a nonce in style-src would make 'unsafe-inline' be ignored,
        so it is deliberately absent here. The main app's CSP does the same. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}';">
+  <!-- font-src: fonts downloaded by the font panel are served from the
+       extension's globalStorage, which asWebviewUri maps onto cspSource.
+       Nothing is loaded from fonts.gstatic.com at render time — the page
+       never talks to Google; only the extension host does, at download time. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; font-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
 ${cssLinks}
   <style>
     body {
@@ -284,7 +350,7 @@ ${cssLinks}
   <script nonce="${nonce}" src="${mermaidConfigUri}"></script>
   <script nonce="${nonce}" src="${mermaidLibUri}"></script>
   <script nonce="${nonce}" src="${codeBlocksUri}"></script>
-  <script nonce="${nonce}" src="${designSystemShimUri}"></script>
+${dsScripts}
   <script nonce="${nonce}" src="${designSystemIconsUri}"></script>
   <script nonce="${nonce}" src="${mockupImagesUri}"></script>
   <script nonce="${nonce}" src="${carouselUri}"></script>
@@ -292,6 +358,7 @@ ${cssLinks}
   <script nonce="${nonce}" src="${scriptUri}"></script>
   <script nonce="${nonce}" src="${commentsScriptUri}"></script>
   <script nonce="${nonce}" src="${diffScriptUri}"></script>
+  <script nonce="${nonce}" src="${fontsScriptUri}"></script>
 </body>
 </html>`;
   }

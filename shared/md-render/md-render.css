@@ -11,6 +11,18 @@
 }
 
 /* ── Headings ── */
+/* Trục font riêng cho tiêu đề. Mặc định --ds-font-family-title trỏ về
+   font thân bài, nên rule này không đổi gì cho tới khi --font-title
+   được set (font panel của extension). */
+.md-render-body h1,
+.md-render-body h2,
+.md-render-body h3,
+.md-render-body h4,
+.md-render-body h5,
+.md-render-body h6 {
+    font-family: var(--ds-font-family-title);
+}
+
 .md-render-body h1 {
     font-size: 32px;
     font-weight: 700;

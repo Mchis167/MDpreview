@@ -57,6 +57,10 @@
    /* ── Typography ────────────────────────────────────────── */
    --ds-font-family-text: var(--font-text, 'Inter'), -apple-system, BlinkMacSystemFont, sans-serif;
    --ds-font-family-code: var(--font-code, 'Roboto Mono'), ui-monospace, SFMono-Regular, monospace;
+   /* Tiêu đề mặc định dùng chung font với thân bài; chỉ tách ra khi
+      --font-title được set. Nhờ vậy app và publish-worker không đổi
+      hình dạng cho tới lúc người dùng thực sự chọn font tiêu đề. */
+   --ds-font-family-title: var(--font-title, var(--ds-font-family-text));
 
    --ds-font-xs: 11px;
    --ds-font-sm: 12px;
