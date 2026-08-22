@@ -2,7 +2,7 @@
   "name": "mdpreview-vscode",
   "displayName": "MDpreview",
   "description": "Rendered markdown preview with line-anchored comments, right inside VSCode.",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "engines": {
     "vscode": "^1.75.0"

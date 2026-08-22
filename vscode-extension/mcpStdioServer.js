@@ -20,21 +20,23 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const NAME = 'mdpreview';
-const VERSION = '2.1.0';
+const VERSION = '2.2.0';
 const PROTOCOL_VERSION = '2024-11-05';
 
 const ROOT_DIR = '.mdpreview';
 const STORE_DIR = path.join('.mdpreview', 'comments');
 const ARCHIVE_DIR = path.join('.mdpreview', 'comments', '.archive');
 
-const TOOL = {
+const READ_TOOL = {
   name: 'mdp_read_comments',
   description:
-    'Read all pending review comments the user left on a markdown file in MDpreview. ' +
-    'Reading consumes them: the tool archives the comments in the same operation, so ' +
-    'there is nothing to delete or resolve afterwards — just apply the requested changes. ' +
+    'Read the pending review comments the user left on a markdown file in MDpreview. ' +
+    'Reading is non-destructive: comments stay pending until you close them with ' +
+    'mdp_resolve_comments, so after applying a requested change, resolve that comment ' +
+    'by its "id" — and leave open any comment that still needs the user\'s decision. ' +
     'A comment may carry a "tag" saying what kind of feedback it is (bug, enhancement, ' +
     'or comment) and an "images" list of absolute paths to screenshots the user pasted in — ' +
     'read those image files, they usually show the problem more directly than the text does. ' +
@@ -48,6 +50,40 @@ const TOOL = {
     required: ['file']
   }
 };
+
+const RESOLVE_TOOL = {
+  name: 'mdp_resolve_comments',
+  description:
+    'Mark review comments on a markdown file as handled, moving them out of the pending ' +
+    'list into the archive. Call this after actually addressing a comment, passing the ' +
+    '"id" values from mdp_read_comments. Omit "ids" to resolve every pending comment on ' +
+    'the file. Leave a comment unresolved when it still needs the user\'s confirmation.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      file: { type: 'string', description: 'Markdown file path, relative to the project root or absolute' },
+      ids: {
+        type: 'array',
+        items: { type: 'string' },
+        description: 'Comment ids to resolve; omit to resolve all pending comments on the file'
+      }
+    },
+    required: ['file']
+  }
+};
+
+const LIST_TOOL = {
+  name: 'mdp_list_pending',
+  description:
+    'List every markdown file in the current workspace that has pending MDpreview review ' +
+    'comments, with a count and the newest comment timestamp per file. Use this to find ' +
+    'out whether there is new feedback without guessing file paths; then read each file\'s ' +
+    'comments with mdp_read_comments. The workspace is resolved from the server\'s working ' +
+    'directory.',
+  inputSchema: { type: 'object', properties: {} }
+};
+
+const TOOLS = [READ_TOOL, RESOLVE_TOOL, LIST_TOOL];
 
 // ── Locating the store ──────────────────────────────────────
 
@@ -167,27 +203,108 @@ function removeAndPrune(root, filePath) {
 }
 
 /**
- * Read the pending comments and archive them in the same operation.
- * Nothing pending means nothing is written — no empty archive files.
- *
- * The emptied store file is deleted rather than rewritten as `[]`, so a file
- * with no outstanding comments leaves no trace in the tree. Pasted images
- * stay put: the archived copies still reference them, and the agent that has
- * just read these comments may still need to open them.
+ * Read the pending comments without consuming anything: the store file stays
+ * put, so a compacted context or a second agent can read them again. The one
+ * write it may do is assigning an id to a legacy comment that has none —
+ * persisted back so a later resolve-by-id can find it.
  */
-function readAndConsume(loc) {
+function readPending(loc) {
   const comments = readJsonArray(loc.commentsPath);
   if (!comments.length) return { comments: [] };
 
-  const consumedAt = new Date().toISOString();
-  const archive = readJsonArray(loc.archivePath);
-  archive.push(...comments.map((c) => ({ ...c, consumedAt })));
+  let assigned = false;
+  for (const c of comments) {
+    if (!c.id) {
+      c.id = crypto.randomUUID();
+      assigned = true;
+    }
+  }
+  if (assigned) fs.writeFileSync(loc.commentsPath, JSON.stringify(comments, null, 2));
 
-  fs.mkdirSync(path.dirname(loc.archivePath), { recursive: true });
-  fs.writeFileSync(loc.archivePath, JSON.stringify(archive, null, 2));
-  removeAndPrune(loc.root, loc.commentsPath);
+  return { comments };
+}
 
-  return { comments, consumedAt };
+/**
+ * Move the listed comments (all of them when `ids` is omitted) from the
+ * pending store into the archive, stamped with `consumedAt` — the same field
+ * the old read-and-consume flow wrote, so archived entries stay uniform.
+ *
+ * The emptied store file is deleted rather than rewritten as `[]`, so a file
+ * with no outstanding comments leaves no trace in the tree. Pasted images
+ * stay put: the archived copies still reference them.
+ */
+function resolveComments(loc, ids) {
+  const comments = readJsonArray(loc.commentsPath);
+  const wanted = Array.isArray(ids) ? new Set(ids) : null;
+
+  const toArchive = wanted ? comments.filter((c) => wanted.has(c.id)) : comments;
+  const remaining = wanted ? comments.filter((c) => !wanted.has(c.id)) : [];
+  const found = new Set(toArchive.map((c) => c.id));
+  const unknown = wanted ? [...wanted].filter((id) => !found.has(id)) : [];
+
+  if (toArchive.length) {
+    const consumedAt = new Date().toISOString();
+    const archive = readJsonArray(loc.archivePath);
+    archive.push(...toArchive.map((c) => ({ ...c, consumedAt })));
+
+    fs.mkdirSync(path.dirname(loc.archivePath), { recursive: true });
+    fs.writeFileSync(loc.archivePath, JSON.stringify(archive, null, 2));
+
+    if (remaining.length) {
+      fs.writeFileSync(loc.commentsPath, JSON.stringify(remaining, null, 2));
+    } else {
+      removeAndPrune(loc.root, loc.commentsPath);
+    }
+  }
+
+  return { resolved: toArchive.map((c) => c.id), remaining: remaining.length, unknown };
+}
+
+/**
+ * Every file in the workspace with pending comments. The workspace root comes
+ * from `cwd` the same way a file's root does — walk up to the store or a .git
+ * marker. `.archive` and `assets` are the store's two non-comment residents.
+ */
+function listPending(cwd) {
+  const root = findRoot(path.resolve(cwd));
+  if (!root) {
+    return { error: 'Could not find a workspace root — no .mdpreview/comments store and no .git directory above the working directory.' };
+  }
+
+  const storeAbs = path.join(root, STORE_DIR);
+  const files = [];
+
+  const walk = (dir) => {
+    let entries;
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      if (entry.name === '.archive' || entry.name === 'assets') continue;
+      const abs = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(abs);
+      } else if (entry.name.endsWith('.json')) {
+        const comments = readJsonArray(abs);
+        if (!comments.length) continue;
+        const newestAt = comments.reduce(
+          (max, c) => (c.createdAt && c.createdAt > max ? c.createdAt : max),
+          ''
+        );
+        files.push({
+          file: path.relative(storeAbs, abs).slice(0, -'.json'.length),
+          count: comments.length,
+          newestAt: newestAt || undefined
+        });
+      }
+    }
+  };
+  walk(storeAbs);
+
+  files.sort((a, b) => (a.file < b.file ? -1 : a.file > b.file ? 1 : 0));
+  return { root, files };
 }
 
 /**
@@ -203,16 +320,42 @@ function imagePaths(comment, root) {
 }
 
 function callTool(name, args, cwd) {
-  if (name !== TOOL.name) return toolError(`Unknown tool "${name}".`);
+  if (name === LIST_TOOL.name) {
+    const result = listPending(cwd);
+    if (result.error) return toolError(result.error);
+    if (!result.files.length) return toolText('No files have pending comments.');
+    return toolText(
+      `${result.files.length} file(s) with pending comments:\n` + JSON.stringify(result.files, null, 2)
+    );
+  }
+
+  if (name !== READ_TOOL.name && name !== RESOLVE_TOOL.name) {
+    return toolError(`Unknown tool "${name}".`);
+  }
 
   const loc = resolveTarget(args && args.file, cwd);
   if (loc.error) return toolError(loc.error);
 
-  const { comments } = readAndConsume(loc);
+  if (name === RESOLVE_TOOL.name) {
+    const ids = args && args.ids;
+    if (ids !== undefined && !Array.isArray(ids)) {
+      return toolError('"ids" must be an array of comment ids (or omitted to resolve all).');
+    }
+    const result = resolveComments(loc, ids);
+    if (!result.resolved.length && result.unknown.length) {
+      return toolError(`No pending comment on ${loc.rel} matches: ${result.unknown.join(', ')}.`);
+    }
+    let text = `Resolved ${result.resolved.length} comment(s) on ${loc.rel}; ${result.remaining} still pending.`;
+    if (result.unknown.length) text += ` Unknown ids ignored: ${result.unknown.join(', ')}.`;
+    return toolText(text);
+  }
+
+  const { comments } = readPending(loc);
   if (!comments.length) return toolText(`No pending comments on ${loc.rel}.`);
 
   const payload = comments.map((c) => {
     const entry = {
+      id: c.id,
       text: c.text,
       selectedText: c.selectedText,
       lineStart: c.lineStart,
@@ -229,7 +372,7 @@ function callTool(name, args, cwd) {
   });
 
   return toolText(
-    `${comments.length} comment(s) on ${loc.rel} (now consumed — no cleanup needed):\n` +
+    `${comments.length} pending comment(s) on ${loc.rel} — resolve each with mdp_resolve_comments after addressing it:\n` +
       JSON.stringify(payload, null, 2)
   );
 }
@@ -255,7 +398,7 @@ function handleMessage(msg, cwd) {
       });
 
     case 'tools/list':
-      return reply({ tools: [TOOL] });
+      return reply({ tools: TOOLS });
 
     case 'tools/call': {
       const params = msg.params || {};
@@ -264,7 +407,7 @@ function handleMessage(msg, cwd) {
       try {
         return reply(callTool(params.name, params.arguments, cwd));
       } catch (err) {
-        return reply(toolError(`mdp_read_comments failed: ${err.message}`));
+        return reply(toolError(`${params.name || 'tool'} failed: ${err.message}`));
       }
     }
 
@@ -327,4 +470,15 @@ function write(obj) {
 
 if (require.main === module) main();
 
-module.exports = { findRoot, resolveTarget, readAndConsume, removeAndPrune, callTool, handleMessage, TOOL, VERSION };
+module.exports = {
+  findRoot,
+  resolveTarget,
+  readPending,
+  resolveComments,
+  listPending,
+  removeAndPrune,
+  callTool,
+  handleMessage,
+  TOOLS,
+  VERSION
+};

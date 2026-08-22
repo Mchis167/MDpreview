@@ -4,7 +4,7 @@ import os from 'os';
 import path from 'path';
 
 const server = require('../vscode-extension/mcpStdioServer.js');
-const { findRoot, resolveTarget, readAndConsume, handleMessage } = server;
+const { findRoot, resolveTarget, readPending, resolveComments, listPending, handleMessage } = server;
 
 let tmp;
 
@@ -90,43 +90,104 @@ describe('resolveTarget', () => {
   });
 });
 
-describe('readAndConsume', () => {
-  function withComments(list) {
-    tree({
-      'repo/.git/HEAD': 'x',
-      'repo/plan.md': '# p',
-      'repo/.mdpreview/comments/plan.md.json': JSON.stringify(list)
-    });
-    return resolveTarget('plan.md', path.join(tmp, 'repo'));
-  }
+const COMMENT = {
+  id: 'c1',
+  text: 'sửa chỗ này',
+  selectedText: 'System Overview',
+  lineStart: 20,
+  lineEnd: 20,
+  context: { before: '', after: '' },
+  createdAt: '2026-08-22T07:32:08.851Z'
+};
 
-  const COMMENT = {
-    id: 'c1',
-    text: 'sửa chỗ này',
-    selectedText: 'System Overview',
-    lineStart: 20,
-    lineEnd: 20,
-    context: { before: '', after: '' },
-    createdAt: '2026-08-22T07:32:08.851Z'
-  };
+function withComments(list) {
+  tree({
+    'repo/.git/HEAD': 'x',
+    'repo/plan.md': '# p',
+    'repo/.mdpreview/comments/plan.md.json': JSON.stringify(list)
+  });
+  return resolveTarget('plan.md', path.join(tmp, 'repo'));
+}
 
-  it('returns the pending comments', () => {
-    const result = readAndConsume(withComments([COMMENT]));
+describe('readPending', () => {
+  it('returns the pending comments without touching the store', () => {
+    const loc = withComments([COMMENT]);
+    const result = readPending(loc);
+
     expect(result.comments).toHaveLength(1);
-    expect(result.comments[0]).toMatchObject({ text: 'sửa chỗ này', selectedText: 'System Overview' });
+    expect(result.comments[0]).toMatchObject({ id: 'c1', text: 'sửa chỗ này' });
+    // Reading must NOT consume: the store file survives, no archive appears.
+    expect(fs.existsSync(loc.commentsPath)).toBe(true);
+    expect(fs.existsSync(loc.archivePath)).toBe(false);
   });
 
-  it('moves them into the archive, stamped, and deletes the emptied store file', () => {
+  it('is repeatable — a second read sees the same comments', () => {
     const loc = withComments([COMMENT]);
-    readAndConsume(loc);
+    readPending(loc);
+    expect(readPending(loc).comments).toHaveLength(1);
+  });
 
-    // Deleted rather than rewritten as `[]`: a file with nothing outstanding
-    // should leave no trace in the tree.
-    expect(fs.existsSync(loc.commentsPath)).toBe(false);
+  it('assigns and persists an id to a legacy comment that has none', () => {
+    const legacy = { ...COMMENT };
+    delete legacy.id;
+    const loc = withComments([legacy]);
+
+    const result = readPending(loc);
+    expect(result.comments[0].id).toBeTruthy();
+    // Persisted back, so a later resolve-by-id finds it.
+    const stored = JSON.parse(fs.readFileSync(loc.commentsPath, 'utf8'));
+    expect(stored[0].id).toBe(result.comments[0].id);
+  });
+
+  it('treats a missing store as no comments', () => {
+    tree({ 'repo/.git/HEAD': 'x', 'repo/plan.md': '# p' });
+    const loc = resolveTarget('plan.md', path.join(tmp, 'repo'));
+    expect(readPending(loc).comments).toHaveLength(0);
+  });
+
+  it('treats a corrupt store as no comments rather than throwing', () => {
+    const loc = withComments([]);
+    fs.writeFileSync(loc.commentsPath, 'not json{');
+    expect(readPending(loc).comments).toHaveLength(0);
+  });
+});
+
+describe('resolveComments', () => {
+  it('archives the listed comments, stamped, and leaves the rest pending', () => {
+    const c2 = { ...COMMENT, id: 'c2', text: 'câu hỏi để mở' };
+    const loc = withComments([COMMENT, c2]);
+
+    const result = resolveComments(loc, ['c1']);
+    expect(result.resolved).toEqual(['c1']);
+    expect(result.remaining).toBe(1);
+
+    const stored = JSON.parse(fs.readFileSync(loc.commentsPath, 'utf8'));
+    expect(stored.map((c) => c.id)).toEqual(['c2']);
     const archived = JSON.parse(fs.readFileSync(loc.archivePath, 'utf8'));
-    expect(archived).toHaveLength(1);
-    expect(archived[0].id).toBe('c1');
+    expect(archived.map((c) => c.id)).toEqual(['c1']);
     expect(archived[0].consumedAt).toBeTruthy();
+  });
+
+  it('resolves everything when no ids are given', () => {
+    const loc = withComments([COMMENT, { ...COMMENT, id: 'c2' }]);
+    const result = resolveComments(loc, undefined);
+    expect(result.resolved).toEqual(['c1', 'c2']);
+    expect(result.remaining).toBe(0);
+  });
+
+  it('deletes the emptied store file and prunes empty directories', () => {
+    tree({
+      'repo/.git/HEAD': 'x',
+      'repo/docs/deep/plan.md': '# p',
+      'repo/.mdpreview/comments/docs/deep/plan.md.json': JSON.stringify([COMMENT])
+    });
+    const loc = resolveTarget('docs/deep/plan.md', path.join(tmp, 'repo'));
+    resolveComments(loc, ['c1']);
+
+    expect(fs.existsSync(loc.commentsPath)).toBe(false);
+    expect(fs.existsSync(path.join(tmp, 'repo/.mdpreview/comments/docs'))).toBe(false);
+    // The archive it just wrote keeps these two alive.
+    expect(fs.existsSync(path.join(tmp, 'repo/.mdpreview/comments'))).toBe(true);
   });
 
   it('appends to an existing archive rather than replacing it', () => {
@@ -134,46 +195,19 @@ describe('readAndConsume', () => {
     fs.mkdirSync(path.dirname(loc.archivePath), { recursive: true });
     fs.writeFileSync(loc.archivePath, JSON.stringify([{ id: 'old' }]));
 
-    readAndConsume(loc);
+    resolveComments(loc, ['c1']);
     const archived = JSON.parse(fs.readFileSync(loc.archivePath, 'utf8'));
     expect(archived.map((c) => c.id)).toEqual(['old', 'c1']);
   });
 
-  it('reports nothing pending without creating an archive file', () => {
-    const loc = withComments([]);
-    const result = readAndConsume(loc);
-    expect(result.comments).toHaveLength(0);
-    expect(fs.existsSync(loc.archivePath)).toBe(false);
+  it('reports unknown ids instead of silently ignoring them', () => {
+    const loc = withComments([COMMENT]);
+    const result = resolveComments(loc, ['c1', 'nope']);
+    expect(result.resolved).toEqual(['c1']);
+    expect(result.unknown).toEqual(['nope']);
   });
 
-  it('treats a missing store as no comments', () => {
-    tree({ 'repo/.git/HEAD': 'x', 'repo/plan.md': '# p' });
-    const loc = resolveTarget('plan.md', path.join(tmp, 'repo'));
-    expect(readAndConsume(loc).comments).toHaveLength(0);
-  });
-
-  it('treats a corrupt store as no comments rather than throwing', () => {
-    const loc = withComments([]);
-    fs.writeFileSync(loc.commentsPath, 'not json{');
-    expect(readAndConsume(loc).comments).toHaveLength(0);
-  });
-
-  it('prunes the directories the deleted store file leaves empty', () => {
-    tree({
-      'repo/.git/HEAD': 'x',
-      'repo/docs/deep/plan.md': '# p',
-      'repo/.mdpreview/comments/docs/deep/plan.md.json': JSON.stringify([COMMENT])
-    });
-    const loc = resolveTarget('docs/deep/plan.md', path.join(tmp, 'repo'));
-    readAndConsume(loc);
-
-    expect(fs.existsSync(path.join(tmp, 'repo/.mdpreview/comments/docs'))).toBe(false);
-    // The archive it just wrote keeps these two alive.
-    expect(fs.existsSync(path.join(tmp, 'repo/.mdpreview/comments'))).toBe(true);
-    expect(fs.existsSync(path.join(tmp, 'repo/.mdpreview'))).toBe(true);
-  });
-
-  it('leaves sibling files and the images the archive still references alone', () => {
+  it('leaves sibling files and referenced images alone', () => {
     tree({
       'repo/.git/HEAD': 'x',
       'repo/docs/plan.md': '# p',
@@ -182,10 +216,50 @@ describe('readAndConsume', () => {
       'repo/.mdpreview/comments/assets/c1-1.png': 'png-bytes'
     });
     const loc = resolveTarget('docs/plan.md', path.join(tmp, 'repo'));
-    readAndConsume(loc);
+    resolveComments(loc, ['c1']);
 
     expect(fs.existsSync(path.join(tmp, 'repo/.mdpreview/comments/docs/other.md.json'))).toBe(true);
     expect(fs.existsSync(path.join(tmp, 'repo/.mdpreview/comments/assets/c1-1.png'))).toBe(true);
+  });
+});
+
+describe('listPending', () => {
+  it('lists every file with pending comments, with counts and newest timestamp', () => {
+    tree({
+      'repo/.git/HEAD': 'x',
+      'repo/.mdpreview/comments/docs/plan.md.json': JSON.stringify([
+        COMMENT,
+        { ...COMMENT, id: 'c2', createdAt: '2026-08-23T01:00:00.000Z' }
+      ]),
+      'repo/.mdpreview/comments/README.md.json': JSON.stringify([{ ...COMMENT, id: 'c3' }])
+    });
+
+    const result = listPending(path.join(tmp, 'repo'));
+    expect(result.files).toEqual([
+      { file: 'README.md', count: 1, newestAt: '2026-08-22T07:32:08.851Z' },
+      { file: 'docs/plan.md', count: 2, newestAt: '2026-08-23T01:00:00.000Z' }
+    ]);
+  });
+
+  it('ignores the archive and the assets directory', () => {
+    tree({
+      'repo/.git/HEAD': 'x',
+      'repo/.mdpreview/comments/.archive/old.md.json': JSON.stringify([COMMENT]),
+      'repo/.mdpreview/comments/assets/c1-1.png': 'png',
+      'repo/.mdpreview/comments/plan.md.json': JSON.stringify([COMMENT])
+    });
+    const result = listPending(path.join(tmp, 'repo'));
+    expect(result.files.map((f) => f.file)).toEqual(['plan.md']);
+  });
+
+  it('returns an empty list when there is no store at all', () => {
+    tree({ 'repo/.git/HEAD': 'x' });
+    expect(listPending(path.join(tmp, 'repo')).files).toEqual([]);
+  });
+
+  it('reports an error when no workspace root can be found', () => {
+    tree({ 'loose/plan.md': '# p' });
+    expect(listPending(path.join(tmp, 'loose')).error).toMatch(/workspace root/i);
   });
 });
 
@@ -265,11 +339,15 @@ describe('JSON-RPC handling', () => {
     expect(res.result.serverInfo.name).toBe('mdpreview');
   });
 
-  it('lists exactly one tool, with a schema', () => {
+  it('lists the three tools, each with a schema', () => {
     const res = call('tools/list');
-    expect(res.result.tools).toHaveLength(1);
-    expect(res.result.tools[0].name).toBe('mdp_read_comments');
+    expect(res.result.tools.map((t) => t.name)).toEqual([
+      'mdp_read_comments',
+      'mdp_resolve_comments',
+      'mdp_list_pending'
+    ]);
     expect(res.result.tools[0].inputSchema.required).toEqual(['file']);
+    expect(res.result.tools[1].inputSchema.required).toEqual(['file']);
   });
 
   it('returns no response for a notification', () => {
@@ -285,21 +363,43 @@ describe('JSON-RPC handling', () => {
     expect(res.error.code).toBe(-32601);
   });
 
-  it('runs the tool end to end', () => {
+  it('runs read → resolve end to end', () => {
     tree({
       'repo/.git/HEAD': 'x',
       'repo/plan.md': '# p',
       'repo/.mdpreview/comments/plan.md.json': JSON.stringify([{ id: 'c1', text: 'đổi tiêu đề' }])
     });
-    const res = handleMessage(
+    const cwd = path.join(tmp, 'repo');
+
+    const read = handleMessage(
       { jsonrpc: '2.0', id: 7, method: 'tools/call', params: { name: 'mdp_read_comments', arguments: { file: 'plan.md' } } },
+      cwd
+    );
+    expect(read.result.isError).toBeFalsy();
+    expect(read.result.content[0].text).toContain('đổi tiêu đề');
+    expect(read.result.content[0].text).toContain('c1');
+    // Still pending after the read.
+    expect(fs.existsSync(path.join(cwd, '.mdpreview/comments/plan.md.json'))).toBe(true);
+
+    const resolve = handleMessage(
+      { jsonrpc: '2.0', id: 8, method: 'tools/call', params: { name: 'mdp_resolve_comments', arguments: { file: 'plan.md', ids: ['c1'] } } },
+      cwd
+    );
+    expect(resolve.result.isError).toBeFalsy();
+    expect(fs.existsSync(path.join(cwd, '.mdpreview/comments/plan.md.json'))).toBe(false);
+  });
+
+  it('runs mdp_list_pending end to end', () => {
+    tree({
+      'repo/.git/HEAD': 'x',
+      'repo/.mdpreview/comments/plan.md.json': JSON.stringify([{ id: 'c1', text: 'x', createdAt: '2026-08-23T01:00:00.000Z' }])
+    });
+    const res = handleMessage(
+      { jsonrpc: '2.0', id: 11, method: 'tools/call', params: { name: 'mdp_list_pending', arguments: {} } },
       path.join(tmp, 'repo')
     );
-
-    expect(res.id).toBe(7);
     expect(res.result.isError).toBeFalsy();
-    expect(res.result.content[0].text).toContain('đổi tiêu đề');
-    expect(res.result.content[0].text).toContain('consumed');
+    expect(res.result.content[0].text).toContain('plan.md');
   });
 
   it('surfaces a resolve failure as a tool error, not a protocol error', () => {

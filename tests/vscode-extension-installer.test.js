@@ -31,7 +31,7 @@ describe('installServer', () => {
     // The point of the zero-dependency rule: nothing to resolve but node builtins.
     const code = fs.readFileSync(serverPath(), 'utf8');
     const requires = [...code.matchAll(/require\('([^']+)'\)/g)].map((m) => m[1]);
-    expect(requires.every((r) => ['fs', 'path'].includes(r))).toBe(true);
+    expect(requires.every((r) => ['fs', 'path', 'crypto'].includes(r))).toBe(true);
   });
 
   it('leaves an up-to-date copy alone', () => {
