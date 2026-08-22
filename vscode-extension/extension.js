@@ -128,7 +128,7 @@ ${cssLinks}
   <style>
     body {
       background: var(--ds-bg-base);
-      padding: 2rem;
+      padding: 2rem 3rem;
       margin: 0;
     }
 
