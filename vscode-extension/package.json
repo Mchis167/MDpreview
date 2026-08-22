@@ -7,21 +7,36 @@
   "engines": {
     "vscode": "^1.75.0"
   },
-  "categories": ["Other"],
-  "activationEvents": [
-    "onCustomEditor:mdpreview.preview"
+  "categories": [
+    "Other"
   ],
   "main": "./extension.js",
+  "scripts": {
+    "vendor": "node scripts/vendor-shared.js",
+    "package": "npm run vendor && vsce package --allow-missing-repository",
+    "vscode:prepublish": "npm run vendor"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "highlight.js": "^11.11.1",
+    "marked": "^12.0.0",
+    "mermaid": "^10.9.8"
+  },
   "contributes": {
     "customEditors": [
       {
         "viewType": "mdpreview.preview",
         "displayName": "MDpreview",
         "selector": [
-          { "filenamePattern": "*.md" }
+          {
+            "filenamePattern": "*.md"
+          }
         ],
         "priority": "default"
       }
     ]
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^3.9.2"
   }
 }

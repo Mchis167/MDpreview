@@ -527,6 +527,7 @@
 .mermaid .relation,
 .mermaid .relationLine {
     stroke: var(--ds-white-a40) !important;
+    fill: none !important;
 }
 
 /* Arrow and marker styling */

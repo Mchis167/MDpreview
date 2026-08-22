@@ -11,7 +11,7 @@
  *   renderer/css/design-system/molecules/mockup-frames.css
  *   renderer/css/design-system/molecules/carousel.css
  * Regenerate: npm run build:publish-assets
- * Generated:  2026-08-22T01:02:49.066Z
+ * Generated:  2026-08-22T01:57:05.586Z
  */
 
 /* ============================================================
@@ -1375,6 +1375,7 @@
 .mermaid .relation,
 .mermaid .relationLine {
     stroke: var(--ds-white-a40) !important;
+    fill: none !important;
 }
 
 /* Arrow and marker styling */

@@ -1,7 +1,6 @@
 const vscode = require('vscode');
-const path = require('path');
 const crypto = require('crypto');
-const { renderWithLineNumbers } = require('../shared/md-render');
+const { renderWithLineNumbers } = require('./vendor/shared/md-render');
 
 function getNonce() {
   return crypto.randomBytes(16).toString('base64');
@@ -20,14 +19,15 @@ class MdPreviewEditorProvider {
   }
 
   async resolveCustomTextEditor(document, webviewPanel) {
-    const sharedRoot = vscode.Uri.file(path.resolve(this.context.extensionUri.fsPath, '..', 'shared'));
+    const sharedRoot = vscode.Uri.joinPath(this.context.extensionUri, 'vendor', 'shared');
+    const rendererRoot = vscode.Uri.joinPath(this.context.extensionUri, 'vendor', 'renderer');
     const mediaRoot = vscode.Uri.joinPath(this.context.extensionUri, 'media');
 
     webviewPanel.webview.options = {
       enableScripts: true,
-      localResourceRoots: [sharedRoot, mediaRoot]
+      localResourceRoots: [sharedRoot, rendererRoot, mediaRoot]
     };
-    webviewPanel.webview.html = this._getHtml(webviewPanel.webview, sharedRoot, mediaRoot);
+    webviewPanel.webview.html = this._getHtml(webviewPanel.webview, sharedRoot, rendererRoot, mediaRoot);
 
     const render = () => {
       const html = renderWithLineNumbers(document.getText());
@@ -42,20 +42,42 @@ class MdPreviewEditorProvider {
     render();
   }
 
-  _getHtml(webview, sharedRoot, mediaRoot) {
-    const cssUri = webview.asWebviewUri(vscode.Uri.joinPath(sharedRoot, 'md-render', 'md-render.css'));
+  _getHtml(webview, sharedRoot, rendererRoot, mediaRoot) {
+    const mdRenderDir = (name) => vscode.Uri.joinPath(sharedRoot, 'md-render', name);
+    const cssUris = [
+      webview.asWebviewUri(mdRenderDir('tokens.css')),
+      webview.asWebviewUri(mdRenderDir('md-render.css')),
+      webview.asWebviewUri(mdRenderDir('markdown-content.css')),
+      webview.asWebviewUri(mdRenderDir('markdown-blocks.css')),
+      webview.asWebviewUri(mdRenderDir('markdown-interactions.css'))
+    ];
+    const mermaidConfigUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(rendererRoot, 'js', 'services', 'mermaid-config.js')
+    );
+    const mermaidLibUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'vendor', 'mermaid.min.js'));
     const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'webview.js'));
     const nonce = getNonce();
+
+    const cssLinks = cssUris.map((uri) => `  <link rel="stylesheet" href="${uri}">`).join('\n');
 
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
-  <link rel="stylesheet" href="${cssUri}">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'nonce-${nonce}'; script-src 'nonce-${nonce}';">
+${cssLinks}
+  <style nonce="${nonce}">
+    body {
+      background: var(--ds-bg-base);
+      padding: 2rem;
+      margin: 0;
+    }
+  </style>
 </head>
 <body>
   <div id="md-content" class="md-render-body"></div>
+  <script nonce="${nonce}" src="${mermaidConfigUri}"></script>
+  <script nonce="${nonce}" src="${mermaidLibUri}"></script>
   <script nonce="${nonce}" src="${scriptUri}"></script>
 </body>
 </html>`;
