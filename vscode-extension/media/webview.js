@@ -39,7 +39,19 @@
   function renderMermaidDiagrams() {
     if (typeof mermaid === 'undefined') return;
     const nodes = Array.from(content.querySelectorAll('.mermaid')).filter((el) => !el.querySelector('svg'));
-    if (nodes.length) mermaid.run({ nodes });
+    if (!nodes.length) return;
+    mermaid.run({ nodes }).then(() => setupMermaidZoom(nodes));
+  }
+
+  // Charts are unreadable at page scale, so a click opens the app's full-screen
+  // pan/zoom overlay. No actions are injected — the app's "Copy SVG code" button
+  // belongs to the Electron host, not here.
+  function setupMermaidZoom(nodes) {
+    nodes.forEach((div) => {
+      div.onclick = () => {
+        if (window.ZoomSystem) window.ZoomSystem.open(div, 'svg');
+      };
+    });
   }
 
   function processCodeBlocks() {

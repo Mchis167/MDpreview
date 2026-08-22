@@ -43,7 +43,8 @@ function buildHtml(webview, sharedRoot, rendererRoot, mediaRoot) {
     // TOC panel + the floating bar it is toggled from. toc-panel.css pulls in
     // toc-core.css itself through a (vendor-flattened) @import.
     webview.asWebviewUri(dsDir('toc-panel.css')),
-    webview.asWebviewUri(dsDir('change-action-view-bar.css'))
+    webview.asWebviewUri(dsDir('change-action-view-bar.css')),
+    webview.asWebviewUri(dsDir('zoom-modal.css'))
   ];
   const mermaidConfigUri = webview.asWebviewUri(
     vscode.Uri.joinPath(rendererRoot, 'js', 'services', 'mermaid-config.js')
@@ -89,6 +90,9 @@ function buildHtml(webview, sharedRoot, rendererRoot, mediaRoot) {
     vscode.Uri.joinPath(rendererRoot, 'js', 'utils', 'mockup-images.js')
   );
   const carouselUri = webview.asWebviewUri(vscode.Uri.joinPath(rendererRoot, 'js', 'utils', 'carousel.js'));
+  // Full-screen pan/zoom for diagrams and images. Mockups and carousels call
+  // into it on their own; webview.js wires the mermaid diagrams to it.
+  const zoomUri = webview.asWebviewUri(vscode.Uri.joinPath(rendererRoot, 'js', 'utils', 'zoom.js'));
   const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'webview.js'));
   const commentAnchorUri = webview.asWebviewUri(vscode.Uri.joinPath(sharedRoot, 'comment-anchor.js'));
   // Layout glue only (flex split between content and the right sidebar) —
@@ -266,6 +270,7 @@ ${cssLinks}
   <script nonce="${nonce}" src="${codeBlocksUri}"></script>
 ${dsScripts}
   <script nonce="${nonce}" src="${designSystemIconsUri}"></script>
+  <script nonce="${nonce}" src="${zoomUri}"></script>
   <script nonce="${nonce}" src="${mockupImagesUri}"></script>
   <script nonce="${nonce}" src="${carouselUri}"></script>
   <script nonce="${nonce}" src="${commentAnchorUri}"></script>

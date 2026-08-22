@@ -95,6 +95,12 @@ const FILES = [
     (css) => css.replace('@import "../../shared/toc-core.css";', '@import "toc-core.css";')
   ],
 
+  // ── Pan/zoom overlay ──
+  // Charts and mockups are unreadable at page scale; this is the app's own
+  // full-screen zoom, injected with no extra actions (no "Copy SVG" here).
+  ['renderer/js/utils/zoom.js', 'vendor/renderer/js/utils/zoom.js'],
+  ['renderer/css/design-system/organisms/zoom-modal.css', 'vendor/renderer/css/zoom-modal.css'],
+
   // ── Floating action bar ──
   // Same bar the app puts at the bottom of the viewer to switch modes.
   ['renderer/css/design-system/organisms/change-action-view-bar.css', 'vendor/renderer/css/change-action-view-bar.css']
