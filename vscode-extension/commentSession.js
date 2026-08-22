@@ -61,6 +61,20 @@ function createCommentSession(document, webviewPanel) {
   archiveWatcher.onDidCreate(sendArchive);
   archiveWatcher.onDidDelete(sendArchive);
 
+  // The only way the archive file gains content is a consume-on-read (or a
+  // restore/delete this same panel already reloads directly) — so treat an
+  // archive create/change as a cue to also re-check the active list. This is
+  // the difference that matters: mcpStdioServer.js's removeAndPrune deletes
+  // the active .json AND then rmdir's its now-empty parent directory in the
+  // same breath, and when that was the last comment in that directory, the
+  // storeWatcher's own onDidDelete for the file can be lost — some watcher
+  // backends coalesce a delete with the immediately-following removal of its
+  // parent directory into just a directory-removed event, which a pattern
+  // matching the specific .json file misses. The archive write has no such
+  // directory churn, so its watcher is the reliable signal.
+  archiveWatcher.onDidChange(reloadActive);
+  archiveWatcher.onDidCreate(reloadActive);
+
   return {
     /** Push the current state to a webview that just announced it is listening. */
     sendAll() {

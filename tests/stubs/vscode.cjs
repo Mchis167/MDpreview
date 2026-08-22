@@ -70,7 +70,87 @@ const workspaceFs = {
   }
 };
 
-const stub = { workspace: { fs: workspaceFs }, Uri, FileType };
+// RelativePattern + createFileSystemWatcher: enough of the real API to test
+// commentSession.js's watcher wiring, without an OS-level watcher. Tests
+// trigger events explicitly via __fireWatcherEvent — this stub is for
+// verifying which handler runs for which event, not for reproducing the
+// real watcher's own race conditions (those live in the host, not here).
+class RelativePattern {
+  constructor(base, pattern) {
+    const baseFsPath = base && base.uri ? base.uri.fsPath : (base && base.fsPath) || String(base);
+    this.base = base;
+    this.pattern = pattern;
+    this.fsPath = path.join(baseFsPath, pattern);
+  }
+}
+
+const watchers = [];
+
+class FileSystemWatcher {
+  constructor(fsPath) {
+    this.fsPath = fsPath;
+    this._onChange = [];
+    this._onCreate = [];
+    this._onDelete = [];
+    watchers.push(this);
+  }
+
+  onDidChange(cb) {
+    this._onChange.push(cb);
+  }
+
+  onDidCreate(cb) {
+    this._onCreate.push(cb);
+  }
+
+  onDidDelete(cb) {
+    this._onDelete.push(cb);
+  }
+
+  dispose() {
+    const idx = watchers.indexOf(this);
+    if (idx !== -1) watchers.splice(idx, 1);
+  }
+}
+
+function createFileSystemWatcher(pattern) {
+  const fsPath = pattern instanceof RelativePattern ? pattern.fsPath : pattern;
+  return new FileSystemWatcher(fsPath);
+}
+
+/** Test helper: fires every live watcher registered for this exact path. */
+function __fireWatcherEvent(fsPath, kind) {
+  watchers
+    .filter((w) => w.fsPath === fsPath)
+    .forEach((w) => {
+      const list = kind === 'create' ? w._onCreate : kind === 'delete' ? w._onDelete : w._onChange;
+      list.forEach((cb) => cb());
+    });
+}
+
+function getWorkspaceFolder(uri) {
+  const folders = stub.workspace.workspaceFolders || [];
+  return folders.find((f) => uri.fsPath === f.uri.fsPath || uri.fsPath.startsWith(f.uri.fsPath + path.sep));
+}
+
+function asRelativePath(uri) {
+  const folder = getWorkspaceFolder(uri);
+  return folder ? path.relative(folder.uri.fsPath, uri.fsPath) : uri.fsPath;
+}
+
+const stub = {
+  workspace: {
+    fs: workspaceFs,
+    workspaceFolders: [],
+    getWorkspaceFolder,
+    asRelativePath,
+    createFileSystemWatcher
+  },
+  Uri,
+  FileType,
+  RelativePattern,
+  __fireWatcherEvent
+};
 
 /**
  * Make `require('vscode')` resolve to this stub for the rest of the process.
