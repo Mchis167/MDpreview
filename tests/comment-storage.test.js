@@ -199,3 +199,74 @@ describe('archive', () => {
     expect(fs.existsSync(storePath('assets', 'c1-1.png'))).toBe(false);
   });
 });
+
+describe('countAll', () => {
+  it('reports nothing for a workspace with no store', async () => {
+    expect(await storage.countAll()).toEqual({ files: 0, comments: 0, images: 0 });
+  });
+
+  it('counts comments, the files holding them and their images', async () => {
+    await save({ text: 'a', pendingImages: [dataUrl('one')] });
+    await save({ text: 'b' });
+    await storage.save(null, 'notes/deep/spec.md', { text: 'c', pendingImages: [dataUrl('two')] });
+
+    expect(await storage.countAll()).toEqual({ files: 2, comments: 3, images: 2 });
+  });
+
+  it('counts the archive too — Delete all takes that with it', async () => {
+    fs.mkdirSync(storePath('.archive', 'docs'), { recursive: true });
+    fs.writeFileSync(
+      path.join(storePath('.archive', 'docs'), 'other.md.json'),
+      JSON.stringify([{ id: 'a1', text: 'x' }, { id: 'a2', text: 'y' }])
+    );
+    await save({ text: 'a' });
+
+    expect(await storage.countAll()).toMatchObject({ files: 2, comments: 3 });
+  });
+
+  it('counts a document once when it appears in both queues', async () => {
+    fs.mkdirSync(storePath('.archive', 'docs'), { recursive: true });
+    fs.writeFileSync(
+      path.join(storePath('.archive', 'docs'), 'plan.md.json'),
+      JSON.stringify([{ id: 'a1', text: 'x' }])
+    );
+    await save({ text: 'a' });
+
+    expect(await storage.countAll()).toMatchObject({ files: 1, comments: 2 });
+  });
+
+  it('does not mistake the assets directory for comment files', async () => {
+    await save({ text: 'a', pendingImages: [dataUrl('one')] });
+    expect(await storage.countAll()).toMatchObject({ files: 1, comments: 1, images: 1 });
+  });
+});
+
+describe('deleteEverything', () => {
+  it('removes both queues, every image, and the whole .mdpreview tree', async () => {
+    await save({ text: 'a', pendingImages: [dataUrl('one')] });
+    await storage.save(null, 'notes/spec.md', { text: 'b' });
+    fs.mkdirSync(storePath('.archive', 'docs'), { recursive: true });
+    fs.writeFileSync(path.join(storePath('.archive', 'docs'), 'plan.md.json'), JSON.stringify([{ id: 'x' }]));
+
+    await storage.deleteEverything();
+
+    expect(fs.existsSync(path.join(root, '.mdpreview'))).toBe(false);
+    expect(await storage.countAll()).toEqual({ files: 0, comments: 0, images: 0 });
+  });
+
+  it('leaves the workspace files themselves alone', async () => {
+    fs.writeFileSync(path.join(root, 'docs', 'plan.md'), '# plan');
+    fs.writeFileSync(path.join(root, '.gitignore'), '.mdpreview/\n');
+    await save({ text: 'a' });
+
+    await storage.deleteEverything();
+
+    expect(fs.readFileSync(path.join(root, 'docs', 'plan.md'), 'utf8')).toBe('# plan');
+    expect(fs.existsSync(path.join(root, '.gitignore'))).toBe(true);
+  });
+
+  it('is a no-op when there is nothing stored', async () => {
+    await storage.deleteEverything();
+    expect(fs.existsSync(path.join(root, '.mdpreview'))).toBe(false);
+  });
+});

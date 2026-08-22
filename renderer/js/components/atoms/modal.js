@@ -100,6 +100,10 @@ const ModalComponent = (() => {
     if (!hasBackdrop) {
       const clickAway = (e) => {
         if (e.target.closest('.ds-popover-card')) return;
+        // A modal with a backdrop is open on top of this popover — very
+        // likely one this popover itself opened. Its backdrop owns the click;
+        // dismissing the popover underneath would take the modal with it.
+        if (document.querySelector('.ds-popover-shield')) return;
         if (!card.contains(e.target)) {
           closeAction();
           document.removeEventListener('click', clickAway, true);

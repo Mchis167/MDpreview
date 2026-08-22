@@ -32,6 +32,9 @@ class Uri {
   }
 }
 
+// Mirrors the real enum's values — commentStorage compares against them.
+const FileType = { Unknown: 0, File: 1, Directory: 2, SymbolicLink: 64 };
+
 // vscode.workspace.fs rejects rather than throwing synchronously, and the
 // callers here only distinguish "worked" from "did not" — a rejection from
 // the underlying fs call carries all the meaning they use.
@@ -55,16 +58,19 @@ const workspaceFs = {
   },
 
   async readDirectory(uri) {
-    return fs.readdirSync(uri.fsPath).map((name) => [name, 1]);
+    return fs.readdirSync(uri.fsPath, { withFileTypes: true }).map((entry) => [
+      entry.name,
+      entry.isDirectory() ? FileType.Directory : FileType.File
+    ]);
   },
 
   async stat(uri) {
     const s = fs.statSync(uri.fsPath);
-    return { type: s.isDirectory() ? 2 : 1, size: s.size };
+    return { type: s.isDirectory() ? FileType.Directory : FileType.File, size: s.size };
   }
 };
 
-const stub = { workspace: { fs: workspaceFs }, Uri };
+const stub = { workspace: { fs: workspaceFs }, Uri, FileType };
 
 /**
  * Make `require('vscode')` resolve to this stub for the rest of the process.

@@ -1,9 +1,21 @@
 /* ============================================================
-   font-kit/picker.js — the font panel.
+   font-kit/picker.js — the font controls.
 
-   Builds DOM through an injected `ui` adapter rather than touching
-   a design system directly, so the panel can be dropped into any
-   host that can supply the same handful of primitives.
+   Two pieces that a host composes as it likes:
+
+     createTypography  the settings rows — which role you are
+                       styling, the font it currently uses, and
+                       its zoom. Small enough to live inside a
+                       larger Settings panel.
+     createFontList    the Google Fonts catalogue — search,
+                       download, apply. Big enough to want a
+                       surface of its own, so the host decides
+                       where it goes (MDpreview puts it in a
+                       modal opened from the font row).
+
+   Both build DOM through an injected `ui` adapter rather than
+   touching a design system directly, so they can be dropped into
+   any host that supplies the same handful of primitives.
    shared/font-kit/ui-mdpreview.js is the adapter for this app.
 
    `bridge` is the async side (search / install / apply / reset).
@@ -24,29 +36,43 @@ const RESULT_LIMIT = 60;
 // một cỡ chữ khi đặt cùng một con số.
 const ZOOM = { min: 50, max: 200, step: 5, default: 100 };
 
-function createPicker(options) {
-  const { ui, bridge, state } = options;
+/**
+ * The Typography group: role switch, current font, zoom.
+ *
+ * options.onBrowse is called with the current role when the font row's
+ * chevron is pressed — that is where the host opens the catalogue.
+ */
+function createTypography(options) {
+  const { ui, bridge, state, onBrowse } = options;
   let role = options.initialRole || 'title';
-  let searchTimer = null;
-  let requestSeq = 0;
+  const roleListeners = new Set();
 
   const el = {};
 
-  // ── Header: role switch + font hiện tại ────────────────────
-  function buildRoleGroup() {
-    const segmented = ui.createSegmented({
-      items: ROLES.map((r) => ({ id: r.id, icon: r.icon, title: r.hint })),
-      activeId: role,
-      onChange: (id) => {
-        role = id;
-        segmented.updateActive(id);
-        renderCurrent();
-        runSearch(el.search.value);
-      }
-    });
+  function setRole(id) {
+    role = id;
+    if (el.segmented) el.segmented.updateActive(id);
+    renderCurrent();
+    roleListeners.forEach((fn) => fn(role));
+  }
 
-    el.segmented = segmented;
+  // ── Dòng "Current font" ────────────────────────────────────
+  // Tên font và mũi tên là một control liền nhau — bấm đâu cũng mở
+  // danh sách; nút reset đứng riêng sau một vạch ngăn, vì nó phá đi
+  // lựa chọn chứ không dẫn tới đâu cả.
+  function buildFontControl() {
     el.currentValue = ui.createElement('span', 'fk-current-value');
+
+    el.browseBtn = ui.createElement('button', 'fk-font-trigger', {
+      'aria-label': 'Choose a font'
+    });
+    el.browseBtn.appendChild(el.currentValue);
+    el.browseBtn.appendChild(
+      ui.createElement('span', 'fk-font-caret', { html: ui.getIcon('chevron-down') })
+    );
+    el.browseBtn.addEventListener('click', () => {
+      if (onBrowse) onBrowse(role);
+    });
 
     el.resetBtn = ui.createElement('button', 'fk-reset', {
       html: ui.getIcon('refresh-cw'),
@@ -60,20 +86,13 @@ function createPicker(options) {
       bridge.apply(role, null);
       state[role] = null;
       renderCurrent();
-      renderList(el.lastResults || []);
     });
 
     const controls = ui.createElement('div', 'fk-current-controls');
-    controls.appendChild(el.currentValue);
+    controls.appendChild(el.browseBtn);
+    controls.appendChild(ui.createElement('span', 'fk-current-divider'));
     controls.appendChild(el.resetBtn);
-
-    return ui.createGroup('Typography', [
-      ui.createSettingRow({ label: 'Applies to', control: segmented.el }),
-      ui.createDivider(),
-      ui.createSettingRow({ label: 'Current font', control: controls }),
-      ui.createDivider(),
-      ui.createSettingRow({ label: 'Zoom', control: buildZoomControl() })
-    ]);
+    return controls;
   }
 
   // Cùng cấu trúc DOM với SettingsComponent._createZoomControl bên app:
@@ -116,33 +135,57 @@ function createPicker(options) {
     const zoom = zoomState()[role] || ZOOM.default;
     el.zoomSlider.value = String(zoom);
     el.zoomLabel.textContent = `${zoom}%`;
-
-    if (el.segmented) el.segmented.updateActive(role);
   }
 
-  // ── Body: ô tìm + danh sách ────────────────────────────────
-  function buildSearchGroup() {
-    el.search = ui.createElement('input', 'fk-search-input', {
-      type: 'text',
-      placeholder: 'Search Google Fonts…',
-      spellcheck: 'false'
-    });
-    el.search.addEventListener('input', () => {
-      clearTimeout(searchTimer);
-      searchTimer = setTimeout(() => runSearch(el.search.value), SEARCH_DEBOUNCE_MS);
+  function render() {
+    el.segmented = ui.createSegmented({
+      items: ROLES.map((r) => ({ id: r.id, icon: r.icon, title: r.hint })),
+      activeId: role,
+      onChange: setRole
     });
 
-    const searchWrap = ui.createElement('div', 'fk-search');
-    const icon = ui.createElement('span', 'fk-search-icon', { html: ui.getIcon('search') });
-    searchWrap.appendChild(icon);
-    searchWrap.appendChild(el.search);
+    const group = ui.createGroup('Typography', [
+      ui.createSettingRow({ label: 'Applies to', control: el.segmented.el }),
+      ui.createDivider(),
+      ui.createSettingRow({ label: 'Current font', control: buildFontControl() }),
+      ui.createDivider(),
+      ui.createSettingRow({ label: 'Zoom', control: buildZoomControl() })
+    ]);
 
-    el.list = ui.createElement('div', 'fk-list');
-    el.status = ui.createElement('div', 'fk-status');
-
-    const group = ui.createGroup('Google Fonts', [searchWrap, el.status, el.list]);
+    renderCurrent();
     return group;
   }
+
+  return {
+    render,
+    refresh: renderCurrent,
+    setRole,
+    /** @returns {Function} unsubscribe */
+    onRoleChange: (fn) => {
+      roleListeners.add(fn);
+      return () => roleListeners.delete(fn);
+    },
+    get role() {
+      return role;
+    }
+  };
+}
+
+/**
+ * The Google Fonts catalogue: search box, status line, result list.
+ *
+ * options.getRole tells it which role a pick applies to — the host owns the
+ * role, so the list stays correct however the host lets the user change it.
+ * options.onApplied fires after a successful install so the host can refresh
+ * whatever else shows the current font.
+ */
+function createFontList(options) {
+  const { ui, bridge, state, getRole, onApplied } = options;
+  const role = () => (getRole ? getRole() : 'title');
+
+  let searchTimer = null;
+  let requestSeq = 0;
+  const el = {};
 
   function setStatus(text, tone) {
     el.status.textContent = text || '';
@@ -153,7 +196,7 @@ function createPicker(options) {
   async function runSearch(query) {
     const seq = (requestSeq += 1);
     try {
-      const results = await bridge.search(query, role, RESULT_LIMIT);
+      const results = await bridge.search(query, role(), RESULT_LIMIT);
       // Kết quả của lần gõ trước về muộn thì bỏ, đừng ghi đè lần mới nhất.
       if (seq !== requestSeq) return;
       el.lastResults = results;
@@ -170,19 +213,16 @@ function createPicker(options) {
     el.list.innerHTML = '';
 
     if (!results.length) {
-      const empty = ui.createElement('div', 'fk-empty', { text: 'No matching font.' });
-      el.list.appendChild(empty);
+      el.list.appendChild(ui.createElement('div', 'fk-empty', { text: 'No matching font.' }));
       return;
     }
 
-    results.forEach((font) => {
-      el.list.appendChild(buildItem(font));
-    });
+    results.forEach((font) => el.list.appendChild(buildItem(font)));
   }
 
   function buildItem(font) {
     const item = ui.createElement('div', 'fk-item');
-    if (font.family === state[role]) item.classList.add('active');
+    if (font.family === state[role()]) item.classList.add('active');
 
     const name = ui.createElement('span', 'fk-item-name', { text: font.family });
     // Chỉ font đã tải mới hiện đúng mặt chữ — font chưa tải không có
@@ -211,17 +251,18 @@ function createPicker(options) {
     mark.innerHTML = ui.getIcon('loader');
     setStatus('');
 
+    const target = role();
     try {
-      await bridge.apply(role, font.family);
+      await bridge.apply(target, font.family);
       font.installed = true;
-      state[role] = font.family;
+      state[target] = font.family;
 
       name.style.fontFamily = `'${font.family}'`;
       el.list.querySelectorAll('.fk-item').forEach((n) => n.classList.remove('active'));
       item.classList.add('active');
       mark.innerHTML = ui.getIcon('check');
       mark.classList.remove('fk-item-mark-download');
-      renderCurrent();
+      if (onApplied) onApplied(target, font.family);
     } catch (err) {
       mark.innerHTML = ui.getIcon(font.installed ? 'check' : 'arrow-down');
       setStatus(`Could not install ${font.family} — ${err.message}`, 'error');
@@ -231,37 +272,42 @@ function createPicker(options) {
   }
 
   function render() {
-    const container = ui.createElement('div', 'fk-panel');
-    container.appendChild(buildRoleGroup());
-    container.appendChild(buildSearchGroup());
-    renderCurrent();
+    el.search = ui.createElement('input', 'fk-search-input', {
+      type: 'text',
+      placeholder: 'Search Google Fonts…',
+      spellcheck: 'false'
+    });
+    el.search.addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => runSearch(el.search.value), SEARCH_DEBOUNCE_MS);
+    });
+
+    const searchWrap = ui.createElement('div', 'fk-search');
+    searchWrap.appendChild(ui.createElement('span', 'fk-search-icon', { html: ui.getIcon('search') }));
+    searchWrap.appendChild(el.search);
+
+    el.list = ui.createElement('div', 'fk-list');
+    el.status = ui.createElement('div', 'fk-status');
+
+    const container = ui.createElement('div', 'fk-catalog');
+    container.appendChild(searchWrap);
+    container.appendChild(el.status);
+    container.appendChild(el.list);
+
     setStatus('Loading font catalog…');
     runSearch('');
     return container;
   }
 
-  return { render, get role() { return role; } };
+  return {
+    render,
+    /** Re-run the current query — call it when the role changed underneath. */
+    refresh: () => runSearch(el.search ? el.search.value : ''),
+    focus: () => el.search && el.search.focus()
+  };
 }
 
-/**
- * Mở panel trong một popover của host. Trả về instance popover.
- */
-function openPicker(options) {
-  const picker = createPicker(options);
-  return options.ui.createPopover({
-    title: 'Fonts',
-    subtitle: 'Search, download and apply any Google Font',
-    content: picker.render(),
-    className: 'fk-popover',
-    // Panel mọc ra từ chính nút mở nó. `position` do host tính từ vị trí
-    // thật của nút, nên nút nằm bên nào thì panel nở ra bên đó.
-    alignment: 'custom',
-    position: options.position,
-    onClose: options.onClose
-  });
-}
-
-const exportsObj = { createPicker, openPicker, ROLES };
+const exportsObj = { createTypography, createFontList, ROLES, ZOOM };
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = exportsObj;

@@ -95,6 +95,17 @@ function createCommentSession(document, webviewPanel) {
           await storage.clearArchive(relPath);
           await sendArchive();
           return true;
+        // The Settings panel's Data section works on the whole workspace, not
+        // just this document, so both answers carry `seq` back to it.
+        case 'commentStats':
+          post({ type: 'commentStatsResult', seq: message.seq, ...(await storage.countAll()) });
+          return true;
+        case 'deleteAllComments':
+          await storage.deleteEverything();
+          await core.load(relPath);
+          await sendArchive();
+          post({ type: 'deleteAllCommentsResult', seq: message.seq });
+          return true;
         default:
           return false;
       }

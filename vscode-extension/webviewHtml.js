@@ -61,6 +61,9 @@ function buildHtml(webview, sharedRoot, rendererRoot, mediaRoot) {
   // here simply return null rather than throwing.
   const designSystemUris = [
     componentDir('atoms', 'modal.js'),
+    // ModalComponent.confirm's footer is built from ButtonComponent — without
+    // it the delete-confirmation dialog would come up with no buttons.
+    componentDir('atoms', 'button.js'),
     componentDir('atoms', 'select.js'),
     componentDir('atoms', 'segmented-control.js'),
     componentDir('atoms', 'icon-action-button.js'),
@@ -73,7 +76,8 @@ function buildHtml(webview, sharedRoot, rendererRoot, mediaRoot) {
     webview.asWebviewUri(vscode.Uri.joinPath(sharedRoot, 'font-kit', 'picker.js')),
     webview.asWebviewUri(vscode.Uri.joinPath(sharedRoot, 'font-kit', 'ui-mdpreview.js'))
   ];
-  const fontsScriptUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'fonts.js'));
+  const settingsScriptUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'settings.js'));
+  const settingsCssUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'settings.css'));
   // The app's TOC, verbatim: ui-utils supplies the scroll mask and skeleton
   // toc-component asks for, toc-service the heading scan and scroll offset.
   const tocUris = [
@@ -109,7 +113,7 @@ function buildHtml(webview, sharedRoot, rendererRoot, mediaRoot) {
   const actionBarCssUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'actionbar.css'));
   const tocCssUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'toc.css'));
 
-  const cssLinks = [...cssUris, ...dsCssUris, commentsCssUri, diffCssUri, actionBarCssUri, tocCssUri]
+  const cssLinks = [...cssUris, ...dsCssUris, commentsCssUri, settingsCssUri, diffCssUri, actionBarCssUri, tocCssUri]
     .map((uri) => `  <link rel="stylesheet" href="${uri}">`)
     .join('\n');
   const dsScripts = [...designSystemUris, ...fontKitUris]
@@ -284,7 +288,7 @@ ${dsScripts}
   <script nonce="${nonce}" src="${commentComposeUri}"></script>
   <script nonce="${nonce}" src="${commentsScriptUri}"></script>
   <script nonce="${nonce}" src="${diffScriptUri}"></script>
-  <script nonce="${nonce}" src="${fontsScriptUri}"></script>
+  <script nonce="${nonce}" src="${settingsScriptUri}"></script>
 ${tocUris.map((uri) => `  <script nonce="${nonce}" src="${uri}"></script>`).join('\n')}
   <!-- Last: the bar wires itself to the panels the scripts above registered. -->
   <script nonce="${nonce}" src="${actionBarUri}"></script>

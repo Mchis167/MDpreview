@@ -56,6 +56,9 @@ const FILES = [
   // exactly like the app's own Settings popover rather than an imitation.
   ['renderer/js/components/design-system.js', 'vendor/renderer/js/components/design-system.js'],
   ['renderer/js/components/atoms/modal.js', 'vendor/renderer/js/components/atoms/modal.js'],
+  // ModalComponent.confirm builds its footer out of ButtonComponent, so the
+  // confirm dialog is only half a dialog without this one.
+  ['renderer/js/components/atoms/button.js', 'vendor/renderer/js/components/atoms/button.js'],
   ['renderer/js/components/atoms/select.js', 'vendor/renderer/js/components/atoms/select.js'],
   ['renderer/js/components/atoms/segmented-control.js', 'vendor/renderer/js/components/atoms/segmented-control.js'],
   ['renderer/js/components/molecules/setting-row.js', 'vendor/renderer/js/components/molecules/setting-row.js'],

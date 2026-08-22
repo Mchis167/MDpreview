@@ -109,7 +109,18 @@ class MdPreviewEditorProvider {
       if (message.type === 'openLink') return this._openLink(message.href, document);
       if (message.type === 'toggleTask') return this._toggleTask(message.line, message.checked, document);
       if (message.type === 'diffScroll') return this._syncPeerScroll(diffState.info, message.line);
-      if (comments) await comments.handleMessage(message);
+      if (comments && (await comments.handleMessage(message))) return;
+
+      // A file outside every workspace folder has no comment store, so the
+      // Settings panel's Data section gets no answer from one. Settle its
+      // promise with a reason rather than leaving it waiting forever.
+      if (message.seq !== undefined) {
+        webviewPanel.webview.postMessage({
+          type: `${message.type}Result`,
+          seq: message.seq,
+          error: 'This file is not inside a workspace folder.'
+        });
+      }
     });
 
     webviewPanel.onDidDispose(() => {

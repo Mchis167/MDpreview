@@ -64,7 +64,11 @@ function createCommentStorage(workspaceFolder) {
     } catch {
       return; // already gone — nothing to prune on its behalf
     }
+    await pruneEmptyFrom(rel);
+  }
 
+  /** Remove the now-possibly-empty directories above an already-deleted path. */
+  async function pruneEmptyFrom(rel) {
     for (const dir of pruneDirs(rel)) {
       let entries;
       try {
@@ -254,6 +258,70 @@ function createCommentStorage(workspaceFolder) {
     /** Absolute Uri for one of a comment's stored images, for the webview to load. */
     imageUri(rel) {
       return uriOf(assetRel(rel));
+    },
+
+    /**
+     * What the whole workspace's store holds, so a destructive action can
+     * say what it would destroy before doing it.
+     * @returns {Promise<{files: number, comments: number, images: number}>}
+     *   `files` counts markdown documents with comments (active or archived);
+     *   `comments` counts both queues together.
+     */
+    async countAll() {
+      const totals = { files: 0, comments: 0, images: 0 };
+      const seenFiles = new Set();
+
+      const visit = async (dirRel, isArchive) => {
+        let entries;
+        try {
+          entries = await vscode.workspace.fs.readDirectory(uriOf(dirRel));
+        } catch {
+          return;
+        }
+
+        for (const [name, type] of entries) {
+          const rel = `${dirRel}/${name}`;
+          if (type === vscode.FileType.Directory) {
+            // assets/ holds images, not comment files, and .archive/ is a
+            // second queue over the same documents.
+            if (name === 'assets') continue;
+            await visit(rel, isArchive || name === '.archive');
+            continue;
+          }
+          if (!name.endsWith('.json')) continue;
+
+          const comments = await readFile(rel);
+          if (!comments.length) continue;
+
+          totals.comments += comments.length;
+          comments.forEach((c) => {
+            totals.images += imagePathsOf(c).length;
+          });
+
+          // The same document can appear in both queues; count it once.
+          const marker = rel.replace(`${STORE_ROOT}/comments/.archive/`, '').replace(`${STORE_ROOT}/comments/`, '');
+          seenFiles.add(marker);
+        }
+      };
+
+      await visit(`${STORE_ROOT}/comments`, false);
+      totals.files = seenFiles.size;
+      return totals;
+    },
+
+    /**
+     * Remove every comment in the workspace — both queues and every pasted
+     * image — then prune what that leaves empty. Irreversible; the caller is
+     * responsible for confirming first.
+     */
+    async deleteEverything() {
+      try {
+        await vscode.workspace.fs.delete(uriOf(`${STORE_ROOT}/comments`), { recursive: true });
+      } catch {
+        return; // nothing there to begin with
+      }
+      // .mdpreview may hold nothing else; pruneDirs stops there either way.
+      await pruneEmptyFrom(`${STORE_ROOT}/comments`);
     }
   };
 }

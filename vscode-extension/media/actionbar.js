@@ -6,8 +6,8 @@
  *
  * Where the app's bar switches between mutually exclusive editor modes, this
  * one toggles the three panels the preview actually has: comments, the table
- * of contents, and the font settings. Each segment therefore reflects whether
- * its panel is open rather than acting as a radio choice.
+ * of contents, and settings. Each segment therefore reflects whether its
+ * panel is open rather than acting as a radio choice.
  */
 (function () {
   const host = document.getElementById('md-viewer-mount');
@@ -16,7 +16,7 @@
   const ACTIONS = [
     { id: 'comment', icon: 'message-circle', title: 'Comments' },
     { id: 'toc', icon: 'list', title: 'Table of Contents' },
-    { id: 'settings', icon: 'sliders', title: 'Fonts' }
+    { id: 'settings', icon: 'sliders', title: 'Settings' }
   ];
 
   const container = DesignSystem.createElement('div', 'ds-change-action-view-bar-container');
@@ -57,16 +57,16 @@
     if (id === 'comment' && window.MdpComments) return window.MdpComments.toggle();
 
     if (id === 'toc' && window.MdpToc) {
-      if (!window.MdpToc.isVisible() && window.MdpFonts) window.MdpFonts.close();
+      if (!window.MdpToc.isVisible() && window.MdpSettings) window.MdpSettings.close();
       return window.MdpToc.toggle();
     }
-    if (id === 'settings' && window.MdpFonts) {
-      if (!window.MdpFonts.isOpen() && window.MdpToc) window.MdpToc.hide();
-      return window.MdpFonts.toggle(segmentEl('settings') || bar);
+    if (id === 'settings' && window.MdpSettings) {
+      if (!window.MdpSettings.isOpen() && window.MdpToc) window.MdpToc.hide();
+      return window.MdpSettings.toggle(segmentEl('settings') || bar);
     }
   }
 
   if (window.MdpComments) window.MdpComments.onChange((on) => setActive('comment', on));
   if (window.MdpToc) window.MdpToc.onChange((on) => setActive('toc', on));
-  if (window.MdpFonts) window.MdpFonts.onChange((on) => setActive('settings', on));
+  if (window.MdpSettings) window.MdpSettings.onChange((on) => setActive('settings', on));
 })();

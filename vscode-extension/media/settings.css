@@ -1,0 +1,28 @@
+/* Settings panel — the Data section only. Typography and the font catalogue
+   are styled by shared/font-kit/picker.css, and the panel shell by the
+   vendored popover/setting-row CSS. What is here is the handful of things
+   font-kit has no equivalent of. */
+
+.mdp-data-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-md);
+  justify-content: flex-end;
+}
+
+/* Says what Delete all would actually destroy, so the button is not a leap
+   of faith. Quiet by design — the button is the thing being read. */
+.mdp-data-count {
+  font-size: var(--ds-font-sm);
+  color: var(--ds-text-tertiary);
+  white-space: nowrap;
+}
+
+.mdp-data-controls .ds-btn {
+  flex-shrink: 0;
+}
+
+.mdp-data-controls .ds-btn:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
