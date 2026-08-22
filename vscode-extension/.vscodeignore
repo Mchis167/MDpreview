@@ -1,0 +1,10 @@
+# Build-time only — vendor-shared.js runs before packaging (vscode:prepublish)
+# and copies what the webview needs into vendor/ and media/vendor/.
+scripts/**
+
+# Repo scaffolding, not part of the extension
+.vscode/**
+.gitignore
+.vscodeignore
+test-sample.md
+*.vsix
