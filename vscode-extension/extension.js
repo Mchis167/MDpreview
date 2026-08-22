@@ -39,6 +39,7 @@ class MdPreviewEditorProvider {
     });
     const messageSub = webviewPanel.webview.onDidReceiveMessage((message) => {
       if (message.type === 'openLink') this._openLink(message.href, document);
+      if (message.type === 'toggleTask') this._toggleTask(message.line, message.checked, document);
     });
     webviewPanel.onDidDispose(() => {
       changeSub.dispose();
@@ -67,6 +68,20 @@ class MdPreviewEditorProvider {
     }
   }
 
+  async _toggleTask(lineNum, checked, document) {
+    // data-line from renderWithLineNumbers is 1-based; TextDocument.lineAt is 0-based.
+    if (!Number.isInteger(lineNum) || lineNum < 1 || lineNum > document.lineCount) return;
+    const line = document.lineAt(lineNum - 1);
+    const newText = checked
+      ? line.text.replace('[ ]', '[x]')
+      : line.text.replace(/\[x\]/i, '[ ]');
+    if (newText === line.text) return;
+
+    const edit = new vscode.WorkspaceEdit();
+    edit.replace(document.uri, line.range, newText);
+    await vscode.workspace.applyEdit(edit);
+  }
+
   _getHtml(webview, sharedRoot, rendererRoot, mediaRoot) {
     const mdRenderDir = (name) => vscode.Uri.joinPath(sharedRoot, 'md-render', name);
     const cssUris = [
@@ -74,7 +89,9 @@ class MdPreviewEditorProvider {
       webview.asWebviewUri(mdRenderDir('md-render.css')),
       webview.asWebviewUri(mdRenderDir('markdown-content.css')),
       webview.asWebviewUri(mdRenderDir('markdown-blocks.css')),
-      webview.asWebviewUri(mdRenderDir('markdown-interactions.css'))
+      webview.asWebviewUri(mdRenderDir('markdown-interactions.css')),
+      webview.asWebviewUri(mdRenderDir('mockup-frames.css')),
+      webview.asWebviewUri(mdRenderDir('carousel.css'))
     ];
     const mermaidConfigUri = webview.asWebviewUri(
       vscode.Uri.joinPath(rendererRoot, 'js', 'services', 'mermaid-config.js')
@@ -83,6 +100,14 @@ class MdPreviewEditorProvider {
     const codeBlocksUri = webview.asWebviewUri(
       vscode.Uri.joinPath(rendererRoot, 'js', 'utils', 'code-blocks.js')
     );
+    const designSystemShimUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'design-system-shim.js'));
+    const designSystemIconsUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(rendererRoot, 'js', 'components', 'design-system-icons.js')
+    );
+    const mockupImagesUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(rendererRoot, 'js', 'utils', 'mockup-images.js')
+    );
+    const carouselUri = webview.asWebviewUri(vscode.Uri.joinPath(rendererRoot, 'js', 'utils', 'carousel.js'));
     const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'webview.js'));
     const nonce = getNonce();
 
@@ -129,6 +154,10 @@ ${cssLinks}
   <script nonce="${nonce}" src="${mermaidConfigUri}"></script>
   <script nonce="${nonce}" src="${mermaidLibUri}"></script>
   <script nonce="${nonce}" src="${codeBlocksUri}"></script>
+  <script nonce="${nonce}" src="${designSystemShimUri}"></script>
+  <script nonce="${nonce}" src="${designSystemIconsUri}"></script>
+  <script nonce="${nonce}" src="${mockupImagesUri}"></script>
+  <script nonce="${nonce}" src="${carouselUri}"></script>
   <script nonce="${nonce}" src="${scriptUri}"></script>
 </body>
 </html>`;

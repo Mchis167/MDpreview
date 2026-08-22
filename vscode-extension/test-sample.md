@@ -61,3 +61,23 @@ graph TD;
 - [Link ngoài](https://example.com) — nên mở bằng trình duyệt mặc định
 - [Link tới file khác](./package.json) — nên mở tab mới trong VSCode
 - [Link neo trong bài](#tiếng-việt-có-dấu) — nên cuộn trong webview, không mở gì cả
+
+## Mockup image
+
+![Ảnh trong khung browser](https://placehold.co/400x250#browser)
+
+## Carousel
+
+:::carousel
+![Slide 1](https://placehold.co/300x200/png?text=Slide+1)
+![Slide 2](https://placehold.co/300x200/png?text=Slide+2)
+:::
+
+## Details / Summary
+
+<details>
+<summary>Bấm để xem thêm</summary>
+
+Nội dung ẩn bên trong `<details>`, nên có icon chevron trước "Bấm để xem thêm".
+
+</details>

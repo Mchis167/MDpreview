@@ -30,9 +30,14 @@ const FILES = [
   ['renderer/css/design-system/organisms/markdown-blocks.css', 'vendor/shared/md-render/markdown-blocks.css'],
   ['renderer/css/design-system/organisms/markdown-content.css', 'vendor/shared/md-render/markdown-content.css'],
   ['renderer/css/design-system/organisms/markdown-interactions.css', 'vendor/shared/md-render/markdown-interactions.css'],
+  ['renderer/css/design-system/molecules/mockup-frames.css', 'vendor/shared/md-render/mockup-frames.css'],
+  ['renderer/css/design-system/molecules/carousel.css', 'vendor/shared/md-render/carousel.css'],
   ['renderer/js/services/md-renderer-core.js', 'vendor/renderer/js/services/md-renderer-core.js'],
   ['renderer/js/services/mermaid-config.js', 'vendor/renderer/js/services/mermaid-config.js'],
-  ['renderer/js/utils/code-blocks.js', 'vendor/renderer/js/utils/code-blocks.js']
+  ['renderer/js/utils/code-blocks.js', 'vendor/renderer/js/utils/code-blocks.js'],
+  ['renderer/js/utils/mockup-images.js', 'vendor/renderer/js/utils/mockup-images.js'],
+  ['renderer/js/utils/carousel.js', 'vendor/renderer/js/utils/carousel.js'],
+  ['renderer/js/components/design-system-icons.js', 'vendor/renderer/js/components/design-system-icons.js']
 ];
 
 const MERMAID_BUNDLE = [
