@@ -30,9 +30,11 @@ function buildHtml(webview, sharedRoot, rendererRoot, mediaRoot) {
     webview.asWebviewUri(dsDir('popover-shield.css')),
     webview.asWebviewUri(dsDir('setting-row.css')),
     webview.asWebviewUri(dsDir('segmented-control.css')),
+    webview.asWebviewUri(dsDir('switch-toggle.css')),
     webview.asWebviewUri(dsDir('tooltip.css')),
     webview.asWebviewUri(dsDir('settings-panel.css')),
     webview.asWebviewUri(vscode.Uri.joinPath(sharedRoot, 'font-kit', 'picker.css')),
+    webview.asWebviewUri(vscode.Uri.joinPath(sharedRoot, 'theme-kit', 'appearance.css')),
     // Comment UI: the real trigger/form/sidebar organisms, not a lookalike.
     webview.asWebviewUri(dsDir('button.css')),
     webview.asWebviewUri(dsDir('icon-action-button.css')),
@@ -66,15 +68,21 @@ function buildHtml(webview, sharedRoot, rendererRoot, mediaRoot) {
     componentDir('atoms', 'button.js'),
     componentDir('atoms', 'select.js'),
     componentDir('atoms', 'segmented-control.js'),
+    // The Background section's on/off switch.
+    componentDir('atoms', 'switch-toggle.js'),
     componentDir('atoms', 'icon-action-button.js'),
     componentDir('molecules', 'setting-row.js'),
     componentDir('organisms', 'comment-form-component.js'),
     componentDir('organisms', 'right-sidebar.js'),
     componentDir('design-system.js')
   ];
+  // The shared kits, plus the ui adapter both are built on. theme.js must
+  // come before appearance.js, which reads ThemeKit off the window.
   const fontKitUris = [
     webview.asWebviewUri(vscode.Uri.joinPath(sharedRoot, 'font-kit', 'picker.js')),
-    webview.asWebviewUri(vscode.Uri.joinPath(sharedRoot, 'font-kit', 'ui-mdpreview.js'))
+    webview.asWebviewUri(vscode.Uri.joinPath(sharedRoot, 'theme-kit', 'theme.js')),
+    webview.asWebviewUri(vscode.Uri.joinPath(sharedRoot, 'theme-kit', 'appearance.js')),
+    webview.asWebviewUri(vscode.Uri.joinPath(sharedRoot, 'ui-mdpreview.js'))
   ];
   const settingsScriptUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'settings.js'));
   const settingsCssUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'settings.css'));
@@ -265,6 +273,9 @@ ${cssLinks}
        width instead of covering the content. -->
   <div id="app-layout">
     <main>
+      <!-- Full-bleed layer the chosen background image paints onto, behind
+           everything. theme-kit shows and hides it. -->
+      <div id="app-background"></div>
       <div id="ds-reading-progress" class="ds-reading-progress"></div>
       <div id="md-viewer-mount">
         <div class="md-viewer-viewport">

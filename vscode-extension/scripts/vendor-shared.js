@@ -49,8 +49,16 @@ const FILES = [
   ['shared/font-kit/catalog.js', 'vendor/shared/font-kit/catalog.js'],
   ['shared/font-kit/installer.js', 'vendor/shared/font-kit/installer.js'],
   ['shared/font-kit/picker.js', 'vendor/shared/font-kit/picker.js'],
-  ['shared/font-kit/ui-mdpreview.js', 'vendor/shared/font-kit/ui-mdpreview.js'],
   ['shared/font-kit/picker.css', 'vendor/shared/font-kit/picker.css'],
+
+  // ── Theme panel ──
+  // Accent swatches and the background grid, shared with the app.
+  ['shared/theme-kit/theme.js', 'vendor/shared/theme-kit/theme.js'],
+  ['shared/theme-kit/appearance.js', 'vendor/shared/theme-kit/appearance.js'],
+  ['shared/theme-kit/appearance.css', 'vendor/shared/theme-kit/appearance.css'],
+
+  // The ui adapter both kits are built on.
+  ['shared/ui-mdpreview.js', 'vendor/shared/ui-mdpreview.js'],
 
   // The design system components the panel is built from, so it looks
   // exactly like the app's own Settings popover rather than an imitation.
@@ -61,10 +69,12 @@ const FILES = [
   ['renderer/js/components/atoms/button.js', 'vendor/renderer/js/components/atoms/button.js'],
   ['renderer/js/components/atoms/select.js', 'vendor/renderer/js/components/atoms/select.js'],
   ['renderer/js/components/atoms/segmented-control.js', 'vendor/renderer/js/components/atoms/segmented-control.js'],
+  ['renderer/js/components/atoms/switch-toggle.js', 'vendor/renderer/js/components/atoms/switch-toggle.js'],
   ['renderer/js/components/molecules/setting-row.js', 'vendor/renderer/js/components/molecules/setting-row.js'],
   ['renderer/css/design-system/molecules/popover-shield.css', 'vendor/renderer/css/popover-shield.css'],
   ['renderer/css/design-system/molecules/setting-row.css', 'vendor/renderer/css/setting-row.css'],
   ['renderer/css/design-system/molecules/segmented-control.css', 'vendor/renderer/css/segmented-control.css'],
+  ['renderer/css/design-system/atoms/switch-toggle.css', 'vendor/renderer/css/switch-toggle.css'],
   ['renderer/css/design-system/atoms/tooltip.css', 'vendor/renderer/css/tooltip.css'],
   ['renderer/css/design-system/organisms/settings-panel.css', 'vendor/renderer/css/settings-panel.css'],
 

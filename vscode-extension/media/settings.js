@@ -1,4 +1,4 @@
-/* global FontKitPicker, FontKitUiMDpreview, DesignSystem, SettingRow, ModalComponent */
+/* global FontKitPicker, MdpUi, ThemeKit, ThemeKitAppearance, DesignSystem, SettingRow, SwitchToggleModule, ModalComponent */
 /* ============================================================
    settings.js — the Settings panel, and the font plumbing it
    sits on top of.
@@ -99,7 +99,82 @@
     }
   };
 
-  const ui = () => FontKitUiMDpreview.createUi(DesignSystem, SettingRow);
+  const ui = () => MdpUi.createUi(DesignSystem, SettingRow, SwitchToggleModule);
+
+  // ── Theme: accent + background ────────────────────────────
+  // theme-kit works on a plain state object and calls this bridge for
+  // anything that has to outlive the page. Applying the result is ours:
+  // the host stores, the webview paints.
+
+  const theme = {
+    accent: null,
+    bgEnabled: false,
+    bgImage: null,      // webview url of the image in use
+    bgImageName: null,  // the name the host knows it by
+    backgrounds: [],    // webview urls, index-aligned with names
+    names: []
+  };
+
+  const backgroundLayer = () => document.getElementById('app-background');
+
+  const nameForUrl = (url) => theme.names[theme.backgrounds.indexOf(url)] || null;
+
+  function paintBackground() {
+    ThemeKit.applyBackground(backgroundLayer(), theme.bgEnabled, theme.bgImage);
+  }
+
+  const themeBridge = {
+    setAccent(hex) {
+      theme.accent = ThemeKit.applyAccent(document.documentElement, hex);
+      request('accentSet', { accent: theme.accent });
+    },
+
+    setBackgroundEnabled(on) {
+      theme.bgEnabled = !!on;
+      paintBackground();
+      request('backgroundEnabled', { enabled: theme.bgEnabled });
+    },
+
+    setBackgroundImage(url) {
+      theme.bgImage = url;
+      theme.bgImageName = url ? nameForUrl(url) : null;
+      paintBackground();
+      request('backgroundSelect', { name: theme.bgImageName });
+    },
+
+    // The host writes the file and answers with a url the webview may load;
+    // a data URL would work in the page but would not survive a reload.
+    async addBackground(file) {
+      const dataUrl = await readAsDataUrl(file);
+      if (!dataUrl) return null;
+
+      const res = await request('backgroundAdd', { dataUrl }).catch(() => null);
+      if (!res || res.error || !res.url) return null;
+
+      theme.names.push(res.name);
+      theme.backgrounds.push(res.url);
+      return res.url;
+    },
+
+    async removeBackground(url) {
+      const name = nameForUrl(url);
+      if (!name) return;
+
+      const idx = theme.backgrounds.indexOf(url);
+      theme.backgrounds.splice(idx, 1);
+      theme.names.splice(idx, 1);
+      await request('backgroundRemove', { name }).catch(() => {});
+    }
+  };
+
+  function readAsDataUrl(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : null);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(file);
+    });
+  }
 
   // ── Modal danh sách font ──────────────────────────────────
   // Mở đè lên panel Settings, có backdrop: lúc này việc duy nhất đang làm
@@ -228,8 +303,23 @@
       onBrowse: openCatalog
     });
 
+    // theme-kit reads `state` as it renders, so hand it the live object
+    // rather than a copy — it stays in step with what themeRestore filled in.
     const panel = adapter.createElement('div', 'fk-panel');
+    panel.appendChild(
+      ThemeKitAppearance.createAccentGroup({ ui: adapter, bridge: themeBridge, state: theme }).render()
+    );
     panel.appendChild(typography.render());
+    panel.appendChild(
+      ThemeKitAppearance.createBackgroundGroup({
+        ui: adapter,
+        bridge: themeBridge,
+        state: theme,
+        // No presets: a webview's CSP will not load an image from a remote
+        // host, and shipping stock photos in the .vsix is not worth the size.
+        presets: []
+      }).render()
+    );
     panel.appendChild(buildDataGroup(adapter));
 
     popover = adapter.createPopover({
@@ -258,22 +348,6 @@
     onChange: (fn) => openListeners.add(fn)
   };
 
-  // Mũi tên của .ds-select là một SVG data-uri ăn theo màu accent —
-  // app dựng nó trong SettingsService; webview không có service đó.
-  function setSelectArrow() {
-    const color = getComputedStyle(document.documentElement)
-      .getPropertyValue('--ds-accent')
-      .trim() || '#ffbf48';
-    const svg =
-      `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" ` +
-      `fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" ` +
-      `stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
-    document.documentElement.style.setProperty(
-      '--select-arrow',
-      `url("data:image/svg+xml,${encodeURIComponent(svg)}")`
-    );
-  }
-
   window.addEventListener('message', (event) => {
     const message = event.data;
     if (!message || typeof message.type !== 'string') return;
@@ -294,8 +368,24 @@
       return;
     }
 
+    if (message.type === 'themeRestore') {
+      const bg = message.background || {};
+      theme.bgEnabled = !!bg.enabled;
+      theme.names = bg.names || [];
+      theme.backgrounds = bg.images || [];
+      theme.bgImage = bg.image || null;
+      theme.bgImageName = bg.imageName || null;
+
+      // applyAccent also regenerates --select-arrow, which is why the webview
+      // no longer needs a copy of that logic.
+      theme.accent = ThemeKit.applyAccent(document.documentElement, message.accent);
+      paintBackground();
+      return;
+    }
+
     if (
       message.type === 'fontResult' ||
+      message.type === 'themeResult' ||
       message.type === 'commentStatsResult' ||
       message.type === 'deleteAllCommentsResult'
     ) {
@@ -303,5 +393,7 @@
     }
   });
 
-  setSelectArrow();
+  // Nothing is stored yet on first open; paint the default so the select
+  // chevron and accent are right before themeRestore lands.
+  ThemeKit.applyAccent(document.documentElement, null);
 })();

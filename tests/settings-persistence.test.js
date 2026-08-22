@@ -25,6 +25,11 @@ global.AppState = {
 };
 
 // --- Load Service Code ---
+// settings-service delegates accent/background application to theme-kit,
+// so that has to be on the global first, exactly as index.html loads it.
+const themeKitCode = fs.readFileSync(path.resolve(__dirname, '../shared/theme-kit/theme.js'), 'utf8');
+new Function('window', themeKitCode).call(global, global);
+
 const settingsServicePath = path.resolve(__dirname, '../renderer/js/services/settings-service.js');
 const settingsServiceCode = fs.readFileSync(settingsServicePath, 'utf8');
 const settingsScript = new Function('global', settingsServiceCode + '\n global.SettingsService = SettingsService;');

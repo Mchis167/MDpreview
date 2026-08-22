@@ -109,6 +109,12 @@
   <script src="js/components/molecules/search-component.js" defer></script>
   <script src="js/components/molecules/setting-toggle-item.js" defer></script>
   <script src="js/components/molecules/setting-row.js" defer></script>
+  <!-- Shared kits: the accent/background controls and the ui adapter they
+       and font-kit are built on. Loaded here so SettingsComponent and
+       SettingsService can rely on them being present. -->
+  <script src="/shared/theme-kit/theme.js" defer></script>
+  <script src="/shared/theme-kit/appearance.js" defer></script>
+  <script src="/shared/ui-mdpreview.js" defer></script>
   <script src="js/components/molecules/menu-shield.js" defer></script>
   <script src="js/components/molecules/scroll-container.js" defer></script>
   <script src="js/components/molecules/tab-preview.js" defer></script>

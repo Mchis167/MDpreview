@@ -55,6 +55,8 @@
 @import 'design-system/organisms/zoom-modal.css';
 @import 'design-system/organisms/toc-panel.css';
 @import 'design-system/organisms/settings-panel.css';
+/* Accent swatches + background grid, shared with the VSCode extension. */
+@import '/shared/theme-kit/appearance.css';
 @import 'design-system/organisms/modals-misc.css';
 @import 'design-system/organisms/publish-config.css';
 @import 'design-system/organisms/editor.css';

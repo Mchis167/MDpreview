@@ -26,3 +26,17 @@
   cursor: default;
   opacity: 0.4;
 }
+
+/* Lớp nền của app. Trong app Electron nó nằm ở modals-misc.css, vốn không
+   được vendor sang đây — chỉ mỗi quy tắc này là cần. z-index âm để nó nằm
+   sau toàn bộ nội dung; theme-kit lo việc hiện/ẩn. */
+#app-background {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.1;
+  pointer-events: none;
+  display: none;
+}

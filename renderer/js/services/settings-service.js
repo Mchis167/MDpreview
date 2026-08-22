@@ -1,4 +1,4 @@
-/* global AppState, MonacoService */
+/* global AppState, MonacoService, ThemeKit, TreeModule */
 /**
  * SettingsService
  * Centralized logic for managing application settings, theme application,
@@ -43,20 +43,11 @@ const SettingsService = (() => {
   };
 
   /**
-   * Helper: Convert Hex to RGB
-   */
-  function hexToRgb(hex) {
-    if (!hex) return null;
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : null;
-  }
-
-  /**
-   * Apply all current theme settings to the document root
+   * Apply all current theme settings to the document root.
+   *
+   * The accent and the background layer are theme-kit's — the same code the
+   * VSCode extension applies them with — so the two surfaces cannot drift on
+   * which variables a colour actually sets.
    */
   function applyTheme() {
     const root = document.documentElement;
@@ -67,22 +58,15 @@ const SettingsService = (() => {
     root.style.setProperty('--preview-zoom', s.textZoom || 100);
     root.style.setProperty('--code-zoom', s.codeZoom || 100);
 
-    // 2. Accent Color
-    root.style.setProperty('--accent-color', s.accentColor);
-    const rgb = hexToRgb(s.accentColor);
-    if (rgb) {
-      root.style.setProperty('--accent-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
-    }
+    // 2. Accent colour, its rgb channels and the select chevron
+    ThemeKit.applyAccent(root, s.accentColor);
 
     // 3. Fonts
     root.style.setProperty('--font-text', s.fontText);
     root.style.setProperty('--font-code', s.fontCode);
 
-    // 4. Select Arrow (Dynamic SVG)
-    _updateSelectArrow(s.accentColor);
-
-    // 5. Background Layer
-    _updateBackgroundLayer(s.bgEnabled, s.bgImage);
+    // 4. Background Layer
+    ThemeKit.applyBackground(document.getElementById('app-background'), s.bgEnabled, s.bgImage);
   }
 
   /**
@@ -122,29 +106,6 @@ const SettingsService = (() => {
     }
   }
 
-  /**
-   * Private: Update the dynamic SVG arrow for select elements
-   */
-  function _updateSelectArrow(color) {
-    const arrowSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
-    document.documentElement.style.setProperty('--select-arrow', `url("data:image/svg+xml,${encodeURIComponent(arrowSvg)}")`);
-  }
-
-  /**
-   * Private: Update the application background layer
-   */
-  function _updateBackgroundLayer(enabled, image) {
-    const bgLayer = document.getElementById('app-background');
-    if (!bgLayer) return;
-
-    if (enabled && image) {
-      bgLayer.style.backgroundImage = `url(${image})`;
-      bgLayer.style.display = 'block';
-    } else {
-      bgLayer.style.display = 'none';
-    }
-  }
-
   // ── Public API ──────────────────────────────────────────
 
   return {
@@ -163,14 +124,22 @@ const SettingsService = (() => {
 
     addCustomBackground(base64) {
       const bgs = this.getCustomBackgrounds();
+      // theme-kit stops the user at the same cap and explains why; this is
+      // the backstop for any other caller.
       if (bgs.length >= 5) return false;
-      
-      const newBgs = [...bgs, base64];
-      this.update('customBackgrounds', newBgs);
+
+      this.update('customBackgrounds', [...bgs, base64]);
       return true;
     },
 
-    hexToRgb
+    removeCustomBackground(base64) {
+      const bgs = this.getCustomBackgrounds();
+      this.update('customBackgrounds', bgs.filter((b) => b !== base64));
+    },
+
+    // Resolved on call, not at load: theme.js may not have run yet when
+    // this file is evaluated.
+    hexToRgb: (hex) => ThemeKit.hexToRgb(hex)
   };
 })();
 

@@ -1,10 +1,20 @@
-/* global DesignSystem, SettingRow, SettingsService, AppState, SwitchToggleModule, showToast, PublishSettingsFormComponent, PublishManagerComponent */
+/* global DesignSystem, SettingRow, SettingsService, AppState, SwitchToggleModule, MdpUi, ThemeKitAppearance, PublishSettingsFormComponent, PublishManagerComponent */
 /* ══════════════════════════════════════════════════
    SettingsComponent.js — Settings View Organism
    Atomic Design System (Organism)
    ════════════════════════════════════════════════════ */
 
 class SettingsComponent {
+  /**
+   * Backgrounds the app ships with. Passed to theme-kit rather than baked
+   * into it: the VSCode extension has none, since a webview's CSP will not
+   * load an image from a remote host.
+   */
+  static BACKGROUND_PRESETS = [
+    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop'
+  ];
+
   constructor(options = {}) {
     this.options = {
       onClose: options.onClose || (() => { })
@@ -19,13 +29,17 @@ class SettingsComponent {
   render() {
     const container = DesignSystem.createElement('div', ['settings-container', 'settings-organism']);
 
+    // The accent swatches and the background grid come from theme-kit, so
+    // this panel and the VSCode extension's Settings panel are the same
+    // controls rather than two implementations that drift apart.
+    const ui = MdpUi.createUi(DesignSystem, SettingRow, SwitchToggleModule);
+    const themeState = this._themeState();
+    const themeBridge = this._themeBridge();
+
     // 1. Appearance Group
-    container.appendChild(this._createGroup('Appearance', [
-      SettingRow.create({
-        label: 'Accent Color',
-        control: this._createColorSelector()
-      })
-    ]));
+    container.appendChild(
+      ThemeKitAppearance.createAccentGroup({ ui, bridge: themeBridge, state: themeState }).render()
+    );
 
     // 2. Typography & Zoom Group
     container.appendChild(this._createGroup('Typography & Zoom', [
@@ -48,29 +62,15 @@ class SettingsComponent {
     ]));
 
     // 3. Background Group
-    const toggleEl = DesignSystem.createElement('div', 'switch-toggle');
-    SwitchToggleModule.init({
-      element: toggleEl,
-      isOn: AppState.settings.bgEnabled,
-      onChange: (val) => {
-        if (typeof SettingsService !== 'undefined') {
-          SettingsService.update('bgEnabled', val);
-          this._updateGridVisibility(container, val);
-        }
-      }
-    });
+    container.appendChild(
+      ThemeKitAppearance.createBackgroundGroup({
+        ui,
+        bridge: themeBridge,
+        state: themeState,
+        presets: SettingsComponent.BACKGROUND_PRESETS
+      }).render()
+    );
 
-    container.appendChild(this._createGroup('Background', [
-      SettingRow.create({
-        label: 'Custom Background',
-        control: toggleEl
-      }),
-      this._createBackgroundGridWrapper()
-    ]));
-
-    // Sync initial visibility
-    this._updateGridVisibility(container, AppState.settings.bgEnabled);
-    
     // 4. Integrations Group
     container.appendChild(this._createGroup('Integrations', [
       SettingRow.create({
@@ -157,39 +157,50 @@ class SettingsComponent {
     return DesignSystem.createElement('div', 'setting-divider');
   }
 
-  _createColorSelector() {
-    const container = DesignSystem.createElement('div', 'color-selector');
-    const accentColors = [
-      { name: 'Orange', value: '#ffbf48' },
-      { name: 'Red',    value: '#FF4500' },
-      { name: 'Pink',   value: '#FF69B4' },
-      { name: 'Purple', value: '#9370DB' },
-      { name: 'Blue',   value: '#1E90FF' },
-      { name: 'Teal',   value: '#40E0D0' },
-      { name: 'Cyan',   value: '#00FFFF' },
-      { name: 'Lime',   value: '#00FF00' },
-      { name: 'Green',  value: '#ADFF2F' }
-    ];
+  // ── theme-kit wiring ────────────────────────────────────
+  // theme-kit reads and writes a plain state object and calls a bridge for
+  // anything that has to persist. Here both sit on SettingsService, which
+  // already knows how to store a setting and re-apply the theme.
 
-    accentColors.forEach(color => {
-      const item = DesignSystem.createElement('div', 'color-item', {
-        title: color.name
-      });
-      item.style.backgroundColor = color.value;
-      if (color.value === AppState.settings.accentColor) item.classList.add('active');
+  _themeState() {
+    const s = AppState.settings || {};
+    return {
+      accent: s.accentColor,
+      bgEnabled: s.bgEnabled,
+      bgImage: s.bgImage,
+      backgrounds: SettingsService.getCustomBackgrounds()
+    };
+  }
 
-      item.addEventListener('click', () => {
-        if (typeof SettingsService !== 'undefined') {
-          SettingsService.update('accentColor', color.value);
-          container.querySelectorAll('.color-item').forEach(el => el.classList.remove('active'));
-          item.classList.add('active');
-        }
-      });
+  _themeBridge() {
+    const set = (key, value) => {
+      if (typeof SettingsService !== 'undefined') SettingsService.update(key, value);
+    };
 
-      container.appendChild(item);
+    return {
+      setAccent: (hex) => set('accentColor', hex),
+      setBackgroundEnabled: (on) => set('bgEnabled', on),
+      setBackgroundImage: (src) => set('bgImage', src),
+
+      // In the app an image is stored inline as a data URL, which is both
+      // the stored form and the displayable one.
+      async addBackground(file) {
+        const dataUrl = await SettingsComponent._toBase64(file);
+        return SettingsService.addCustomBackground(dataUrl) ? dataUrl : null;
+      },
+
+      async removeBackground(src) {
+        SettingsService.removeCustomBackground(src);
+      }
+    };
+  }
+
+  static _toBase64(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.readAsDataURL(file);
     });
-
-    return container;
   }
 
   _createFontSelect(type) {
@@ -252,106 +263,6 @@ class SettingsComponent {
     ctrl.appendChild(slider);
     ctrl.appendChild(label);
     return ctrl;
-  }
-
-  _createBackgroundGridWrapper() {
-    const wrapper = DesignSystem.createElement('div', 'bg-grid-wrapper');
-    wrapper.appendChild(this._createBackgroundGrid());
-    return wrapper;
-  }
-
-  _createBackgroundGrid() {
-    const bgGrid = DesignSystem.createElement('div', 'bg-image-grid');
-    
-    // 1. Upload Trigger
-    const uploadItem = DesignSystem.createElement('div', ['bg-image-item', 'bg-new-image']);
-    uploadItem.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-      </svg>
-      <span>New Image</span>
-    `;
-    const fileInput = DesignSystem.createElement('input', null, {
-      type: 'file',
-      accept: 'image/*',
-      style: 'display: none;',
-      multiple: true
-    });
-    uploadItem.appendChild(fileInput);
-
-    uploadItem.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', async (e) => {
-      const files = Array.from(e.target.files);
-      if (!files.length) return;
-      
-      for (const file of files) {
-        const base64 = await this._toBase64(file);
-        const added = SettingsService.addCustomBackground(base64);
-        if (!added && typeof showToast === 'function') {
-          showToast('Maximum 5 custom images allowed.', 'error');
-          break;
-        }
-      }
-      this._refreshGrid(bgGrid);
-    });
-
-    bgGrid.appendChild(uploadItem);
-
-    // 2. Custom & Preset Images
-    this._renderImageItems(bgGrid);
-
-    return bgGrid;
-  }
-
-  _renderImageItems(container) {
-    const customBgs = this._getCustomBgs();
-    const presets = [
-      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop'
-    ];
-
-    [...customBgs, ...presets].forEach(src => {
-      const item = DesignSystem.createElement('div', 'bg-image-item');
-      if (src === AppState.settings.bgImage) item.classList.add('active');
-      item.innerHTML = `<img src="${src}" alt="Background">`;
-
-      item.addEventListener('click', () => {
-        if (typeof SettingsService !== 'undefined') {
-          SettingsService.update('bgImage', src);
-          container.querySelectorAll('.bg-image-item').forEach(el => el.classList.remove('active'));
-          item.classList.add('active');
-        }
-      });
-      container.appendChild(item);
-    });
-  }
-
-  _refreshGrid(container) {
-    // Keep only the first item (upload trigger)
-    const trigger = container.querySelector('.bg-new-image');
-    container.innerHTML = '';
-    container.appendChild(trigger);
-    this._renderImageItems(container);
-  }
-
-  _getCustomBgs() {
-    return SettingsService.getCustomBackgrounds();
-  }
-
-  _toBase64(file) {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target.result);
-      reader.readAsDataURL(file);
-    });
-  }
-
-  _updateGridVisibility(container, enabled) {
-    const wrapper = container.querySelector('.bg-grid-wrapper');
-    if (wrapper) {
-      wrapper.style.display = enabled ? 'block' : 'none';
-    }
   }
 
   /**

@@ -1,0 +1,133 @@
+/* ============================================================
+   theme-kit/appearance.css — the accent swatches and background
+   grid. Only design-system tokens, no literal colours, so the
+   controls inherit the surfaces of whatever host they land in.
+
+   Moved here from the app's settings-panel.css when these
+   controls became shared; both surfaces load this one file.
+   ============================================================ */
+
+/* ── Accent swatches ── */
+.color-selector {
+  display: flex;
+  gap: var(--ds-space-sm);
+}
+
+.color-item {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--ds-radius-pill);
+  border: 4px solid transparent;
+  cursor: pointer;
+  transition: all var(--ds-transition-fast);
+  background-clip: padding-box;
+}
+
+.color-item:hover {
+  transform: scale(1.1);
+}
+
+.color-item.active {
+  border-color: var(--ds-border-strong);
+  box-shadow: 0 0 0 1px var(--ds-accent), 0 0 4px var(--ds-accent);
+}
+
+/* ── Background grid ── */
+.bg-image-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--ds-space-lg);
+  width: 100%;
+  padding: var(--ds-space-md) 0;
+}
+
+.bg-image-item {
+  aspect-ratio: 16 / 9;
+  border-radius: var(--ds-radius-panel);
+  overflow: hidden;
+  border: 1px solid var(--ds-border-default);
+  background: var(--ds-layer-control-default);
+  cursor: pointer;
+  position: relative;
+  transition: all var(--ds-transition-fast);
+}
+
+.bg-image-item:hover {
+  border-color: var(--ds-accent);
+}
+
+.bg-image-item.active {
+  border-color: var(--ds-accent);
+  box-shadow: 0 0 0 2px var(--ds-accent);
+}
+
+/* Ảnh trong lưới cố tình mờ: đây là ô chọn, không phải ảnh xem trước —
+   và nền thật phía sau app cũng chỉ hiện ở opacity thấp. */
+.bg-image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.1;
+  transition: opacity var(--ds-transition-main);
+}
+
+.bg-image-item.active img {
+  opacity: 0.3;
+}
+
+.bg-new-image {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-sm);
+  color: var(--ds-text-secondary);
+  font-family: var(--ds-font-family-code);
+  font-size: var(--ds-font-xs);
+  text-transform: uppercase;
+}
+
+.bg-new-image:hover {
+  color: var(--ds-accent);
+}
+
+.bg-new-image-icon {
+  display: flex;
+}
+
+.bg-new-image-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Chỉ hiện khi rê chuột lên ảnh của chính mình — preset do host cấp
+   thì không có nút này. */
+.bg-image-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-accent-red);
+  color: var(--ds-text-inverse);
+  cursor: pointer;
+  font-size: 10px;
+  line-height: 18px;
+  opacity: 0;
+  transition: opacity var(--ds-transition-fast);
+}
+
+.bg-image-item:hover .bg-image-remove,
+.bg-image-remove:focus-visible {
+  opacity: 1;
+}
+
+.bg-status {
+  display: none;
+  padding: 0 0 var(--ds-space-sm);
+  font-size: var(--ds-font-sm);
+  color: var(--ds-text-tertiary);
+}

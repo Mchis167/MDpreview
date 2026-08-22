@@ -29,7 +29,7 @@ function loadDesignSystem() {
     .forEach((f) => loadScript(`renderer/js/components/${f}`));
   loadScript('renderer/js/components/design-system.js');
   loadScript('shared/font-kit/picker.js');
-  loadScript('shared/font-kit/ui-mdpreview.js');
+  loadScript('shared/ui-mdpreview.js');
 
   // design-system-icons.js pulls in the whole icon set; font-kit only needs
   // a few, and a marker svg makes assertions readable.
@@ -46,7 +46,7 @@ function loadDesignSystem() {
     'refresh-cw': '<svg data-icon="refresh-cw"></svg>'
   });
 
-  return window.FontKitUiMDpreview.createUi(window.DesignSystem, window.SettingRow);
+  return window.MdpUi.createUi(window.DesignSystem, window.SettingRow);
 }
 
 const CATALOG = [

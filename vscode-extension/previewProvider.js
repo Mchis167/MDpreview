@@ -3,6 +3,7 @@ const { renderWithLineNumbers } = require('./vendor/shared/md-render');
 const { createCommentSession } = require('./commentSession');
 const { computeDiffInfo, registerPane, getPane } = require('./diffMode');
 const { createFontHost } = require('./fontHost');
+const { createThemeHost } = require('./themeHost');
 const { buildHtml } = require('./webviewHtml');
 
 class MdPreviewEditorProvider {
@@ -16,6 +17,7 @@ class MdPreviewEditorProvider {
   constructor(context) {
     this.context = context;
     this.fonts = createFontHost(context);
+    this.theme = createThemeHost(context);
   }
 
   async resolveCustomTextEditor(document, webviewPanel) {
@@ -34,7 +36,15 @@ class MdPreviewEditorProvider {
       enableScripts: true,
       // Font tải về nằm ngoài extension, trong globalStorage — không có
       // nó trong danh sách này thì mọi .woff2 bị webview chặn.
-      localResourceRoots: [sharedRoot, rendererRoot, mediaRoot, this.fonts.resourceRoot(), ...commentAssetRoots]
+      localResourceRoots: [
+        sharedRoot,
+        rendererRoot,
+        mediaRoot,
+        this.fonts.resourceRoot(),
+        // Ảnh nền người dùng chọn, cũng nằm trong globalStorage.
+        this.theme.resourceRoot(),
+        ...commentAssetRoots
+      ]
     };
     webviewPanel.webview.html = buildHtml(webviewPanel.webview, sharedRoot, rendererRoot, mediaRoot);
 
@@ -76,6 +86,20 @@ class MdPreviewEditorProvider {
       webviewPanel.webview.postMessage({ type: 'fontRestore', ...restored });
     };
 
+    const sendTheme = async () => {
+      const restored = await this.theme.restore(webviewPanel.webview);
+      webviewPanel.webview.postMessage({ type: 'themeRestore', ...restored });
+    };
+
+    // Cùng khuôn với replyFont: `seq` khớp yêu cầu với lời hứa bên webview.
+    const replyTheme = async (message, work) => {
+      try {
+        webviewPanel.webview.postMessage({ type: 'themeResult', seq: message.seq, ...(await work()) });
+      } catch (err) {
+        webviewPanel.webview.postMessage({ type: 'themeResult', seq: message.seq, error: err.message });
+      }
+    };
+
     // Panel font trả lời bằng một loại message duy nhất; `seq` khớp yêu cầu
     // với lời hứa bên webview, `error` là chuỗi để hiện ngay trong panel.
     const replyFont = async (message, work) => {
@@ -92,6 +116,7 @@ class MdPreviewEditorProvider {
         render();
         pushDiff();
         sendFonts();
+        sendTheme();
         if (comments) comments.sendAll();
         return;
       }
@@ -105,6 +130,28 @@ class MdPreviewEditorProvider {
         return replyFont(message, () =>
           this.fonts.apply(message.role, message.family, webviewPanel.webview)
         );
+      }
+      if (message.type === 'accentSet') {
+        return replyTheme(message, () => this.theme.setAccent(message.accent));
+      }
+      if (message.type === 'backgroundEnabled') {
+        return replyTheme(message, () => this.theme.setBackgroundEnabled(message.enabled));
+      }
+      if (message.type === 'backgroundSelect') {
+        return replyTheme(message, () => this.theme.selectBackground(message.name));
+      }
+      if (message.type === 'backgroundAdd') {
+        return replyTheme(message, async () => {
+          const result = await this.theme.addBackground(message.dataUrl);
+          if (result.error) return { error: result.error };
+          return {
+            name: result.name,
+            url: this.theme.toWebviewUrls(webviewPanel.webview, [result.name])[0]
+          };
+        });
+      }
+      if (message.type === 'backgroundRemove') {
+        return replyTheme(message, () => this.theme.removeBackground(message.name));
       }
       if (message.type === 'openLink') return this._openLink(message.href, document);
       if (message.type === 'toggleTask') return this._toggleTask(message.line, message.checked, document);
