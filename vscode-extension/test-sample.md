@@ -44,3 +44,20 @@ function hello() {
 ## Tiếng Việt có dấu
 
 Kiểm tra dấu tiếng Việt: à á ả ã ạ, ê ề ế ể, ơ ờ ớ, đ Đ.
+
+## Sơ đồ Mermaid
+
+```mermaid
+graph TD;
+  A[Bắt đầu] --> B{Kiểm tra};
+  B -- Có --> C[Xử lý];
+  B -- Không --> D[Bỏ qua];
+  C --> E[Kết thúc];
+  D --> E;
+```
+
+## Test link
+
+- [Link ngoài](https://example.com) — nên mở bằng trình duyệt mặc định
+- [Link tới file khác](./package.json) — nên mở tab mới trong VSCode
+- [Link neo trong bài](#tiếng-việt-có-dấu) — nên cuộn trong webview, không mở gì cả

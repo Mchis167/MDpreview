@@ -31,7 +31,8 @@ const FILES = [
   ['renderer/css/design-system/organisms/markdown-content.css', 'vendor/shared/md-render/markdown-content.css'],
   ['renderer/css/design-system/organisms/markdown-interactions.css', 'vendor/shared/md-render/markdown-interactions.css'],
   ['renderer/js/services/md-renderer-core.js', 'vendor/renderer/js/services/md-renderer-core.js'],
-  ['renderer/js/services/mermaid-config.js', 'vendor/renderer/js/services/mermaid-config.js']
+  ['renderer/js/services/mermaid-config.js', 'vendor/renderer/js/services/mermaid-config.js'],
+  ['renderer/js/utils/code-blocks.js', 'vendor/renderer/js/utils/code-blocks.js']
 ];
 
 const MERMAID_BUNDLE = [

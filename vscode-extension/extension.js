@@ -37,9 +37,34 @@ class MdPreviewEditorProvider {
     const changeSub = vscode.workspace.onDidChangeTextDocument((e) => {
       if (e.document.uri.toString() === document.uri.toString()) render();
     });
-    webviewPanel.onDidDispose(() => changeSub.dispose());
+    const messageSub = webviewPanel.webview.onDidReceiveMessage((message) => {
+      if (message.type === 'openLink') this._openLink(message.href, document);
+    });
+    webviewPanel.onDidDispose(() => {
+      changeSub.dispose();
+      messageSub.dispose();
+    });
 
     render();
+  }
+
+  async _openLink(href, document) {
+    if (/^https?:\/\//i.test(href)) {
+      vscode.env.openExternal(vscode.Uri.parse(href));
+      return;
+    }
+
+    // Relative file reference, e.g. "./other.md" or "../docs/plan.md".
+    // Strip a trailing #anchor — VSCode's file open doesn't use it.
+    const relativePath = href.split('#')[0];
+    if (!relativePath) return;
+
+    const targetUri = vscode.Uri.joinPath(document.uri, '..', relativePath);
+    try {
+      await vscode.commands.executeCommand('vscode.open', targetUri);
+    } catch {
+      vscode.window.showWarningMessage(`MDpreview: không mở được liên kết "${href}"`);
+    }
   }
 
   _getHtml(webview, sharedRoot, rendererRoot, mediaRoot) {
@@ -55,6 +80,9 @@ class MdPreviewEditorProvider {
       vscode.Uri.joinPath(rendererRoot, 'js', 'services', 'mermaid-config.js')
     );
     const mermaidLibUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'vendor', 'mermaid.min.js'));
+    const codeBlocksUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(rendererRoot, 'js', 'utils', 'code-blocks.js')
+    );
     const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'webview.js'));
     const nonce = getNonce();
 
@@ -83,6 +111,7 @@ ${cssLinks}
   <div id="md-content" class="md-render-body"></div>
   <script nonce="${nonce}" src="${mermaidConfigUri}"></script>
   <script nonce="${nonce}" src="${mermaidLibUri}"></script>
+  <script nonce="${nonce}" src="${codeBlocksUri}"></script>
   <script nonce="${nonce}" src="${scriptUri}"></script>
 </body>
 </html>`;
