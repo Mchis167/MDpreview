@@ -55,21 +55,6 @@ const CommentsModule = (() => {
   }
 
   // ── Claude bridge: ref helpers ────────────────────────────────
-  function _buildRef(commentFilter) {
-    return core.buildRef(commentFilter);
-  }
-
-  function _copyRefToClipboard(commentFilter, count) {
-    const ref = _buildRef(commentFilter);
-    if (!ref) return;
-    const file = AppState.currentFile || 'unknown';
-    const countLabel = (typeof count === 'number') ? `${count} comment${count !== 1 ? 's' : ''}` : 'comment';
-    const line = `@mdpreview ${file} — ${countLabel}  ·  ${ref}`;
-    navigator.clipboard.writeText(line).then(() => {
-      if (typeof showToast === 'function') showToast('Copied ref for Claude');
-    });
-  }
-
   // ── Copy all comments to clipboard ───────────────────────────
   function copyAll() {
     if (!comments.length) return;
@@ -153,16 +138,7 @@ const CommentsModule = (() => {
       title: 'Comment',
       actions: [
         { id: 'clear', icon: 'trash', title: 'Clear all comments', onClick: () => clear() },
-        { id: 'copy', icon: 'copy', title: 'Copy all comments', onClick: copyAll },
-        {
-          id: 'copy-for-claude',
-          icon: 'bot',
-          title: 'Copy for Claude (all unresolved)',
-          onClick: () => {
-            const pendingCount = comments.filter(c => (c.claude?.status || 'none') !== 'resolved').length;
-            _copyRefToClipboard('pending', pendingCount);
-          }
-        }
+        { id: 'copy', icon: 'copy', title: 'Copy all comments', onClick: copyAll }
       ],
       items: comments,
       emptyState: {

@@ -369,30 +369,6 @@ function initSocket() {
 
   AppState.socket.on('tree-changed', () => { TreeModule.load(); });
 
-  // ── Claude Code bridge ──
-  AppState.socket.on('comments-changed', ({ file } = {}) => {
-    if (typeof CommentsModule !== 'undefined' && file === AppState.currentFile) {
-      CommentsModule.loadForFile(AppState.currentFile);
-    }
-  });
-
-  AppState.socket.on('mcp-open-file', async ({ wsId, path: filePath } = {}) => {
-    if (window.electronAPI && typeof window.electronAPI.focusWindow === 'function') {
-      window.electronAPI.focusWindow();
-    }
-
-    // The file may belong to a different workspace than the one currently
-    // open — switch first (reuses the existing dirty-check + setWatchDir +
-    // tree/tabs reload logic) so the file actually resolves.
-    if (wsId && AppState.currentWorkspace?.id !== wsId && typeof WorkspaceModule !== 'undefined') {
-      await WorkspaceModule.switchTo(wsId);
-    }
-
-    if (filePath && typeof window.loadFile === 'function') {
-      window.loadFile(filePath).catch(() => {});
-    }
-  });
-
   AppState.socket.on('file-deleted', ({ file }) => {
     if (typeof TabsModule !== 'undefined') TabsModule.remove(file, true);
     if (typeof RecentlyViewedModule !== 'undefined') RecentlyViewedModule.remove(file);

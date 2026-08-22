@@ -6,9 +6,7 @@ const { createCommentStorage } = require('./commentStorage');
 const { computeDiffInfo, registerPane, getPane } = require('./diffMode');
 const { createFontHost } = require('./fontHost');
 const takeover = require('./takeover');
-const { createMcpBridge } = require('./mcpServer');
-const { installSkill } = require('./skillInstaller');
-const { ensureMcpConfig } = require('./mcpConfig');
+const { installAll } = require('./installer');
 
 function getNonce() {
   return crypto.randomBytes(16).toString('base64');
@@ -461,32 +459,12 @@ function activate(context) {
   context.subscriptions.push(MdPreviewEditorProvider.register(context));
   takeover.activate(context);
 
-  const bridge = createMcpBridge({
-    getWorkspaceFolders: () =>
-      (vscode.workspace.workspaceFolders || []).map((f) => ({ name: f.name, fsPath: f.uri.fsPath }))
-  });
-  bridge
-    .start()
-    .then(({ httpServer, port }) => {
-      context.subscriptions.push({ dispose: () => httpServer.close() });
-      console.log(`MDpreview MCP bridge listening on 127.0.0.1:${port}/mcp`);
-
-      const offerConfig = (folder) => ensureMcpConfig(folder, port).catch(() => {});
-      (vscode.workspace.workspaceFolders || []).forEach(offerConfig);
-      context.subscriptions.push(
-        vscode.workspace.onDidChangeWorkspaceFolders((e) => e.added.forEach(offerConfig))
-      );
-    })
-    .catch((err) => {
-      // Preview + comments still work without the bridge; just say so once.
-      vscode.window.showWarningMessage(`MDpreview: MCP bridge không khởi động được — ${err.message}`);
-    });
-
-  try {
-    installSkill();
-  } catch (err) {
-    console.warn('MDpreview: không ghi được skill mdp-comments:', err.message);
-  }
+  // Puts the stdio MCP server, its user-scope registration and the
+  // mdp-comments skill in place, so installing the extension is the whole
+  // setup. Version-gated, so an unchanged install does nothing. Nothing
+  // here is worth failing activation over — preview and comments work
+  // regardless of whether Claude Code can reach them.
+  installAll();
 }
 
 function deactivate() {}

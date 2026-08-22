@@ -78,8 +78,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Custom
   rebuildApp: () => ipcRenderer.send('rebuild-app'),
-  openExternal: (url) => ipcRenderer.invoke('open-external', url),
-
-  // Claude Code bridge
-  focusWindow: () => ipcRenderer.invoke('focus-window')
+  openExternal: (url) => ipcRenderer.invoke('open-external', url)
 });

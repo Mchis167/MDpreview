@@ -142,7 +142,6 @@ app.use('/api', require('./routes/worker-publish'));
 app.use('/api', require('./routes/publish-cache'));
 app.use('/api', require('./routes/search'));
 app.use('/api', require('./routes/history'));
-app.use('/api', require('./routes/mcp'));
 
 // --- File watcher ---
 function startWatcher(dir) {

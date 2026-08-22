@@ -61,14 +61,6 @@ ipcMain.handle('toggle-fullscreen', () => {
 
 ipcMain.handle('is-fullscreen', () => mainWindow ? mainWindow.isFullScreen() : false);
 
-// --- IPC: Focus window (used by the Claude Code bridge on mcp-open-file) ---
-ipcMain.handle('focus-window', () => {
-  if (mainWindow) {
-    mainWindow.show();
-    mainWindow.focus();
-  }
-});
-
 // --- Dock menu (macOS) ---
 if (process.platform === 'darwin') {
   app.dock.setMenu(Menu.buildFromTemplate([
