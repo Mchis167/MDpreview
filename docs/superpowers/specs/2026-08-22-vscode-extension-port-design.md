@@ -246,7 +246,7 @@ Mỗi pha kết thúc ở trạng thái chạy được và test xanh.
 3. **Rút `comments-core.js`** + adapter Electron. `comments.js` co lại còn UI. **App Electron phải chạy y như cũ — chốt kiểm tra tay.**
 4. **Chốt baseline render** — test snapshot HTML đầu ra của `renderWithLineNumbers` trên một bộ markdown mẫu, chưa sửa code sản phẩm. Đây là lưới an toàn cho pha 5.
 5. **Rút `shared/md-render/`** — bóc dòng 87–569 của `render.js` ra, wikilink/carousel/mermaid thành extension. `render.js` co lại còn route. Snapshot pha 4 phải khớp từng byte. **Pha rủi ro cao nhất — chốt kiểm tra tay app Electron.**
-6. **Gom publish worker** — `cf-publish-worker` chuyển sang lõi. Xử lý khác biệt hành vi do bản này đang lệch; ghi lại từng khác biệt và quyết định giữ hay bỏ.
+6. **Gom publish worker — SKIPPED.** Khảo sát cho thấy `cf-publish-worker/src/renderer.js` lệch nhiều hơn dự đoán: không có line-anchor, thuật toán slugify khác (có dedup), cấu trúc HTML bọc phẳng thay vì lồng theo dòng/bảng/list-item, không hỗ trợ wikilink/carousel, và dùng ESM trong khi `shared/md-render` là CommonJS. Đây là trang **đã publish công khai, có thể đã bị người dùng bookmark/share link** — đổi renderer sẽ đổi HTML output và có thể vỡ anchor `#heading` cũ. Người dùng chọn giữ nguyên, không migrate. `shared/md-render` vẫn dùng chung cho app Electron + extension VSCode; publish worker coi như chưa migrate, có thể quay lại sau nếu có nhu cầu thật.
 7. **Tách CSS** — gom markdown CSS + tokens vào `shared/md-render/`, cả hai app trỏ vào đó.
 8. **Extension khung** — `CustomTextEditorProvider`, webview render markdown bằng lõi, chưa có comment.
 9. **Extension comment** — nối core với adapter VSCode, cổng UI comment sang, Copy for Claude.
@@ -256,7 +256,7 @@ Có hai điểm dừng nghiệm thu: sau pha 3 (comment) và sau pha 7 (render) 
 ## Rủi ro
 
 - **Làm hỏng đường render của app Electron (pha 5).** Rủi ro lớn nhất toàn dự án: 609 dòng bóc khỏi Express, và render là đường đi chính của app. Giảm thiểu bằng snapshot chốt ở pha 4 — khớp từng byte, không "gần đúng".
-- **Publish worker lệch hành vi (pha 6).** Đã biết chắc là có lệch, chỉ chưa biết lệch chỗ nào. Không tự ý chọn — liệt kê từng khác biệt và hỏi trước khi quyết định giữ hay bỏ.
+- ~~Publish worker lệch hành vi (pha 6).~~ Đã khảo sát, trình bày khác biệt cụ thể, và người dùng quyết định giữ nguyên — không migrate. Xem pha 6.
 - **Làm hỏng comment của app Electron.** App đang chạy tốt. Giảm thiểu bằng pha 1 (test baseline trước) và chốt kiểm tra tay ở cuối pha 3.
 - **CSP của webview.** Chưa đo thực tế được, chỉ biết chắc khi chạy pha 8. Nếu phát sinh nhiều hơn dự kiến, dừng lại báo cáo thay vì tự mở rộng phạm vi.
 - **`markdown-viewer-component.js` (1390 dòng) dây dưa hơn dự kiến khi cổng UI viewer sang webview.** Nếu gặp, xử lý ở pha 8 và báo lại — không tiện tay refactor nó ngoài phạm vi.
