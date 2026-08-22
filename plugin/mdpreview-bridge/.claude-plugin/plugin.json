@@ -1,0 +1,5 @@
+{
+  "name": "mdpreview-bridge",
+  "version": "1.0.0",
+  "description": "Bridge between MDpreview (local markdown viewer) and Claude Code — open files in the app, read and reply to review comments via MCP."
+}
