@@ -78,7 +78,26 @@ const FILES = [
   ['renderer/css/design-system/organisms/right-sidebar.css', 'vendor/renderer/css/right-sidebar.css'],
   ['renderer/css/design-system/molecules/sidebar-base.css', 'vendor/renderer/css/sidebar-base.css'],
   // ds-header-action (the sidebar header's action buttons) lives here.
-  ['renderer/css/design-system/organisms/tab-bar.css', 'vendor/renderer/css/tab-bar.css']
+  ['renderer/css/design-system/organisms/tab-bar.css', 'vendor/renderer/css/tab-bar.css'],
+
+  // ── Table of Contents ──
+  // The app's own TOC, algorithm and styling untouched: heading scan, tree
+  // build, scroll-sync offset, expand/collapse state and the panel chrome.
+  ['renderer/js/services/toc-service.js', 'vendor/renderer/js/services/toc-service.js'],
+  ['renderer/js/components/organisms/toc-component.js', 'vendor/renderer/js/components/organisms/toc-component.js'],
+  ['renderer/js/services/ui-utils.js', 'vendor/renderer/js/services/ui-utils.js'],
+  ['renderer/css/shared/toc-core.css', 'vendor/renderer/css/toc-core.css'],
+  // The vendored css/ tree is flat, so toc-panel's relative @import of
+  // toc-core has to be flattened along with it.
+  [
+    'renderer/css/design-system/organisms/toc-panel.css',
+    'vendor/renderer/css/toc-panel.css',
+    (css) => css.replace('@import "../../shared/toc-core.css";', '@import "toc-core.css";')
+  ],
+
+  // ── Floating action bar ──
+  // Same bar the app puts at the bottom of the viewer to switch modes.
+  ['renderer/css/design-system/organisms/change-action-view-bar.css', 'vendor/renderer/css/change-action-view-bar.css']
 ];
 
 const MERMAID_BUNDLE = [
@@ -86,17 +105,21 @@ const MERMAID_BUNDLE = [
   'media/vendor/mermaid.min.js'
 ];
 
-function copy(srcAbs, destAbs) {
+function copy(srcAbs, destAbs, transform) {
   fs.mkdirSync(path.dirname(destAbs), { recursive: true });
-  fs.copyFileSync(srcAbs, destAbs);
+  if (transform) {
+    fs.writeFileSync(destAbs, transform(fs.readFileSync(srcAbs, 'utf8')));
+  } else {
+    fs.copyFileSync(srcAbs, destAbs);
+  }
   console.log(`✓ ${path.relative(EXT_ROOT, destAbs)}`);
 }
 
 function run() {
   console.log('📦 Vendoring shared/md-render into vscode-extension/...\n');
 
-  for (const [src, dest] of FILES) {
-    copy(path.join(REPO_ROOT, src), path.join(EXT_ROOT, dest));
+  for (const [src, dest, transform] of FILES) {
+    copy(path.join(REPO_ROOT, src), path.join(EXT_ROOT, dest), transform);
   }
 
   const [mermaidSrc, mermaidDest] = MERMAID_BUNDLE;

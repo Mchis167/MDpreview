@@ -2,23 +2,26 @@
    items, highlights) is styled entirely by the vendored design-system CSS
    (comment-form.css, right-sidebar.css, sidebar-base.css,
    icon-action-button.css, tab-bar.css, markdown-interactions.css).
-   This file covers only what those can't: placing the comment-mode toggle,
-   which in the desktop app lives inside a toolbar this webview doesn't have,
-   and marking the active Inbox/Archive header action, which the app has no
-   equivalent of. */
+   What's left here is the handful of things the app has no equivalent of:
+   the panel's collapse button, the active-tab marker and the disabled state
+   for a header action. */
 
-/* Anchored to the content area, not the window, so opening the sidebar
-   slides it left instead of being covered by the panel. */
-.mdp-comment-mode-toggle {
-  position: absolute;
-  z-index: var(--ds-z-index-toolbar);
-  top: var(--ds-space-lg);
-  right: var(--ds-space-lg);
-  background: var(--ds-layer-surface-default);
-  border: 1px solid var(--ds-border-default);
-  box-shadow: var(--ds-shadow-sm);
+/* The collapse button sits before the title, so the header's own left padding
+   would double up as indent — trim it and let the button provide the inset. */
+.ds-sidebar-header {
+  padding-left: var(--ds-space-sm);
+  gap: var(--ds-space-sm);
+}
+
+.mdp-collapse-btn {
+  flex-shrink: 0;
 }
 
 .ds-header-action.is-active {
   color: var(--ds-accent);
+}
+
+.ds-header-action[disabled] {
+  opacity: 0.3;
+  pointer-events: none;
 }

@@ -1,0 +1,19 @@
+/* Layout glue for the TOC panel. Its chrome, items, indentation and empty
+   state all come from the vendored toc-panel.css / toc-core.css.
+
+   What changes here is where it opens. The app anchors it under a floating
+   button in the top-right corner and slides it in from off-screen; this
+   webview opens it from the bottom action bar, so it is centred in the viewer
+   and simply fades in. The centre is lifted by half the bar's clearance and
+   the height capped by all of it, so a long outline stops above the bar
+   instead of running underneath it. */
+
+#md-viewer-mount .ds-toc-panel,
+#md-viewer-mount .ds-toc-panel.show {
+  top: 50%;
+  left: 50%;
+  right: auto;
+  transform: translate(-50%, calc(-50% - var(--mdp-bar-clearance) / 2));
+  max-height: calc(100% - var(--mdp-bar-clearance) - var(--ds-space-lg) * 2);
+  transition: opacity var(--ds-transition-main);
+}

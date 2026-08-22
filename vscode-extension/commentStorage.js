@@ -101,6 +101,11 @@ function createCommentStorage(workspaceFolder) {
       const archived = (await readFile(archiveUri)).filter((c) => c.id !== commentId);
       await writeFile(archiveUri, archived);
       return archived;
+    },
+
+    async clearArchive(relPath) {
+      await writeFile(archiveFileUri(relPath), []);
+      return [];
     }
   };
 }

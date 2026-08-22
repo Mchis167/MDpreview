@@ -7,6 +7,35 @@
     mermaid.initialize(mermaidConfig.getMermaidConfig('server'));
   }
 
+  // Reading progress, ported from cf-publish-worker/src/toc-publish.js. The
+  // scrollbar is hidden in this webview (the host kept repainting its track),
+  // so this bar is the only scroll affordance. Scrolling happens on
+  // .md-viewer-viewport here, not the window as on a published page.
+  const scroller = document.querySelector('.md-viewer-viewport');
+  const progressBar = document.getElementById('ds-reading-progress');
+
+  function updateProgressBar() {
+    if (!progressBar || !scroller) return;
+    const height = scroller.scrollHeight - scroller.clientHeight;
+    const scrolled = height > 0 ? (scroller.scrollTop / height) * 100 : 0;
+    progressBar.style.width = scrolled + '%';
+  }
+
+  let ticking = false;
+  scroller.addEventListener(
+    'scroll',
+    () => {
+      if (ticking) return;
+      window.requestAnimationFrame(() => {
+        updateProgressBar();
+        ticking = false;
+      });
+      ticking = true;
+    },
+    { passive: true }
+  );
+  window.addEventListener('resize', updateProgressBar, { passive: true });
+
   function renderMermaidDiagrams() {
     if (typeof mermaid === 'undefined') return;
     const nodes = Array.from(content.querySelectorAll('.mermaid')).filter((el) => !el.querySelector('svg'));
@@ -82,6 +111,7 @@
       processSummaries();
       bindCheckboxes();
       document.dispatchEvent(new CustomEvent('mdp:content-rendered'));
+      updateProgressBar(); // new content, new scroll height
     }
   });
 })();

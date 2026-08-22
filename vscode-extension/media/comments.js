@@ -15,22 +15,23 @@
   let formTarget = null;
   let activeCommentId = null;
 
+  // panel-right isn't in the app's icon set (the app has no collapse control
+  // in this position). Registered through the public API rather than editing
+  // the vendored registry, so re-vendoring never drops it.
+  DesignSystem.registerIcons({
+    'panel-right': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/></svg>`
+  });
+
   // ---- comment mode toggle ----
   // Mirrors renderer/js/modules/comments.js's applyCommentMode/removeCommentMode:
-  // outside comment mode, selecting text is just selecting text.
+  // outside comment mode, selecting text is just selecting text. The mode is
+  // entered from the floating action bar and can be left either from there or
+  // from the panel's own header button.
 
-  const modeToggle = new IconActionButton({
-    iconName: 'message-circle',
-    title: 'Toggle Comment Mode',
-    isLarge: true,
-    className: 'mdp-comment-mode-toggle',
-    onClick: () => setCommentMode(!commentModeOn)
-  }).render();
-  document.querySelector('main').appendChild(modeToggle);
+  const modeListeners = new Set();
 
   function setCommentMode(on) {
     commentModeOn = on;
-    modeToggle.classList.toggle('is-primary', on);
     if (on) mount.setAttribute('data-active-mode', 'comment');
     else mount.removeAttribute('data-active-mode');
 
@@ -42,7 +43,14 @@
       window.getSelection().removeAllRanges();
     }
     renderPanel();
+    modeListeners.forEach((fn) => fn(commentModeOn));
   }
+
+  window.MdpComments = {
+    isOn: () => commentModeOn,
+    toggle: () => setCommentMode(!commentModeOn),
+    onChange: (fn) => modeListeners.add(fn)
+  };
 
   // ---- floating "+" trigger (real IconActionButton, real .comment-trigger CSS) ----
 
@@ -244,9 +252,17 @@
             renderPanel();
           }
         },
-        ...(isArchive
-          ? []
-          : [{ id: 'clear', icon: 'trash', title: 'Clear all comments', onClick: () => vscode.postMessage({ type: 'clearComments' }) }])
+        {
+          id: 'clear',
+          icon: 'trash',
+          // Archived comments are still deletable, so the action stays in both
+          // tabs; it only goes inert when the list it would clear is empty.
+          title: isArchive ? 'Clear archive' : 'Clear all comments',
+          onClick: () => {
+            if (!items.length) return;
+            vscode.postMessage({ type: isArchive ? 'clearArchive' : 'clearComments' });
+          }
+        }
       ],
       items,
       emptyState: {
@@ -256,10 +272,33 @@
       renderItem: (c) => buildItem(c, isArchive)
     });
 
-    // Mark which tab is showing — ds-header-action has no active state of its
-    // own, so reuse the accent colour the app uses elsewhere.
-    const activeBtn = sidebar.mount.querySelector(`[data-action-id="tab-${activeTab}"]`);
+    decorateHeader(isArchive, items.length);
+  }
+
+  // RightSidebarComponent rebuilds its header on every setupModule, so these
+  // touch-ups are reapplied each render: the collapse button (which the app's
+  // sidebar has no equivalent of, hence prepended here rather than passed as
+  // an action, which would land after the title), the active-tab marker, and
+  // the disabled state of Clear.
+  function decorateHeader(isArchive, itemCount) {
+    const header = sidebar.mount.querySelector('.ds-sidebar-header');
+    if (!header) return;
+
+    if (!header.querySelector('.mdp-collapse-btn')) {
+      const collapseBtn = new IconActionButton({
+        iconName: 'panel-right',
+        title: 'Close comments',
+        className: 'mdp-collapse-btn',
+        onClick: () => setCommentMode(false)
+      }).render();
+      header.prepend(collapseBtn);
+    }
+
+    const activeBtn = header.querySelector(`[data-action-id="tab-${activeTab}"]`);
     if (activeBtn) activeBtn.classList.add('is-active');
+
+    const clearBtn = header.querySelector('[data-action-id="clear"]');
+    if (clearBtn) clearBtn.toggleAttribute('disabled', itemCount === 0);
   }
 
   function buildItem(c, archived) {

@@ -1,0 +1,49 @@
+/* Layout glue for the floating action bar. Everything visual — the glass
+   surface, the radius arithmetic, the slide-up entrance, the segment styling —
+   comes from the vendored change-action-view-bar.css and segmented-control.css.
+
+   Two things differ from the app and are set here:
+   the container ships as display:none (the app flips it to flex once a file is
+   open; this webview always has one), and the sliding indicator is hidden
+   because these segments are independent toggles rather than a radio group,
+   so there is no single active segment for it to sit under. */
+
+.ds-change-action-view-bar-container {
+  display: flex;
+}
+
+/* How much room at the bottom of the viewer the bar occupies: its own offset
+   from the bottom plus its height (2xs padding either side of a 28px segment,
+   plus the border). Panels opened from the bar reserve this so they never
+   come to rest on top of it. */
+#md-viewer-mount {
+  --mdp-bar-clearance: calc(var(--ds-space-lg) + 46px);
+}
+
+.ds-change-action-view-bar .ds-segment-indicator {
+  display: none;
+}
+
+/* The font panel opens centred inside the viewer rather than anchored to its
+   button, so the shield reserves the bar's strip at the bottom — the card
+   settles above the bar instead of over it. The shield is the panel's own
+   scroll frame, so the card is capped to what is left. */
+#md-viewer-mount > .ds-popover-floating,
+#md-viewer-mount > .ds-popover-shield {
+  padding-bottom: var(--mdp-bar-clearance);
+}
+
+/* The card's own cap is written against the window (100vh - 88px); inside the
+   shield the space left after the bar's strip is what actually matters. */
+#md-viewer-mount > .ds-popover-floating .ds-popover-card.fk-popover,
+#md-viewer-mount > .ds-popover-shield .ds-popover-card.fk-popover {
+  max-height: 100%;
+}
+
+/* The indicator normally paints the active segment's background; without it
+   the active state needs its own fill — the indicator's exact surface, so an
+   open panel's segment looks the way a selected one does in the app. */
+.ds-change-action-view-bar .ds-segment-item.active {
+  background: var(--ds-white-a08);
+  box-shadow: var(--ds-shadow-xs);
+}

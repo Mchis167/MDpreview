@@ -93,43 +93,50 @@
     }
   };
 
-  // ── Nút mở panel ──────────────────────────────────────────
-  function mountTrigger() {
-    const btn = DesignSystem.createElement('button', 'fk-trigger', {
-      html: DesignSystem.getIcon('sliders') || 'Aa',
-      'data-ds-tooltip': 'Fonts',
-      'data-ds-tooltip-pos': 'top',
-      'aria-label': 'Fonts'
-    });
+  // ── Mở panel ──────────────────────────────────────────────
+  // Nút bấm nằm ở floating action bar; ở đây chỉ còn việc mở/đóng panel.
+  const openListeners = new Set();
+  const notifyOpen = () => openListeners.forEach((fn) => fn(!!popover));
 
-    btn.addEventListener('click', (e) => {
-      // Popover không backdrop tự đóng khi click ra ngoài; không chặn
-      // ở đây thì chính cú click mở panel sẽ đóng nó ngay lập tức.
-      e.stopPropagation();
-      if (popover) {
-        popover.close();
-        popover = null;
-        return;
-      }
-      // Panel nở ra từ chính nút này: mép phải thẳng mép phải nút, đáy
-      // ngay trên nút. Nút nằm góc phải nên panel cũng ở góc phải.
-      const rect = btn.getBoundingClientRect();
-      popover = FontKitPicker.openPicker({
-        ui: FontKitUiMDpreview.createUi(DesignSystem, SettingRow),
-        bridge,
-        state,
-        position: {
-          right: `${Math.round(window.innerWidth - rect.right)}px`,
-          bottom: `${Math.round(window.innerHeight - rect.top + 8)}px`
-        },
-        onClose: () => {
-          popover = null;
-        }
-      });
-    });
-
-    document.body.appendChild(btn);
+  function closePicker() {
+    if (!popover) return;
+    popover.close();
+    popover = null;
+    notifyOpen();
   }
+
+  function togglePicker() {
+    if (popover) return closePicker();
+
+    // FontKitPicker.openPicker() neo panel vào nút mở nó (alignment 'custom'),
+    // vốn hợp với app. Ở đây panel mở giữa vùng xem, nên gọi thẳng
+    // createPicker + createPopover với alignment 'center' thay vì openPicker.
+    const ui = FontKitUiMDpreview.createUi(DesignSystem, SettingRow);
+    const picker = FontKitPicker.createPicker({ ui, bridge, state });
+
+    popover = ui.createPopover({
+      title: 'Fonts',
+      subtitle: 'Search, download and apply any Google Font',
+      content: picker.render(),
+      className: 'fk-popover',
+      alignment: 'center',
+      // Căn giữa trong khung xem chứ không phải cả cửa sổ, để chừa chỗ cho
+      // floating bar bên dưới (CSS lo phần chừa đó).
+      container: document.getElementById('md-viewer-mount'),
+      onClose: () => {
+        popover = null;
+        notifyOpen();
+      }
+    });
+    notifyOpen();
+  }
+
+  window.MdpFonts = {
+    isOpen: () => !!popover,
+    toggle: togglePicker,
+    close: closePicker,
+    onChange: (fn) => openListeners.add(fn)
+  };
 
   // Mũi tên của .ds-select là một SVG data-uri ăn theo màu accent —
   // app dựng nó trong SettingsService; webview không có service đó.
@@ -170,5 +177,4 @@
   });
 
   setSelectArrow();
-  mountTrigger();
 })();
