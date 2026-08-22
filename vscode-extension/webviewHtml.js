@@ -39,6 +39,7 @@ function buildHtml(webview, sharedRoot, rendererRoot, mediaRoot) {
     webview.asWebviewUri(dsDir('button.css')),
     webview.asWebviewUri(dsDir('icon-action-button.css')),
     webview.asWebviewUri(dsDir('comment-form.css')),
+    webview.asWebviewUri(dsDir('textarea.css')),
     webview.asWebviewUri(dsDir('sidebar-base.css')),
     webview.asWebviewUri(dsDir('right-sidebar.css')),
     webview.asWebviewUri(dsDir('tab-bar.css')),

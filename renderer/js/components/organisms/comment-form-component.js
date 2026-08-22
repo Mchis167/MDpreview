@@ -42,7 +42,9 @@ const CommentFormComponent = (() => {
           <!-- View View -->
           <div class="ds-comment-form__read-view">
             <div class="ds-comment-form__read-header">
-              <div class="ds-comment-form__header-label">COMMENT</div>
+              <div class="ds-comment-form__read-header-left">
+                <div class="ds-comment-form__header-label">COMMENT</div>
+              </div>
               <div class="ds-comment-form__secondary-action"></div>
             </div>
             <div class="ds-comment-form__read-body">
@@ -80,7 +82,7 @@ const CommentFormComponent = (() => {
           e.preventDefault();
           if (this.onSaveCallback) this.onSaveCallback(this.input.value.trim());
         }
-        if (e.key === 'Escape') this.hide();
+        if (e.key === 'Escape') this._dismiss();
       });
 
       this.saveBtn.onclick = () => {
@@ -88,8 +90,7 @@ const CommentFormComponent = (() => {
       };
 
       this.cancelBtn.onclick = () => {
-        if (this.onCancelCallback) this.onCancelCallback();
-        this.hide();
+        this._dismiss();
       };
 
       this._initDrag();
@@ -97,10 +98,19 @@ const CommentFormComponent = (() => {
       document.addEventListener('mousedown', (e) => {
         if (this.el.classList.contains('show')) {
           if (!this.el.contains(e.target) && !e.target.closest('.ds-sidebar-item') && !e.target.closest('.comment-trigger')) {
-            this.hide();
+            this._dismiss();
           }
         }
       });
+    }
+
+    /** Any dismissal that isn't a save — Cancel, Escape, or clicking away —
+     *  needs the same cleanup a caller's onCancel does (e.g. clearing a
+     *  pending selection highlight). hide() alone skipped that outside the
+     *  Cancel button, leaving the highlight behind. */
+    _dismiss() {
+      if (this.onCancelCallback) this.onCancelCallback();
+      this.hide();
     }
 
     _initDrag() {
@@ -180,8 +190,12 @@ const CommentFormComponent = (() => {
         setTimeout(() => this.input.focus(), 50);
       }
       const rect = anchorBtn.getBoundingClientRect();
+      const FORM_WIDTH = 360;
       let left = rect.right + 10;
-      if (left + 360 > window.innerWidth - 10) left = rect.left - 370;
+      if (left + FORM_WIDTH > window.innerWidth - 10) left = rect.left - FORM_WIDTH - 10;
+      // A wide anchor (e.g. a full-width line block) can push either branch
+      // past the viewport on its own — clamp the result instead of trusting it.
+      left = Math.max(10, Math.min(left, window.innerWidth - FORM_WIDTH - 10));
       this.el.style.left = `${left}px`;
       requestAnimationFrame(() => {
         const top = Math.max(10, Math.min(rect.top, window.innerHeight - this.el.offsetHeight - 10));

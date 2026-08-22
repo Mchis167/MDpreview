@@ -72,7 +72,7 @@
 }
 
 .expanded-textarea-footer {
-  padding: 0 var(--ds-space-xl) var(--ds-space-xl);
+  padding: var(--ds-space-lg) var(--ds-space-xl) var(--ds-space-xl);
   display: flex;
   justify-content: flex-end;
   gap: var(--ds-space-md);
@@ -156,6 +156,16 @@
   color: var(--ds-text-disabled);
 }
 
+/* Empty and hidden (via .mdp-tag-row's own display) when nothing has ever
+   called MdpCompose.attach() — the plain app has no tag feature to show. */
+.expanded-textarea-tagslot {
+  padding: 0 var(--ds-space-xl) var(--ds-space-sm);
+}
+
+.expanded-textarea-tagslot:empty {
+  display: none;
+}
+
 .expanded-textarea-body {
   flex: 1;
   margin: 0 var(--ds-space-2xs) var(--ds-space-2xs) var(--ds-space-2xs);
@@ -164,6 +174,8 @@
   border: 1px solid var(--ds-border-default);
   border-radius: max(0px, var(--ds-radius-shell) - var(--ds-space-2xs));
   display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-sm);
   overflow: clip;
 }
 

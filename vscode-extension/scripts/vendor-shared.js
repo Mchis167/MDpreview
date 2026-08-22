@@ -88,6 +88,9 @@ const FILES = [
   ['renderer/css/design-system/atoms/button.css', 'vendor/renderer/css/button.css'],
   ['renderer/css/design-system/atoms/icon-action-button.css', 'vendor/renderer/css/icon-action-button.css'],
   ['renderer/css/design-system/organisms/comment-form.css', 'vendor/renderer/css/comment-form.css'],
+  // The "Expand to full editor" modal comment-form-component.js's maximize
+  // button opens — comments.js wires it up, this supplies its chrome.
+  ['renderer/css/design-system/atoms/textarea.css', 'vendor/renderer/css/textarea.css'],
   ['renderer/css/design-system/organisms/right-sidebar.css', 'vendor/renderer/css/right-sidebar.css'],
   ['renderer/css/design-system/molecules/sidebar-base.css', 'vendor/renderer/css/sidebar-base.css'],
   // ds-header-action (the sidebar header's action buttons) lives here.

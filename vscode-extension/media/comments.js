@@ -22,6 +22,74 @@
     'panel-right': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/></svg>`
   });
 
+  // ---- expand to full editor ----
+  // Ported from renderer/js/modules/comments.js's _renderExpandedModal +
+  // the onExpand wiring in _bindEvents: the form's own "maximize-2" button
+  // (comment-form-component.js) already calls onExpandCallback, but nothing
+  // on this side ever supplied one, so the button did nothing.
+  const formComp = CommentFormComponent.getInstance();
+  let expandModal = null;
+  let expandInput = null;
+
+  function buildExpandModal() {
+    const el = document.createElement('div');
+    el.className = 'expanded-textarea-modal';
+    el.innerHTML = `
+      <div class="expanded-textarea-backdrop"></div>
+      <div class="expanded-textarea-container">
+        <div class="expanded-textarea-header">
+          <div class="textarea-label">COMMENT FEEDBACK</div>
+          <button type="button" class="textarea-expand-btn" title="Minimize">${
+            DesignSystem.getIcon ? DesignSystem.getIcon('minimize-2') || '' : ''
+          }</button>
+        </div>
+        <div class="expanded-textarea-tagslot"></div>
+        <div class="expanded-textarea-body">
+          <textarea class="expanded-textarea-input" placeholder="What's your feedback..."></textarea>
+        </div>
+        <div class="expanded-textarea-footer">
+          <button type="button" class="ds-btn ds-btn-primary">Save Comment</button>
+        </div>
+      </div>`;
+    document.body.appendChild(el);
+
+    const input = el.querySelector('.expanded-textarea-input');
+    const attachSlot = el.querySelector('.expanded-textarea-body');
+    const close = () => {
+      formComp.setText(input.value);
+      MdpCompose.returnHome();
+      el.classList.remove('show');
+    };
+    el.querySelector('.textarea-expand-btn').addEventListener('click', close);
+    el.querySelector('.expanded-textarea-backdrop').addEventListener('click', close);
+    input.addEventListener('input', () => formComp.setText(input.value));
+    // Same slot the form's own Enter-to-save/Save button use — whichever
+    // save flow is currently bound (new comment vs edit) fires either way.
+    el.querySelector('.ds-btn-primary').addEventListener('click', () => {
+      formComp.setText(input.value);
+      formComp.saveBtn.click();
+      MdpCompose.returnHome();
+      el.classList.remove('show');
+    });
+
+    return { el, input, attachSlot };
+  }
+
+  let expandAttachSlot = null;
+  ({ el: expandModal, input: expandInput, attachSlot: expandAttachSlot } = buildExpandModal());
+  formComp.onExpand((text) => {
+    expandInput.value = text;
+    // Borrow the popup's own tag row/attach strip rather than keeping a
+    // second copy in sync — the small "empty state" fallback (nothing has
+    // called MdpCompose.attach yet) just shows the textarea alone.
+    const { tagRow, strip } = MdpCompose.elements();
+    const tagSlot = expandModal.querySelector('.expanded-textarea-tagslot');
+    if (tagRow && tagSlot) tagSlot.appendChild(tagRow);
+    if (strip && expandAttachSlot) expandAttachSlot.appendChild(strip);
+    expandModal.classList.add('show');
+    setTimeout(() => expandInput.focus(), 50);
+  });
+
   // ---- comment mode toggle ----
   // Mirrors renderer/js/modules/comments.js's applyCommentMode/removeCommentMode:
   // outside comment mode, selecting text is just selecting text. The mode is
@@ -127,7 +195,6 @@
     formTarget = { lineStart, lineEnd, selectedText, context };
     highlightPending(lineStart, lineEnd, selectedText, context);
 
-    const formComp = CommentFormComponent.getInstance();
     MdpCompose.attach(formComp);
     formComp.onSave((text) => {
       if (!formTarget) return;
@@ -424,11 +491,15 @@
     targetLine.classList.add('pulse-highlight');
     setTimeout(() => targetLine.classList.remove('pulse-highlight'), 2000);
 
+    // Anchor to the highlighted span itself rather than the full-width line
+    // block: comment-form-component.js positions the popup off anchorRect.right,
+    // and a line-wide rect can put that past the edge of the window.
+    const anchor = content.querySelector(`mark.comment-range[data-id="${c.id}"]`) || targetLine;
+
     formTarget = { ...c };
-    const formComp = CommentFormComponent.getInstance();
     MdpCompose.attach(formComp);
     formComp.onEdit((text) => {
-      formComp.show(targetLine, 'filled', text);
+      formComp.show(anchor, 'filled', text);
       MdpCompose.reset(c); // seed the chips and thumbnails from the comment
       formComp.onSave((newText) => {
         const compose = MdpCompose.getState();
@@ -438,7 +509,8 @@
         formTarget = null;
       });
     });
-    formComp.show(targetLine, 'view', c.text);
+    MdpCompose.showView(c);
+    formComp.show(anchor, 'view', c.text);
   }
 
   // ---- inline highlights ----

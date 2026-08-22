@@ -55,6 +55,9 @@
 
 
 .ds-comment-form__input-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   padding: 20px;
   border-bottom: 1px solid var(--ds-border-default);
   flex: 1;
@@ -115,6 +118,13 @@
   padding-right: var(--ds-space-md);
 }
 
+
+.ds-comment-form__read-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-xs);
+  min-width: 0;
+}
 
 .ds-comment-form__header-label {
   font-family: 'Roboto Mono', monospace;
