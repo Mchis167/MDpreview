@@ -41,14 +41,25 @@
     "commands": [
       {
         "command": "mdpreview.openAsText",
-        "title": "MDpreview: Mở file này dưới dạng văn bản thô"
+        "title": "MDpreview: Mở file này dưới dạng văn bản thô",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "mdpreview.openAsPreview",
+        "title": "MDpreview: Mở file này bằng MDpreview",
+        "icon": "$(open-preview)"
       }
     ],
     "menus": {
       "editor/title": [
         {
           "command": "mdpreview.openAsText",
-          "when": "resourceExtname == .md",
+          "when": "resourceExtname == .md && activeCustomEditorId == mdpreview.preview",
+          "group": "navigation@99"
+        },
+        {
+          "command": "mdpreview.openAsPreview",
+          "when": "resourceExtname == .md && activeCustomEditorId != mdpreview.preview",
           "group": "navigation@99"
         }
       ]

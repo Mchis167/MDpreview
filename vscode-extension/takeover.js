@@ -63,7 +63,13 @@ async function takeOver(tab) {
   try {
     await vscode.commands.executeCommand('vscode.openWith', uri, VIEW_TYPE, {
       viewColumn: tab.group.viewColumn,
-      preserveFocus: !tab.isActive
+      preserveFocus: !tab.isActive,
+      // Keep the original tab's preview-ness. Agents (Claude Code etc.)
+      // touch many .md files per turn via showTextDocument, all as preview
+      // tabs — which replace each other, occupying one slot. Reopening them
+      // as permanent tabs turned every file an agent glanced at into its own
+      // pinned-open MDpreview tab, spamming the tab bar.
+      preview: tab.isPreview
     });
   } catch {
     // Losing the swap is harmless — the file stays open as text.
@@ -83,9 +89,23 @@ async function openAsTextCommand(uri) {
   await vscode.commands.executeCommand('vscode.openWith', target, 'default');
 }
 
+/**
+ * The reverse direction: switches a tab currently open as raw text back to
+ * MDpreview. Clears the openAsText opt-out too, so the takeover watcher
+ * doesn't immediately fight the very swap this command just made — without
+ * it, this button would only work once per tab.
+ */
+async function openAsPreviewCommand(uri) {
+  const target = uri || vscode.window.tabGroups.activeTabGroup.activeTab?.input?.uri;
+  if (!target) return;
+  openAsText.delete(target.toString());
+  await vscode.commands.executeCommand('vscode.openWith', target, VIEW_TYPE);
+}
+
 function activate(context) {
   context.subscriptions.push(
     vscode.commands.registerCommand('mdpreview.openAsText', openAsTextCommand),
+    vscode.commands.registerCommand('mdpreview.openAsPreview', openAsPreviewCommand),
 
     vscode.window.tabGroups.onDidChangeTabs((event) => {
       for (const tab of event.closed) {
