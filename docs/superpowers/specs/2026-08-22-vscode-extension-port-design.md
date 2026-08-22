@@ -7,7 +7,10 @@
 
 Đưa hai năng lực cốt lõi của MDpreview — **render markdown đẹp** và **comment/reply neo theo dòng** — vào VSCode dưới dạng extension, ngồi cạnh Claude Code panel.
 
-Trên đường đi, tách phần logic comment ra khỏi DOM để cả app Electron hiện tại lẫn extension (và các port sau này) dùng chung một lõi.
+Trên đường đi, tách hai lõi dùng chung:
+
+- **Lõi comment** — bóc khỏi DOM, để app Electron và extension dùng chung.
+- **Lõi render** — gom ba bản đang phân kỳ về một mối, với API đủ generic để các dự án khác dùng lại.
 
 ## Phi mục tiêu
 
@@ -19,6 +22,7 @@ Bản này **không** làm:
 - MCP bridge — Claude đọc file JSON trong repo là đủ
 - History / version snapshot, diff scroll, publish, asset manager
 - Cơ chế Claude tự mở extension (để pha sau, xem *Mở rộng tương lai*)
+- **Đóng gói `md-render` thành npm package** — chỉ dựng biên giới đủ sạch để sau này promote là bước đóng gói, không phải viết lại
 
 ## Bối cảnh: code hiện tại đang dính vào đâu
 
@@ -34,12 +38,67 @@ Bản này **không** làm:
 
 Kết luận: cản trở chính **không phải DOM** mà là ba biến global. Việc tách là tiêm phụ thuộc, không phải viết lại.
 
+## Bối cảnh: render đang có ba bản phân kỳ
+
+- `renderer/js/services/md-renderer-core.js` (90 dòng) — đã dùng chung giữa renderer và server, nhưng chỉ chứa 4 hàm phụ trợ: `highlightCodeBlock`, `sanitizeHtml`, `wrapInTableWrapper`, `renderMermaidBlock`.
+- `server/routes/render.js` (609 dòng) — **lõi render thật**, đang bị nhốt trong một Express route. Đây là chỗ sinh ra `data-line`, `data-src-start`, `data-src-end` — tức là chính cái mà comment neo vào. Không có nó thì extension không có gì để neo.
+- `cf-publish-worker/src/renderer.js` (52 dòng) — bản thứ ba, đã lệch khỏi hai bản trên.
+
+Điểm thuận lợi: biên giới trong `render.js` đã sạch sẵn. `renderWithLineNumbers(content, wikiIndex, currentFilePath)` (dòng 551) là entry point; dòng 570–609 chỉ là route bọc ngoài; `loadWikiIndex` (dòng 10) là chỗ duy nhất đụng `fs`.
+
+Về phần "đẹp": nó nằm ở CSS, không phải JS. Markdown CSS khoảng 1069 dòng (`shared/markdown-render.css` 622 + bốn file `markdown-*.css`), cộng `tokens.css` 316 dòng. JS sinh **cấu trúc**, CSS sinh **cái đẹp** — nên module phải xuất cả hai.
+
+## `shared/md-render/`
+
+Thuần: không Express, không DOM, không `fs`.
+
+```
+shared/md-render/
+  index.js              — render() + slugify
+  inline.js             — renderInlineTokens (line/offset tracking)
+  blocks.js             — renderTokens
+  utils.js              — từ md-renderer-core.js hiện tại
+  md-render.css         — từ shared/markdown-render.css + markdown-*.css
+  tokens.css            — biến CSS để dự án khác đổi theme
+```
+
+API:
+
+```js
+render(markdown, {
+  resolveLink,   // (href, currentFilePath) -> { href, target } | null
+  extensions,    // marked extension[] — chỗ cắm wikilink, carousel
+  currentFilePath
+})
+  -> { html, headings, totalLines }
+```
+
+### Đâu là generic, đâu là của riêng MDpreview
+
+Dự án khác chỉ cần: markdown chuẩn + line anchor + nhận diện link nội bộ để mở tab mới. Vậy nên:
+
+- **Trong lõi (generic):** parse, line/offset tracking (`data-line`, `data-src-start`, `data-src-end`), heading + slugify, code highlight, table wrapper, sanitize, và hook `resolveLink`.
+- **Ngoài lõi (extension MDpreview truyền vào):** wikilink resolution (`resolveWikiTarget`, `resolveCodespan`, `commonPrefixDepth` — dòng 23–83, 114–131), carousel (dòng 133–144), mermaid.
+
+`loadWikiIndex` ở lại `server/` vì nó đọc `fs`. Lõi chỉ nhận `wikiIndex` đã nạp sẵn qua extension.
+
+Ranh giới này chính là điều kiện để sau promote lên npm mà không phải thiết kế lại API.
+
+### Ai dùng lõi
+
+Cả ba consumer chuyển sang dùng chung:
+
+- `server/routes/render.js` — co lại còn route + `loadWikiIndex`, cắm extension MDpreview
+- `cf-publish-worker/src/renderer.js` — thay bằng lõi; **sẽ có khác biệt hành vi phải xử lý** vì bản này đang lệch
+- Extension VSCode — dùng lõi generic, cắm extension nào cần
+
 ## Kiến trúc đích
 
 ```
 shared/
   comment-anchor.js     — thuần chuỗi: sinh context + tìm vị trí neo
   comments-core.js      — thuần logic: CRUD + state, nhận adapter
+  md-render/            — lõi render generic + CSS (xem mục trên)
 
 renderer/js/modules/
   comments.js           — chỉ còn UI, gọi vào core (app Electron)
@@ -143,7 +202,7 @@ Hai nơi khác nhau là chấp nhận được vì core không quan tâm — sto
 
 ### Webview
 
-Chỉ mang sang những gì cần: `marked`, `highlight.js`, `renderer/css/design-system*`, pipeline render trích từ `app.js`, và tầng UI comment trích từ `comments.js`.
+Chỉ mang sang những gì cần: `shared/md-render/` (kèm CSS của nó) và tầng UI comment trích từ `comments.js`. Không copy renderer thứ tư — dùng đúng lõi chung.
 
 Webview không đọc file. Mọi I/O đi qua `postMessage` tới extension host, host mới gọi `vscode.workspace.fs`. Nhờ vậy chạy được cả trên remote/SSH.
 
@@ -173,27 +232,37 @@ Repo đã có vitest. Chiến lược: **viết test chốt hành vi hiện tạ
 
 - `comment-anchor`: test thuần, không DOM. Phủ các ca — khớp duy nhất; nhiều lần xuất hiện và context quyết định chọn cái nào; nội dung xung quanh đã đổi; `before`/`after` bị cắt có `...`; fallback `indexOf`; fallback chuẩn hoá khoảng trắng; không tìm thấy trả `-1`. Thêm test khứ hồi `buildContext` → `findAnchor`.
 - `comments-core`: test với storage giả trong bộ nhớ. Phủ — tạo, cập nhật theo id, nhánh fallback khi id đổi, xoá, xoá sạch, thứ tự sắp xếp, `onChange` phát đúng số lần, `buildRef` khi thiếu workspace/file.
+- `md-render`: test snapshot HTML. Bộ markdown mẫu phải phủ — heading, list lồng nhau, task list, bảng, code block có/không ngôn ngữ, blockquote, inline formatting lồng nhau, link, ảnh, mermaid, và văn bản có ký tự HTML cần escape. Snapshot chốt ở pha 4 phải khớp từng byte sau pha 5.
+- `md-render` line anchor: test riêng rằng `data-line` / `data-src-start` / `data-src-end` trỏ đúng vị trí trong markdown gốc — đây là hợp đồng mà comment neo dựa vào.
+- `md-render` tính generic: một test render **không truyền extension nào**, xác nhận lõi chạy được mà không cần wikilink/carousel. Đây là bài kiểm tra ranh giới API cho việc dùng lại ở dự án khác.
 - Regression app Electron: sau bước 3, mở app thật và kiểm tra tay — tạo, sửa, xoá comment, highlight hiện đúng chỗ, copy for Claude.
 
 ## Các pha
 
 Mỗi pha kết thúc ở trạng thái chạy được và test xanh.
 
-1. **Chốt baseline** — viết test cho hành vi comment hiện tại, chưa sửa code sản phẩm.
+1. **Chốt baseline comment** — viết test cho hành vi comment hiện tại, chưa sửa code sản phẩm.
 2. **Rút `comment-anchor.js`** — thuần nhất, rủi ro thấp nhất. `comments.js` gọi vào nó.
-3. **Rút `comments-core.js`** + adapter Electron. `comments.js` co lại còn UI. **App Electron phải chạy y như cũ — đây là chốt kiểm tra tay.**
-4. **Extension khung** — `CustomTextEditorProvider`, webview render markdown, chưa có comment.
-5. **Extension comment** — nối core với adapter VSCode, cổng UI comment sang, Copy for Claude.
+3. **Rút `comments-core.js`** + adapter Electron. `comments.js` co lại còn UI. **App Electron phải chạy y như cũ — chốt kiểm tra tay.**
+4. **Chốt baseline render** — test snapshot HTML đầu ra của `renderWithLineNumbers` trên một bộ markdown mẫu, chưa sửa code sản phẩm. Đây là lưới an toàn cho pha 5.
+5. **Rút `shared/md-render/`** — bóc dòng 87–569 của `render.js` ra, wikilink/carousel/mermaid thành extension. `render.js` co lại còn route. Snapshot pha 4 phải khớp từng byte. **Pha rủi ro cao nhất — chốt kiểm tra tay app Electron.**
+6. **Gom publish worker** — `cf-publish-worker` chuyển sang lõi. Xử lý khác biệt hành vi do bản này đang lệch; ghi lại từng khác biệt và quyết định giữ hay bỏ.
+7. **Tách CSS** — gom markdown CSS + tokens vào `shared/md-render/`, cả hai app trỏ vào đó.
+8. **Extension khung** — `CustomTextEditorProvider`, webview render markdown bằng lõi, chưa có comment.
+9. **Extension comment** — nối core với adapter VSCode, cổng UI comment sang, Copy for Claude.
 
-Sau pha 3 có thể dừng lại nghiệm thu bản Electron trước khi đụng tới extension.
+Có hai điểm dừng nghiệm thu: sau pha 3 (comment) và sau pha 7 (render) — cả hai đều kiểm tra trên app Electron trước khi đụng tới extension.
 
 ## Rủi ro
 
-- **Làm hỏng comment của app Electron.** Đây là rủi ro lớn nhất — app đang chạy tốt. Giảm thiểu bằng pha 1 (test baseline trước) và chốt kiểm tra tay ở cuối pha 3.
-- **CSP của webview.** Chưa đo thực tế được, chỉ biết chắc khi chạy pha 4. Nếu pha 4 phát sinh nhiều hơn dự kiến, dừng lại báo cáo thay vì tự mở rộng phạm vi.
-- **`app.js` dây dưa hơn dự kiến khi trích pipeline render.** Nếu gặp, xử lý ở pha 4 và báo lại — không tiện tay refactor `app.js` ngoài phạm vi.
+- **Làm hỏng đường render của app Electron (pha 5).** Rủi ro lớn nhất toàn dự án: 609 dòng bóc khỏi Express, và render là đường đi chính của app. Giảm thiểu bằng snapshot chốt ở pha 4 — khớp từng byte, không "gần đúng".
+- **Publish worker lệch hành vi (pha 6).** Đã biết chắc là có lệch, chỉ chưa biết lệch chỗ nào. Không tự ý chọn — liệt kê từng khác biệt và hỏi trước khi quyết định giữ hay bỏ.
+- **Làm hỏng comment của app Electron.** App đang chạy tốt. Giảm thiểu bằng pha 1 (test baseline trước) và chốt kiểm tra tay ở cuối pha 3.
+- **CSP của webview.** Chưa đo thực tế được, chỉ biết chắc khi chạy pha 8. Nếu phát sinh nhiều hơn dự kiến, dừng lại báo cáo thay vì tự mở rộng phạm vi.
+- **`markdown-viewer-component.js` (1390 dòng) dây dưa hơn dự kiến khi cổng UI viewer sang webview.** Nếu gặp, xử lý ở pha 8 và báo lại — không tiện tay refactor nó ngoài phạm vi.
 
 ## Mở rộng tương lai (không làm bây giờ)
 
 - Claude tự mở extension: extension theo dõi `.mdpreview/open-request.json`, skill của Claude ghi đường dẫn vào, extension mở tab. Không cần hook, không cần MCP.
 - Hợp nhất nơi lưu comment giữa app Electron và extension.
+- Đóng gói `shared/md-render/` thành npm package cho các dự án khác. Điều kiện đã chuẩn bị sẵn ở pha 5–7: lõi không import gì thuộc repo này, wikilink/carousel nằm ngoài, CSS đi kèm và theme hoá bằng biến. Việc còn lại chỉ là `package.json`, versioning và tài liệu.
