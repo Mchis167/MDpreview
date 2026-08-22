@@ -127,3 +127,6 @@ cf-publish-worker/.wrangler/
 data/
 workspaces/
 1lobby/
+
+# MDpreview VSCode extension: per-file review comments (personal, not shared)
+.mdpreview/
