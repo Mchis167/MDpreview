@@ -24,12 +24,19 @@ function loadComments(dataDir, wsId, filePath) {
     const data = fs.readFileSync(file, 'utf8');
     const comments = JSON.parse(data);
 
-    // Auto-fix: Ensure every comment has a unique ID
+    // Auto-fix: Ensure every comment has a unique ID, and a normalized `claude` field
     let changed = false;
     comments.forEach(c => {
       if (!c.id) {
         c.id = uuidv4();
         changed = true;
+      }
+      if (!c.claude || typeof c.claude !== 'object') {
+        c.claude = { status: 'none', replies: [] };
+        changed = true;
+      } else {
+        if (!c.claude.status) { c.claude.status = 'none'; changed = true; }
+        if (!Array.isArray(c.claude.replies)) { c.claude.replies = []; changed = true; }
       }
     });
 
@@ -100,3 +107,6 @@ router.post('/comments/clear', (req, res) => {
 });
 
 module.exports = router;
+module.exports.loadComments = loadComments;
+module.exports.saveComments = saveComments;
+module.exports.getCommentsFile = getCommentsFile;

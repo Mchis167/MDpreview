@@ -262,7 +262,7 @@ const WorkspaceModule = (() => {
     // Switcher click is now handled internally by WorkspaceSwitcherComponent
   }
 
-  return { init, load, openPanel: _openPanel, getActive: () => workspaces.find(w => w.id === activeId) };
+  return { init, load, switchTo, openPanel: _openPanel, getActive: () => workspaces.find(w => w.id === activeId) };
 })();
 
 window.WorkspaceModule = WorkspaceModule;

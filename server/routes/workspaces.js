@@ -128,3 +128,4 @@ router.post('/workspaces/rename', (req, res) => {
 });
 
 module.exports = router;
+module.exports.loadWorkspaces = loadWorkspaces;
