@@ -29,3 +29,67 @@
   cursor: zoom-in;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
+
+/* ── ASCII Art Block ─────────────────────────────────────── */
+/* Wrapper emitted by AsciiArtModule.process() */
+.ds-ascii-art-block {
+  --_bg: var(--ds-layer-base-subtle, rgba(255, 255, 255, 0.02));
+  --_border: var(--ds-border-subtle);
+  --_line: var(--ds-white-a40, rgba(255, 255, 255, 0.4));
+  --_accent: var(--ds-accent, #8b5cf6);
+  --_text: var(--ds-text-primary);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: auto;
+  background: var(--_bg);
+  border: 1px solid var(--_border);
+  border-radius: var(--ds-radius-panel);
+  padding: var(--ds-space-lg);
+  margin: var(--ds-space-md) 0;
+  box-sizing: border-box;
+}
+
+.ds-ascii-art-block .aas-svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+/* Card Backdrop inside SVG */
+.ds-ascii-art-block .aas-backdrop {
+  fill: var(--ds-black-a30, rgba(0, 0, 0, 0.25));
+  stroke: var(--ds-border-subtle);
+  stroke-width: 1;
+}
+
+/* Continuous Solid Vector Grid Lines */
+.ds-ascii-art-block .aas-grid-line {
+  stroke: var(--_line);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+/* Arrowheads */
+.ds-ascii-art-block .aas-arrowhead {
+  fill: var(--_accent);
+  stroke: none;
+}
+
+/* Text Typography */
+.ds-ascii-art-block .aas-text {
+  fill: var(--_text);
+  font-size: 13px;
+  font-family: var(--ds-font-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
+  letter-spacing: 0;
+  dominant-baseline: alphabetic;
+}
+
+.ds-ascii-art-block .aas-text--header {
+  font-weight: 700;
+  fill: var(--_accent);
+}

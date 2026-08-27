@@ -72,12 +72,27 @@ function renderMermaidBlock(text, lineStart, lineEnd, srcStart, srcEnd) {
   return `<div class="mermaid" ${metadata}>${escaped}</div>`;
 }
 
+/**
+ * Render an ASCII art block as a placeholder for client-side SVG conversion.
+ * AsciiArtModule.process() replaces this with an inline SVG at render time.
+ */
+function renderAsciiArtBlock(text, lineStart, lineEnd, srcStart, srcEnd) {
+  const escaped = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+  const metadata = lineStart !== undefined ? `data-line-start="${lineStart}" data-line-end="${lineEnd}" data-src-start="${srcStart}" data-src-end="${srcEnd}"` : '';
+  return `<div class="ds-ascii-art-block" data-ascii-raw="${escaped}" ${metadata}></div>`;
+}
+
 // Export for both environments
 const exportsObj = {
   highlightCodeBlock,
   sanitizeHtml,
   wrapInTableWrapper,
-  renderMermaidBlock
+  renderMermaidBlock,
+  renderAsciiArtBlock
 };
 
 if (typeof module !== 'undefined' && module.exports) {

@@ -16,10 +16,12 @@ const CodeBlockModule = {
     codeBlocks.forEach(codeEl => {
       // ── Defensive: Skip Mermaid blocks (they are handled by mermaid.js) ──
       if (codeEl.classList.contains('language-mermaid') || codeEl.classList.contains('mermaid')) return;
+      // ── Defensive: Skip ASCII art blocks (they are handled by ascii-art.js) ──
+      if (codeEl.classList.contains('language-ascii') || codeEl.classList.contains('language-art') || codeEl.classList.contains('language-bob')) return;
 
       const preEl = codeEl.parentElement;
       if (!preEl || preEl.tagName !== 'PRE') return;
-      if (preEl.classList.contains('code-block-processed')) return;
+      if (preEl.classList.contains('code-block-processed') || preEl.classList.contains('ds-ascii-art-block')) return;
       
       // 1. Identify language
       let lang = 'TEXT';

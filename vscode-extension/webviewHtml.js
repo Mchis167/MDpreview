@@ -53,6 +53,9 @@ function buildHtml(webview, sharedRoot, rendererRoot, mediaRoot) {
     vscode.Uri.joinPath(rendererRoot, 'js', 'services', 'mermaid-config.js')
   );
   const mermaidLibUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'vendor', 'mermaid.min.js'));
+  const asciiArtUri = webview.asWebviewUri(
+    vscode.Uri.joinPath(rendererRoot, 'js', 'utils', 'ascii-art.js')
+  );
   const codeBlocksUri = webview.asWebviewUri(
     vscode.Uri.joinPath(rendererRoot, 'js', 'utils', 'code-blocks.js')
   );
@@ -301,6 +304,7 @@ ${cssLinks}
   </div>
   <script nonce="${nonce}" src="${mermaidConfigUri}"></script>
   <script nonce="${nonce}" src="${mermaidLibUri}"></script>
+  <script nonce="${nonce}" src="${asciiArtUri}"></script>
   <script nonce="${nonce}" src="${codeBlocksUri}"></script>
 ${dsScripts}
   <script nonce="${nonce}" src="${designSystemIconsUri}"></script>

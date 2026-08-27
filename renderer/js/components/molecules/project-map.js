@@ -404,9 +404,10 @@ const ProjectMap = (() => {
                   }
                 });
 
-                // 3. Process remaining static content (Mockup frames → Carousel → Code Blocks)
+                // 3. Process remaining static content (Mockup frames → Carousel → ASCII Art → Code Blocks)
                 if (window.MockupImageModule) window.MockupImageModule.process(innerEl);
                 if (window.CarouselModule) window.CarouselModule.process(innerEl);
+                if (window.AsciiArtModule) window.AsciiArtModule.process(innerEl);
                 if (html && window.CodeBlockModule) window.CodeBlockModule.process(innerEl);
               }
             });

@@ -15,6 +15,7 @@ const matter = require('gray-matter');
 const {
   sanitizeHtml,
   renderMermaidBlock,
+  renderAsciiArtBlock,
   highlightCodeBlock,
   wrapInTableWrapper
 } = require('../../renderer/js/services/md-renderer-core.js');
@@ -90,10 +91,13 @@ renderer.table = (header, body) => {
   return wrapInTableWrapper(`<table>\n<thead>\n${header}</thead>\n<tbody>\n${body}</tbody>\n</table>\n`);
 };
 
-// Mermaid and Highlighted Code Blocks
+// Mermaid, ASCII art, and Highlighted Code Blocks
 renderer.code = (code, lang) => {
   if (lang === 'mermaid') {
     return renderMermaidBlock(code);
+  }
+  if (lang === 'ascii' || lang === 'art' || lang === 'bob') {
+    return renderAsciiArtBlock(code);
   }
   const highlighted = highlightCodeBlock(code, lang);
   return `<pre><code class="hljs language-${lang || ''}">${highlighted}</code></pre>`;
@@ -142,12 +146,184 @@ const carouselExtension = {
   renderer() { return ''; }
 };
 
+const LATEX_SYMBOLS = {
+  // Arrows
+  'rightarrow': '→',
+  'to': '→',
+  'leftarrow': '←',
+  'gets': '←',
+  'Rightarrow': '⇒',
+  'Leftarrow': '⇐',
+  'leftrightarrow': '↔',
+  'Leftrightarrow': '⇔',
+  'uparrow': '↑',
+  'downarrow': '↓',
+  'Uparrow': '⇑',
+  'Downarrow': '⇓',
+  'nearrow': '↗',
+  'searrow': '↘',
+  'nwarrow': '↖',
+  'swarrow': '↙',
+  'mapsto': '↦',
+  'rightharpoonup': '⇀',
+  'rightharpoondown': '⇁',
+  'leftharpoonup': '↼',
+  'leftharpoondown': '↽',
+
+  // Comparison & Relations
+  'le': '≤',
+  'leq': '≤',
+  'ge': '≥',
+  'geq': '≥',
+  'ne': '≠',
+  'neq': '≠',
+  'approx': '≈',
+  'sim': '∼',
+  'simeq': '≃',
+  'equiv': '≡',
+  'cong': '≅',
+  'll': '≪',
+  'gg': '≫',
+  'propto': '∝',
+
+  // Arithmetic & Operations
+  'pm': '±',
+  'mp': '∓',
+  'times': '×',
+  'div': '÷',
+  'cdot': '·',
+  'ast': '∗',
+  'star': '⋆',
+  'circ': '∘',
+  'bullet': '•',
+  'oplus': '⊕',
+  'otimes': '⊗',
+  'odot': '⊙',
+
+  // Logic & Set Theory
+  'forall': '∀',
+  'exists': '∃',
+  'nexists': '∄',
+  'in': '∈',
+  'notin': '∉',
+  'ni': '∋',
+  'subset': '⊂',
+  'subseteq': '⊆',
+  'supset': '⊃',
+  'supseteq': '⊇',
+  'cap': '∩',
+  'cup': '∪',
+  'setminus': '∖',
+  'lor': '∨',
+  'land': '∧',
+  'neg': '¬',
+  'lnot': '¬',
+  'top': '⊤',
+  'bot': '⊥',
+  'vdash': '⊢',
+  'models': '⊨',
+  'empty': '∅',
+  'emptyset': '∅',
+
+  // Calculus & Symbols
+  'infty': '∞',
+  'partial': '∂',
+  'nabla': '∇',
+  'degree': '°',
+  'angle': '∠',
+  'dots': '…',
+  'ldots': '…',
+  'cdots': '⋯',
+  'vdots': '⋮',
+  'ddots': '⋱',
+
+  // Greek lowercase
+  'alpha': 'α',
+  'beta': 'β',
+  'gamma': 'γ',
+  'delta': 'δ',
+  'epsilon': 'ε',
+  'zeta': 'ζ',
+  'eta': 'η',
+  'theta': 'θ',
+  'iota': 'ι',
+  'kappa': 'κ',
+  'lambda': 'λ',
+  'mu': 'μ',
+  'nu': 'ν',
+  'xi': 'ξ',
+  'pi': 'π',
+  'rho': 'ρ',
+  'sigma': 'σ',
+  'tau': 'τ',
+  'upsilon': 'υ',
+  'phi': 'φ',
+  'chi': 'χ',
+  'psi': 'ψ',
+  'omega': 'ω',
+
+  // Greek uppercase
+  'Gamma': 'Γ',
+  'Delta': 'Δ',
+  'Theta': 'Θ',
+  'Lambda': 'Λ',
+  'Xi': 'Ξ',
+  'Pi': 'Π',
+  'Sigma': 'Σ',
+  'Upsilon': 'Υ',
+  'Phi': 'Φ',
+  'Psi': 'Ψ',
+  'Omega': 'Ω'
+};
+
+const latexSymbolExtension = {
+  name: 'latexSymbol',
+  level: 'inline',
+  start(src) {
+    const dollarIdx = src.indexOf('$');
+    const slashIdx = src.indexOf('\\');
+    if (dollarIdx === -1) return slashIdx;
+    if (slashIdx === -1) return dollarIdx;
+    return Math.min(dollarIdx, slashIdx);
+  },
+  tokenizer(src) {
+    // 1. $...$ syntax: $\rightarrow$, $\to$, $ \rightarrow $, $alpha$
+    const dollarMatch = src.match(/^\$\s*\\?([a-zA-Z]+)\s*\$/);
+    if (dollarMatch) {
+      const name = dollarMatch[1];
+      if (LATEX_SYMBOLS[name]) {
+        return {
+          type: 'latexSymbol',
+          raw: dollarMatch[0],
+          symbol: LATEX_SYMBOLS[name]
+        };
+      }
+    }
+
+    // 2. Standalone \command syntax: \rightarrow, \Rightarrow, etc.
+    const slashMatch = src.match(/^\\([a-zA-Z]+)\b/);
+    if (slashMatch) {
+      const name = slashMatch[1];
+      if (LATEX_SYMBOLS[name]) {
+        return {
+          type: 'latexSymbol',
+          raw: slashMatch[0],
+          symbol: LATEX_SYMBOLS[name]
+        };
+      }
+    }
+  },
+  renderer(token) {
+    return `<span class="md-symbol">${token.symbol}</span>`;
+  }
+};
+
 marked.use({
   renderer: renderer,
   langPrefix: 'hljs language-',
   gfm: true,
   breaks: true,
-  extensions: [wikilinkExtension, carouselExtension]
+  extensions: [wikilinkExtension, carouselExtension, latexSymbolExtension]
 });
 
 /**
@@ -248,6 +424,10 @@ function renderInlineTokens(tokens, originalSource, baseOffset, wikiIndex = null
       case 'image':
         html += `<img src="${token.href}" alt="${token.text}" title="${token.title || ''}" ${data}>`;
         break;
+      case 'latexSymbol': {
+        html += `<span class="md-symbol" ${data}>${token.symbol}</span>`;
+        break;
+      }
       case 'escape':
         html += `<span ${data}>${token.text}</span>`;
         break;
@@ -459,6 +639,13 @@ function renderTokens(tokens, originalSource, baseOffset, lineStart, isTopLevel 
         const atomicHtml = renderMermaidBlock(token.text, tokenStartLine, tokenEndLine, tokenStartOffset, tokenEndOffset);
         // For Mermaid, we use a slightly flatter structure to ensure the renderer
         // can accurately measure dimensions. We still keep md-block for sync anchoring.
+        html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${atomicHtml}</div>\n`;
+        currentLine = tokenEndLine;
+        continue;
+      }
+
+      if (token.lang === 'ascii' || token.lang === 'art' || token.lang === 'bob') {
+        const atomicHtml = renderAsciiArtBlock(token.text, tokenStartLine, tokenEndLine, tokenStartOffset, tokenEndOffset);
         html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${atomicHtml}</div>\n`;
         currentLine = tokenEndLine;
         continue;

@@ -112,6 +112,7 @@ export function buildShell({ slug, html, title = 'Document', assetsUrl = '/publi
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="${assetsUrl}">
+  <script src="/ascii-art.js"></script>
   <script src="/code-blocks.js"></script>
   <script src="/zoom.js"></script>
   <script src="/design-system.js"></script>
@@ -162,9 +163,13 @@ export function buildShell({ slug, html, title = 'Document', assetsUrl = '/publi
     const mermaidConfig = ${JSON.stringify(mermaidConfig)};
     
     (async () => {
-      // 1. Initialize Code Blocks
-      if (window.CodeBlockModule) {
-        const container = document.getElementById('md-content');
+      const container = document.getElementById('md-content');
+
+      // 1. Initialize ASCII Art & Code Blocks
+      if (window.AsciiArtModule && container) {
+        window.AsciiArtModule.process(container);
+      }
+      if (window.CodeBlockModule && container) {
         window.CodeBlockModule.process(container);
       }
 

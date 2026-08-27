@@ -31,6 +31,19 @@ describe('shared/md-render: standalone usage', () => {
     expect(html).not.toThrow;
   });
 
+  it('renders LaTeX and AI math symbols (like $\\rightarrow$) into md-symbol spans with accurate offsets', () => {
+    const md = 'Value A $\\rightarrow$ Value B and $\\Rightarrow$ with $\\approx$ 100.\n';
+    const html = mdRender.renderWithLineNumbers(md);
+    expect(html).toContain('<span class="md-symbol"');
+    expect(html).toContain('>→</span>');
+    expect(html).toContain('>⇒</span>');
+    expect(html).toContain('>≈</span>');
+    // Ensure accurate offset attributes for scroll sync
+    const startIdx = md.indexOf('$\\rightarrow$');
+    const endIdx = startIdx + '$\\rightarrow$'.length;
+    expect(html).toContain(`data-src-start="${startIdx}" data-src-end="${endIdx}"`);
+  });
+
   it('does not require any Express/server module to load', () => {
     // If this file imported express or fs at the top level for anything
     // other than its own internal use, requiring it standalone would

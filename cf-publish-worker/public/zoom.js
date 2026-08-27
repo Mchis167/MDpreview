@@ -1,7 +1,12 @@
-/* global DesignSystem, showToast */
+/* global DesignSystem */
 /**
  * ZoomSystem — Universal Pan/Zoom System
  * Supports SVG (Mermaid) and Images (Assets) with a unified high-fidelity experience.
+ *
+ * The control bar owns only what every caller needs: fit, zoom out/in, percent.
+ * Anything feature-specific (copying a Mermaid diagram's SVG, say) is injected
+ * by the caller through `open(content, type, { actions })`, so a host that
+ * doesn't want it simply doesn't pass it.
  */
 window.ZoomSystem = (() => {
   'use strict';
@@ -44,13 +49,38 @@ window.ZoomSystem = (() => {
         <button class="ds-icon-action-btn is-large" id="zoom-in-btn" title="Zoom in">
           ${DesignSystem.getIcon('plus', { width: 14, height: 14 })}
         </button>
-        <div class="zoom-ctrl-divider" id="zoom-copy-divider"></div>
-        <button class="ds-icon-action-btn is-large" id="zoom-copy-btn" title="Copy SVG code">
-          ${DesignSystem.getIcon('copy', { width: 14, height: 14 })}
-        </button>
+        <span id="zoom-actions"></span>
       </div>`;
     document.body.appendChild(el);
     _bindEvents();
+  }
+
+  /**
+   * Dựng lại nhóm nút do caller cung cấp. Gọi mỗi lần open() vì mỗi caller
+   * mang một bộ action khác nhau qua cùng một modal.
+   * @param {Array<{id, icon, title, onClick}>} actions
+   */
+  function _renderActions(actions) {
+    const slot = document.getElementById('zoom-actions');
+    if (!slot) return;
+    slot.innerHTML = '';
+    if (!actions.length) return;
+
+    const divider = document.createElement('div');
+    divider.className = 'zoom-ctrl-divider';
+    slot.appendChild(divider);
+
+    actions.forEach(({ id, icon, title, onClick }) => {
+      const btn = document.createElement('button');
+      btn.className = 'ds-icon-action-btn is-large';
+      btn.dataset.zoomAction = id;
+      btn.title = title || '';
+      btn.innerHTML = DesignSystem.getIcon(icon, { width: 14, height: 14 });
+      btn.addEventListener('click', () => {
+        onClick({ container: document.getElementById('zoom-container'), type: _state.type });
+      });
+      slot.appendChild(btn);
+    });
   }
 
   function _updateTransform() {
@@ -85,8 +115,9 @@ window.ZoomSystem = (() => {
    * Mở overlay zoom cho nội dung bất kỳ.
    * @param {HTMLElement|string} content - Div chứa SVG hoặc URL hình ảnh.
    * @param {string} type - 'svg' hoặc 'image'.
+   * @param {{actions?: Array<{id: string, icon: string, title: string, onClick: (ctx: {container: HTMLElement, type: string}) => void}>}} [options]
    */
-  async function open(content, type = 'svg') {
+  async function open(content, type = 'svg', options = {}) {
     _renderModal();
     const modal = document.getElementById('zoom-modal');
     const container = document.getElementById('zoom-container');
@@ -95,12 +126,8 @@ window.ZoomSystem = (() => {
     _state.type = type;
     _state.isVisible = true;
     container.innerHTML = '';
-    
-    // Toggle copy button (chỉ dành cho SVG)
-    const copyBtn = document.getElementById('zoom-copy-btn');
-    const copyDiv = document.getElementById('zoom-copy-divider');
-    if (copyBtn) copyBtn.style.display = (type === 'svg') ? 'flex' : 'none';
-    if (copyDiv) copyDiv.style.display = (type === 'svg') ? 'block' : 'none';
+
+    _renderActions(options.actions || []);
 
     if (type === 'svg') {
       const svg = content.querySelector('svg');
@@ -161,16 +188,6 @@ window.ZoomSystem = (() => {
       _state.x = (window.innerWidth - _state.naturalW * _state.scale) / 2;
       _state.y = (window.innerHeight - _state.naturalH * _state.scale) / 2;
       _updateTransform(); _updatePercent();
-    });
-
-    document.getElementById('zoom-copy-btn')?.addEventListener('click', () => {
-      const container = document.getElementById('zoom-container');
-      const svg = container.querySelector('svg');
-      if (svg) {
-        navigator.clipboard.writeText(svg.outerHTML).then(() => {
-          if (typeof showToast === 'function') showToast('SVG copied to clipboard');
-        });
-      }
     });
 
     window.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
@@ -251,7 +268,7 @@ window.ZoomSystem = (() => {
 
   return {
     init: () => _renderModal(),
-    open: (content, type) => open(content, type),
+    open: (content, type, options) => open(content, type, options),
     close: () => close(),
     fit: () => fit()
   };

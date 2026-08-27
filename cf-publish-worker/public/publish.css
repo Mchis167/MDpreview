@@ -11,7 +11,7 @@
  *   renderer/css/design-system/molecules/mockup-frames.css
  *   renderer/css/design-system/molecules/carousel.css
  * Regenerate: npm run build:publish-assets
- * Generated:  2026-08-22T01:57:05.586Z
+ * Generated:  2026-08-26T11:39:32.402Z
  */
 
 /* ============================================================
@@ -73,6 +73,10 @@
    /* ── Typography ────────────────────────────────────────── */
    --ds-font-family-text: var(--font-text, 'Inter'), -apple-system, BlinkMacSystemFont, sans-serif;
    --ds-font-family-code: var(--font-code, 'Roboto Mono'), ui-monospace, SFMono-Regular, monospace;
+   /* Tiêu đề mặc định dùng chung font với thân bài; chỉ tách ra khi
+      --font-title được set. Nhờ vậy app và publish-worker không đổi
+      hình dạng cho tới lúc người dùng thực sự chọn font tiêu đề. */
+   --ds-font-family-title: var(--font-title, var(--ds-font-family-text));
 
    --ds-font-xs: 11px;
    --ds-font-sm: 12px;
@@ -838,6 +842,12 @@
   cursor: default;
 }
 
+/* Slot for caller-injected actions: lays its children out as if they were
+   direct children of the bar, and takes up nothing when empty. */
+#zoom-actions {
+  display: contents;
+}
+
 .zoom-ctrl-divider {
   width: 1px;
   height: 18px;
@@ -854,14 +864,30 @@
 /* ── Base Markdown Body ── */
 .md-render-body {
     font-size: 15px;
+    font-weight: var(--font-text-weight, 400);
     color: var(--ds-text-secondary);
     line-height: 1.8;
 }
 
 /* ── Headings ── */
+/* Trục font riêng cho tiêu đề. Mặc định --ds-font-family-title trỏ về
+   font thân bài, nên rule này không đổi gì cho tới khi --font-title
+   được set (font panel của extension). */
+.md-render-body h1,
+.md-render-body h2,
+.md-render-body h3,
+.md-render-body h4,
+.md-render-body h5,
+.md-render-body h6 {
+    font-family: var(--ds-font-family-title);
+}
+
 .md-render-body h1 {
     font-size: 32px;
-    font-weight: 700;
+    /* Same variable on both weight tiers below: unset, h1/h2 stay bolder than
+       h3-h6 as designed; set, the whole heading scale flattens to one weight
+       — that is the Font Weight control choosing "uniform" over "hierarchy". */
+    font-weight: var(--font-title-weight, 700);
     color: var(--ds-text-inverse);
     margin: 0;
     padding-bottom: 1rem;
@@ -872,7 +898,7 @@
 
 .md-render-body h2 {
     font-size: 24px;
-    font-weight: 700;
+    font-weight: var(--font-title-weight, 700);
     color: var(--ds-text-inverse);
     margin: 0;
     padding-left: 20px;
@@ -893,7 +919,7 @@
 
 .md-render-body h3 {
     font-size: 18px;
-    font-weight: 600;
+    font-weight: var(--font-title-weight, 600);
     color: var(--ds-accent);
     margin: 0;
     line-height: 1.4;
@@ -901,7 +927,7 @@
 
 .md-render-body h4 {
     font-size: 16px;
-    font-weight: 600;
+    font-weight: var(--font-title-weight, 600);
     color: var(--ds-text-inverse);
     margin: 0;
     line-height: 1.4;
@@ -909,7 +935,7 @@
 
 .md-render-body h5 {
     font-size: 14px;
-    font-weight: 600;
+    font-weight: var(--font-title-weight, 600);
     color: var(--ds-text-primary);
     margin: 0;
     line-height: 1.4;
@@ -917,7 +943,7 @@
 
 .md-render-body h6 {
     font-size: 12px;
-    font-weight: 600;
+    font-weight: var(--font-title-weight, 600);
     color: var(--ds-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -969,6 +995,7 @@
 .md-render-body code {
     font-family: var(--ds-font-family-code);
     font-size: 0.85em;
+    font-weight: var(--font-code-weight, 400);
     color: var(--ds-accent);
     display: inline;
     vertical-align: baseline;
@@ -1243,6 +1270,7 @@
     display: block;
     font-family: var(--ds-font-family-code);
     font-size: 13.5px;
+    font-weight: var(--font-code-weight, 400);
     line-height: 1.6;
     color: #fff;
     white-space: pre-wrap;

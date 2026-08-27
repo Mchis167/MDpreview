@@ -35,6 +35,7 @@ const FILES = [
   ['renderer/css/design-system/atoms/checkbox.css', 'vendor/shared/md-render/checkbox.css'],
   ['renderer/js/services/md-renderer-core.js', 'vendor/renderer/js/services/md-renderer-core.js'],
   ['renderer/js/services/mermaid-config.js', 'vendor/renderer/js/services/mermaid-config.js'],
+  ['renderer/js/utils/ascii-art.js', 'vendor/renderer/js/utils/ascii-art.js'],
   ['renderer/js/utils/code-blocks.js', 'vendor/renderer/js/utils/code-blocks.js'],
   ['renderer/js/utils/mockup-images.js', 'vendor/renderer/js/utils/mockup-images.js'],
   ['renderer/js/utils/carousel.js', 'vendor/renderer/js/utils/carousel.js'],

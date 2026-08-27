@@ -145,6 +145,14 @@
     overflow-wrap: break-word;
 }
 
+.md-render-body .md-symbol {
+    display: inline-block;
+    padding: 0 0.15em;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--ds-text-primary);
+}
+
 .md-render-body img {
     max-width: 100%;
     border-radius: var(--ds-radius-panel);

@@ -234,6 +234,9 @@ class MdPreviewEditorProvider {
     const edit = new vscode.WorkspaceEdit();
     edit.replace(document.uri, line.range, newText);
     await vscode.workspace.applyEdit(edit);
+    // Checkbox toggles are easy to forget to save (Ctrl+S), which risks
+    // conflicting with concurrent agent/file edits — persist immediately.
+    await document.save();
   }
 }
 

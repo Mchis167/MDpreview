@@ -54,6 +54,10 @@
     });
   }
 
+  function processAsciiArt() {
+    if (typeof AsciiArtModule !== 'undefined') AsciiArtModule.process(content);
+  }
+
   function processCodeBlocks() {
     if (typeof CodeBlockModule !== 'undefined') CodeBlockModule.process(content);
   }
@@ -117,6 +121,7 @@
     if (message.type === 'render') {
       content.innerHTML = message.html;
       renderMermaidDiagrams();
+      processAsciiArt();
       processCodeBlocks();
       processMockupImages();
       processCarousels();

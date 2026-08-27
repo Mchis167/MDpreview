@@ -133,8 +133,9 @@ const TabPreview = (() => {
         });
       }
 
-      // 7. Mermaid/CodeBlock/Mockup processing if needed
+      // 7. Mermaid/CodeBlock/Mockup/AsciiArt processing if needed
       if (window.processMermaid) window.processMermaid(contentEl);
+      if (window.AsciiArtModule) window.AsciiArtModule.process(contentEl);
       if (window.CodeBlockModule) window.CodeBlockModule.process(contentEl);
       if (window.MockupImageModule) window.MockupImageModule.process(contentEl);
       if (window.CarouselModule) window.CarouselModule.process(contentEl);

@@ -2,7 +2,7 @@
    draft.js — Logic for Multiple Draft tabs
    ============================================================ */
 
-/* global AppState, MarkdownViewer, EditorModule, updateHeaderUI, processMermaid, CodeBlockModule */
+/* global AppState, MarkdownViewer, EditorModule, updateHeaderUI, processMermaid, CodeBlockModule, AsciiArtModule */
 
 const DraftModule = (() => {
   // Map of drafts: { [draftId]: { draftContent, renderedHtml, lastTouched } }
@@ -467,6 +467,7 @@ const DraftModule = (() => {
         inner.innerHTML = data.renderedHtml;
         
         if (typeof processMermaid === 'function') processMermaid(inner);
+        if (typeof AsciiArtModule !== 'undefined') AsciiArtModule.process(inner);
         if (typeof CodeBlockModule !== 'undefined') CodeBlockModule.process(inner);
         updateHeader('draft');
       }

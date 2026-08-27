@@ -33,6 +33,7 @@ const OUTPUT            = path.join(ROOT, 'cf-publish-worker/public/publish.css'
 
 // JS Assets to sync
 const JS_ASSETS = [
+  { src: 'renderer/js/utils/ascii-art.js',            dest: 'cf-publish-worker/public/ascii-art.js' },
   { src: 'renderer/js/utils/code-blocks.js',          dest: 'cf-publish-worker/public/code-blocks.js' },
   { src: 'renderer/js/utils/zoom.js',                  dest: 'cf-publish-worker/public/zoom.js' },
   { src: 'cf-publish-worker/src/toc-publish.js',       dest: 'cf-publish-worker/public/toc-publish.js' },

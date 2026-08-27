@@ -1047,6 +1047,9 @@ class MarkdownPreview {
         if (window.processMermaid) await window.processMermaid(inner);
       } catch (_e) { /* Mermaid error - gracefully skip */ }
       try {
+        if (window.AsciiArtModule) window.AsciiArtModule.process(inner);
+      } catch (_e) { /* AsciiArt error - gracefully skip */ }
+      try {
         if (window.CodeBlockModule) window.CodeBlockModule.process(inner);
       } catch (_e) { /* CodeBlock error - gracefully skip */ }
       try {
@@ -1189,6 +1192,7 @@ class MarkdownPreview {
       if (window.processMermaid) {
         window.processMermaid(inner).catch(_e => { /* Mermaid error - gracefully skip */ });
       }
+      if (window.AsciiArtModule) window.AsciiArtModule.process(inner);
       if (window.CodeBlockModule) window.CodeBlockModule.process(inner);
       if (window.MockupImageModule) window.MockupImageModule.process(inner);
       if (window.CarouselModule) window.CarouselModule.process(inner);
