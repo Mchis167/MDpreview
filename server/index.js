@@ -54,6 +54,7 @@ app.use('/shared', express.static(path.join(__dirname, '../shared')));
 app.use('/wasm-assets', express.static(path.join(__dirname, '../assets/wasm')));
 app.use('/monaco', express.static(path.join(__dirname, '../node_modules/monaco-editor')));
 app.use('/jsquash', express.static(path.join(__dirname, '../node_modules/@jsquash')));
+app.use('/katex', express.static(path.join(__dirname, '../node_modules/katex/dist')));
 app.use('/testing', express.static(path.join(__dirname, '../renderer/testing')));
 app.use('/_md-workspace-assets', (req, res, next) => {
   if (currentWatchDir) {

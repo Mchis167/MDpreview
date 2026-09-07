@@ -23,7 +23,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 const NAME = 'mdpreview';
-const VERSION = '2.2.1';
+const VERSION = '2.3.0';
 const PROTOCOL_VERSION = '2024-11-05';
 
 const ROOT_DIR = '.mdpreview';
@@ -42,11 +42,15 @@ const READ_TOOL = {
     'pasted in — ' +
     'read those image files, they usually show the problem more directly than the text does. ' +
     'Pass the path to the markdown file, relative to the project root (e.g. "docs/plan.md") ' +
-    'or absolute.',
+    'or absolute. Can also pass optional "workspace" if file is relative.',
   inputSchema: {
     type: 'object',
     properties: {
-      file: { type: 'string', description: 'Markdown file path, relative to the project root or absolute' }
+      file: { type: 'string', description: 'Markdown file path, relative to the project root or absolute' },
+      workspace: {
+        type: 'string',
+        description: 'Optional workspace root directory used to resolve relative file paths'
+      }
     },
     required: ['file']
   }
@@ -67,6 +71,10 @@ const RESOLVE_TOOL = {
         type: 'array',
         items: { type: 'string' },
         description: 'Comment ids to resolve; omit to resolve all pending comments on the file'
+      },
+      workspace: {
+        type: 'string',
+        description: 'Optional workspace root directory used to resolve relative file paths'
       }
     },
     required: ['file']
@@ -80,8 +88,16 @@ const LIST_TOOL = {
     'comments, with a count and the newest comment timestamp per file. Use this to find ' +
     'out whether there is new feedback without guessing file paths; then read each file\'s ' +
     'comments with mdp_read_comments. The workspace is resolved from the server\'s working ' +
-    'directory.',
-  inputSchema: { type: 'object', properties: {} }
+    'directory, or from the optional "workspace" argument.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      workspace: {
+        type: 'string',
+        description: 'Optional workspace root directory. Defaults to server working directory.'
+      }
+    }
+  }
 };
 
 const TOOLS = [READ_TOOL, RESOLVE_TOOL, LIST_TOOL];
@@ -131,12 +147,13 @@ function isDir(p) {
 /**
  * @returns {{root, rel, commentsPath, archivePath}|{error: string}}
  */
-function resolveTarget(file, cwd) {
+function resolveTarget(file, cwd, workspace) {
   if (typeof file !== 'string' || !file.trim()) {
     return { error: 'Missing required argument "file".' };
   }
 
-  const abs = path.resolve(cwd, file);
+  const baseDir = (workspace && typeof workspace === 'string' && workspace.trim()) ? workspace.trim() : cwd;
+  const abs = path.resolve(baseDir, file);
   const root = findRoot(path.dirname(abs));
   if (!root) {
     return {
@@ -266,8 +283,9 @@ function resolveComments(loc, ids) {
  * from `cwd` the same way a file's root does — walk up to the store or a .git
  * marker. `.archive` and `assets` are the store's two non-comment residents.
  */
-function listPending(cwd) {
-  const root = findRoot(path.resolve(cwd));
+function listPending(cwd, workspace) {
+  const baseDir = (workspace && typeof workspace === 'string' && workspace.trim()) ? workspace.trim() : cwd;
+  const root = findRoot(path.resolve(baseDir));
   if (!root) {
     return { error: 'Could not find a workspace root — no .mdpreview/comments store and no .git directory above the working directory.' };
   }
@@ -321,8 +339,9 @@ function imagePaths(comment, root) {
 }
 
 function callTool(name, args, cwd) {
+  const workspace = args && args.workspace;
   if (name === LIST_TOOL.name) {
-    const result = listPending(cwd);
+    const result = listPending(cwd, workspace);
     if (result.error) return toolError(result.error);
     if (!result.files.length) return toolText('No files have pending comments.');
     return toolText(
@@ -334,7 +353,7 @@ function callTool(name, args, cwd) {
     return toolError(`Unknown tool "${name}".`);
   }
 
-  const loc = resolveTarget(args && args.file, cwd);
+  const loc = resolveTarget(args && args.file, cwd, workspace);
   if (loc.error) return toolError(loc.error);
 
   if (name === RESOLVE_TOOL.name) {

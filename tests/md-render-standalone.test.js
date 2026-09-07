@@ -44,6 +44,25 @@ describe('shared/md-render: standalone usage', () => {
     expect(html).toContain(`data-src-start="${startIdx}" data-src-end="${endIdx}"`);
   });
 
+  it('renders inline KaTeX math formulas with text and operations into .katex spans', () => {
+    const md = 'Ghost: $\\text{Toạ độ màn hình} = \\text{Toạ độ cha} + \\text{Toạ độ thiết kế} \\times \\text{scale}$. Hết.\n';
+    const html = mdRender.renderWithLineNumbers(md);
+    expect(html).toContain('class="md-math-inline"');
+    expect(html).toContain('class="katex"');
+    expect(html).toContain('Toạ');
+    // Ensure accurate offset attributes for scroll sync
+    const startIdx = md.indexOf('$\\text{Toạ độ màn hình}');
+    const endIdx = md.indexOf('. Hết.');
+    expect(html).toContain(`data-src-start="${startIdx}" data-src-end="${endIdx}"`);
+  });
+
+  it('renders block KaTeX math formulas ($$...$$) into .md-math-block with display mode', () => {
+    const md = '$$\nE = mc^2\n$$\n';
+    const html = mdRender.renderWithLineNumbers(md);
+    expect(html).toContain('md-math-block');
+    expect(html).toContain('katex-display');
+  });
+
   it('does not require any Express/server module to load', () => {
     // If this file imported express or fs at the top level for anything
     // other than its own internal use, requiring it standalone would

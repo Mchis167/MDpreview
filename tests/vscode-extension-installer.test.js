@@ -4,7 +4,17 @@ import os from 'os';
 import path from 'path';
 
 const installer = require('../vscode-extension/installer.js');
-const { installServer, installSkill, registerMcp, mergeMcpServers, SERVER_VERSION } = installer;
+const {
+  installServer,
+  installSkill,
+  registerMcp,
+  registerAntigravityMcp,
+  installAntigravitySkill,
+  installAntigravityWorkflow,
+  installAll,
+  mergeMcpServers,
+  SERVER_VERSION
+} = installer;
 
 let home;
 const readJson = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
@@ -214,5 +224,118 @@ describe('versioning', () => {
   it('takes the server version from the server file itself', () => {
     const code = fs.readFileSync(path.join(__dirname, '..', 'vscode-extension', 'mcpStdioServer.js'), 'utf8');
     expect(code).toContain(`const VERSION = '${SERVER_VERSION}'`);
+  });
+});
+
+describe('registerAntigravityMcp', () => {
+  const globalCfgPath = () => path.join(home, '.gemini', 'config', 'mcp_config.json');
+  const ideCfgPath = () => path.join(home, '.gemini', 'antigravity-ide', 'mcp_config.json');
+
+  it('registers in ~/.gemini/config/mcp_config.json on a clean machine', () => {
+    const res = registerAntigravityMcp(home);
+    expect(res.via).toBe('file');
+    const cfg = readJson(globalCfgPath());
+    expect(cfg.mcpServers.mdpreview.command).toBe('node');
+    expect(cfg.mcpServers.mdpreview.args[0]).toBe(path.join(home, '.mdpreview', 'mcp-server.js'));
+  });
+
+  it('also registers in ~/.gemini/antigravity-ide/mcp_config.json if the IDE folder exists', () => {
+    fs.mkdirSync(path.dirname(ideCfgPath()), { recursive: true });
+    registerAntigravityMcp(home);
+
+    const ideCfg = readJson(ideCfgPath());
+    expect(ideCfg.mcpServers.mdpreview.command).toBe('node');
+  });
+
+  it('is a no-op when already registered', () => {
+    registerAntigravityMcp(home);
+    const res = registerAntigravityMcp(home);
+    expect(res.via).toBe('already-registered');
+  });
+});
+
+describe('installAntigravitySkill', () => {
+  const skillPath = () => path.join(home, '.gemini', 'config', 'skills', 'mdp-comments', 'SKILL.md');
+
+  it('writes the skill in ~/.gemini/config/skills/mdp-comments/', () => {
+    const res = installAntigravitySkill(home);
+    expect(res.installed).toBe(true);
+    expect(fs.readFileSync(skillPath(), 'utf8')).toContain('name: mdp-comments');
+  });
+
+  it('leaves an up-to-date copy alone', () => {
+    installAntigravitySkill(home);
+    expect(installAntigravitySkill(home).installed).toBe(false);
+  });
+});
+
+describe('installAntigravityWorkflow', () => {
+  const workflowPath = () => path.join(home, '.gemini', 'antigravity-ide', 'global_workflows', 'mdp-comments.md');
+
+  it('writes global workflow for Antigravity slash command', () => {
+    const res = installAntigravityWorkflow(home);
+    expect(res.installed).toBe(true);
+    const content = fs.readFileSync(workflowPath(), 'utf8');
+    expect(content).toContain('description:');
+    expect(content).toContain('MDpreview Comments Workflow');
+  });
+
+  it('leaves an up-to-date copy alone', () => {
+    installAntigravityWorkflow(home);
+    expect(installAntigravityWorkflow(home).installed).toBe(false);
+  });
+});
+
+describe('installAll', () => {
+  it('runs all installation steps and returns their results', () => {
+    const res = installAll(home);
+    expect(res.server.installed).toBe(true);
+    expect(res.mcp.via).toBe('file');
+    expect(res.skill.installed).toBe(true);
+    expect(res.antigravityMcp.via).toBe('file');
+    expect(res.antigravitySkill.installed).toBe(true);
+    expect(res.antigravityWorkflow.installed).toBe(true);
+  });
+});
+
+describe('mcpStdioServer with workspace parameter', () => {
+  const mcpServer = require('../vscode-extension/mcpStdioServer.js');
+  let workspaceDir;
+
+  beforeEach(() => {
+    workspaceDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mdp-ws-'));
+    fs.mkdirSync(path.join(workspaceDir, '.git'));
+    const storeDir = path.join(workspaceDir, '.mdpreview', 'comments');
+    fs.mkdirSync(storeDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(storeDir, 'test.md.json'),
+      JSON.stringify([{ id: 'c1', text: 'fix this', selectedText: 'foo', createdAt: '2026-09-07T00:00:00Z' }])
+    );
+  });
+
+  afterEach(() => {
+    fs.rmSync(workspaceDir, { recursive: true, force: true });
+  });
+
+  it('resolves target with workspace when cwd is outside project', () => {
+    const outsideCwd = home;
+    const target = mcpServer.resolveTarget('test.md', outsideCwd, workspaceDir);
+    expect(target.error).toBeUndefined();
+    expect(target.root).toBe(workspaceDir);
+    expect(target.rel).toBe('test.md');
+  });
+
+  it('lists pending comments with workspace when cwd has no store or git', () => {
+    const outsideCwd = home;
+    const result = mcpServer.listPending(outsideCwd, workspaceDir);
+    expect(result.error).toBeUndefined();
+    expect(result.files.length).toBe(1);
+    expect(result.files[0].file).toBe('test.md');
+  });
+
+  it('allows callTool to use workspace argument', () => {
+    const outsideCwd = home;
+    const reply = mcpServer.callTool('mdp_list_pending', { workspace: workspaceDir }, outsideCwd);
+    expect(reply.content[0].text).toContain('1 file(s) with pending comments');
   });
 });

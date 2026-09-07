@@ -11,7 +11,7 @@
  *   renderer/css/design-system/molecules/mockup-frames.css
  *   renderer/css/design-system/molecules/carousel.css
  * Regenerate: npm run build:publish-assets
- * Generated:  2026-08-26T11:39:32.402Z
+ * Generated:  2026-09-07T09:54:49.183Z
  */
 
 /* ============================================================
@@ -1003,6 +1003,14 @@
     overflow-wrap: break-word;
 }
 
+.md-render-body .md-symbol {
+    display: inline-block;
+    padding: 0 0.15em;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--ds-text-primary);
+}
+
 .md-render-body img {
     max-width: 100%;
     border-radius: var(--ds-radius-panel);
@@ -1497,6 +1505,30 @@
 
 .md-line {
     width: 100%;
+}
+
+/* ── Math (KaTeX) ── */
+.md-math-block {
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: var(--ds-space-sm) 0;
+}
+
+.md-math-block .katex-display {
+    margin: 0;
+    text-align: center;
+}
+
+.md-math-inline {
+    display: inline;
+}
+
+.katex-error {
+    color: var(--ds-status-danger-text, #f87171);
+    font-family: var(--ds-font-family-code);
+    font-size: var(--ds-font-sm);
 }
 /* ============================================================
    publish-styles.css — Publish-page specific styles

@@ -128,6 +128,11 @@ const MERMAID_BUNDLE = [
   'media/vendor/mermaid.min.js'
 ];
 
+const KATEX_BUNDLE = [
+  'node_modules/katex/dist/katex.min.css',
+  'media/vendor/katex/katex.min.css'
+];
+
 function copy(srcAbs, destAbs, transform) {
   fs.mkdirSync(path.dirname(destAbs), { recursive: true });
   if (transform) {
@@ -136,6 +141,20 @@ function copy(srcAbs, destAbs, transform) {
     fs.copyFileSync(srcAbs, destAbs);
   }
   console.log(`✓ ${path.relative(EXT_ROOT, destAbs)}`);
+}
+
+function copyDir(srcDir, destDir) {
+  fs.mkdirSync(destDir, { recursive: true });
+  const entries = fs.readdirSync(srcDir, { withFileTypes: true });
+  for (const entry of entries) {
+    const srcPath = path.join(srcDir, entry.name);
+    const destPath = path.join(destDir, entry.name);
+    if (entry.isDirectory()) {
+      copyDir(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
 }
 
 function run() {
@@ -152,6 +171,17 @@ function run() {
     process.exit(1);
   }
   copy(mermaidSrcAbs, path.join(EXT_ROOT, mermaidDest));
+
+  const [katexCssSrc, katexCssDest] = KATEX_BUNDLE;
+  const katexCssSrcAbs = path.join(EXT_ROOT, katexCssSrc);
+  if (fs.existsSync(katexCssSrcAbs)) {
+    copy(katexCssSrcAbs, path.join(EXT_ROOT, katexCssDest));
+    const katexFontsSrcAbs = path.join(EXT_ROOT, 'node_modules/katex/dist/fonts');
+    if (fs.existsSync(katexFontsSrcAbs)) {
+      copyDir(katexFontsSrcAbs, path.join(EXT_ROOT, 'media/vendor/katex/fonts'));
+      console.log('✓ media/vendor/katex/fonts');
+    }
+  }
 
   console.log('\n✓ Vendoring complete.');
 }

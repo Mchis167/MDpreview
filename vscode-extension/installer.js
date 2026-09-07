@@ -27,7 +27,7 @@ const { VERSION: SERVER_VERSION } = require('./mcpStdioServer.js');
 
 const SERVER_SOURCE = path.join(__dirname, 'mcpStdioServer.js');
 const MCP_NAME = 'mdpreview';
-const SKILL_VERSION = 3;
+const SKILL_VERSION = 4;
 
 // ── The stdio server ────────────────────────────────────────
 
@@ -78,8 +78,28 @@ function sameEntry(a, b) {
   return Boolean(a) && a.command === b.command && JSON.stringify(a.args) === JSON.stringify(b.args);
 }
 
+function registerMcpConfigFile(configPath, entry) {
+  let config = {};
+  if (fs.existsSync(configPath)) {
+    try {
+      config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    } catch {
+      // Unparseable: rewriting it would drop every other server the user has.
+      return { via: 'skipped', reason: 'unparseable-config' };
+    }
+  }
+
+  if (sameEntry(config.mcpServers && config.mcpServers[MCP_NAME], entry)) {
+    return { via: 'already-registered', entry };
+  }
+
+  fs.mkdirSync(path.dirname(configPath), { recursive: true });
+  writeAtomic(configPath, JSON.stringify(mergeMcpServers(config, MCP_NAME, entry), null, 2) + '\n');
+  return { via: 'file', entry };
+}
+
 /**
- * Register the server for every project, once.
+ * Register the server for Claude Code.
  *
  * The CLI is tried first because ~/.claude.json belongs to Claude Code and
  * it may be running right now — letting it write its own file is safer than
@@ -94,20 +114,14 @@ function registerMcp(homeDir, { exec = defaultExec, homedir = os.homedir } = {})
     try {
       config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
     } catch {
-      // Unparseable: rewriting it would drop every other server the user has.
       return { via: 'skipped', reason: 'unparseable-config' };
     }
   }
 
-  // Checked before anything else, because `claude mcp add` fails on a name
-  // that already exists — trying it first would make every activate after
-  // the first fall through to a needless rewrite.
   if (sameEntry(config.mcpServers && config.mcpServers[MCP_NAME], entry)) {
     return { via: 'already-registered', entry };
   }
 
-  // `claude mcp add --scope user` always writes the real user's home, whatever
-  // homeDir says, so it is only correct when the two are the same place.
   if (homeDir === homedir()) {
     const cli = exec(
       `claude mcp add ${MCP_NAME} --scope user -- node ${JSON.stringify(entry.args[0])}`
@@ -115,8 +129,32 @@ function registerMcp(homeDir, { exec = defaultExec, homedir = os.homedir } = {})
     if (cli && cli.ok) return { via: 'cli', entry };
   }
 
-  writeAtomic(configPath, JSON.stringify(mergeMcpServers(config, MCP_NAME, entry), null, 2) + '\n');
-  return { via: 'file', entry };
+  return registerMcpConfigFile(configPath, entry);
+}
+
+/**
+ * Register the server for Antigravity IDE.
+ *
+ * Writes to ~/.gemini/config/mcp_config.json, and also
+ * ~/.gemini/antigravity-ide/mcp_config.json if the IDE directory exists.
+ */
+function registerAntigravityMcp(homeDir) {
+  const entry = mcpEntry(homeDir);
+  const configs = [
+    path.join(homeDir, '.gemini', 'config', 'mcp_config.json'),
+    path.join(homeDir, '.gemini', 'antigravity-ide', 'mcp_config.json')
+  ];
+
+  let primaryResult = null;
+  for (const cfg of configs) {
+    if (cfg.includes('antigravity-ide') && !fs.existsSync(path.dirname(cfg))) {
+      continue;
+    }
+    const res = registerMcpConfigFile(cfg, entry);
+    if (!primaryResult) primaryResult = res;
+  }
+
+  return primaryResult || { via: 'skipped' };
 }
 
 function defaultExec(command) {
@@ -128,15 +166,14 @@ function defaultExec(command) {
   }
 }
 
-// Temp file + rename: a half-written ~/.claude.json would take Claude Code's
-// whole configuration down with it.
+// Temp file + rename: a half-written config would corrupt the user's settings.
 function writeAtomic(dest, contents) {
   const tmp = `${dest}.mdpreview-tmp`;
   fs.writeFileSync(tmp, contents);
   fs.renameSync(tmp, dest);
 }
 
-// ── The skill ───────────────────────────────────────────────
+// ── The skills and workflows ────────────────────────────────
 
 const SKILL_MD = `---
 name: mdp-comments
@@ -150,13 +187,15 @@ metadata:
 Người dùng review file markdown trong MDpreview (VSCode extension) và để lại
 comment. Khi họ bảo file nào đó "có comment", làm như sau:
 
-1. Nếu không chắc file nào có comment, gọi \`mdp_list_pending\` (không tham số)
-   — nó liệt kê mọi file còn comment chờ xử lý kèm số lượng.
+1. Nếu không chắc file nào có comment, gọi \`mdp_list_pending\` (không tham số
+   hoặc truyền \`workspace\` nếu không chạy ở gốc repo) — nó liệt kê mọi file
+   còn comment chờ xử lý kèm số lượng.
 2. Gọi tool MCP \`mdp_read_comments\` của server \`mdpreview\`, truyền đường dẫn
    file — tương đối so với thư mục đang làm việc, hoặc tuyệt đối. Đọc KHÔNG
    làm mất comment; mỗi comment có \`id\` ổn định.
 3. Áp dụng các thay đổi được yêu cầu vào file. Mỗi comment nhắm vào đúng đoạn
-   \`selectedText\` của nó.
+   \`selectedText\` của nó. Nếu có ảnh đính kèm trong \`images\`, đọc các file
+   ảnh đó để nắm rõ vấn đề trực quan.
 4. Sau khi xử lý xong comment nào, gọi \`mdp_resolve_comments\` với \`ids\` của
    những comment ĐÃ xử lý. Comment còn cần người dùng quyết định thì ĐỂ MỞ
    (không resolve) và nói rõ trong câu trả lời.
@@ -166,16 +205,41 @@ Lưu ý:
 - KHÔNG tự đi tìm file trong \`.mdpreview/comments/\` — luôn đi qua tool.
 - Tool trả "No pending comments" nghĩa là comment đã được resolve trước đó
   hoặc chưa có — hỏi lại người dùng thay vì đoán.
-- Nếu tool báo không tìm được project root, truyền đường dẫn tuyệt đối.
+- Nếu tool báo không tìm được project root, truyền đường dẫn tuyệt đối hoặc
+  truyền tham số "workspace".
 `;
 
-function installSkill(homeDir) {
-  const skillDir = path.join(homeDir, '.claude', 'skills', 'mdp-comments');
+const WORKFLOW_MD = `---
+description: Đọc và xử lý review comments từ MDpreview
+---
+
+<!-- mdpreview-workflow-version: ${SKILL_VERSION} -->
+# MDpreview Comments Workflow
+
+Đọc và xử lý các nhận xét (review comments) do người dùng để lại trên file Markdown trong MDpreview.
+
+## Quy trình xử lý:
+
+1. **Kiểm tra comments chờ xử lý**:
+   - Gọi tool MCP \`mdp_list_pending\` để xem danh sách các file có comment.
+   - Có thể truyền thêm tham số \`workspace\` nếu đang chạy ngoài thư mục gốc dự án.
+2. **Đọc chi tiết comments**:
+   - Gọi tool MCP \`mdp_read_comments\` với đường dẫn file \`file\` (tương đối hoặc tuyệt đối).
+   - Mỗi comment mang một \`id\` ổn định và nhắm vào đoạn \`selectedText\`.
+   - Nếu comment có danh sách \`images\`, hãy đọc các ảnh để nắm rõ vấn đề trực quan.
+3. **Áp dụng các thay đổi**:
+   - Chỉnh sửa nội dung file Markdown theo đúng yêu cầu nhận xét.
+4. **Đóng (Resolve) comments**:
+   - Gọi tool MCP \`mdp_resolve_comments\` với danh sách \`ids\` của những comment đã giải quyết xong.
+   - Những nhận xét còn cần người dùng quyết định thì ĐỂ MỞ và thông báo trong câu trả lời.
+`;
+
+function installSkillTo(skillDir) {
   const skillPath = path.join(skillDir, 'SKILL.md');
 
   try {
     const m = fs.readFileSync(skillPath, 'utf8').match(/mdpreview-skill-version:\s*(\d+)/);
-    if (m && parseInt(m[1], 10) >= SKILL_VERSION) return { installed: false, reason: 'up-to-date' };
+    if (m && parseInt(m[1], 10) >= SKILL_VERSION) return { installed: false, reason: 'up-to-date', path: skillPath };
   } catch {
     // not installed yet
   }
@@ -183,6 +247,44 @@ function installSkill(homeDir) {
   fs.mkdirSync(skillDir, { recursive: true });
   fs.writeFileSync(skillPath, SKILL_MD);
   return { installed: true, path: skillPath };
+}
+
+function installSkill(homeDir) {
+  return installSkillTo(path.join(homeDir, '.claude', 'skills', 'mdp-comments'));
+}
+
+function installAntigravitySkill(homeDir) {
+  return installSkillTo(path.join(homeDir, '.gemini', 'config', 'skills', 'mdp-comments'));
+}
+
+function installAntigravityWorkflow(homeDir) {
+  const dirs = [
+    path.join(homeDir, '.gemini', 'antigravity-ide', 'global_workflows'),
+    path.join(homeDir, '.gemini', 'antigravity', 'global_workflows')
+  ];
+
+  let primaryResult = null;
+  for (const workflowDir of dirs) {
+    if (workflowDir.endsWith('/antigravity/global_workflows') && !fs.existsSync(path.dirname(workflowDir))) {
+      continue;
+    }
+    const workflowPath = path.join(workflowDir, 'mdp-comments.md');
+    try {
+      const m = fs.readFileSync(workflowPath, 'utf8').match(/mdpreview-workflow-version:\s*(\d+)/);
+      if (m && parseInt(m[1], 10) >= SKILL_VERSION) {
+        if (!primaryResult) primaryResult = { installed: false, reason: 'up-to-date', path: workflowPath };
+        continue;
+      }
+    } catch {
+      // not installed yet
+    }
+
+    fs.mkdirSync(workflowDir, { recursive: true });
+    fs.writeFileSync(workflowPath, WORKFLOW_MD);
+    if (!primaryResult) primaryResult = { installed: true, path: workflowPath };
+  }
+
+  return primaryResult || { installed: false, reason: 'skipped' };
 }
 
 // ── Entry point ─────────────────────────────────────────────
@@ -196,7 +298,10 @@ function installAll(homeDir = os.homedir()) {
   for (const [key, step] of [
     ['server', () => installServer(homeDir)],
     ['mcp', () => registerMcp(homeDir)],
-    ['skill', () => installSkill(homeDir)]
+    ['skill', () => installSkill(homeDir)],
+    ['antigravityMcp', () => registerAntigravityMcp(homeDir)],
+    ['antigravitySkill', () => installAntigravitySkill(homeDir)],
+    ['antigravityWorkflow', () => installAntigravityWorkflow(homeDir)]
   ]) {
     try {
       results[key] = step();
@@ -213,6 +318,9 @@ module.exports = {
   installServer,
   registerMcp,
   installSkill,
+  registerAntigravityMcp,
+  installAntigravitySkill,
+  installAntigravityWorkflow,
   mergeMcpServers,
   serverPath,
   SERVER_VERSION,

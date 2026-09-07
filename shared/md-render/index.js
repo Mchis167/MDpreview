@@ -12,6 +12,7 @@
 const path = require('path');
 const { marked } = require('marked');
 const matter = require('gray-matter');
+const katex = require('katex');
 const {
   sanitizeHtml,
   renderMermaidBlock,
@@ -318,12 +319,105 @@ const latexSymbolExtension = {
   }
 };
 
+function safeKatexRender(tex, options) {
+  const originalWarn = console.warn;
+  try {
+    console.warn = (msg, ...args) => {
+      if (typeof msg === 'string' && msg.startsWith('No character metrics')) return;
+      originalWarn(msg, ...args);
+    };
+    return katex.renderToString(tex, options);
+  } finally {
+    console.warn = originalWarn;
+  }
+}
+
+const blockMathExtension = {
+  name: 'blockMath',
+  level: 'block',
+  start(src) {
+    return src.indexOf('$$');
+  },
+  tokenizer(src) {
+    const match = src.match(/^\$\$([\s\S]*?)\$\$(?:\n+|$)/);
+    if (match) {
+      return {
+        type: 'blockMath',
+        raw: match[0],
+        text: match[1].trim()
+      };
+    }
+  },
+  renderer(token) {
+    try {
+      return safeKatexRender(token.text, { displayMode: true, throwOnError: false, strict: 'ignore' });
+    } catch (_err) {
+      return `<div class="katex-error">${token.text}</div>`;
+    }
+  }
+};
+
+const inlineMathExtension = {
+  name: 'inlineMath',
+  level: 'inline',
+  start(src) {
+    let index = src.indexOf('$');
+    while (index !== -1) {
+      if (index === 0 || src[index - 1] !== '\\') {
+        return index;
+      }
+      index = src.indexOf('$', index + 1);
+    }
+    return -1;
+  },
+  tokenizer(src) {
+    // If it is a known single symbol handled by latexSymbolExtension, let that handle it
+    const symMatch = src.match(/^\$\s*\\?([a-zA-Z]+)\s*\$/);
+    if (symMatch && LATEX_SYMBOLS[symMatch[1]]) {
+      return;
+    }
+
+    // 1. Double dollar inline: $$...$$
+    const doubleMatch = src.match(/^\$\$([^\$]+?)\$\$/);
+    if (doubleMatch) {
+      return {
+        type: 'inlineMath',
+        raw: doubleMatch[0],
+        text: doubleMatch[1].trim(),
+        displayMode: true
+      };
+    }
+
+    // 2. Single dollar inline: $...$
+    const singleMatch = src.match(/^\$([^\$\n\r]+?)\$/);
+    if (singleMatch) {
+      const content = singleMatch[1];
+      if (/^\s/.test(content) || /\s$/.test(content)) {
+        return;
+      }
+      return {
+        type: 'inlineMath',
+        raw: singleMatch[0],
+        text: content,
+        displayMode: false
+      };
+    }
+  },
+  renderer(token) {
+    try {
+      return safeKatexRender(token.text, { displayMode: !!token.displayMode, throwOnError: false, strict: 'ignore' });
+    } catch (_err) {
+      return `<span class="katex-error">${token.text}</span>`;
+    }
+  }
+};
+
 marked.use({
   renderer: renderer,
   langPrefix: 'hljs language-',
   gfm: true,
   breaks: true,
-  extensions: [wikilinkExtension, carouselExtension, latexSymbolExtension]
+  extensions: [wikilinkExtension, carouselExtension, latexSymbolExtension, blockMathExtension, inlineMathExtension]
 });
 
 /**
@@ -426,6 +520,20 @@ function renderInlineTokens(tokens, originalSource, baseOffset, wikiIndex = null
         break;
       case 'latexSymbol': {
         html += `<span class="md-symbol" ${data}>${token.symbol}</span>`;
+        break;
+      }
+      case 'inlineMath': {
+        let mathHtml = '';
+        try {
+          mathHtml = safeKatexRender(token.text, {
+            displayMode: !!token.displayMode,
+            throwOnError: false,
+            strict: 'ignore'
+          });
+        } catch (_err) {
+          mathHtml = `<span class="katex-error">${token.text}</span>`;
+        }
+        html += `<span class="md-math-inline" ${data}>${mathHtml}</span>`;
         break;
       }
       case 'escape':
@@ -686,6 +794,23 @@ function renderTokens(tokens, originalSource, baseOffset, lineStart, isTopLevel 
     if (token.type === 'blockquote') {
       const innerHtml = renderTokens(token.tokens || [], originalSource, tokenStartOffset, tokenStartLine, false, wikiIndex, currentFilePath);
       tokenHtml = `<div class="md-line" data-line="${tokenStartLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}"><blockquote>${innerHtml}</blockquote></div>`;
+      html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${tokenHtml}</div>\n`;
+      currentLine = tokenEndLine;
+      continue;
+    }
+
+    if (token.type === 'blockMath') {
+      let mathHtml = '';
+      try {
+        mathHtml = safeKatexRender(token.text, {
+          displayMode: true,
+          throwOnError: false,
+          strict: 'ignore'
+        });
+      } catch (_err) {
+        mathHtml = `<div class="katex-error">${token.text}</div>`;
+      }
+      tokenHtml = `<div class="md-line md-math-block" data-line="${tokenStartLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${mathHtml}</div>`;
       html += `<div class="md-block" data-line-start="${tokenStartLine}" data-line-end="${tokenEndLine}" data-src-start="${tokenStartOffset}" data-src-end="${tokenEndOffset}">${tokenHtml}</div>\n`;
       currentLine = tokenEndLine;
       continue;

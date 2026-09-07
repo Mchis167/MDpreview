@@ -20,7 +20,8 @@ function buildHtml(webview, sharedRoot, rendererRoot, mediaRoot) {
     webview.asWebviewUri(mdRenderDir('markdown-interactions.css')),
     webview.asWebviewUri(mdRenderDir('mockup-frames.css')),
     webview.asWebviewUri(mdRenderDir('carousel.css')),
-    webview.asWebviewUri(mdRenderDir('checkbox.css'))
+    webview.asWebviewUri(mdRenderDir('checkbox.css')),
+    webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, 'vendor', 'katex', 'katex.min.css'))
   ];
   // The design system pieces the font panel is built from — the same
   // popover card, group cards, setting rows and segmented control the

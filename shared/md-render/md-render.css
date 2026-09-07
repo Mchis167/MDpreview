@@ -648,3 +648,27 @@
 .md-line {
     width: 100%;
 }
+
+/* ── Math (KaTeX) ── */
+.md-math-block {
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: var(--ds-space-sm) 0;
+}
+
+.md-math-block .katex-display {
+    margin: 0;
+    text-align: center;
+}
+
+.md-math-inline {
+    display: inline;
+}
+
+.katex-error {
+    color: var(--ds-status-danger-text, #f87171);
+    font-family: var(--ds-font-family-code);
+    font-size: var(--ds-font-sm);
+}
